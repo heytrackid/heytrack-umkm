@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 import { Calculator, Save } from 'lucide-react'
-import * as React from 'react'
-import type { OrderFormData, OrderItem } from '../hooks/useOrderLogic'
+import type { FormEvent } from 'react'
+import type { OrderFormData, OrderItem } from '@/app/orders/new/hooks/useOrderLogic'
 
 interface OrderSummaryProps {
   formData: OrderFormData
@@ -15,7 +15,7 @@ interface OrderSummaryProps {
   taxAmount: number
   totalAmount: number
   isSubmitting: boolean
-  onSubmit: (e: React.FormEvent) => void
+  onSubmit: (e: FormEvent) => void
   onCancel: () => void
 }
 
@@ -39,7 +39,8 @@ export default function OrderSummary({
           Ringkasan Pesanan
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
+        <form className="space-y-4" onSubmit={onSubmit}>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span>Subtotal:</span>
@@ -88,32 +89,32 @@ export default function OrderSummary({
           </div>
         </div>
 
-        <div className="space-y-2 pt-4">
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting || orderItems.length === 0}
-            onClick={onSubmit}
-          >
-            {isSubmitting ? (
-              <>Menyimpan...</>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Simpan Pesanan
-              </>
-            )}
-          </Button>
+          <div className="space-y-2 pt-4">
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || orderItems.length === 0}
+            >
+              {isSubmitting ? (
+                <>Menyimpan...</>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Simpan Pesanan
+                </>
+              )}
+            </Button>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={onCancel}
-          >
-            Batal
-          </Button>
-        </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={onCancel}
+            >
+              Batal
+            </Button>
+          </div>
+        </form>
       </CardContent>
     </Card>
   )

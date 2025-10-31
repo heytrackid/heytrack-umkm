@@ -4,7 +4,10 @@
  */
 
 import { z } from 'zod'
-import { OrderInsertSchema, OrderUpdateSchema, type OrderInsert, type OrderUpdate } from './order'
+import { OrderInsertSchema, type OrderInsert, type OrderUpdate } from './order'
+
+// Re-export for convenience
+export { OrderUpdateSchema } from './order'
 
 // Enhanced order validation with business rules
 export const EnhancedOrderInsertSchema = OrderInsertSchema
@@ -81,9 +84,9 @@ export class OrderValidationHelpers {
     try {
       const validatedData = EnhancedOrderInsertSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -97,9 +100,9 @@ export class OrderValidationHelpers {
     try {
       const validatedData = EnhancedOrderUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -189,16 +192,16 @@ export class OrderValidationHelpers {
    * Validate bulk order import
    */
   static validateBulkImport(orders: unknown[]): {
-    valid: any[]
-    invalid: Array<{ index: number; data: any; errors: string[] }>
+    valid: OrderInsert[]
+    invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: any[] = []
-    const invalid: Array<{ index: number; data: any; errors: string[] }> = []
+    const valid: OrderInsert[] = []
+    const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     orders.forEach((order, index) => {
       const result = this.validateInsert(order)
       if (result.success) {
-        valid.push(result.data)
+        valid.push(result.data!)
       } else {
         invalid.push({
           index,

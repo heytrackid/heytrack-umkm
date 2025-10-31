@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { ProfitData } from './types'
@@ -8,11 +7,10 @@ interface ProductProfitabilityTableProps {
   formatCurrency: (amount: number) => string
 }
 
-export function ProductProfitabilityTable({
+export const ProductProfitabilityTable = ({
   products,
   formatCurrency
-}: ProductProfitabilityTableProps) {
-  return (
+}: ProductProfitabilityTableProps) => (
     <Card>
       <CardHeader>
         <CardTitle>Detail Profitabilitas Produk</CardTitle>
@@ -60,4 +58,3 @@ export function ProductProfitabilityTable({
       </CardContent>
     </Card>
   )
-}

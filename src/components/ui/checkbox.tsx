@@ -1,16 +1,15 @@
 "use client"
 
-import * as React from"react"
+import type { ComponentProps } from 'react'
 import * as CheckboxPrimitive from"@radix-ui/react-checkbox"
 import { CheckIcon } from"lucide-react"
 
 import { cn } from"@/lib/utils"
 
-function Checkbox({
+const Checkbox = ({
   className,
   ...props
-}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
-  return (
+}: ComponentProps<typeof CheckboxPrimitive.Root>) => (
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
@@ -27,6 +26,5 @@ function Checkbox({
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   )
-}
 
 export { Checkbox }

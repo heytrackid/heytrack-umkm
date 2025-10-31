@@ -9,7 +9,7 @@ import type {
   SettingsUpdateHandler,
   ThemeOption,
   LanguageOption,
-} from '../types'
+} from '@/app/settings/types'
 
 interface UIThemeSettingsProps {
   settings: AppSettingsState
@@ -19,8 +19,8 @@ interface UIThemeSettingsProps {
 /**
  * UI theme settings component
  */
-export function UIThemeSettings({ settings, onSettingChange }: UIThemeSettingsProps) {
-  const { settings: contextSettings, languages, updateLanguage } = useSettings()
+export const UIThemeSettings = ({ settings, onSettingChange }: UIThemeSettingsProps) => {
+  const { languages, updateLanguage } = useSettings()
 
   return (
     <Card>
@@ -55,7 +55,7 @@ export function UIThemeSettings({ settings, onSettingChange }: UIThemeSettingsPr
             onChange={(e) => {
               const selected = languages.find(l => l.code === e.target.value)
               if (selected) {
-                updateLanguage(selected)
+                void updateLanguage(selected)
                 onSettingChange('ui', 'language', selected.code as LanguageOption)
               }
             }}

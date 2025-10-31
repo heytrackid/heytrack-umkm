@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+import type { UseFormReturn } from 'react-hook-form'
 /**
  * Shared CRUD Modal Components
  * Reusable modal components for CRUD operations
@@ -7,7 +9,7 @@ import { Modal } from '@/components/ui/modal'
 import { CrudForm, FormActions } from '@/components/ui/crud-form'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, Plus } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 
 interface CrudModalProps {
   isOpen: boolean
@@ -15,53 +17,50 @@ interface CrudModalProps {
   title: string
   size?: 'sm' | 'md' | 'lg' | 'xl'
   fullScreenOnMobile?: boolean
-  children: React.ReactNode
+  children: ReactNode
 }
 
 /**
  * Base modal wrapper for CRUD operations
  */
-export function CrudModal({
+export const CrudModal = ({
   isOpen,
   onClose,
   title,
   size = 'lg',
   fullScreenOnMobile = true,
   children
-}: CrudModalProps) {
-  return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={title}
-      size={size}
-      fullScreenOnMobile={fullScreenOnMobile}
-    >
-      {children}
-    </Modal>
-  )
-}
+}: CrudModalProps) => (
+  <Modal
+    isOpen={isOpen}
+    onClose={onClose}
+    title={title}
+    size={size}
+    fullScreenOnMobile={fullScreenOnMobile}
+  >
+    {children}
+  </Modal>
+)
 
-interface CreateModalProps extends Omit<CrudModalProps, 'title'> {
+interface CreateModalProps<T = Record<string, unknown>, FormData = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
   entityName: string
-  form: any
-  onSubmit: (data: any) => Promise<void>
+  form: UseFormReturn<FormData>
+  onSubmit: (data: T) => Promise<void>
   isLoading?: boolean
-  children: React.ReactNode
+  children: ReactNode
 }
 
 /**
  * Create modal with form
  */
-export function CreateModal({
+export const CreateModal = <T = Record<string, unknown>, FormData = Record<string, unknown>>({
   entityName,
   form,
   onSubmit,
   isLoading,
   children,
   ...modalProps
-}: CreateModalProps) {
-  return (
+}: CreateModalProps<T, FormData>) => (
     <CrudModal
       {...modalProps}
       title={`Tambah ${entityName} Baru`}
@@ -72,33 +71,31 @@ export function CreateModal({
           onCancel={modalProps.onClose}
           submitText={`Simpan ${entityName}`}
           loading={isLoading}
-          sticky={true}
+          sticky
         />
       </CrudForm>
     </CrudModal>
   )
-}
 
-interface EditModalProps extends Omit<CrudModalProps, 'title'> {
+interface EditModalProps<T = Record<string, unknown>, FormData = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
   entityName: string
-  form: any
-  onSubmit: (data: any) => Promise<void>
+  form: UseFormReturn<FormData>
+  onSubmit: (data: T) => Promise<void>
   isLoading?: boolean
-  children: React.ReactNode
+  children: ReactNode
 }
 
 /**
  * Edit modal with form
  */
-export function EditModal({
+export const EditModal = <T = Record<string, unknown>, FormData = Record<string, unknown>>({
   entityName,
   form,
   onSubmit,
   isLoading,
   children,
   ...modalProps
-}: EditModalProps) {
-  return (
+}: EditModalProps<T, FormData>) => (
     <CrudModal
       {...modalProps}
       title={`Edit ${entityName}`}
@@ -109,12 +106,11 @@ export function EditModal({
           onCancel={modalProps.onClose}
           submitText="Simpan Perubahan"
           loading={isLoading}
-          sticky={true}
+          sticky
         />
       </CrudForm>
     </CrudModal>
   )
-}
 
 interface DeleteModalProps {
   isOpen: boolean
@@ -128,27 +124,25 @@ interface DeleteModalProps {
 /**
  * Delete confirmation modal
  */
-export function DeleteModal({
+export const DeleteModal = ({
   isOpen,
   onClose,
   onConfirm,
   entityName,
   itemName,
   isLoading
-}: DeleteModalProps) {
-  return (
-    <ConfirmDialog
-      open={isOpen}
-      onOpenChange={(open) => !open && onClose()}
-      title={`Hapus ${entityName}`}
-      description={`Apakah Anda yakin ingin menghapus "${itemName}"? Tindakan ini tidak dapat dibatalkan.`}
-      onConfirm={onConfirm}
-      confirmText="Ya, Hapus"
-      variant="destructive"
-      loading={isLoading}
-    />
-  )
-}
+}: DeleteModalProps) => (
+  <ConfirmDialog
+    open={isOpen}
+    onOpenChange={(open) => !open && onClose()}
+    title={`Hapus ${entityName}`}
+    description={`Apakah Anda yakin ingin menghapus "${itemName}"? Tindakan ini tidak dapat dibatalkan.`}
+    onConfirm={onConfirm}
+    confirmText="Ya, Hapus"
+    variant="destructive"
+    loading={isLoading}
+  />
+)
 
 interface CrudActionButtonsProps {
   onEdit?: () => void
@@ -160,35 +154,33 @@ interface CrudActionButtonsProps {
 /**
  * Standardized CRUD action buttons
  */
-export function CrudActionButtons({
+export const CrudActionButtons = ({
   onEdit,
   onDelete,
   size = 'sm',
   variant = 'ghost'
-}: CrudActionButtonsProps) {
-  return (
-    <div className="flex gap-1">
-      {onEdit && (
-        <Button
-          variant={variant}
-          size={size}
-          onClick={onEdit}
-        >
-          <Pencil className="h-4 w-4" />
-        </Button>
-      )}
-      {onDelete && (
-        <Button
-          variant={variant}
-          size={size}
-          onClick={onDelete}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      )}
-    </div>
-  )
-}
+}: CrudActionButtonsProps) => (
+  <div className="flex gap-1">
+    {onEdit && (
+      <Button
+        variant={variant}
+        size={size}
+        onClick={onEdit}
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+    )}
+    {onDelete && (
+      <Button
+        variant={variant}
+        size={size}
+        onClick={onDelete}
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    )}
+  </div>
+)
 
 // Import React for types
-import * as React from 'react'
+import type React from 'react'

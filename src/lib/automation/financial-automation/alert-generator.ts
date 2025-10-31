@@ -3,7 +3,7 @@
  * Handles financial alert generation based on metrics and thresholds
  */
 
-import type { FinancialMetrics, Ingredient, FinancialAlert, AutomationConfig } from '../types'
+import type { FinancialMetrics, Ingredient, FinancialAlert, AutomationConfig } from '@/lib/automation/types'
 
 export class AlertGenerator {
   /**

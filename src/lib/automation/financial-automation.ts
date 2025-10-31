@@ -7,4 +7,4 @@
  */
 
 // Re-export everything from the modular structure
-export * from './financial-automation'
+export * from './financial-automation/index'

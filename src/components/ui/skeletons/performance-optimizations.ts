@@ -174,7 +174,7 @@ export const LazySkeletons = {
 // Memory optimization - cleanup skeleton cache periodically
 let skeletonCacheCleanupInterval: NodeJS.Timeout | null = null
 
-export function startSkeletonCacheCleanup(intervalMs: number = 300000) { // 5 minutes
+export function startSkeletonCacheCleanup(intervalMs = 300000) { // 5 minutes
   if (skeletonCacheCleanupInterval) {
     clearInterval(skeletonCacheCleanupInterval)
   }

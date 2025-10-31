@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { getErrorMessage } from '@/lib/type-guards'
-import { apiLogger } from '@/lib/logger'
+import { logger } from '@/lib/logger'
 import type { AppError, ErrorState } from './types'
 
 /**
@@ -22,7 +22,7 @@ import type { AppError, ErrorState } from './types'
  *
  * try {
  *   await someAsyncOperation()
- * } catch (err) {
+ * } catch (_err) {
  *   handleError(err, 'MyComponent.operation')
  * }
  *
@@ -37,9 +37,9 @@ export function useErrorHandler() {
     message: '',
   })
 
-  const handle = useCallback((error: any, context?: string) => {
+  const handle = useCallback((error: unknown, context?: string) => {
     const appError = error instanceof Error ? error : new Error(String(error))
-    console.error({ error, context }, `Error in ${context || 'component'}`)
+    logger.error({ error, context }, `Error in ${context || 'component'}`)
 
     setErrorState({
       error: appError as AppError,
@@ -59,7 +59,7 @@ export function useErrorHandler() {
   }, [])
 
   const throwError = useCallback((error: AppError) => {
-    console.error({ error }, 'Throwing error')
+    logger.error({ error }, 'Throwing error')
     setErrorState({
       error,
       isError: true,

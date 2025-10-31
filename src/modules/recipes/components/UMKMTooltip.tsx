@@ -1,20 +1,19 @@
 'use client'
+import type { ReactNode } from 'react'
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { HelpCircle } from 'lucide-react'
-import * as React from 'react'
 
 interface UMKMTooltipProps {
   title: string
   content: string
-  children: React.ReactNode
+  children: ReactNode
 }
 
 /**
  * Educational tooltip component for UMKM users
  */
-export function UMKMTooltip({ title, content, children }: UMKMTooltipProps) {
-  return (
+export const UMKMTooltip = ({ title, content, children }: UMKMTooltipProps) => (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -32,4 +31,3 @@ export function UMKMTooltip({ title, content, children }: UMKMTooltipProps) {
       </Tooltip>
     </TooltipProvider>
   )
-}

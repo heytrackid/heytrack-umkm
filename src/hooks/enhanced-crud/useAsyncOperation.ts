@@ -23,8 +23,8 @@ export function useAsyncOperation() {
       showToasts = true
     } = options
 
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     if (showToasts && loadingMessage) {
       infoToast(loadingMessage)
@@ -38,9 +38,9 @@ export function useAsyncOperation() {
       }
 
       return result
-    } catch (error: unknown) {
-      const errorMsg = error instanceof Error ? error.message : 'Terjadi kesalahan tak terduga'
-      setError(errorMsg)
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Terjadi kesalahan tak terduga'
+      void setError(errorMsg)
 
       if (showToasts) {
         errorToast(
@@ -49,15 +49,15 @@ export function useAsyncOperation() {
         )
       }
 
-      apiLogger.error({ error: error }, 'Async operation error:')
+      apiLogger.error({ error: err }, 'Async operation error:')
       return null
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [])
 
   const clearError = useCallback(() => {
-    setError(null)
+    void setError(null)
   }, [])
 
   return { execute, loading, error, clearError }

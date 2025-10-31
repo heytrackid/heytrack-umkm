@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 
-import { apiLogger } from '@/lib/logger'
+// Removed unused import: apiLogger
 
 /**
  * Smart preloading based on user behavior patterns
@@ -37,7 +37,7 @@ export const useSmartPreloading = () => {
       popularRoutes.forEach(route => {
         if (route !== currentRoute) {
           // Router prefetch would go here if needed
-          console.log('Popular route identified:', route)
+          // Popular route identified silently
         }
       })
     }, 2000)

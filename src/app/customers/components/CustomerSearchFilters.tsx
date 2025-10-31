@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { Edit2, Search, Trash2 } from 'lucide-react'
-import type { Customer, CustomerFilters } from './types'
+import type { Customer } from './types'
 
 interface CustomerSearchFiltersProps {
   searchTerm: string
@@ -18,7 +18,7 @@ interface CustomerSearchFiltersProps {
   isLoading: boolean
 }
 
-export default function CustomerSearchFilters({
+const CustomerSearchFilters = ({
   searchTerm,
   onSearchChange,
   filteredCustomers,
@@ -27,7 +27,7 @@ export default function CustomerSearchFilters({
   onBulkEdit,
   onBulkDelete,
   isLoading
-}: CustomerSearchFiltersProps) {
+}: CustomerSearchFiltersProps) => {
   if (isLoading) {
     return <SearchFormSkeleton />
   }
@@ -89,3 +89,5 @@ export default function CustomerSearchFilters({
     </div>
   )
 }
+
+export default CustomerSearchFilters

@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { CheckSquare, Eye, MessageSquare, X } from 'lucide-react'
-import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
+import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
 import type { BatchExecutionState } from './types'
 
 interface BatchDetailsProps {
@@ -101,7 +101,7 @@ export default function BatchDetails({
                   <div className="flex gap-1">
                     {check.completed ? (
                       <Badge variant={check.passed ? "default" : "destructive"} className="text-xs">
-                        {check.passed ? 'PASSED' : 'FAILED'}
+                        {check.passed ? 'LULUS' : 'GAGAL'}
                       </Badge>
                     ) : (
                       <>

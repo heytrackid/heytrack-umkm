@@ -3,7 +3,6 @@
  * Optimized select dropdown for mobile devices
  */
 
-import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Label } from '../label'
@@ -23,7 +22,7 @@ interface MobileSelectProps {
   className?: string
 }
 
-export function MobileSelect({
+export const MobileSelect = ({
   label,
   placeholder,
   value,
@@ -35,7 +34,7 @@ export function MobileSelect({
   error,
   hint,
   className
-}: MobileSelectProps) {
+}: MobileSelectProps) => {
   const { isMobile } = useResponsive()
 
   return (

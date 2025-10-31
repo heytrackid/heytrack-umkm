@@ -12,7 +12,7 @@ import type {
   ProductionPlanSummary,
   AvailabilityCheck,
   AutomationConfig
-} from '../types'
+} from '@/lib/automation/types'
 import type { OrderForProduction } from './types'
 import { AvailabilityChecker } from './availability-checker'
 import { TimeCalculator } from './time-calculator'
@@ -42,7 +42,7 @@ export class ProductionPlanner {
       const startTime = TimeCalculator.calculateOptimalStartTime(order.delivery_date, productionTime, config)
 
       return {
-        orderId: order.recipe_id + '-' + Date.now(),
+        orderId: `${order.recipe_id  }-${  Date.now()}`,
         recipe,
         quantity: order.quantity,
         deliveryDate: new Date(order.delivery_date),

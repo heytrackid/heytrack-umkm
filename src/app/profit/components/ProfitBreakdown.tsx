@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import type { ProfitData } from './types'
 
@@ -7,9 +6,7 @@ interface ProfitBreakdownProps {
   formatCurrency: (amount: number) => string
 }
 
-export function ProfitBreakdown({ summary, formatCurrency }: ProfitBreakdownProps) {
-
-  return (
+export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProps) => (
     <Card>
       <CardHeader>
         <CardTitle>Ringkasan Laba Rugi</CardTitle>
@@ -55,4 +52,3 @@ export function ProfitBreakdown({ summary, formatCurrency }: ProfitBreakdownProp
       </CardContent>
     </Card>
   )
-}

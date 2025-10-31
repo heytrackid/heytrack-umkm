@@ -5,10 +5,14 @@
 
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { WorkflowEventData, WorkflowResult, WorkflowContext } from '../types'
+import {
+  type WorkflowEventData,
+  type WorkflowResult,
+  type WorkflowContext
+} from '@/lib/automation/types'
+import type { Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types'
-import type { NotificationsTable } from '@/types/notifications'
+import type { NotificationsTable } from '@/types/features/notifications'
 
 export class InventoryWorkflowHandlers {
   /**
@@ -202,7 +206,7 @@ export class InventoryWorkflowHandlers {
       entity_id?: string
       entity_type?: string
       action_url?: string
-      metadata?: any
+      metadata?: Record<string, unknown>
     }
   ): Promise<void> {
     try {

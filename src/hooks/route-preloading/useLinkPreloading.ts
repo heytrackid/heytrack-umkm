@@ -11,12 +11,12 @@ export const useLinkPreloading = () => {
   const { preloadRoute } = useRoutePreloading()
 
   const handleLinkHover = useCallback((href: string) => {
-    preloadRoute(href)
+    void preloadRoute(href)
   }, [preloadRoute])
 
   const handleLinkFocus = useCallback((href: string) => {
     // Preload on focus for keyboard navigation
-    preloadRoute(href)
+    void preloadRoute(href)
   }, [preloadRoute])
 
   return {

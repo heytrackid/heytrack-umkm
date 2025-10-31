@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 export async function GET(request: NextRequest) {
@@ -32,7 +31,7 @@ export async function GET(request: NextRequest) {
     })
 
     if (error) {
-        apiLogger.error({ error: error }, 'Email confirmation error:')
+        apiLogger.error({ error }, 'Email confirmation error:')
         return NextResponse.redirect(
             new URL('/auth/login?error=confirmation_failed', request.url)
         )

@@ -3,7 +3,7 @@
  * Generates financial recommendations and insights
  */
 
-import type { FinancialMetrics, SaleData, ExpenseData } from '../types'
+import type { FinancialMetrics, SaleData, ExpenseData } from '@/lib/automation/types'
 import type { ExpensesByCategory } from './types'
 
 export class RecommendationEngine {
@@ -84,7 +84,7 @@ export class RecommendationEngine {
     const recommendations: string[] = []
 
     const expensesByCategory = expenses.reduce((acc, exp) => {
-      if (!acc[exp.category]) acc[exp.category] = 0
+      if (!acc[exp.category]) {acc[exp.category] = 0}
       acc[exp.category] += exp.amount
       return acc
     }, {} as ExpensesByCategory)

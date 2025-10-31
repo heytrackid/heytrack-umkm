@@ -44,14 +44,14 @@ export class APICache {
    */
   get<T>(key: string): T | null {
     const entry = this.cache.get(key)
-    if (!entry) return null
+    if (!entry) {return null}
 
     if (this.isCacheValid(entry)) {
       return entry.data as T
-    } else {
+    } 
       this.cache.delete(key)
       return null
-    }
+    
   }
 
   /**
@@ -81,7 +81,7 @@ export class APICache {
     queryFn: () => Promise<T>,
     cacheKey: string,
     ttl?: number,
-    useCache: boolean = true
+    useCache = true
   ): Promise<T> {
     // Check cache first
     if (useCache) {

@@ -15,13 +15,13 @@ export function useMinimumLoading(minDuration = 500): UseMinimumLoadingReturn {
   const [startTime, setStartTime] = useState<number | null>(null)
 
   const startLoading = useCallback(() => {
-    setIsLoading(true)
+    void setIsLoading(true)
     setStartTime(Date.now())
   }, [])
 
   const stopLoading = useCallback(() => {
     if (startTime === null) {
-      setIsLoading(false)
+      void setIsLoading(false)
       return
     }
 
@@ -30,18 +30,18 @@ export function useMinimumLoading(minDuration = 500): UseMinimumLoadingReturn {
 
     if (remaining > 0) {
       setTimeout(() => {
-        setIsLoading(false)
-        setStartTime(null)
+        void setIsLoading(false)
+        void setStartTime(null)
       }, remaining)
     } else {
-      setIsLoading(false)
-      setStartTime(null)
+      void setIsLoading(false)
+      void setStartTime(null)
     }
   }, [startTime, minDuration])
 
   const withLoading = useCallback(async <T>(fn: () => Promise<T>): Promise<T> => {
     try {
-      startLoading()
+      void startLoading()
       return await fn()
     } finally {
       stopLoading()

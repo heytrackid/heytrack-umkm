@@ -3,7 +3,7 @@
  * Handles financial trend analysis and forecasting
  */
 
-import type { SaleData, ExpenseData, FinancialTrend } from '../types'
+import type { SaleData, ExpenseData, FinancialTrend } from '@/lib/automation/types'
 import type { WeeklyData } from './types'
 
 export class TrendAnalyzer {
@@ -57,13 +57,13 @@ export class TrendAnalyzer {
    * Calculate growth rates from historical data
    */
   static calculateGrowthRate(values: number[]): number {
-    if (values.length < 2) return 0
+    if (values.length < 2) {return 0}
 
     const firstValue = values[0]
     const lastValue = values[values.length - 1]
     const periods = values.length - 1
 
-    if (firstValue <= 0) return 0
+    if (firstValue <= 0) {return 0}
 
     return Math.pow(lastValue / firstValue, 1 / periods) - 1
   }
@@ -76,8 +76,8 @@ export class TrendAnalyzer {
   ): 'High' | 'Medium' | 'Low' {
     const revenueVariability = this.calculateVariability(historicalData.map(d => d.revenue))
 
-    if (revenueVariability < 0.1) return 'High'
-    if (revenueVariability < 0.3) return 'Medium'
+    if (revenueVariability < 0.1) {return 'High'}
+    if (revenueVariability < 0.3) {return 'Medium'}
     return 'Low'
   }
 

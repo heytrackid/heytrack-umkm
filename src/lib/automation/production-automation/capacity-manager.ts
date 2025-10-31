@@ -13,13 +13,9 @@ export class CapacityManager {
     equipment: Equipment[],
     staffing: Staffing[]
   ): ProductionCapacity {
-    const equipmentCapacity = equipment.reduce((total, eq) => {
-      return total + (eq.capacity * eq.availability / 100)
-    }, 0)
+    const equipmentCapacity = equipment.reduce((total, eq) => total + (eq.capacity * eq.availability / 100), 0)
 
-    const staffCapacity = staffing.reduce((total, staff) => {
-      return total + (staff.count * staff.productivity)
-    }, 0)
+    const staffCapacity = staffing.reduce((total, staff) => total + (staff.count * staff.productivity), 0)
 
     const bottleneck = equipmentCapacity < staffCapacity ? 'equipment' : 'staffing'
     const maxCapacity = Math.min(equipmentCapacity, staffCapacity)

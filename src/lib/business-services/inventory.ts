@@ -6,10 +6,10 @@
 
 
 import type { ReorderSummary } from './types'
-import type { Database } from '@/types'
+import type { Database, IngredientsTable } from '@/types/database'
 import { inventoryLogger } from '@/lib/logger'
 
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type Ingredient = IngredientsTable
 
 export class InventoryServices {
   private static instance: InventoryServices
@@ -88,8 +88,8 @@ export class InventoryServices {
         totalItems: reorderItems.length,
         criticalItems
       }
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in checkReorderNeeds')
+    } catch (err) {
+      inventoryLogger.error({ err }, 'Error in checkReorderNeeds')
       return { items: [], totalItems: 0, criticalItems: 0 }
     }
   }
@@ -126,9 +126,9 @@ export class InventoryServices {
         return []
       }
 
-      return (ingredients as Ingredient[]) || []
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in getLowStockItems')
+      return (ingredients) || []
+    } catch (err) {
+      inventoryLogger.error({ err }, 'Error in getLowStockItems')
       return []
     }
   }
@@ -155,9 +155,9 @@ export class InventoryServices {
       }
 
       inventoryLogger.info({ updatesCount: updates.length }, 'Successfully updated stock levels')
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in updateStockLevels')
-      throw error
+    } catch (err) {
+      inventoryLogger.error({ err }, 'Error in updateStockLevels')
+      throw err
     }
   }
 
@@ -230,8 +230,8 @@ export class InventoryServices {
         const priorityOrder = { out_of_stock: 3, critical: 2, low_stock: 1 }
         return priorityOrder[b.alert_type] - priorityOrder[a.alert_type]
       })
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in getStockAlerts')
+    } catch (err) {
+      inventoryLogger.error({ err }, 'Error in getStockAlerts')
       return []
     }
   }

@@ -2,25 +2,25 @@
 // Displays purchase statistics and metrics cards
 
 import { Card, CardContent } from '@/components/ui/card'
-import { DollarSign, Package, ShoppingCart, TrendingUp } from 'lucide-react'
+import { DollarSign, Package, ShoppingCart, TrendingUp, type LucideIcon } from 'lucide-react'
 import type { IngredientPurchase, PurchaseStats } from './types'
 
 interface PurchaseStatsProps {
   purchases: IngredientPurchase[]
 }
 
-export default function PurchaseStats({ purchases }: PurchaseStatsProps) {
+const PurchaseStats = ({ purchases }: PurchaseStatsProps) => {
   // Calculate stats
   const thisMonth = purchases.filter((p) => {
     const purchaseDate = new Date(p.purchase_date)
     const now = new Date()
     return purchaseDate.getMonth() === now.getMonth() &&
-           purchaseDate.getFullYear() === now.getFullYear()
+      purchaseDate.getFullYear() === now.getFullYear()
   })
 
   const uniqueSuppliers = new Set(purchases.filter((p) => p.supplier).map((p) => p.supplier))
 
-  const stats: PurchaseStats[] = [
+  const stats: Array<PurchaseStats & { icon: LucideIcon }> = [
     {
       title: 'Pembelian (Bulan Ini)',
       value: thisMonth.length,
@@ -82,3 +82,5 @@ export default function PurchaseStats({ purchases }: PurchaseStatsProps) {
     </div>
   )
 }
+
+export default PurchaseStats

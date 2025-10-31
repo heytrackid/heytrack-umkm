@@ -3,11 +3,11 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { OrderFormData } from '../hooks/useOrderLogic'
+import type { OrderFormData } from '@/app/orders/new/hooks/useOrderLogic'
 
 interface OrderPaymentStepProps {
   formData: OrderFormData
-  onInputChange: (field: keyof OrderFormData, value: any) => void
+  onInputChange: (field: keyof OrderFormData, value: string | number | boolean) => void
 }
 
 export default function OrderPaymentStep({

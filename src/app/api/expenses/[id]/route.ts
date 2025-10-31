@@ -1,14 +1,24 @@
 import { NextResponse } from 'next/server';
-import { createClient as createSupabaseClient } from '@/utils/supabase';
-import { getErrorMessage } from '@/lib/type-guards';
+import { createClient } from '@/utils/supabase/server'
+import { getErrorMessage, isValidUUID, isRecord, extractFirst, safeString } from '@/lib/type-guards';
+import { prepareUpdate } from '@/lib/supabase/insert-helpers';
+
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 });
+  }
+  
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
     
     const { data: expense, error } = await supabase
       .from('expenses')
@@ -19,9 +29,41 @@ export async function GET(
       .eq('id', id)
       .single();
 
-    if (error) {throw error;}
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Expense not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json(
+        { error: error.message || 'Failed to fetch expense' },
+        { status: 500 }
+      )
+    }
 
-    return NextResponse.json(expense);
+    // ✅ V2: Validate expense structure
+    if (!isRecord(expense)) {
+      return NextResponse.json(
+        { error: 'Invalid expense data structure' },
+        { status: 500 }
+      )
+    }
+
+    // ✅ V2: Safe extraction of supplier data
+    let responseExpense: typeof expense & { supplier_name?: string } = expense;
+    if ('supplier' in expense) {
+      const supplier = extractFirst(expense.supplier)
+      if (supplier && isRecord(supplier) && 'name' in supplier) {
+        // Supplier data safely extracted
+        responseExpense = { 
+          ...expense, 
+          supplier_name: safeString(supplier.name, 'Unknown')
+        };
+      }
+    }
+
+    return NextResponse.json(responseExpense);
   } catch (error: unknown) {
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
@@ -29,29 +71,41 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 });
+  }
+  
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
     const body = await request.json();
 
-    const updatePayload = {
-      ...body,
-      updated_at: new Date().toISOString()
-    };
+    const updatePayload = prepareUpdate('financial_records', body)
 
+    // ✅ Use financial_records table
     const { data: expense, error } = await supabase
-      .from('expenses')
+      .from('financial_records')
       .update(updatePayload)
       .eq('id', id)
-      .select(`
-        *,
-        supplier:suppliers(name)
-      `)
+      .select()
       .single();
 
-    if (error) {throw error;}
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Expense record not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json(
+        { error: error.message || 'Failed to update expense' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(expense);
   } catch (error: unknown) {
@@ -61,18 +115,29 @@ export async function PUT(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 });
+  }
+  
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
 
     const { error } = await supabase
       .from('expenses')
       .delete()
       .eq('id', id);
 
-    if (error) {throw error;}
+    if (error) {
+      return NextResponse.json(
+        { error: error.message || 'Failed to delete expense' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ message: 'Expense deleted successfully' });
   } catch (error: unknown) {

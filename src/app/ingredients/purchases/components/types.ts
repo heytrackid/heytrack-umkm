@@ -1,22 +1,14 @@
 // Ingredient Purchases Types
 // Type definitions for ingredient purchase management
 
-export interface IngredientPurchase {
-  id: string
-  ingredient_id: string
-  quantity: number
-  unit_price: number
-  total_price: number
-  supplier?: string
-  purchase_date: string
-  notes?: string
-  created_at: string
-  updated_at: string
-  ingredient?: {
-    id: string
-    name: string
-    unit: string
-  }
+import type { IngredientPurchasesTable, IngredientsTable } from '@/types/database'
+
+type IngredientPurchaseBase = IngredientPurchasesTable
+type Ingredient = IngredientsTable
+
+// Re-export base type with relations
+export interface IngredientPurchase extends IngredientPurchaseBase {
+  ingredient?: Pick<Ingredient, 'id' | 'name' | 'unit'>
 }
 
 export interface PurchaseFormData {
@@ -31,16 +23,9 @@ export interface PurchaseFormData {
 export interface PurchaseStats {
   title: string
   value: string | number
-  icon: string | React.ReactNode
   color: string
   bgColor: string
   description: string
 }
 
-export interface AvailableIngredient {
-  id: string
-  name: string
-  unit: string
-  current_stock: number
-  price_per_unit: number
-}
+export type AvailableIngredient = Pick<Ingredient, 'id' | 'name' | 'unit' | 'current_stock' | 'price_per_unit'>

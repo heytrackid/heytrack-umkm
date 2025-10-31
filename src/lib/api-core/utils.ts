@@ -3,7 +3,7 @@
  * General utility functions for API operations
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 /**
  * Parse search parameters from request URL
@@ -25,7 +25,7 @@ export function getClientIP(request: NextRequest): string {
 /**
  * Create ETag for response caching
  */
-export function createETag(data: any): string {
+export function createETag(data: unknown): string {
   const hash = JSON.stringify(data).split('').reduce((a, b) => {
     a = ((a << 5) - a) + b.charCodeAt(0)
     return a & a

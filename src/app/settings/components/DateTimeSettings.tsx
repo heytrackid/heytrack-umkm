@@ -8,7 +8,7 @@ import type {
   SettingsUpdateHandler,
   DateFormatOption,
   TimeFormatOption,
-} from '../types'
+} from '@/app/settings/types'
 
 interface DateTimeSettingsProps {
   settings: AppSettingsState
@@ -18,9 +18,7 @@ interface DateTimeSettingsProps {
 /**
  * Date and time format settings component
  */
-export function DateTimeSettings({ settings, onSettingChange }: DateTimeSettingsProps) {
-  
-  return (
+export const DateTimeSettings = ({ settings, onSettingChange }: DateTimeSettingsProps) => (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -61,4 +59,3 @@ export function DateTimeSettings({ settings, onSettingChange }: DateTimeSettings
       </CardContent>
     </Card>
   )
-}

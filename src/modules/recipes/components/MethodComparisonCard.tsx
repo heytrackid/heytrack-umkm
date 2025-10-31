@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { BarChart3 } from 'lucide-react'
-import type { HPPCalculationResult, PricingMethod } from '../services/EnhancedHPPCalculationService'
+import type { HPPCalculationResult, PricingMethod } from '@/modules/recipes/types'
 
 // Method descriptions for UMKM
 const getPricingMethodDescription = (method: PricingMethod) => {
@@ -46,8 +46,7 @@ interface MethodComparisonCardProps {
 /**
  * Pricing method comparison card component
  */
-export function MethodComparisonCard({ calculationResult, formatCurrency, selectedPricingMethod }: MethodComparisonCardProps) {
-  return (
+export const MethodComparisonCard = ({ calculationResult, formatCurrency, selectedPricingMethod }: MethodComparisonCardProps) => (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -87,7 +86,7 @@ export function MethodComparisonCard({ calculationResult, formatCurrency, select
                 </div>
                 <div className="text-right">
                   <p className="font-semibold">
-                    {formatCurrency(alternative.costPerUnit)}
+                    {formatCurrency(alternative.cost_per_unit)}
                   </p>
                   <p className="text-xs text-gray-500">per porsi</p>
                 </div>
@@ -98,4 +97,3 @@ export function MethodComparisonCard({ calculationResult, formatCurrency, select
       </CardContent>
     </Card>
   )
-}

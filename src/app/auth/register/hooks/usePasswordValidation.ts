@@ -3,11 +3,11 @@ import { useMemo } from 'react'
 export function usePasswordValidation(password: string) {
   const passwordStrength = useMemo(() => {
     let strength = 0
-    if (password.length >= 8) strength++
-    if (password.length >= 12) strength++
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++
-    if (/\d/.test(password)) strength++
-    if (/[^a-zA-Z\d]/.test(password)) strength++
+    if (password.length >= 8) {strength++}
+    if (password.length >= 12) {strength++}
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) {strength++}
+    if (/\d/.test(password)) {strength++}
+    if (/[^a-zA-Z\d]/.test(password)) {strength++}
     return strength
   }, [password])
 

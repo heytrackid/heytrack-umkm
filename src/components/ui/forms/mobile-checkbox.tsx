@@ -3,7 +3,6 @@
  * Optimized checkbox for mobile devices with larger touch targets
  */
 
-import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Label } from '../label'
@@ -21,7 +20,7 @@ interface MobileCheckboxProps {
   className?: string
 }
 
-export function MobileCheckbox({
+export const MobileCheckbox = ({
   label,
   checked,
   defaultChecked,
@@ -31,7 +30,7 @@ export function MobileCheckbox({
   error,
   hint,
   className
-}: MobileCheckboxProps) {
+}: MobileCheckboxProps) => {
   const { isMobile } = useResponsive()
 
   return (

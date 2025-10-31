@@ -1,3 +1,4 @@
+import type { ComponentType, ReactNode } from 'react'
 /**
  * Shared Layout Components
  * Reusable layout patterns to reduce duplicate code
@@ -11,23 +12,23 @@ import { useRouter } from 'next/navigation'
 interface PageLayoutProps {
   title: string
   description?: string
-  breadcrumb?: React.ReactNode
-  actions?: React.ReactNode
-  children: React.ReactNode
+  breadcrumb?: ReactNode
+  actions?: ReactNode
+  children: ReactNode
   backHref?: string
 }
 
 /**
  * Standard page layout with header, breadcrumb, and content
  */
-export function PageLayout({
+export const PageLayout = ({
   title,
   description,
   breadcrumb,
   actions,
   children,
   backHref
-}: PageLayoutProps) {
+}: PageLayoutProps) => {
   const router = useRouter()
 
   return (
@@ -64,7 +65,7 @@ export function PageLayout({
 }
 
 interface DataGridProps {
-  children: React.ReactNode
+  children: ReactNode
   className?: string
   variant?: 'default' | 'cards' | 'list'
 }
@@ -72,7 +73,7 @@ interface DataGridProps {
 /**
  * Responsive data grid layouts
  */
-export function DataGrid({ children, className, variant = 'default' }: DataGridProps) {
+export const DataGrid = ({ children, className, variant = 'default' }: DataGridProps) => {
   const gridClasses = {
     default: "grid gap-4 md:grid-cols-2 lg:grid-cols-4",
     cards: "grid gap-4 md:grid-cols-2 lg:grid-cols-3",
@@ -89,24 +90,23 @@ export function DataGrid({ children, className, variant = 'default' }: DataGridP
 interface ContentCardProps {
   title?: string
   description?: string
-  children: React.ReactNode
+  children: ReactNode
   className?: string
-  headerActions?: React.ReactNode
+  headerActions?: ReactNode
   noPadding?: boolean
 }
 
 /**
  * Standardized content card with optional header
  */
-export function ContentCard({
+export const ContentCard = ({
   title,
   description,
   children,
   className,
   headerActions,
   noPadding = false
-}: ContentCardProps) {
-  return (
+}: ContentCardProps) => (
     <Card className={className}>
       {(title || headerActions) && (
         <CardHeader>
@@ -132,25 +132,23 @@ export function ContentCard({
       </CardContent>
     </Card>
   )
-}
 
 interface PageActionsProps {
   onAdd?: () => void
   addText?: string
-  addIcon?: React.ComponentType<{ className?: string }>
-  children?: React.ReactNode
+  addIcon?: ComponentType<{ className?: string }>
+  children?: ReactNode
 }
 
 /**
  * Standardized page action buttons
  */
-export function PageActions({
+export const PageActions = ({
   onAdd,
   addText = "Tambah",
   addIcon: Icon = Plus,
   children
-}: PageActionsProps) {
-  return (
+}: PageActionsProps) => (
     <div className="flex gap-2">
       {onAdd && (
         <Button onClick={onAdd}>
@@ -161,7 +159,6 @@ export function PageActions({
       {children}
     </div>
   )
-}
 
 // Import React for types
-import * as React from 'react'
+import type React from 'react'

@@ -13,7 +13,7 @@ export function useScreenSize(): ScreenSizeState {
   })
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') {return}
 
     const updateSize = () => {
       setScreenSize({
@@ -22,7 +22,7 @@ export function useScreenSize(): ScreenSizeState {
       })
     }
 
-    updateSize()
+    void updateSize()
     window.addEventListener('resize', updateSize)
     return () => window.removeEventListener('resize', updateSize)
   }, [])

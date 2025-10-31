@@ -4,7 +4,10 @@ import { useState } from 'react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { RegistrationSuccess, RegistrationForm } from './components'
 
-export default function RegisterPage() {
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
+const RegisterPage = () => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -12,7 +15,7 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false)
 
   const handleSuccess = () => {
-    setSuccess(true)
+    void setSuccess(true)
   }
 
   if (success) {
@@ -53,3 +56,5 @@ export default function RegisterPage() {
     </div>
   )
 }
+
+export default RegisterPage

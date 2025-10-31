@@ -177,8 +177,8 @@ export function getCurrentCurrency(): Currency {
         }
       }
     }
-  } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error loading currency settings')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error loading currency settings')
   }
 
   return DEFAULT_CURRENCY
@@ -228,7 +228,7 @@ export function formatCurrencyIntl(amount: number, currency: Currency): string {
     }).format(amount)
     
     return `${currency.symbol} ${formatted}`
-  } catch (error: unknown) {
+  } catch (err: unknown) {
     // Fallback to basic formatting
     return formatCurrency(amount, currency)
   }
@@ -287,7 +287,7 @@ export function createCurrencyFormatter(currency: Currency) {
  */
 export function formatCurrencyInput(
   value: string,
-  currencyCode: string = 'IDR'
+  currencyCode = 'IDR'
 ): string {
   const config = currencyConfigs[currencyCode]
   if (!config) {return value}

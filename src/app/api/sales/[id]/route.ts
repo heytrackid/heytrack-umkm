@@ -1,14 +1,24 @@
 import { NextResponse } from 'next/server';
-import { createClient as createSupabaseClient } from '@/utils/supabase';
-import { getErrorMessage } from '@/lib/type-guards';
+import { createClient } from '@/utils/supabase/server'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards';
+import { prepareUpdate } from '@/lib/supabase/insert-helpers';
+
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid sale ID format' }, { status: 400 });
+  }
+  
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
     
     const { data: sale, error } = await supabase
       .from('financial_records')
@@ -19,7 +29,18 @@ export async function GET(
       .eq('record_type', 'INCOME')
       .single();
 
-    if (error) {throw error;}
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Sale record not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json(
+        { error: error.message || 'Failed to fetch sale record' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(sale);
   } catch (error: unknown) {
@@ -29,17 +50,20 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid sale ID format' }, { status: 400 });
+  }
+  
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
     const body = await request.json();
 
-    const updatePayload = {
-      ...body,
-      updated_at: new Date().toISOString()
-    };
+    const updatePayload = prepareUpdate('financial_records', body)
 
     const { data: sale, error } = await supabase
       .from('financial_records')
@@ -51,7 +75,18 @@ export async function PUT(
       `)
       .single();
 
-    if (error) {throw error;}
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Sale record not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json(
+        { error: error.message || 'Failed to update sale record' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(sale);
   } catch (error: unknown) {
@@ -61,11 +96,17 @@ export async function PUT(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid sale ID format' }, { status: 400 });
+  }
+  
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
 
     const { error } = await supabase
       .from('financial_records')
@@ -73,10 +114,15 @@ export async function DELETE(
       .eq('id', id)
       .eq('record_type', 'INCOME');
 
-    if (error) {throw error;}
+    if (error) {
+      return NextResponse.json(
+        { error: error.message || 'Failed to delete sale record' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ message: 'Sale deleted successfully' });
-  } catch (error: unknown) {
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
   }
 }

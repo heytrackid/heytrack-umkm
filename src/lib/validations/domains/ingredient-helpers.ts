@@ -4,7 +4,10 @@
  */
 
 import { z } from 'zod'
-import { IngredientInsertSchema, IngredientUpdateSchema, type IngredientInsert, type IngredientUpdate } from './ingredient'
+import { IngredientInsertSchema, type IngredientInsert, type IngredientUpdate } from './ingredient'
+
+// Re-export for convenience
+export { IngredientUpdateSchema } from './ingredient'
 
 // Enhanced ingredient validation with business rules
 export const EnhancedIngredientInsertSchema = IngredientInsertSchema
@@ -23,7 +26,7 @@ export const EnhancedIngredientInsertSchema = IngredientInsertSchema
 
     // Category validation
     category: z.string().max(100).optional().refine((category) => {
-      if (!category) return true
+      if (!category) {return true}
       const validCategories = ['dairy', 'meat', 'vegetables', 'fruits', 'grains', 'spices', 'oils', 'beverages', 'bakery', 'other']
       return validCategories.includes(category.toLowerCase())
     }, {
@@ -68,9 +71,9 @@ export class IngredientValidationHelpers {
     try {
       const validatedData = EnhancedIngredientInsertSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -84,9 +87,9 @@ export class IngredientValidationHelpers {
     try {
       const validatedData = EnhancedIngredientUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -152,16 +155,16 @@ export class IngredientValidationHelpers {
    * Validate bulk ingredient import
    */
   static validateBulkImport(ingredients: unknown[]): {
-    valid: any[]
-    invalid: Array<{ index: number; data: any; errors: string[] }>
+    valid: IngredientInsert[]
+    invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: any[] = []
-    const invalid: Array<{ index: number; data: any; errors: string[] }> = []
+    const valid: IngredientInsert[] = []
+    const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     ingredients.forEach((ingredient, index) => {
       const result = this.validateInsert(ingredient)
       if (result.success) {
-        valid.push(result.data)
+        valid.push(result.data!)
       } else {
         invalid.push({
           index,

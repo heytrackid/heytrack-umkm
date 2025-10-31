@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import type { ProfitData } from './types'
 
@@ -7,11 +6,10 @@ interface IngredientCostsTableProps {
   formatCurrency: (amount: number) => string
 }
 
-export function IngredientCostsTable({
+export const IngredientCostsTable = ({
   ingredients,
   formatCurrency
-}: IngredientCostsTableProps) {
-  return (
+}: IngredientCostsTableProps) => (
     <Card>
       <CardHeader>
         <CardTitle>Biaya Bahan Baku (WAC)</CardTitle>
@@ -47,4 +45,3 @@ export function IngredientCostsTable({
       </CardContent>
     </Card>
   )
-}

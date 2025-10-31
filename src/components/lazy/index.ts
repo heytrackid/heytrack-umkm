@@ -25,11 +25,6 @@ export {
   LazyConfirmationModal, LazyCustomerDetail, LazyCustomerForm, LazyExportModal, LazyFinanceForm, LazyIngredientForm, LazyInventoryDetail, LazyModal, LazyOrderDetail, LazyOrderForm, LazyRecipeForm, ModalLoadingStrategy, preloadModalComponent, useConfirmationModal, useLazyModal
 } from './modal-lazy-loader'
 
-// Vendor Bundle Lazy Loading
-export {
-  HoverCardWithSuspense, LazyDateBundle, LazyRadixBundle, LazyRechartsBundle, loadVendorWhenNeeded, NavigationMenuWithSuspense, RadixWithLoading, RechartsWithLoading, ScrollAreaWithSuspense, useVendorLib, AreaChartWithSuspense as VendorAreaChart, BarChartWithSuspense as VendorBarChart, VendorBundleSizes, LineChartWithSuspense as VendorLineChart, VendorLoadingStrategy, PieChartWithSuspense as VendorPieChart
-} from './vendor-bundles'
-
 // Route-based Lazy Loading Strategy
 export const RouteLazyLoadingConfig = {
   // Dashboard Page
@@ -164,7 +159,7 @@ export const LazyLoadingMetrics = {
     LazyLoadingMetrics.loadingTimes.set(componentName, loadTime)
 
     if (loadTime > 1000) {
-      apiLogger.warn('Slow component load', { componentName, loadTime: loadTime.toFixed(2) })
+      apiLogger.warn(`Slow component load: ${componentName}`, { loadTime: loadTime.toFixed(2) })
     }
   },
 
@@ -184,7 +179,7 @@ export const globalLazyLoadingUtils = {
   // Preload critical components for the current route
   preloadForRoute: async (routeName: keyof typeof RouteLazyLoadingConfig) => {
     const config = RouteLazyLoadingConfig[routeName]
-    const preloadPromises: Promise<unknown>[] = []
+    const preloadPromises: Array<Promise<unknown>> = []
 
     // Preload essential components
     if (config.essential) {
@@ -221,10 +216,8 @@ export const globalLazyLoadingUtils = {
   // Monitor bundle size impact
   monitorBundleImpact: () => {
     if (typeof performance !== 'undefined' && 'memory' in performance) {
-      const memory = (performance as any).memory
-      apiLogger.debug('Current memory usage', {
-        memoryMB: (memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
-      })
+      const {memory} = (performance as any)
+      apiLogger.debug(`Current memory usage: ${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`)
     }
   }
 }

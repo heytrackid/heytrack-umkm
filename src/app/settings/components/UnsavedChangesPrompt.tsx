@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+// import { Badge } from '@/components/ui/badge'
 import { AlertTriangle } from 'lucide-react'
 
 interface UnsavedChangesPromptProps {
@@ -15,7 +15,7 @@ interface UnsavedChangesPromptProps {
 /**
  * Unsaved changes prompt component
  */
-export function UnsavedChangesPrompt({ isUnsavedChanges, onReset, onSave, isSaving }: UnsavedChangesPromptProps) {
+export const UnsavedChangesPrompt = ({ isUnsavedChanges, onReset, onSave, isSaving }: UnsavedChangesPromptProps) => {
   if (!isUnsavedChanges) {return null}
 
   return (

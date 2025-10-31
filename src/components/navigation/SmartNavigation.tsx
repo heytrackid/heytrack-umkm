@@ -1,7 +1,6 @@
 'use client'
-import * as React from 'react'
 
-import { useState } from 'react'
+import { Fragment, type ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -9,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { useLinkPreloading, useButtonPreloading } from '@/hooks/useSimplePreloading'
 import {
   LayoutDashboard,
-  ShoppingCart, 
+  ShoppingCart,
   Users,
   Package,
   Utensils,
@@ -23,17 +22,17 @@ import {
 // Smart Link component with preloading
 interface SmartLinkProps {
   href: string
-  children: React.ReactNode
+  children: ReactNode
   className?: string
   activeClassName?: string
   preloadOnHover?: boolean
   preloadDelay?: number
 }
 
-export const SmartLink = ({ 
-  href, 
-  children, 
-  className, 
+export const SmartLink = ({
+  href,
+  children,
+  className,
   activeClassName,
   preloadOnHover = true,
   preloadDelay = 100
@@ -41,22 +40,22 @@ export const SmartLink = ({
   const pathname = usePathname()
   const linkPreloading = useLinkPreloading()
   const [isHovered, setIsHovered] = useState(false)
-  
+
   const isActive = pathname === href || (href !== '/' && pathname.startsWith(href))
-  
+
   const handleMouseEnter = () => {
-    setIsHovered(true)
+    void setIsHovered(true)
     if (preloadOnHover) {
       setTimeout(() => {
         linkPreloading.onMouseEnter(href)
       }, preloadDelay)
     }
   }
-  
+
   const handleMouseLeave = () => {
-    setIsHovered(false)
+    void setIsHovered(false)
   }
-  
+
   return (
     <Link
       href={href}
@@ -76,7 +75,7 @@ export const SmartLink = ({
 
 // Smart Button component with modal preloading
 interface SmartButtonProps {
-  children: React.ReactNode
+  children: ReactNode
   onClick?: () => void
   modalType?: string
   preloadOnHover?: boolean
@@ -85,9 +84,9 @@ interface SmartButtonProps {
   size?: "default" | "sm" | "lg" | "icon"
 }
 
-export const SmartButton = ({ 
-  children, 
-  onClick, 
+export const SmartButton = ({
+  children,
+  onClick,
   modalType,
   preloadOnHover = true,
   className,
@@ -95,13 +94,13 @@ export const SmartButton = ({
   size = "default"
 }: SmartButtonProps) => {
   const { preloadModalOnHover } = useButtonPreloading()
-  
+
   const handleMouseEnter = () => {
     if (preloadOnHover && modalType) {
-      preloadModalOnHover(modalType)
+      void preloadModalOnHover(modalType)
     }
   }
-  
+
   return (
     <Button
       variant={variant}
@@ -125,7 +124,7 @@ const navigationItems = [
   },
   {
     title: 'Orders',
-    href: '/orders', 
+    href: '/orders',
     icon: ShoppingCart,
     preloadTargets: ['/customers', '/orders/new']
   },
@@ -142,14 +141,14 @@ const navigationItems = [
     preloadTargets: ['/ingredients', '/orders']
   },
   {
-    title: 'Ingredients', 
+    title: 'Ingredients',
     href: '/ingredients',
     icon: Utensils,
-    preloadTargets: ['/inventory', '/resep']
+    preloadTargets: ['/inventory', '/recipes']
   },
   {
     title: 'Recipes',
-    href: '/resep',
+    href: '/recipes',
     icon: BarChart3,
     preloadTargets: ['/ingredients', '/hpp']
   },
@@ -168,29 +167,27 @@ const navigationItems = [
 ]
 
 // Smart Sidebar Navigation
-export const SmartSidebar = () => {
-  return (
-    <nav className="space-y-2">
-      {navigationItems.map((item) => (
-        <SmartLink
-          key={item.href}
-          href={item.href}
-          className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-          activeClassName="bg-accent text-accent-foreground"
-          preloadDelay={50} // Fast preload for sidebar
-        >
-          <item.icon className="h-4 w-4" />
-          <span>{item.title}</span>
-        </SmartLink>
-      ))}
-    </nav>
-  )
-}
+export const SmartSidebar = () => (
+  <nav className="space-y-2">
+    {navigationItems.map((item) => (
+      <SmartLink
+        key={item.href}
+        href={item.href}
+        className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+        activeClassName="bg-accent text-accent-foreground"
+        preloadDelay={50} // Fast preload for sidebar
+      >
+        <item.icon className="h-4 w-4" />
+        <span>{item.title}</span>
+      </SmartLink>
+    ))}
+  </nav>
+)
 
 // Smart Mobile Bottom Navigation
 export const SmartBottomNav = () => {
   const mainItems = navigationItems.slice(0, 5) // First 5 items for mobile
-  
+
   return (
     <nav className="flex justify-around items-center py-2 bg-background border-t">
       {mainItems.map((item) => (
@@ -210,23 +207,23 @@ export const SmartBottomNav = () => {
 }
 
 // Smart Action Buttons (for forms, modals, etc)
-export const SmartActionButton = ({ 
-  action, 
-  children, 
-  ...props 
-}: { 
+export const SmartActionButton = ({
+  action,
+  children,
+  ...props
+}: {
   action: 'add-order' | 'add-customer' | 'add-ingredient' | 'add-recipe' | 'add-finance'
-  children: React.ReactNode 
+  children: ReactNode
 } & Omit<SmartButtonProps, 'modalType'>) => {
-  
+
   const modalTypeMap = {
     'add-order': 'order-form',
-    'add-customer': 'customer-form', 
+    'add-customer': 'customer-form',
     'add-ingredient': 'ingredient-form',
     'add-recipe': 'recipe-form',
     'add-finance': 'finance-form'
   }
-  
+
   return (
     <SmartButton modalType={modalTypeMap[action]} {...props}>
       <Plus className="h-4 w-4 mr-2" />
@@ -238,10 +235,10 @@ export const SmartActionButton = ({
 // Smart Search Component (preloads search results)
 export const SmartSearchButton = () => {
   const { preloadTableOnHover } = useButtonPreloading()
-  
+
   return (
-    <Button 
-      variant="outline" 
+    <Button
+      variant="outline"
       size="sm"
       onMouseEnter={() => preloadTableOnHover()}
     >
@@ -257,48 +254,44 @@ interface BreadcrumbItem {
   href?: string
 }
 
-export const SmartBreadcrumbs = ({ items }: { items: BreadcrumbItem[] }) => {
-  return (
-    <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
-      {items.map((item, index: number) => (
-        <React.Fragment key={index}>
-          {item.href ? (
-            <SmartLink 
-              href={item.href}
-              className="hover:text-foreground transition-colors"
-              preloadDelay={200}
-            >
-              {item.label}
-            </SmartLink>
-          ) : (
-            <span className="text-foreground font-medium">{item.label}</span>
-          )}
-          {index < items.length - 1 && (
-            <span className="text-muted-foreground">/</span>
-          )}
-        </React.Fragment>
-      ))}
-    </nav>
-  )
-}
+export const SmartBreadcrumbs = ({ items }: { items: BreadcrumbItem[] }) => (
+  <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
+    {items.map((item, index: number) => (
+      <Fragment key={index}>
+        {item.href ? (
+          <SmartLink
+            href={item.href}
+            className="hover:text-foreground transition-colors"
+            preloadDelay={200}
+          >
+            {item.label}
+          </SmartLink>
+        ) : (
+          <span className="text-foreground font-medium">{item.label}</span>
+        )}
+        {index < items.length - 1 && (
+          <span className="text-muted-foreground">/</span>
+        )}
+      </Fragment>
+    ))}
+  </nav>
+)
 
 // Quick Actions Panel with Smart Buttons
-export const SmartQuickActions = () => {
-  return (
-    <div className="flex flex-wrap gap-2">
-      <SmartActionButton action="add-order">
-        New Order
-      </SmartActionButton>
-      
-      <SmartActionButton action="add-customer" variant="outline">
-        Add Customer
-      </SmartActionButton>
-      
-      <SmartActionButton action="add-ingredient" variant="outline">
-        Add Ingredient
-      </SmartActionButton>
-      
-      <SmartSearchButton />
-    </div>
-  )
-}
+export const SmartQuickActions = () => (
+  <div className="flex flex-wrap gap-2">
+    <SmartActionButton action="add-order">
+      New Order
+    </SmartActionButton>
+
+    <SmartActionButton action="add-customer" variant="outline">
+      Add Customer
+    </SmartActionButton>
+
+    <SmartActionButton action="add-ingredient" variant="outline">
+      Add Ingredient
+    </SmartActionButton>
+
+    <SmartSearchButton />
+  </div>
+)

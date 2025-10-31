@@ -23,10 +23,7 @@ export type {
 export type {
   // Recipes Types
   Recipe,
-  RecipeIngredient,
-  HPPCalculation,
-  RecipeHppResult,
-  RecipePricingSuggestions
+  RecipeIngredient
 } from './recipes/types'
 
 // Module Configuration
@@ -47,7 +44,7 @@ export const MODULES_CONFIG = {
     name: 'Recipes',
     path: '/recipes', 
     icon: 'ChefHat',
-    description: 'Manajemen resep dan HPP'
+    description: 'Manajemen resep dan pricing'
   },
   finance: {
     name: 'Finance',
@@ -70,13 +67,9 @@ export const MODULES_CONFIG = {
 } as const
 
 // Module utilities
-export const getModuleConfig = (moduleName: keyof typeof MODULES_CONFIG) => {
-  return MODULES_CONFIG[moduleName]
-}
+export const getModuleConfig = (moduleName: keyof typeof MODULES_CONFIG) => MODULES_CONFIG[moduleName]
 
-export const getAllModules = () => {
-  return Object.entries(MODULES_CONFIG).map(([key, config]) => ({
+export const getAllModules = () => Object.entries(MODULES_CONFIG).map(([key, config]) => ({
     key,
     ...config
   }))
-}

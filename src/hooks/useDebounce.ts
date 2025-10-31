@@ -10,7 +10,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedValue(value)
+      void setDebouncedValue(value)
     }, delay)
 
     return () => {

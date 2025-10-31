@@ -7,4 +7,4 @@
  */
 
 // Re-export everything from the modular structure
-export * from './notification-system'
+export * from './notification-system/index'

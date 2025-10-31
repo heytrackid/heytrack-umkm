@@ -1,7 +1,7 @@
 // Core Sidebar Components
 // Main sidebar structure and layout components
 
-import * as React from "react"
+import type { ComponentProps, CSSProperties } from 'react'
 import { PanelLeftIcon } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -20,20 +20,20 @@ const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 
-interface SidebarProps extends React.ComponentProps<"div"> {
+interface SidebarProps extends ComponentProps<'div'> {
   side?: "left" | "right"
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }
 
-export function Sidebar({
+export const Sidebar = ({
   side = "left",
   variant = "sidebar",
   collapsible = "offcanvas",
   className,
   children,
   ...props
-}: SidebarProps) {
+}: SidebarProps) => {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
   if (collapsible === "none") {
@@ -62,7 +62,7 @@ export function Sidebar({
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
+            } as CSSProperties
           }
           side={side}
         >
@@ -124,11 +124,11 @@ export function Sidebar({
   )
 }
 
-export function SidebarTrigger({
+export const SidebarTrigger = ({
   className,
   onClick,
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: ComponentProps<typeof Button>) => {
   const { toggleSidebar } = useSidebar()
 
   return (
@@ -150,7 +150,7 @@ export function SidebarTrigger({
   )
 }
 
-export function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
+export const SidebarRail = ({ className, ...props }: ComponentProps<'button'>) => {
   const { toggleSidebar } = useSidebar()
 
   return (
@@ -175,8 +175,7 @@ export function SidebarRail({ className, ...props }: React.ComponentProps<"butto
   )
 }
 
-export function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
-  return (
+export const SidebarInset = ({ className, ...props }: ComponentProps<'main'>) => (
     <main
       data-slot="sidebar-inset"
       className={cn(
@@ -187,4 +186,3 @@ export function SidebarInset({ className, ...props }: React.ComponentProps<"main
       {...props}
     />
   )
-}

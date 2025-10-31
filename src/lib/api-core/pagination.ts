@@ -3,7 +3,7 @@
  * Pagination utilities for API responses
  */
 
-import { NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server'
 import type { PaginationParams, PaginationState } from './types'
 
 /**
@@ -47,7 +47,7 @@ export function createPaginationMeta(
 /**
  * Apply pagination to array of items
  */
-export function usePagination(items: any[], params: PaginationParams) {
+export function usePagination<T>(items: T[], params: PaginationParams) {
   const { page = 1, limit = 10, offset } = params
   const actualOffset = offset ?? calculateOffset(page, limit)
   const paginatedItems = items.slice(actualOffset, actualOffset + limit)

@@ -100,7 +100,7 @@ export interface APIError {
   message: string
   statusCode: number
   code?: string
-  details?: any
+  details?: Record<string, unknown>
 }
 
 // ============================================================================
@@ -109,11 +109,11 @@ export interface APIError {
 
 export interface RouteHandlerConfig {
   validation?: {
-    body?: any // z.ZodSchema
-    query?: any // z.ZodSchema
-    params?: any // z.ZodSchema
+    body?: unknown // z.ZodSchema
+    query?: unknown // z.ZodSchema
+    params?: unknown // z.ZodSchema
   }
-  middleware?: Array<(request: NextRequest) => Promise<any> | any>
+  middleware?: Array<(request: NextRequest) => Promise<unknown> | unknown>
   pagination?: boolean
   caching?: {
     key: string
@@ -129,5 +129,5 @@ export interface RouteHandlerContext<T = unknown> {
   request: NextRequest
   validatedData?: T
   pagination?: PaginationState
-  user?: any
+  user?: { id: string; email?: string; role?: string }
 }

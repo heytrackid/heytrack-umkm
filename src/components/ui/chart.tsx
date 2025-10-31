@@ -1,37 +1,35 @@
 "use client"
 
-import * as React from "react"
+import { forwardRef, type ComponentProps, type ComponentType, type HTMLAttributes } from 'react'
 import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
 
 // Chart container component
-const ChartContainer = React.forwardRef<
+const ChartContainer = forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
-    config?: Record<string, { label?: string; icon?: React.ComponentType; color?: string }>
-    children: React.ComponentProps<
+  HTMLAttributes<HTMLDivElement> & {
+    config?: Record<string, { label?: string; icon?: ComponentType; color?: string }>
+    children: ComponentProps<
       typeof RechartsPrimitive.ResponsiveContainer
     >["children"]
   }
->(({ className, config, children, ...props }, ref) => {
-  return (
+>(({ className, config, children, ...props }, ref) => (
     <div ref={ref} className={cn("flex aspect-video justify-center text-xs", className)} {...props}>
       <RechartsPrimitive.ResponsiveContainer width="100%" height="100%">
         {children}
       </RechartsPrimitive.ResponsiveContainer>
     </div>
-  )
-})
+  ))
 ChartContainer.displayName ="Chart"
 
 // Chart tooltip
 const ChartTooltip = RechartsPrimitive.Tooltip
 
-const ChartTooltipContent = React.forwardRef<
+const ChartTooltipContent = forwardRef<
   HTMLDivElement,
-  React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-    React.HTMLAttributes<HTMLDivElement> & {
+  ComponentProps<typeof RechartsPrimitive.Tooltip> &
+    HTMLAttributes<HTMLDivElement> & {
       hideLabel?: boolean
       hideIndicator?: boolean
       indicator?:"line" |"dot" |"dashed"
@@ -61,8 +59,7 @@ const ChartTooltipContent = React.forwardRef<
     wrapperStyle,
     accessibilityLayer,
     ...validDOMProps 
-  }, ref) => {
-    return (
+  }, ref) => (
       <div
         ref={ref}
         className={cn(
@@ -72,16 +69,15 @@ const ChartTooltipContent = React.forwardRef<
         {...validDOMProps}
       />
     )
-  }
 )
 ChartTooltipContent.displayName ="ChartTooltipContent"
 
 // Chart legend
 const ChartLegend = RechartsPrimitive.Legend
 
-const ChartLegendContent = React.forwardRef<
+const ChartLegendContent = forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div"> & {
+  ComponentProps<'div'> & {
     payload?: Array<{ value: string; type?: string; color?: string }>
   }
 >(({ className, payload, ...props }, ref) => {

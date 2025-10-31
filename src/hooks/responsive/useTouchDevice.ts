@@ -9,15 +9,12 @@ export function useTouchDevice(): boolean {
   const [isTouch, setIsTouch] = useState(false)
 
   useEffect(() => {
-    setIsTouch(() => {
-      return (
+    setIsTouch(() => (
         typeof window !== 'undefined' &&
         ('ontouchstart' in window ||
           navigator.maxTouchPoints > 0 ||
-          // @ts-ignore
-          navigator.msMaxTouchPoints > 0)
-      )
-    })
+          ('msMaxTouchPoints' in navigator && (navigator as any).msMaxTouchPoints > 0))
+      ))
   }, [])
 
   return isTouch

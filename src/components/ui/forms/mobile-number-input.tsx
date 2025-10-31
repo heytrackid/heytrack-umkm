@@ -3,7 +3,6 @@
  * Optimized number input with +/- buttons for mobile
  */
 
-import * as React from 'react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -30,7 +29,7 @@ interface MobileNumberInputProps {
   className?: string
 }
 
-export function MobileNumberInput({
+export const MobileNumberInput = ({
   label,
   placeholder,
   value,
@@ -46,7 +45,7 @@ export function MobileNumberInput({
   hint,
   formatCurrency = false,
   className
-}: MobileNumberInputProps) {
+}: MobileNumberInputProps) => {
   const [isFocused, setIsFocused] = useState(false)
   const { isMobile } = useResponsive()
 
@@ -125,7 +124,7 @@ export function MobileNumberInput({
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
-            setIsFocused(false)
+            void setIsFocused(false)
             onBlur?.()
           }}
           disabled={disabled}

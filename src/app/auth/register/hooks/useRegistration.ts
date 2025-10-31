@@ -1,7 +1,7 @@
 import { useState, useTransition } from 'react'
-import { getAuthErrorMessage, validateEmail, validatePassword, validatePasswordMatch } from '../utils/validation'
-import { signup } from '../actions'
-import type { FieldErrors, ErrorAction } from '../types'
+import { getAuthErrorMessage, validateEmail, validatePassword, validatePasswordMatch } from '@/app/auth/register/utils/validation'
+import { signup } from '@/app/auth/register/actions'
+import type { FieldErrors, ErrorAction } from '@/app/auth/register/types'
 
 export function useRegistration() {
   const [error, setError] = useState('')
@@ -16,8 +16,8 @@ export function useRegistration() {
       delete newErrors[field]
       return newErrors
     })
-    setError('')
-    setErrorAction(null)
+    void setError('')
+    void setErrorAction(null)
   }
 
   const validateForm = (email: string, password: string, confirmPassword: string): FieldErrors => {
@@ -42,9 +42,9 @@ export function useRegistration() {
   }
 
   const handleSubmit = async (formData: FormData) => {
-    setError('')
-    setErrorAction(null)
-    setFieldErrors({})
+    void setError('')
+    void setErrorAction(null)
+    void setFieldErrors({})
 
     const email = formData.get('email') as string
     const password = formData.get('password') as string
@@ -54,7 +54,7 @@ export function useRegistration() {
     const errors = validateForm(email, password, confirmPassword)
 
     if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors)
+      void setFieldErrors(errors)
       return
     }
 
@@ -62,12 +62,12 @@ export function useRegistration() {
       const result = await signup(formData)
       if (result?.error) {
         const authError = getAuthErrorMessage(result.error)
-        setError(authError.message)
+        void setError(authError.message)
         if (authError.action) {
-          setErrorAction(authError.action)
+          void setErrorAction(authError.action)
         }
       } else if (result?.success) {
-        setSuccess(true)
+        void setSuccess(true)
       }
     })
   }

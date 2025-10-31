@@ -1,5 +1,5 @@
 import type { OrderStatus, PaymentStatus, Priority, StatusInfo } from './types'
-import { formatCurrentCurrency, formatDate } from '@/shared'
+import { formatCurrentCurrency } from '@/shared'
 
 // Order Status Configurations
 export const orderStatuses: Record<OrderStatus, StatusInfo> = {
@@ -20,7 +20,8 @@ export const paymentStatuses: Record<PaymentStatus, StatusInfo> = {
 export const priorities: Record<Priority, StatusInfo> = {
   'low': { label: 'Rendah', color: 'bg-gray-100 text-gray-800' },
   'normal': { label: 'Normal', color: 'bg-blue-100 text-blue-800' },
-  'high': { label: 'Tinggi', color: 'bg-red-100 text-red-800' }
+  'high': { label: 'Tinggi', color: 'bg-red-100 text-red-800' },
+  'urgent': { label: 'Mendesak', color: 'bg-purple-100 text-purple-800' }
 }
 
 // Helper functions
@@ -37,7 +38,7 @@ export function getPriorityInfo(priority: Priority): StatusInfo {
 }
 
 // Generate order number
-export function generateOrderNumber(): string {
+export function generateOrderNo(): string {
   const date = new Date()
   const year = date.getFullYear().toString().slice(-2)
   const month = (date.getMonth() + 1).toString().padStart(2, '0')
@@ -48,12 +49,14 @@ export function generateOrderNumber(): string {
 }
 
 // Calculate order total
-export function calculateOrderTotal(orderItems: Array<{quantity: number; price: number}>): number {
-  return orderItems.reduce((total, item) => total + (item.quantity * item.price), 0)
+export function calculateOrderTotal(orderItems: Array<{quantity: number; unit_price: number}>): number {
+  return orderItems.reduce((total, item) => total + (item.quantity * item.unit_price), 0)
 }
 
 // Format currency
 export const formatCurrency = formatCurrentCurrency
+
+export { formatDate } from '@/shared'
 
 export function formatTime(date: string | Date): string {
   return new Date(date).toLocaleTimeString('id-ID', {

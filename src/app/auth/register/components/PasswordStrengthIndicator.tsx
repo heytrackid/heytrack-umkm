@@ -1,13 +1,15 @@
-import { usePasswordValidation } from '../hooks/usePasswordValidation'
+'use client'
+
+import { usePasswordValidation } from '@/app/auth/register/hooks/usePasswordValidation'
 
 interface PasswordStrengthIndicatorProps {
   password: string
 }
 
-export function PasswordStrengthIndicator({ password }: PasswordStrengthIndicatorProps) {
+export const PasswordStrengthIndicator = ({ password }: PasswordStrengthIndicatorProps) => {
   const { passwordStrength, strengthColors, currentStrengthLabel } = usePasswordValidation(password)
 
-  if (!password) return null
+  if (!password) { return null }
 
   return (
     <div className="space-y-2 animate-fade-in">
@@ -15,9 +17,8 @@ export function PasswordStrengthIndicator({ password }: PasswordStrengthIndicato
         {[...Array(5)].map((_, i) => (
           <div
             key={i}
-            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-              i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-slate-200 dark:bg-slate-700'
-            }`}
+            className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-slate-200 dark:bg-slate-700'
+              }`}
           />
         ))}
       </div>

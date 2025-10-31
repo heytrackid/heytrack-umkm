@@ -2,18 +2,32 @@
  * PATCH /api/notifications/[id] - Update notification (mark as read/dismiss)
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
-export async function PATCH(
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const supabase = await createClient()
-    const resolvedParams = await params
-    const notificationId = resolvedParams.id
+    const { id: notificationId } = params
+    
+    // Validate UUID format
+    if (!isValidUUID(notificationId)) {
+      return NextResponse.json({ error: 'Invalid notification ID format' }, { status: 400 })
+    }
+    
+    // Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     const body = await request.json()
     const { is_read, is_dismissed } = body
@@ -25,19 +39,28 @@ export async function PATCH(
       )
     }
 
-    const updateData: any = {}
+    interface NotificationUpdate {
+      is_read?: boolean
+      is_dismissed?: boolean
+      updated_at: string
+    }
+
+    const updateData: NotificationUpdate = {
+      updated_at: new Date().toISOString()
+    }
+    
     if (typeof is_read === 'boolean') {
       updateData.is_read = is_read
     }
     if (typeof is_dismissed === 'boolean') {
       updateData.is_dismissed = is_dismissed
     }
-    updateData.updated_at = new Date().toISOString()
 
     const { data: notification, error } = await supabase
       .from('notifications')
       .update(updateData)
       .eq('id', notificationId)
+      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -55,7 +78,7 @@ export async function PATCH(
     return NextResponse.json(notification)
 
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in notification update API')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in PATCH /api/notifications/[id]')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

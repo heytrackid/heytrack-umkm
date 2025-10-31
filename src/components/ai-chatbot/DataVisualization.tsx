@@ -1,27 +1,57 @@
-'use client';
-import * as React from 'react'
+'use client'
 
-import { Suspense } from 'react';
+import type { CustomersTable, RecipesTable } from '@/types/database'
+type Customer = CustomersTable
+type Recipe = RecipesTable
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Package, Users, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Package, Users } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
 
 // Dynamically import Recharts components to reduce bundle size
-const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false })
-const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false })
-const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false })
-const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false })
-const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false })
-const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false })
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false })
-const PieChart = dynamic(() => import('recharts').then(mod => mod.PieChart), { ssr: false })
-const Pie = dynamic(() => import('recharts').then(mod => mod.Pie), { ssr: false })
-const Cell = dynamic(() => import('recharts').then(mod => mod.Cell), { ssr: false })
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false })
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false })
+const BarChart = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.BarChart),
+  { ssr: false }
+)
+const Bar = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Bar),
+  { ssr: false }
+)
+const XAxis = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.XAxis),
+  { ssr: false }
+)
+const YAxis = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.YAxis),
+  { ssr: false }
+)
+const CartesianGrid = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.CartesianGrid),
+  { ssr: false }
+)
+const Tooltip = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Tooltip),
+  { ssr: false }
+)
+const ResponsiveContainer = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.ResponsiveContainer),
+  { ssr: false }
+)
+const PieChart = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.PieChart),
+  { ssr: false }
+)
+const Pie = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Pie),
+  { ssr: false }
+)
+const Cell = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Cell),
+  { ssr: false }
+)
+
 
 // Type definitions for data structures
 interface ChartEntry {
@@ -30,14 +60,13 @@ interface ChartEntry {
   color: string
 }
 
-interface Customer {
-  name: string
+// Extended types for visualization
+interface CustomerForViz extends Omit<Customer, 'total_spent' | 'total_orders'> {
   total_spent?: number
   total_orders?: number
 }
 
-interface Recipe {
-  name: string
+interface RecipeForViz extends Omit<Recipe, 'total_revenue' | 'times_made'> {
   total_revenue?: number
   times_made?: number
 }
@@ -61,12 +90,12 @@ interface InventoryData {
 }
 
 interface CustomerData {
-  topCustomers: Customer[]
+  topCustomers: CustomerForViz[]
   summary: string
 }
 
 interface ProductData {
-  topRecipes: Recipe[]
+  topRecipes: RecipeForViz[]
   recommendations: string[]
 }
 
@@ -85,7 +114,7 @@ interface DataVisualizationProps {
   compact?: boolean;
 }
 
-const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compact = false }) => {
+const DataVisualization = ({ type, data, compact = false }: DataVisualizationProps) => {
   const { formatCurrency } = useCurrency();
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -113,7 +142,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
     ];
 
     const marginStatus = data.profitMargin > 25 ? 'success' : data.profitMargin > 15 ? 'warning' : 'danger';
-    
+
     return (
       <Card className="w-full">
         <CardHeader className="pb-3">
@@ -136,15 +165,14 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
               </div>
               <div className="text-center col-span-2 md:col-span-1">
                 <div className="flex items-center justify-center space-x-2">
-                  <div className={`text-2xl font-bold ${
-                    marginStatus === 'success' ? 'text-green-600' :
+                  <div className={`text-2xl font-bold ${marginStatus === 'success' ? 'text-green-600' :
                     marginStatus === 'warning' ? 'text-yellow-600' : 'text-red-600'
-                  }`}>
+                    }`}>
                     {data.profitMargin.toFixed(1)}%
                   </div>
                   {marginStatus === 'success' ? <TrendingUp className="h-5 w-5 text-green-600" /> :
-                   marginStatus === 'warning' ? <AlertCircle className="h-5 w-5 text-yellow-600" /> :
-                   <TrendingDown className="h-5 w-5 text-red-600" />}
+                    marginStatus === 'warning' ? <AlertCircle className="h-5 w-5 text-yellow-600" /> :
+                      <TrendingDown className="h-5 w-5 text-red-600" />}
                 </div>
                 <div className="text-sm text-gray-500">Profit Margin</div>
               </div>
@@ -158,7 +186,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis tickFormatter={(value) => `${value / 1000000}M`} />
-                    <Tooltip formatter={(value: number) => [formatCurrency(value), '']} />
+                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
                     <Bar dataKey="value" fill="#8884d8">
                       {chartData.map((entry: ChartEntry, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -175,8 +203,8 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                 <span>Profit Margin Status</span>
                 <span className="font-medium">{data.profitMargin.toFixed(1)}% / 30% target</span>
               </div>
-              <Progress 
-                value={Math.min(data.profitMargin, 30) / 30 * 100} 
+              <Progress
+                value={Math.min(data.profitMargin, 30) / 30 * 100}
                 className="h-2"
               />
             </div>
@@ -187,74 +215,72 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   };
 
   // Inventory Status Visualization
-  const InventoryChart = ({ data }: { data: InventoryData }) => {
-    return (
-      <Card className="w-full">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center space-x-2">
-            <Package className="h-5 w-5 text-blue-600" />
-            <span>Inventory Status</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Critical items alert */}
-            {data.criticalItems.length > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <div className="flex items-center space-x-2">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                  <span className="font-medium text-red-800">
-                    {data.criticalItems.length} Critical Items
-                  </span>
-                </div>
-                <div className="mt-2 space-y-1">
-                  {data.criticalItems.slice(0, 3).map((item: InventoryItem, index: number) => (
-                    <div key={index} className="text-sm text-red-700">
-                      • {item.name}: {item.current_stock} {item.unit} remaining
-                    </div>
-                  ))}
-                  {data.criticalItems.length > 3 && (
-                    <div className="text-sm text-red-600 font-medium">
-                     {data.criticalItems.length - 3} more items
-                    </div>
-                  )}
-                </div>
+  const InventoryChart = ({ data }: { data: InventoryData }) => (
+    <Card className="w-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center space-x-2">
+          <Package className="h-5 w-5 text-blue-600" />
+          <span>Inventory Status</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {/* Critical items alert */}
+          {data.criticalItems.length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <span className="font-medium text-red-800">
+                  {data.criticalItems.length} Critical Items
+                </span>
               </div>
-            )}
-
-            {/* Inventory summary */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{data.alerts.length}</div>
-                <div className="text-sm text-gray-600">Low Stock Items</div>
-              </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">{data.criticalItems.length}</div>
-                <div className="text-sm text-gray-600">Critical Items</div>
-              </div>
-            </div>
-
-            {/* Recommendations */}
-            {data.recommendations.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-900">Recommendations:</h4>
-                {data.recommendations.map((rec: string, index: number) => (
-                  <div key={index} className="flex items-start space-x-2">
-                    <Badge variant="outline" className="mt-0.5">•</Badge>
-                    <span className="text-sm text-gray-700">{rec}</span>
+              <div className="mt-2 space-y-1">
+                {data.criticalItems.slice(0, 3).map((item: InventoryItem, index: number) => (
+                  <div key={index} className="text-sm text-red-700">
+                    • {item.name}: {item.current_stock} {item.unit} remaining
                   </div>
                 ))}
+                {data.criticalItems.length > 3 && (
+                  <div className="text-sm text-red-600 font-medium">
+                    {data.criticalItems.length - 3} more items
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Inventory summary */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">{data.alerts.length}</div>
+              <div className="text-sm text-gray-600">Low Stock Items</div>
+            </div>
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">{data.criticalItems.length}</div>
+              <div className="text-sm text-gray-600">Critical Items</div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    );
-  };
+
+          {/* Recommendations */}
+          {data.recommendations.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-medium text-gray-900">Recommendations:</h4>
+              {data.recommendations.map((rec: string, index: number) => (
+                <div key={index} className="flex items-start space-x-2">
+                  <Badge variant="outline" className="mt-0.5">•</Badge>
+                  <span className="text-sm text-gray-700">{rec}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   // Customer Analysis Visualization
   const CustomerChart = ({ data }: { data: CustomerData }) => {
-    const pieData = data.topCustomers.slice(0, 5).map((customer: Customer, index: number) => ({
+    const pieData = data.topCustomers.slice(0, 5).map((customer: CustomerForViz, index: number) => ({
       name: customer.name,
       value: customer.total_spent || 0,
       color: COLORS[index % COLORS.length]
@@ -277,11 +303,11 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                 <div className="text-sm text-gray-500">Total Customers</div>
               </div>
               <div>
-                <div className="text-xl font-bold">{data.summary ? data.summary.split('T')[1]?.split('T')[1]?.replace(')', '') || 'N/A' : 'N/A'}</div>
+                <div className="text-xl font-bold">N/A</div>
                 <div className="text-sm text-gray-500">Retention Rate</div>
               </div>
               <div className="col-span-2 md:col-span-1">
-                <div className="text-xl font-bold">{data.summary ? data.summary.split('T')[1] || 'N/A' : 'N/A'}</div>
+                <div className="text-xl font-bold">N/A</div>
                 <div className="text-sm text-gray-500">Avg Order Value</div>
               </div>
             </div>
@@ -296,7 +322,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      label={({ name, percent }) => `${name} (${((percent as number) * 100).toFixed(0)}%)`}
                       outerRadius={60}
                       fill="#8884d8"
                       dataKey="value"
@@ -305,7 +331,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                         <Cell key={`cell-${_index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => [formatCurrency(value), 'Total Spent']} />
+                    <Tooltip formatter={(value) => [formatCurrency(value as number), 'Total Spent']} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -314,7 +340,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
             {/* Top customers list */}
             <div className="space-y-2">
               <h4 className="font-medium text-gray-900">Top Customers:</h4>
-              {data.topCustomers.slice(0, 3).map((customer: Customer, index: number) => (
+              {data.topCustomers.slice(0, 3).map((customer: CustomerForViz, index: number) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                   <span className="font-medium">{customer.name}</span>
                   <div className="text-right">
@@ -332,8 +358,8 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
 
   // Product Analysis Visualization
   const ProductChart = ({ data }: { data: ProductData }) => {
-    const chartData = data.topRecipes.slice(0, 5).map((recipe: Recipe) => ({
-      name: recipe.name.length > 10 ? recipe.name.substring(0, 10) + '...' : recipe.name,
+    const chartData = data.topRecipes.slice(0, 5).map((recipe: RecipeForViz) => ({
+      name: recipe.name.length > 10 ? `${recipe.name.substring(0, 10)}...` : recipe.name,
       revenue: recipe.total_revenue || 0,
       count: recipe.times_made || 0
     }));
@@ -342,7 +368,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
       <Card className="w-full">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center space-x-2">
-            <BarChart className="h-5 w-5 text-orange-600" />
+            <Package className="h-5 w-5 text-orange-600" />
             <span>Product Performance</span>
           </CardTitle>
         </CardHeader>
@@ -356,8 +382,8 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis tickFormatter={(value) => `${value / 1000}K`} />
-                    <Tooltip formatter={(value: number, name: string) => [
-                      name === 'revenue' ? formatCurrency(value) : formatNumber(value),
+                    <Tooltip formatter={(value, name) => [
+                      name === 'revenue' ? formatCurrency(value as number) : formatNumber(value as number),
                       name === 'revenue' ? 'Revenue' : 'Sales Count'
                     ]} />
                     <Bar dataKey="revenue" fill="#FF8042" />
@@ -370,7 +396,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
             {/* Top products list */}
             <div className="space-y-2">
               <h4 className="font-medium text-gray-900">Best Selling Products:</h4>
-              {data.topRecipes.slice(0, 3).map((recipe: Recipe, index: number) => (
+              {data.topRecipes.slice(0, 3).map((recipe: RecipeForViz, index: number) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                   <span className="font-medium">{recipe.name}</span>
                   <div className="text-right">
@@ -419,27 +445,27 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
 
   // Type guards for runtime validation
   const isFinancialData = (data: unknown): data is FinancialData => {
-    if (!data || typeof data !== 'object') {return false;}
+    if (!data || typeof data !== 'object') { return false; }
     return 'revenue' in data && 'costs' in data && 'profitMargin' in data;
   };
 
   const isInventoryData = (data: unknown): data is InventoryData => {
-    if (!data || typeof data !== 'object') {return false;}
+    if (!data || typeof data !== 'object') { return false; }
     return 'criticalItems' in data && 'alerts' in data && Array.isArray((data as InventoryData).criticalItems);
   };
 
   const isCustomerData = (data: unknown): data is CustomerData => {
-    if (!data || typeof data !== 'object') {return false;}
+    if (!data || typeof data !== 'object') { return false; }
     return 'topCustomers' in data && 'summary' in data && Array.isArray((data as CustomerData).topCustomers);
   };
 
   const isProductData = (data: unknown): data is ProductData => {
-    if (!data || typeof data !== 'object') {return false;}
+    if (!data || typeof data !== 'object') { return false; }
     return 'topRecipes' in data && 'recommendations' in data && Array.isArray((data as ProductData).topRecipes);
   };
 
   const isAnalysisData = (data: unknown): data is AnalysisData => {
-    if (!data || typeof data !== 'object') {return false;}
+    if (!data || typeof data !== 'object') { return false; }
     return 'analysis' in data && typeof (data as AnalysisData).analysis === 'object';
   };
 

@@ -4,7 +4,10 @@
  */
 
 import { z } from 'zod'
-import { RecipeInsertSchema, RecipeUpdateSchema, type RecipeInsert, type RecipeUpdate } from './recipe'
+import { RecipeInsertSchema, type RecipeInsert, type RecipeUpdate } from './recipe'
+
+// Re-export for convenience
+export { RecipeUpdateSchema } from './recipe'
 
 // Enhanced recipe validation with business rules
 export const EnhancedRecipeInsertSchema = RecipeInsertSchema
@@ -75,9 +78,9 @@ export class RecipeValidationHelpers {
     try {
       const validatedData = EnhancedRecipeInsertSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -91,9 +94,9 @@ export class RecipeValidationHelpers {
     try {
       const validatedData = EnhancedRecipeUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -133,8 +136,8 @@ export class RecipeValidationHelpers {
    * Check recipe complexity
    */
   static getRecipeComplexity(recipe: {
-    ingredients: any[]
-    instructions?: any[]
+    ingredients: Array<Record<string, unknown>>
+    instructions?: Array<Record<string, unknown>>
     preparation_time?: number
     cooking_time?: number
   }): 'simple' | 'moderate' | 'complex' {
@@ -193,11 +196,11 @@ export class RecipeValidationHelpers {
    * Validate bulk recipe import
    */
   static validateBulkImport(recipes: unknown[]): {
-    valid: any[]
-    invalid: Array<{ index: number; data: any; errors: string[] }>
+    valid: Array<Record<string, unknown>>
+    invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: any[] = []
-    const invalid: Array<{ index: number; data: any; errors: string[] }> = []
+    const valid: Array<Record<string, unknown>> = []
+    const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     recipes.forEach((recipe, index) => {
       const result = this.validateInsert(recipe)

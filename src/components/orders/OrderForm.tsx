@@ -1,7 +1,9 @@
 'use client'
-import * as React from 'react'
 
 import { useState, useEffect } from 'react'
+import type { RecipesTable } from '@/types/database'
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
+type Recipe = RecipesTable
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -10,11 +12,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react'
-import type { Order, OrderFormData, Priority } from './types'
-import { generateOrderNumber, calculateOrderTotal, validateOrderData } from './utils'
+import type { Order, OrderFormData, Priority, OrderItem } from './types'
+import { calculateOrderTotal } from './utils'
+import { validateOrderData } from '@/lib/validations/form-validations'
 import { useCurrency } from '@/hooks/useCurrency'
 
 import { apiLogger } from '@/lib/logger'
+
 interface OrderFormProps {
   order?: Order // For editing existing order
   onSave: (orderData: OrderFormData) => void
@@ -22,24 +26,18 @@ interface OrderFormProps {
   loading?: boolean
 }
 
-interface Recipe {
-  id: string
-  name: string
-  price?: number
-}
-
-export default function OrderForm({ 
-  order, 
-  onSave, 
-  onCancel, 
-  loading = false 
+export default function OrderForm({
+  order,
+  onSave,
+  onCancel,
+  loading = false
 }: OrderFormProps) {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
   const [formData, setFormData] = useState<OrderFormData>({
     customer_name: '',
     customer_phone: '',
-    customer_email: '',
+    // customer_email: '', // Field doesn't exist in DB
     customer_address: '',
     delivery_date: '',
     delivery_time: '10:00',
@@ -54,20 +52,21 @@ export default function OrderForm({
   useEffect(() => {
     if (order) {
       setFormData({
-        customer_name: order.customer_name,
-        customer_phone: order.customer_phone || '',
-        customer_email: order.customer_email || '',
-        customer_address: order.customer_address || '',
-        delivery_date: order.delivery_date.split('T')[0], // Extract date part
-        delivery_time: order.delivery_time || '10:00',
-        priority: order.priority,
-        notes: order.notes || '',
-        order_items: order.order_items?.map(item => ({
+        customer_name: order.customer_name ?? '',
+        customer_phone: order.customer_phone ?? '',
+        // customer_email: order.customer_email ?? '', // Field doesn't exist in DB
+        customer_address: order.customer_address ?? '',
+        delivery_date: order.delivery_date ? order.delivery_date.split('T')[0] : '',
+        delivery_time: order.delivery_time ?? '10:00',
+        priority: (order.priority ?? 'normal') as Priority,
+        notes: order.notes ?? '',
+        order_items: (order as OrderWithRelations).items?.map(item => ({
           recipe_id: item.recipe_id,
-          product_name: item.product_name,
+          product_name: item.product_name ?? null,
           quantity: item.quantity,
-          price: item.price,
-          notes: item.notes
+          unit_price: item.unit_price,
+          total_price: item.total_price,
+          special_requests: item.special_requests ?? null
         })) || []
       })
     }
@@ -75,7 +74,7 @@ export default function OrderForm({
 
   // Fetch recipes for order items
   useEffect(() => {
-    fetchRecipes()
+    void fetchRecipes()
   }, [])
 
   const fetchRecipes = async () => {
@@ -83,10 +82,10 @@ export default function OrderForm({
       const response = await fetch('/api/recipes')
       if (response.ok) {
         const data = await response.json()
-        setRecipes(data)
+        void setRecipes(data)
       }
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Error fetching recipes:')
+    } catch (err: unknown) {
+      apiLogger.error({ err }, 'Error fetching recipes')
     }
   }
 
@@ -104,23 +103,31 @@ export default function OrderForm({
     setFormData(prev => ({
       ...prev,
       order_items: [...prev.order_items, {
-        recipe_id: 'placeholder',
-        product_name: '',
+        recipe_id: '',
+        product_name: null,
         quantity: 1,
-        price: 0,
-        notes: ''
+        unit_price: 0,
+        total_price: 0,
+        special_requests: null
       }]
     }))
   }
 
-  const updateOrderItem = <K extends keyof Omit<OrderItem, 'id'>>(
+  const updateOrderItem = (
     index: number,
-    field: K,
-    value: Omit<OrderItem, 'id'>[K]
+    field: keyof {
+      recipe_id: string
+      product_name: string | null
+      quantity: number
+      unit_price: number
+      total_price: number
+      special_requests: string | null
+    },
+    value: string | number | null
   ) => {
     setFormData(prev => ({
       ...prev,
-      order_items: prev.order_items.map((item, i) => 
+      order_items: prev.order_items.map((item, i) =>
         i === index ? { ...item, [field]: value } : item
       )
     }))
@@ -134,22 +141,23 @@ export default function OrderForm({
   }
 
   const handleRecipeSelect = (index: number, recipeId: string) => {
-    if (recipeId === 'placeholder') {return} // Ignore placeholder selection
-    
+    if (recipeId === 'placeholder') { return } // Ignore placeholder selection
+
     const recipe = recipes.find(r => r.id === recipeId)
     if (recipe) {
-      updateOrderItem(index, 'recipe_id', recipeId)
-      updateOrderItem(index, 'product_name', recipe.name)
-      if (recipe.price) {
-        updateOrderItem(index, 'price', recipe.price)
+      void updateOrderItem(index, 'recipe_id', recipeId)
+      void updateOrderItem(index, 'product_name', recipe.name)
+      if (recipe.selling_price) {
+        void updateOrderItem(index, 'unit_price', recipe.selling_price)
+        void updateOrderItem(index, 'total_price', recipe.selling_price * formData.order_items[index].quantity)
       }
     }
   }
 
   const handleSubmit = () => {
-    const validationErrors = validateOrderData(formData)
+    const validationErrors = validateOrderData(formData as unknown as Record<string, unknown>)
     if (validationErrors.length > 0) {
-      setErrors(validationErrors)
+      void setErrors(validationErrors)
       return
     }
 
@@ -198,7 +206,7 @@ export default function OrderForm({
         {/* Customer Information */}
         <Card>
           <CardHeader>
-          <CardTitle>Informasi Pelanggan</CardTitle>
+            <CardTitle>Informasi Pelanggan</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -209,7 +217,7 @@ export default function OrderForm({
                 placeholder=""
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label>Nomor Telepon *</Label>
               <Input
@@ -218,21 +226,13 @@ export default function OrderForm({
                 placeholder=""
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label>Alamat Email</Label>
-              <Input
-                type="email"
-                value={formData.customer_email}
-                onChange={(e) => handleInputChange('customer_email', e.target.value)}
-                placeholder=""
-              />
-            </div>
-            
+
+            {/* Email field removed - not in database schema */}
+
             <div className="space-y-2">
               <Label>Alamat Pengiriman</Label>
               <Textarea
-                value={formData.customer_address}
+                value={formData.customer_address || ''}
                 onChange={(e) => handleInputChange('customer_address', e.target.value)}
                 placeholder=""
                 rows={3}
@@ -257,7 +257,7 @@ export default function OrderForm({
                   min={new Date().toISOString().split('T')[0]}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Waktu Pengiriman</Label>
                 <Input
@@ -267,11 +267,11 @@ export default function OrderForm({
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label>Tingkat Prioritas</Label>
-              <Select 
-                value={formData.priority} 
+              <Select
+                value={formData.priority || 'normal'}
                 onValueChange={(value: Priority) => handleInputChange('priority', value)}
               >
                 <SelectTrigger>
@@ -284,11 +284,11 @@ export default function OrderForm({
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label>Catatan Pesanan</Label>
               <Textarea
-                value={formData.notes}
+                value={formData.notes || ''}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
                 placeholder=""
                 rows={3}
@@ -341,7 +341,7 @@ export default function OrderForm({
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div>
                       <Label>Jumlah</Label>
                       <Input
@@ -351,17 +351,17 @@ export default function OrderForm({
                         min="1"
                       />
                     </div>
-                    
+
                     <div>
                       <Label>Harga</Label>
                       <Input
                         type="number"
-                        value={item.price}
-                        onChange={(e) => updateOrderItem(index, 'price', parseFloat(e.target.value) || 0)}
+                        value={item.unit_price}
+                        onChange={(e) => updateOrderItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
                         min="0"
                       />
                     </div>
-                    
+
                     <div className="flex items-end">
                       <Button
                         variant="ghost"
@@ -373,18 +373,18 @@ export default function OrderForm({
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="mt-3">
                     <Label>Catatan (Opsional)</Label>
                     <Input
-                      value={item.notes || ''}
-                      onChange={(e) => updateOrderItem(index, 'notes', e.target.value)}
+                      value={item.special_requests || ''}
+                      onChange={(e) => updateOrderItem(index, 'special_requests', e.target.value)}
                       placeholder=""
                     />
                   </div>
                 </div>
               ))}
-              
+
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center text-lg font-bold">
                   <span>Total Harga:</span>
@@ -398,8 +398,8 @@ export default function OrderForm({
 
       {/* Action Buttons */}
       <div className="flex gap-3">
-        <Button 
-          onClick={handleSubmit} 
+        <Button
+          onClick={handleSubmit}
           disabled={loading || formData.order_items.length === 0}
           className="flex-1"
         >

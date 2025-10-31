@@ -3,8 +3,7 @@
  * Handles production time calculations and scheduling
  */
 
-import type { Recipe } from '../types'
-import type { AutomationConfig } from '../types'
+import { type Recipe, type AutomationConfig } from '@/lib/automation/types'
 
 export class TimeCalculator {
   /**
@@ -56,7 +55,7 @@ export class TimeCalculator {
    * Schedule production orders with optimal timing
    */
   static scheduleOptimalProduction(
-    plan: any[], // ProductionPlanItem[]
+    plan: Array<{ recipeId: string; quantity: number; priority: number }>, // ProductionPlanItem[]
     workingHours: { start: number; end: number }
   ) {
     // Sort by delivery date priority
@@ -85,7 +84,7 @@ export class TimeCalculator {
           scheduledEnd: newEnd,
           isOnTime: newEnd <= item.deliveryDate
         }
-      } else {
+      } 
         currentTime = scheduledEnd
 
         return {
@@ -94,7 +93,7 @@ export class TimeCalculator {
           scheduledEnd,
           isOnTime: scheduledEnd <= item.deliveryDate
         }
-      }
+      
     })
   }
 }

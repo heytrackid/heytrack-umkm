@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
@@ -10,14 +10,14 @@ interface ChatInputProps {
   isLoading: boolean
 }
 
-export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
+export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
   const [input, setInput] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (input.trim() && !isLoading) {
       onSendMessage(input.trim())
-      setInput('')
+      void setInput('')
     }
   }
 

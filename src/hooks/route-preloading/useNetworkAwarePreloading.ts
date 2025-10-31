@@ -25,7 +25,6 @@ export const useNetworkAwarePreloading = () => {
           preloadChartBundle().catch(() => {})
         }, 1000)
       } else if (isSlowConnection) {
-        console.log('🐌 Slow connection detected - minimal preloading')
         // Minimal preloading on slow connections
       }
     }

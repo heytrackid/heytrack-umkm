@@ -15,12 +15,11 @@ interface GeneratedRecipeDisplayProps {
   availableIngredients: AvailableIngredient[]
 }
 
-export default function GeneratedRecipeDisplay({
+const GeneratedRecipeDisplay = ({
   recipe,
   onSave,
-  onGenerateAgain,
-  availableIngredients
-}: GeneratedRecipeDisplayProps) {
+  onGenerateAgain
+}: GeneratedRecipeDisplayProps) => {
   const { formatCurrency } = useSettings()
 
   return (
@@ -206,3 +205,5 @@ export default function GeneratedRecipeDisplay({
     </div>
   )
 }
+
+export default GeneratedRecipeDisplay

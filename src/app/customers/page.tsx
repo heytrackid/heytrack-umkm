@@ -3,6 +3,6 @@
 
 import CustomersLayout from './components/CustomersLayout'
 
-export default function CustomersPage() {
-  return <CustomersLayout />
-}
+const CustomersPage = () => <CustomersLayout />
+
+export default CustomersPage

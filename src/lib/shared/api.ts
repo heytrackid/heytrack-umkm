@@ -3,7 +3,7 @@
 import { apiLogger } from '@/lib/logger'
 
 // API response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T> {
   success: boolean
   data?: T
   error?: string
@@ -26,7 +26,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 export interface ApiError {
   readonly code: string
   readonly message: string
-  readonly details?: Record<string, any>
+  readonly details?: Record<string, unknown>
   readonly statusCode: number
 }
 
@@ -70,7 +70,7 @@ export class ApiError extends Error {
     message: string,
     code: string = API_ERROR_CODES.UNKNOWN_ERROR,
     statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'ApiError'
@@ -91,12 +91,12 @@ export const createApiResponse = {
     timestamp: new Date().toISOString(),
   }),
 
-  error: (
+  error: <T = unknown>(
     message: string,
     statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
     code: string = API_ERROR_CODES.UNKNOWN_ERROR,
-    details?: Record<string, any>
-  ): ApiResponse => ({
+    details?: Record<string, unknown>
+  ): ApiResponse<T> => ({
     success: false,
     error: message,
     statusCode,
@@ -157,17 +157,17 @@ export const sleep = (ms: number): Promise<void> =>
  */
 export const retryWithBackoff = async <T>(
   operation: () => Promise<T>,
-  maxRetries: number = 3,
-  baseDelay: number = 1000,
-  maxDelay: number = 10000
+  maxRetries = 3,
+  baseDelay = 1000,
+  maxDelay = 10000
 ): Promise<T> => {
   let lastError: Error
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await operation()
-    } catch (error) {
-      lastError = error as Error
+    } catch (err) {
+      lastError = err as Error
 
       if (attempt === maxRetries) {
         throw lastError
@@ -178,7 +178,7 @@ export const retryWithBackoff = async <T>(
       const jitter = Math.random() * 0.1 * exponentialDelay
       const delay = exponentialDelay + jitter
 
-      apiLogger.warn(`API call failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delay}ms:`, { error })
+      apiLogger.warn({ error, attempt: attempt + 1, maxRetries: maxRetries + 1, delay }, 'API call failed, retrying')
       await sleep(delay)
     }
   }
@@ -191,9 +191,9 @@ export const retryWithBackoff = async <T>(
  */
 export const apiCache = {
   // Simple in-memory cache
-  cache: new Map<string, { data: any; timestamp: number; ttl: number }>(),
+  cache: new Map<string, { data: unknown; timestamp: number; ttl: number }>(),
 
-  set: (key: string, data: any, ttl: number = DEFAULT_API_CONFIG.cacheTimeout) => {
+  set: (key: string, data: unknown, ttl: number = DEFAULT_API_CONFIG.cacheTimeout) => {
     apiCache.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -203,7 +203,7 @@ export const apiCache = {
 
   get: (key: string) => {
     const cached = apiCache.cache.get(key)
-    if (!cached) return null
+    if (!cached) {return null}
 
     if (Date.now() - cached.timestamp > cached.ttl) {
       apiCache.cache.delete(key)
@@ -247,7 +247,7 @@ export const apiRequest = async <T>(
     const cacheKey = `${options.method || 'GET'}-${url}`
     const cached = apiCache.get(cacheKey)
     if (cached) {
-      apiLogger.debug(`Cache hit for ${url}`)
+      apiLogger.debug({ url }, 'Cache hit')
       return cached
     }
   }
@@ -291,7 +291,7 @@ export const apiRequest = async <T>(
       const data = await response.json()
       const duration = Date.now() - startTime
 
-      apiLogger.debug(`API call to ${url} completed in ${duration}ms`)
+      apiLogger.debug({ url, duration }, 'API call completed')
 
       // Cache response if enabled
       if (finalConfig.cache) {
@@ -300,14 +300,14 @@ export const apiRequest = async <T>(
       }
 
       return data
-    } catch (error) {
+    } catch (err) {
       clearTimeout(timeoutId)
 
-      if (error instanceof ApiError) {
-        throw error
+      if (err instanceof ApiError) {
+        throw err
       }
 
-      if (error instanceof DOMException && error.name === 'AbortError') {
+      if (err instanceof DOMException && err.name === 'AbortError') {
         throw new ApiError(
           'Request timeout',
           API_ERROR_CODES.TIMEOUT_ERROR,
@@ -315,7 +315,7 @@ export const apiRequest = async <T>(
         )
       }
 
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+      if (err instanceof TypeError && err.message.includes('fetch')) {
         throw new ApiError(
           'Network error - please check your connection',
           API_ERROR_CODES.NETWORK_ERROR,
@@ -324,7 +324,7 @@ export const apiRequest = async <T>(
       }
 
       throw new ApiError(
-        error instanceof Error ? error.message : 'Unknown error occurred',
+        err instanceof Error ? err.message : 'Unknown error occurred',
         API_ERROR_CODES.UNKNOWN_ERROR,
         HTTP_STATUS.INTERNAL_SERVER_ERROR
       )
@@ -346,19 +346,19 @@ export const apiMethods = {
   get: <T>(url: string, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, { method: 'GET' }, config),
 
-  post: <T>(url: string, data?: any, config?: Partial<ApiRequestConfig>) =>
+  post: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     }, config),
 
-  put: <T>(url: string, data?: any, config?: Partial<ApiRequestConfig>) =>
+  put: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     }, config),
 
-  patch: <T>(url: string, data?: any, config?: Partial<ApiRequestConfig>) =>
+  patch: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
@@ -373,7 +373,7 @@ export const apiMethods = {
  */
 export const urlBuilder = {
   // Build URL with query parameters
-  withParams: (baseUrl: string, params: Record<string, any> = {}): string => {
+  withParams: (baseUrl: string, params: Record<string, unknown> = {}): string => {
     const url = new URL(baseUrl, typeof window !== 'undefined' ? window.location.origin : 'http://localhost')
 
     Object.entries(params).forEach(([key, value]) => {
@@ -390,21 +390,17 @@ export const urlBuilder = {
   },
 
   // Build pagination URL
-  withPagination: (baseUrl: string, page: number, limit: number, params: Record<string, any> = {}): string => {
-    return urlBuilder.withParams(baseUrl, {
+  withPagination: (baseUrl: string, page: number, limit: number, params: Record<string, unknown> = {}): string => urlBuilder.withParams(baseUrl, {
       ...params,
       page,
       limit,
-    })
-  },
+    }),
 
   // Build search URL
-  withSearch: (baseUrl: string, search: string, params: Record<string, any> = {}): string => {
-    return urlBuilder.withParams(baseUrl, {
+  withSearch: (baseUrl: string, search: string, params: Record<string, unknown> = {}): string => urlBuilder.withParams(baseUrl, {
       ...params,
       search,
-    })
-  },
+    }),
 }
 
 /**
@@ -412,7 +408,7 @@ export const urlBuilder = {
  */
 export const responseTransformers = {
   // Transform Supabase response to standardized format
-  supabaseToStandard: <T>(response: any): ApiResponse<T> => {
+  supabaseToStandard: <T>(response: { data?: T; error?: { message: string } }): ApiResponse<T> => {
     if (response.error) {
       return createApiResponse.error(
         response.error.message,
@@ -422,14 +418,14 @@ export const responseTransformers = {
       )
     }
 
-    return createApiResponse.success(response.data)
+    return createApiResponse.success(response.data!)
   },
 
   // Transform array response to paginated response
   arrayToPaginated: <T>(
     data: T[],
-    page: number = 1,
-    limit: number = 10,
+    page = 1,
+    limit = 10,
     total: number = data.length
   ): PaginatedResponse<T> => {
     const totalPages = Math.ceil(total / limit)
@@ -456,7 +452,7 @@ export const responseTransformers = {
 export const apiAnalytics = {
   requests: new Map<string, { count: number; totalTime: number; errors: number }>(),
 
-  trackRequest: (url: string, duration: number, error: boolean = false) => {
+  trackRequest: (url: string, duration: number, error = false) => {
     const key = url.split('?')[0] // Remove query params for grouping
     const existing = apiAnalytics.requests.get(key) || { count: 0, totalTime: 0, errors: 0 }
 

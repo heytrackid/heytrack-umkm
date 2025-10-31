@@ -3,8 +3,7 @@
 
 'use client'
 
-import type { ErrorInfo, ReactNode } from 'react';
-import React, { Component } from 'react'
+import { Component, type ComponentType, type ErrorInfo, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
@@ -101,7 +100,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
                 Go Back
               </Button>
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {this.state.error && (
                 <details className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs">
                   <summary className="cursor-pointer text-gray-700 dark:text-gray-300 mb-2">
                     Error Details
@@ -123,7 +122,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
 
 // Higher-order component for wrapping routes
 export function withRouteErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
+  Component: ComponentType<P>,
   routeName?: string
 ) {
   const WrappedComponent = (props: P) => (

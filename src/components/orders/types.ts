@@ -1,11 +1,11 @@
-export type OrderStatus = 
-  | 'PENDING' 
-  | 'CONFIRMED' 
-  | 'IN_PROGRESS' 
-  | 'READY' 
-  | 'DELIVERED' 
-  | 'CANCELLED'
+// Use generated types from Supabase
+import type { OrdersTable, OrderItemsTable, OrderStatus as OrderStatusEnum } from '@/types/database'
 
+export type Order = OrdersTable
+export type OrderItem = OrderItemsTable
+export type OrderStatus = OrderStatusEnum
+
+// Extended types for UI
 export type PaymentStatus = 
   | 'UNPAID' 
   | 'PARTIAL' 
@@ -15,45 +15,28 @@ export type Priority =
   | 'low' 
   | 'normal' 
   | 'high'
-
-export interface OrderItem {
-  id: string
-  recipe_id: string
-  product_name: string
-  quantity: number
-  price: number
-  notes?: string
-}
-
-export interface Order {
-  id: string
-  order_no: string
-  customer_name: string
-  customer_phone?: string
-  customer_email?: string
-  customer_address?: string
-  delivery_date: string
-  delivery_time?: string
-  status: OrderStatus
-  payment_status: PaymentStatus
-  priority: Priority
-  total_amount?: number
-  notes?: string
-  order_items?: OrderItem[]
-  created_at?: string
-  updated_at?: string
-}
+  | 'urgent'
 
 export interface OrderFormData {
   customer_name: string
   customer_phone: string
-  customer_email?: string
-  customer_address?: string
+  customer_address?: string | null
   delivery_date: string
   delivery_time: string
-  priority: Priority
-  notes?: string
-  order_items: Omit<OrderItem, 'id'>[]
+  priority: Priority | null
+  notes?: string | null
+  order_items: Array<{
+    id?: string
+    order_id?: string
+    recipe_id: string
+    product_name: string | null
+    quantity: number
+    unit_price: number
+    total_price: number
+    special_requests: string | null
+    updated_at?: string | null
+    user_id?: string
+  }>
 }
 
 export interface OrderStats {

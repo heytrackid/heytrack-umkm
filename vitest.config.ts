@@ -1,6 +1,17 @@
-import react from '@vitejs/plugin-react'
 import path from 'path'
 import { defineConfig } from 'vitest/config'
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
+
+const react = (() => {
+    try {
+        const plugin = require('@vitejs/plugin-react')
+        return plugin.default ?? plugin
+    } catch {
+        return () => ({ name: 'noop-react-plugin' })
+    }
+})()
 
 export default defineConfig({
     plugins: [react()],

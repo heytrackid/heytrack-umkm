@@ -1,50 +1,36 @@
-// Recipe types - basic definitions for now
-export interface Recipe {
-  id: string
-  name: string
-  description?: string
-  category: string
-  servings: number
-  prep_time?: number
-  cook_time?: number
-  difficulty?: string
-  instructions?: string
-  notes?: string
-  cost_per_unit?: number
-  selling_price?: number
-  margin_percentage?: number
-  rating?: number
-  times_made?: number
-  image_url?: string
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
+// Recipe types - use generated Supabase types as base
+import type {
+  RecipesTable,
+  RecipesInsert,
+  RecipesUpdate,
+  RecipeIngredientsTable,
+  RecipeIngredientsInsert,
+  RecipeIngredientsUpdate
+} from '@/types/database'
 
-export interface RecipeIngredient {
-  id: string
-  recipe_id: string
-  ingredient_id: string
-  quantity: number
-  unit: string
-  cost?: number
-  notes?: string
-  created_at: string
-}
+// Base types from generated schema
+export type Recipe = RecipesTable
+export type RecipeInsert = RecipesInsert
+export type RecipeUpdate = RecipesUpdate
 
-export interface RecipeFormData extends Omit<Recipe, 'id' | 'created_at' | 'updated_at'> {
-  recipe_ingredients?: Omit<RecipeIngredient, 'id' | 'recipe_id' | 'created_at'>[]
+export type RecipeIngredient = RecipeIngredientsTable
+export type RecipeIngredientInsert = RecipeIngredientsInsert
+export type RecipeIngredientUpdate = RecipeIngredientsUpdate
+
+// Extended types for UI
+export interface RecipeFormData extends Omit<Recipe, 'id' | 'created_at' | 'updated_at' | 'user_id'> {
+  recipe_ingredients?: Array<Omit<RecipeIngredient, 'id' | 'recipe_id' | 'created_at'>>
 }
 
 export interface RecipeWithIngredients extends Recipe {
-  recipe_ingredients: (RecipeIngredient & {
+  recipe_ingredients: Array<RecipeIngredient & {
     ingredient: {
       id: string
       name: string
       unit: string
       price_per_unit: number
     }
-  })[]
+  }>
 }
 
 // HPP Calculation types
@@ -145,6 +131,18 @@ export interface RecipeHppResult {
   marginAnalysis: RecipeMarginAnalysis
   suggestions: RecipePricingSuggestions
   availability: RecipeAvailability
+  pricingAlternatives: RecipePricingAlternative[]
+  recommendations: string[]
+}
+
+export interface HPPCalculationResult {
+  servings: number
+  calculations: {
+    hppPerUnit: number
+    suggestedSellingPrice: number
+    profitMarginPercent: number
+    totalHPP: number
+  }
   pricingAlternatives: RecipePricingAlternative[]
   recommendations: string[]
 }

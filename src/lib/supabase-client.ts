@@ -4,17 +4,20 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, Tables, TablesInsert, TablesUpdate } from '@/types/supabase-generated'
+import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
+import { apiLogger } from '@/lib/logger'
 
 // ============================================================================
 // TYPE UTILITIES
 // ============================================================================
 
+import type { Tables, TablesInsert, TablesUpdate } from '@/types/database'
+
 type TableName = keyof Database['public']['Tables']
-type TableRow<T extends TableName> = Database['public']['Tables'][T]['Row']
-type TableInsert<T extends TableName> = Database['public']['Tables'][T]['Insert']
-type TableUpdate<T extends TableName> = Database['public']['Tables'][T]['Update']
+type TableRow<T extends TableName> = Tables<T>
+type TableInsert<T extends TableName> = TablesInsert<T>
+type TableUpdate<T extends TableName> = TablesUpdate<T>
 
 // Query Result Types
 export interface QueryResult<T> {
@@ -37,17 +40,26 @@ export interface QueryArrayResult<T> {
 export async function typedInsert<T extends TableName>(
   supabase: SupabaseClient<Database>,
   table: T,
-  data: TableInsert<T> | TableInsert<T>[]
+  data: TableInsert<T> | Array<TableInsert<T>>
 ) {
-  const isArray = Array.isArray(data)
-  const result = await (supabase as any)
+  const result = await supabase
     .from(table)
     .insert(data)
     .select()
 
+  // Log error if there's one, but don't crash the function
+  if (result.error) {
+    apiLogger.error({
+      table,
+      operation: 'insert',
+      error: result.error,
+      data
+    }, 'Supabase insert error')
+  }
+
   return result as {
-    data: TableRow<T>[] | null
-    error: any
+    data: Array<TableRow<T>> | null
+    error: Error | null
   }
 }
 
@@ -58,17 +70,28 @@ export async function typedUpdate<T extends TableName>(
   supabase: SupabaseClient<Database>,
   table: T,
   id: string,
-  data: TableUpdate<T>
+  data: Partial<TableUpdate<T>>
 ) {
-  const result = await (supabase as any)
+  const result = await supabase
     .from(table)
     .update(data)
     .eq('id', id)
     .select()
 
+  // Log error if there's one, but don't crash the function
+  if (result.error) {
+    apiLogger.error({
+      table,
+      operation: 'update',
+      id,
+      error: result.error,
+      data
+    }, 'Supabase update error')
+  }
+
   return result as {
-    data: TableRow<T>[] | null
-    error: any
+    data: Array<TableRow<T>> | null
+    error: Error | null
   }
 }
 
@@ -80,15 +103,25 @@ export async function typedDelete<T extends TableName>(
   table: T,
   id: string
 ) {
-  const result = await (supabase as any)
+  const result = await supabase
     .from(table)
     .delete()
     .eq('id', id)
     .select()
 
+  // Log error if there's one, but don't crash the function
+  if (result.error) {
+    apiLogger.error({
+      table,
+      operation: 'delete',
+      id,
+      error: result.error
+    }, 'Supabase delete error')
+  }
+
   return result as {
-    data: TableRow<T>[] | null
-    error: any
+    data: Array<TableRow<T>> | null
+    error: Error | null
   }
 }
 
@@ -100,7 +133,7 @@ export async function typedSelect<T extends TableName>(
   table: T,
   query?: {
     select?: string
-    filter?: Record<string, any>
+    filter?: Record<string, unknown>
     orderBy?: { column: string; ascending?: boolean }
     limit?: number
     single?: boolean
@@ -111,7 +144,13 @@ export async function typedSelect<T extends TableName>(
   // Apply filters
   if (query?.filter) {
     Object.entries(query.filter).forEach(([key, value]) => {
-      queryBuilder = queryBuilder.eq(key, value)
+      if (value === undefined) {return}
+      const column = key
+      if (value === null) {
+        queryBuilder = queryBuilder.is(column, null)
+      } else {
+        queryBuilder = queryBuilder.eq(column, value)
+      }
     })
   }
 
@@ -131,9 +170,19 @@ export async function typedSelect<T extends TableName>(
     ? await queryBuilder.single()
     : await queryBuilder
 
+  // Log error if there's one, but don't crash the function
+  if ('error' in result && result.error) {
+    apiLogger.error({
+      table,
+      operation: 'select',
+      query,
+      error: result.error
+    }, 'Supabase select error')
+  }
+
   return result as {
-    data: TableRow<T> | TableRow<T>[] | null
-    error: any
+    data: TableRow<T> | Array<TableRow<T>> | null
+    error: Error | null
   }
 }
 
@@ -165,7 +214,7 @@ export async function isAuthenticated() {
     const supabase = getSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
     return !!user
-  } catch {
+  } catch (_error) {
     return false
   }
 }
@@ -177,10 +226,9 @@ export async function getCurrentUser() {
   try {
     const supabase = getSupabaseClient()
     const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) throw error
+    if (error) {throw error}
     return user
-  } catch (error) {
-    console.error('Failed to get current user:', error)
+  } catch (err) {
     return null
   }
 }
@@ -192,10 +240,9 @@ export async function signOut() {
   try {
     const supabase = getSupabaseClient()
     const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    if (error) {throw error}
     return { success: true }
-  } catch (error) {
-    console.error('Failed to sign out:', error)
+  } catch (_error) {
     return { success: false, error }
   }
 }
@@ -206,9 +253,6 @@ export async function signOut() {
 
 export type {
   Database,
-  Tables,
-  TablesInsert,
-  TablesUpdate,
   TableName,
   TableRow,
   TableInsert,

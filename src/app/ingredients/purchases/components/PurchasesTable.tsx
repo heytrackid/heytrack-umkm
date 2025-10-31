@@ -9,7 +9,7 @@ interface PurchasesTableProps {
   purchases: IngredientPurchase[]
 }
 
-export default function PurchasesTable({ purchases }: PurchasesTableProps) {
+const PurchasesTable = ({ purchases }: PurchasesTableProps) => {
   return (
     <Card>
       <CardHeader>
@@ -69,3 +69,5 @@ export default function PurchasesTable({ purchases }: PurchasesTableProps) {
     </Card>
   )
 }
+
+export default PurchasesTable

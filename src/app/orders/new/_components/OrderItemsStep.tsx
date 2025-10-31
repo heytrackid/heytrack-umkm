@@ -5,14 +5,16 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2, Package } from 'lucide-react'
-import type { OrderItem } from '../hooks/useOrderLogic'
+import type { OrderItem } from '@/app/orders/new/hooks/useOrderLogic'
+
+import type { Recipe } from '@/types'
 
 interface OrderItemsStepProps {
   orderItems: OrderItem[]
-  availableRecipes: unknown[]
+  availableRecipes: Recipe[]
   subtotal: number
   onAddItem: () => void
-  onUpdateItem: (index: number, field: keyof OrderItem, value: any) => void
+  onUpdateItem: (index: number, field: keyof OrderItem, value: string | number | boolean) => void
   onRemoveItem: (index: number) => void
 }
 

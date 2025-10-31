@@ -6,9 +6,6 @@ import {
   UUIDSchema,
   EmailSchema,
   PhoneSchema,
-  DateStringSchema,
-  PositiveNumberSchema,
-  NonNegativeNumberSchema,
   indonesianName,
   optionalString,
   positiveNumber,
@@ -105,10 +102,10 @@ export const CustomerSchema = z.object({
   }).optional().default("REGULAR"),
   notes: optionalString,
   is_active: z.boolean().default(true)
-}).refine(data => {
+}).refine(data => 
   // At least one contact method should be provided
-  return data.email || data.phone
-}, {
+   data.email || data.phone
+, {
   message: 'validation.contactRequired',
   path: ['email']
 })
@@ -117,7 +114,7 @@ export type CustomerFormData = z.infer<typeof CustomerSchema>
 
 // Order validation schema
 export const OrderSchema = z.object({
-  order_no: z.string().min(1, 'validation.orderNumberRequired'),
+  order_no: z.string().min(1, 'validation.OrderNoRequired'),
   customer_id: UUIDSchema.optional(),
   customer_name: optionalString,
   customer_phone: PhoneSchema.optional(),
@@ -271,9 +268,7 @@ export const OperationalCostFormSchema = z.object({
 // Simple Ingredient Form Schema (matches the form fields used)
 export const IngredientFormSchema = z.object({
   name: indonesianName,
-  unit: z.enum(['kg', 'g', 'l', 'ml', 'pcs', 'dozen'], {
-    message: 'Satuan tidak valid'
-  }),
+  unit: z.string().min(1, { message: 'Satuan harus diisi' }),
   price_per_unit: z.number().positive('Harga harus lebih dari 0'),
   current_stock: positiveNumber,
   min_stock: positiveNumber.optional(),
@@ -303,14 +298,16 @@ export type SupplierForm = z.infer<typeof SupplierFormSchema>
 export type OperationalCostForm = z.infer<typeof OperationalCostFormSchema>
 
 // Order validation helper function (moved from components/orders/utils.ts)
-export function validateOrderData(data: any): string[] {
+export function validateOrderData(data: Record<string, unknown>): string[] {
   const errors: string[] = []
 
-  if (!data.customer_name?.trim()) {
+  const customerName = data.customer_name
+  if (typeof customerName === 'string' && !customerName.trim()) {
     errors.push('Nama pelanggan harus diisi')
   }
 
-  if (!data.customer_phone?.trim()) {
+  const customerPhone = data.customer_phone
+  if (typeof customerPhone === 'string' && !customerPhone.trim()) {
     errors.push('Nomor telepon harus diisi')
   }
 
@@ -318,7 +315,8 @@ export function validateOrderData(data: any): string[] {
     errors.push('Tanggal pengiriman harus diisi')
   }
 
-  if (!data.order_items || data.order_items.length === 0) {
+  const orderItems = data.order_items
+  if (!orderItems || (Array.isArray(orderItems) && orderItems.length === 0)) {
     errors.push('Minimal harus ada 1 item pesanan')
   }
 

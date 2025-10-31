@@ -3,7 +3,7 @@
  * Provides consistent loading states and error boundaries
  */
 
-import React, { Suspense, ComponentType, ReactNode } from 'react'
+import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from 'react'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 // Import comprehensive skeletons
@@ -35,7 +35,7 @@ interface SkeletonProps {
 }
 
 // Loading components mapped to skeleton types
-const loadingComponents: Record<string, ComponentType<any>> = {
+const loadingComponents: Record<string, ComponentType<Record<string, unknown>>> = {
   // Page-level skeletons
   page: () => <div className="p-6 space-y-6">
     <DashboardHeaderSkeleton />
@@ -77,7 +77,7 @@ const loadingComponents: Record<string, ComponentType<any>> = {
   dashboardHeader: DashboardHeaderSkeleton,
 
   // Default fallback
-  default: () => <div className="flex items-center justify-center p-4"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>
+  default: () => <div className="flex items-center justify-center p-4"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" /></div>
 }
 
 interface SuspenseWrapperProps {
@@ -90,12 +90,12 @@ interface SuspenseWrapperProps {
 /**
  * Generic suspense wrapper with consistent loading states
  */
-export function SuspenseWrapper({
+export const SuspenseWrapper = ({
   children,
   fallback,
   loadingType = 'default',
   errorFallback
-}: SuspenseWrapperProps) {
+}: SuspenseWrapperProps) => {
   const LoadingComponent = loadingComponents[loadingType]
 
   return (
@@ -136,15 +136,15 @@ export function withSuspense<P extends object>(
 /**
  * Route-based lazy loading wrapper
  */
-export function RouteSuspenseWrapper({
+export const RouteSuspenseWrapper = ({
   children,
   routeName
 }: {
   children: ReactNode
   routeName: string
-}) {
+}) => {
   // Preload critical components for this route
-  React.useEffect(() => {
+  useEffect(() => {
     // Import the lazy loading utils and preload for route
     import('@/components/lazy').then(({ globalLazyLoadingUtils }) => {
       globalLazyLoadingUtils.preloadForRoute(routeName as any).catch(() => {
@@ -163,7 +163,7 @@ export function RouteSuspenseWrapper({
 /**
  * Lazy component with automatic performance tracking
  */
-export function createTrackedLazyComponent<T extends ComponentType<any>>(
+export function createTrackedLazyComponent<T extends ComponentType<Record<string, unknown>>>(
   importFn: () => Promise<{ default: T }>,
   componentName: string,
   options: {
@@ -171,7 +171,7 @@ export function createTrackedLazyComponent<T extends ComponentType<any>>(
     errorFallback?: ReactNode
   } = {}
 ) {
-  const LazyComponent = React.lazy(() =>
+  const LazyComponent = lazy(() =>
     importFn().then(module => {
       // Track component load time
       const startTime = performance.now()

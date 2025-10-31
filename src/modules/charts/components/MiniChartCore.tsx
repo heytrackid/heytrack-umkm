@@ -1,23 +1,34 @@
 'use client'
-import * as React from 'react'
 
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
 // Dynamically import recharts components to reduce bundle size
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { 
-  ssr: false,
-  loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
-})
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false })
-const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { 
-  ssr: false,
-  loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
-})
-const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false })
+const LineChart = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.LineChart),
+  {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
+  }
+)
+const Line = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Line),
+  { ssr: false }
+)
+const BarChart = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.BarChart),
+  {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
+  }
+)
+const Bar = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Bar),
+  { ssr: false }
+)
 const ResponsiveContainer = dynamic(
-  () => import('recharts').then(mod => mod.ResponsiveContainer),
-  { 
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.ResponsiveContainer),
+  {
     ssr: false,
     loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
   }
@@ -41,25 +52,27 @@ export default function MiniChartCore({
   className = ''
 }: MiniChartCoreProps) {
   return (
-    <Suspense fallback={<div className="w-full h-16 bg-muted animate-pulse rounded" />}>
-      <ResponsiveContainer width="100%" height="100%">
-        {type === 'line' ? (
-          <LineChart data={data}>
-            <Line
-              type="monotone"
-              dataKey={dataKey}
-              stroke={color}
-              strokeWidth={2}
-              dot={false}
-              activeDot={false}
-            />
-          </LineChart>
-        ) : (
-          <BarChart data={data}>
-            <Bar dataKey={dataKey} fill={color} />
-          </BarChart>
-        )}
-      </ResponsiveContainer>
-    </Suspense>
+    <div className={className} style={{ height }}>
+      <Suspense fallback={<div className="w-full h-full bg-muted animate-pulse rounded" />}>
+        <ResponsiveContainer width="100%" height="100%">
+          {type === 'line' ? (
+            <LineChart data={data}>
+              <Line
+                type="monotone"
+                dataKey={dataKey}
+                stroke={color}
+                strokeWidth={2}
+                dot={false}
+                activeDot={false}
+              />
+            </LineChart>
+          ) : (
+            <BarChart data={data}>
+              <Bar dataKey={dataKey} fill={color} />
+            </BarChart>
+          )}
+        </ResponsiveContainer>
+      </Suspense>
+    </div>
   )
 }

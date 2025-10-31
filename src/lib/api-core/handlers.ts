@@ -3,11 +3,11 @@
  * Utilities for creating standardized API route handlers
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { validateRequestData, validateRequestOrRespond } from './validation'
 import { extractPagination } from './pagination'
-import { createErrorResponse } from './responses'
+import { createErrorResponse, createSuccessResponse } from './responses'
 import { handleAPIError, createAPIErrorResponse } from './errors'
 import { apiCache } from './cache'
 import type { RouteHandlerConfig, RouteHandlerContext } from './types'
@@ -52,7 +52,7 @@ export function createRouteHandler<T>(
       }
 
       // Extract pagination
-      let pagination: any
+      let pagination: { page: number; limit: number; offset: number } | undefined
       if (config.pagination) {
         pagination = extractPagination(request)
       }
@@ -81,14 +81,14 @@ export function createRouteHandler<T>(
           if (responseData.success && responseData.data) {
             apiCache.set(config.caching.key, responseData.data, config.caching.ttl)
           }
-        } catch {
+        } catch (error) {
           // Ignore cache errors
         }
       }
 
       return response
-    } catch (error) {
-      const apiError = handleAPIError(error)
+    } catch (err) {
+      const apiError = handleAPIError(err)
       return createAPIErrorResponse(apiError)
     }
   }

@@ -1,28 +1,27 @@
 'use client'
-import * as React from 'react'
+import { type ReactNode, type TouchEvent as ReactTouchEvent, useState, useEffect, useRef, useCallback } from 'react'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
-import { Loader2, RefreshCw, ChevronDown } from 'lucide-react'
+import { Loader2, RefreshCw } from 'lucide-react'
 import { useResponsive } from '@/hooks/useResponsive'
 
 import { apiLogger } from '@/lib/logger'
 // Pull to Refresh Component
 interface PullToRefreshProps {
-  children: React.ReactNode
+  children: ReactNode
   onRefresh: () => Promise<void>
   refreshThreshold?: number
   className?: string
   disabled?: boolean
 }
 
-export function PullToRefresh({
+export const PullToRefresh = ({
   children,
   onRefresh,
   refreshThreshold = 60,
   className,
   disabled = false
-}: PullToRefreshProps) {
+}: PullToRefreshProps) => {
   const [pullDistance, setPullDistance] = useState(0)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [canRefresh, setCanRefresh] = useState(false)
@@ -43,7 +42,7 @@ export function PullToRefresh({
 
     if (distance > 0 && window.scrollY === 0) {
       // Prevent default scrolling when pulling down at top
-      e.preventDefault
+      e.preventDefault()
       
       // Apply resistance to the pull
       const resistance = 0.5
@@ -62,7 +61,7 @@ export function PullToRefresh({
       try {
         await onRefresh()
       } catch (error: unknown) {
-        apiLogger.error({ error: error }, 'Refresh failed:')
+        apiLogger.error({ error }, 'Refresh failed:')
       } finally {
         setIsRefreshing(false)
       }
@@ -156,17 +155,17 @@ export function PullToRefresh({
 
 // Infinite Scroll Component
 interface InfiniteScrollProps {
-  children: React.ReactNode
+  children: ReactNode
   hasMore: boolean
   loading: boolean
   onLoadMore: () => void
   threshold?: number
   className?: string
-  loadingComponent?: React.ReactNode
-  endMessage?: React.ReactNode
+  loadingComponent?: ReactNode
+  endMessage?: ReactNode
 }
 
-export function InfiniteScroll({
+export const InfiniteScroll = ({
   children,
   hasMore,
   loading,
@@ -175,7 +174,7 @@ export function InfiniteScroll({
   className,
   loadingComponent,
   endMessage
-}: InfiniteScrollProps) {
+}: InfiniteScrollProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isNearBottom, setIsNearBottom] = useState(false)
 
@@ -209,8 +208,8 @@ export function InfiniteScroll({
     }
 
     // Small delay to ensure content is rendered
-    const timeout = setTimeout
-    return () => clearTimeout
+    const timeout = setTimeout(checkInitialLoad, 100);
+    return () => clearTimeout(timeout);
   }, [hasMore, loading, onLoadMore])
 
   const defaultLoadingComponent = (
@@ -243,7 +242,7 @@ export function InfiniteScroll({
 
 // Combined Pull to Refresh + Infinite Scroll
 interface PullToRefreshInfiniteScrollProps {
-  children: React.ReactNode
+  children: ReactNode
   onRefresh: () => Promise<void>
   onLoadMore: () => void
   hasMore: boolean
@@ -253,7 +252,7 @@ interface PullToRefreshInfiniteScrollProps {
   disabled?: boolean
 }
 
-export function PullToRefreshInfiniteScroll({
+export const PullToRefreshInfiniteScroll = ({
   children,
   onRefresh,
   onLoadMore,
@@ -262,8 +261,7 @@ export function PullToRefreshInfiniteScroll({
   refreshing = false,
   className,
   disabled = false
-}: PullToRefreshInfiniteScrollProps) {
-  return (
+}: PullToRefreshInfiniteScrollProps) => (
     <PullToRefresh
       onRefresh={onRefresh}
       className={className}
@@ -278,19 +276,18 @@ export function PullToRefreshInfiniteScroll({
       </InfiniteScroll>
     </PullToRefresh>
   )
-}
 
 // Swipe Actions Component (for table rows, list items, etc.)
 interface SwipeAction {
   id: string
   label: string
-  icon?: React.ReactNode
+  icon?: ReactNode
   color: 'red' | 'green' | 'blue' | 'yellow' | 'gray'
   onClick: () => void
 }
 
 interface SwipeActionsProps {
-  children: React.ReactNode
+  children: ReactNode
   actions: SwipeAction[]
   onSwipeStart?: () => void
   onSwipeEnd?: () => void
@@ -298,22 +295,22 @@ interface SwipeActionsProps {
   className?: string
 }
 
-export function SwipeActions({
+export const SwipeActions = ({
   children,
   actions,
   onSwipeStart,
   onSwipeEnd,
   threshold = 60,
   className
-}: SwipeActionsProps) {
+}: SwipeActionsProps) => {
   const [swipeDistance, setSwipeDistance] = useState(0)
   const [isSwipeActive, setIsSwipeActive] = useState(false)
   const startX = useRef(0)
   const currentX = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
-  const { isMobile, isTouchDevice } = useResponsive()
+  const { isTouchDevice } = useResponsive()
 
-  const handleTouchStart = (e: TouchEvent | React.TouchEvent) => {
+  const handleTouchStart = (e: TouchEvent | ReactTouchEvent) => {
     if (!isTouchDevice || actions.length === 0) {return}
     
     const touch = 'touches' in e ? e.touches[0] : e
@@ -322,7 +319,7 @@ export function SwipeActions({
     onSwipeStart?.()
   }
 
-  const handleTouchMove = (e: TouchEvent | React.TouchEvent) => {
+  const handleTouchMove = (e: TouchEvent | ReactTouchEvent) => {
     if (!isTouchDevice || !isSwipeActive || startX.current === 0) {return}
 
     const touch = 'touches' in e ? e.touches[0] : e
@@ -436,7 +433,7 @@ function throttle<T extends (...args: unknown[]) => unknown>(
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean
-  return function (this: any, ...args: Parameters<T>) {
+  return function (this: unknown, ...args: Parameters<T>) {
     if (!inThrottle) {
       func.apply(this, args)
       inThrottle = true

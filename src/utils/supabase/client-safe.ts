@@ -14,7 +14,7 @@ function validateServerEnvironment() {
     throw new Error('createServerClient should only be called server-side')
   }
 
-  const runtime = process.env.NEXT_RUNTIME
+  const runtime = process.env['NEXT_RUNTIME']
   if (runtime && runtime !== 'nodejs') {
     throw new Error(`createServerClient requires NEXT_RUNTIME to be "nodejs", received "${runtime}"`)
   }
@@ -37,11 +37,10 @@ export async function createServerClient() {
   const serverModule = await (async () => {
     // Import path as a variable to avoid static analysis
     const serverPath = './server'
-    return await import(serverPath)
+    return import(serverPath)
   })()
   
   return serverModule.createClient()
 }
 
 // Export server client only for server-side use
-export { createServiceRoleClient } from './service-role'

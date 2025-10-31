@@ -4,7 +4,7 @@
  */
 
 // Route preloading patterns based on user behavior
-export type RouteConfig = {
+export interface RouteConfig {
   immediate: string[]
   onHover: string[]
   components: string[]

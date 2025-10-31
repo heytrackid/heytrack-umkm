@@ -5,7 +5,7 @@
 
 // Components
 export { ProfitSummaryCards } from './ProfitSummaryCards'
-export { ProfitFilters } from './ProfitFilters'
+export { ProfitFiltersComponent as ProfitFilters } from './ProfitFilters'
 export { ProductProfitabilityChart } from './ProductProfitabilityChart'
 export { ProductProfitabilityTable } from './ProductProfitabilityTable'
 export { IngredientCostsTable } from './IngredientCostsTable'
@@ -14,10 +14,10 @@ export { ProfitBreakdown } from './ProfitBreakdown'
 export { ProfitInfoCard } from './ProfitInfoCard'
 
 // Hooks
-export { useProfitData } from '../hooks/useProfitData'
+export { useProfitData } from '@/app/profit/hooks/useProfitData'
 
 // Types
 export type * from './types'
 
 // Utils
-export { useProductChartData, formatCurrencyAmount } from '../utils/chartData'
+export { useProductChartData, formatCurrencyAmount } from '@/app/profit/utils/chartData'

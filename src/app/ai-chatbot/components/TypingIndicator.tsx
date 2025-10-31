@@ -1,8 +1,7 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Bot, Loader2 } from 'lucide-react'
 
-export function TypingIndicator() {
-  return (
+export const TypingIndicator = () => (
     <div className="flex gap-3">
       <Avatar className="w-8 h-8">
         <AvatarFallback className="bg-primary/10">
@@ -17,4 +16,3 @@ export function TypingIndicator() {
       </div>
     </div>
   )
-}

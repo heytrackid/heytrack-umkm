@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import {
   Select,
@@ -16,9 +15,7 @@ import {
 } from '@/components/ui/select'
 import { AlertCircle, ChefHat, Loader2, Sparkles } from 'lucide-react'
 import type {
-  AvailableIngredient,
-  PRODUCT_TYPES,
-  DIETARY_RESTRICTIONS
+  AvailableIngredient
 } from './types'
 
 interface RecipeGeneratorFormProps {
@@ -37,6 +34,7 @@ interface RecipeGeneratorFormProps {
   availableIngredients: AvailableIngredient[]
   loading: boolean
   onGenerate: () => void
+  mode: 'complete' | 'quick'
 }
 
 export default function RecipeGeneratorForm({

@@ -1,7 +1,6 @@
 'use client'
 
-import * as React from 'react'
-
+import { useState, useEffect, type ReactNode } from 'react'
 import type {
   ToastActionElement,
   ToastProps,
@@ -12,8 +11,8 @@ const TOAST_REMOVE_DELAY = 1000000
 
 type ToasterToast = ToastProps & {
   id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
+  title?: ReactNode
+  description?: ReactNode
   action?: ToastActionElement
 }
 
@@ -66,7 +65,7 @@ const addToRemoveQueue = (toastId: string) => {
     toastTimeouts.delete(toastId)
     dispatch({
       type: 'REMOVE_TOAST',
-      toastId: toastId,
+      toastId,
     })
   }, TOAST_REMOVE_DELAY)
 
@@ -164,16 +163,16 @@ function toast(props: Toast) {
   })
 
   return {
-    id: id,
+    id,
     dismiss,
     update,
   }
 }
 
 function useToast() {
-  const [state, setState] = React.useState<State>(memoryState)
+  const [state, setState] = useState<State>(memoryState)
 
-  React.useEffect(() => {
+  useEffect(() => {
     listeners.push(setState)
     return () => {
       const index = listeners.indexOf(setState)

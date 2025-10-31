@@ -1,11 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import type { Database } from '@/types'
+import type { Database, RecipesTable, IngredientsTable, RecipeIngredientsTable } from '@/types/database'
 
 // Database types
-export type Recipe = Database['public']['Tables']['recipes']['Row']
-export type Ingredient = Database['public']['Tables']['ingredients']['Row']
-export type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
+export type Recipe = RecipesTable
+export type Ingredient = IngredientsTable
+export type RecipeIngredient = RecipeIngredientsTable
 
 // Configuration for automation rules
 export interface AutomationConfig {
@@ -187,7 +187,7 @@ export interface SmartNotification {
   action: string
   priority: NotificationPriority
   timestamp?: Date
-  data?: any
+  data?: Record<string, unknown>
 }
 
 // Event types untuk automation triggers
@@ -212,13 +212,13 @@ export interface WorkflowEventData {
 export interface WorkflowResult {
   success: boolean
   message: string
-  data?: any
+  data?: Record<string, unknown>
   error?: string
 }
 
 export interface WorkflowContext {
   event: WorkflowEventData
   supabase: SupabaseClient<Database> | null
-  logger: any // Logger instance
+  logger: { info: (msg: string, data?: unknown) => void; error: (msg: string, data?: unknown) => void; warn: (msg: string, data?: unknown) => void }
   config: AutomationConfig
 }

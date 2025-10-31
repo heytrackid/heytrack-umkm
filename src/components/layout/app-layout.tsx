@@ -1,7 +1,6 @@
 'use client'
-import * as React from 'react'
 
-import SmartNotifications from '@/components/automation/smart-notifications'
+import { useState, useEffect, memo, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -9,10 +8,8 @@ import { useMobile } from '@/hooks/useResponsive'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { Search, User } from 'lucide-react'
-import type { ReactNode} from 'react';
-import { memo, useEffect, useState } from 'react'
 import MobileHeader from './mobile-header'
-import SimpleSidebar from './sidebar'
+import Sidebar from './sidebar'
 // Supabase auth
 import {
   DropdownMenu,
@@ -30,13 +27,14 @@ interface AppLayoutProps {
   showMobileHeader?: boolean
 }
 
-const AppLayout = memo(function AppLayout({
+const AppLayout = memo(({
   children,
   pageTitle,
   showMobileHeader = true
-}: AppLayoutProps) {
+}: AppLayoutProps) => {
   const { isMobile } = useMobile()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -48,29 +46,69 @@ const AppLayout = memo(function AppLayout({
     const getUser = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
-        setUser(user)
-      } catch (error) {
-        uiLogger.error({ error: error }, 'Error getting user:')
+        void setUser(user)
+      } catch (_err) {
+        uiLogger.error({ err }, 'Error getting user:')
       } finally {
-        setLoading(false)
+        void setLoading(false)
       }
     }
 
-    getUser()
+    void getUser()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null)
-        setLoading(false)
+      async (_event, session) => {
+        void setUser(session?.user ?? null)
+        void setLoading(false)
       }
     )
 
     return () => subscription.unsubscribe()
   }, [supabase.auth])
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen)
+  useEffect(() => {
+    setSidebarOpen(!isMobile)
+    // Reset collapsed state on mobile
+    if (isMobile) {
+      setSidebarCollapsed(false)
+    }
+  }, [isMobile])
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobile && mobileMenuOpen) {
+      document.body.classList.add('sidebar-open')
+    } else {
+      document.body.classList.remove('sidebar-open')
+    }
+
+    return () => {
+      document.body.classList.remove('sidebar-open')
+    }
+  }, [isMobile, mobileMenuOpen])
+
+  const toggleSidebar = () => setSidebarOpen((prev) => !prev)
+  const toggleSidebarCollapse = () => setSidebarCollapsed((prev) => !prev)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+
+  // Keyboard shortcuts for sidebar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + B to toggle sidebar collapse (desktop only)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'b' && !isMobile) {
+        e.preventDefault()
+        toggleSidebarCollapse()
+      }
+      // Escape to close mobile menu
+      if (e.key === 'Escape' && isMobile && mobileMenuOpen) {
+        toggleMobileMenu()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isMobile, mobileMenuOpen])
 
   return (
     <div className={cn(
@@ -79,10 +117,35 @@ const AppLayout = memo(function AppLayout({
     )}>
       {/* Desktop Sidebar */}
       {!isMobile && (
-        <SimpleSidebar
+        <Sidebar
           isOpen={sidebarOpen}
           onToggle={toggleSidebar}
+          isCollapsed={sidebarCollapsed}
+          onCollapse={toggleSidebarCollapse}
         />
+      )}
+
+      {/* Mobile Sidebar Overlay */}
+      {isMobile && mobileMenuOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={toggleMobileMenu}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile Sidebar */}
+      {isMobile && (
+        <div className={cn(
+          "fixed inset-y-0 left-0 z-40 w-72 bg-background shadow-lg transition-transform duration-300 ease-in-out",
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        )}>
+          <Sidebar
+            isOpen={mobileMenuOpen}
+            onToggle={toggleMobileMenu}
+            isMobile
+          />
+        </div>
       )}
 
       {/* Mobile Header */}
@@ -98,7 +161,10 @@ const AppLayout = memo(function AppLayout({
         />
       )}
 
-      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+      <div className={cn(
+        "flex flex-1 flex-col min-w-0 overflow-hidden transition-all duration-300",
+        !isMobile && (sidebarCollapsed ? "ml-16" : "ml-72")
+      )}>
         {/* Desktop Header */}
         {!isMobile && (
           <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6 flex-shrink-0">
@@ -112,7 +178,6 @@ const AppLayout = memo(function AppLayout({
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <SmartNotifications />
               <ThemeToggle />
               {/* User Authentication */}
               {loading ? (
@@ -135,7 +200,7 @@ const AppLayout = memo(function AppLayout({
                     <DropdownMenuItem
                       onClick={async () => {
                         await supabase.auth.signOut()
-                        router.push('/auth/login')
+                        void router.push('/auth/login')
                       }}
                       className="text-red-600 focus:text-red-600"
                     >

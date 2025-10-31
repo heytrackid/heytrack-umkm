@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { Calendar, CalendarDays } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -17,14 +16,14 @@ interface DateFilterProps {
   className?: string
 }
 
-export function DateFilter({ 
+export const DateFilter = ({ 
   startDate = '', 
   endDate = '', 
   onStartDateChange, 
   onEndDateChange, 
   onQuickFilter,
   className 
-}: DateFilterProps) {
+}: DateFilterProps) => {
   
   const quickFilters = [
     { label: 'Hari ini', days: 0 },

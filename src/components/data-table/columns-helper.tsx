@@ -14,15 +14,15 @@ export function createTextColumn<T extends Record<string, unknown>>(
   header: string,
   options?: {
     sortable?: boolean
-    width?: string
+    width?: number
   }
 ): ColumnDef<T> {
   return {
     accessorKey: key,
-    header: ({ column }) => header,
+    header,
     cell: ({ getValue }) => getValue(),
     enableSorting: options?.sortable !== false,
-    size: options?.width as any,
+    size: options?.width,
   }
 }
 
@@ -39,7 +39,7 @@ export function createNumberColumn<T extends Record<string, unknown>>(
 ): ColumnDef<T> {
   return {
     accessorKey: key,
-    header: header,
+    header,
     cell: ({ getValue }) => {
       const value = getValue() as number
       return options?.format ? options.format(value) : value.toString()
@@ -67,7 +67,7 @@ export function createCurrencyColumn<T extends Record<string, unknown>>(
 
   return {
     accessorKey: key,
-    header: header,
+    header,
     cell: ({ getValue }) => {
       const value = getValue() as number
       return formatter.format(value)
@@ -91,7 +91,7 @@ export function createDateColumn<T extends Record<string, unknown>>(
 
   return {
     accessorKey: key,
-    header: header,
+    header,
     cell: ({ getValue }) => {
       const value = getValue()
       if (!value) {return '-'}
@@ -112,7 +112,7 @@ export function createStatusColumn<T extends Record<string, unknown>>(
 ): ColumnDef<T> {
   return {
     accessorKey: key,
-    header: header,
+    header,
     cell: ({ getValue }) => {
       const value = getValue() as string
       const config = statusConfig[value]

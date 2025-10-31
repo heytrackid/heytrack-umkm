@@ -1,7 +1,6 @@
 'use client'
-import * as React from 'react'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,10 +8,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useCurrency } from '@/hooks/useCurrency'
-import { 
-  CheckCircle2, 
-  AlertTriangle, 
-  XCircle, 
+import {
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
   TrendingUp,
   TrendingDown,
   DollarSign,
@@ -77,39 +76,43 @@ export default function AutoSyncFinancialDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
+  // Hydration fix - prevent SSR/client mismatch
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const fetchAutoSyncData = async () => {
     try {
-      setRefreshing(true)
+      void setRefreshing(true)
       const response = await fetch('/api/financial/auto-sync')
       const result = await response.json()
-      
+
       if (result.success) {
-        setData(result.data)
-        setError(null)
+        void setData(result.data)
+        void setError(null)
       } else {
-        setError(result.error || 'Failed to fetch auto-sync data')
+        void setError(result.error || 'Failed to fetch auto-sync data')
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+    } catch (_err) {
+      void setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
-      setLoading(false)
-      setRefreshing(false)
+      void setLoading(false)
+      void setRefreshing(false)
     }
   }
 
   useEffect(() => {
-    fetchAutoSyncData()
+    void fetchAutoSyncData()
   }, [])
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 
   const getHealthBadge = (health: string) => {
     switch (health) {
@@ -124,7 +127,7 @@ export default function AutoSyncFinancialDashboard() {
     }
   }
 
-  const UMKMTooltip = ({ title, content, children }: { title: string, content: string, children: React.ReactNode }) => (
+  const UMKMTooltip = ({ title, content, children }: { title: string, content: string, children: ReactNode }) => (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -143,7 +146,8 @@ export default function AutoSyncFinancialDashboard() {
     </TooltipProvider>
   )
 
-  if (loading) {
+  // Prevent hydration mismatch
+  if (!isMounted || loading) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
@@ -154,8 +158,8 @@ export default function AutoSyncFinancialDashboard() {
           <Card key={i}>
             <CardContent className="pt-6">
               <div className="animate-pulse space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-3 bg-gray-200 rounded w-1/2" />
               </div>
             </CardContent>
           </Card>
@@ -170,9 +174,9 @@ export default function AutoSyncFinancialDashboard() {
         <XCircle className="h-4 w-4" />
         <AlertDescription>
           {error || 'Failed to load auto-sync data'}
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="ml-2"
             onClick={fetchAutoSyncData}
           >
@@ -194,8 +198,8 @@ export default function AutoSyncFinancialDashboard() {
             Sinkronisasi otomatis transaksi ke catatan keuangan
           </p>
         </div>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={fetchAutoSyncData}
           disabled={refreshing}
         >
@@ -295,7 +299,7 @@ export default function AutoSyncFinancialDashboard() {
               {data.recommendations.recommendations.map((rec, index: number) => (
                 <Alert key={index} className={rec.includes('✅') ? 'border-green-200 bg-green-50' : ''}>
                   <AlertDescription className="flex items-center">
-                    {rec.includes('✅') ? 
+                    {rec.includes('✅') ?
                       <CheckCircle2 className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" /> :
                       <Info className="h-4 w-4 text-blue-600 mr-2 flex-shrink-0" />
                     }
@@ -358,13 +362,13 @@ export default function AutoSyncFinancialDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {data.recentTransactions.slice(0, 5).map((tx, index: number) => (
+              {data.recentTransactions.slice(0, 5).map((tx) => (
                 <div key={tx.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                   <div>
                     <p className="text-sm font-medium">
-                      {tx.source === 'stock_transaction' ? '📦 Pembelian Bahan' : 
-                       tx.source === 'operational_cost' ? '🏭 Biaya Operasional' :
-                       tx.source === 'order_completion' ? '💰 Penjualan' : tx.source}
+                      {tx.source === 'stock_transaction' ? '📦 Pembelian Bahan' :
+                        tx.source === 'operational_cost' ? '🏭 Biaya Operasional' :
+                          tx.source === 'order_completion' ? '💰 Penjualan' : tx.source}
                     </p>
                     <p className="text-xs text-gray-600">{formatDate(tx.syncedAt)}</p>
                   </div>
@@ -399,7 +403,6 @@ export default function AutoSyncFinancialDashboard() {
             </Button>
             {data.recommendations.missingSync > 0 && (
               <Button variant="secondary">
-                <Sync className="h-4 w-4 mr-2" />
                 Manual Sync ({data.recommendations.missingSync})
               </Button>
             )}

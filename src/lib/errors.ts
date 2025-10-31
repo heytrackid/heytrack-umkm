@@ -185,8 +185,11 @@ export const AUTH_ERROR_MESSAGES: Record<string, AuthError> = {
 /**
  * Handle authentication errors with user-friendly messages
  */
-export function handleAuthError(error: any): AuthError {
-  const errorMessage = error?.message || String(error)
+export function handleAuthError(error: unknown): AuthError {
+  const errorMessage = 
+    error && typeof error === 'object' && 'message' in error 
+      ? String((error as { message?: string }).message) 
+      : String(error)
 
   // Try to match exact error message
   if (AUTH_ERROR_MESSAGES[errorMessage]) {
@@ -209,7 +212,7 @@ export function handleAuthError(error: any): AuthError {
 /**
  * Log authentication errors for monitoring
  */
-export function logAuthError(error: any, context?: ErrorContext): void {
+export function logAuthError(error: unknown, context?: ErrorContext): void {
   captureError(error instanceof Error ? error : String(error), {
     ...context,
     tags: { ...context?.tags, type: 'auth' },
@@ -234,7 +237,7 @@ export function createAuthError(code: string, message: string, action?: AuthErro
 /**
  * Handle database operation errors
  */
-export function handleDatabaseError(error: any): {
+export function handleDatabaseError(error: unknown): {
   message: string
   statusCode: number
   code?: string
@@ -242,51 +245,53 @@ export function handleDatabaseError(error: any): {
   apiLogger.error({ err: error }, 'Database Error')
 
   // Handle specific Supabase/Postgres errors
-  if (error.code) {
-    switch (error.code) {
+  if (error && typeof error === 'object' && 'code' in error) {
+    const errCode = String((error as { code?: string }).code)
+    switch (errCode) {
       case '23505': // Unique constraint violation
         return {
           message: 'Data sudah ada di sistem',
           statusCode: 409,
-          code: error.code
+          code: errCode
         }
       case '23503': // Foreign key constraint violation
         return {
           message: 'Data yang direferensikan tidak ditemukan',
           statusCode: 400,
-          code: error.code
+          code: errCode
         }
       case '23502': // Not null constraint violation
         return {
           message: 'Field yang wajib diisi belum diisi',
           statusCode: 400,
-          code: error.code
+          code: errCode
         }
       case '42P01': // Table does not exist
         return {
           message: 'Resource tidak ditemukan',
           statusCode: 404,
-          code: error.code
+          code: errCode
         }
       default:
         return {
           message: 'Terjadi kesalahan database',
           statusCode: 500,
-          code: error.code
+          code: errCode
         }
     }
   }
 
   // Handle Supabase client errors
-  if (error.message) {
-    if (error.message.includes('JWT')) {
+  if (error && typeof error === 'object' && 'message' in error) {
+    const errMessage = String((error as { message?: string }).message)
+    if (errMessage.includes('JWT')) {
       return {
         message: 'Akses tidak sah',
         statusCode: 401,
         code: 'AUTH_ERROR'
       }
     }
-    if (error.message.includes('RLS')) {
+    if (errMessage.includes('RLS')) {
       return {
         message: 'Akses ditolak',
         statusCode: 403,

@@ -3,9 +3,10 @@
  * Reusable search inputs, filters, and data manipulation UI
  */
 
+import { type ReactNode, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Search, X, Filter, SortAsc, SortDesc } from 'lucide-react'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -20,18 +21,18 @@ interface SearchInputProps {
   showClear?: boolean
 }
 
-export function SearchInput({
+export const SearchInput = ({
   placeholder = "Cari...",
   value,
   onChange,
   debounceMs = 300,
   className,
   showClear = true
-}: SearchInputProps) {
+}: SearchInputProps) => {
   const debouncedValue = useDebounce(value, debounceMs)
 
   // Update parent when debounced value changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (debouncedValue !== value) {
       onChange(debouncedValue)
     }
@@ -73,24 +74,22 @@ interface FilterToggleProps {
   count?: number
 }
 
-export function FilterToggle({ label, isActive, onToggle, count }: FilterToggleProps) {
-  return (
-    <Button
-      variant={isActive ? 'default' : 'outline'}
-      size="sm"
-      onClick={onToggle}
-      className="flex items-center gap-2"
-    >
-      <Filter className="h-3 w-3" />
-      {label}
-      {count !== undefined && count > 0 && (
-        <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
-          {count}
-        </Badge>
-      )}
-    </Button>
-  )
-}
+export const FilterToggle = ({ label, isActive, onToggle, count }: FilterToggleProps) => (
+  <Button
+    variant={isActive ? 'default' : 'outline'}
+    size="sm"
+    onClick={onToggle}
+    className="flex items-center gap-2"
+  >
+    <Filter className="h-3 w-3" />
+    {label}
+    {count !== undefined && count > 0 && (
+      <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+        {count}
+      </Badge>
+    )}
+  </Button>
+)
 
 // Sort button component
 interface SortButtonProps {
@@ -100,7 +99,7 @@ interface SortButtonProps {
   onSort: (field: string, direction: 'asc' | 'desc') => void
 }
 
-export function SortButton({ label, field, currentSort, onSort }: SortButtonProps) {
+export const SortButton = ({ label, field, currentSort, onSort }: SortButtonProps) => {
   const isActive = currentSort?.field === field
   const direction = isActive ? currentSort.direction : 'asc'
 
@@ -131,12 +130,12 @@ interface ActiveFiltersProps {
   filterLabels?: Record<string, string>
 }
 
-export function ActiveFilters({ filters, onRemoveFilter, filterLabels = {} }: ActiveFiltersProps) {
+export const ActiveFilters = ({ filters, onRemoveFilter, filterLabels = {} }: ActiveFiltersProps) => {
   const activeFilters = Object.entries(filters).filter(([_, value]) =>
     value !== null && value !== undefined && value !== '' && value !== false
   )
 
-  if (activeFilters.length === 0) return null
+  if (activeFilters.length === 0) { return null }
 
   return (
     <div className="flex flex-wrap gap-2 mb-4">
@@ -173,58 +172,56 @@ interface SearchFilterBarProps {
   searchValue: string
   onSearchChange: (value: string) => void
   searchPlaceholder?: string
-  filters?: React.ReactNode
-  actions?: React.ReactNode
+  filters?: ReactNode
+  actions?: ReactNode
   className?: string
 }
 
-export function SearchFilterBar({
+export const SearchFilterBar = ({
   searchValue,
   onSearchChange,
   searchPlaceholder = "Cari...",
   filters,
   actions,
   className
-}: SearchFilterBarProps) {
-  return (
-    <Card className={className}>
-      <CardContent className="p-4">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1">
-            <SearchInput
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={onSearchChange}
-            />
-          </div>
-
-          {filters && (
-            <div className="flex flex-wrap gap-2">
-              {filters}
-            </div>
-          )}
-
-          {actions && (
-            <div className="flex gap-2">
-              {actions}
-            </div>
-          )}
+}: SearchFilterBarProps) => (
+  <Card className={className}>
+    <CardContent className="p-4">
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex-1">
+          <SearchInput
+            placeholder={searchPlaceholder}
+            value={searchValue}
+            onChange={onSearchChange}
+          />
         </div>
-      </CardContent>
-    </Card>
-  )
-}
+
+        {filters && (
+          <div className="flex flex-wrap gap-2">
+            {filters}
+          </div>
+        )}
+
+        {actions && (
+          <div className="flex gap-2">
+            {actions}
+          </div>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+)
 
 // Bulk actions bar
 interface BulkActionsBarProps {
   selectedCount: number
   totalCount: number
-  actions: React.ReactNode
+  actions: ReactNode
   onClearSelection: () => void
 }
 
-export function BulkActionsBar({ selectedCount, totalCount, actions, onClearSelection }: BulkActionsBarProps) {
-  if (selectedCount === 0) return null
+export const BulkActionsBar = ({ selectedCount, totalCount, actions, onClearSelection }: BulkActionsBarProps) => {
+  if (selectedCount === 0) { return null }
 
   return (
     <Card className="border-blue-200 bg-blue-50">
@@ -252,6 +249,3 @@ export function BulkActionsBar({ selectedCount, totalCount, actions, onClearSele
     </Card>
   )
 }
-
-// Import React for types
-import * as React from 'react'
