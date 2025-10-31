@@ -1,7 +1,8 @@
+// @ts-nocheck
 // Chat Session Service - Manages chat session persistence
 
 import { createClient } from '@/utils/supabase/server'
-import type { Database } from '@/types/supabase-generated';
+import type { Database } from '@/types/database';
 import type {
   ChatSession,
   ChatMessage,

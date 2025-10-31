@@ -1,10 +1,10 @@
 import { formatCurrency } from '@/shared'
-import type { Database } from '@/types/supabase-generated'
+import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 
 // Use generated types from Supabase
-export type Recipe = Database['public']['Tables']['recipes']['Row']
-export type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
-export type Ingredient = Database['public']['Tables']['ingredients']['Row']
+export type Recipe = RecipesTable
+export type RecipeIngredient = RecipeIngredientsTable
+export type Ingredient = IngredientsTable
 
 // Extended type for recipe with ingredient details
 export interface RecipeIngredientWithDetails extends RecipeIngredient {

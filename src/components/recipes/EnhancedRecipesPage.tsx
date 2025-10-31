@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSettings } from '@/contexts/settings-context'
+// import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
 import { useResponsive } from '@/hooks/useResponsive'
 
@@ -56,9 +56,9 @@ import { usePagination } from '@/hooks/usePagination'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 
 // Types
-import type { Database } from '@/types/supabase-generated'
+import type { RecipesTable } from '@/types/database'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
+type Recipe = RecipesTable
 type CategoryFilter = 'all' | 'bread' | 'pastry' | 'cake' | 'cookie' | 'other'
 type DifficultyFilter = 'all' | 'easy' | 'medium' | 'hard'
 

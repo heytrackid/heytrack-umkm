@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
+import type { ExpensesInsert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -23,7 +23,7 @@ export async function POST() {
     }
 
     // Template operational costs (common for Indonesian culinary businesses)
-    const templates: Database['public']['Tables']['expenses']['Insert'][] = [
+    const templates: ExpensesInsert[] = [
       {
         user_id: user.id,
         category: 'Utilities',

@@ -14,9 +14,9 @@ import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields
 import { CreateModal, EditModal, DeleteModal } from '@/components/ui';
 
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated';
+import type { SuppliersTable, SuppliersInsert, SuppliersUpdate } from '@/types/database'
 
-type Supplier = Database['public']['Tables']['suppliers']['Row'];
+type Supplier = SuppliersTable
 
 
 export const SuppliersCRUD = () => {
@@ -108,7 +108,7 @@ export const SuppliersCRUD = () => {
 
   const handleSubmitCreate = async (data: Record<string, unknown>) => {
     try {
-      await createSupplier(data as Database['public']['Tables']['suppliers']['Insert'])
+      await createSupplier(data as SuppliersInsert)
       void setIsCreateModalOpen(false)
       createForm.reset({
         name: '',
@@ -127,7 +127,7 @@ export const SuppliersCRUD = () => {
     if (!selectedSupplier) { return }
 
     try {
-      await updateSupplier(selectedSupplier.id, data as Database['public']['Tables']['suppliers']['Update'])
+      await updateSupplier(selectedSupplier.id, data as SuppliersUpdate)
       void setIsEditModalOpen(false)
       void setSelectedSupplier(null)
       editForm.reset({

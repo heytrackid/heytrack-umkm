@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Database } from '@/types/supabase-generated'
-type Order = Database['public']['Tables']['orders']['Row']
-type OrderItem = Database['public']['Tables']['order_items']['Row']
-type OrderStatus = Database['public']['Enums']['order_status']
-type PaymentStatus = Database['public']['Enums']['payment_status']
-type Recipe = Database['public']['Tables']['recipes']['Row']
+import type { OrdersTable, OrderItemsTable, OrderStatus, RecipesTable } from '@/types/database'
+type Order = OrdersTable
+type OrderItem = OrderItemsTable
+// payment_status is a string field, not an enum
+type PaymentStatus = string
+type Recipe = RecipesTable
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -111,12 +111,12 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
 
     // Replace common variables
     const replacements = {
-      'customer_name': orderData.customer_name,
-      'order_no': orderData.order_no,
-      'order_date': new Date(orderData.order_date).toLocaleDateString('id-ID'),
+      'customer_name': orderData.customer_name ?? '',
+      'order_no': orderData.order_no ?? '',
+      'order_date': new Date(orderData.order_date ?? new Date()).toLocaleDateString('id-ID'),
       'due_date': orderData.due_date ? new Date(orderData.due_date).toLocaleDateString('id-ID') : '',
-      'total_amount': orderData.total_amount.toLocaleString('id-ID'),
-      'remaining_amount': orderData.remaining_amount ? orderData.remaining_amount.toLocaleString('id-ID') : '0',
+      'total_amount': (orderData.total_amount ?? 0).toLocaleString('id-ID'),
+      'remaining_amount': (orderData.remaining_amount ?? 0).toLocaleString('id-ID'),
       'estimated_arrival': orderData.due_date ? new Date(orderData.due_date).toLocaleDateString('id-ID') : ''
     }
 
@@ -201,7 +201,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
 
   const handleCopyMessage = () => {
     const message = getCurrentMessage()
-    navigator.clipboard.writeText(text)
+    navigator.clipboard.writeText(message)
   }
 
   const getStatusBadgeColor = (status: string) => {
@@ -257,13 +257,13 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                  <Badge className={getStatusBadgeColor(order.status)}>
-                    {order.status.replace('_', ' ').toUpperCase()}
+                  <Badge className={getStatusBadgeColor(order.status ?? '')}>
+                    {(order.status ?? '').replace('_', ' ').toUpperCase()}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Total:</span>
-                  <span className="font-medium">Rp {order.total_amount.toLocaleString('id-ID')}</span>
+                  <span className="font-medium">Rp {(order.total_amount ?? 0).toLocaleString('id-ID')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Items:</span>

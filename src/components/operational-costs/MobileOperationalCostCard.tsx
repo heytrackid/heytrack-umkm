@@ -12,9 +12,9 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MoreVertical, Edit, Trash2 } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { OperationalCostsTable } from '@/types/database'
 
-type OperationalCost = Database['public']['Tables']['operational_costs']['Row']
+type OperationalCost = OperationalCostsTable
 
 interface MobileOperationalCostCardProps {
     cost: OperationalCost

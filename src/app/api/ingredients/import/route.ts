@@ -1,13 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
-import { isIngredient, isArrayOf, isRecord, getErrorMessage } from '@/lib/type-guards'
+import type { IngredientsInsert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type IngredientInsert = Database['public']['Tables']['ingredients']['Insert']
+type IngredientInsert = IngredientsInsert
 
 export async function POST(request: NextRequest) {
   try {

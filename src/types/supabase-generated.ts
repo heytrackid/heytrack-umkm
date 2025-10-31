@@ -2376,6 +2376,10 @@ export type Database = {
       }
       clean_old_logs: { Args: never; Returns: undefined }
       cleanup_expired_context_cache: { Args: never; Returns: undefined }
+      create_default_whatsapp_templates: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       decrement_ingredient_stock: {
         Args: { p_ingredient_id: string; p_quantity: number }
         Returns: {

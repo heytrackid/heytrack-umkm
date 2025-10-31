@@ -1,8 +1,8 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { Database } from '@/types/supabase-generated'
-type Recipe = Database['public']['Tables']['recipes']['Row']
+import type { RecipesTable } from '@/types/database'
+type Recipe = RecipesTable
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Package } from 'lucide-react'
 

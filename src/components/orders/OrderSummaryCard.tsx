@@ -14,7 +14,7 @@ import {
     MapPin,
     AlertCircle
 } from 'lucide-react'
-import type { Order } from './types'
+import type { Order, PaymentStatus, Priority } from './types'
 import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
 import { useCurrency } from '@/hooks/useCurrency'
 
@@ -31,9 +31,9 @@ const OrderSummaryCard = memo(({
     showActions: _showActions = false
 }: OrderSummaryCardProps) => {
     const { formatCurrency } = useCurrency()
-    const statusInfo = getStatusInfo((order.status || 'PENDING') as any)
-    const paymentInfo = getPaymentInfo((order.payment_status || 'unpaid') as any)
-    const priorityInfo = getPriorityInfo((order.priority || 'normal') as any)
+    const statusInfo = getStatusInfo(order.status || 'PENDING')
+    const paymentInfo = getPaymentInfo((order.payment_status || 'UNPAID') as PaymentStatus)
+    const priorityInfo = getPriorityInfo((order.priority || 'normal') as Priority)
 
     return (
         <Card
@@ -115,7 +115,7 @@ const OrderSummaryCard = memo(({
                             <div className="font-bold text-lg">
                                 {formatCurrency(order.total_amount || 0)}
                             </div>
-                            <Badge className={paymentInfo.color} variant="outline" className="text-xs">
+                            <Badge className={`${paymentInfo.color} text-xs`} variant="outline">
                                 {paymentInfo.label}
                             </Badge>
                         </div>

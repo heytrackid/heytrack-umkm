@@ -3,18 +3,18 @@
  * Workaround for Supabase SSR client type inference issues
  */
 
-import type { Database } from '@/types/supabase-generated'
+import type { Database } from '@/types/database'
 
-type Tables = Database['public']['Tables']
-type TableName = keyof Tables
+type TablesMap = Database['public']['Tables']
+type TableName = keyof TablesMap
 
 /**
  * Type-safe insert helper that properly handles Supabase SSR client types
  */
 export function prepareInsert<T extends TableName>(
   _tableName: T,
-  data: Tables[T]['Insert']
-): Tables[T]['Insert'] {
+  data: TablesMap[T]['Insert']
+): TablesMap[T]['Insert'] {
   return data
 }
 
@@ -23,8 +23,8 @@ export function prepareInsert<T extends TableName>(
  */
 export function prepareUpdate<T extends TableName>(
   _tableName: T,
-  data: Tables[T]['Update']
-): Tables[T]['Update'] {
+  data: TablesMap[T]['Update']
+): TablesMap[T]['Update'] {
   return data
 }
 
@@ -34,8 +34,8 @@ export function prepareUpdate<T extends TableName>(
 export function castRow<T extends TableName>(
   _tableName: T,
   data: unknown
-): Tables[T]['Row'] {
-  return data as Tables[T]['Row']
+): TablesMap[T]['Row'] {
+  return data as TablesMap[T]['Row']
 }
 
 /**
@@ -44,6 +44,6 @@ export function castRow<T extends TableName>(
 export function castRows<T extends TableName>(
   _tableName: T,
   data: unknown
-): Array<Tables[T]['Row']> {
-  return data as Array<Tables[T]['Row']>
+): Array<TablesMap[T]['Row']> {
+  return data as Array<TablesMap[T]['Row']>
 }

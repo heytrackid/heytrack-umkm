@@ -4,7 +4,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
-import type { Tables } from '@/types/supabase-generated'
+import type { OrdersTable } from '@/types/database'
+
+type Order = OrdersTable
 
 interface SalesReportProps {
   dateRange: {
@@ -12,8 +14,6 @@ interface SalesReportProps {
     end: string
   }
 }
-
-type Order = Tables<'orders'>
 
 export default function SalesReport({ dateRange }: SalesReportProps) {
   const { formatCurrency } = useCurrency()

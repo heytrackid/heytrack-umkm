@@ -1,14 +1,14 @@
-import type { Database } from '@/types/supabase-generated'
+import type { NotificationsTable, NotificationsInsert, NotificationsUpdate } from '@/types/database'
 
 // Base types from generated schema
-export type Notification = Database['public']['Tables']['notifications']['Row']
-export type NotificationInsert = Database['public']['Tables']['notifications']['Insert']
-export type NotificationUpdate = Database['public']['Tables']['notifications']['Update']
+export type Notification = NotificationsTable
+export type NotificationInsert = NotificationsInsert
+export type NotificationUpdate = NotificationsUpdate
 
-// Notification types
-export type NotificationType = 'info' | 'warning' | 'error' | 'success' | 'alert'
-export type NotificationCategory = 'inventory' | 'orders' | 'production' | 'finance' | 'system'
-export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent'
+// Use database field types - these match the actual database schema
+export type NotificationType = Notification['type']
+export type NotificationCategory = Notification['category']
+export type NotificationPriority = Notification['priority']
 
 // Extended types for UI
 export interface NotificationWithDetails extends Notification {

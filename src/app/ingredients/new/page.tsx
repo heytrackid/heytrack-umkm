@@ -16,9 +16,9 @@ import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import { ArrowLeft, Package } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { IngredientsInsert } from '@/types/database'
 
-type IngredientInsert = Database['public']['Tables']['ingredients']['Insert']
+type IngredientInsert = IngredientsInsert
 
 export default function NewIngredientPage() {
   const router = useRouter()

@@ -16,10 +16,11 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { RecipesTable, IngredientsTable } from '@/types/database'
+import { uiLogger } from '@/lib/logger'
 
-type RecipeInsert = Database['public']['Tables']['recipes']['Insert']
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type RecipeInsert = RecipesTable
+type Ingredient = IngredientsTable
 
 interface RecipeFormPageProps {
     mode: 'create' | 'edit'

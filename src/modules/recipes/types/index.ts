@@ -1,14 +1,21 @@
 // Recipe types - use generated Supabase types as base
-import type { Database } from '@/types/supabase-generated'
+import type {
+  RecipesTable,
+  RecipesInsert,
+  RecipesUpdate,
+  RecipeIngredientsTable,
+  RecipeIngredientsInsert,
+  RecipeIngredientsUpdate
+} from '@/types/database'
 
 // Base types from generated schema
-export type Recipe = Database['public']['Tables']['recipes']['Row']
-export type RecipeInsert = Database['public']['Tables']['recipes']['Insert']
-export type RecipeUpdate = Database['public']['Tables']['recipes']['Update']
+export type Recipe = RecipesTable
+export type RecipeInsert = RecipesInsert
+export type RecipeUpdate = RecipesUpdate
 
-export type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
-export type RecipeIngredientInsert = Database['public']['Tables']['recipe_ingredients']['Insert']
-export type RecipeIngredientUpdate = Database['public']['Tables']['recipe_ingredients']['Update']
+export type RecipeIngredient = RecipeIngredientsTable
+export type RecipeIngredientInsert = RecipeIngredientsInsert
+export type RecipeIngredientUpdate = RecipeIngredientsUpdate
 
 // Extended types for UI
 export interface RecipeFormData extends Omit<Recipe, 'id' | 'created_at' | 'updated_at' | 'user_id'> {

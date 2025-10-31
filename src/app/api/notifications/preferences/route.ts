@@ -3,7 +3,6 @@ import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { NotificationPreferencesUpdateSchema } from '@/lib/validations/domains/notification-preferences'
 import { DEFAULT_NOTIFICATION_PREFERENCES } from '@/types/domain/notification-preferences'
-import { isRecord, assertNonNull, getErrorMessage } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'

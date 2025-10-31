@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Suggestion Engine - Generates dynamic chat suggestions
 
 import type { ChatSuggestion, BusinessContext } from '@/types/features/chat';

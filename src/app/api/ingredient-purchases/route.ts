@@ -2,8 +2,8 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage } from '@/lib/type-guards'
+import type { IngredientPurchasesInsert, FinancialRecordsInsert, InventoryStockLogsInsert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -148,12 +148,12 @@ export async function POST(request: NextRequest) {
         }
 
         // Type-safe ingredient data
-        type IngredientRow = Database['public']['Tables']['ingredients']['Row']
+        type IngredientRow = typeof ingredient
         const ingredientData = ingredient as IngredientRow
 
         // 1. Create financial transaction (expense)
         let financialTransactionId: string | null = null
-        const financialRecord: Database['public']['Tables']['financial_records']['Insert'] = {
+        const financialRecord: FinancialRecordsInsert = {
             user_id: user.id,
             type: 'EXPENSE',
             category: 'Pembelian Bahan Baku',
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Create purchase record
-        const purchaseRecord: Database['public']['Tables']['ingredient_purchases']['Insert'] = {
+        const purchaseRecord: IngredientPurchasesInsert = {
             user_id: user.id,
             ingredient_id: validatedData.ingredient_id,
             supplier: validatedData.supplier,
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
         // For now, use optimistic locking with current_stock check
         const newStock = (ingredientData.current_stock || 0) + qtyBeli
 
-        const stockUpdate: Database['public']['Tables']['ingredients']['Update'] = {
+        const stockUpdate = {
             current_stock: newStock
         }
 
@@ -243,7 +243,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 4. Create stock ledger entry
-        const stockLog: Database['public']['Tables']['inventory_stock_logs']['Insert'] = {
+        const stockLog: InventoryStockLogsInsert = {
             ingredient_id: validatedData.ingredient_id,
             quantity_before: ingredientData.current_stock || 0,
             quantity_after: newStock,

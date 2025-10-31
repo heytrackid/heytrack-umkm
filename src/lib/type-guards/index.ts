@@ -8,7 +8,7 @@
  * - Unknown/any types
  */
 
-import type { Database } from '@/types/supabase-generated'
+import type { RecipesTable, IngredientsTable, OrdersTable, CustomersTable } from '@/types/database'
 
 // ============================================================================
 // Basic Type Guards
@@ -42,10 +42,10 @@ export function isError(value: unknown): value is Error {
 // Database Type Guards
 // ============================================================================
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
-type Order = Database['public']['Tables']['orders']['Row']
-type Customer = Database['public']['Tables']['customers']['Row']
+type Recipe = RecipesTable
+type Ingredient = IngredientsTable
+type Order = OrdersTable
+type Customer = CustomersTable
 
 /**
  * Check if value is a valid Recipe
@@ -266,8 +266,7 @@ export function isIngredientArray(value: unknown): value is Ingredient[] {
 // Enum Type Guards
 // ============================================================================
 
-type OrderStatus = Database['public']['Enums']['order_status']
-type ProductionStatus = Database['public']['Enums']['production_status']
+import type { OrderStatus, ProductionStatus } from '@/types/database'
 
 /**
  * Check if value is a valid order status
@@ -275,7 +274,7 @@ type ProductionStatus = Database['public']['Enums']['production_status']
 export function isOrderStatus(value: unknown): value is OrderStatus {
   if (!isString(value)) return false
   
-  const validStatuses: OrderStatus[] = ['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DELIVERED']
+  const validStatuses: OrderStatus[] = ['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'CANCELLED', 'DELIVERED']
   return validStatuses.includes(value as OrderStatus)
 }
 

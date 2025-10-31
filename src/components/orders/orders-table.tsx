@@ -1,11 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import type { Database } from '@/types/supabase-generated'
-type Order = Database['public']['Tables']['orders']['Row']
-type OrderItem = Database['public']['Tables']['order_items']['Row']
-type OrderStatus = Database['public']['Enums']['order_status']
-type PaymentStatus = Database['public']['Enums']['payment_status']
+import type { OrdersTable, OrderItemsTable, OrderStatus, PaymentStatus } from '@/types/database'
+type Order = OrdersTable
+type OrderItem = OrderItemsTable
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -143,8 +141,8 @@ const OrdersTable = ({
     void setOrderToDelete(null)
   }
 
-  const getStatusBadge = (status: string) => {
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING
+  const getStatusBadge = (status: string | null) => {
+    const config = statusConfig[(status || 'PENDING') as keyof typeof statusConfig] || statusConfig.PENDING
     return (
       <Badge className={config.color}>
         {config.label}
@@ -152,8 +150,8 @@ const OrdersTable = ({
     )
   }
 
-  const getPaymentBadge = (status: string) => {
-    const config = paymentStatusConfig[status as keyof typeof paymentStatusConfig] || paymentStatusConfig.UNPAID
+  const getPaymentBadge = (status: string | null) => {
+    const config = paymentStatusConfig[(status || 'UNPAID') as keyof typeof paymentStatusConfig] || paymentStatusConfig.UNPAID
     return (
       <Badge variant="outline" className={config.color}>
         {config.label}
@@ -161,8 +159,8 @@ const OrdersTable = ({
     )
   }
 
-  const getPriorityBadge = (priority: string) => {
-    const config = priorityConfig[priority as keyof typeof priorityConfig] || priorityConfig.normal
+  const getPriorityBadge = (priority: string | null) => {
+    const config = priorityConfig[(priority || 'normal') as keyof typeof priorityConfig] || priorityConfig.normal
     return (
       <Badge variant="secondary" className={config.color}>
         {config.label}
@@ -170,11 +168,14 @@ const OrdersTable = ({
     )
   }
 
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  })
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-'
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    })
+  }
 
   // Using formatCurrency from useCurrency hook
 
@@ -295,7 +296,9 @@ const OrdersTable = ({
                   checked={isAllSelected}
                   onCheckedChange={handleSelectAll}
                   ref={(el) => {
-                    if (el) { el.indeterminate = isIndeterminate }
+                    if (el) { 
+                      (el as HTMLInputElement).indeterminate = isIndeterminate;
+                    }
                   }}
                 />
               </TableHead>
@@ -367,7 +370,7 @@ const OrdersTable = ({
 
                   <TableCell>
                     <div className="space-y-2">
-                      <div className="font-medium">{formatCurrency(order.total_amount)}</div>
+                      <div className="font-medium">{formatCurrency(order.total_amount || 0)}</div>
                       {getPaymentBadge(order.payment_status)}
                       {(order.paid_amount || 0) > 0 && order.payment_status !== 'PAID' && (
                         <div className="text-xs text-muted-foreground">

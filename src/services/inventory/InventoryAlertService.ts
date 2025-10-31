@@ -1,7 +1,7 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { Database, Json } from '@/types/supabase-generated'
+import type { Database, Json, InventoryAlertsInsert } from '@/types/database'
 
 /**
  * Service for managing inventory alerts
@@ -20,7 +20,7 @@ export class InventoryAlertService {
       // Get all ingredients with stock below reorder point
       const { data: ingredients, error } = await supabase
         .from('ingredients')
-        .select('*')
+        .select()
         .eq('user_id', userId)
         .eq('is_active', true)
 
@@ -32,13 +32,12 @@ export class InventoryAlertService {
         return
       }
 
-      type InventoryAlertInsert = Database['public']['Tables']['inventory_alerts']['Insert']
       interface PendingInventoryAlert {
         ingredient_id: string
-        alert_type: InventoryAlertInsert['alert_type']
-        severity: InventoryAlertInsert['severity']
-        message: InventoryAlertInsert['message']
-        metadata: InventoryAlertInsert['metadata']
+        alert_type: string
+        severity: string
+        message: string
+        metadata: InventoryAlertsInsert['metadata']
       }
 
       const alerts: PendingInventoryAlert[] = []
@@ -179,7 +178,7 @@ export class InventoryAlertService {
       
       const { data: ingredient, error } = await supabase
         .from('ingredients')
-        .select('*')
+        .select()
         .eq('id', ingredientId)
         .eq('user_id', userId)
         .single()

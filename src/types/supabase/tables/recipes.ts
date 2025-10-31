@@ -6,17 +6,24 @@
  * Always use generated types from @/types/supabase-generated
  */
 
-import type { Database } from '@/types/supabase-generated'
+import type { 
+  RecipesTable as RecipesTableType,
+  RecipesInsert,
+  RecipesUpdate,
+  RecipeIngredientsTable as RecipeIngredientsTableType,
+  RecipeIngredientsInsert,
+  RecipeIngredientsUpdate
+} from '@/types/database'
 
 // Re-export from generated types
-export type RecipesTable = Database['public']['Tables']['recipes']
-export type RecipeIngredientsTable = Database['public']['Tables']['recipe_ingredients']
+export type RecipesTable = RecipesTableType
+export type RecipeIngredientsTable = RecipeIngredientsTableType
 
 // Convenience type aliases
-export type Recipe = RecipesTable['Row']
-export type RecipeInsert = RecipesTable['Insert']
-export type RecipeUpdate = RecipesTable['Update']
+export type Recipe = RecipesTable
+export type RecipeInsert = RecipesInsert
+export type RecipeUpdate = RecipesUpdate
 
-export type RecipeIngredient = RecipeIngredientsTable['Row']
-export type RecipeIngredientInsert = RecipeIngredientsTable['Insert']
-export type RecipeIngredientUpdate = RecipeIngredientsTable['Update']
+export type RecipeIngredient = RecipeIngredientsTable
+export type RecipeIngredientInsert = RecipeIngredientsInsert
+export type RecipeIngredientUpdate = RecipeIngredientsUpdate

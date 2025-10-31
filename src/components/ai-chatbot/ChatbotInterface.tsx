@@ -6,13 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import type { ChatMessage, ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
+import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 import DataVisualization from './DataVisualization';
 
 import { apiLogger } from '@/lib/logger'
 
 // Extended message type for UI with additional properties
-interface ExtendedChatMessage extends ChatMessage {
+interface ExtendedChatMessage {
+  id: string
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  timestamp: Date
   actions?: ChatAction[]
   data?: Record<string, unknown>
 }
@@ -124,9 +128,15 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
         // Update session context
         if (result.session_id) {
           setContext({
+            userId: userId,
             sessionId: result.session_id,
-            conversationHistory: messages,
-            currentPage: 'chatbot'
+            conversationHistory: messages
+              .filter(m => m.role !== 'system')
+              .map(({ role, content, timestamp }) => ({ 
+                role: role as 'user' | 'assistant', 
+                content, 
+                timestamp 
+              })),
           });
         }
       } else {
@@ -185,17 +195,17 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
 
         const systemMessage: ExtendedChatMessage = {
           id: `system_${Date.now()}`,
-          role: 'system' as const,
+          role: 'system',
           content,
           timestamp: new Date(),
           data: {
             ...result,
             actionType: action.type,
-            aiEnhanced: !!(result.aiRecommendations || result.businessInsights)
-          },
-          metadata: {
-            actionType: action.type,
-            aiEnhanced: !!(result.aiRecommendations || result.businessInsights)
+            aiEnhanced: !!(result.aiRecommendations || result.businessInsights),
+            metadata: {
+              actionType: action.type,
+              aiEnhanced: !!(result.aiRecommendations || result.businessInsights)
+            }
           }
         };
 

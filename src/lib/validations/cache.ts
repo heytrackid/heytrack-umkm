@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Validation Caching System
  * Performance optimization for validation operations

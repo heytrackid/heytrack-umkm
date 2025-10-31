@@ -3,7 +3,6 @@ import { triggerWorkflow } from '@/lib/automation-engine'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-import { isOrder, isOrderStatus, isRecord, getErrorMessage } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'

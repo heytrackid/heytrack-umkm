@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
-import type { Database } from '@/types/supabase-generated'
+import type { RecipeIngredientsInsert } from '@/types/database'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
@@ -122,7 +122,7 @@ export async function PUT(
           notes?: string
         }
 
-        const ingredientsToInsert: Array<Database['public']['Tables']['recipe_ingredients']['Insert']> = 
+        const ingredientsToInsert: Array<RecipeIngredientsInsert> = 
           recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
             recipe_id: id,
             ingredient_id: ingredient.ingredient_id || ingredient.bahan_id || '',

@@ -4,18 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ShoppingCart } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { useCurrency } from '@/hooks/useCurrency'
-import { apiLogger } from '@/lib/logger'
 import { useRouter } from 'next/navigation'
-
-interface RecentOrder {
-  id: string
-  customer: string
-  amount: number | null
-  status: string | null
-  time: string | null
-}
 
 interface RecentOrdersSectionProps {
   orders?: Array<{

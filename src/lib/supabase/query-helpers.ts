@@ -6,10 +6,10 @@
  */
 
 import type { RecipeWithIngredients, RecipeIngredientWithDetails } from '@/types/query-results'
-import type { Database } from '@/types/supabase-generated'
+import type { Database, RecipesTable, IngredientsTable } from '@/types/database'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type Recipe = RecipesTable
+type Ingredient = IngredientsTable
 
 /**
  * Extract first element from Supabase join result
@@ -49,9 +49,9 @@ export function transformRecipeWithIngredients(
       id: string
       recipe_id: string
       ingredient_id: string
-      qty_per_batch: number
+      quantity: number
       unit: string
-      notes?: string | null
+      user_id: string
       ingredient?: Ingredient[] | null
     }>
   }
@@ -62,9 +62,9 @@ export function transformRecipeWithIngredients(
       id: ri.id,
       recipe_id: ri.recipe_id,
       ingredient_id: ri.ingredient_id,
-      qty_per_batch: ri.qty_per_batch,
+      quantity: ri.quantity,
       unit: ri.unit,
-      notes: ri.notes,
+      user_id: ri.user_id,
       ingredient: extractFirst(ri.ingredient) ?? {
         id: ri.ingredient_id,
         name: 'Unknown',
@@ -104,7 +104,7 @@ export function calculateRecipeCOGS(recipe: RecipeWithIngredients): number {
   for (const ri of recipe.recipe_ingredients) {
     if (ri.ingredient) {
       const wac = ri.ingredient.weighted_average_cost ?? 0
-      const quantity = ri.qty_per_batch ?? 0
+      const quantity = ri.quantity ?? 0
       totalCost += wac * quantity
     }
   }

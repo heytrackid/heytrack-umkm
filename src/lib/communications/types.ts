@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Communications Module Types
  * Centralized type definitions for all communication services

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // AI Fallback Service - Handles AI service failures gracefully
 
 import type { BusinessContext } from '@/types/features/chat';

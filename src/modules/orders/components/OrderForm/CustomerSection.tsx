@@ -10,9 +10,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertCircle } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { CustomersTable } from '@/types/database'
 
-type Customer = Database['public']['Tables']['customers']['Row']
+type Customer = CustomersTable
 
 interface CustomerSectionProps {
     formData: {

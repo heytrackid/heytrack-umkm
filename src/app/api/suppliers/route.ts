@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { Database } from '@/types/supabase-generated'
+import type { SuppliersInsert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
 
     const validatedData = validation.data
 
-    const insertPayload: Database['public']['Tables']['suppliers']['Insert'] = {
+    const insertPayload: SuppliersInsert = {
       ...validatedData,
       user_id: user.id
     }

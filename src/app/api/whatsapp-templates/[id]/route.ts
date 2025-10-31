@@ -6,12 +6,12 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
+import { WhatsappTemplatesUpdate } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type WhatsAppTemplateUpdate = Database['public']['Tables']['whatsapp_templates']['Update']
+type WhatsAppTemplateUpdate = WhatsappTemplatesUpdate
 
 type RouteContext = {
   params: Promise<{ id: string }>

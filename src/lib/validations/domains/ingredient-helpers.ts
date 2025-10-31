@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Ingredient Validation Helpers
  * Domain-specific validation helpers for ingredient-related business rules

@@ -6,19 +6,14 @@ import { OrderInsertSchema } from '@/lib/validations/domains/order'
 export const runtime = 'nodejs'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { createPaginationMeta } from '@/lib/validations/pagination'
-import type { Database } from '@/types/supabase-generated'
+import type { OrderStatus, FinancialRecordsInsert, FinancialRecordsUpdate, OrdersInsert, OrdersTable } from '@/types/database'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger, logError } from '@/lib/logger'
 import { withSecurity, SecurityPresets } from '@/utils/security'
-import { getErrorMessage } from '@/lib/type-guards'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-
-type FinancialRecordInsert = Database['public']['Tables']['financial_records']['Insert']
-type FinancialRecordUpdate = Database['public']['Tables']['financial_records']['Update']
-type OrderInsert = Database['public']['Tables']['orders']['Insert']
-type OrderItemInsert = Database['public']['Tables']['order_items']['Insert']
-
-type OrdersTable = Database['public']['Tables']['orders']
+type FinancialRecordInsert = FinancialRecordsInsert
+type FinancialRecordUpdate = FinancialRecordsUpdate
+type OrderInsert = OrdersInsert
 
 // GET /api/orders - Get all orders
 async function GET(request: NextRequest) {
@@ -58,8 +53,7 @@ async function GET(request: NextRequest) {
     if (!queryValidation.success) {
       logError(apiLogger, new Error('Invalid query parameters'), 'GET /api/orders - Validation failed', {
         userId: user.id,
-        url: request.url,
-        validationErrors: queryValidation.error.issues
+        url: request.url
       })
       return NextResponse.json(
         { error: 'Invalid query parameters', details: queryValidation.error.issues },
@@ -81,7 +75,7 @@ async function GET(request: NextRequest) {
     }
 
     if (status) {
-      countQuery = countQuery.eq('status', status as Database['public']['Enums']['order_status'])
+      countQuery = countQuery.eq('status', status as OrderStatus)
     }
 
     const { count, error: countError } = await countQuery
@@ -111,7 +105,7 @@ async function GET(request: NextRequest) {
     // Add status filter
     if (status) {
       // Type assertion for status - validated by database enum
-      query = query.eq('status', status as Database['public']['Enums']['order_status'])
+      query = query.eq('status', status as OrderStatus)
     }
 
     // Add sorting
@@ -153,7 +147,7 @@ async function GET(request: NextRequest) {
       }
     }
     
-    type OrderWithItems = OrdersTable['Row'] & { 
+    type OrderWithItems = OrdersTable & { 
       order_items?: OrderItemWithRecipe[]
     }
     
@@ -214,8 +208,7 @@ async function POST(request: NextRequest) {
     if (!validation.success) {
       logError(apiLogger, new Error('Invalid request data'), 'POST /api/orders - Validation failed', {
         userId: user.id,
-        url: request.url,
-        validationErrors: validation.error.issues
+        url: request.url
       })
       return NextResponse.json(
         {
@@ -329,14 +322,14 @@ async function POST(request: NextRequest) {
 
     // If order items provided, create them
     if (validatedData.items && validatedData.items.length > 0) {
-      const orderItems: OrderItemInsert[] = validatedData.items.map((item) => ({
-        order_id: createdOrder.id,
+      const orderItems = validatedData.items.map((item) => ({
         recipe_id: item.recipe_id,
-        product_name: item.product_name,
+        product_name: item.product_name ?? null,
         quantity: item.quantity,
         unit_price: item.unit_price,
         total_price: item.total_price || (item.quantity * item.unit_price),
-        special_requests: item.special_requests,
+        special_requests: item.special_requests ?? null,
+        order_id: createdOrder.id,
         user_id: user.id
       }))
 

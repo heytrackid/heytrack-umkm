@@ -2,9 +2,9 @@
 
 import { useMemo } from 'react'
 import { useIngredients } from '@/hooks'
-import type { Database } from '@/types/supabase-generated'
+import type { IngredientsTable } from '@/types/database'
 
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type Ingredient = IngredientsTable
 
 export interface ReorderSuggestion {
   ingredient_id: string

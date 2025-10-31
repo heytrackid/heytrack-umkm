@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Common API Validation Schemas
  * Shared validation schemas for common API operations

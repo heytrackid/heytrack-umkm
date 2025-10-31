@@ -1,7 +1,3 @@
-/**
- * Admin Dashboard Component
- * Comprehensive admin and performance monitoring interface
- */
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -12,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
+import { useSettings } from '@/contexts/settings-context'
 import {
     Activity,
     Database,
@@ -19,7 +16,6 @@ import {
     TrendingUp,
     AlertTriangle,
     CheckCircle,
-    Clock,
     Server,
     Zap,
     HardDrive,
@@ -28,7 +24,6 @@ import {
     RefreshCw,
     Download
 } from 'lucide-react'
-import { formatCurrency } from '@/lib/currency'
 import { format } from 'date-fns'
 
 interface AdminDashboardProps {
@@ -81,13 +76,14 @@ interface ErrorLog {
     stack_trace: string | null
 }
 
-export default function AdminDashboard({ userId }: AdminDashboardProps) {
+export default function AdminDashboard(_props: AdminDashboardProps) {
     const [metrics, setMetrics] = useState<SystemMetrics | null>(null)
     const [performanceLogs, setPerformanceLogs] = useState<PerformanceLog[]>([])
     const [errorLogs, setErrorLogs] = useState<ErrorLog[]>([])
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
     const { toast } = useToast()
+    const { formatCurrency } = useSettings()
 
     useEffect(() => {
         void loadMetrics()

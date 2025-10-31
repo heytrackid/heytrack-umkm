@@ -1,10 +1,10 @@
 // Ingredient Purchases Types
 // Type definitions for ingredient purchase management
 
-import type { Database } from '@/types/supabase-generated'
+import type { IngredientPurchasesTable, IngredientsTable } from '@/types/database'
 
-type IngredientPurchaseBase = Database['public']['Tables']['ingredient_purchases']['Row']
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type IngredientPurchaseBase = IngredientPurchasesTable
+type Ingredient = IngredientsTable
 
 // Re-export base type with relations
 export interface IngredientPurchase extends IngredientPurchaseBase {

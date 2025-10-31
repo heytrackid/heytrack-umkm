@@ -9,9 +9,9 @@ import { EnhancedIngredientForm } from './EnhancedIngredientForm'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2 } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { IngredientsTable } from '@/types/database'
 
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type Ingredient = IngredientsTable
 
 interface IngredientFormDialogProps {
     open: boolean
@@ -34,7 +34,7 @@ export function IngredientFormDialog({
         resolver: zodResolver(IngredientFormSchema),
         defaultValues: ingredient ? {
             name: ingredient.name,
-            unit: ingredient.unit,
+            unit: ingredient.unit as "g" | "l" | "kg" | "ml" | "pcs" | "dozen",
             price_per_unit: ingredient.price_per_unit,
             current_stock: ingredient.current_stock ?? 0,
             min_stock: ingredient.min_stock ?? 0,
@@ -98,7 +98,14 @@ export function IngredientFormDialog({
                     <EnhancedIngredientForm
                         form={form}
                         mode={mode}
-                        initialData={ingredient}
+                        initialData={ingredient ? {
+                            name: ingredient.name ?? '',
+                            unit: ingredient.unit ?? 'kg',
+                            price_per_unit: ingredient.price_per_unit ?? 0,
+                            current_stock: ingredient.current_stock ?? 0,
+                            min_stock: ingredient.min_stock ?? 0,
+                            description: ingredient.description ?? '',
+                        } : undefined}
                     />
 
                     <DialogFooter className="gap-2">

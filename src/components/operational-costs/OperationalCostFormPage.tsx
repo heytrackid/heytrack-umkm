@@ -19,10 +19,10 @@ import {
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ArrowLeft, Save } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { OperationalCostsTable, OperationalCostsInsert } from '@/types/database'
 
-type OperationalCost = Database['public']['Tables']['operational_costs']['Row']
-type OperationalCostInsert = Database['public']['Tables']['operational_costs']['Insert']
+type OperationalCost = OperationalCostsTable
+type OperationalCostInsert = OperationalCostsInsert
 
 interface OperationalCostFormPageProps {
     mode: 'create' | 'edit'

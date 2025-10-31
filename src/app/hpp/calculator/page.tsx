@@ -15,11 +15,8 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { useRecipes } from '@/hooks/useRecipes'
 import { dbLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
 import { PageHeader, SharedStatsCards } from '@/components/shared'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
-
-type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
 
 const calculatorBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -28,7 +25,13 @@ const calculatorBreadcrumbs = [
 ]
 
 // Extended type for calculator display
-interface HppCalculationExtended extends HppCalculation {
+interface HppCalculationExtended {
+  id: string
+  recipe_id: string
+  material_cost: number
+  labor_cost: number
+  overhead_cost: number
+  total_cost: number
   cost_per_unit: number
   wac_adjustment: number
   production_quantity: number
@@ -40,6 +43,8 @@ interface HppCalculationExtended extends HppCalculation {
     unit_price: number
     total_cost: number
   }>
+  created_at: string
+  user_id: string
 }
 
 export default function HppCalculatorPage() {
@@ -191,7 +196,7 @@ export default function HppCalculatorPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">
-                  {formatCurrency(calculation.total_hpp)}
+                  {formatCurrency(calculation.total_cost)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   untuk {calculation.production_quantity} porsi
@@ -265,7 +270,7 @@ export default function HppCalculatorPage() {
                 <Separator />
                 <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg">
                   <span className="font-bold text-lg">Total HPP</span>
-                  <span className="font-bold text-lg">{formatCurrency(calculation.total_hpp)}</span>
+                  <span className="font-bold text-lg">{formatCurrency(calculation.total_cost)}</span>
                 </div>
               </div>
 

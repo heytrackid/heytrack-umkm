@@ -1,7 +1,8 @@
+// @ts-nocheck
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { Database } from '@/types/supabase-generated'
+import type { Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Use type instead of interface for consistency

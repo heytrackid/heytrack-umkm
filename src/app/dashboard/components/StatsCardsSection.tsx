@@ -1,34 +1,7 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useCurrency } from '@/hooks/useCurrency'
-import { apiLogger } from '@/lib/logger'
-
-interface DashboardStats {
-  revenue: {
-    today: number
-    total: number
-    growth: string
-    trend: 'up' | 'down'
-  }
-  orders: {
-    active: number
-    total: number
-    today: number
-  }
-  customers: {
-    total: number
-    vip: number
-    regular: number
-  }
-  inventory: {
-    total: number
-    lowStock: number
-    categories: number
-  }
-}
 
 interface StatsCardsSectionProps {
   stats?: {

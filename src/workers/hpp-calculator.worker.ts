@@ -3,10 +3,10 @@
  * Offloads heavy calculations from main thread
  */
 
-import type { Database } from '@/types/supabase-generated'
+import type { RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 
-type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type RecipeIngredient = RecipeIngredientsTable
+type Ingredient = IngredientsTable
 
 /**
  * Worker input type based on generated types

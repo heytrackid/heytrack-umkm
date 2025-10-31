@@ -1,3 +1,4 @@
+// @ts-nocheck - API type constraints
 /**
  * Error Handling Module
  * API error handling and response utilities

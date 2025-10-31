@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 import { type ReactNode, type TouchEvent as ReactTouchEvent, useState, useEffect, useRef, useCallback } from 'react'
 

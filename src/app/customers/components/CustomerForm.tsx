@@ -23,9 +23,9 @@ import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { Loader2, Save, X, User, Phone, Mail, MapPin, Tag, Percent, FileText } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { CustomersTable } from '@/types/database'
 
-type Customer = Database['public']['Tables']['customers']['Row']
+type Customer = CustomersTable
 
 // Form validation schema (without user_id - will be added on submit)
 const CustomerFormSchema = z.object({

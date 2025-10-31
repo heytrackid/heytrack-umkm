@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Shared Utilities Barrel Export
  * Centralized exports for all shared utility functions

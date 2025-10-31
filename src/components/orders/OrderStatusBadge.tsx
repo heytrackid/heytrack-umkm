@@ -11,11 +11,33 @@ import {
     Truck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { OrderStatus as DatabaseOrderStatus } from '@/types/database'
 
+// Map the database enum values to component-friendly values
 type OrderStatus = 'pending' | 'confirmed' | 'in_production' | 'completed' | 'cancelled' | 'delivered'
 
+// Map from UI values to database values
+const uiToDbStatusMap: Record<OrderStatus, DatabaseOrderStatus> = {
+    'pending': 'PENDING',
+    'confirmed': 'CONFIRMED',
+    'in_production': 'IN_PROGRESS',
+    'completed': 'READY',
+    'cancelled': 'CANCELLED',
+    'delivered': 'DELIVERED'
+} as const
+
+// Map from database values to UI values
+const dbToUiStatusMap: Record<DatabaseOrderStatus, OrderStatus> = {
+    'PENDING': 'pending',
+    'CONFIRMED': 'confirmed',
+    'IN_PROGRESS': 'in_production',
+    'READY': 'completed',
+    'DELIVERED': 'delivered',
+    'CANCELLED': 'cancelled'
+} as const
+
 interface OrderStatusBadgeProps {
-    status: OrderStatus
+    status: OrderStatus | DatabaseOrderStatus // Accept both UI and DB formats
     showNextAction?: boolean
     onNextAction?: () => void
     compact?: boolean
@@ -79,7 +101,17 @@ export const OrderStatusBadge = ({
     compact = false,
     className
 }: OrderStatusBadgeProps) => {
-    const config = statusConfig[status]
+    // Normalize the status to UI format
+    let normalizedStatus: OrderStatus;
+    if (typeof status === 'string' && Object.values(uiToDbStatusMap).includes(status as DatabaseOrderStatus)) {
+        // If it's a database enum value, convert to UI value
+        normalizedStatus = dbToUiStatusMap[status as DatabaseOrderStatus];
+    } else {
+        // Otherwise assume it's already a UI value
+        normalizedStatus = status as OrderStatus;
+    }
+    
+    const config = statusConfig[normalizedStatus];
     const Icon = config.icon
 
     if (compact) {
@@ -90,7 +122,7 @@ export const OrderStatusBadge = ({
             >
                 <Icon className={cn(
                     'w-3 h-3 mr-1',
-                    config.animate && 'animate-spin'
+                    (config as any).animate && 'animate-spin'
                 )} />
                 {config.label}
             </Badge>
@@ -106,7 +138,7 @@ export const OrderStatusBadge = ({
                 >
                     <Icon className={cn(
                         'w-4 h-4 mr-2',
-                        config.animate && 'animate-spin'
+                        (config as any).animate && 'animate-spin'
                     )} />
                     {config.label}
                 </Badge>
@@ -134,11 +166,21 @@ export const OrderStatusBadge = ({
 
 // Progress indicator component
 interface OrderProgressProps {
-    currentStatus: OrderStatus
+    currentStatus: OrderStatus | DatabaseOrderStatus
     className?: string
 }
 
 export const OrderProgress = ({ currentStatus, className }: OrderProgressProps) => {
+    // Normalize the status to UI format
+    let normalizedStatus: OrderStatus;
+    if (typeof currentStatus === 'string' && Object.values(uiToDbStatusMap).includes(currentStatus as DatabaseOrderStatus)) {
+        // If it's a database enum value, convert to UI value
+        normalizedStatus = dbToUiStatusMap[currentStatus as DatabaseOrderStatus];
+    } else {
+        // Otherwise assume it's already a UI value
+        normalizedStatus = currentStatus as OrderStatus;
+    }
+
     const steps = [
         { status: 'pending', label: 'Order' },
         { status: 'confirmed', label: 'Konfirmasi' },
@@ -146,8 +188,8 @@ export const OrderProgress = ({ currentStatus, className }: OrderProgressProps) 
         { status: 'completed', label: 'Selesai' }
     ]
 
-    const currentIndex = steps.findIndex(s => s.status === currentStatus)
-    const isCancelled = currentStatus === 'cancelled'
+    const currentIndex = steps.findIndex(s => s.status === normalizedStatus)
+    const isCancelled = normalizedStatus === 'cancelled'
 
     if (isCancelled) {
         return (
@@ -202,7 +244,23 @@ export const OrderProgress = ({ currentStatus, className }: OrderProgressProps) 
 }
 
 // Status change confirmation dialog helper
-export function getStatusChangeConfirmation(fromStatus: OrderStatus, toStatus: OrderStatus) {
+export function getStatusChangeConfirmation(fromStatus: OrderStatus | DatabaseOrderStatus, toStatus: OrderStatus | DatabaseOrderStatus) {
+    // Normalize the statuses to UI format
+    let normalizedFromStatus: OrderStatus;
+    let normalizedToStatus: OrderStatus;
+
+    if (typeof fromStatus === 'string' && Object.values(uiToDbStatusMap).includes(fromStatus as DatabaseOrderStatus)) {
+        normalizedFromStatus = dbToUiStatusMap[fromStatus as DatabaseOrderStatus];
+    } else {
+        normalizedFromStatus = fromStatus as OrderStatus;
+    }
+
+    if (typeof toStatus === 'string' && Object.values(uiToDbStatusMap).includes(toStatus as DatabaseOrderStatus)) {
+        normalizedToStatus = dbToUiStatusMap[toStatus as DatabaseOrderStatus];
+    } else {
+        normalizedToStatus = toStatus as OrderStatus;
+    }
+
     const confirmations: Record<string, { title: string; description: string; action: string }> = {
         'pending-confirmed': {
             title: 'Konfirmasi Order?',
@@ -226,7 +284,7 @@ export function getStatusChangeConfirmation(fromStatus: OrderStatus, toStatus: O
         }
     }
 
-    return confirmations[`${fromStatus}-${toStatus}`] || {
+    return confirmations[`${normalizedFromStatus}-${normalizedToStatus}`] || {
         title: 'Ubah Status?',
         description: 'Apakah Anda yakin ingin mengubah status order ini?',
         action: 'Ya, Ubah Status'

@@ -30,19 +30,17 @@ import {
   Trash2,
   Users
 } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
 import { useMemo, useState } from 'react'
-
-type CustomersTable = Database['public']['Tables']['customers']
+import type { CustomersTable } from '@/types/database'
 
 interface CustomersTableProps {
-  customers: Array<CustomersTable['Row']>
+  customers: Array<CustomersTable>
   selectedItems: string[]
   onSelectItem: (itemId: string) => void
   onSelectAll: () => void
-  onView: (customer: CustomersTable['Row']) => void
-  onEdit: (customer: CustomersTable['Row']) => void
-  onDelete: (customer: CustomersTable['Row']) => void
+  onView: (customer: CustomersTable) => void
+  onEdit: (customer: CustomersTable) => void
+  onDelete: (customer: CustomersTable) => void
   onAddNew: () => void
   formatCurrency: (amount: number) => string
   isMobile: boolean

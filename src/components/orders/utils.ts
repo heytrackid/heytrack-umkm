@@ -20,7 +20,8 @@ export const paymentStatuses: Record<PaymentStatus, StatusInfo> = {
 export const priorities: Record<Priority, StatusInfo> = {
   'low': { label: 'Rendah', color: 'bg-gray-100 text-gray-800' },
   'normal': { label: 'Normal', color: 'bg-blue-100 text-blue-800' },
-  'high': { label: 'Tinggi', color: 'bg-red-100 text-red-800' }
+  'high': { label: 'Tinggi', color: 'bg-red-100 text-red-800' },
+  'urgent': { label: 'Mendesak', color: 'bg-purple-100 text-purple-800' }
 }
 
 // Helper functions
@@ -48,8 +49,8 @@ export function generateOrderNo(): string {
 }
 
 // Calculate order total
-export function calculateOrderTotal(orderItems: Array<{quantity: number; price: number}>): number {
-  return orderItems.reduce((total, item) => total + (item.quantity * item.price), 0)
+export function calculateOrderTotal(orderItems: Array<{quantity: number; unit_price: number}>): number {
+  return orderItems.reduce((total, item) => total + (item.quantity * item.unit_price), 0)
 }
 
 // Format currency

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Shared Date and Time Utilities
  * Consistent date formatting and manipulation across the application

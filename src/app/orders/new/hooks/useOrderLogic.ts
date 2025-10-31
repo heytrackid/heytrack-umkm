@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { FormEvent } from 'react'
-import type { Database } from '@/types/supabase-generated'
+import type { RecipesTable, CustomersTable } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isArrayOf, isRecipe, isCustomer } from '@/lib/type-guards'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type Customer = Database['public']['Tables']['customers']['Row']
+type Recipe = RecipesTable
+type Customer = CustomersTable
+
 export interface OrderItem {
   id?: string
   recipe_id: string

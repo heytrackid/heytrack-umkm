@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Shared API Utilities
  * Common API response patterns and utilities

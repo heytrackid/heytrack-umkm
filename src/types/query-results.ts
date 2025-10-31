@@ -5,16 +5,24 @@
  * These interfaces define the exact structure of query results with relations.
  */
 
-import type { Database } from '@/types/supabase-generated'
+import type { 
+  OrdersTable, 
+  OrderItemsTable, 
+  RecipesTable, 
+  RecipeIngredientsTable, 
+  IngredientsTable, 
+  CustomersTable, 
+  FinancialRecordsTable 
+} from '@/types/database'
 
-// Base table types
-type Order = Database['public']['Tables']['orders']['Row']
-type OrderItem = Database['public']['Tables']['order_items']['Row']
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
-type Customer = Database['public']['Tables']['customers']['Row']
-type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
+// Base table types - use imported types
+type Order = OrdersTable
+type OrderItem = OrderItemsTable
+type Recipe = RecipesTable
+type RecipeIngredient = RecipeIngredientsTable
+type Ingredient = IngredientsTable
+type Customer = CustomersTable
+type FinancialRecord = FinancialRecordsTable
 
 // Query result types with relations
 

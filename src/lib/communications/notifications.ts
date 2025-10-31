@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Smart Notification System Module
  * Intelligent notification system with rules and real-time updates

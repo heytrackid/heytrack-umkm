@@ -51,15 +51,19 @@ export async function GET(
     }
 
     // ✅ V2: Safe extraction of supplier data
+    let responseExpense: typeof expense & { supplier_name?: string } = expense;
     if ('supplier' in expense) {
       const supplier = extractFirst(expense.supplier)
       if (supplier && isRecord(supplier) && 'name' in supplier) {
         // Supplier data safely extracted
-        (expense as any).supplier_name = safeString(supplier.name, 'Unknown')
+        responseExpense = { 
+          ...expense, 
+          supplier_name: safeString(supplier.name, 'Unknown')
+        };
       }
     }
 
-    return NextResponse.json(expense);
+    return NextResponse.json(responseExpense);
   } catch (error: unknown) {
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }

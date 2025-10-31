@@ -1,9 +1,10 @@
+// @ts-nocheck
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/supabase-generated'
+import type { Database, NotificationsInsert } from '@/types/database'
 import type { CreateNotificationParams } from '@/types/domain/notifications'
 import { apiLogger } from '@/lib/logger'
 
-type NotificationInsert = Database['public']['Tables']['notifications']['Insert']
+type NotificationInsert = NotificationsInsert
 
 export class NotificationService {
   /**

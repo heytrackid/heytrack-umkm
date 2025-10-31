@@ -1,14 +1,17 @@
-import type { Tables, Database } from '@/types/supabase-generated'
+import type { OrdersTable, OrderItemsTable, CustomersTable, OrderStatus, PaymentMethod } from '@/types/database'
 // Orders module types and interfaces with multi-currency support
 // Use generated types from Supabase as base
-export type Order = Tables<'orders'>
-export type OrderItem = Tables<'order_items'>
-export type OrderStatusDb = Database['public']['Enums']['order_status']
+export type Order = OrdersTable
+export type OrderItem = OrderItemsTable
+
+// Re-export enums for external use
+export type { OrderStatus, PaymentMethod }
 
 // Extended Order type with relations for UI
+
 export interface OrderWithRelations extends Order {
   items: OrderItem[]
-  customer?: Tables<'customers'>
+  customer?: CustomersTable
   payments?: OrderPayment[]
 }
 
@@ -26,16 +29,17 @@ export interface OrderPayment {
 }
 
 // Import types from config to ensure consistency
-export type OrderStatus = 
-  | 'draft'
-  | 'confirmed'
-  | 'payment_pending'
-  | 'paid'
-  | 'in_production'
-  | 'ready'
-  | 'delivered'
-  | 'cancelled'
-  | 'refunded'
+// Note: Using the Supabase enum type instead of locally defined ones
+// export type OrderStatus = 
+//   | 'draft'
+//   | 'confirmed'
+//   | 'payment_pending'
+//   | 'paid'
+//   | 'in_production'
+//   | 'ready'
+//   | 'delivered'
+//   | 'cancelled'
+//   | 'refunded'
 
 export type OrderPriority = 
   | 'low'
@@ -43,14 +47,14 @@ export type OrderPriority =
   | 'high'
   | 'urgent'
 
-export type PaymentMethod = 
-  | 'cash'
-  | 'bank_transfer'
-  | 'card'
-  | 'qris'
-  | 'ewallet'
-  | 'check'
-  | 'credit'
+// export type PaymentMethod = 
+//   | 'cash'
+//   | 'bank_transfer'
+//   | 'card'
+//   | 'qris'
+//   | 'ewallet'
+//   | 'check'
+//   | 'credit'
 
 // Order creation and update interfaces
 export interface CreateOrderData {

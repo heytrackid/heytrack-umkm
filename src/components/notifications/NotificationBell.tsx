@@ -67,9 +67,9 @@ export function NotificationBell() {
 
                         if (shouldPlaySound) {
                             if (latestNotif.priority === 'urgent') {
-                                playUrgentNotificationSound(preferences.sound_volume)
+                                playUrgentNotificationSound(preferences.sound_volume !== null ? preferences.sound_volume : undefined)
                             } else {
-                                playNotificationSound(preferences.sound_volume)
+                                playNotificationSound(preferences.sound_volume !== null ? preferences.sound_volume : undefined)
                             }
                         }
                     }
@@ -189,7 +189,6 @@ export function NotificationBell() {
                     onMarkAllRead={handleMarkAllRead}
                     onNotificationUpdate={handleNotificationUpdate}
                     onRefresh={fetchNotifications}
-                    preferences={preferences}
                 />
             </PopoverContent>
         </Popover>

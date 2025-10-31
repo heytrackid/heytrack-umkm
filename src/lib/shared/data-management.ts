@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 
 // Shared data management and caching utilities

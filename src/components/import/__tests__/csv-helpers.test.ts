@@ -1,4 +1,5 @@
-import { parseCSV, parseCSVLine } from '../csv-helpers'
+import { parseCSV } from '../csv-helpers'
+import { describe, it, expect } from 'vitest'
 
 describe('CSV Helpers', () => {
   describe('parseCSV', () => {

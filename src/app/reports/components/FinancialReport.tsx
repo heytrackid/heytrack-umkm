@@ -4,7 +4,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
-import type { Tables } from '@/types/supabase-generated'
+import type { FinancialRecordsTable } from '@/types/database'
+
+type FinancialRecord = FinancialRecordsTable
 
 interface FinancialReportProps {
   dateRange: {
@@ -12,8 +14,6 @@ interface FinancialReportProps {
     end: string
   }
 }
-
-type FinancialRecord = Tables<'financial_records'>
 
 export default function FinancialReport({ dateRange }: FinancialReportProps) {
   const { formatCurrency } = useCurrency()

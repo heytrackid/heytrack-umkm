@@ -2,13 +2,11 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
-import type { Database } from '@/types/supabase-generated'
+import type { SuppliersUpdate } from '@/types/database'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-
-type SupplierUpdate = Database['public']['Tables']['suppliers']['Update']
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -77,7 +75,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const updatePayload: SupplierUpdate = body
+    const updatePayload: SuppliersUpdate = body
 
     const { data, error } = await supabase
       .from('suppliers')

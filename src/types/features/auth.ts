@@ -3,19 +3,25 @@
  * Re-exported from Supabase generated types
  */
 
-import type { Database } from '@/types/supabase-generated'
+import type { 
+  UserProfilesTable as UserProfilesTableType,
+  UserProfilesInsert,
+  UserProfilesUpdate
+} from '@/types/database'
 
 // Re-export table types from generated
-export type UserProfilesTable = Database['public']['Tables']['user_profiles']
+export type UserProfilesTable = UserProfilesTableType
 
 // Convenience aliases
-export type UserProfile = UserProfilesTable['Row']
-export type UserProfileInsert = UserProfilesTable['Insert']
-export type UserProfileUpdate = UserProfilesTable['Update']
+export type UserProfile = UserProfilesTable
+export type UserProfileInsert = UserProfilesInsert
+export type UserProfileUpdate = UserProfilesUpdate
 
 // Re-export enums from generated
-export type UserRole = Database['public']['Enums']['user_role']
-export type BusinessUnit = Database['public']['Enums']['business_unit']
+import type { UserRole as UserRoleEnum, BusinessUnit as BusinessUnitEnum } from '@/types/database'
+
+export type UserRole = UserRoleEnum
+export type BusinessUnit = BusinessUnitEnum
 
 // Business logic types (not table types)
 export interface SecurityContext {

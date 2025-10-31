@@ -1,13 +1,15 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import { getErrorMessage } from '@/lib/type-guards'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { ErrorLogsInsert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
 // POST /api/errors - Log errors to database
-export async function POST(request: NextRequest) {
+async function POST(request: NextRequest) {
   try {
     // Authenticate user (optional - errors can be logged without auth)
     let userId: string | null = null
@@ -17,77 +19,65 @@ export async function POST(request: NextRequest) {
       if (user?.id) {
         userId = user.id
       }
-    } catch (authError) {
-      apiLogger.debug({ error: getErrorMessage(authError) }, 'Authentication failed for error logging')
-      // Continue without user ID
+    } catch (authError: unknown) {
+      // Ignore auth errors - client-side errors can be anonymous
+      apiLogger.debug({ error: getErrorMessage(authError) }, 'Anonymous error report')
     }
 
-    const errorData = await request.json()
+    const body = await request.json()
     
-    // Validate error data structure
-    if (!errorData || typeof errorData !== 'object') {
-      return NextResponse.json(
-        { error: 'Invalid error data format' },
-        { status: 400 }
-      )
-    }
-
     // Validate required fields
-    if (!errorData.message || typeof errorData.message !== 'string') {
+    if (!body.message) {
       return NextResponse.json(
-        { error: 'Error message is required' },
+        { error: 'Message is required' },
         { status: 400 }
       )
     }
 
-    // Sanitize error data to prevent injection
+    // Sanitize error data
     const sanitizedErrorData = {
-      message: String(errorData.message).substring(0, 1000), // Limit length
-      stack: errorData.stack ? String(errorData.stack).substring(0, 5000) : null,
-      name: errorData.name ? String(errorData.name).substring(0, 100) : null,
-      timestamp: errorData.timestamp || new Date().toISOString(),
-      context: typeof errorData.context === 'object' ? errorData.context : {},
-      url: errorData.url ? String(errorData.url).substring(0, 500) : null,
-      userAgent: errorData.userAgent ? String(errorData.userAgent).substring(0, 500) : null,
-      componentStack: errorData.componentStack ? String(errorData.componentStack).substring(0, 2000) : null,
-      level: errorData.level || 'error',
-      tags: typeof errorData.tags === 'object' ? errorData.tags : {},
+      message: body.message.substring(0, 1000), // Limit message length
+      stack: body.stack ? body.stack.substring(0, 5000) : null, // Limit stack trace
+      url: body.url ? body.url.substring(0, 500) : null,
+      userAgent: body.userAgent ? body.userAgent.substring(0, 500) : null,
+      timestamp: body.timestamp || new Date().toISOString(),
+      componentStack: body.componentStack ? body.componentStack.substring(0, 2000) : null,
+      // Add any additional fields you want to log
     }
 
-    // Store error in database if Supabase is available
-    try {
-      const supabase = await createClient()
-      
-      const errorRecord = {
-        user_id: userId,
-        message: sanitizedErrorData.message,
-        stack: sanitizedErrorData.stack,
-        error_type: sanitizedErrorData.name,
-        error_level: sanitizedErrorData.level,
-        context: sanitizedErrorData.context,
-        url: sanitizedErrorData.url,
-        user_agent: sanitizedErrorData.userAgent,
-        component_stack: sanitizedErrorData.componentStack,
-        tags: sanitizedErrorData.tags,
-        occurred_at: new Date().toISOString(),
-      }
+    // Log to database if authenticated
+    if (userId) {
+      try {
+        const supabase = await createClient()
+        const errorLogData: ErrorLogsInsert = {
+          user_id: userId,
+          endpoint: sanitizedErrorData.url || 'unknown',
+          error_message: sanitizedErrorData.message,
+          error_type: body.errorType || 'ClientError',
+          stack_trace: sanitizedErrorData.stack,
+          timestamp: sanitizedErrorData.timestamp,
+          metadata: {
+            url: sanitizedErrorData.url,
+            userAgent: sanitizedErrorData.userAgent,
+            componentStack: sanitizedErrorData.componentStack,
+            browser: body.browser,
+            os: body.os,
+            device: body.device,
+          }
+        }
+        
+        const { error: dbError } = await supabase
+          .from('error_logs')
+          .insert(errorLogData)
 
-      const { error: insertError } = await supabase
-        .from('error_logs')
-        .insert(errorRecord)
-
-      if (insertError) {
-        apiLogger.error({ error: insertError }, 'Failed to insert error log into database')
-        // Don't fail the request if database insert fails, just log it
-      } else {
-        apiLogger.info({ 
-          errorId: errorRecord.occurred_at,
-          userId: userId 
-        }, 'Error logged to database')
+        if (dbError) {
+          apiLogger.error({ error: getErrorMessage(dbError) }, 'Database error when logging error')
+          // Continue to return success even if DB logging fails
+        }
+      } catch (dbError: unknown) {
+        apiLogger.error({ error: getErrorMessage(dbError) }, 'Database error when logging error')
+        // Continue to return success even if DB logging fails
       }
-    } catch (dbError) {
-      apiLogger.error({ error: getErrorMessage(dbError) }, 'Database error when logging error')
-      // Continue to return success even if DB logging fails
     }
 
     // Also log to our logger
@@ -107,7 +97,7 @@ export async function POST(request: NextRequest) {
 }
 
 // GET /api/errors - Get recent errors (admin only)
-export async function GET(request: NextRequest) {
+async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
 
@@ -121,14 +111,25 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // For now, just fetch the most recent errors for the user
-    // In a real implementation, you might have role-based access controls
+    // TODO: Add admin check
+    // const isAdmin = await isAdminUser(user.id)
+    // if (!isAdmin) {
+    //   return NextResponse.json(
+    //     { error: 'Forbidden' },
+    //     { status: 403 }
+    //   )
+    // }
+
+    const { searchParams } = new URL(request.url)
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const offset = parseInt(searchParams.get('offset') || '0')
+
+    // Fetch recent errors from database
     const { data: errors, error: queryError } = await supabase
       .from('error_logs')
       .select('*')
-      .eq('user_id', user.id)
-      .order('occurred_at', { ascending: false })
-      .limit(50)
+      .order('timestamp', { ascending: false })
+      .range(offset, offset + limit - 1)
 
     if (queryError) {
       apiLogger.error({ error: queryError }, 'Failed to fetch error logs')
@@ -147,3 +148,8 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.basic()) // Allow anonymous error reporting
+
+export { securedGET as GET, securedPOST as POST }

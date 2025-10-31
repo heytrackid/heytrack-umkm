@@ -1,21 +1,30 @@
-import type { Database } from '@/types/supabase-generated'
+import type { 
+  IngredientsTable, 
+  IngredientsInsert, 
+  IngredientsUpdate,
+  InventoryAlertsTable, 
+  InventoryAlertsInsert, 
+  InventoryAlertsUpdate,
+  IngredientPurchasesTable, 
+  IngredientPurchasesInsert, 
+  IngredientPurchasesUpdate,
+  StockTransactionsTable, 
+  StockTransactionsInsert, 
+  StockTransactionsUpdate
+} from '@/types/database'
 
-export type IngredientsTable = Database['public']['Tables']['ingredients']
-export type Ingredient = IngredientsTable['Row']
-export type IngredientInsert = IngredientsTable['Insert']
-export type IngredientUpdate = IngredientsTable['Update']
+export type Ingredient = IngredientsTable
+export type IngredientInsert = IngredientsInsert
+export type IngredientUpdate = IngredientsUpdate
 
-export type InventoryAlertsTable = Database['public']['Tables']['inventory_alerts']
-export type InventoryAlert = InventoryAlertsTable['Row']
-export type InventoryAlertInsert = InventoryAlertsTable['Insert']
-export type InventoryAlertUpdate = InventoryAlertsTable['Update']
+export type InventoryAlert = InventoryAlertsTable
+export type InventoryAlertInsert = InventoryAlertsInsert
+export type InventoryAlertUpdate = InventoryAlertsUpdate
 
-export type IngredientPurchasesTable = Database['public']['Tables']['ingredient_purchases']
-export type IngredientPurchase = IngredientPurchasesTable['Row']
-export type IngredientPurchaseInsert = IngredientPurchasesTable['Insert']
-export type IngredientPurchaseUpdate = IngredientPurchasesTable['Update']
+export type IngredientPurchase = IngredientPurchasesTable
+export type IngredientPurchaseInsert = IngredientPurchasesInsert
+export type IngredientPurchaseUpdate = IngredientPurchasesUpdate
 
-export type StockTransactionsTable = Database['public']['Tables']['stock_transactions']
-export type StockTransaction = StockTransactionsTable['Row']
-export type StockTransactionInsert = StockTransactionsTable['Insert']
-export type StockTransactionUpdate = StockTransactionsTable['Update']
+export type StockTransaction = StockTransactionsTable
+export type StockTransactionInsert = StockTransactionsInsert
+export type StockTransactionUpdate = StockTransactionsUpdate

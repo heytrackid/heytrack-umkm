@@ -2,9 +2,9 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Receipt, TrendingUp, DollarSign, BarChart3 } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { OperationalCostsTable } from '@/types/database'
 
-type OperationalCost = Database['public']['Tables']['operational_costs']['Row']
+type OperationalCost = OperationalCostsTable
 
 interface OperationalCostStatsProps {
     costs: OperationalCost[]

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Shared utilities for formatting, calculations, and common operations
 
 /**

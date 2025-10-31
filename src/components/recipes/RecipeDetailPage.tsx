@@ -16,13 +16,13 @@ import {
     Users,
     ArrowLeft,
 } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 
-type RecipeRow = Database['public']['Tables']['recipes']['Row']
-type RecipeIngredientRow = Database['public']['Tables']['recipe_ingredients']['Row']
-type IngredientRow = Database['public']['Tables']['ingredients']['Row']
+type RecipeRow = RecipesTable
+type RecipeIngredientRow = RecipeIngredientsTable
+type IngredientRow = IngredientsTable
 
 type RecipeIngredientWithDetails = RecipeIngredientRow & {
     ingredient: Pick<IngredientRow, 'id' | 'name' | 'unit' | 'price_per_unit'> | null
@@ -108,7 +108,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
     }, [user?.id, authLoading, loadRecipe])
 
     const handleDelete = async () => {
-        if (!recipe || !user?.id) {return}
+        if (!recipe || !user?.id) { return }
 
         try {
             const { error } = await supabase
@@ -288,18 +288,18 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                     {recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0 ? (
                         <div className="space-y-2">
                             {recipe.recipe_ingredients.map((ri) => (
-                                    <div
-                                        key={ri.id}
-                                        className="flex items-center justify-between p-3 border rounded-lg"
-                                    >
-                                        <div className="flex-1">
-                                            <p className="font-medium">{ri.ingredient?.name || 'Unknown'}</p>
-                                            <p className="text-sm text-muted-foreground">
-                                                {ri.quantity} {ri.unit}
-                                            </p>
-                                        </div>
+                                <div
+                                    key={ri.id}
+                                    className="flex items-center justify-between p-3 border rounded-lg"
+                                >
+                                    <div className="flex-1">
+                                        <p className="font-medium">{ri.ingredient?.name || 'Unknown'}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {ri.quantity} {ri.unit}
+                                        </p>
                                     </div>
-                                ))}
+                                </div>
+                            ))}
                         </div>
                     ) : (
                         <div className="text-center py-8 text-muted-foreground">

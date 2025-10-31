@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import type { Database } from '@/types/supabase-generated'
-type Recipe = Database['public']['Tables']['recipes']['Row']
+import type { RecipesTable } from '@/types/database'
+type Recipe = RecipesTable
 import {
   useQuery,
   useMutation,

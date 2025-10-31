@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
     // Get query params

@@ -70,3 +70,5 @@ export const MiniChart = memo(({
     </div>
   )
 }, (prevProps: MiniChartProps, nextProps: MiniChartProps) => prevProps.data === nextProps.data && prevProps.type === nextProps.type)
+
+export default memo(MiniChart)

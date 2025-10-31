@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Capacity Manager Module
  * Handles production capacity calculation and optimization

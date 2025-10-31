@@ -2,17 +2,19 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
-import type { Database } from '@/types/supabase-generated'
-import { isRecord, isArrayOf, isCustomer, getErrorMessage, extractFirst } from '@/lib/type-guards'
+import type { OrderStatus } from '@/types/database'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type CustomerInsert = Database['public']['Tables']['customers']['Insert']
-type OrderInsert = Database['public']['Tables']['orders']['Insert']
-type OrderItemInsert = Omit<Database['public']['Tables']['order_items']['Insert'], 'order_id'>
+import type { CustomersInsert, OrdersInsert, OrderItemsInsert } from '@/types/database'
 
-export async function POST(request: NextRequest) {
+type CustomerInsert = CustomersInsert
+type OrderInsert = OrdersInsert
+type OrderItemInsert = Omit<OrderItemsInsert, 'order_id'>
+
+async function POST(request: NextRequest) {
   try {
     // 1. Authenticate
     const supabase = await createClient()
@@ -130,7 +132,7 @@ export async function POST(request: NextRequest) {
           customer_name: order.customer_name.trim(),
           customer_phone: order.customer_phone?.trim() || null,
           customer_address: order.customer_address?.trim() || null,
-          status: (order.status?.toUpperCase() as any) || 'PENDING',
+          status: (order.status ? order.status.toUpperCase() : 'PENDING') as OrderStatus,
           total_amount: totalPrice,
           delivery_date: order.delivery_date ? new Date(order.delivery_date).toISOString() : null,
           notes: order.notes?.trim() || null,
@@ -264,3 +266,9 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+// Apply security middleware
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+// Export secured handler
+export { securedPOST as POST }

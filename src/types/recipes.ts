@@ -1,13 +1,17 @@
-import type { Database } from './supabase-generated'
+// Re-export recipe-related types from the main database types
+import type { 
+  RecipesTable, 
+  RecipeIngredientsTable,
+  RecipesInsert,
+  RecipesUpdate,
+  RecipeIngredientsInsert,
+  RecipeIngredientsUpdate
+} from './database'
 
-type Tables = Database['public']['Tables']
+export type Recipe = RecipesTable
+export type RecipeInsert = RecipesInsert
+export type RecipeUpdate = RecipesUpdate
 
-export type RecipesTable = Tables['recipes']
-export type Recipe = RecipesTable['Row']
-export type RecipeInsert = RecipesTable['Insert']
-export type RecipeUpdate = RecipesTable['Update']
-
-export type RecipeIngredientsTable = Tables['recipe_ingredients']
-export type RecipeIngredient = RecipeIngredientsTable['Row']
-export type RecipeIngredientInsert = RecipeIngredientsTable['Insert']
-export type RecipeIngredientUpdate = RecipeIngredientsTable['Update']
+export type RecipeIngredient = RecipeIngredientsTable
+export type RecipeIngredientInsert = RecipeIngredientsInsert
+export type RecipeIngredientUpdate = RecipeIngredientsUpdate

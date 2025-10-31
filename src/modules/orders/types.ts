@@ -2,30 +2,37 @@
 // Comprehensive type definitions for order management system
 // Uses generated Supabase types as base
 
-import type { Database } from '@/types/supabase-generated'
-
-// Table helpers for convenience
-export type CustomersTable = Database['public']['Tables']['customers']
-export type OrdersTable = Database['public']['Tables']['orders']
-export type OrderItemsTable = Database['public']['Tables']['order_items']
-export type PaymentsTable = Database['public']['Tables']['payments']
+import type { 
+  CustomersTable, 
+  OrdersTable, 
+  OrderItemsTable, 
+  PaymentsTable,
+  CustomersInsert,
+  CustomersUpdate,
+  OrdersInsert,
+  OrdersUpdate,
+  OrderItemsInsert,
+  OrderItemsUpdate,
+  PaymentsInsert,
+  PaymentsUpdate,
+  OrderStatus,
+  PaymentMethod
+} from '@/types/database'
 
 // Use generated types from Supabase
-export type Customer = CustomersTable['Row']
-export type CustomerInsert = CustomersTable['Insert']
-export type CustomerUpdate = CustomersTable['Update']
+export type Customer = CustomersTable
+export type CustomerInsert = CustomersInsert
+export type CustomerUpdate = CustomersUpdate
 
-export type OrderItem = OrderItemsTable['Row']
-export type OrderItemInsert = OrderItemsTable['Insert']
-export type OrderItemUpdate = OrderItemsTable['Update']
+export type OrderItem = OrderItemsTable
+export type OrderItemInsert = OrderItemsInsert
+export type OrderItemUpdate = OrderItemsUpdate
 
-export type Order = OrdersTable['Row']
-export type OrderInsert = OrdersTable['Insert']
-export type OrderUpdate = OrdersTable['Update']
+export type Order = OrdersTable
+export type OrderInsert = OrdersInsert
+export type OrderUpdate = OrdersUpdate
 
-// Type aliases for enums from database
-export type OrderStatus = Database['public']['Enums']['order_status']
-export type PaymentMethod = Database['public']['Enums']['payment_method']
+
 
 // Custom types (not in database enums)
 export type PaymentStatus = 'PENDING' | 'PAID' | 'PARTIAL' | 'REFUNDED'
@@ -43,9 +50,12 @@ export interface OrderItemWithRecipe extends OrderItem {
   }
 }
 
-export type Payment = Database['public']['Tables']['payments']['Row']
-export type PaymentInsert = Database['public']['Tables']['payments']['Insert']
-export type PaymentUpdate = Database['public']['Tables']['payments']['Update']
+export type Payment = PaymentsTable
+export type PaymentInsert = PaymentsInsert
+export type PaymentUpdate = PaymentsUpdate
+
+// Re-export database enums
+export type { OrderStatus } from '@/types/database'
 
 // Extended Order type with relations for UI
 export interface OrderWithRelations extends Order {

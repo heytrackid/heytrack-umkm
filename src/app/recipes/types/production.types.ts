@@ -1,4 +1,9 @@
-import type { Tables } from '@/types/supabase-generated'
+import type { 
+  RecipesTable, 
+  UserProfilesTable,
+  ProductionStatus as DBProductionStatus 
+} from '@/types/database'
+
 // Production module types and interfaces for Indonesian UMKM operations
 
 export interface ProductionBatch {
@@ -57,8 +62,8 @@ export interface ProductionBatch {
   updated_at: string
   
   // Relations
-  recipe?: Tables<'recipes'> // Recipe data type
-  quality_inspector?: Tables<'user_profiles'> // Staff member
+  recipe?: RecipesTable // Recipe data type
+  quality_inspector?: UserProfilesTable // Staff member
   production_logs?: ProductionLog[]
 }
 
@@ -200,15 +205,8 @@ export interface ProductionStaff {
 }
 
 // Enums and types from config
-export type ProductionStatus = 
-  | 'planned'
-  | 'ingredients_ready'
-  | 'in_progress'
-  | 'quality_check'
-  | 'completed'
-  | 'on_hold'
-  | 'cancelled'
-  | 'failed'
+// Use database enum for production status
+export type ProductionStatus = DBProductionStatus
 
 export type BatchPriority = 
   | 'low'

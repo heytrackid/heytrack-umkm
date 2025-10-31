@@ -5,16 +5,16 @@ import { useRouter } from 'next/navigation';
 import { EnhancedIngredientsPage as IngredientsCRUD } from '@/components/ingredients/EnhancedIngredientsPage';
 import AppLayout from '@/components/layout/app-layout';
 import { StatsCards, StatCardPatterns, PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui'
-import { useIngredients } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useIngredients } from '@/hooks/useIngredients';
+import type { IngredientsTable } from '@/types/database';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  AlertTriangle,
   Plus,
   ShoppingCart,
-  Upload
+  Upload,
+  AlertTriangle
 } from 'lucide-react';
 import { ImportDialog } from '@/components/import';
 import {
@@ -25,7 +25,7 @@ import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDia
 import { PageHeader } from '@/components/layout/PageHeader';
 
 export default function IngredientsPage() {
-  const { data: ingredients, loading, error } = useIngredients({ realtime: true });
+  const { data: ingredients, isLoading: loading, error } = useIngredients();
   const { isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
@@ -59,13 +59,13 @@ export default function IngredientsPage() {
 
   // Calculate stats
   const totalIngredients = ingredients?.length || 0;
-  const lowStockCount = ingredients?.filter(i =>
+  const lowStockCount = ingredients?.filter((i: IngredientsTable) =>
     (i.current_stock || 0) <= (i.min_stock || 0) && (i.current_stock || 0) > 0
   ).length || 0;
-  const totalValue = ingredients?.reduce((sum, i) =>
+  const totalValue = ingredients?.reduce((sum: number, i: IngredientsTable) =>
     sum + ((i.current_stock || 0) * (i.price_per_unit || 0)), 0
   ) || 0;
-  const outOfStockCount = ingredients?.filter(i => (i.current_stock || 0) <= 0).length || 0;
+  const outOfStockCount = ingredients?.filter((i: IngredientsTable) => (i.current_stock || 0) <= 0).length || 0;
 
   // ✅ FIX: Combine loading states
   const isLoading = isAuthLoading || loading

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types/supabase-generated'
+import type { OrdersTable, IngredientsTable, CustomersTable } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { cachePresets } from '@/providers/QueryProvider'
 // Dashboard stats type
@@ -113,16 +113,16 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
 
     if (inventoryError) {throw inventoryError}
 
-    type Order = Database['public']['Tables']['orders']['Row']
-    type Ingredient = Database['public']['Tables']['ingredients']['Row']
-    type Customer = Database['public']['Tables']['customers']['Row']
+    type Order = OrdersTable
+    type Ingredient = IngredientsTable
+    type Customer = CustomersTable
 
     // Calculate stats
     const todayRevenue = todayOrders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
     const weeklyRevenue = weeklyOrders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
     
     const lowStockItems = inventory?.filter((item: Ingredient) => 
-      item.current_stock <= (item.reorder_point || 0)
+      (item.current_stock || 0) <= (item.reorder_point || 0)
     ) || []
     const outOfStockItems = inventory?.filter((item: Ingredient) => item.current_stock === 0) || []
     
@@ -132,7 +132,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     const recentOrders = todayOrders?.slice(-3).map((order: Order) => ({
       customer: order.customer_name || 'Unknown',
       amount: order.total_amount || 0,
-      time: order.created_at
+      time: order.created_at || ''
     })) || []
 
     return {
@@ -215,7 +215,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
 
       if (error) {throw error}
 
-      type Order = Database['public']['Tables']['orders']['Row']
+      type Order = OrdersTable
       const revenue = orders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
       
       weekData.push({

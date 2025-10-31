@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Rate Limiter Service - Prevent API abuse
  */

@@ -241,11 +241,12 @@ export const ToastNotification = ({
 
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [duration, onClose])
 
   if (!isVisible) { return null }
 
-  const getToastStyles = () => {
+  const getToastStyles = (): string => {
     switch (type) {
       case 'success':
         return 'border-green-200 bg-green-50 text-green-800'

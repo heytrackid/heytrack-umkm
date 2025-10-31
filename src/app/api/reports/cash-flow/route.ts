@@ -2,7 +2,6 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { safeParseAmount, safeString } from '@/lib/api-helpers'
-import { isArrayOf, isRecord, safeNumber, getErrorMessage } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'

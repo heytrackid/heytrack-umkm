@@ -8,7 +8,7 @@ import { useSupabaseCRUD } from '@/hooks/supabase'
 import { usePagination } from '@/hooks/usePagination'
 import { useToast } from '@/hooks/use-toast'
 import { useMobile } from '@/hooks/useResponsive'
-import type { Database } from '@/types/supabase-generated'
+import type { IngredientsTable } from '@/types/database'
 
 // Enhanced Components
 import { StockBadge } from './StockBadge'
@@ -48,7 +48,7 @@ import {
     genericErrorToast,
 } from '@/lib/ingredients-toast'
 
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type Ingredient = IngredientsTable
 type StockFilter = 'all' | 'normal' | 'low' | 'out'
 type CategoryFilter = 'all' | 'Bahan Kering' | 'Bahan Basah' | 'Bumbu' | 'Protein' | 'Sayuran' | 'Buah' | 'Dairy' | 'Kemasan' | 'Lainnya'
 

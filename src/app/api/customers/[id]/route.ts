@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
+import { CustomersUpdate } from '@/types/database'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
@@ -102,7 +102,7 @@ export async function PUT(
     }
 
     // Prepare update data
-    const updateData: Database['public']['Tables']['customers']['Update'] = {
+    const updateData: CustomersUpdate = {
       name: validation.data.name,
       phone: validation.data.phone,
       email: validation.data.email,

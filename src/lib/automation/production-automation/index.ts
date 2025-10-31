@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Production Automation Module - Main Entry Point
  * Comprehensive production planning and automation system

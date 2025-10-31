@@ -82,7 +82,7 @@ export function useAIService() {
       })
 
       // Generate contextual suggestions based on intent
-      const suggestions = this.generateSuggestions(nlpResult.primaryIntent)
+      const suggestions = generateSuggestions(nlpResult.primaryIntent)
 
       apiLogger.info({ 
         userId, 
@@ -116,42 +116,42 @@ export function useAIService() {
       if (lowerQuery.includes('stok') || lowerQuery.includes('bahan') || lowerQuery.includes('inventory')) {
         return {
           message: '📦 **Manajemen Stok Bahan Baku**\n\nUntuk mengelola stok dengan optimal:\n\n• **Monitoring Real-time** - Pantau stok di halaman Inventory\n• **Alert Otomatis** - Set minimum stock untuk notifikasi\n• **Tracking Penggunaan** - Catat konsumsi per produksi\n• **Supplier Management** - Kelola data supplier dan lead time\n\n💡 **Tips**: Gunakan fitur reorder point untuk menghindari stockout.',
-          suggestions: this.generateSuggestions('check_inventory')
+          suggestions: generateSuggestions('check_inventory')
         }
       }
 
       if (lowerQuery.includes('resep') || lowerQuery.includes('recipe') || lowerQuery.includes('produksi')) {
         return {
           message: '🍳 **Manajemen Resep & Produksi**\n\nOptimalkan resep untuk profit maksimal:\n\n• **Cost Analysis** - Hitung HPP setiap resep\n• **Ingredient Optimization** - Sesuaikan komposisi bahan\n• **Batch Planning** - Rencanakan produksi efisien\n• **Quality Control** - Standardisasi proses produksi\n\n💡 **Tips**: Fokus pada resep dengan margin tertinggi.',
-          suggestions: this.generateSuggestions('recipe_query')
+          suggestions: generateSuggestions('recipe_query')
         }
       }
 
       if (lowerQuery.includes('hpp') || lowerQuery.includes('biaya') || lowerQuery.includes('cost')) {
         return {
           message: '💰 **Analisis HPP (Harga Pokok Produksi)**\n\nKelola biaya produksi dengan tepat:\n\n• **Ingredient Costing** - Hitung biaya bahan per unit\n• **Operational Costs** - Alokasi biaya operasional\n• **Margin Analysis** - Tentukan markup yang sehat\n• **Price Optimization** - Sesuaikan harga jual\n\n💡 **Formula**: HPP + Margin = Harga Jual Optimal',
-          suggestions: this.generateSuggestions('analyze_hpp')
+          suggestions: generateSuggestions('analyze_hpp')
         }
       }
 
       if (lowerQuery.includes('profit') || lowerQuery.includes('untung') || lowerQuery.includes('laba')) {
         return {
           message: '📈 **Analisis Profitabilitas**\n\nMaximalkan keuntungan bisnis:\n\n• **Margin Tracking** - Monitor profit per produk\n• **Cost Efficiency** - Identifikasi area penghematan\n• **Revenue Optimization** - Fokus produk high-margin\n• **Trend Analysis** - Analisis performa bulanan\n\n💡 **Target**: Margin 35-50% untuk sustainability.',
-          suggestions: this.generateSuggestions('analyze_profit')
+          suggestions: generateSuggestions('analyze_profit')
         }
       }
 
       if (lowerQuery.includes('harga') || lowerQuery.includes('pricing') || lowerQuery.includes('price')) {
         return {
           message: '🏷️ **Strategi Pricing**\n\nTentukan harga yang kompetitif:\n\n• **Market Research** - Analisis harga kompetitor\n• **Cost-Plus Pricing** - HPP + margin target\n• **Value-Based Pricing** - Sesuai perceived value\n• **Dynamic Pricing** - Sesuaikan dengan demand\n\n💡 **Tips**: Review harga secara berkala sesuai market.',
-          suggestions: this.generateSuggestions('pricing_strategy')
+          suggestions: generateSuggestions('pricing_strategy')
         }
       }
 
       if (lowerQuery.includes('marketing') || lowerQuery.includes('promosi') || lowerQuery.includes('jualan')) {
         return {
           message: '📢 **Strategi Marketing UMKM**\n\nTingkatkan penjualan dengan:\n\n• **Digital Marketing** - Social media & online presence\n• **Customer Retention** - Program loyalitas pelanggan\n• **Product Positioning** - Highlight unique selling point\n• **Seasonal Campaigns** - Promo sesuai momen\n\n💡 **Focus**: Build brand awareness & customer loyalty.',
-          suggestions: this.generateSuggestions('marketing_strategy')
+          suggestions: generateSuggestions('marketing_strategy')
         }
       }
 

@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Database } from '@/types/supabase-generated'
+import type { ProductionBatchesTable, RecipesTable, ProductionStatus } from '@/types/database'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 
 // Use production_batches table (not productions)
-type ProductionBatch = Database['public']['Tables']['production_batches']['Row']
-type ProductionStatus = Database['public']['Enums']['production_status']
-type Recipe = Database['public']['Tables']['recipes']['Row']
+type ProductionBatch = ProductionBatchesTable
+type Recipe = RecipesTable
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

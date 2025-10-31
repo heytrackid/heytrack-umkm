@@ -27,7 +27,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
     const sessionId = params.id
@@ -60,7 +60,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
     const sessionId = params.id

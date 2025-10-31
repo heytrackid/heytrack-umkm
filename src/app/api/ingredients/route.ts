@@ -7,19 +7,18 @@ import {
   calculateOffset,
   createPaginationMeta
 } from '@/lib/api-core'
+import { z } from 'zod'
 import {
   IngredientInsertSchema
 } from '@/lib/validations/domains/ingredient'
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest } from 'next/server'
-import { z } from 'zod'
+import type { IngredientsInsert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-import { isIngredient, assertIngredient, isArrayOf, getErrorMessage } from '@/lib/type-guards'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // Extended schema for ingredients query
@@ -75,7 +74,8 @@ async function GET(request: NextRequest) {
     const { data, error, count } = await supabaseQuery
 
     if (error) {
-      return handleAPIError(error)
+      const apiError = handleAPIError(error)
+      return createErrorResponse(apiError.message, apiError.statusCode)
     }
 
     // Create pagination metadata
@@ -87,7 +87,8 @@ async function GET(request: NextRequest) {
     })
 
   } catch (error: unknown) {
-    return handleAPIError(error)
+    const apiError = handleAPIError(error)
+    return createErrorResponse(apiError.message, apiError.statusCode)
   }
 }
 
@@ -117,7 +118,7 @@ async function POST(request: NextRequest) {
       return createErrorResponse('Unauthorized', 401)
     }
 
-    const ingredientData: Database['public']['Tables']['ingredients']['Insert'] = {
+    const ingredientData: IngredientsInsert = {
       ...validatedData,
       user_id: user.id
     }
@@ -129,19 +130,21 @@ async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      return handleAPIError(error)
+      const apiError = handleAPIError(error)
+      return createErrorResponse(apiError.message, apiError.statusCode)
     }
 
-    return createSuccessResponse(insertedData, '201')
+    return createSuccessResponse(insertedData, 'Bahan baku berhasil ditambahkan')
 
   } catch (error: unknown) {
-    return handleAPIError(error)
+    const apiError = handleAPIError(error)
+    return createErrorResponse(apiError.message, apiError.statusCode)
   }
 }
 
 // Apply security middleware with enhanced security configuration
-const securedGET = withSecurity(GET as any, SecurityPresets.enhanced())
-const securedPOST = withSecurity(POST as any, SecurityPresets.enhanced())
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
 
 // Export secured handlers
 export { securedGET as GET, securedPOST as POST }

@@ -11,11 +11,11 @@ import { Label } from '@/components/ui/label'
 import { useCurrency } from '@/hooks/useCurrency'
 import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
 import type { OrderItemWithRecipe } from '@/app/orders/types/orders-db.types'
-import type { RecipesTable } from '@/types/recipes'
+import type { RecipesTable } from '@/types/database'
 
 interface ItemsSectionProps {
     orderItems: OrderItemWithRecipe[]
-    availableRecipes: Array<RecipesTable['Row']>
+    availableRecipes: Array<RecipesTable>
     fieldErrors: Record<string, string>
     subtotal: number
     onAddItem: () => void

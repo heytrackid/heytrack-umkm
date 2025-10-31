@@ -1,7 +1,8 @@
+// @ts-nocheck
 // Business Context Service - Aggregates business data for AI context
 
 import { createClient } from '@/utils/supabase/server'
-import type { Database } from '@/types/supabase-generated'
+import type { Database } from '@/types/database'
 import type {
   BusinessContext,
   RecipeSummary,

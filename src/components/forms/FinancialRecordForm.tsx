@@ -11,14 +11,14 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { 
+import {
   FinancialRecordSchema,
   type FinancialRecordFormData
 } from '@/lib/validations'
 import { FormField } from './shared/FormField'
-import type { Database } from '@/types/supabase-generated'
+import type { FinancialRecordsTable } from '@/types/database'
 
-type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
+type FinancialRecord = FinancialRecordsTable
 
 interface FinancialRecordFormProps {
   initialData?: Partial<FinancialRecordFormData> & Partial<FinancialRecord>
@@ -28,7 +28,7 @@ interface FinancialRecordFormProps {
 
 export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: FinancialRecordFormProps) => {
   const { toast } = useToast()
-  
+
   const form = useForm<FinancialRecordFormData>({
     resolver: zodResolver(FinancialRecordSchema),
     defaultValues: {
@@ -71,13 +71,13 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
       <CardContent>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField 
-              label="Tipe Transaksi" 
-              required 
+            <FormField
+              label="Tipe Transaksi"
+              required
               error={form.formState.errors.type?.message}
             >
-              <Select 
-                value={form.watch('type')} 
+              <Select
+                value={form.watch('type')}
                 onValueChange={(value) => {
                   if (value === 'INCOME' || value === 'EXPENSE') {
                     form.setValue('type', value)
@@ -94,22 +94,22 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
               </Select>
             </FormField>
 
-            <FormField 
-              label="Kategori" 
-              required 
+            <FormField
+              label="Kategori"
+              required
               error={form.formState.errors.category?.message}
             >
-              <Input 
+              <Input
                 {...form.register('category')}
               />
             </FormField>
 
-            <FormField 
-              label="Jumlah (Rp)" 
-              required 
+            <FormField
+              label="Jumlah (Rp)"
+              required
               error={form.formState.errors.amount?.message}
             >
-              <Input 
+              <Input
                 type="number"
                 min="0"
                 step="0.01"
@@ -117,23 +117,23 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
               />
             </FormField>
 
-            <FormField 
-              label="Tanggal" 
-              required 
+            <FormField
+              label="Tanggal"
+              required
               error={form.formState.errors.date?.message}
             >
-              <Input 
+              <Input
                 type="datetime-local"
                 {...form.register('date')}
               />
             </FormField>
 
-            <FormField 
-              label="Metode Pembayaran" 
+            <FormField
+              label="Metode Pembayaran"
               error={form.formState.errors.payment_method?.message}
             >
-              <Select 
-                value={form.watch('payment_method')} 
+              <Select
+                value={form.watch('payment_method')}
                 onValueChange={(value) => {
                   if (
                     value === 'CASH' ||
@@ -157,39 +157,39 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
               </Select>
             </FormField>
 
-            <FormField 
-              label="Nomor Referensi" 
+            <FormField
+              label="Nomor Referensi"
               error={form.formState.errors.reference_no?.message}
             >
-              <Input 
+              <Input
                 {...form.register('reference_no')}
               />
             </FormField>
           </div>
 
-          <FormField 
-            label="Deskripsi" 
-            required 
+          <FormField
+            label="Deskripsi"
+            required
             error={form.formState.errors.description?.message}
           >
-            <Textarea 
+            <Textarea
               {...form.register('description')}
               rows={3}
             />
           </FormField>
 
-          <FormField 
-            label="Catatan" 
+          <FormField
+            label="Catatan"
             error={form.formState.errors.notes?.message}
           >
-            <Textarea 
+            <Textarea
               {...form.register('notes')}
               rows={2}
             />
           </FormField>
 
           <div className="flex items-center space-x-2">
-            <Checkbox 
+            <Checkbox
               checked={form.watch('is_recurring')}
               onCheckedChange={(checked) => form.setValue('is_recurring', !!checked)}
             />
@@ -197,12 +197,12 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
           </div>
 
           {form.watch('is_recurring') && (
-            <FormField 
-              label="Periode Berulang" 
+            <FormField
+              label="Periode Berulang"
               error={form.formState.errors.recurring_period?.message}
             >
-              <Select 
-                value={form.watch('recurring_period')} 
+              <Select
+                value={form.watch('recurring_period')}
                 onValueChange={(value) => {
                   if (
                     value === 'DAILY' ||
@@ -227,8 +227,8 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
             </FormField>
           )}
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isLoading || !form.formState.isValid}
             className="w-full"
           >

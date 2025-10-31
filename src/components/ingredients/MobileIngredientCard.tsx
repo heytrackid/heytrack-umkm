@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import type { Database } from '@/types/supabase-generated'
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+import type { IngredientsTable } from '@/types/database'
+type Ingredient = IngredientsTable
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 // import { Badge } from '@/components/ui/badge'

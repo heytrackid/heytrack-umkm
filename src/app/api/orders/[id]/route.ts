@@ -4,7 +4,7 @@ import { OrderUpdateSchema } from '@/lib/validations/domains/order'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-import type { Database } from '@/types/supabase-generated'
+import { OrdersUpdate, FinancialRecordsUpdate } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage, isValidUUID, isRecord } from '@/lib/type-guards'
@@ -13,8 +13,8 @@ interface RouteContext {
   params: Promise<{ id: string }>
 }
 
-type OrderUpdate = Database['public']['Tables']['orders']['Update']
-type FinancialRecordUpdate = Database['public']['Tables']['financial_records']['Update']
+type OrderUpdate = OrdersUpdate
+type FinancialRecordUpdate = FinancialRecordsUpdate
 
 // GET /api/orders/[id] - Get single order
 async function GET(

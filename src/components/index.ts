@@ -25,6 +25,7 @@ export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 
 // Table Components
 export { DataTable } from './data-table/data-table'
+export { useReactTable } from '@tanstack/react-table'
 
 // Layout Components
 export { default as AppLayout } from './layout/app-layout'

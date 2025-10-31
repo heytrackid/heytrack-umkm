@@ -29,8 +29,8 @@ export type {
 // ============================================================================
 // DOMAIN TYPES (Business Logic)
 // ============================================================================
-// Domain types removed - use Database types directly from supabase-generated
-// Example: type Recipe = Database['public']['Tables']['recipes']['Row']
+// Domain types removed - use Tables helper from supabase-generated
+// Example: type Recipe = Tables<'recipes'>
 
 // ============================================================================
 // FEATURE TYPES (Application Features)
@@ -107,22 +107,21 @@ export * from './shared/api'
 export * from './shared/errors'
 export * from './shared/guards'
 export * from './shared/utils'
-export * from './shared/functions'
 
 // ============================================================================
 // CONVENIENCE ALIASES
 // ============================================================================
-import type { Database } from './supabase-generated'
+import type { Tables } from './supabase-generated'
 
-export type Ingredient = Database['public']['Tables']['ingredients']['Row']
-export type Recipe = Database['public']['Tables']['recipes']['Row']
-export type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
-export type Order = Database['public']['Tables']['orders']['Row']
-export type OrderItem = Database['public']['Tables']['order_items']['Row']
-export type Customer = Database['public']['Tables']['customers']['Row']
-export type Supplier = Database['public']['Tables']['suppliers']['Row']
-export type Expense = Database['public']['Tables']['expenses']['Row']
-export type OperationalCost = Database['public']['Tables']['operational_costs']['Row']
+export type Ingredient = Tables<'ingredients'>
+export type Recipe = Tables<'recipes'>
+export type RecipeIngredient = Tables<'recipe_ingredients'>
+export type Order = Tables<'orders'>
+export type OrderItem = Tables<'order_items'>
+export type Customer = Tables<'customers'>
+export type Supplier = Tables<'suppliers'>
+export type Expense = Tables<'expenses'>
+export type OperationalCost = Tables<'operational_costs'>
 
 // Complex types
 export type RecipeWithIngredients = Recipe & {

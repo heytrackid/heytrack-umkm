@@ -14,13 +14,13 @@ import {
   Users
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import type { Database } from '@/types/supabase-generated'
+import type { IngredientsTable, OrdersTable, CustomersTable, RecipesTable } from '@/types/database'
 
 // Extended types for search display
-type IngredientItem = Pick<Database['public']['Tables']['ingredients']['Row'], 'id' | 'name' | 'current_stock' | 'unit'>
-type OrderItem = Pick<Database['public']['Tables']['orders']['Row'], 'id' | 'order_no' | 'customer_name'>
-type CustomerItem = Pick<Database['public']['Tables']['customers']['Row'], 'id' | 'name' | 'email' | 'phone'>
-type RecipeItem = Pick<Database['public']['Tables']['recipes']['Row'], 'id' | 'name'>
+type IngredientItem = Pick<IngredientsTable, 'id' | 'name' | 'current_stock' | 'unit'>
+type OrderItem = Pick<OrdersTable, 'id' | 'order_no' | 'customer_name'>
+type CustomerItem = Pick<CustomersTable, 'id' | 'name' | 'email' | 'phone'>
+type RecipeItem = Pick<RecipesTable, 'id' | 'name'>
 
 interface QuickAction {
   label: string

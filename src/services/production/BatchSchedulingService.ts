@@ -5,19 +5,34 @@
 
 import { apiLogger } from '@/lib/logger'
 import { isArrayOf, isProductionBatch, getErrorMessage } from '@/lib/type-guards'
-import type { Database } from '@/types/supabase-generated'
+import type { ProductionsTable, ProductionsInsert, ProductionStatus } from '@/types/database'
 
 // Use generated types
-export type ProductionBatch = Database['public']['Tables']['productions']['Row']
-export type ProductionBatchInsert = Database['public']['Tables']['productions']['Insert']
+export type ProductionBatch = ProductionsTable
+export type ProductionBatchInsert = ProductionsInsert
 
-// Extended types for UI
-export interface BatchSchedule {
+// Extended type for UI components that need joined data
+export interface ProductionBatchWithDetails extends ProductionBatch {
+  // Joined fields from recipes table
+  recipe_name?: string
+  
+  // Computed fields that should be provided by the API
+  priority?: number
+  estimated_duration?: number
+  
+  // Mapped fields from the API response
+  batch_number?: string
+  planned_date?: string
+  actual_cost?: number
+  unit?: string
+}
+
+// Production capacity tracking
+export interface ProductionCapacity {
   batches: ProductionBatch[]
   total_capacity: number
   available_capacity: number
 }
-
 // Timeline and scheduling types
 export interface TimelineSlot {
   batch_id: string
@@ -59,7 +74,7 @@ export class BatchSchedulingService {
   /**
    * Get all scheduled batches
    */
-  static async getScheduledBatches(): Promise<ProductionBatch[]> {
+  static async getScheduledBatches(): Promise<ProductionBatchWithDetails[]> {
     try {
       const response = await fetch('/api/production/batches')
       if (!response.ok) {
@@ -97,7 +112,7 @@ export class BatchSchedulingService {
   /**
    * Create a new batch
    */
-  static async createBatch(batch: Partial<ProductionBatchInsert>): Promise<ProductionBatch | null> {
+  static async createBatch(batch: Partial<ProductionBatchInsert>): Promise<ProductionBatchWithDetails | null> {
     try {
       const response = await fetch('/api/production/batches', {
         method: 'POST',
@@ -129,7 +144,7 @@ export class BatchSchedulingService {
    */
   static async updateBatchStatus(
     batchId: string,
-    status: Database['public']['Enums']['production_status']
+    status: ProductionStatus
   ): Promise<boolean> {
     try {
       const response = await fetch(`/api/production/batches/${batchId}`, {

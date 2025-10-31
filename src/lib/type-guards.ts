@@ -5,9 +5,16 @@
  * like Supabase queries, API responses, etc.
  */
 
-import type { Database } from '@/types/supabase-generated'
+import type { 
+  Database,
+  HppCalculationsTable,
+  CustomersTable,
+  RecipesTable,
+  IngredientsTable,
+  OrdersTable,
+  ProductionsTable
+} from '@/types/database'
 
-type Tables = Database['public']['Tables']
 type Enums = Database['public']['Enums']
 
 // ============================================================================
@@ -393,7 +400,7 @@ function isRecipeIngredientItem(value: unknown): value is RecipeIngredientItem {
 /**
  * Type guard for recipe (basic)
  */
-export type Recipe = Tables['recipes']['Row']
+export type Recipe = RecipesTable
 
 export function isRecipe(data: unknown): data is Recipe {
   if (!isRecord(data)) return false
@@ -454,7 +461,7 @@ export function assertRecipeWithIngredients(
 /**
  * Type guard for ingredient (basic)
  */
-export type Ingredient = Tables['ingredients']['Row']
+export type Ingredient = IngredientsTable
 
 export function isIngredient(data: unknown): data is Ingredient {
   if (!isRecord(data)) return false
@@ -523,7 +530,7 @@ export function isOrderStatus(value: unknown): value is OrderStatus {
 /**
  * Type guard for order (basic)
  */
-export type Order = Tables['orders']['Row']
+export type Order = OrdersTable
 
 export function isOrder(data: unknown): data is Order {
   if (!isRecord(data)) return false
@@ -594,7 +601,7 @@ export function isProductionStatus(value: unknown): value is ProductionStatus {
 /**
  * Type guard for production batch (using generated types)
  */
-export type ProductionBatch = Tables['productions']['Row']
+export type ProductionBatch = ProductionsTable
 
 export function isProductionBatch(data: unknown): data is ProductionBatch {
   if (!isRecord(data)) return false
@@ -613,7 +620,7 @@ export function isProductionBatch(data: unknown): data is ProductionBatch {
 /**
  * Type guard for HPP calculation result (using generated types)
  */
-export type HppCalculationData = Tables['hpp_calculations']['Row']
+export type HppCalculationData = HppCalculationsTable
 
 export function isHppCalculation(data: unknown): data is HppCalculationData {
   if (!isRecord(data)) return false
@@ -634,7 +641,7 @@ export function isHppCalculation(data: unknown): data is HppCalculationData {
 /**
  * Type guard for customer (using generated types)
  */
-export type Customer = Tables['customers']['Row']
+export type Customer = CustomersTable
 
 export function isCustomer(data: unknown): data is Customer {
   if (!isRecord(data)) return false

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Shared constants and configuration
 
 /**

@@ -20,7 +20,7 @@ import {
   Trash2,
   Plus
 } from 'lucide-react'
-import type { Order, OrderStatus } from './types'
+import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
 import { getPaymentInfo, getPriorityInfo } from './utils'
 
 interface OrdersListProps {
@@ -118,22 +118,25 @@ const OrdersList = memo(({
             key={order.id}
             actions={[
               {
+                id: 'view',
                 label: 'Lihat',
                 color: 'blue',
                 icon: <Eye className="h-4 w-4" />,
-                onAction: () => onViewOrder(order)
+                onClick: () => onViewOrder(order)
               },
               {
+                id: 'edit',
                 label: 'Edit',
                 color: 'green',
                 icon: <Edit className="h-4 w-4" />,
-                onAction: () => onEditOrder(order)
+                onClick: () => onEditOrder(order)
               },
               {
+                id: 'delete',
                 label: 'Hapus',
                 color: 'red',
                 icon: <Trash2 className="h-4 w-4" />,
-                onAction: () => onDeleteOrder(order.id)
+                onClick: () => onDeleteOrder(order.id)
               }
             ]}
           >
@@ -145,14 +148,14 @@ const OrdersList = memo(({
                     <p className="text-sm text-muted-foreground">{order.customer_name}</p>
                   </div>
                   <OrderStatusBadge
-                    status={order.status as any}
+                    status={order.status || 'PENDING'}
                     compact
                   />
                 </div>
 
                 {/* Progress indicator */}
                 <div className="mb-3">
-                  <OrderProgress currentStatus={order.status as any} />
+                  <OrderProgress currentStatus={order.status || 'PENDING'} />
                 </div>
 
                 <div className="space-y-2 text-sm">
@@ -262,13 +265,13 @@ const OrdersList = memo(({
                         <div className="font-medium">
                           {formatCurrency(order.total_amount || 0)}
                         </div>
-                        <Badge className={getPaymentInfo(order.payment_status).color} variant="outline">
-                          {getPaymentInfo(order.payment_status).label}
+                        <Badge className={getPaymentInfo((order.payment_status || 'UNPAID') as PaymentStatus).color} variant="outline">
+                          {getPaymentInfo((order.payment_status || 'UNPAID') as PaymentStatus).label}
                         </Badge>
                       </td>
                       <td className="py-3">
                         <select
-                          value={order.status}
+                          value={order.status || 'PENDING'}
                           onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
                           className="bg-transparent border border-input rounded px-2 py-1 text-sm"
                         >
@@ -281,8 +284,8 @@ const OrdersList = memo(({
                         </select>
                       </td>
                       <td className="py-3">
-                        <Badge className={getPriorityInfo(order.priority).color}>
-                          {getPriorityInfo(order.priority).label}
+                        <Badge className={getPriorityInfo((order.priority || 'normal') as Priority).color}>
+                          {getPriorityInfo((order.priority || 'normal') as Priority).label}
                         </Badge>
                       </td>
                       <td className="py-3">

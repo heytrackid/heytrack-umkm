@@ -16,10 +16,9 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2 } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { OperationalCostsTable, OperationalCostsInsert } from '@/types/database'
 
-type OperationalCost = Database['public']['Tables']['operational_costs']['Row']
-type OperationalCostInsert = Database['public']['Tables']['operational_costs']['Insert']
+type OperationalCost = OperationalCostsTable
 
 interface OperationalCostFormDialogProps {
     open: boolean
@@ -49,7 +48,7 @@ export function OperationalCostFormDialog({
     const [isSubmitting, setIsSubmitting] = useState(false)
     const mode = cost ? 'edit' : 'create'
 
-    const [formData, setFormData] = useState<Partial<OperationalCostInsert>>({
+    const [formData, setFormData] = useState<Partial<OperationalCostsInsert>>({
         description: '',
         category: 'utilities',
         amount: 0,

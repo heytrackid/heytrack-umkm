@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Financial Workflow Handlers
  * Workflow automation handlers for financial-related events

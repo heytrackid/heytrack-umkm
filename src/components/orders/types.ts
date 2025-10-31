@@ -1,9 +1,9 @@
 // Use generated types from Supabase
-import type { Database } from '@/types/supabase-generated'
+import type { OrdersTable, OrderItemsTable, OrderStatus as OrderStatusEnum } from '@/types/database'
 
-export type Order = Database['public']['Tables']['orders']['Row']
-export type OrderItem = Database['public']['Tables']['order_items']['Row']
-export type OrderStatus = Database['public']['Enums']['order_status']
+export type Order = OrdersTable
+export type OrderItem = OrderItemsTable
+export type OrderStatus = OrderStatusEnum
 
 // Extended types for UI
 export type PaymentStatus = 
@@ -15,16 +15,28 @@ export type Priority =
   | 'low' 
   | 'normal' 
   | 'high'
+  | 'urgent'
 
 export interface OrderFormData {
   customer_name: string
   customer_phone: string
-  customer_address?: string
+  customer_address?: string | null
   delivery_date: string
   delivery_time: string
-  priority: Priority
-  notes?: string
-  order_items: Array<Omit<OrderItem, 'id'>>
+  priority: Priority | null
+  notes?: string | null
+  order_items: Array<{
+    id?: string
+    order_id?: string
+    recipe_id: string
+    product_name: string | null
+    quantity: number
+    unit_price: number
+    total_price: number
+    special_requests: string | null
+    updated_at?: string | null
+    user_id?: string
+  }>
 }
 
 export interface OrderStats {

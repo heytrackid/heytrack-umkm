@@ -9,9 +9,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { Database } from '@/types/supabase-generated'
+import type { OrdersTable } from '@/types/database'
 
-type Order = Database['public']['Tables']['orders']['Row']
+type Order = OrdersTable
 
 // Extended type for table display
 interface OrderForTable extends Order {

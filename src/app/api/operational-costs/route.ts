@@ -1,14 +1,12 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
-import type { Database } from '@/types/supabase-generated'
+import type { ExpensesTable, ExpensesInsert } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-
-type ExpensesTable = Database['public']['Tables']['expenses']
 /**
  * GET /api/operational-costs
  * 
@@ -81,7 +79,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform to match frontend interface
-    const costs: CostSummary[] = data?.map((expense: ExpensesTable['Row']) => ({
+    const costs: CostSummary[] = data?.map((expense: ExpensesTable) => ({
       id: expense.id,
       name: expense.description,
       category: expense.category,
@@ -158,7 +156,7 @@ export async function POST(request: NextRequest) {
 
     const validatedData = validation.data
 
-    const insertPayload: Database['public']['Tables']['expenses']['Insert'] = {
+    const insertPayload: ExpensesInsert = {
       user_id: user.id,
       category: validatedData.category,
       subcategory: validatedData.subcategory,

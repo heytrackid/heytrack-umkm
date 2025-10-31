@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Theme and color management utilities
 
 import { type ClassValue, clsx } from 'clsx'

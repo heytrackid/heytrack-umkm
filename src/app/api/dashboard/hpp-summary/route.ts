@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
-import { isRecipe, isHppCalculation, isArrayOf, safeNumber, getErrorMessage } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
-type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
+type HppCalculationSummary = {
+  recipe_id: string | null
+  total_hpp: number
+  created_at: string | null
+}
 
 export async function GET() {
   try {
@@ -66,7 +66,7 @@ export async function GET() {
     const unreadAlerts = alerts?.filter(alert => !alert.is_read).length || 0
 
     // Get top recipes by margin - create map first
-    const recipeHppMap = new Map<string, HppCalculation>()
+    const recipeHppMap = new Map<string, HppCalculationSummary>()
     hppCalculations?.forEach(calc => {
       if (calc.recipe_id && !recipeHppMap.has(calc.recipe_id)) {
         recipeHppMap.set(calc.recipe_id, calc)
@@ -97,7 +97,7 @@ export async function GET() {
           name: recipe.name,
           hpp_value: hpp,
           margin_percentage: margin,
-          last_updated: hppCalc?.created_at || recipe.updated_at || ''
+          last_updated: hppCalc?.created_at || ''
         }
       })
       .filter(r => r.hpp_value > 0)

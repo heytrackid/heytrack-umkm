@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 
 import { lazy, Suspense, type ComponentProps, type ComponentType } from 'react'

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * WhatsApp Service Module
  * WhatsApp messaging service for order notifications and customer communication

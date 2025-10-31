@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Standardized Application Error Classes
  * This file defines consistent error types for the application

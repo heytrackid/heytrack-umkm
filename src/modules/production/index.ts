@@ -1,11 +1,16 @@
 // Production module - use generated Supabase types
-import type { Database } from '@/types/supabase-generated'
+import type { 
+  ProductionsTable, 
+  ProductionsInsert, 
+  ProductionsUpdate,
+  ProductionStatus as ProductionStatusEnum 
+} from '@/types/database'
 
 // Base types from generated schema
-export type Production = Database['public']['Tables']['productions']['Row']
-export type ProductionInsert = Database['public']['Tables']['productions']['Insert']
-export type ProductionUpdate = Database['public']['Tables']['productions']['Update']
-export type ProductionStatus = Database['public']['Enums']['production_status']
+export type Production = ProductionsTable
+export type ProductionInsert = ProductionsInsert
+export type ProductionUpdate = ProductionsUpdate
+export type ProductionStatus = ProductionStatusEnum
 
 // Backward compatibility aliases
 export type ProductionBatch = Production

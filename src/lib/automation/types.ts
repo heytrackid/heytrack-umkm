@@ -1,11 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import type { Database } from '@/types/supabase-generated'
+import type { Database, RecipesTable, IngredientsTable, RecipeIngredientsTable } from '@/types/database'
 
 // Database types
-export type Recipe = Database['public']['Tables']['recipes']['Row']
-export type Ingredient = Database['public']['Tables']['ingredients']['Row']
-export type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
+export type Recipe = RecipesTable
+export type Ingredient = IngredientsTable
+export type RecipeIngredient = RecipeIngredientsTable
 
 // Configuration for automation rules
 export interface AutomationConfig {

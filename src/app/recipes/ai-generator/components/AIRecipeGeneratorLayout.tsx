@@ -74,7 +74,7 @@ export default function AIRecipeGeneratorPage() {
             setProductType(draft.productType)
             setServings(draft.servings)
             setSelectedIngredients(draft.selectedIngredients)
-            if (draft.targetPrice) {setTargetPrice(draft.targetPrice)}
+            if (draft.targetPrice) { setTargetPrice(draft.targetPrice) }
           }}>
             Restore
           </Button>
@@ -205,26 +205,26 @@ export default function AIRecipeGeneratorPage() {
       }
 
       // Save recipe to database
-      const { data: recipe, error: recipeError } = await supabase
+      const recipeInsert = {
+        user_id: user.id,
+        name: generatedRecipe.name,
+        category: generatedRecipe.category,
+        servings: generatedRecipe.servings,
+        prep_time: generatedRecipe.prep_time_minutes,
+        cook_time: generatedRecipe.bake_time_minutes,
+        description: generatedRecipe.description,
+        instructions: generatedRecipe.instructions as any, // JSON type
+        is_active: true
+      }
+
+      const { data: recipeResult, error: recipeError } = await supabase
         .from('recipes')
-        .insert({
-          user_id: user.id,
-          name: generatedRecipe.name,
-          category: generatedRecipe.category,
-          servings: generatedRecipe.servings,
-          prep_time: generatedRecipe.prep_time_minutes,
-          cook_time: generatedRecipe.bake_time_minutes,
-          description: generatedRecipe.description,
-          instructions: generatedRecipe.instructions,
-          tips: generatedRecipe.tips,
-          storage_instructions: generatedRecipe.storage,
-          shelf_life: generatedRecipe.shelf_life,
-          is_active: true
-        } as any)
+        .insert(recipeInsert as any)
         .select()
         .single()
 
       if (recipeError) { throw recipeError }
+      const recipe = recipeResult as any
 
       // Save recipe ingredients
       const recipeIngredients = generatedRecipe.ingredients.map((ing) => {
@@ -233,11 +233,11 @@ export default function AIRecipeGeneratorPage() {
         )
 
         return {
-          recipe_id: (recipe as any).id,
-          ingredient_id: ingredient?.id,
+          recipe_id: recipe.id,
+          ingredient_id: ingredient?.id || '',
           quantity: ing.quantity,
           unit: ing.unit,
-          notes: ing.notes
+          user_id: user.id
         }
       })
 

@@ -19,11 +19,10 @@ import {
 import { Search, Plus, Package, Clock, CheckCircle, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useSettings } from '@/contexts/settings-context'
-import type { Database } from '@/types/supabase-generated'
+import type { OrdersTable, OrderStatus } from '@/types/database'
 import type { PaginatedResponse } from '@/lib/validations/pagination'
 
-type Order = Database['public']['Tables']['orders']['Row']
-type OrderStatus = Database['public']['Enums']['order_status']
+type Order = OrdersTable
 
 interface OrderWithItems extends Order {
     items?: Array<{
@@ -39,7 +38,7 @@ export const OrdersListWithPagination = () => {
     const router = useRouter()
     const { toast } = useToast()
     const { formatCurrency } = useSettings()
-    const _supabase = createClient()
+    // const _supabase = createClient()
 
     // State
     const [orders, setOrders] = useState<OrderWithItems[]>([])
@@ -113,7 +112,7 @@ export const OrdersListWithPagination = () => {
         const statusConfig: Record<OrderStatus, { label: string; icon: any; className: string }> = {
             PENDING: { label: 'Pending', icon: Clock, className: 'bg-yellow-100 text-yellow-700' },
             CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle, className: 'bg-blue-100 text-blue-700' },
-            IN_PRODUCTION: { label: 'Produksi', icon: Package, className: 'bg-purple-100 text-purple-700' },
+            IN_PROGRESS: { label: 'Sedang Diproses', icon: Package, className: 'bg-purple-100 text-purple-700' },
             READY: { label: 'Siap', icon: CheckCircle, className: 'bg-green-100 text-green-700' },
             DELIVERED: { label: 'Terkirim', icon: CheckCircle, className: 'bg-green-100 text-green-700' },
             CANCELLED: { label: 'Dibatalkan', icon: XCircle, className: 'bg-red-100 text-red-700' },
@@ -223,7 +222,7 @@ export const OrdersListWithPagination = () => {
                                     <div className="flex-1 space-y-2">
                                         <div className="flex items-center gap-3">
                                             <h3 className="font-semibold text-lg">#{order.order_no}</h3>
-                                            {getStatusBadge(order.status)}
+                                            {getStatusBadge(order.status || 'PENDING')}
                                         </div>
                                         <div className="text-sm text-muted-foreground space-y-1">
                                             <p>Pelanggan: {order.customer_name}</p>
@@ -235,7 +234,7 @@ export const OrdersListWithPagination = () => {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-2xl font-bold">
-                                            {formatCurrency(order.total_amount)}
+                                            {formatCurrency(order.total_amount || 0)}
                                         </p>
                                         {order.items && order.items.length > 0 && (
                                             <p className="text-sm text-muted-foreground mt-1">

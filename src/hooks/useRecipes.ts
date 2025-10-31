@@ -7,11 +7,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { Database } from '@/types/supabase-generated'
+import type { RecipesTable, RecipesInsert, RecipesUpdate } from '@/types/database'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type RecipeInsert = Database['public']['Tables']['recipes']['Insert']
-type RecipeUpdate = Database['public']['Tables']['recipes']['Update']
+type Recipe = RecipesTable
+type RecipeInsert = RecipesInsert
+type RecipeUpdate = RecipesUpdate
 
 interface UseRecipesOptions {
   limit?: number

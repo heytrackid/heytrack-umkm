@@ -268,9 +268,7 @@ export const OperationalCostFormSchema = z.object({
 // Simple Ingredient Form Schema (matches the form fields used)
 export const IngredientFormSchema = z.object({
   name: indonesianName,
-  unit: z.enum(['kg', 'g', 'l', 'ml', 'pcs', 'dozen'], {
-    message: 'Satuan tidak valid'
-  }),
+  unit: z.string().min(1, { message: 'Satuan harus diisi' }),
   price_per_unit: z.number().positive('Harga harus lebih dari 0'),
   current_stock: positiveNumber,
   min_stock: positiveNumber.optional(),

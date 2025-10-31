@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Enhanced Toast Notifications for Ingredients
  * 

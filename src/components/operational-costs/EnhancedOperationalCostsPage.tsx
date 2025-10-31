@@ -36,6 +36,7 @@ import {
     Edit,
     Trash2,
     X,
+    Receipt,
 } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 
@@ -47,9 +48,9 @@ import { DeleteModal } from '@/components/ui'
 import { OperationalCostFormDialog } from './OperationalCostFormDialog'
 
 // Types
-import type { Database } from '@/types/supabase-generated'
+import type { OperationalCostsTable } from '@/types/database'
 
-type OperationalCost = Database['public']['Tables']['operational_costs']['Row']
+type OperationalCost = OperationalCostsTable
 type CategoryFilter = 'all' | 'utilities' | 'rent' | 'staff' | 'transport' | 'communication' | 'insurance' | 'maintenance' | 'other'
 
 // Constants
@@ -65,7 +66,7 @@ const COST_CATEGORIES = [
 ]
 
 export const EnhancedOperationalCostsPage = () => {
-    const router = useRouter()
+    const _router = useRouter()
     const { formatCurrency } = useSettings()
 
     // Use query hook for fetching data

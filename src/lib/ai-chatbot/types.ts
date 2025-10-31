@@ -3,6 +3,20 @@
  * Type definitions for chatbot functionality
  */
 
+export interface ChatMessage {
+  id: string
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  timestamp: Date
+}
+
+export interface ChatAction {
+  type: 'navigate' | 'create' | 'update' | 'delete' | 'search'
+  label?: string
+  target?: string
+  data?: Record<string, unknown>
+}
+
 export interface ChatContext {
   userId: string
   sessionId?: string

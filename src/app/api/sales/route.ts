@@ -3,14 +3,14 @@ import { createClient } from '@/utils/supabase/server'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations'
-import type { Database } from '@/types/supabase-generated'
+import type { FinancialRecordsInsert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
 // Note: 'sales' table doesn't exist - sales data is tracked through orders and order_items
-// type Sale = Database['public']['Tables']['sales']['Row']
+// type Sale = SalesTable
 
 // Define the original GET function
 async function GET(request: NextRequest) {
@@ -161,7 +161,7 @@ async function POST(request: NextRequest) {
     const validatedData = validation.data
 
     // Map sales data to financial_records structure
-    const insertPayload: Database['public']['Tables']['financial_records']['Insert'] = {
+    const insertPayload: FinancialRecordsInsert = {
       amount: validatedData.total_amount,
       category: 'Sales',
       description: `Sale of recipe ${validatedData.recipe_id}${validatedData.customer_name ? ` to ${validatedData.customer_name}` : ''}`,

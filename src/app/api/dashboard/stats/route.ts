@@ -4,7 +4,7 @@ import { DateRangeQuerySchema } from '@/lib/validations/domains/common'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-import type { Database } from '@/types/supabase-generated'
+import type { OrderStatus } from '@/types/database'
 import { safeParseAmount, safeString, safeParseInt, safeTimestamp, isInArray } from '@/lib/api-helpers'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
@@ -13,7 +13,7 @@ import { apiLogger } from '@/lib/logger'
 interface OrderStats {
   id: string
   total_amount: number | null
-  status: Database['public']['Enums']['order_status'] | null
+  status: OrderStatus | null
   order_date?: string | null
   customer_name?: string | null
   created_at?: string | null
@@ -373,8 +373,7 @@ export async function POST() {
     const profitEstimate = totalRevenue - totalExpenses
 
     // Upsert daily summary
-    type DailySalesSummary = Database['public']['Tables']['daily_sales_summary']['Insert']
-    const summaryData: DailySalesSummary = {
+    const summaryData = {
       sales_date: today,
       user_id: user.id,
       total_orders: todayOrders?.length || 0,

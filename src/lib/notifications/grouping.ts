@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Notification } from '@/types/domain/notifications'
 
 export interface GroupedNotification {

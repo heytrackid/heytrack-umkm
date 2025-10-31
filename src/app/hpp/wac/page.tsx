@@ -10,9 +10,9 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
 import { PageHeader } from '@/components/shared'
-import type { Database } from '@/types/supabase-generated'
+import type { IngredientsTable } from '@/types/database'
 
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type Ingredient = IngredientsTable
 
 export default function WacEnginePage() {
   const { formatCurrency } = useCurrency()

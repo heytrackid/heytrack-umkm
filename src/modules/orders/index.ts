@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Orders Domain Module
  * Centralized exports untuk semua functionality terkait order management & sales

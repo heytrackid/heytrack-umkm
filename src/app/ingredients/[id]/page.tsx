@@ -16,10 +16,10 @@ import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import { ArrowLeft, Package, Loader2 } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { IngredientsTable, IngredientsUpdate } from '@/types/database'
 
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
-type IngredientUpdate = Database['public']['Tables']['ingredients']['Update']
+type Ingredient = IngredientsTable
+type IngredientUpdate = IngredientsUpdate
 
 export default function EditIngredientPage() {
     const router = useRouter()
@@ -57,7 +57,7 @@ export default function EditIngredientPage() {
                     .eq('id', id)
                     .single<Ingredient>()
 
-                if (error) {throw error}
+                if (error) { throw error }
 
                 if (data) {
                     setIngredient(data)

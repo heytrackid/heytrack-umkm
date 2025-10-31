@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
+import { IngredientPurchasesUpdate, StockTransactionsInsert, InventoryStockLogsInsert } from '@/types/database'
 import { getErrorMessage, isValidUUID, isRecord, extractFirst } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
@@ -126,7 +126,7 @@ export async function PUT(
     const quantityDiff = newQuantity - oldQuantity
 
     // Update purchase
-    const updatePayload: Database['public']['Tables']['ingredient_purchases']['Update'] = {
+    const updatePayload: IngredientPurchasesUpdate = {
       supplier: body.supplier,
       quantity: newQuantity,
       unit_price: body.unit_price,
@@ -161,8 +161,17 @@ export async function PUT(
     // ✅ FIX: Let database trigger handle stock update
     // Only create stock transaction, trigger will auto-update current_stock
     if (quantityDiff !== 0) {
+      // Get current stock before adjustment
+      const { data: ingredient } = await supabase
+        .from('ingredients')
+        .select('current_stock')
+        .eq('id', existingPurchase.ingredient_id)
+        .single()
+
+      const currentStock = ingredient?.current_stock || 0
+
       // Create adjustment transaction - trigger will handle stock update
-      const adjustmentTransaction: Database['public']['Tables']['stock_transactions']['Insert'] = {
+      const adjustmentTransaction: StockTransactionsInsert = {
         ingredient_id: existingPurchase.ingredient_id,
         type: 'ADJUSTMENT',
         quantity: quantityDiff,
@@ -182,9 +191,11 @@ export async function PUT(
       }
 
       // Log the change for audit trail
-      const stockLog: Database['public']['Tables']['inventory_stock_logs']['Insert'] = {
+      const stockLog: InventoryStockLogsInsert = {
         ingredient_id: existingPurchase.ingredient_id,
         quantity_changed: quantityDiff,
+        quantity_before: currentStock,
+        quantity_after: currentStock + quantityDiff,
         change_type: quantityDiff > 0 ? 'increase' : 'decrease',
         reason: 'Purchase quantity updated',
         reference_id: id,
@@ -239,9 +250,18 @@ export async function DELETE(
       return NextResponse.json({ error: 'Purchase not found' }, { status: 404 })
     }
 
+    // Get current stock before reversal
+    const { data: ingredient } = await supabase
+      .from('ingredients')
+      .select('current_stock')
+      .eq('id', purchase.ingredient_id)
+      .single()
+
+    const currentStock = ingredient?.current_stock || 0
+
     // ✅ FIX: Let database trigger handle stock reversal
     // Create reversal transaction - trigger will auto-update current_stock
-    const reversalTransaction: Database['public']['Tables']['stock_transactions']['Insert'] = {
+    const reversalTransaction: StockTransactionsInsert = {
       ingredient_id: purchase.ingredient_id,
       type: 'ADJUSTMENT',
       quantity: -purchase.quantity, // Negative to reduce stock
@@ -260,9 +280,11 @@ export async function DELETE(
     }
 
     // Log stock reversal for audit trail
-    const reversalLog: Database['public']['Tables']['inventory_stock_logs']['Insert'] = {
+    const reversalLog: InventoryStockLogsInsert = {
       ingredient_id: purchase.ingredient_id,
       quantity_changed: -purchase.quantity,
+      quantity_before: currentStock,
+      quantity_after: currentStock - purchase.quantity,
       change_type: 'adjustment',
       reason: 'Purchase deletion',
       reference_id: purchase.id,

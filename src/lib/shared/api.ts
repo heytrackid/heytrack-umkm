@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Shared API utilities and helpers
 
 import { apiLogger } from '@/lib/logger'

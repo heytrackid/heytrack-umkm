@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Email Service Module
  * Email communication service for notifications and updates

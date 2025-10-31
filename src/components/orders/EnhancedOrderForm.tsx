@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Database } from '@/types/supabase-generated'
+import type { RecipesTable } from '@/types/database'
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
-type Recipe = Database['public']['Tables']['recipes']['Row']
+type Recipe = RecipesTable
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -56,7 +56,7 @@ export default function EnhancedOrderForm({
         customer_address: '',
         delivery_date: '',
         delivery_time: '10:00',
-        priority: 'normal' as Priority,
+        priority: 'normal',
         notes: '',
         order_items: []
     })
@@ -70,9 +70,9 @@ export default function EnhancedOrderForm({
     useEffect(() => {
         if (order) {
             setFormData({
-                customer_name: order.customer_name,
+                customer_name: order.customer_name || '',
                 customer_phone: order.customer_phone || '',
-                // customer_email: order.customer_email || '', // Field doesn't exist in DB
+                // customer_email: order.customer_name || '', // Field doesn't exist in DB
                 customer_address: order.customer_address || '',
                 delivery_date: order.delivery_date ? order.delivery_date.split('T')[0] : '',
                 delivery_time: order.delivery_time || '10:00',
@@ -80,14 +80,11 @@ export default function EnhancedOrderForm({
                 notes: order.notes || '',
                 order_items: (order as OrderWithRelations).items?.map(item => ({
                     recipe_id: item.recipe_id,
-                    product_name: item.product_name || '',
+                    product_name: item.product_name ?? null,
                     quantity: item.quantity,
                     unit_price: item.unit_price,
                     total_price: item.total_price,
-                    special_requests: item.special_requests || '',
-                    order_id: item.order_id,
-                    user_id: item.user_id,
-                    updated_at: item.updated_at || null
+                    special_requests: item.special_requests ?? null
                 })) || []
             })
             setCurrentStep(3) // Skip to items if editing
@@ -137,10 +134,11 @@ export default function EnhancedOrderForm({
             ...prev,
             order_items: [...prev.order_items, {
                 recipe_id: '',
-                product_name: '',
+                product_name: null,
                 quantity: 1,
-                price: 0,
-                notes: ''
+                special_requests: null,
+                total_price: 0,
+                unit_price: 0
             }]
         }))
     }
@@ -170,9 +168,7 @@ export default function EnhancedOrderForm({
                     quantity: 1,
                     unit_price: recipe.selling_price || 0,
                     total_price: recipe.selling_price || 0,
-                    special_requests: '',
-                    order_id: '', // Will be set when order is created
-                    user_id: '' // Will be set when order is created
+                    special_requests: null
                 }]
             }))
         }
@@ -181,8 +177,15 @@ export default function EnhancedOrderForm({
 
     const updateOrderItem = (
         index: number,
-        field: keyof Omit<OrderItem, 'id'>,
-        value: string | number
+        field: keyof {
+            recipe_id: string
+            product_name: string | null
+            quantity: number
+            unit_price: number
+            total_price: number
+            special_requests: string | null
+        },
+        value: string | number | null
     ) => {
         setFormData(prev => ({
             ...prev,
@@ -265,7 +268,7 @@ export default function EnhancedOrderForm({
                         Alamat Pengiriman (Opsional)
                     </Label>
                     <Textarea
-                        value={formData.customer_address}
+                        value={formData.customer_address || ''}
                         onChange={(e) => handleInputChange('customer_address', e.target.value)}
                         placeholder="Masukkan alamat lengkap"
                         rows={3}
@@ -329,7 +332,7 @@ export default function EnhancedOrderForm({
                         />
                     </div>
                     <Select
-                        value={formData.priority}
+                        value={formData.priority || 'normal'}
                         onValueChange={(value: Priority) => handleInputChange('priority', value)}
                     >
                         <SelectTrigger className="text-base">
@@ -361,7 +364,7 @@ export default function EnhancedOrderForm({
                 <div className="space-y-2">
                     <Label>Catatan Pesanan (Opsional)</Label>
                     <Textarea
-                        value={formData.notes}
+                        value={formData.notes || ''}
                         onChange={(e) => handleInputChange('notes', e.target.value)}
                         placeholder="Tambahkan catatan khusus untuk pesanan ini"
                         rows={3}

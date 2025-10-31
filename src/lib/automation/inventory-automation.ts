@@ -272,7 +272,7 @@ export class InventoryAutomation {
    */
   private calculateTurnoverRate(ingredient: Ingredient): number {
     // Simplified calculation - would use actual historical data
-    const avgStock = (ingredient.current_stock ?? 0 + ingredient.min_stock) / 2
+    const avgStock = ((ingredient.current_stock ?? 0) + (ingredient.min_stock ?? 0)) / 2
     const estimatedMonthlyCOGS = avgStock * ingredient.price_per_unit * 0.1 // Assume 10% monthly usage
     
     if (avgStock === 0) {return 0}
@@ -283,8 +283,8 @@ export class InventoryAutomation {
    * Calculate storage efficiency score
    */
   private calculateStorageEfficiency(ingredient: Ingredient): number {
-    const optimalStock = ingredient.min_stock ?? 0 * 2 // Optimal is 2x minimum
-    const currentRatio = ingredient.current_stock ?? 0 / optimalStock
+    const optimalStock = (ingredient.min_stock ?? 0) * 2 // Optimal is 2x minimum
+    const currentRatio = (ingredient.current_stock ?? 0) / optimalStock
     
     // Efficiency score: 100% when at optimal, decreases with over/understocking
     if (currentRatio <= 1) {return currentRatio * 100}

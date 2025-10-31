@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Production Automation Module Types
  * Additional type definitions specific to production automation

@@ -1,33 +1,31 @@
 /**
  * Supabase Database Enums
  * All enum types from the database
+ * 
+ * These types are re-exported from the main database.ts file to maintain
+ * consistency with the generated Supabase types.
  */
 
-export type BusinessUnit = "kitchen" | "sales" | "inventory" | "finance" | "all"
+import type { 
+  BusinessUnit as BusinessUnitDB,
+  OrderStatus as OrderStatusDB,
+  PaymentMethod as PaymentMethodDB,
+  ProductionStatus as ProductionStatusDB,
+  RecordType as RecordTypeDB,
+  TransactionType as TransactionTypeDB,
+  UserRole as UserRoleDB
+} from '../database'
 
-export type OrderStatus =
-  | "PENDING"
-  | "CONFIRMED"
-  | "IN_PROGRESS"
-  | "READY"
-  | "DELIVERED"
-  | "CANCELLED"
+// Re-export enum types from the main database file for consistency
+export type BusinessUnit = BusinessUnitDB
+export type OrderStatus = OrderStatusDB
+export type PaymentMethod = PaymentMethodDB
+export type ProductionStatus = ProductionStatusDB
+export type RecordType = RecordTypeDB
+export type TransactionType = TransactionTypeDB
+export type UserRole = UserRoleDB
 
-export type PaymentMethod =
-  | "CASH"
-  | "BANK_TRANSFER"
-  | "CREDIT_CARD"
-  | "DIGITAL_WALLET"
-  | "OTHER"
-
-export type ProductionStatus = "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
-
-export type RecordType = "INCOME" | "EXPENSE" | "INVESTMENT" | "WITHDRAWAL"
-
-export type TransactionType = "PURCHASE" | "USAGE" | "ADJUSTMENT" | "WASTE"
-
-export type UserRole = "super_admin" | "admin" | "manager" | "staff" | "viewer"
-
+// Constants for enum values
 export const EnumConstants = {
   business_unit: ["kitchen", "sales", "inventory", "finance", "all"] as const,
   order_status: [

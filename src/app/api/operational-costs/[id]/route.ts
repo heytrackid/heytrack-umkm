@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { OperationalCostUpdateSchema } from '@/lib/validations/domains/finance'
-import type { Database } from '@/types/supabase-generated'
+import type { OperationalCostsUpdate } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
@@ -35,7 +35,7 @@ export async function GET(
 
     // Fetch operational cost
     const { data, error } = await supabase
-      .from('expenses')
+      .from('operational_costs')
       .select('*')
       .eq('id', id)
       .eq('user_id', user.id)
@@ -96,24 +96,22 @@ export async function PUT(
 
     const validatedData = validation.data
 
+
     // Build update object
-    const updatePayload: Database['public']['Tables']['expenses']['Update'] = {
-      category: validatedData.category,
-      subcategory: validatedData.subcategory,
+    const updatePayload: OperationalCostsUpdate = {
+      category: validatedData.category || undefined,
       amount: validatedData.amount,
-      description: validatedData.description,
-      expense_date: validatedData.date,
-      is_recurring: validatedData.is_recurring,
-      recurring_frequency: validatedData.recurring_frequency || undefined,
-      supplier: validatedData.vendor_name ?? undefined,
-      receipt_number: validatedData.invoice_number !== null ? validatedData.invoice_number : undefined,
-      status: validatedData.is_paid ? 'paid' : 'pending',
+      description: validatedData.description || undefined,
+      date: validatedData.date,
+      recurring: validatedData.is_recurring,
+      frequency: validatedData.recurring_frequency,
+      supplier: validatedData.vendor_name,
+      reference: validatedData.invoice_number,
+      payment_method: validatedData.is_paid ? 'CASH' : undefined,
       updated_at: new Date().toISOString()
     }
-
-    // Update with RLS enforcement
     const { data, error } = await supabase
-      .from('expenses')
+      .from('operational_costs')
       .update(updatePayload)
       .eq('id', id)
       .eq('user_id', user.id)
@@ -161,7 +159,7 @@ export async function DELETE(
 
     // Delete with RLS enforcement
     const { error } = await supabase
-      .from('expenses')
+      .from('operational_costs')
       .delete()
       .eq('id', id)
       .eq('user_id', user.id)

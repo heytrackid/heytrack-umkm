@@ -1,8 +1,8 @@
 'use client'
 
-import type { Database } from '@/types/supabase-generated'
-type Customer = Database['public']['Tables']['customers']['Row']
-type Recipe = Database['public']['Tables']['recipes']['Row']
+import type { CustomersTable, RecipesTable } from '@/types/database'
+type Customer = CustomersTable
+type Recipe = RecipesTable
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

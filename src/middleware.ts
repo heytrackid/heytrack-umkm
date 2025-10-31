@@ -1,11 +1,9 @@
-import { updateSession } from '@/utils/supabase/middleware'
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { middlewareLogger } from '@/lib/logger'
 import { generateNonce, getStrictCSP } from '@/lib/csp'
+import { updateSession } from '@/utils/supabase/middleware'
 
-// Define protected routes as a Set for O(1) lookup performance
 const PROTECTED_ROUTES = new Set([
   '/dashboard',
   '/orders',
@@ -21,168 +19,122 @@ const PROTECTED_ROUTES = new Set([
   '/reports',
 ])
 
-// Auth pages that should redirect when user is authenticated
 const AUTH_PAGES = new Set(['/auth/login', '/auth/register'])
 
-// Request validation schemas
-// ✅ Allow null values for headers (some requests don't have all headers)
 const RequestHeadersSchema = z.object({
   'user-agent': z.string().nullable().optional(),
-  'accept': z.string().nullable().optional(),
+  accept: z.string().nullable().optional(),
   'accept-language': z.string().nullable().optional(),
   'content-type': z.string().nullable().optional(),
   'x-forwarded-for': z.string().nullable().optional(),
 })
 
 const UrlValidationSchema = z.object({
-  pathname: z.string().min(1).max(2048), // Reasonable URL length limit
-  search: z.string().max(2048).optional(), // Query string length limit
+  pathname: z.string().min(1).max(2048),
+  search: z.string().max(2048).optional(),
 })
 
 export async function middleware(request: NextRequest) {
+  const isDev = process.env.NODE_ENV === 'development'
+  const nonce = generateNonce()
+
   try {
-    // Generate CSP nonce for this request
-    const nonce = generateNonce()
-    const isDev = process.env.NODE_ENV === 'development'
-    
-    // Validate request headers (optional, for security monitoring)
+    // Validasi ringan (log saja saat dev)
     const headersValidation = RequestHeadersSchema.safeParse({
       'user-agent': request.headers.get('user-agent'),
-      'accept': request.headers.get('accept'),
+      accept: request.headers.get('accept'),
       'accept-language': request.headers.get('accept-language'),
       'content-type': request.headers.get('content-type'),
       'x-forwarded-for': request.headers.get('x-forwarded-for'),
     })
-
-    // Validate URL structure
     const urlValidation = UrlValidationSchema.safeParse({
       pathname: request.nextUrl.pathname,
       search: request.nextUrl.search,
     })
-
-    // Log suspicious requests but don't block them
-    // Only log in development for debugging (too noisy in production)
-    if (!headersValidation.success && process.env.NODE_ENV === 'development') {
-      middlewareLogger.debug({ 
-        url: request.url,
-        issues: headersValidation.error.issues,
-      }, 'Request headers validation failed (non-blocking)')
+    if (!headersValidation.success && isDev) {
+      middlewareLogger.debug(
+        { url: request.url, issues: headersValidation.error.issues },
+        'Request headers validation failed (non-blocking)'
+      )
     }
-
     if (!urlValidation.success) {
-      middlewareLogger.warn({ 
-        url: request.url,
-        issues: urlValidation.error.issues,
-      }, 'Malformed URL detected')
-      return NextResponse.json(
-        { error: 'Invalid request URL' },
-        { status: 400 }
+      middlewareLogger.warn(
+        { url: request.url, issues: urlValidation.error.issues },
+        'Malformed URL detected'
       )
+      return NextResponse.json({ error: 'Invalid request URL' }, { status: 400 })
     }
 
-    // Update session using the new helper
-    let response = await updateSession(request)
-    
-    // Add CSP nonce to request headers for use in components
-    request.headers.set('x-nonce', nonce)
-    
-    // Add strict CSP header to response
+    // Update session and get user (this handles cookie refresh)
+    const { user, response } = await updateSession(request)
+
+    // Add CSP headers to response
     response.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
+    response.headers.set('x-nonce', nonce)
 
-    const {pathname} = request.nextUrl
+    const { pathname } = request.nextUrl
 
-    // ✅ Check for auth cookies first - avoid AuthSessionMissingError
-    const hasAuthCookie = request.cookies.has('sb-access-token') || 
-                          request.cookies.has('sb:token') ||
-                          request.cookies.getAll().some(cookie => cookie.name.startsWith('sb-'))
-    
-    let user = null
-    
-    // Only attempt auth check if cookies exist
-    if (hasAuthCookie) {
-      const supabase = createServerClient(
-        process.env['NEXT_PUBLIC_SUPABASE_URL']!,
-        process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!,
-        {
-          cookies: {
-            getAll() {
-              return request.cookies.getAll()
-            },
-            setAll(cookiesToSet) {
-              cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-              response = NextResponse.next({
-                request,
-              })
-              cookiesToSet.forEach(({ name, value, options }) =>
-                response.cookies.set(name, value, options)
-              )
-            },
-          },
-        }
-      )
-
-      try {
-        const { data, error } = await supabase.auth.getUser()
-        
-        if (!error && data?.user) {
-          user = data.user
-        }
-        // Silently ignore auth errors - cookies might be expired
-      } catch {
-        // Silently handle exceptions - don't block the request
+    // Protected route check
+    let isProtected = false
+    for (const base of PROTECTED_ROUTES) {
+      if (pathname.startsWith(base)) {
+        isProtected = true
+        break
       }
     }
 
-    // Check if the current path is protected (optimized with Set)
-    const isProtectedRoute = Array.from(PROTECTED_ROUTES).some((route) =>
-      pathname.startsWith(route)
-    )
-
-    // Protect authenticated routes
-    if (isProtectedRoute && !user && !pathname.startsWith('/auth/login')) {
+    if (isProtected && !user && !pathname.startsWith('/auth/login')) {
       const url = request.nextUrl.clone()
       url.pathname = '/auth/login'
-      // Preserve intended destination for redirect after login
       url.searchParams.set('redirectTo', pathname)
-      return NextResponse.redirect(url)
+      const redirectResponse = NextResponse.redirect(url)
+      redirectResponse.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
+      redirectResponse.headers.set('x-nonce', nonce)
+      return redirectResponse
     }
 
-    // Redirect authenticated users away from auth pages (optimized with Set)
-    const isAuthPage = Array.from(AUTH_PAGES).some((page) => pathname.startsWith(page))
-    if (isAuthPage && user) {
+    // Auth page check
+    let isAuth = false
+    for (const base of AUTH_PAGES) {
+      if (pathname.startsWith(base)) {
+        isAuth = true
+        break
+      }
+    }
+
+    if (isAuth && user) {
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
-      return NextResponse.redirect(url)
+      const redirectResponse = NextResponse.redirect(url)
+      redirectResponse.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
+      redirectResponse.headers.set('x-nonce', nonce)
+      return redirectResponse
     }
 
-    // Redirect root based on auth status
+    // Root redirect
     if (pathname === '/') {
       const url = request.nextUrl.clone()
       url.pathname = user ? '/dashboard' : '/auth/login'
       const redirectResponse = NextResponse.redirect(url)
-      // Preserve CSP header on redirect
       redirectResponse.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
+      redirectResponse.headers.set('x-nonce', nonce)
       return redirectResponse
     }
 
     return response
   } catch (error) {
     middlewareLogger.error({ error }, 'Middleware error')
-    // On error, allow request to proceed to avoid blocking the app
-    return NextResponse.next()
+    // Return basic response with CSP on error
+    const errorResponse = NextResponse.next()
+    errorResponse.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
+    errorResponse.headers.set('x-nonce', nonce)
+    return errorResponse
   }
 }
 
+// Sesuaikan matcher dengan kebutuhanmu
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif)$).*)',
   ],
 }

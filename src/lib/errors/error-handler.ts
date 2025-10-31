@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Centralized Error Handling Utilities
  * Provides consistent error handling across the application

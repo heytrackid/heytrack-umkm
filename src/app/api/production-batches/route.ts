@@ -14,7 +14,7 @@ export async function GET() {
     // ✅ Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
     
     // ✅ Fetch with RLS (user_id filter)
@@ -22,7 +22,7 @@ export async function GET() {
       .from('productions')
       .select(`
         *,
-        recipe:recipes(name)
+        recipe:recipes(name, cook_time)
       `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
@@ -35,10 +35,14 @@ export async function GET() {
     // ✅ Map database columns to expected format
     const mappedBatches = batches?.map(batch => ({
       ...batch,
+      recipe_name: batch.recipe?.name, // Extract recipe name from joined data
       batch_number: batch.id.slice(0, 8).toUpperCase(), // Generate batch number from ID
       planned_date: batch.created_at, // Use created_at as planned_date
       actual_cost: batch.total_cost, // Map total_cost to actual_cost
-      unit: 'pcs' // Default unit since recipes table doesn't have unit column
+      unit: 'pcs', // Default unit since recipes table doesn't have unit column
+      // Add missing fields with default values
+      priority: 5, // Default priority (assuming 1-10 scale)
+      estimated_duration: batch.recipe?.cook_time || 30, // Default to 30 minutes if not available
     })) || []
 
     return NextResponse.json(mappedBatches);
@@ -54,7 +58,7 @@ export async function POST(request: Request) {
     // ✅ Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
     
     const body = await request.json();
@@ -68,7 +72,7 @@ export async function POST(request: Request) {
       }])
       .select(`
         *,
-        recipe:recipes(name)
+        recipe:recipes(name, cook_time)
       `)
       .single();
 
@@ -80,10 +84,14 @@ export async function POST(request: Request) {
     // ✅ Map database columns to expected format
     const mappedBatch = {
       ...batch,
+      recipe_name: batch.recipe?.name, // Extract recipe name from joined data
       batch_number: batch.id.slice(0, 8).toUpperCase(),
       planned_date: batch.created_at,
       actual_cost: batch.total_cost,
-      unit: 'pcs' // Default unit since recipes table doesn't have unit column
+      unit: 'pcs', // Default unit since recipes table doesn't have unit column
+      // Add missing fields with default values
+      priority: 5, // Default priority (assuming 1-10 scale)
+      estimated_duration: batch.recipe?.cook_time || 30, // Default to 30 minutes if not available
     }
 
     // Invalidate cache

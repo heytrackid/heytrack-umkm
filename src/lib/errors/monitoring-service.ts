@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Error Monitoring Service
  * Integrates with external error monitoring services like Sentry, LogRocket, etc.

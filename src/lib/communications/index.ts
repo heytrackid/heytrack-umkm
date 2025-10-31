@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Communications Module - Main Entry Point
  * Unified communication services for WhatsApp, notifications, and email

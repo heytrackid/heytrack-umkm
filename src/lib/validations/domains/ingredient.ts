@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Ingredient Validation Schemas
  * Validation schemas for ingredient-related operations

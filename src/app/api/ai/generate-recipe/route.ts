@@ -3,14 +3,11 @@ import { apiLogger } from '@/lib/logger'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
-import type { Database } from '@/types/supabase-generated'
-import { isIngredient, isRecipe, isArrayOf, getErrorMessage, safeNumber } from '@/lib/type-guards'
+import type { IngredientsTable, RecipesTable } from '@/types/database'
 
-// Use generated types
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
-type Recipe = Database['public']['Tables']['recipes']['Row']
-// type RecipeInsert = Database['public']['Tables']['recipes']['Insert']
-// type RecipeIngredientRow = Database['public']['Tables']['recipe_ingredients']['Row']
+// Use generated types from database.ts (these are already Row types)
+type Ingredient = IngredientsTable
+type Recipe = RecipesTable
 
 // AI response structure (not a table type)
 interface RecipeIngredient {
@@ -85,9 +82,9 @@ export async function POST(request: NextRequest) {
         const typedIngredients: IngredientSubset[] = (ingredients || []).map(ing => ({
             id: ing.id,
             name: ing.name,
-            unit: ing.unit,
-            price_per_unit: ing.price_per_unit,
-            current_stock: ing.current_stock
+            unit: ing.unit || 'gram', // Default to common unit if null
+            price_per_unit: ing.price_per_unit || 0, // Default to 0 if null
+            current_stock: ing.current_stock || 0  // Default to 0 if null
         }))
 
         // Build the AI prompt
@@ -108,20 +105,24 @@ export async function POST(request: NextRequest) {
         const recipe = parseRecipeResponse(aiResponse)
 
         // Check for duplicate recipe names
+        const recipeName = (typeof recipe.name === 'string') ? recipe.name : ''
         const { data: existingRecipes } = await supabase
             .from('recipes')
             .select('id, name')
-            .eq('name', (recipe as Partial<Recipe>).name || '')
+            .eq('name', recipeName)
             .eq('user_id', userId)
 
+        let finalRecipe = recipe; // Start with the original recipe
+        
         if (existingRecipes && existingRecipes.length > 0) {
-            apiLogger.warn({ recipeName: (recipe as Partial<Recipe>).name || 'Unknown', count: existingRecipes.length }, 'Duplicate recipe name detected')
+            apiLogger.warn({ recipeName, count: existingRecipes.length }, 'Duplicate recipe name detected')
             // Add version suffix to name
-            ;(recipe as Recipe).name = `${(recipe as Recipe).name} v${existingRecipes.length + 1}`
+            const updatedRecipeName = `${recipeName} v${existingRecipes.length + 1}`
+            finalRecipe = { ...recipe, name: updatedRecipeName }
         }
 
         // Calculate HPP for the generated recipe
-        const hppCalculation = await calculateRecipeHPP(recipe as Recipe, typedIngredients, userId)
+        const hppCalculation = await calculateRecipeHPP(finalRecipe, typedIngredients, userId)
 
         return NextResponse.json({
             success: true,
@@ -585,7 +586,8 @@ async function calculateRecipeHPP(
     
     const supabaseClient = await createClient()
 
-    const recipeIngredients = (recipe as any).ingredients as RecipeIngredient[] || []
+    const recipeIngredients = Array.isArray((recipe as any).ingredients) ? 
+        (recipe as any).ingredients as RecipeIngredient[] : []
     for (const recipeIng of recipeIngredients) {
         // Find matching ingredient using fuzzy matching
         const ingredient = findBestIngredientMatch(recipeIng.name, availableIngredients)
@@ -640,14 +642,16 @@ async function calculateRecipeHPP(
     // Estimate operational cost per unit
     // Assume daily production of 50 units (can be configured)
     const estimatedDailyProduction = 50
-    const recipeServings = recipe.servings ?? 1
+    const recipeServings = (recipe.servings !== null && recipe.servings !== undefined) ? 
+        Number(recipe.servings) : 1
     const operationalCostPerBatch = dailyOpCost > 0 
         ? (dailyOpCost / estimatedDailyProduction) * recipeServings
         : totalMaterialCost * 0.3 // Fallback to 30% if no data
 
     const totalHPP = totalMaterialCost + operationalCostPerBatch
-    const servings = recipe.servings ?? 1
-    const hppPerUnit = totalHPP / servings
+    const servings = (recipe.servings !== null && recipe.servings !== undefined) ? 
+        Number(recipe.servings) : 1
+    const hppPerUnit = servings > 0 ? totalHPP / servings : 0
 
     return {
         totalMaterialCost,

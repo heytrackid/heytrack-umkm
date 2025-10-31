@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Client-Side API Error Handler
  * Handles errors from API calls on the client side

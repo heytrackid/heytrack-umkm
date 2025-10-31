@@ -20,9 +20,8 @@ import { apiLogger } from '@/lib/logger'
 
 // Shared components
 import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
-import { PageActions } from '@/components/ui/page-patterns'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { Plus, RefreshCw } from 'lucide-react'
+import { Plus, RefreshCw, Users } from 'lucide-react'
 
 // Import components normally - they're lightweight
 import CustomersTable from './CustomersTable'
@@ -30,10 +29,8 @@ import CustomerStats from './CustomerStats'
 import CustomerSearchFilters from './CustomerSearchFilters'
 import CustomerForm from './CustomerForm'
 
+import type { CustomersTable as CustomersTableType } from '@/types/database'
 import type { Customer } from './types'
-import type { Database } from '@/types/supabase-generated'
-
-type CustomersTable = Database['public']['Tables']['customers']
 
 export default function CustomersLayout() {
   const router = useRouter()
@@ -49,7 +46,7 @@ export default function CustomersLayout() {
     [LOADING_KEYS.FETCH_CUSTOMERS]: true
   })
 
-  const [customers, setCustomers] = useState<Array<CustomersTable['Row']>>([])
+  const [customers, setCustomers] = useState<Array<CustomersTableType>>([])
   const { toast } = useToast()
 
   // Fetch customers on mount - auth is handled by middleware

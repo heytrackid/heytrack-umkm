@@ -1,35 +1,14 @@
-import type { Json } from '../shared/common'
+import type { NotificationsTable, NotificationsInsert, NotificationsUpdate } from '@/types/database'
 
-/**
- * Notification priority levels
- */
-export type NotificationPriority = 'low' | 'medium' | 'high' | 'critical'
+// Use database field types - these match the actual database schema
+export type Notification = NotificationsTable
+export type NotificationInsert = NotificationsInsert
+export type NotificationUpdate = NotificationsUpdate
 
-/**
- * Notification types
- */
-export type NotificationType = 
-  | 'info'
-  | 'success'
-  | 'warning'
-  | 'error'
-  | 'inventory_alert'
-  | 'order_update'
-  | 'payment_received'
-  | 'production_complete'
-  | 'system_alert'
-
-/**
- * Notification category
- */
-export type NotificationCategory = 
-  | 'system'
-  | 'order'
-  | 'inventory'
-  | 'production'
-  | 'payment'
-  | 'customer'
-  | 'general'
+// Use database field types for notification attributes to ensure consistency with DB schema
+export type NotificationType = Notification['type']
+export type NotificationCategory = Notification['category']
+export type NotificationPriority = Notification['priority']
 
 /**
  * Notification data payload
@@ -76,11 +55,3 @@ export interface NotificationPreferences {
     end: string   // HH:mm format
   }
 }
-
-// Re-export table types from generated
-import type { Database } from '@/types/supabase-generated'
-
-export type NotificationsTable = Database['public']['Tables']['notifications']
-export type Notification = NotificationsTable['Row']
-export type NotificationInsert = NotificationsTable['Insert']
-export type NotificationUpdate = NotificationsTable['Update']

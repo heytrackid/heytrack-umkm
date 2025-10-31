@@ -3,17 +3,12 @@
  * Workaround untuk issue dengan Supabase type inference
  */
 
-import type { Database } from '@/types/supabase-generated'
+import type { Tables, TablesInsert as SupabaseTablesInsert, TablesUpdate as SupabaseTablesUpdate, Database } from '@/types/database'
 
-// Helper type untuk extract Insert types
-export type TablesInsert<T extends keyof Database['public']['Tables']> = 
-  Database['public']['Tables'][T]['Insert']
-
-export type TablesUpdate<T extends keyof Database['public']['Tables']> = 
-  Database['public']['Tables'][T]['Update']
-
-export type TablesRow<T extends keyof Database['public']['Tables']> = 
-  Database['public']['Tables'][T]['Row']
+// Helper type untuk extract Insert types - re-export from database.ts
+export type TablesInsert<T extends keyof Database['public']['Tables']> = SupabaseTablesInsert<T>
+export type TablesUpdate<T extends keyof Database['public']['Tables']> = SupabaseTablesUpdate<T>
+export type TablesRow<T extends keyof Database['public']['Tables']> = Tables<T>
 
 /**
  * Type-safe insert helper

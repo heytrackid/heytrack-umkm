@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED');
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' });
     }
 
     // Rate limiting - per minute
@@ -45,8 +45,7 @@ export async function POST(request: NextRequest) {
       
       throw new APIError(
         'Terlalu banyak permintaan. Silakan tunggu sebentar.',
-        429,
-        'RATE_LIMIT_EXCEEDED'
+        { status: 429, code: 'RATE_LIMIT_EXCEEDED' }
       );
     }
 
@@ -55,8 +54,7 @@ export async function POST(request: NextRequest) {
     if (!RateLimiter.check(hourlyRateLimitKey, RATE_LIMITS.AI_CHAT_HOURLY.maxRequests, RATE_LIMITS.AI_CHAT_HOURLY.windowMs)) {
       throw new APIError(
         'Anda telah mencapai batas maksimal chat per jam. Silakan coba lagi nanti.',
-        429,
-        'RATE_LIMIT_EXCEEDED'
+        { status: 429, code: 'RATE_LIMIT_EXCEEDED' }
       );
     }
 

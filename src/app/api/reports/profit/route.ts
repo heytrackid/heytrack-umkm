@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import type { Database } from '@/types/supabase-generated'
+import type { OrdersTable, OrderItemsTable, FinancialRecordsTable } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
 import type { RecipeWithIngredients } from '@/types/query-results'
@@ -9,9 +9,9 @@ import type { RecipeWithIngredients } from '@/types/query-results'
 export const runtime = 'nodejs'
 
 
-type Order = Database['public']['Tables']['orders']['Row']
-type OrderItem = Database['public']['Tables']['order_items']['Row']
-type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
+type Order = OrdersTable
+type OrderItem = OrderItemsTable
+type FinancialRecord = FinancialRecordsTable
 /**
  * GET /api/reports/profit
  * 

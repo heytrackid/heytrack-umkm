@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Database } from '@/types/supabase-generated'
-type Recipe = Database['public']['Tables']['recipes']['Row']
+import type { RecipesTable } from '@/types/database'
+type Recipe = RecipesTable
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

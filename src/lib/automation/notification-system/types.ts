@@ -4,7 +4,7 @@
  */
 
 // Use generated types for database entities
-import type { Database } from '@/types/supabase-generated'
+import type { Database, IngredientsTable } from '@/types/database'
 
 export interface SmartNotification {
   type: 'critical' | 'warning' | 'info' | 'success'
@@ -33,7 +33,7 @@ export interface FinancialMetrics {
   revenue: number
 }
 
-export type Ingredient = Database['public']['Tables']['ingredients']['Row']
+export type Ingredient = IngredientsTable
 
 export interface OrderForNotification {
   delivery_date: string

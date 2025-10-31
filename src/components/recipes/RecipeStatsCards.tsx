@@ -2,9 +2,9 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { ChefHat, TrendingUp, Calculator, BarChart3 } from 'lucide-react'
-import type { Database } from '@/types/supabase-generated'
+import type { RecipesTable } from '@/types/database'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
+type Recipe = RecipesTable
 
 interface RecipeStatsCardsProps {
     recipes: Recipe[]

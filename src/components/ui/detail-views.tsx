@@ -7,7 +7,7 @@ import type { ComponentType, ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Edit, Trash2, MoreHorizontal, Download, Share } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, MoreHorizontal, Download, Share, Plus } from 'lucide-react'
 
 // Detail view header with back button and actions
 interface DetailHeaderProps {

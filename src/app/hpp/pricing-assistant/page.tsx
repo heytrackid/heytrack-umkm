@@ -21,9 +21,9 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
 import { PageHeader, SharedStatsCards } from '@/components/shared'
-import type { Database } from '@/types/supabase-generated'
+import type { RecipesTable } from '@/types/database'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
+type Recipe = RecipesTable
 
 const pricingBreadcrumbs = [
   { label: 'Dashboard', href: '/' },

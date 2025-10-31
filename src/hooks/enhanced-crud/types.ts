@@ -1,6 +1,6 @@
-import type { Database } from '@/types/supabase-generated'
+import type { Database, TablesUpdate } from '@/types/database'
 
-type Tables = Database['public']['Tables']
+type TablesMap = Database['public']['Tables']
 
 export interface EnhancedCRUDOptions {
   showSuccessToast?: boolean
@@ -13,9 +13,9 @@ export interface EnhancedCRUDOptions {
   customErrorHandler?: (error: Error, operation: 'create' | 'update' | 'delete') => void
 }
 
-export interface BulkUpdateItem<T extends keyof Tables> {
+export interface BulkUpdateItem<T extends keyof TablesMap> {
   id: string
-  data: Tables[T]['Update']
+  data: TablesUpdate<T>
 }
 
 export interface AsyncOperationOptions {

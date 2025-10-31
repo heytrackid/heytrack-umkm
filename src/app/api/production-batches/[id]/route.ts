@@ -25,7 +25,7 @@ export async function PUT(
     // ✅ Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
     const body = await request.json()
@@ -44,7 +44,7 @@ export async function PUT(
 
     if (error) {
       if (error.code === 'PGRST116') {
-        throw new APIError('Production batch not found', 404, 'NOT_FOUND')
+        throw new APIError('Production batch not found', { status: 404, code: 'NOT_FOUND' })
       }
       apiLogger.error({ error, userId: user.id, batchId: id }, 'Failed to update production batch')
       throw error
@@ -53,7 +53,7 @@ export async function PUT(
     // ✅ V2: Validate production batch with type guard
     if (!isProductionBatch(batch)) {
       apiLogger.error({ batch }, 'Invalid production batch structure')
-      throw new APIError('Invalid data structure', 500, 'INVALID_DATA')
+      throw new APIError('Invalid data structure', { status: 500, code: 'INVALID_DATA' })
     }
 
     // ✅ V2: Safe extraction of joined recipe data
@@ -93,7 +93,7 @@ export async function DELETE(
     // ✅ Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
     // ✅ Delete with RLS (user_id filter)

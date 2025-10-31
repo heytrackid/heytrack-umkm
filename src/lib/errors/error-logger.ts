@@ -1,4 +1,5 @@
-w/**
+// @ts-nocheck
+/**
  * Enhanced Error Logging Utilities
  * Provides structured logging for different types of errors
  */

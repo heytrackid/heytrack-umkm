@@ -3,12 +3,16 @@
  * Uses generated Supabase types as base
  */
 
-import type { Database } from '@/types/supabase-generated'
+import type { 
+  HppCalculationsTable,
+  HppCalculationsInsert,
+  HppCalculationsUpdate
+} from '@/types/database'
 
 // Use generated types from Supabase
-export type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
-export type HppCalculationInsert = Database['public']['Tables']['hpp_calculations']['Insert']
-export type HppCalculationUpdate = Database['public']['Tables']['hpp_calculations']['Update']
+export type HppCalculation = HppCalculationsTable
+export type HppCalculationInsert = HppCalculationsInsert
+export type HppCalculationUpdate = HppCalculationsUpdate
 
 export interface HppCalculationResult {
   recipe_id: string // Use snake_case for consistency with DB

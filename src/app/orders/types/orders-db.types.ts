@@ -3,12 +3,12 @@
  * These types are generated based on the actual database structure
  */
 
-import type { Database } from '@/types/supabase-generated'
+import type { OrdersTable, OrderItemsTable, OrderStatus, PaymentMethod } from '@/types/database'
 
 // Base types from database
-export type OrderRow = Database['public']['Tables']['orders']['Row']
-export type OrderItemRow = Database['public']['Tables']['order_items']['Row']
-export type OrderStatus = Database['public']['Enums']['order_status']
+export type OrderRow = OrdersTable
+export type OrderItemRow = OrderItemsTable
+export type { OrderStatus, PaymentMethod }
 
 // Backwards compatible aliases
 export type Order = OrderRow
@@ -45,7 +45,7 @@ export interface OrderFormData {
   customer_name: string
   customer_phone?: string
   customer_address?: string
-  status: string
+  status: OrderStatus  // Use database enum
   order_date: string
   delivery_date?: string
   delivery_time?: string
@@ -55,7 +55,7 @@ export interface OrderFormData {
   tax_amount: number
   total_amount: number
   paid_amount: number
-  payment_method: string
+  payment_method: PaymentMethod  // Use database enum
   priority: string
   notes?: string
   special_instructions?: string
@@ -67,6 +67,3 @@ export interface OrderFormData {
     notes?: string
   }>
 }
-
-// Payment method type
-export type PaymentMethod = 'cash' | 'transfer' | 'qris' | 'card' | 'ewallet'

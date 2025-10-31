@@ -190,22 +190,12 @@ export default function Dashboard() {
         {/* Header - Always visible */}
         <PageHeader
           title="Beranda"
-          description={
-            <>
-              {currentTime.toLocaleDateString('id-ID', {
+          description={`${currentTime.toLocaleDateString('id-ID', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
-              })}
-              {user && (
-                <>
-                  <br />
-                  Selamat datang kembali, {user.email?.split('@')[0]}! 👋
-                </>
-              )}
-            </>
-          }
+              })}${user ? `, Selamat datang kembali, ${user.email?.split('@')[0]}! 👋` : ''}`}
         />
 
         {/* Empty State - Show when user has no data */}

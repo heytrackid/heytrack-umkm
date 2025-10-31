@@ -27,6 +27,7 @@ export const SupplierFormFields = ({
         description="Masukkan informasi dasar supplier"
       >
         <FormField
+          name="name"
           label="Nama Supplier"
           error={errors.name?.message}
           required
@@ -39,6 +40,7 @@ export const SupplierFormFields = ({
         </FormField>
 
         <FormField
+          name="contact_person"
           label="Contact Person"
           error={errors.contact_person?.message}
         >
@@ -56,6 +58,7 @@ export const SupplierFormFields = ({
       >
         <FormGrid cols={2}>
           <FormField
+            name="phone"
             label="Nomor Telepon"
             error={errors.phone?.message}
           >
@@ -67,6 +70,7 @@ export const SupplierFormFields = ({
           </FormField>
 
           <FormField
+            name="email"
             label="Email"
             error={errors.email?.message}
           >
@@ -81,6 +85,7 @@ export const SupplierFormFields = ({
 
       <FormSection title="Alamat">
         <FormField
+          name="address"
           label="Alamat Lengkap"
           error={errors.address?.message}
         >
@@ -95,6 +100,7 @@ export const SupplierFormFields = ({
       {showNotes && (
         <FormSection title="Catatan Tambahan">
           <FormField
+            name="notes"
             label="Catatan"
             error={errors.notes?.message}
           >
