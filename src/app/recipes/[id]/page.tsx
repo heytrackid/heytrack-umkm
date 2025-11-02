@@ -5,6 +5,8 @@ import { RecipeDetailPage } from '@/components/recipes/RecipeDetailPage'
 import AppLayout from '@/components/layout/app-layout'
 import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
+
+
 interface RecipePageProps {
     params: {
         id: string

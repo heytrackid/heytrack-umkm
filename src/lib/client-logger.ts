@@ -1,3 +1,5 @@
+
+
 /**
  * Client-Side Logger
  * 
@@ -60,9 +62,13 @@ class ClientLogger {
     }
 
     // Use appropriate console method
+    // eslint-disable-next-line no-console
     const consoleMethod = level === 'error' ? console.error : 
+                         // eslint-disable-next-line no-console
                          level === 'warn' ? console.warn :
+                         // eslint-disable-next-line no-console
                          level === 'debug' ? console.debug :
+                         // eslint-disable-next-line no-console
                          console.log
 
     if (isDevelopment()) {

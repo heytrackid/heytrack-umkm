@@ -1,8 +1,7 @@
-// Form validation schemas
-// Validation schemas specifically for form submissions and user input
-
 import { z } from 'zod'
+import type { OrderFormData as OrderFormValues } from '@/components/orders/types'
 import {
+
   UUIDSchema,
   EmailSchema,
   PhoneSchema,
@@ -12,6 +11,9 @@ import {
   rupiah,
   percentage
 } from './base-validations'
+
+// Form validation schemas
+// Validation schemas specifically for form submissions and user input 
 
 // Common validation field types for forms
 const RequiredString = z.string().min(1, 'Field ini wajib diisi')
@@ -298,25 +300,22 @@ export type SupplierForm = z.infer<typeof SupplierFormSchema>
 export type OperationalCostForm = z.infer<typeof OperationalCostFormSchema>
 
 // Order validation helper function (moved from components/orders/utils.ts)
-export function validateOrderData(data: Record<string, unknown>): string[] {
+export function validateOrderData(data: OrderFormValues): string[] {
   const errors: string[] = []
 
-  const customerName = data.customer_name
-  if (typeof customerName === 'string' && !customerName.trim()) {
+  if (!data.customer_name.trim()) {
     errors.push('Nama pelanggan harus diisi')
   }
 
-  const customerPhone = data.customer_phone
-  if (typeof customerPhone === 'string' && !customerPhone.trim()) {
+  if (!data.customer_phone.trim()) {
     errors.push('Nomor telepon harus diisi')
   }
 
-  if (!data.delivery_date) {
+  if (!data.delivery_date?.trim()) {
     errors.push('Tanggal pengiriman harus diisi')
   }
 
-  const orderItems = data.order_items
-  if (!orderItems || (Array.isArray(orderItems) && orderItems.length === 0)) {
+  if (data.order_items.length === 0) {
     errors.push('Minimal harus ada 1 item pesanan')
   }
 

@@ -12,15 +12,15 @@ import { dbLogger } from '@/lib/logger'
 import { PageHeader } from '@/components/shared'
 import type { IngredientsTable } from '@/types/database'
 
-type Ingredient = IngredientsTable
 
-const WacEnginePage = () {
+
+const WacEnginePage = () => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
 
   // ✅ OPTIMIZED: Use TanStack Query for caching (to be fully implemented)
   // TODO: Import and use useIngredients({ limit: 1000 })
-  const [ingredients, setIngredients] = useState<Ingredient[]>([])
+  const [ingredients, setIngredients] = useState<IngredientsTable[]>([])
   const [selectedIngredient, setSelectedIngredient] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [calculating, setCalculating] = useState(false)
@@ -158,7 +158,7 @@ const WacEnginePage = () {
 
             <Button
               onClick={calculateWac}
-              disabled={calculating || loading || !selectedIngredient}
+              disabled={(calculating || loading) || !selectedIngredient}
               className="w-full md:w-auto"
             >
               {calculating ? 'Menghitung...' : 'Hitung WAC'}
@@ -257,7 +257,7 @@ const WacEnginePage = () {
               <div className="text-3xl font-bold text-purple-600">
                 {formatCurrency(
                   ingredients.reduce((sum, i) => {
-                    const wac = i.weighted_average_cost || i.price_per_unit || 0
+                    const wac = (i.weighted_average_cost || i.price_per_unit) || 0
                     const stock = i.current_stock || 0
                     return sum + (wac * stock)
                   }, 0)

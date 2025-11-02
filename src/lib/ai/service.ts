@@ -1,12 +1,13 @@
+import { apiLogger } from '@/lib/logger'
+import { AIClient } from './client'
+import { AISecurity } from './security'
+import { PromptBuilder } from './prompt-builder'
+
 /**
  * AI Service Module
  * Core AI service with security and prompt building
  */
 
-import { apiLogger } from '@/lib/logger'
-import { AIClient } from './client'
-import { AISecurity } from './security'
-import { PromptBuilder } from './prompt-builder'
 
 export class AIService {
   /**
@@ -22,7 +23,7 @@ export class AIService {
     }
 
     const secureSystemPrompt = PromptBuilder.buildSystemPrompt(safeSystemPrompt)
-    return await AIClient.callAI(safePrompt, secureSystemPrompt)
+    return AIClient.callAI(safePrompt, secureSystemPrompt)
   }
 
   /**
@@ -31,7 +32,7 @@ export class AIService {
   static async getPredictions(data: Record<string, unknown>): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(data, 'sales forecasting and trend analysis')
     const systemPrompt = 'You are a business intelligence analyst specializing in Indonesian food businesses.'
-    return await this.callOpenRouter(prompt, systemPrompt)
+    return this.callOpenRouter(prompt, systemPrompt)
   }
 
   /**
@@ -40,6 +41,6 @@ export class AIService {
   static async optimizeInventory(inventoryData: Record<string, unknown>): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(inventoryData, 'inventory optimization and demand forecasting')
     const systemPrompt = 'You are an inventory management expert for food businesses.'
-    return await this.callOpenRouter(prompt, systemPrompt)
+    return this.callOpenRouter(prompt, systemPrompt)
   }
 }

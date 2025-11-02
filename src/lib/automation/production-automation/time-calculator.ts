@@ -1,9 +1,10 @@
+import { type Recipe, type AutomationConfig } from '@/lib/automation/types'
+
 /**
  * Time Calculator Module
  * Handles production time calculations and scheduling
  */
 
-import { type Recipe, type AutomationConfig } from '@/lib/automation/types'
 
 export class TimeCalculator {
   /**
@@ -55,7 +56,7 @@ export class TimeCalculator {
    * Schedule production orders with optimal timing
    */
   static scheduleOptimalProduction(
-    plan: Array<{ recipeId: string; quantity: number; priority: number }>, // ProductionPlanItem[]
+    plan: Array<{ recipeId: string; quantity: number; priority: number; deliveryDate: Date; production: { estimatedDuration: number } }>,
     workingHours: { start: number; end: number }
   ) {
     // Sort by delivery date priority

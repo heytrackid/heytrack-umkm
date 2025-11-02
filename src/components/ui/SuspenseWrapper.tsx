@@ -1,12 +1,5 @@
-/**
- * Suspense Wrapper for Lazy Components
- * Provides consistent loading states and error boundaries
- */
-
 import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from 'react'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
-
-// Import comprehensive skeletons
 import {
   OrdersTableSkeleton,
   CustomersTableSkeleton,
@@ -27,6 +20,12 @@ import {
   DashboardHeaderSkeleton,
   ChartCardSkeleton
 } from '@/components/ui/skeletons'
+import { globalLazyLoadingUtils } from '../lazy'
+
+/**
+ * Suspense Wrapper for Lazy Components
+ * Provides consistent loading states and error boundaries
+ */
 
 interface SkeletonProps {
   className?: string
@@ -146,25 +145,18 @@ export const RouteSuspenseWrapper = ({
   // Preload critical components for this route
   useEffect(() => {
     // Import the lazy loading utils and preload for route
-    import('@/components/lazy').then(({ globalLazyLoadingUtils }) => {
-      globalLazyLoadingUtils.preloadForRoute(routeName as any).catch(() => {
-        // Ignore preload errors
-      })
+    globalLazyLoadingUtils.preloadForRoute(routeName as any).catch(() => {
+      // Ignore preload errors
     })
   }, [routeName])
 
-  return (
-    <SuspenseWrapper loadingType="page">
-      {children}
-    </SuspenseWrapper>
-  )
+  return <>{children}</>
 }
 
 /**
  * Lazy component with automatic performance tracking
  */
 export function createTrackedLazyComponent<T extends ComponentType<Record<string, unknown>>>(
-  importFn: () => Promise<{ default: T }>,
   componentName: string,
   options: {
     loadingType?: keyof typeof loadingComponents
@@ -172,16 +164,15 @@ export function createTrackedLazyComponent<T extends ComponentType<Record<string
   } = {}
 ) {
   const LazyComponent = lazy(() =>
-    importFn().then(module => {
+    import(`../path/to/component/${componentName}`).then(module => {
       // Track component load time
       const startTime = performance.now()
       setTimeout(() => {
-        import('@/components/lazy').then(({ LazyLoadingMetrics }) => {
-          LazyLoadingMetrics.trackComponentLoad(componentName, startTime)
-        })
+        if (typeof window !== 'undefined' && (window as any).LazyLoadingMetrics) {
+          (window as any).LazyLoadingMetrics.trackComponentLoad(componentName, startTime)
+        }
       }, 0)
-
-      return { default: module.default }
+      return module
     })
   )
 

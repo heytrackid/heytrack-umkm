@@ -1,11 +1,12 @@
+import { apiLogger } from '@/lib/logger'
+import { AIService } from './service'
+import { PromptBuilder } from './prompt-builder'
+
 /**
  * Business AI Module
  * AI services for business intelligence and insights
  */
 
-import { apiLogger } from '@/lib/logger'
-import { AIService } from './service'
-import { PromptBuilder } from './prompt-builder'
 
 export interface PricingData {
   products?: Array<{
@@ -68,7 +69,7 @@ export class BusinessAI {
   static async generatePricingStrategy(data: PricingData): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(data, 'dynamic pricing strategy and market positioning')
     const systemPrompt = 'You are a pricing strategist specializing in Indonesian food businesses and competitive analysis.'
-    return await AIService.callOpenRouter(prompt, systemPrompt)
+    return AIService.callOpenRouter(prompt, systemPrompt)
   }
 
   /**
@@ -77,7 +78,7 @@ export class BusinessAI {
   static async analyzeInventory(data: InventoryData): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(data, 'inventory management and supply chain optimization')
     const systemPrompt = 'You are an inventory optimization expert for food service businesses.'
-    return await AIService.callOpenRouter(prompt, systemPrompt)
+    return AIService.callOpenRouter(prompt, systemPrompt)
   }
 
   /**
@@ -86,7 +87,7 @@ export class BusinessAI {
   static async optimizeProduction(data: ProductionData): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(data, 'production planning and resource optimization')
     const systemPrompt = 'You are a production planning expert for food manufacturing businesses.'
-    return await AIService.callOpenRouter(prompt, systemPrompt)
+    return AIService.callOpenRouter(prompt, systemPrompt)
   }
 
   /**

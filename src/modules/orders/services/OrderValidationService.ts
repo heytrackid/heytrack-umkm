@@ -2,6 +2,8 @@ import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 
+
+
 type Recipe = RecipesTable
 type RecipeIngredient = RecipeIngredientsTable
 type Ingredient = IngredientsTable
@@ -95,8 +97,8 @@ export class OrderValidationService {
           }
 
           const requiredQuantity = ri.quantity * item.quantity
-          const currentStock = ingredient.current_stock ?? 0
-          const reorderPoint = ingredient.reorder_point ?? 0
+          const currentStock = ingredient.current_stock || 0
+          const reorderPoint = ingredient.reorder_point || 0
 
           if (currentStock < requiredQuantity) {
             errors.push(

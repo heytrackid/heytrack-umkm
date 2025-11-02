@@ -1,11 +1,12 @@
+import { useCallback, useState } from 'react'
+import { apiLogger } from '@/lib/logger'
+
 /**
  * useConfirm Hook
  * Easy way to add confirmation dialogs
  */
 
-import { useCallback, useState } from 'react'
 
-import { apiLogger } from '@/lib/logger'
 interface UseConfirmOptions {
   onConfirm: () => void | Promise<void>
   title?: string
@@ -29,7 +30,7 @@ export function useConfirm() {
       void setLoading(true)
       await config.onConfirm()
       void setIsOpen(false)
-    } catch (_err) {
+    } catch (err) {
       apiLogger.error({ err }, 'Confirmation action failed:')
     } finally {
       void setLoading(false)

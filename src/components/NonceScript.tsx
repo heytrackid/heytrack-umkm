@@ -1,6 +1,7 @@
 import Script from 'next/script'
 import { getNonce } from '@/lib/nonce'
 
+
 /**
  * Script component with CSP nonce support
  * Use this instead of regular <script> tags for inline scripts

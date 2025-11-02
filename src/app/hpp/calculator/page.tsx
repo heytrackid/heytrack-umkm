@@ -2,9 +2,6 @@
 
 import { useState } from 'react'
 import AppLayout from '@/components/layout/app-layout'
-
-// Force dynamic rendering to avoid SSG issues
-export const dynamic = 'force-dynamic'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -17,6 +14,9 @@ import { useRecipes } from '@/hooks/useRecipes'
 import { dbLogger } from '@/lib/logger'
 import { PageHeader, SharedStatsCards } from '@/components/shared'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+
+// Force dynamic rendering to avoid SSG issues
+export const dynamic = 'force-dynamic'
 
 const calculatorBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -47,13 +47,13 @@ interface HppCalculationExtended {
   user_id: string
 }
 
-const HppCalculatorPage = () {
+const HppCalculatorPage = () => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
 
   // ✅ OPTIMIZED: Use TanStack Query for caching
   const { data: recipesData, isLoading: loading } = useRecipes({ limit: 1000 })
-  const recipes = recipesData?.recipes || []
+  const recipes = recipesData?.recipes ?? []
 
   const [selectedRecipe, setSelectedRecipe] = useState<string>('')
   const [calculation, setCalculation] = useState<HppCalculationExtended | null>(null)
@@ -175,7 +175,7 @@ const HppCalculatorPage = () {
 
             <Button
               onClick={calculateHpp}
-              disabled={calculating || loading || !selectedRecipe}
+              disabled={(calculating || loading) || !selectedRecipe}
               className="w-full md:w-auto"
             >
               {calculating ? 'Menghitung...' : 'Hitung HPP'}
@@ -229,8 +229,8 @@ const HppCalculatorPage = () {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-3xl font-bold ${(calculation.wac_adjustment ?? 0) >= 0 ? 'text-red-600' : 'text-green-600'}`}>
-                  {(calculation.wac_adjustment ?? 0) >= 0 ? '+' : ''}{formatCurrency(calculation.wac_adjustment ?? 0)}
+                <div className={`text-3xl font-bold ${(calculation.wac_adjustment || 0) >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {(calculation.wac_adjustment || 0) >= 0 ? '+' : ''}{formatCurrency(calculation.wac_adjustment || 0)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   penyesuaian inventory
@@ -261,10 +261,10 @@ const HppCalculatorPage = () {
                   <span className="font-medium">Biaya Overhead</span>
                   <span className="font-semibold">{formatCurrency(calculation.overhead_cost)}</span>
                 </div>
-                {(calculation.wac_adjustment ?? 0) !== 0 && (
+                {(calculation.wac_adjustment || 0) !== 0 && (
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                     <span className="font-medium">WAC Adjustment</span>
-                    <span className="font-semibold">{formatCurrency(calculation.wac_adjustment ?? 0)}</span>
+                    <span className="font-semibold">{formatCurrency(calculation.wac_adjustment || 0)}</span>
                   </div>
                 )}
                 <Separator />
@@ -281,8 +281,8 @@ const HppCalculatorPage = () {
                   Breakdown Bahan Baku
                 </h4>
                 <div className="space-y-2">
-                  {calculation.material_breakdown.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
+                  {calculation.material_breakdown.map((item) => (
+                    <div key={item.ingredient_name} className="flex justify-between items-center p-3 border rounded-lg">
                       <div>
                         <div className="font-medium">{item.ingredient_name}</div>
                         <div className="text-sm text-muted-foreground">

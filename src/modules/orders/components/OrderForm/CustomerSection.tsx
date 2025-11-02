@@ -1,31 +1,37 @@
-/**
- * Customer Section Component
- * Handles customer selection and input
- */
-
-'use client'
-
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertCircle } from 'lucide-react'
 import type { CustomersTable } from '@/types/database'
+import { useState } from 'react'
+
+'use client'
+
+
+/**
+ * Customer Section Component
+ * Handles customer selection and input
+ */
 
 type Customer = CustomersTable
 
+interface CustomerFormData {
+    customer_name: string
+    customer_phone: string
+    customer_address: string
+    order_date: string
+    priority: string
+}
+
+type CustomerField = keyof CustomerFormData
+
 interface CustomerSectionProps {
-    formData: {
-        customer_name: string
-        customer_phone: string
-        customer_address: string
-        order_date: string
-        priority: string
-    }
+    formData: CustomerFormData
     fieldErrors: Record<string, string>
     availableCustomers: Customer[]
-    onInputChange: <K extends keyof any>(field: K, value: any) => void
-    onClearError: (field: string) => void
+    onInputChange: <K extends CustomerField>(field: K, value: CustomerFormData[K]) => void
+    onClearError: (field: CustomerField) => void
 }
 
 export const CustomerSection = ({
@@ -39,7 +45,7 @@ export const CustomerSection = ({
     const [showNewCustomer, setShowNewCustomer] = useState(false)
 
     const selectCustomer = (customer: Customer | undefined) => {
-        if (!customer) {return}
+        if (!customer) { return }
         onInputChange('customer_name', customer.name)
         onInputChange('customer_phone', customer.phone || '')
         onInputChange('customer_address', customer.address || '')
@@ -54,7 +60,7 @@ export const CustomerSection = ({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowNewCustomer(!showNewCustomer)}
+                    onClick={() => setShowNewCustomer(prev => !prev)}
                     className="self-end sm:self-auto"
                 >
                     {showNewCustomer ? "Batalkan" : "Pelanggan Baru"}
@@ -104,7 +110,7 @@ export const CustomerSection = ({
                         value={formData.customer_name}
                         onChange={(e) => {
                             onInputChange('customer_name', e.target.value)
-                            if (fieldErrors['customer_name']) {onClearError('customer_name')}
+                            if (fieldErrors['customer_name']) { onClearError('customer_name') }
                         }}
                         required
                         className={`mt-1 ${fieldErrors['customer_name'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
@@ -169,5 +175,3 @@ export const CustomerSection = ({
         </div>
     )
 }
-
-import { useState } from 'react'

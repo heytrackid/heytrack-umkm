@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 
+
+
 interface PerformanceMetrics {
   // Core Web Vitals
   lcp: number | null // Largest Contentful Paint

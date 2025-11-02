@@ -1,5 +1,7 @@
 import type { NotificationPreferencesTable, NotificationPreferencesInsert, NotificationPreferencesUpdate } from '@/types/database'
 
+
+
 export type NotificationPreferences = NotificationPreferencesTable
 export type NotificationPreferencesInsertType = NotificationPreferencesInsert
 export type NotificationPreferencesUpdateType = NotificationPreferencesUpdate

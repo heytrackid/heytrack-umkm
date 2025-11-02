@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Receipt, Plus, Zap, Lightbulb } from 'lucide-react'
 
+
+
 interface EnhancedEmptyStateProps {
     onAdd: () => void
     onQuickSetup: () => void

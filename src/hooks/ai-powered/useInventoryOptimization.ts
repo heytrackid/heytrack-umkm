@@ -3,6 +3,8 @@
 import { useCallback, useState } from 'react'
 import type { AIAnalysisState, InventoryOptimizationRequest } from './types'
 
+
+
 /**
  * AI-Powered Inventory Optimization Hook
  * Provides intelligent inventory management recommendations based on usage patterns, seasonality, and supply chain factors

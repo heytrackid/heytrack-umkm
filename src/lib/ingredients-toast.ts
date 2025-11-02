@@ -1,11 +1,13 @@
-// @ts-nocheck
+import { createElement } from 'react'
+import { ToastAction, type ToastActionElement } from '@/components/ui/toast'
+
+
 /**
  * Enhanced Toast Notifications for Ingredients
  * 
  * Provides specific, actionable feedback for ingredient operations
  */
 
-import type { ToastActionElement } from '@/components/ui/toast'
 
 interface ToastOptions {
   title: string
@@ -45,11 +47,9 @@ export const ingredientDeletedToast = (name: string, onUndo?: () => void): Toast
   title: '🗑️ Bahan Baku Dihapus',
   description: `"${name}" telah dihapus dari daftar`,
   variant: 'default',
-  action: onUndo ? {
-    altText: 'Undo',
-    onClick: onUndo,
-    children: 'Batalkan'
-  } as ToastActionElement : undefined
+  action: onUndo
+    ? createElement(ToastAction, { altText: 'Undo', onClick: onUndo }, 'Batalkan') as unknown as ToastActionElement
+    : undefined
 })
 
 /**

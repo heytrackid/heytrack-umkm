@@ -1,6 +1,3 @@
-// Global Error Boundary Component
-// Catches React errors and provides graceful fallback UI
-
 'use client'
 
 import { Component, type ErrorInfo, type ReactNode } from 'react'
@@ -8,6 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import { apiLogger } from '@/lib/logger'
+
+// Global Error Boundary Component
+// Catches React errors and provides graceful fallback UI
+
+
 
 interface Props {
   children: ReactNode

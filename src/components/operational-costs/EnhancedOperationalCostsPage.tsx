@@ -5,14 +5,21 @@ import { useRouter } from 'next/navigation'
 import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
 import { useResponsive } from '@/hooks/useResponsive'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/supabase'
 import { usePagination } from '@/hooks/usePagination'
-// UI Components
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { SimplePagination } from '@/components/ui/simple-pagination'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { EnhancedEmptyState } from './EnhancedEmptyState'
+import { MobileOperationalCostCard } from './MobileOperationalCostCard'
+import { OperationalCostStats } from './OperationalCostStats'
+import { DeleteModal } from '@/components/ui'
+import { OperationalCostFormDialog } from './OperationalCostFormDialog'
+import type { OperationalCostsTable } from '@/types/database'
 import {
     Select,
     SelectContent,
@@ -38,17 +45,10 @@ import {
     X,
     Receipt,
 } from 'lucide-react'
-import { PageHeader } from '@/components/layout/PageHeader'
 
 // Feature Components
-import { EnhancedEmptyState } from './EnhancedEmptyState'
-import { MobileOperationalCostCard } from './MobileOperationalCostCard'
-import { OperationalCostStats } from './OperationalCostStats'
-import { DeleteModal } from '@/components/ui'
-import { OperationalCostFormDialog } from './OperationalCostFormDialog'
 
 // Types
-import type { OperationalCostsTable } from '@/types/database'
 
 type OperationalCost = OperationalCostsTable
 type CategoryFilter = 'all' | 'utilities' | 'rent' | 'staff' | 'transport' | 'communication' | 'insurance' | 'maintenance' | 'other'
@@ -78,6 +78,7 @@ export const EnhancedOperationalCostsPage = () => {
     const { delete: deleteCost } = useSupabaseCRUD('operational_costs')
     const { toast } = useToast()
     const { isMobile } = useResponsive()
+    const { confirm } = useConfirm()
 
     // Hydration fix - prevent SSR/client mismatch
     const [isMounted, setIsMounted] = useState(false)
@@ -107,7 +108,7 @@ export const EnhancedOperationalCostsPage = () => {
                     !searchTerm ||
                     cost.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     cost.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (cost.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
+                    (cost.notes?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
 
                 // Category filter
                 const matchesCategory = categoryFilter === 'all' || cost.category === categoryFilter
@@ -174,9 +175,12 @@ export const EnhancedOperationalCostsPage = () => {
     }
 
     const handleQuickSetup = async () => {
-        const confirmed = window.confirm(
-            'Tambahkan template biaya operasional umum?\n\nIni akan menambahkan 8 kategori biaya yang umum digunakan.'
-        )
+        const confirmed = await confirm({
+            title: 'Tambahkan Template Biaya Operasional?',
+            description: 'Ini akan menambahkan 8 kategori biaya yang umum digunakan.',
+            confirmText: 'Tambahkan',
+            variant: 'default'
+        })
         if (!confirmed) { return }
 
         try {

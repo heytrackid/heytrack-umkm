@@ -1,8 +1,10 @@
-"use client"
+'use client';
 
 import type { CSSProperties } from 'react'
 import { useTheme } from "next-themes"
 import { type ToasterProps, Toaster as Sonner } from 'sonner'
+
+
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme ="system" } = useTheme()

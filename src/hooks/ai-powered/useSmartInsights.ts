@@ -4,6 +4,8 @@ import { useCallback } from 'react'
 import { logger } from '@/lib/logger'
 import type { SmartInsightsRequest, AIInsight, PricingAnalysisRequest, InventoryOptimizationRequest } from './types'
 
+
+
 interface UseSmartInsightsProps {
   analyzePricing: (request: PricingAnalysisRequest) => Promise<AIInsight['analysis']>
   optimizeInventory: (request: InventoryOptimizationRequest) => Promise<AIInsight['analysis']>
@@ -49,26 +51,26 @@ export function useSmartInsights({
         for (const recipe of topRecipes) {
           if (recipe.recipe_ingredients && Array.isArray(recipe.recipe_ingredients)) {
             const ingredients = recipe.recipe_ingredients.map(ri => ({
-              name: ri.ingredient?.name ?? 'Unknown',
-              cost: (ri.ingredient?.price_per_unit ?? 0) * ri.quantity,
+              name: ri.ingredient?.name || 'Unknown',
+              cost: (ri.ingredient?.price_per_unit || 0) * ri.quantity,
               quantity: ri.quantity
             }))
 
             try {
               const pricingAnalysis = await analyzePricing({
-                productName: recipe.name ?? 'Unknown Recipe',
+                productName: recipe.name || 'Unknown Recipe',
                 ingredients,
-                currentPrice: recipe.selling_price ?? undefined
+                currentPrice: recipe.selling_price || undefined
               })
 
               insights.push({
                 type: 'pricing',
-                productName: recipe.name ?? 'Unknown Recipe',
+                productName: recipe.name || 'Unknown Recipe',
                 analysis: pricingAnalysis,
                 priority: 'high'
               })
             } catch (err: unknown) {
-              logger.warn({ err }, `Pricing analysis failed for ${recipe.name ?? 'unknown'}`)
+              logger.warn({ err }, `Pricing analysis failed for ${recipe.name || 'unknown'}`)
             }
           }
         }
@@ -79,12 +81,12 @@ export function useSmartInsights({
         try {
           const inventoryOptimization = await optimizeInventory({
             ingredients: (businessData.ingredients as IngredientData[]).map(ingredient => ({
-              name: ingredient.name ?? 'Unknown Ingredient',
-              currentStock: ingredient.current_stock ?? 0,
-              minStock: ingredient.min_stock ?? 0,
-              price: ingredient.price_per_unit ?? 0,
-              supplier: ingredient.supplier ?? 'Unknown',
-              leadTime: ingredient.lead_time ?? 3
+              name: ingredient.name || 'Unknown Ingredient',
+              currentStock: ingredient.current_stock || 0,
+              minStock: ingredient.min_stock || 0,
+              price: ingredient.price_per_unit || 0,
+              supplier: ingredient.supplier || 'Unknown',
+              leadTime: ingredient.lead_time || 3
             }))
           })
 

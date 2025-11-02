@@ -1,9 +1,11 @@
+import { createClient } from './client'
+
+
 /**
  * Client-safe Supabase utilities that can be imported anywhere
  * Server-specific functionality is isolated and only executed server-side
  */
 
-import { createClient } from './client'
 
 export { createClient }
 

@@ -1,13 +1,14 @@
-/**
- * React Query hooks for Ingredients
- * Provides caching and optimistic updates for ingredient data
- */
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { IngredientsTable, IngredientsInsert, IngredientsUpdate } from '@/types/database'
+
+/**
+ * React Query hooks for Ingredients
+ * Provides caching and optimistic updates for ingredient data
+ */
+
 
 type Ingredient = IngredientsTable
 type IngredientInsert = IngredientsInsert

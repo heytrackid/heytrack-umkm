@@ -1,28 +1,19 @@
-'use client';
+'use client'
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { EnhancedIngredientsPage as IngredientsCRUD } from '@/components/ingredients/EnhancedIngredientsPage';
 import AppLayout from '@/components/layout/app-layout';
-import { StatsCards, StatCardPatterns, PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui'
+import { StatsCards, StatCardPatterns, PageBreadcrumb, BreadcrumbPatterns, PageHeader } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useIngredients } from '@/hooks/useIngredients';
 import type { IngredientsTable } from '@/types/database';
 import { Button } from '@/components/ui/button';
-import {
-  Plus,
-  ShoppingCart,
-  Upload,
-  AlertTriangle
-} from 'lucide-react';
-import { ImportDialog } from '@/components/import';
-import {
-  parseIngredientsCSV,
-  generateIngredientsTemplate
-} from '@/components/import/csv-helpers';
+import { Plus, ShoppingCart, Upload, AlertTriangle } from 'lucide-react';
+import { ImportDialog } from '@/components/import/ImportDialog';
 import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { parseIngredientsCSV, generateIngredientsTemplate } from '@/components/import/csv-helpers';
 
 const IngredientsPage = () => {
   const { data: ingredients, isLoading: loading, error } = useIngredients();
@@ -81,7 +72,7 @@ const IngredientsPage = () => {
           <PageHeader
             title="Bahan Baku"
             description="Kelola stok dan harga bahan baku"
-            action={
+            actions={
               <div className="flex gap-2">
                 <Button variant="outline" disabled className="flex-1 sm:flex-none">
                   <Upload className="h-4 w-4 mr-2" />
@@ -134,7 +125,7 @@ const IngredientsPage = () => {
         <PageHeader
           title="Bahan Baku"
           description="Kelola stok dan harga bahan baku"
-          action={
+          actions={
             <div className="flex gap-2">
               <Button
                 variant="outline"

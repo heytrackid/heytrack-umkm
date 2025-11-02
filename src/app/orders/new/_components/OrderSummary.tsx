@@ -8,6 +8,8 @@ import { Calculator, Save } from 'lucide-react'
 import type { FormEvent } from 'react'
 import type { OrderFormData, OrderItem } from '@/app/orders/new/hooks/useOrderLogic'
 
+
+
 interface OrderSummaryProps {
   formData: OrderFormData
   orderItems: OrderItem[]
@@ -19,7 +21,7 @@ interface OrderSummaryProps {
   onCancel: () => void
 }
 
-export default function OrderSummary({
+const OrderSummary = ({
   formData,
   orderItems,
   subtotal,
@@ -28,7 +30,7 @@ export default function OrderSummary({
   isSubmitting,
   onSubmit,
   onCancel
-}: OrderSummaryProps) {
+}: OrderSummaryProps) => {
   const { formatCurrency } = useCurrency()
 
   return (
@@ -41,53 +43,53 @@ export default function OrderSummary({
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={onSubmit}>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span>Subtotal:</span>
-            <span>{formatCurrency(subtotal)}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span>Diskon:</span>
-            <span>- {formatCurrency(formData.discount_amount)}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span>Pajak ({formData.tax_rate}%):</span>
-            <span>{formatCurrency(taxAmount)}</span>
-          </div>
-
-          {formData.delivery_method === 'delivery' && (
+          <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span>Biaya Kirim:</span>
-              <span>{formatCurrency(formData.delivery_fee)}</span>
+              <span>Subtotal:</span>
+              <span>{formatCurrency(subtotal)}</span>
             </div>
-          )}
 
-          <hr className="my-2" />
-
-          <div className="flex justify-between text-lg font-bold">
-            <span>Total:</span>
-            <span>{formatCurrency(totalAmount)}</span>
-          </div>
-        </div>
-
-        <div className="space-y-2 pt-4 border-t">
-          <div className="text-sm text-muted-foreground">
             <div className="flex justify-between">
-              <span>Items:</span>
-              <span>{orderItems.length}</span>
+              <span>Diskon:</span>
+              <span>- {formatCurrency(formData.discount_amount)}</span>
             </div>
+
             <div className="flex justify-between">
-              <span>Qty Total:</span>
-              <span>{orderItems.reduce((sum, item) => sum + item.quantity, 0)}</span>
+              <span>Pajak ({formData.tax_rate}%):</span>
+              <span>{formatCurrency(taxAmount)}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Status Awal:</span>
-              <Badge variant="outline">PENDING</Badge>
+
+            {formData.delivery_method === 'delivery' && (
+              <div className="flex justify-between">
+                <span>Biaya Kirim:</span>
+                <span>{formatCurrency(formData.delivery_fee)}</span>
+              </div>
+            )}
+
+            <hr className="my-2" />
+
+            <div className="flex justify-between text-lg font-bold">
+              <span>Total:</span>
+              <span>{formatCurrency(totalAmount)}</span>
             </div>
           </div>
-        </div>
+
+          <div className="space-y-2 pt-4 border-t">
+            <div className="text-sm text-muted-foreground">
+              <div className="flex justify-between">
+                <span>Items:</span>
+                <span>{orderItems.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Qty Total:</span>
+                <span>{orderItems.reduce((sum, item) => sum + item.quantity, 0)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Status Awal:</span>
+                <Badge variant="outline">PENDING</Badge>
+              </div>
+            </div>
+          </div>
 
           <div className="space-y-2 pt-4">
             <Button
@@ -119,3 +121,5 @@ export default function OrderSummary({
     </Card>
   )
 }
+
+export default OrderSummary

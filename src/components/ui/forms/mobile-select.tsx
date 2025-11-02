@@ -1,12 +1,13 @@
+import { cn } from '@/lib/utils'
+import { useResponsive } from '@/hooks/useResponsive'
+import { Label } from '../label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select'
+
 /**
  * Mobile Select Component
  * Optimized select dropdown for mobile devices
  */
 
-import { cn } from '@/lib/utils'
-import { useResponsive } from '@/hooks/useResponsive'
-import { Label } from '../label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select'
 
 interface MobileSelectProps {
   label?: string
@@ -42,9 +43,9 @@ export const MobileSelect = ({
       {label && (
         <Label
           className={cn(
-           "text-sm font-medium",
-            isMobile &&"text-base",
-            error &&"text-destructive"
+            "text-sm font-medium",
+            isMobile && "text-base",
+            error && "text-destructive"
           )}
         >
           {label}
@@ -61,9 +62,9 @@ export const MobileSelect = ({
       >
         <SelectTrigger
           className={cn(
-           "transition-all duration-200",
-            isMobile &&"h-12 text-base",
-            error &&"border-destructive focus:ring-destructive"
+            "transition-all duration-200",
+            isMobile && "h-12 text-base",
+            error && "border-destructive focus:ring-destructive"
           )}
         >
           <SelectValue placeholder={placeholder} />
@@ -73,7 +74,7 @@ export const MobileSelect = ({
             <SelectItem
               key={option.value}
               value={option.value}
-              className={cn(isMobile &&"text-base py-3")}
+              className={cn(isMobile && "text-base py-3")}
             >
               {option.label}
             </SelectItem>
@@ -84,8 +85,8 @@ export const MobileSelect = ({
       {/* Hint or Error message */}
       {(hint || error) && (
         <p className={cn(
-         "text-sm",
-          error ?"text-destructive" :"text-muted-foreground"
+          "text-sm",
+          error ? "text-destructive" : "text-muted-foreground"
         )}>
           {error || hint}
         </p>

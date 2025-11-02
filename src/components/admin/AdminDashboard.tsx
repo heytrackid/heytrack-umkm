@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
 import { useSettings } from '@/contexts/settings-context'
+import { format } from 'date-fns'
 import {
     Activity,
     Database,
@@ -24,7 +25,6 @@ import {
     RefreshCw,
     Download
 } from 'lucide-react'
-import { format } from 'date-fns'
 
 interface AdminDashboardProps {
     userId: string
@@ -76,7 +76,7 @@ interface ErrorLog {
     stack_trace: string | null
 }
 
-export default function AdminDashboard(_props: AdminDashboardProps) {
+const AdminDashboard = (_props: AdminDashboardProps) => {
     const [metrics, setMetrics] = useState<SystemMetrics | null>(null)
     const [performanceLogs, setPerformanceLogs] = useState<PerformanceLog[]>([])
     const [errorLogs, setErrorLogs] = useState<ErrorLog[]>([])
@@ -137,7 +137,7 @@ export default function AdminDashboard(_props: AdminDashboardProps) {
     const handleExportLogs = async () => {
         try {
             const response = await fetch('/api/admin/export-logs')
-            if (!response.ok) {throw new Error('Export failed')}
+            if (!response.ok) { throw new Error('Export failed') }
 
             const blob = await response.blob()
             const url = window.URL.createObjectURL(blob)
@@ -561,3 +561,5 @@ export default function AdminDashboard(_props: AdminDashboardProps) {
         </div>
     )
 }
+
+export default AdminDashboard

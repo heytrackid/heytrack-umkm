@@ -1,9 +1,10 @@
+import type { FinancialMetrics, Ingredient, FinancialAlert, AutomationConfig } from '@/lib/automation/types'
+
 /**
  * Alert Generator Module
  * Handles financial alert generation based on metrics and thresholds
  */
 
-import type { FinancialMetrics, Ingredient, FinancialAlert, AutomationConfig } from '@/lib/automation/types'
 
 export class AlertGenerator {
   /**
@@ -64,10 +65,16 @@ export class AlertGenerator {
     }
 
     // Sort by severity
-    return alerts.sort((a, b) => {
-      const severityOrder = { critical: 3, warning: 2, info: 1 }
-      return severityOrder[b.type] - severityOrder[a.type]
-    })
+    const severityOrder: Record<'critical' | 'warning' | 'info', number> = {
+      critical: 3,
+      warning: 2,
+      info: 1
+    }
+
+    const getSeverity = (type: FinancialAlert['type']): number =>
+      severityOrder[type as keyof typeof severityOrder] ?? 0
+
+    return alerts.sort((a, b) => getSeverity(b.type) - getSeverity(a.type))
   }
 
   /**

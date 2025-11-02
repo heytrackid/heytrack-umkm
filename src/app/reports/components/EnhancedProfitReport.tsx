@@ -5,22 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import {
-    TrendingUp,
-    TrendingDown,
-    DollarSign,
-    ShoppingCart,
-    Package,
-    AlertCircle,
-    Download,
-    RefreshCw,
-    ArrowUpRight,
-    ArrowDownRight,
-    Minus
-} from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
 import { apiLogger } from '@/lib/logger'
+import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Package, AlertCircle, Download, RefreshCw, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
 // ✅ OPTIMIZED: Lazy load charts to reduce initial bundle
 import {
     LazyLineChart,
@@ -96,7 +84,7 @@ interface ProfitData {
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 
-export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
+const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
     const { formatCurrency } = useCurrency()
     const { isMobile } = useResponsive()
     const [loading, setLoading] = useState(true)
@@ -124,7 +112,7 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
 
             const data = await response.json()
             setProfitData(data)
-        } catch (_err) {
+        } catch (err) {
             apiLogger.error({ err }, 'Error fetching profit data')
         } finally {
             setLoading(false)
@@ -518,3 +506,5 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
         </div>
     )
 }
+
+export default EnhancedProfitReport

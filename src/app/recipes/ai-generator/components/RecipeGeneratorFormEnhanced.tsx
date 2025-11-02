@@ -1,7 +1,5 @@
-// Enhanced Recipe Generator Form with Quick/Complete Mode
-// Improved UX with contextual placeholders and better guidance
-
 'use client'
+
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,20 +7,13 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles, Info, ChefHat } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import type { AvailableIngredient } from './types'
+
+// Enhanced Recipe Generator Form with Quick/Complete Mode
+// Improved UX with contextual placeholders and better guidance
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from '@/components/ui/tooltip'
 
 interface RecipeGeneratorFormProps {
   productName: string
@@ -61,7 +52,7 @@ const dietaryOptions = [
   { value: 'gluten-free', label: 'Bebas Gluten' },
 ]
 
-export default function RecipeGeneratorFormEnhanced({
+const RecipeGeneratorFormEnhanced = ({
   productName,
   setProductName,
   productType,
@@ -78,7 +69,7 @@ export default function RecipeGeneratorFormEnhanced({
   loading,
   onGenerate,
   mode,
-}: RecipeGeneratorFormProps) {
+}: RecipeGeneratorFormProps) => {
   const currentProductType = productTypes.find(p => p.value === productType)
   const servingsLabel = currentProductType?.unit || 'porsi'
   const servingsExample = currentProductType?.example || '5 porsi'
@@ -285,7 +276,7 @@ export default function RecipeGeneratorFormEnhanced({
         {/* Generate Button */}
         <Button
           onClick={onGenerate}
-          disabled={loading || !productName || !servings}
+          disabled={(loading || false) || !productName || !servings}
           className="w-full shadow-lg hover:shadow-xl transition-all"
           size="lg"
         >
@@ -311,3 +302,5 @@ export default function RecipeGeneratorFormEnhanced({
     </Card>
   )
 }
+
+export default RecipeGeneratorFormEnhanced

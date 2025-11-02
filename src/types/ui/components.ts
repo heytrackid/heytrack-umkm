@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react';
+
+
 /**
  * Component Prop Types
  * Provides reusable type definitions for React components
  */
 
-import type { ReactNode } from 'react';
 
 /**
  * Base props that most components should accept

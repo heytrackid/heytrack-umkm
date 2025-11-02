@@ -1,5 +1,7 @@
-// Recipe types - use generated Supabase types as base
 import type {
+
+
+// Recipe types - use generated Supabase types as base
   RecipesTable,
   RecipesInsert,
   RecipesUpdate,

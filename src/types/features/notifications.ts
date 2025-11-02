@@ -1,5 +1,7 @@
 import type { NotificationsTable, NotificationsInsert, NotificationsUpdate } from '@/types/database'
 
+
+
 // Use database field types - these match the actual database schema
 export type Notification = NotificationsTable
 export type NotificationInsert = NotificationsInsert

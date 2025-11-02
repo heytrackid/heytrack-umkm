@@ -1,10 +1,11 @@
+import type { NextRequest, NextResponse } from 'next/server'
+import { createErrorResponse } from '@/lib/api-core/responses'
+
 /**
  * Rate Limiting Middleware Module
  * API rate limiting protection
  */
 
-import type { NextRequest, NextResponse } from 'next/server'
-import { createErrorResponse } from '@/lib/api-core/responses'
 
 /**
  * Create rate limiting middleware

@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import type { OrdersTable, OrderItemsTable, OrderStatus, PaymentStatus } from '@/types/database'
-type Order = OrdersTable
-type OrderItem = OrderItemsTable
+import type { OrdersTable } from '@/types/database'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { useCurrency } from '@/hooks/useCurrency'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,7 +45,7 @@ import {
   RefreshCw,
   Archive
 } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
+import type { OrderItem, Order } from './types'
 
 // Extended type for table display
 interface OrderWithItems extends Order {
@@ -104,13 +103,13 @@ const OrdersTable = ({
     if (checked) {
       setSelectedOrders(orders.map(order => order.id))
     } else {
-      void setSelectedOrders([])
+      setSelectedOrders([])
     }
   }
 
   const handleSelectOrder = (orderId: string, checked: boolean) => {
     if (checked) {
-      void setSelectedOrders(prev => [...prev, orderId])
+      setSelectedOrders(prev => [...prev, orderId])
     } else {
       setSelectedOrders(prev => prev.filter(id => id !== orderId))
     }
@@ -129,16 +128,16 @@ const OrdersTable = ({
 
   // Delete handler
   const handleDeleteOrder = (order: OrderWithItems) => {
-    void setOrderToDelete(order)
-    void setShowDeleteDialog(true)
+    setOrderToDelete(order)
+    setShowDeleteDialog(true)
   }
 
   const confirmDelete = () => {
     if (orderToDelete && onDeleteOrder) {
       onDeleteOrder(orderToDelete)
     }
-    void setShowDeleteDialog(false)
-    void setOrderToDelete(null)
+    setShowDeleteDialog(false)
+    setOrderToDelete(null)
   }
 
   const getStatusBadge = (status: string | null) => {
@@ -169,7 +168,7 @@ const OrdersTable = ({
   }
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) {return '-'}
+    if (!dateString) { return '-' }
     return new Date(dateString).toLocaleDateString('id-ID', {
       day: '2-digit',
       month: 'short',
@@ -296,7 +295,7 @@ const OrdersTable = ({
                   checked={isAllSelected}
                   onCheckedChange={handleSelectAll}
                   ref={(el) => {
-                    if (el) { 
+                    if (el) {
                       (el as HTMLInputElement).indeterminate = isIndeterminate;
                     }
                   }}

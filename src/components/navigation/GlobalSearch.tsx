@@ -4,6 +4,8 @@ import { type ComponentType, memo, useCallback, useEffect, useState } from 'reac
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
 import { useDebounce } from '@/hooks/useDebounce'
+import { useRouter } from 'next/navigation'
+import type { IngredientsTable, OrdersTable, CustomersTable, RecipesTable } from '@/types/database'
 import {
   BarChart3,
   BookOpen,
@@ -13,8 +15,6 @@ import {
   ShoppingCart,
   Users
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import type { IngredientsTable, OrdersTable, CustomersTable, RecipesTable } from '@/types/database'
 
 // Extended types for search display
 type IngredientItem = Pick<IngredientsTable, 'id' | 'name' | 'current_stock' | 'unit'>

@@ -7,7 +7,7 @@ const require = createRequire(import.meta.url)
 const react = (() => {
     try {
         const plugin = require('@vitejs/plugin-react')
-        return plugin.default ?? plugin
+        return plugin.default || plugin
     } catch {
         return () => ({ name: 'noop-react-plugin' })
     }

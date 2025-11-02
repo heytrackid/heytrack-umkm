@@ -1,3 +1,7 @@
+import { apiLogger, dbLogger, uiLogger, serializeError } from './logger';
+import type pino from 'pino';
+
+
 /**
  * Comprehensive Debugging Utility
  * 
@@ -9,8 +13,6 @@
  * - Request/response logging
  */
 
-import { apiLogger, dbLogger, uiLogger, serializeError } from './logger';
-import type pino from 'pino';
 
 interface DebugContext {
   userId?: string;
@@ -183,7 +185,7 @@ class DebugLogger {
   ): T {
     const name = options.name || fn.name || 'anonymous';
     
-    return ((...args: any[]) => {
+    return ((...args: unknown[]) => {
       if (options.logParams) {
         this.logDetailed(`${name} called with`, { 
           ...options, 
@@ -274,7 +276,7 @@ class DebugLogger {
     };
   }
 
-  private safeSerialize(obj: any): any {
+  private safeSerialize(obj: unknown): unknown {
     if (obj === null || obj === undefined) {return obj;}
     
     if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') {
@@ -296,7 +298,7 @@ class DebugLogger {
     if (typeof obj === 'object') {
       // Prevent circular references
       const seen = new WeakSet();
-      const serialize = (obj: any): any => {
+      const serialize = (obj: unknown): unknown => {
         if (obj === null || obj === undefined) {return obj;}
         
         if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') {
@@ -321,11 +323,10 @@ class DebugLogger {
           }
           seen.add(obj);
           
-          const result: any = {};
-          for (const key in obj) {
-            if (obj.hasOwnProperty(key)) {
-              result[key] = serialize(obj[key]);
-            }
+          const result: Record<string, unknown> = {};
+          const record = obj as Record<string, unknown>;
+          for (const key of Object.keys(record)) {
+            result[key] = serialize(record[key]);
           }
           return result;
         }
@@ -353,11 +354,11 @@ export const uiDebugLogger = new DebugLogger('UiDebug');
  * Decorator for class methods to automatically add debugging
  */
 export function DebugMethod(options: DetailedDebugOptions = {}) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: object, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
-    const debugLog = new DebugLogger(target.constructor.name);
+    const debugLog = new DebugLogger((target as { constructor: { name: string } }).constructor.name);
     
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = function (...args: unknown[]) {
       return debugLog.traceFunction(originalMethod.bind(this), {
         ...options,
         name: propertyKey
@@ -371,7 +372,7 @@ export function DebugMethod(options: DetailedDebugOptions = {}) {
 /**
  * Higher-order function to wrap API route handlers with detailed debugging
  */
-export function withDetailedDebug<T extends (...args: any[]) => any>(
+export function withDetailedDebug<T extends (...args: unknown[]) => unknown>(
   handler: T,
   options: DetailedDebugOptions & { name?: string } = {}
 ): T {

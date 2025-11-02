@@ -1,40 +1,26 @@
-/**
- * ProductionTimeline
- * Visual Gantt chart timeline for production batch scheduling
- * Shows production batches, resource allocation, and dependencies
- */
-'use client'
-
 import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import {
-  Calendar,
-  Clock,
-  ChefHat,
-  Oven,
-  Package,
-  AlertTriangle,
-  CheckCircle,
-  Play,
-  Pause,
-  BarChart3,
-  Settings
-} from 'lucide-react'
-import { format, addHours, startOfDay, endOfDay, differenceInMinutes } from 'date-fns'
+'use client'
 
-import type {
-  ProductionBatch,
-  TimelineSlot,
-  SchedulingResult
-} from '@/services/production/BatchSchedulingService';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { format, addHours, startOfDay, endOfDay, differenceInMinutes } from 'date-fns'
+import { Calendar, Clock, ChefHat, Flame, Package, AlertTriangle, CheckCircle, Play, Pause, BarChart3, Settings } from 'lucide-react'
 import {
+  type ProductionBatchWithDetails,
+  type TimelineSlot,
+  type SchedulingResult,
   batchSchedulingService
 } from '@/services/production/BatchSchedulingService'
+
+/**
+ * ProductionTimeline
+ * Visual Gantt chart timeline for production batch scheduling
+ * Shows production batches, resource allocation, and dependencies
+ */
 
 // Define the status type for production batches based on the enum
 type ProductionStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
@@ -44,7 +30,7 @@ type ResourceType = 'oven' | 'mixer' | 'decorator' | 'packaging'
 
 interface ProductionTimelineProps {
   schedulingResult?: SchedulingResult
-  onBatchSelect?: (batch: ProductionBatch) => void
+  onBatchSelect?: (batch: ProductionBatchWithDetails) => void
   onBatchStatusChange?: (batchId: string, status: ProductionStatus) => void
   className?: string
 }
@@ -72,12 +58,12 @@ const STATUS_COLORS: Record<ProductionStatus | 'blocked', string> = {
   blocked: 'bg-red-300'
 }
 
-export default function ProductionTimeline({
+const ProductionTimeline = ({
   schedulingResult,
   onBatchSelect,
   onBatchStatusChange,
   className = ''
-}: ProductionTimelineProps) {
+}: ProductionTimelineProps) => {
   const [selectedBatch, setSelectedBatch] = useState<string | null>(null)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [zoomLevel, setZoomLevel] = useState(1)
@@ -104,8 +90,8 @@ export default function ProductionTimeline({
     }
 
     const scheduledBatches = schedulingResult.schedule.filter(b => b.scheduled_start)
-    const startTimes = scheduledBatches.map(b => new Date(b.scheduled_start))
-    const endTimes = scheduledBatches.map(b => new Date(b.scheduled_end))
+    const startTimes = scheduledBatches.map(b => b.scheduled_start ? new Date(b.scheduled_start) : new Date())
+    const endTimes = scheduledBatches.map(b => b.scheduled_end ? new Date(b.scheduled_end) : new Date())
 
     const startDate = startOfDay(new Date(Math.min(...startTimes.map(d => d.getTime()))))
     const endDate = endOfDay(new Date(Math.max(...endTimes.map(d => d.getTime()))))
@@ -123,7 +109,7 @@ export default function ProductionTimeline({
   }, [schedulingResult, zoomLevel])
 
   // Calculate position of batch on timeline
-  const calculateBatchPosition = (batch: ProductionBatch) => {
+  const calculateBatchPosition = (batch: ProductionBatchWithDetails) => {
     if (!batch.scheduled_start || !batch.scheduled_end) { return null }
 
     const batchStart = new Date(batch.scheduled_start)
@@ -173,12 +159,12 @@ export default function ProductionTimeline({
     }))
   }, [schedulingResult])
 
-  const handleBatchClick = (batch: ProductionBatch) => {
+  const handleBatchClick = (batch: ProductionBatchWithDetails) => {
     setSelectedBatch(batch.id)
     onBatchSelect?.(batch)
   }
 
-  const handleStatusToggle = (batch: ProductionBatch) => {
+  const handleStatusToggle = (batch: ProductionBatchWithDetails) => {
     const nextStatus: ProductionStatus = batch.status === 'PLANNED' ? 'IN_PROGRESS' :
       batch.status === 'IN_PROGRESS' ? 'COMPLETED' : 'PLANNED'
     onBatchStatusChange?.(batch.id, nextStatus)
@@ -316,7 +302,7 @@ export default function ProductionTimeline({
                     <div key={resourceKey} className="relative">
                       {/* Resource label */}
                       <div className="flex items-center gap-2 mb-1">
-                        {resourceType === 'oven' && <Oven className="h-4 w-4" />}
+                        {resourceType === 'oven' && <Flame className="h-4 w-4" />}
                         {resourceType === 'mixer' && <ChefHat className="h-4 w-4" />}
                         {(resourceType === 'decorator' || resourceType === 'packaging') && <Package className="h-4 w-4" />}
 
@@ -444,8 +430,8 @@ export default function ProductionTimeline({
                 <Separator orientation="vertical" className="h-4" />
 
                 <div className="flex items-center gap-2">
-                  <Oven className="h-4 w-4 text-orange-500" />
-                  <span>Oven</span>
+                  <Flame className="h-4 w-4 text-orange-500" />
+                  <span>Flame</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <ChefHat className="h-4 w-4 text-gray-600 dark:text-gray-400" />
@@ -478,3 +464,5 @@ export default function ProductionTimeline({
     </TooltipProvider>
   )
 }
+
+export default ProductionTimeline

@@ -1,11 +1,12 @@
+import { apiLogger } from '@/lib/logger'
+import { AISecurity } from './security'
+import { AIService } from './service'
+
 /**
  * NLP Processor Module
  * Natural Language Processing for chatbot queries
  */
 
-import { apiLogger } from '@/lib/logger'
-import { AISecurity } from './security'
-import { AIService } from './service'
 
 export interface NLPIntent {
   intent: string

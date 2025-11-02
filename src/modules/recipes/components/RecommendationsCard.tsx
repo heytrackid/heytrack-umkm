@@ -1,9 +1,12 @@
-'use client'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Lightbulb, Info } from 'lucide-react'
 import type { HPPCalculationResult } from '@/modules/recipes/types'
+
+'use client'
+
+
+
 
 interface RecommendationsCardProps {
   calculationResult: HPPCalculationResult
@@ -25,8 +28,8 @@ export const RecommendationsCard = ({ calculationResult }: RecommendationsCardPr
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {calculationResult.recommendations.map((recommendation, index: number) => (
-            <Alert key={index}>
+          {calculationResult.recommendations.map((recommendation) => (
+            <Alert key={recommendation}>
               <Info className="h-4 w-4" />
               <AlertDescription>
                 {recommendation}

@@ -1,3 +1,4 @@
+
 /**
  * Route Optimization Configuration
  * Defines which routes should use dynamic loading

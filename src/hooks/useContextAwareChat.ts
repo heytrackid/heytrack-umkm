@@ -1,12 +1,13 @@
-/**
- * React Hook for Context-Aware AI Chat with Session Persistence
- */
-
 import { useState, useCallback, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { logger } from '@/lib/logger';
 import { getErrorMessage } from '@/lib/type-guards';
 import type { ChatMessage, ChatSuggestion, SessionListItem } from '@/types/features/chat';
+
+/**
+ * React Hook for Context-Aware AI Chat with Session Persistence
+ */
+
 
 interface UseContextAwareChatReturn {
   messages: ChatMessage[];

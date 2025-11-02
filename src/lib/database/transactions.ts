@@ -1,3 +1,8 @@
+import { dbLogger } from '@/lib/logger'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database'
+
+
 /**
  * Database Transaction Management
  * 
@@ -5,9 +10,6 @@
  * Uses Supabase RPC functions for transaction management.
  */
 
-import { dbLogger } from '@/lib/logger'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/database'
 
 export interface TransactionOperation<T = unknown> {
   name: string
@@ -62,7 +64,7 @@ export async function executeTransaction<T = unknown>(
         if (logProgress) {
           dbLogger.debug({ operation: operation.name }, 'Operation completed')
         }
-      } catch (_error) {
+      } catch (error) {
         failedOperation = operation.name
         
         dbLogger.error(
@@ -95,7 +97,7 @@ export async function executeTransaction<T = unknown>(
       data: results,
       completedOperations,
     }
-  } catch (_error) {
+  } catch (error) {
     return {
       success: false,
       error: error instanceof Error ? error : new Error('Unknown error'),
@@ -179,8 +181,8 @@ export async function retryWithBackoff<T>(
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      return await fn()
-    } catch (_error) {
+      return fn()
+    } catch (error) {
       lastError = error instanceof Error ? error : new Error('Unknown error')
       
       if (attempt < maxRetries) {
@@ -218,7 +220,7 @@ export async function executeParallel<T>(
       try {
         const data = await operation()
         results.push({ success: true, data })
-      } catch (_error) {
+      } catch (error) {
         const err = error instanceof Error ? error : new Error('Unknown error')
         results.push({ success: false, error: err })
         

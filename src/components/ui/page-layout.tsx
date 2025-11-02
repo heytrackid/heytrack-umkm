@@ -1,13 +1,14 @@
 import type { ComponentType, ReactNode } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft, Plus } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
 /**
  * Shared Layout Components
  * Reusable layout patterns to reduce duplicate code
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, Plus } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
 interface PageLayoutProps {
   title: string
@@ -107,31 +108,31 @@ export const ContentCard = ({
   headerActions,
   noPadding = false
 }: ContentCardProps) => (
-    <Card className={className}>
-      {(title || headerActions) && (
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              {title && <CardTitle>{title}</CardTitle>}
-              {description && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {description}
-                </p>
-              )}
-            </div>
-            {headerActions && (
-              <div className="flex gap-2">
-                {headerActions}
-              </div>
+  <Card className={className}>
+    {(title || headerActions) && (
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            {title && <CardTitle>{title}</CardTitle>}
+            {description && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {description}
+              </p>
             )}
           </div>
-        </CardHeader>
-      )}
-      <CardContent className={noPadding ? 'p-0' : ''}>
-        {children}
-      </CardContent>
-    </Card>
-  )
+          {headerActions && (
+            <div className="flex gap-2">
+              {headerActions}
+            </div>
+          )}
+        </div>
+      </CardHeader>
+    )}
+    <CardContent className={noPadding ? 'p-0' : ''}>
+      {children}
+    </CardContent>
+  </Card>
+)
 
 interface PageActionsProps {
   onAdd?: () => void
@@ -149,16 +150,15 @@ export const PageActions = ({
   addIcon: Icon = Plus,
   children
 }: PageActionsProps) => (
-    <div className="flex gap-2">
-      {onAdd && (
-        <Button onClick={onAdd}>
-          <Icon className="h-4 w-4 mr-2" />
-          {addText}
-        </Button>
-      )}
-      {children}
-    </div>
-  )
+  <div className="flex gap-2">
+    {onAdd && (
+      <Button onClick={onAdd}>
+        <Icon className="h-4 w-4 mr-2" />
+        {addText}
+      </Button>
+    )}
+    {children}
+  </div>
+)
 
 // Import React for types
-import type React from 'react'

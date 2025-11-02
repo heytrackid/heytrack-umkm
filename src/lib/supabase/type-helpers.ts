@@ -1,10 +1,12 @@
+import type { Database } from '@/types/database'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+
 /**
  * Type helpers for Supabase operations
  * Properly typed Supabase operations without using "any" types
  */
 
-import type { Database } from '@/types/database'
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Define table mapping type to help with type inference
 type TablesMap = Database['public']['Tables']
@@ -20,7 +22,7 @@ export function safeInsert<T extends keyof TablesMap>(
 ) {
   return supabase
     .from(table)
-    .insert(data)
+    .insert(data as never)
 }
 
 /**
@@ -33,7 +35,7 @@ export function safeUpdate<T extends keyof TablesMap>(
 ) {
   return supabase
     .from(table)
-    .update(data)
+    .update(data as never)
 }
 
 /**

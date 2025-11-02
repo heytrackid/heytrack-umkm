@@ -1,3 +1,4 @@
+
 /**
  * Validation utilities for Supabase operations
  */

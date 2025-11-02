@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { apiLogger } from '@/lib/logger'
+
 /**
  * Root page - redirects based on auth status
  * Middleware will handle the redirect, but this provides server-side fallback

@@ -2,11 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import type { OrdersTable, OrderItemsTable, OrderStatus, RecipesTable } from '@/types/database'
-type Order = OrdersTable
-type OrderItem = OrderItemsTable
-// payment_status is a string field, not an enum
-type PaymentStatus = string
-type Recipe = RecipesTable
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+
 import { apiLogger } from '@/lib/logger'
 import {
   MessageCircle,
@@ -29,6 +25,12 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react'
+
+type Order = OrdersTable
+type OrderItem = OrderItemsTable
+// payment_status is a string field, not an enum
+type PaymentStatus = string
+type Recipe = RecipesTable
 
 // Extended type for WhatsApp follow-up
 interface OrderForWhatsApp extends Order {
@@ -68,7 +70,7 @@ const getTemplateIcon = (category: string) => {
   return icons[category as keyof typeof icons] || <MessageCircle className="h-4 w-4" />
 }
 
-export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProps) {
+const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>([])
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [customMessage, setCustomMessage] = useState('')
@@ -97,7 +99,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
           void setSelectedTemplateId(data[0].id)
         }
       }
-    } catch (_err) {
+    } catch (err) {
       apiLogger.error({ error: err }, 'Error fetching templates:')
     } finally {
       void setLoading(false)
@@ -111,12 +113,12 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
 
     // Replace common variables
     const replacements = {
-      'customer_name': orderData.customer_name ?? '',
-      'order_no': orderData.order_no ?? '',
-      'order_date': new Date(orderData.order_date ?? new Date()).toLocaleDateString('id-ID'),
+      'customer_name': orderData.customer_name || '',
+      'order_no': orderData.order_no || '',
+      'order_date': new Date(orderData.order_date || new Date()).toLocaleDateString('id-ID'),
       'due_date': orderData.due_date ? new Date(orderData.due_date).toLocaleDateString('id-ID') : '',
-      'total_amount': (orderData.total_amount ?? 0).toLocaleString('id-ID'),
-      'remaining_amount': (orderData.remaining_amount ?? 0).toLocaleString('id-ID'),
+      'total_amount': (orderData.total_amount || 0).toLocaleString('id-ID'),
+      'remaining_amount': (orderData.remaining_amount || 0).toLocaleString('id-ID'),
       'estimated_arrival': orderData.due_date ? new Date(orderData.due_date).toLocaleDateString('id-ID') : ''
     }
 
@@ -257,13 +259,13 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                  <Badge className={getStatusBadgeColor(order.status ?? '')}>
-                    {(order.status ?? '').replace('_', ' ').toUpperCase()}
+                  <Badge className={getStatusBadgeColor(order.status || '')}>
+                    {(order.status || '').replace('_', ' ').toUpperCase()}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Total:</span>
-                  <span className="font-medium">Rp {(order.total_amount ?? 0).toLocaleString('id-ID')}</span>
+                  <span className="font-medium">Rp {(order.total_amount || 0).toLocaleString('id-ID')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Items:</span>
@@ -505,3 +507,5 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
     </Dialog>
   )
 }
+
+export default WhatsAppFollowUp

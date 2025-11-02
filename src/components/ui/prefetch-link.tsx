@@ -1,10 +1,12 @@
 'use client'
-import { type ComponentProps, type MouseEvent } from 'react'
 
+import { type ComponentProps, type MouseEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-
 import { apiLogger } from '@/lib/logger'
+
+
+
 interface PrefetchLinkProps extends ComponentProps<typeof Link> {
   prefetchOnHover?: boolean
   prefetchOnMount?: boolean

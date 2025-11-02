@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react'
+
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
-export default function SettingsLayout({
+const SettingsLayout = ({
   children,
 }: {
   children: ReactNode
-}) {
-  return <>{children}</>
-}
+}) => <>{children}</>
+
+export default SettingsLayout

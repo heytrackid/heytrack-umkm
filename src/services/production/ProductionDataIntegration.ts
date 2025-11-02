@@ -1,10 +1,12 @@
+import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isRecord, hasKeys } from '@/lib/type-guards'
+
+
 /**
  * Production Data Integration Service
  * Integrates production data with inventory and orders
  */
 
-import { apiLogger } from '@/lib/logger'
-import { getErrorMessage, isRecord, hasKeys } from '@/lib/type-guards'
 
 // Extended types for metrics
 export interface ProductionMetrics {

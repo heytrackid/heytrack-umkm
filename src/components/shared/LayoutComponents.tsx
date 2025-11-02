@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { cn } from '@/lib/utils'
+import { useResponsive } from '@/hooks/responsive'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +26,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
 import {
   ChevronDown,
   ChevronRight,
@@ -46,8 +48,6 @@ import {
   ArrowLeft,
   RefreshCw
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { useResponsive } from '@/hooks/responsive'
 
 interface BreadcrumbItem {
   label: string
@@ -575,7 +575,7 @@ export const Sidebar = ({
 
         {hasChildren && isExpanded && (
           <div className="mt-1">
-            {item.children!.map(child => renderItem(child, depth + 1))}
+            {item.children?.map(child => renderItem(child, depth + 1))}
           </div>
         )}
       </div>

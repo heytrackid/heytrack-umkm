@@ -160,7 +160,7 @@ export async function PUT(
     }
 
     // Invalidate cache
-    cacheInvalidation.recipes()
+    await cacheInvalidation.recipes()
 
     return NextResponse.json(completeRecipe)
   } catch (error: unknown) {
@@ -206,7 +206,7 @@ export async function DELETE(
     }
 
     // Invalidate cache
-    cacheInvalidation.recipes()
+    await cacheInvalidation.recipes()
 
     return NextResponse.json({ message: 'Recipe deleted successfully' })
   } catch (error: unknown) {

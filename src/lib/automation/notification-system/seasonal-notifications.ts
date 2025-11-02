@@ -1,9 +1,10 @@
+import type { SmartNotification } from './types'
+
 /**
  * Seasonal Notifications Module
  * Handles seasonal business notification generation
  */
 
-import type { SmartNotification } from './types'
 
 export class SeasonalNotifications {
   /**

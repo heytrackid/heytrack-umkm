@@ -1,8 +1,3 @@
-/**
- * Shared Search and Filter Components
- * Reusable search inputs, filters, and data manipulation UI
- */
-
 import { type ReactNode, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -10,6 +5,12 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Search, X, Filter, SortAsc, SortDesc } from 'lucide-react'
 import { useDebounce } from '@/hooks/useDebounce'
+
+/**
+ * Shared Search and Filter Components
+ * Reusable search inputs, filters, and data manipulation UI
+ */
+
 
 // Debounced search input component
 interface SearchInputProps {
@@ -125,7 +126,7 @@ export const SortButton = ({ label, field, currentSort, onSort }: SortButtonProp
 
 // Active filters display
 interface ActiveFiltersProps {
-  filters: Record<string, any>
+  filters: Record<string, unknown>
   onRemoveFilter: (key: string) => void
   filterLabels?: Record<string, string>
 }

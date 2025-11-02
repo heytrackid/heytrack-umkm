@@ -5,6 +5,8 @@ import { extractFirst } from '@/lib/type-guards'
 import type { TablesInsert, RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
 
+
+
 type Recipe = RecipesTable
 type RecipeIngredient = RecipeIngredientsTable
 type Ingredient = IngredientsTable

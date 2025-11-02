@@ -1,3 +1,6 @@
+import { createClient } from './client'
+
+
 /**
  * Barrel export for Supabase utilities
  *
@@ -12,5 +15,4 @@ export { createClient } from './client'
 export { updateSession } from './middleware'
 
 // Default export for backward compatibility - creates a client instance
-import { createClient } from './client'
 export default createClient()

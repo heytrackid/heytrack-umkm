@@ -1,7 +1,10 @@
-// Production service hooks for Indonesian UMKM operations
 'use client'
+
 import { useMemo } from 'react'
 import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks'
+import { PRODUCTION_CONFIG } from '@/app/recipes/config/production.config'
+import { formatCurrency, DEFAULT_CURRENCY, currencies, type Currency } from '@/lib/currency'
+import type { ProductionBatchesTable, AppSettingsTable, StockTransactionsTable, NotificationsTable } from '@/types/database'
 import type {
   ProductionBatch,
   CreateBatchData,
@@ -15,10 +18,8 @@ import type {
   BatchPriority,
   QualityStatus
 } from '@/app/recipes/types/production.types'
-import { PRODUCTION_CONFIG } from '@/app/recipes/config/production.config'
-import { formatCurrency, DEFAULT_CURRENCY, currencies } from '@/lib/currency'
-import type { Currency } from '@/lib/currency'
-import type { ProductionBatchesTable, AppSettingsTable, StockTransactionsTable, NotificationsTable } from '@/types/database'
+
+// Production service hooks for Indonesian UMKM operations
 
 // Main production batches hook
 export function useProductionBatches(filters?: ProductionFilters) {
@@ -160,7 +161,7 @@ export function useProductionBatches(filters?: ProductionFilters) {
 
   return {
     batches: filteredBatches,
-    allBatches: filteredBatches ?? [],
+    allBatches: filteredBatches || [],
     loading,
     error,
     createBatch: createBatchRecord,
@@ -203,7 +204,7 @@ export function useQualityChecks(batchId: string) {
     recipe_name: 'N/A', // Placeholder
     quality_score: 100, // Placeholder
     temperature: null // Placeholder
-  })) ?? []
+  })) || []
 
   return {
     checks,
@@ -256,7 +257,7 @@ export function useProductionEquipment(filters?: { type?: string; status?: strin
     efficiency: 95, // Placeholder
     location: 'main facility', // Placeholder
     operator: setting.user_id // Placeholder
-  })) ?? []
+  })) || []
 
   return {
     equipment,
@@ -306,7 +307,7 @@ export function useProductionStaff(filters?: { role?: string; active?: boolean }
     last_shift: setting.updated_at, // Placeholder
     shift_schedule: 'day', // Placeholder
     certifications: ['food safety'] // Placeholder
-  })) ?? []
+  })) || []
 
   return {
     staff,
@@ -350,7 +351,7 @@ export function useIngredientAllocations(batchId: string) {
     notes: transaction.notes,
     status: 'allocated' as const, // Literal type
     unit: 'kg' // Placeholder
-  })) ?? []
+  })) || []
 
   return {
     allocations,
@@ -520,7 +521,7 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
     )
     const average_batch_efficiency: number = efficiencyBatches.length > 0 
       ? efficiencyBatches.reduce((sum: number, b: ProductionBatch) => 
-          sum + ((b.estimated_duration_minutes / b.actual_duration_minutes!) * 100), 0
+          sum + ((b.estimated_duration_minutes / (b.actual_duration_minutes || 1)) * 100), 0
         ) / efficiencyBatches.length
       : 0
 
@@ -700,16 +701,16 @@ export function useTemperatureMonitoring(batchId: string) {
     id: setting.id,
     batch_id: batchId, // Use the passed batchId
     stage: setting.settings_data && typeof setting.settings_data === 'object' && 'stage' in setting.settings_data 
-      ? (setting.settings_data as any).stage 
+      ? (setting.settings_data as { stage?: string }).stage || 'general'
       : 'general',
     temperature: setting.settings_data && typeof setting.settings_data === 'object' && 'temperature' in setting.settings_data 
-      ? (setting.settings_data as any).temperature 
+      ? (setting.settings_data as { temperature?: number }).temperature 
       : null,
     within_range: true, // Placeholder
     recorded_at: setting.updated_at,
     notes: '',
     operator: setting.user_id
-  })) ?? []
+  })) || []
 
   return {
     temperatureLogs,
@@ -723,8 +724,8 @@ export function useTemperatureMonitoring(batchId: string) {
 // Currency formatting for production costs
 export function useProductionCurrency(currency?: string | Currency) {
   const resolvedCurrency: Currency = typeof currency === 'string'
-    ? currencies.find(curr => curr.code === currency) ?? DEFAULT_CURRENCY
-    : currency ?? DEFAULT_CURRENCY
+    ? currencies.find(curr => curr.code === currency) || DEFAULT_CURRENCY
+    : currency || DEFAULT_CURRENCY
 
   const formatCost = (amount: number, _options?: {
     showSymbol?: boolean
@@ -756,7 +757,7 @@ function calculateProductionTimeline(
   context: ProductionTimelineContext = {}
 ): ProductionTimelineResult {
   const now = new Date()
-  const queueDelay = (context.current_queue_length ?? 0) * config.DEFAULT_COOK_TIME
+  const queueDelay = (context.current_queue_length || 0) * config.DEFAULT_COOK_TIME
   const priorityMultiplier = context.priority === 'urgent' || context.rush_order ? 0.75 : 1
 
   const prepTime = config.DEFAULT_PREP_TIME

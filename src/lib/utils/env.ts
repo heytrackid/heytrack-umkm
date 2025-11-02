@@ -1,3 +1,5 @@
+
+
 /**
  * Environment utilities for client-side code
  * Safe to use in client components with Turbopack
@@ -17,7 +19,7 @@ export function getEnv(key: string): string | undefined {
   if (typeof window === 'undefined') {return undefined}
   
   // Access from window object to avoid Turbopack issues
-  const env = (window as any).__NEXT_DATA__?.props?.pageProps?.env
+  const env = (window as typeof window & { __NEXT_DATA__?: { props?: { pageProps?: { env?: Record<string, string> } } } }).__NEXT_DATA__?.props?.pageProps?.env
   return env?.[key]
 }
 

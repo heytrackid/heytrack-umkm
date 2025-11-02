@@ -1,7 +1,4 @@
-'use client'
-
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,57 +6,48 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
-import type { SmartPricingAnalysis } from '@/types/features/analytics'
 import { uiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+import type { IngredientsTable, RecipeIngredientsTable, RecipesTable } from '@/types/database'
+import type { SmartPricingAnalysis } from '@/types/features/analytics'
+import { AlertTriangle, Calculator, CheckCircle, Lightbulb, Target, Zap } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState, type FC } from 'react'
+
+'use client'
+
 
 type Recipe = RecipesTable
 type RecipeIngredient = RecipeIngredientsTable
 type Ingredient = IngredientsTable
+
+type PricingTierKey = 'economy' | 'standard' | 'premium'
 
 interface RecipeWithIngredients extends Recipe {
   recipe_ingredients?: Array<RecipeIngredient & {
     ingredient?: Ingredient
   }>
 }
-import {
-  AlertTriangle,
-  Calculator,
-  CheckCircle,
-  Lightbulb,
-  Target,
-  Zap
-} from 'lucide-react'
-import { useEffect, useState } from 'react'
 
-interface SmartPricingAssistantProps {
+export interface SmartPricingAssistantProps {
   recipe: RecipeWithIngredients
   onPriceUpdate: (price: number, margin: number) => void
 }
 
-export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAssistantProps) {
+const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPriceUpdate }) => {
+
   const { formatCurrency } = useCurrency()
   const [analysis, setAnalysis] = useState<SmartPricingAnalysis | null>(null)
-  const [selectedTier, setSelectedTier] = useState<'economy' | 'standard' | 'premium'>('standard')
+  const [selectedTier, setSelectedTier] = useState<PricingTierKey>('standard')
   const [customPrice, setCustomPrice] = useState<number>(0)
   const [loading, setLoading] = useState(false)
 
-  type PricingTierKey = 'economy' | 'standard' | 'premium'
-
-  useEffect(() => {
-    if (recipe?.recipe_ingredients) {
-      analyzePricing()
-    }
-  }, [recipe])
-
-  const analyzePricing = async () => {
-    void setLoading(true)
+  const analyzePricing = useCallback(async () => {
+    setLoading(true)
     try {
-      // Call API endpoint to calculate smart pricing
       const response = await fetch(`/api/recipes/${recipe.id}/pricing`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ recipe })
       })
@@ -69,67 +57,74 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
       }
 
       const pricingAnalysis = await response.json() as SmartPricingAnalysis
-      void setAnalysis(pricingAnalysis)
-      void setCustomPrice(pricingAnalysis.pricing.standard.price)
+      setAnalysis(pricingAnalysis)
+      setCustomPrice(pricingAnalysis.pricing.standard.price || 0)
     } catch (error: unknown) {
       const message = getErrorMessage(error)
       uiLogger.error({ error: message }, 'Error analyzing pricing')
-      // Set fallback analysis to prevent UI breaks
-      // Calculate basic analysis as fallback for now
-      if (recipe?.recipe_ingredients && recipe.recipe_ingredients.length > 0) {
+
+      if (recipe?.recipe_ingredients?.length) {
         const totalCost = recipe.recipe_ingredients.reduce((sum, ri) => {
           const ingredientPrice = ri.ingredient?.price_per_unit || 0
           return sum + (ingredientPrice * ri.quantity)
         }, 0)
+        const ingredientCost = totalCost
+        const overheadCost = ingredientCost * 0.15
+        const totalCalculatedCost = ingredientCost + overheadCost
+        const servings = recipe.servings || 1
+
         const fallbackAnalysis: SmartPricingAnalysis = {
           breakdown: {
-            ingredientCost: totalCost,
-            overheadCost: totalCost * 0.15,
-            totalCost: totalCost * 1.15,
-            costPerServing: (totalCost * 1.15) / (recipe.servings || 1)
+            ingredientCost,
+            overheadCost,
+            totalCost: totalCalculatedCost,
+            costPerServing: totalCalculatedCost / Math.max(1, servings)
           },
           pricing: {
             economy: {
-              price: Math.ceil((totalCost * 1.15 * 1.3) / 500) * 500,
+              price: Math.ceil((totalCalculatedCost * 1.3) / 500) * 500,
               margin: 30,
               positioning: 'Harga terjangkau untuk volume tinggi'
             },
             standard: {
-              price: Math.ceil((totalCost * 1.15 * 1.6) / 500) * 500,
+              price: Math.ceil((totalCalculatedCost * 1.6) / 500) * 500,
               margin: 60,
               positioning: 'Harga optimal untuk profit maksimal'
             },
             premium: {
-              price: Math.ceil((totalCost * 1.15 * 2.0) / 1000) * 1000,
+              price: Math.ceil((totalCalculatedCost * 2.0) / 1000) * 1000,
               margin: 100,
               positioning: 'Harga premium untuk positioning eksklusif'
             }
           },
           recommendations: ['Gagal memuat analisis harga otomatis. Silakan coba lagi nanti.']
         }
-        void setAnalysis(fallbackAnalysis)
-        void setCustomPrice(fallbackAnalysis.pricing.standard.price)
+        setAnalysis(fallbackAnalysis)
+        setCustomPrice(fallbackAnalysis.pricing.standard.price)
       }
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
-  }
+  }, [recipe])
+
+  useEffect(() => {
+    if (recipe?.recipe_ingredients?.length) {
+      void analyzePricing()
+    }
+  }, [analyzePricing, recipe])
 
   const handleApplyPrice = (tier: PricingTierKey | 'custom') => {
     if (!analysis) { return }
 
-    let price: number
-    let margin: number
-
     if (tier === 'custom') {
-      price = customPrice
-      margin = ((price - analysis.breakdown.totalCost) / price) * 100
-    } else {
-      price = analysis.pricing[tier].price
-      margin = analysis.pricing[tier].margin
+      if (customPrice <= 0) { return }
+      const margin = ((customPrice - analysis.breakdown.totalCost) / customPrice) * 100
+      onPriceUpdate(customPrice, margin)
+      return
     }
 
-    onPriceUpdate(price, margin)
+    const { price: tierPrice, margin: tierMargin } = analysis.pricing[tier]
+    onPriceUpdate(tierPrice, tierMargin)
   }
 
   if (loading) {
@@ -409,7 +404,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
                 </div>
                 <div className="flex justify-between items-center py-2 border-b">
                   <span>Overhead (15%)</span>
-                  <span className="font-medium">{formatCurrency(analysis.breakdown.overhead_cost)}</span>
+                  <span className="font-medium">{formatCurrency(analysis.breakdown.overheadCost)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b font-bold text-lg">
                   <span>Total HPP</span>
@@ -603,3 +598,6 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
     </div>
   )
 }
+
+
+export default SmartPricingAssistant

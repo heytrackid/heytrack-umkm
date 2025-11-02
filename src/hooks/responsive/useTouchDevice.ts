@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+
+
 /**
  * Detect if device supports touch
  */
@@ -13,7 +15,7 @@ export function useTouchDevice(): boolean {
         typeof window !== 'undefined' &&
         ('ontouchstart' in window ||
           navigator.maxTouchPoints > 0 ||
-          ('msMaxTouchPoints' in navigator && (navigator as any).msMaxTouchPoints > 0))
+          ('msMaxTouchPoints' in navigator && (navigator as Navigator & { msMaxTouchPoints: number }).msMaxTouchPoints > 0))
       ))
   }, [])
 

@@ -3,6 +3,8 @@
 import { useCallback, useState } from 'react'
 import type { AIAnalysisState, FinancialAnalysisRequest } from './types'
 
+
+
 /**
  * AI-Powered Financial Analysis Hook
  * Provides intelligent financial performance analysis, cash flow predictions, and business health insights

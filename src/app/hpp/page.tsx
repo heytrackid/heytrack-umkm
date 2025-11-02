@@ -6,8 +6,7 @@ import { UnifiedHppPage } from '@/modules/hpp'
 import { TooltipHelper, UMKM_TOOLTIPS } from '@/components/ui/tooltip-helper'
 import { PageHeader } from '@/components/layout/PageHeader'
 
-export default function HppPage() {
-  return (
+const HppPage = () => (
     <AppLayout>
       <div className="space-y-6 p-6">
         <PageBreadcrumb items={BreadcrumbPatterns.hpp} />
@@ -23,4 +22,5 @@ export default function HppPage() {
       </div>
     </AppLayout>
   )
-}
+
+export default HppPage

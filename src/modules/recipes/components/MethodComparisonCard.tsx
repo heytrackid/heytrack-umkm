@@ -1,9 +1,12 @@
-'use client'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { BarChart3 } from 'lucide-react'
 import type { HPPCalculationResult, PricingMethod } from '@/modules/recipes/types'
+
+'use client'
+
+
+
 
 // Method descriptions for UMKM
 const getPricingMethodDescription = (method: PricingMethod) => {
@@ -47,53 +50,52 @@ interface MethodComparisonCardProps {
  * Pricing method comparison card component
  */
 export const MethodComparisonCard = ({ calculationResult, formatCurrency, selectedPricingMethod }: MethodComparisonCardProps) => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="h-5 w-5" />
-          Perbandingan Metode Harga
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {calculationResult.pricingAlternatives.map((alternative) => {
-            const methodDesc = getPricingMethodDescription(alternative.method)
-            return (
-              <div
-                key={alternative.method}
-                className={`flex items-center justify-between p-3 rounded-lg border ${
-                  alternative.method === selectedPricingMethod
-                    ? 'border-blue-200 bg-blue-50'
-                    : 'border-gray-200'
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2">
+        <BarChart3 className="h-5 w-5" />
+        Perbandingan Metode Harga
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-3">
+        {calculationResult.pricingAlternatives.map((alternative) => {
+          const methodDesc = getPricingMethodDescription(alternative.method)
+          return (
+            <div
+              key={alternative.method}
+              className={`flex items-center justify-between p-3 rounded-lg border ${alternative.method === selectedPricingMethod
+                ? 'border-blue-200 bg-blue-50'
+                : 'border-gray-200'
                 }`}
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span>{methodDesc.icon}</span>
-                    <span className="font-medium">
-                      {methodDesc.name}
-                    </span>
-                    {alternative.method === selectedPricingMethod && (
-                      <Badge variant="default" className="text-xs">Dipilih</Badge>
-                    )}
-                    {alternative.method === 'moving' && alternative.method !== selectedPricingMethod && (
-                      <Badge variant="secondary" className="text-xs">Rekomendasi</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-600 mt-1">
-                    {alternative.methodDescription}
-                  </p>
+            >
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span>{methodDesc.icon}</span>
+                  <span className="font-medium">
+                    {methodDesc.name}
+                  </span>
+                  {alternative.method === selectedPricingMethod && (
+                    <Badge variant="default" className="text-xs">Dipilih</Badge>
+                  )}
+                  {alternative.method === 'moving' && alternative.method !== selectedPricingMethod && (
+                    <Badge variant="secondary" className="text-xs">Rekomendasi</Badge>
+                  )}
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold">
-                    {formatCurrency(alternative.cost_per_unit)}
-                  </p>
-                  <p className="text-xs text-gray-500">per porsi</p>
-                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  {alternative.methodDescription}
+                </p>
               </div>
-            )
-          })}
-        </div>
-      </CardContent>
-    </Card>
-  )
+              <div className="text-right">
+                <p className="font-semibold">
+                  {formatCurrency(alternative.costPerUnit)}
+                </p>
+                <p className="text-xs text-gray-500">per porsi</p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </CardContent>
+  </Card>
+)

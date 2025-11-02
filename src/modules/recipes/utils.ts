@@ -1,5 +1,7 @@
 import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 
+
+
 // Use generated types from Supabase
 export type Recipe = RecipesTable
 export type RecipeIngredient = RecipeIngredientsTable
@@ -295,12 +297,12 @@ export function calculateComplexityScore(
  * Generate recipe summary statistics
  */
 export function generateRecipeSummary(recipe: Recipe, ingredients: RecipeIngredientWithDetails[]) {
-  const prepTime = recipe.prep_time ?? 0
-  const cookTime = recipe.cook_time ?? 0
+  const prepTime = recipe.prep_time || 0
+  const cookTime = recipe.cook_time || 0
   const totalTime = prepTime + cookTime
-  const servings = recipe.servings ?? 1
-  const difficulty = recipe.difficulty ?? 'medium'
-  const category = recipe.category ?? 'other'
+  const servings = recipe.servings || 1
+  const difficulty = recipe.difficulty || 'medium'
+  const category = recipe.category || 'other'
   
   const complexityScore = calculateComplexityScore(
     ingredients.length,

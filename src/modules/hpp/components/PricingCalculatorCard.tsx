@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ComponentType } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +10,29 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Loader2, CheckCircle, TrendingUp, TrendingDown, DollarSign, Lightbulb } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
+
+
+type MarginLevel = 'high' | 'medium' | 'low'
+
+const getMarginLevel = (margin: number): MarginLevel => {
+    if (margin >= 50) { return 'high' }
+    if (margin >= 30) { return 'medium' }
+    return 'low'
+}
+
+const marginVariantMap: Record<MarginLevel, 'default' | 'secondary' | 'destructive'> = {
+    high: 'default',
+    medium: 'secondary',
+    low: 'destructive',
+}
+
+const marginBadgeContent: Record<MarginLevel, { label: string; Icon: ComponentType<{ className?: string }> }> = {
+    high: { label: 'Margin Bagus', Icon: TrendingUp },
+    medium: { label: 'Margin Standar', Icon: TrendingUp },
+    low: { label: 'Margin Rendah', Icon: TrendingDown },
+}
+
+const getMarginVariant = (margin: number) => marginVariantMap[getMarginLevel(margin)]
 
 interface PricingCalculatorCardProps {
     totalCost: number
@@ -43,10 +66,40 @@ export const PricingCalculatorCard = ({
 
     const displayPrice = mode === 'manual' ? manualPrice : suggestedPrice
     const profit = displayPrice - totalCost
-    const hasCurrentPrice = currentPrice && currentPrice > 0
+    const hasCurrentPrice = typeof currentPrice === 'number' && currentPrice > 0
     const currentProfit = hasCurrentPrice ? currentPrice - totalCost : 0
     const currentMargin = hasCurrentPrice ? ((currentProfit / totalCost) * 100) : 0
     const displayMargin = mode === 'manual' ? ((profit / totalCost) * 100) : marginPercentage
+    const autoMarginVariant = getMarginVariant(marginPercentage)
+    const manualMarginVariant = getMarginVariant(displayMargin)
+    const marginLevel = getMarginLevel(displayMargin)
+    const { Icon: MarginStatusIcon, label: marginLabel } = marginBadgeContent[marginLevel]
+    const actionContent = (() => {
+        if (isSaving) {
+            return (
+                <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Menyimpan...
+                </>
+            )
+        }
+
+        if (displayPrice === currentPrice) {
+            return (
+                <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Harga Sudah Tersimpan
+                </>
+            )
+        }
+
+        return (
+            <>
+                <CheckCircle className="h-4 w-4 mr-2" />
+                {hasCurrentPrice ? 'Update Harga' : 'Simpan Harga Ini'}
+            </>
+        )
+    })()
 
     return (
         <Card>
@@ -94,10 +147,7 @@ export const PricingCalculatorCard = ({
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium">Target Margin Keuntungan</span>
-                                <Badge
-                                    variant={marginPercentage >= 50 ? "default" : "secondary"}
-                                    className="text-base"
-                                >
+                                <Badge variant={autoMarginVariant} className="text-base">
                                     {marginPercentage}%
                                 </Badge>
                             </div>
@@ -126,10 +176,7 @@ export const PricingCalculatorCard = ({
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium">Masukkan Harga Jual</span>
-                                <Badge
-                                    variant={displayMargin >= 50 ? "default" : displayMargin >= 30 ? "secondary" : "destructive"}
-                                    className="text-base"
-                                >
+                                <Badge variant={manualMarginVariant} className="text-base">
                                     Margin: {displayMargin.toFixed(0)}%
                                 </Badge>
                             </div>
@@ -164,26 +211,9 @@ export const PricingCalculatorCard = ({
                                 {formatCurrency(displayPrice)}
                             </div>
                         </div>
-                        <Badge
-                            variant={displayMargin >= 50 ? "default" : displayMargin >= 30 ? "secondary" : "destructive"}
-                            className="gap-1"
-                        >
-                            {displayMargin >= 50 ? (
-                                <>
-                                    <TrendingUp className="h-3 w-3" />
-                                    Margin Bagus
-                                </>
-                            ) : displayMargin >= 30 ? (
-                                <>
-                                    <TrendingUp className="h-3 w-3" />
-                                    Margin Standar
-                                </>
-                            ) : (
-                                <>
-                                    <TrendingDown className="h-3 w-3" />
-                                    Margin Rendah
-                                </>
-                            )}
+                        <Badge variant={manualMarginVariant} className="gap-1">
+                            <MarginStatusIcon className="h-3 w-3" />
+                            {marginLabel}
                         </Badge>
                     </div>
 
@@ -232,22 +262,7 @@ export const PricingCalculatorCard = ({
                     className="w-full"
                     disabled={isSaving || displayPrice === currentPrice || (mode === 'manual' && manualPrice < totalCost)}
                 >
-                    {isSaving ? (
-                        <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Menyimpan...
-                        </>
-                    ) : displayPrice === currentPrice ? (
-                        <>
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Harga Sudah Tersimpan
-                        </>
-                    ) : (
-                        <>
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            {hasCurrentPrice ? 'Update Harga' : 'Simpan Harga Ini'}
-                        </>
-                    )}
+                    {actionContent}
                 </Button>
             </CardContent>
         </Card>

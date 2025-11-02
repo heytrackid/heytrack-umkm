@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge'
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+
+
 interface StockBadgeProps {
     currentStock: number
     minStock: number

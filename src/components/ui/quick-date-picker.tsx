@@ -1,9 +1,8 @@
-'use client'
-
 import { useState } from 'react'
 import { CalendarIcon, Clock } from 'lucide-react'
 import { format, addDays, startOfToday } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
+'use client'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -112,8 +111,8 @@ export const QuickDatePicker = ({
                             setOpen(false)
                         }}
                         disabled={(date) => {
-                            if (minDate && date < minDate) {return true}
-                            if (maxDate && date > maxDate) {return true}
+                            if (minDate && date < minDate) { return true }
+                            if (maxDate && date > maxDate) { return true }
                             return false
                         }}
                         initialFocus

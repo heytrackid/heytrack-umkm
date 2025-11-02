@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { type ApiResponse, type ApiRequestOptions, apiClient } from '@/lib/api/client'
 
+
 type RequestConfig = ApiRequestOptions
 
 interface UseApiOptions<T> {
@@ -59,7 +60,7 @@ export function useApi<T = unknown >(
         })
         onError?.(error)
       }
-    } catch (_err) {
+    } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setState({
         data: null,
@@ -97,7 +98,7 @@ export function useApi<T = unknown >(
         }))
         onError?.(error)
       }
-    } catch (_err) {
+    } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setState((prev) => ({
         ...prev,
@@ -187,7 +188,7 @@ export function useMutationApi<T = unknown , R = unknown >(
           onError?.(error)
           throw new Error(error)
         }
-      } catch (_err) {
+      } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error'
         setState({
           data: null,

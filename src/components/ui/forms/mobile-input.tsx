@@ -1,14 +1,15 @@
-/**
- * Mobile Input Component
- * Optimized input field for mobile devices with password toggle
- */
-
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Input } from '../input'
 import { Label } from '../label'
 import { Eye, EyeOff } from 'lucide-react'
+
+/**
+ * Mobile Input Component
+ * Optimized input field for mobile devices with password toggle
+ */
+
 
 interface MobileInputProps {
   label?: string
@@ -63,9 +64,9 @@ export const MobileInput = ({
       {label && (
         <Label
           className={cn(
-           "text-sm font-medium",
-            isMobile &&"text-base",
-            error &&"text-destructive"
+            "text-sm font-medium",
+            isMobile && "text-base",
+            error && "text-destructive"
           )}
         >
           {label}
@@ -89,10 +90,10 @@ export const MobileInput = ({
           required={required}
           inputMode={getInputMode()}
           className={cn(
-           "transition-all duration-200 pr-10",
-            isMobile &&"text-base h-12", // Better readability on mobile
-            error &&"border-destructive focus-visible:ring-destructive",
-            isFocused &&"ring-2 ring-ring ring-offset-2"
+            "transition-all duration-200 pr-10",
+            isMobile && "text-base h-12", // Better readability on mobile
+            error && "border-destructive focus-visible:ring-destructive",
+            isFocused && "ring-2 ring-ring ring-offset-2"
           )}
         />
 
@@ -115,8 +116,8 @@ export const MobileInput = ({
       {/* Hint or Error message */}
       {(hint || error) && (
         <p className={cn(
-         "text-sm",
-          error ?"text-destructive" :"text-muted-foreground"
+          "text-sm",
+          error ? "text-destructive" : "text-muted-foreground"
         )}>
           {error || hint}
         </p>

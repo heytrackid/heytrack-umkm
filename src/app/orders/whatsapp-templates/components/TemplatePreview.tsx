@@ -1,21 +1,12 @@
-// Template Preview Component
-// Preview dialog for WhatsApp templates with example data
-
 'use client'
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle
-} from '@/components/ui/dialog'
 import { MessageCircle, RefreshCw } from 'lucide-react'
 import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, type WhatsAppTemplate } from './types'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 interface TemplatePreviewProps {
     showPreview: boolean
@@ -23,22 +14,22 @@ interface TemplatePreviewProps {
     template: WhatsAppTemplate | null
 }
 
-export default function TemplatePreview({
+const TemplatePreview = ({
     showPreview,
     onOpenChange,
     template
-}: TemplatePreviewProps) {
+}: TemplatePreviewProps) => {
     const [showExampleData, setShowExampleData] = useState(true)
 
-    const getCategoryLabel = (category: string) => TEMPLATE_CATEGORIES.find(cat => cat.value === category)?.label || category
+    const getCategoryLabel = (category: string) => TEMPLATE_CATEGORIES.find((cat) => cat.value === category)?.label || category
 
     const getExampleValue = (variableName: string): string => {
-        const variable = AVAILABLE_VARIABLES.find(v => v.name === variableName)
+        const variable = AVAILABLE_VARIABLES.find((v) => v.name === variableName)
         return variable?.example || `{${variableName}}`
     }
 
     const renderPreview = (content: string): string => {
-        if (!showExampleData) {return content}
+        if (!showExampleData) { return content }
 
         let preview = content
         const variableRegex = /\{([^}]+)\}/g
@@ -74,7 +65,7 @@ export default function TemplatePreview({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setShowExampleData(!showExampleData)}
+                                onClick={() => setShowExampleData((prev) => !prev)}
                                 className="gap-2"
                             >
                                 <RefreshCw className="h-3 w-3" />
@@ -186,3 +177,5 @@ export default function TemplatePreview({
         </Dialog>
     )
 }
+
+export default TemplatePreview

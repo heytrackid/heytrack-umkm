@@ -1,9 +1,10 @@
+import type { AvailabilityCheck, ProductionPlanItem } from '@/lib/automation/types'
+
 /**
  * Recommendations Module
  * Generates production recommendations and optimizations
  */
 
-import type { AvailabilityCheck, ProductionPlanItem } from '@/lib/automation/types'
 
 export class ProductionRecommendations {
   /**
@@ -19,13 +20,15 @@ export class ProductionRecommendations {
       recommendations.push('🛑 Cannot produce - insufficient ingredients')
 
       const criticalShortages = availability.requirements
-        .filter(req => !req.sufficient)
-        .sort((a, b) => b.shortage - a.shortage)
+        .filter((req: { sufficient: boolean }) => !req.sufficient)
+        .sort((a: { shortage: number }, b: { shortage: number }) => b.shortage - a.shortage)
         .slice(0, 3)
 
-      criticalShortages.forEach(shortage => {
+      criticalShortages.forEach((shortage: { shortage: number; ingredient: { unit: string; name: string } | null }) => {
+        const ingredient = shortage.ingredient
+        if (!ingredient) {return}
         recommendations.push(
-          `📦 Need ${shortage.shortage} ${shortage.ingredient.unit} more of ${shortage.ingredient.name}`
+          `📦 Need ${shortage.shortage} ${ingredient.unit} more of ${ingredient.name}`
         )
       })
     } else {
@@ -53,18 +56,18 @@ export class ProductionRecommendations {
     const optimizations: string[] = []
 
     // Batch optimization
-    const recipeGroups = plan.reduce((groups, item) => {
+    const recipeGroups = plan.reduce<Record<string, ProductionPlanItem[]>>((groups, item) => {
       const recipeId = item.recipe.id
       if (!groups[recipeId]) {
         groups[recipeId] = []
       }
       groups[recipeId].push(item)
       return groups
-    }, {} as Record<string, ProductionPlanItem[]>)
+    }, {})
 
-    Object.entries(recipeGroups).forEach(([recipeId, items]) => {
-      if (items.length > 1) {
-        const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0)
+    Object.entries(recipeGroups).forEach(([_recipeId, items]) => {
+      if (Array.isArray(items) && items.length > 1) {
+        const totalQuantity = items.reduce((sum: number, item: ProductionPlanItem) => sum + item.quantity, 0)
         optimizations.push(
           `🔄 Batch ${items.length} orders of ${items[0].recipe.name} (${totalQuantity} total units) for efficiency`
         )
@@ -139,12 +142,14 @@ export class ProductionRecommendations {
   private static findCommonIngredients(plan: ProductionPlanItem[]) {
     const ingredientUsage: Record<string, { name: string; recipeCount: number; totalQuantity: number }> = {}
 
-    plan.forEach(item => {
-      item.recipe.recipe_ingredients.forEach(ri => {
-        const ingredientId = ri.ingredient.id
+    plan.forEach((item) => {
+      item.recipe.recipe_ingredients.forEach((ri: { ingredient: { id: string; name: string } | null; quantity: number }) => {
+        const ingredient = ri.ingredient
+        if (!ingredient) {return}
+        const ingredientId = ingredient.id
         if (!ingredientUsage[ingredientId]) {
           ingredientUsage[ingredientId] = {
-            name: ri.ingredient.name,
+            name: ingredient.name,
             recipeCount: 0,
             totalQuantity: 0
           }

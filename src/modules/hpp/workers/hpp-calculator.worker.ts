@@ -1,3 +1,5 @@
+
+
 // HPP Calculator Web Worker
 // Performs heavy calculations off the main thread to prevent UI blocking
 

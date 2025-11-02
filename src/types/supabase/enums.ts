@@ -1,3 +1,6 @@
+import type { 
+
+
 /**
  * Supabase Database Enums
  * All enum types from the database
@@ -6,7 +9,6 @@
  * consistency with the generated Supabase types.
  */
 
-import type { 
   BusinessUnit as BusinessUnitDB,
   OrderStatus as OrderStatusDB,
   PaymentMethod as PaymentMethodDB,

@@ -2,6 +2,8 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import type { OrderStatus as DatabaseOrderStatus } from '@/types/database'
 import {
     Clock,
     CheckCircle,
@@ -10,8 +12,6 @@ import {
     XCircle,
     Truck
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import type { OrderStatus as DatabaseOrderStatus } from '@/types/database'
 
 // Map the database enum values to component-friendly values
 type OrderStatus = 'pending' | 'confirmed' | 'in_production' | 'completed' | 'cancelled' | 'delivered'
@@ -110,7 +110,7 @@ export const OrderStatusBadge = ({
         // Otherwise assume it's already a UI value
         normalizedStatus = status as OrderStatus;
     }
-    
+
     const config = statusConfig[normalizedStatus];
     const Icon = config.icon
 
@@ -122,7 +122,7 @@ export const OrderStatusBadge = ({
             >
                 <Icon className={cn(
                     'w-3 h-3 mr-1',
-                    (config as any).animate && 'animate-spin'
+                    'animate' in config && config.animate && 'animate-spin'
                 )} />
                 {config.label}
             </Badge>
@@ -138,7 +138,7 @@ export const OrderStatusBadge = ({
                 >
                     <Icon className={cn(
                         'w-4 h-4 mr-2',
-                        (config as any).animate && 'animate-spin'
+                        'animate' in config && config.animate && 'animate-spin'
                     )} />
                     {config.label}
                 </Badge>

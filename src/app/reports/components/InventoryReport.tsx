@@ -1,9 +1,10 @@
-// Inventory Report Component
-// Handles inventory data filtering, calculations, and display
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
+
+// Inventory Report Component
+// Handles inventory data filtering, calculations, and display
+
 
 interface InventoryReportProps {
   dateRange: {
@@ -18,17 +19,17 @@ interface InventoryStats {
   outOfStock: number
 }
 
-export default function InventoryReport({ dateRange: _dateRange }: InventoryReportProps) {
+const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps) => {
   const { formatCurrency } = useCurrency()
   const { data: ingredients } = useSupabaseCRUD<'ingredients'>('ingredients')
 
   // Calculate inventory report
-  const ingredientList = ingredients ?? []
+  const ingredientList = ingredients || []
 
   const inventoryStats = ingredientList.reduce<InventoryStats>(
     (stats, ingredient) => {
-      const currentStock = ingredient.current_stock ?? 0
-      const minimumStock = ingredient.min_stock ?? 0
+      const currentStock = ingredient.current_stock || 0
+      const minimumStock = ingredient.min_stock || 0
 
       if (currentStock <= minimumStock) {
         stats.lowStock += 1
@@ -93,3 +94,5 @@ export default function InventoryReport({ dateRange: _dateRange }: InventoryRepo
     </div>
   )
 }
+
+export default InventoryReport

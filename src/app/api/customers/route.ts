@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
       customer_type: validatedData.customer_type || 'regular',
       discount_percentage: validatedData.discount_percentage || null,
       notes: validatedData.notes || null,
-      is_active: validatedData.is_active ?? true,
+      is_active: validatedData.is_active || true,
     })
     
     // Insert with proper typing

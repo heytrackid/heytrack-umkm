@@ -2,22 +2,23 @@
 
 import { useState } from 'react'
 import type { RecipesTable } from '@/types/database'
-type Recipe = RecipesTable
+import { useToast } from '@/hooks/use-toast'
+import { apiLogger } from '@/lib/logger'
+import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import {
   useQuery,
   useMutation,
   useQueryClient,
   type UseMutationResult,
 } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
-import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import type {
   RecipeIngredientWithPrice,
   RecipeWithHpp,
   HppOverview,
   HppComparison,
 } from '@/modules/hpp/types'
+
+type Recipe = RecipesTable
 
 interface RecipeIngredientRecord {
   ingredient_id: string
@@ -149,11 +150,11 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         : []
 
       ingredientCost = recipeIngredients.reduce((sum: number, ri) => {
-        const quantity = ri.quantity ?? 0
+        const quantity = ri.quantity || 0
         // Use WAC if available, otherwise use current price
         const unitPrice =
-          ri.ingredients?.weighted_average_cost ??
-          ri.ingredients?.price_per_unit ??
+          ri.ingredients?.weighted_average_cost ||
+          ri.ingredients?.price_per_unit ||
           0
         return sum + quantity * unitPrice
       }, 0)
@@ -168,14 +169,14 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         ...data,
         ingredients: recipeIngredients.map((ri): RecipeIngredientWithPrice => ({
           id: ri.ingredient_id,
-          name: ri.ingredients?.name ?? 'Unknown',
-          quantity: ri.quantity ?? 0,
-          unit: ri.unit ?? 'unit',
+          name: ri.ingredients?.name || 'Unknown',
+          quantity: ri.quantity || 0,
+          unit: ri.unit || 'unit',
           unit_price:
-            ri.ingredients?.weighted_average_cost ??
-            ri.ingredients?.price_per_unit ??
+            ri.ingredients?.weighted_average_cost ||
+            ri.ingredients?.price_per_unit ||
             0,
-          category: ri.ingredients?.category ?? undefined
+          category: ri.ingredients?.category || undefined
         })),
         operational_costs: operationalCost,
         total_cost: ingredientCost + operationalCost
@@ -278,10 +279,10 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
 
 
   return {
-    recipes: recipesData ?? [],
+    recipes: recipesData || [],
     overview: overviewData,
-    recipe: (recipeData ?? null),
-    comparison: comparisonData ?? [],
+    recipe: (recipeData || null),
+    comparison: comparisonData || [],
     isLoading: recipesLoading || overviewLoading,
     recipeLoading,
     selectedRecipeId,

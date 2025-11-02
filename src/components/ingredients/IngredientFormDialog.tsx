@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast'
 import { Loader2 } from 'lucide-react'
 import type { IngredientsTable } from '@/types/database'
 
+
+
 type Ingredient = IngredientsTable
 
 interface IngredientFormDialogProps {
@@ -36,9 +38,9 @@ export const IngredientFormDialog = ({
             name: ingredient.name,
             unit: ingredient.unit as "g" | "l" | "kg" | "ml" | "pcs" | "dozen",
             price_per_unit: ingredient.price_per_unit,
-            current_stock: ingredient.current_stock ?? 0,
-            min_stock: ingredient.min_stock ?? 0,
-            description: ingredient.description ?? '',
+            current_stock: ingredient.current_stock || 0,
+            min_stock: ingredient.min_stock || 0,
+            description: ingredient.description || '',
         } : {
             name: '',
             unit: 'kg',
@@ -74,7 +76,7 @@ export const IngredientFormDialog = ({
             form.reset()
             onOpenChange(false)
             onSuccess?.()
-        } catch (_error) {
+        } catch (error: unknown) {
             toast({
                 title: 'Error',
                 description: error instanceof Error ? error.message : 'Terjadi kesalahan',
@@ -99,12 +101,12 @@ export const IngredientFormDialog = ({
                         form={form}
                         mode={mode}
                         initialData={ingredient ? {
-                            name: ingredient.name ?? '',
-                            unit: ingredient.unit ?? 'kg',
-                            price_per_unit: ingredient.price_per_unit ?? 0,
-                            current_stock: ingredient.current_stock ?? 0,
-                            min_stock: ingredient.min_stock ?? 0,
-                            description: ingredient.description ?? '',
+                            name: ingredient.name || '',
+                            unit: ingredient.unit || 'kg',
+                            price_per_unit: ingredient.price_per_unit || 0,
+                            current_stock: ingredient.current_stock || 0,
+                            min_stock: ingredient.min_stock || 0,
+                            description: ingredient.description || '',
                         } : undefined}
                     />
 

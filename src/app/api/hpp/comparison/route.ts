@@ -8,6 +8,30 @@ export const runtime = 'nodejs'
 
 type Recipe = RecipesTable
 
+const getProfitabilityLevel = (marginPercentage: number): 'high' | 'medium' | 'low' => {
+  if (marginPercentage >= 30) {
+    return 'high'
+  }
+
+  if (marginPercentage >= 15) {
+    return 'medium'
+  }
+
+  return 'low'
+}
+
+const getEfficiencyLevel = (timesMade: number): 'high' | 'medium' | 'low' => {
+  if (timesMade >= 20) {
+    return 'high'
+  }
+
+  if (timesMade >= 10) {
+    return 'medium'
+  }
+
+  return 'low'
+}
+
 // GET /api/hpp/comparison - Get recipe comparison data
 export async function GET(request: NextRequest) {
   try {
@@ -63,12 +87,10 @@ export async function GET(request: NextRequest) {
       const marginPercentage = sellingPrice > 0 ? (margin / sellingPrice) * 100 : 0
 
       // Calculate profitability and efficiency
-      const profitability = marginPercentage >= 30 ? 'high' :
-                          marginPercentage >= 15 ? 'medium' : 'low'
+      const profitability = getProfitabilityLevel(marginPercentage)
 
       const timesMade = recipe.times_made || 0
-      const efficiency = timesMade >= 20 ? 'high' :
-                        timesMade >= 10 ? 'medium' : 'low'
+      const efficiency = getEfficiencyLevel(timesMade)
 
       return {
         id: recipe.id,

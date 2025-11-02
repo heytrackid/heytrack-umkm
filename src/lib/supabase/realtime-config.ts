@@ -1,9 +1,11 @@
+import { dbLogger } from '@/lib/logger'
+
+
 /**
  * Supabase Realtime Configuration
  * Handles realtime connection with proper error handling
  */
 
-import { dbLogger } from '@/lib/logger'
 
 /**
  * Check if realtime is available and properly configured
@@ -27,7 +29,7 @@ export function isRealtimeAvailable(): boolean {
       dbLogger.warn('Invalid Supabase URL protocol')
       return false
     }
-  } catch (_error) {
+  } catch (error) {
     dbLogger.error({ error }, 'Invalid Supabase URL format')
     return false
   }
@@ -68,7 +70,7 @@ export function safeRealtimeSubscribe<T>(
 
   try {
     return subscriptionFn()
-  } catch (_error) {
+  } catch (error) {
     dbLogger.error({ error }, 'Failed to create realtime subscription')
     onError?.(error)
     return null

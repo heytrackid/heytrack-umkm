@@ -1,3 +1,5 @@
+
+
 // Common types used across the database schema
 export type Json =
   | string

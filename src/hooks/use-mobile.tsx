@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react"
+
 /**
  * Mobile Detection Hook
  * Detects if the current device is mobile based on screen width
@@ -5,7 +7,6 @@
  * Returns false on server-side to prevent hydration mismatch
  */
 
-import { useState, useEffect } from "react"
 
 const MOBILE_BREAKPOINT = 768
 

@@ -1,8 +1,3 @@
-/**
- * Orders List Component
- * List view of all orders
- */
-
 'use client'
 
 import { Button } from '@/components/ui/button'
@@ -10,6 +5,15 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Package, Plus, XCircle } from 'lucide-react'
 import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import { OrderCard } from './OrderCard'
+
+
+
+/**
+ * Orders List Component
+ * List view of all orders
+ */
+
+
 
 interface OrdersListProps {
     orders: Order[]

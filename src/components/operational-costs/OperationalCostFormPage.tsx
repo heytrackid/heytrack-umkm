@@ -10,6 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ArrowLeft, Save } from 'lucide-react'
+import type { OperationalCostsTable, OperationalCostsInsert, OperationalCostsUpdate } from '@/types/database'
 import {
     Select,
     SelectContent,
@@ -17,9 +20,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { ArrowLeft, Save } from 'lucide-react'
-import type { OperationalCostsTable, OperationalCostsInsert } from '@/types/database'
 
 type OperationalCost = OperationalCostsTable
 type OperationalCostInsert = OperationalCostsInsert
@@ -53,6 +53,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
         amount: 0,
         frequency: 'monthly',
         recurring: false,
+        is_active: true,
         notes: '',
     })
 
@@ -63,7 +64,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
     }, [mode, costId])
 
     const loadCost = async () => {
-        if (!costId) {return}
+        if (!costId) { return }
 
         try {
             setLoading(true)
@@ -72,7 +73,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                 .select('*')
                 .eq('id', costId)
                 .single()
-            
+
             if (cost) {
                 setFormData(cost)
             } else {
@@ -115,10 +116,49 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
         try {
             setLoading(true)
 
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) {
+                throw new Error('User tidak terautentikasi')
+            }
+
+            const basePayload: OperationalCostInsert = {
+                amount: formData.amount!,
+                category: formData.category || 'utilities',
+                description: formData.description,
+                user_id: user.id,
+                is_active: formData.is_active ?? true,
+            }
+
+            if (formData.frequency !== undefined) {
+                basePayload.frequency = formData.frequency
+            }
+            if (formData.recurring !== undefined) {
+                basePayload.recurring = formData.recurring
+            }
+            if (formData.notes !== undefined) {
+                basePayload.notes = formData.notes?.trim() ? formData.notes : null
+            }
+            if (formData.date !== undefined) {
+                basePayload.date = formData.date
+            }
+            if (formData.payment_method !== undefined) {
+                basePayload.payment_method = formData.payment_method || null
+            }
+            if (formData.supplier !== undefined) {
+                basePayload.supplier = formData.supplier || null
+            }
+            if (formData.reference !== undefined) {
+                basePayload.reference = formData.reference || null
+            }
+
             if (mode === 'create') {
-                await create(formData as OperationalCostInsert)
+                await create(basePayload)
             } else if (costId) {
-                await update(costId, formData)
+                const updatePayload: OperationalCostsUpdate = {
+                    ...basePayload,
+                    user_id: formData.user_id ?? user.id,
+                }
+                await update(costId, updatePayload)
             }
 
             toast({

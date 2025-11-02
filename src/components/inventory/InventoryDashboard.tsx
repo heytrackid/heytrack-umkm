@@ -9,6 +9,8 @@ import { useInventoryAlerts, useReorderManagement } from '@/hooks'
 import { InventoryAlertsList } from '@/hooks/useInventoryAlerts'
 import { useSettings } from '@/contexts/settings-context'
 
+
+
 export const InventoryDashboard = () => {
   const { formatCurrency } = useSettings()
   const { inventoryStatus, loading: alertsLoading, refetch: refetchAlerts } = useInventoryAlerts()

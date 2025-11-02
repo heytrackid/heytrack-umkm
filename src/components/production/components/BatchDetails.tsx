@@ -1,6 +1,3 @@
-// Batch Details Component - Lazy Loaded
-// Displays detailed view of selected batch with quality control and notes
-
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +7,10 @@ import { Separator } from '@/components/ui/separator'
 import { CheckSquare, Eye, MessageSquare, X } from 'lucide-react'
 import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
 import type { BatchExecutionState } from './types'
+
+// Batch Details Component - Lazy Loaded
+// Displays detailed view of selected batch with quality control and notes
+
 
 interface BatchDetailsProps {
   selectedBatch: string | null
@@ -21,7 +22,7 @@ interface BatchDetailsProps {
   onQualityCheck: (batchId: string, checkId: string, passed: boolean, notes?: string) => void
 }
 
-export default function BatchDetails({
+const BatchDetails = ({
   selectedBatch,
   batches,
   executionStates,
@@ -29,7 +30,7 @@ export default function BatchDetails({
   onNotesChange,
   onAddNote,
   onQualityCheck
-}: BatchDetailsProps) {
+}: BatchDetailsProps) => {
   if (!selectedBatch) {
     return (
       <Card>
@@ -167,3 +168,5 @@ export default function BatchDetails({
     </Card>
   )
 }
+
+export default BatchDetails

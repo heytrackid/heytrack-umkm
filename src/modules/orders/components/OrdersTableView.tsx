@@ -1,18 +1,20 @@
 'use client'
 
-import OrdersTable from '@/components/orders/orders-table'
+import OrdersTableComponent from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { OrderDetailView } from './OrderDetailView'
 import { OrderForm } from './OrderForm'
-
 import { uiLogger } from '@/lib/logger'
 import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'
-import type { Database } from '@/types/database'
+import type { OrdersTable as OrdersTableRow } from '@/types/database'
 import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
 
-type Order = OrdersTable
+
+
+
+type Order = OrdersTableRow
 
 export const OrdersTableView = () => {
   const queryClient = useQueryClient()
@@ -28,7 +30,7 @@ export const OrdersTableView = () => {
   }, [])
 
   // ✅ Use TanStack Query for orders
-  const { data: orders = [], isLoading: loading } = useQuery({
+  const { data: orders = [], isLoading: loading } = useQuery<Order[]>({
     queryKey: ['orders', 'table'],
     queryFn: async () => {
       const response = await fetch('/api/orders')
@@ -50,8 +52,8 @@ export const OrdersTableView = () => {
   })
 
   const handleViewOrder = (order: Order) => {
-    void setSelectedOrder(order)
-    void setShowOrderDetail(true)
+    setSelectedOrder(order)
+    setShowOrderDetail(true)
   }
 
   const handleEditOrder = (order: Order) => {
@@ -60,8 +62,8 @@ export const OrdersTableView = () => {
       ...order,
       items: [] // Will be loaded by the form if needed
     }
-    void setEditingOrder(orderWithItems)
-    void setShowOrderForm(true)
+    setEditingOrder(orderWithItems)
+    setShowOrderForm(true)
   }
 
   // ✅ Delete mutation
@@ -77,7 +79,7 @@ export const OrdersTableView = () => {
       return orderId
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
       uiLogger.info('Order deleted successfully')
     },
     onError: (err) => {
@@ -113,7 +115,7 @@ export const OrdersTableView = () => {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
       uiLogger.info('Order status updated')
     },
     onError: (err) => {
@@ -182,7 +184,7 @@ export const OrdersTableView = () => {
 
   return (
     <>
-      <OrdersTable
+      <OrdersTableComponent
         orders={orders}
         loading={loading}
         onViewOrder={handleViewOrder}
@@ -216,12 +218,12 @@ export const OrdersTableView = () => {
               // Handle form submission
               uiLogger.info({ orderNo: data.order_no }, 'Order submitted')
               await queryClient.invalidateQueries({ queryKey: ['orders'] })
-              void setShowOrderForm(false)
-              void setEditingOrder(undefined)
+              setShowOrderForm(false)
+              setEditingOrder(undefined)
             }}
             onCancel={() => {
-              void setShowOrderForm(false)
-              void setEditingOrder(undefined)
+              setShowOrderForm(false)
+              setEditingOrder(undefined)
             }}
           />
         </DialogContent>

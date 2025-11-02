@@ -5,16 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 // SwipeableTabsContent not used in this component
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Textarea } from '@/components/ui/textarea'
 import { ArrowUpCircle, ArrowDownCircle, AlertCircle, Loader2, Calendar } from 'lucide-react'
 import { incomeCategories, expenseCategories, type TransactionFormData } from '../constants'
 
@@ -72,20 +67,24 @@ const EnhancedTransactionForm = ({
                 return ''
 
             case 'amount':
-                if (!value) { return 'Jumlah wajib diisi' }
-                const amount = parseFloat(value)
-                if (isNaN(amount)) { return 'Jumlah harus berupa angka' }
-                if (amount <= 0) { return 'Jumlah harus lebih dari 0' }
-                if (amount > 1000000000) { return 'Jumlah terlalu besar' }
-                return ''
+                {
+                    if (!value) { return 'Jumlah wajib diisi' }
+                    const amount = parseFloat(value)
+                    if (isNaN(amount)) { return 'Jumlah harus berupa angka' }
+                    if (amount <= 0) { return 'Jumlah harus lebih dari 0' }
+                    if (amount > 1000000000) { return 'Jumlah terlalu besar' }
+                    return ''
+                }
 
             case 'date':
-                if (!value) { return 'Tanggal wajib diisi' }
-                const selectedDate = new Date(value)
-                const today = new Date()
-                today.setHours(23, 59, 59, 999)
-                if (selectedDate > today) { return 'Tanggal tidak boleh di masa depan' }
-                return ''
+                {
+                    if (!value) { return 'Tanggal wajib diisi' }
+                    const selectedDate = new Date(value)
+                    const today = new Date()
+                    today.setHours(23, 59, 59, 999)
+                    if (selectedDate > today) { return 'Tanggal tidak boleh di masa depan' }
+                    return ''
+                }
 
             default:
                 return ''

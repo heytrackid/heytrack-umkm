@@ -5,6 +5,8 @@ import { getErrorMessage } from '@/lib/type-guards'
 import { logger } from '@/lib/logger'
 import type { AppError, ErrorState } from './types'
 
+
+
 /**
  * Hook untuk handle errors dalam functional components
  * Menyediakan error state dan methods untuk manage errors
@@ -22,7 +24,7 @@ import type { AppError, ErrorState } from './types'
  *
  * try {
  *   await someAsyncOperation()
- * } catch (_err) {
+ * } catch (err) {
  *   handleError(err, 'MyComponent.operation')
  * }
  *

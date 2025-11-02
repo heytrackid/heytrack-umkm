@@ -3,14 +3,6 @@
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
@@ -18,11 +10,10 @@ import { Download, Loader2, AlertCircle } from 'lucide-react'
 import { StatsSkeleton } from '@/components/ui'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import { useProfitData, useProductChartData } from './components'
-import { PageHeader } from '@/components/layout/PageHeader'
-
-// Import lightweight components normally (tables, filters, cards)
 import {
+  useProfitData,
+  useProductChartData,
+  // Lightweight components (tables, filters, cards)
   ProfitFilters,
   ProfitSummaryCards,
   ProfitInfoCard,
@@ -32,23 +23,29 @@ import {
   ProfitBreakdown
 } from './components'
 
+import { PageHeader } from '@/components/layout/PageHeader'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+
+// Loading component for chart
+const LoadingChart = () => (
+  <Card>
+    <CardContent className="p-6">
+      <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    </CardContent>
+  </Card>
+)
+
 // Only lazy load HEAVY chart components
 const ProductProfitabilityChart = dynamic(
   () => import(/* webpackChunkName: "profit-chart" */ './components').then(mod => ({ default: mod.ProductProfitabilityChart })),
   {
-    loading: () => (
-      <Card>
-        <CardContent className="p-6">
-          <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-    )
+    loading: LoadingChart
   }
 )
 
-export default function ProfitReportPage() {
+const ProfitReportPage = () => {
   const { formatCurrency } = useSettings()
   const { isMobile } = useResponsive()
 
@@ -63,6 +60,31 @@ export default function ProfitReportPage() {
   } = useProfitData()
 
   const productChartData = useProductChartData(profitData)
+
+  // Loading skeleton helper functions to avoid unstable nested components
+  const renderProfitInfoSkeleton = () => (
+    Array.from({ length: 5 }, (_, i) => (
+      <div key={`profit-info-${i}`} className="h-12 bg-muted rounded" />
+    ))
+  )
+
+  const renderIngredientCostSkeleton = () => (
+    Array.from({ length: 3 }, (_, i) => (
+      <div key={`ingredient-cost-${i}`} className="h-12 bg-muted rounded" />
+    ))
+  )
+
+  const renderOperatingExpenseSkeleton = () => (
+    Array.from({ length: 4 }, (_, i) => (
+      <div key={`operating-expense-${i}`} className="h-10 bg-muted rounded" />
+    ))
+  )
+
+  const renderProfitBreakdownSkeleton = () => (
+    Array.from({ length: 6 }, (_, i) => (
+      <div key={`profit-breakdown-${i}`} className="h-6 bg-muted rounded" />
+    ))
+  )
 
   // Error state
   if (error) {
@@ -112,7 +134,7 @@ export default function ProfitReportPage() {
     products = [],
     ingredients = [],
     operating_expenses = []
-  } = profitData || {}
+  } = profitData ?? {}
 
   return (
     <AppLayout>
@@ -250,9 +272,7 @@ export default function ProfitReportPage() {
                   <div className="animate-pulse space-y-4">
                     <div className="h-4 bg-muted rounded w-1/3" />
                     <div className="space-y-2">
-                      {Array.from({ length: 5 }, (_, i) => (
-                        <div key={i} className="h-12 bg-muted rounded" />
-                      ))}
+                      {renderProfitInfoSkeleton()}
                     </div>
                   </div>
                 </CardContent>
@@ -264,9 +284,7 @@ export default function ProfitReportPage() {
                   <div className="animate-pulse space-y-4">
                     <div className="h-4 bg-muted rounded w-1/4" />
                     <div className="space-y-2">
-                      {Array.from({ length: 3 }, (_, i) => (
-                        <div key={i} className="h-12 bg-muted rounded" />
-                      ))}
+                      {renderIngredientCostSkeleton()}
                     </div>
                   </div>
                 </CardContent>
@@ -278,9 +296,7 @@ export default function ProfitReportPage() {
                   <div className="animate-pulse space-y-4">
                     <div className="h-4 bg-muted rounded w-1/3" />
                     <div className="space-y-2">
-                      {Array.from({ length: 4 }, (_, i) => (
-                        <div key={i} className="h-10 bg-muted rounded" />
-                      ))}
+                      {renderOperatingExpenseSkeleton()}
                     </div>
                   </div>
                 </CardContent>
@@ -292,9 +308,7 @@ export default function ProfitReportPage() {
                   <div className="animate-pulse space-y-4">
                     <div className="h-4 bg-muted rounded w-1/4" />
                     <div className="space-y-2">
-                      {Array.from({ length: 6 }, (_, i) => (
-                        <div key={i} className="h-6 bg-muted rounded" />
-                      ))}
+                      {renderProfitBreakdownSkeleton()}
                     </div>
                   </div>
                 </CardContent>
@@ -372,3 +386,5 @@ export default function ProfitReportPage() {
     </AppLayout>
   )
 }
+
+export default ProfitReportPage

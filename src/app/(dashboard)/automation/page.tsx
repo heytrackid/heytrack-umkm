@@ -6,17 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { apiLogger } from '@/lib/logger'
-import {
-  Play,
-  RefreshCw,
-  CheckCircle,
-  Clock,
-  Bell,
-  Package,
-  Settings,
-  AlertTriangle,
-  TrendingUp
-} from 'lucide-react'
+import { Play, RefreshCw, CheckCircle, Clock, Bell, Package, Settings, AlertTriangle, TrendingUp } from 'lucide-react'
 
 interface AutomationStatus {
   timestamp: string
@@ -81,8 +71,12 @@ const AutomationPage = () => {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to run task')
+        const errorData = await response.json().catch(() => null)
+        const apiMessage =
+          errorData && typeof errorData.error === 'string' && errorData.error.trim().length > 0
+            ? errorData.error
+            : null
+        throw new Error(apiMessage || 'Failed to run task')
       }
 
       const data = await response.json()

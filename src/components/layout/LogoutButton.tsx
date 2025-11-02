@@ -6,6 +6,8 @@ import { LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import { uiLogger } from '@/lib/logger'
 
+
+
 export const LogoutButton = () => {
     const [isLoggingOut, setIsLoggingOut] = useState(false)
     const router = useRouter()

@@ -1,16 +1,15 @@
 'use client'
-
 import { apiLogger } from '@/lib/logger'
-import {
+import { usePathname, useRouter } from 'next/navigation' 
+import { useCallback, useEffect } from 'react'
+import { ROUTE_PRELOADING_PATTERNS } from './routePatterns'
+import { PreloadPriority } from './types'
+import { 
   globalLazyLoadingUtils,
   preloadChartBundle,
   preloadModalComponent
 } from '@/components/lazy/index'
-import { usePathname, useRouter } from 'next/navigation'
-import { useCallback, useEffect } from 'react'
 
-import { ROUTE_PRELOADING_PATTERNS } from './routePatterns'
-import { PreloadPriority } from './types'
 
 /**
  * Route-based preloading hook
@@ -46,7 +45,7 @@ export const useRoutePreloading = () => {
           // Preload critical modals
           if (config.modals) {
             config.modals.forEach(modal => {
-              preloadModalComponent(modal as any).catch(() => {})
+              preloadModalComponent(modal as Parameters<typeof preloadModalComponent>[0]).catch(() => {})
             })
           }
           break
@@ -107,9 +106,12 @@ export const useRoutePreloading = () => {
 
   // Manual preload function for user interactions
   const preloadRoute = useCallback((targetRoute: string) => {
+    const validRoutes = ['inventory', 'customers', 'recipes', 'orders', 'finance', 'dashboard', 'settings'] as const
+    type ValidRoute = typeof validRoutes[number]
+    
     const config = ROUTE_PRELOADING_PATTERNS[targetRoute]
-    if (config?.components) {
-      globalLazyLoadingUtils.preloadForRoute(targetRoute as any).catch(() => {})
+    if (config?.components && validRoutes.includes(targetRoute as ValidRoute)) {
+      globalLazyLoadingUtils.preloadForRoute(targetRoute as ValidRoute).catch(() => {})
     }
     void router.prefetch(targetRoute)
   }, [router])

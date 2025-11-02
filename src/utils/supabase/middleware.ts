@@ -1,7 +1,9 @@
-// src/utils/supabase/middleware.ts
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from '@/types/database'
+
+
+// src/utils/supabase/middleware.ts
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -42,7 +44,7 @@ export async function updateSession(request: NextRequest) {
     if (data?.user && !error) {
       user = data.user
     }
-  } catch (_error) {
+  } catch (error) {
     // AuthSessionMissingError is expected for unauthenticated users
     // Don't log as error, just continue with null user
     user = null

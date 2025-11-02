@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 
+
 /**
  * Check if user has admin role
  * @param userId - User ID to check

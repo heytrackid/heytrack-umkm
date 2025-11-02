@@ -1,5 +1,7 @@
 import { headers } from 'next/headers'
 
+
+
 /**
  * Get CSP nonce from request headers
  * Use this in Server Components to access the nonce

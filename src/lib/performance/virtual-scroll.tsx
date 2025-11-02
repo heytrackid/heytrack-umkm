@@ -1,7 +1,10 @@
-'use client'
-
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useRef, type ReactNode } from 'react'
+
+'use client'
+
+
+
 
 interface VirtualScrollProps<T> {
     items: T[]
@@ -12,14 +15,14 @@ interface VirtualScrollProps<T> {
     className?: string
 }
 
-export function VirtualScroll<T>({
+export const VirtualScroll = <T,>({
     items,
     height,
     itemHeight,
     renderItem,
     overscan = 5,
     className = ''
-}: VirtualScrollProps<T>) {
+}: VirtualScrollProps<T>) => {
     const parentRef = useRef<HTMLDivElement>(null)
 
     const virtualizer = useVirtualizer({
@@ -66,16 +69,14 @@ export function VirtualScroll<T>({
 }
 
 // Hook for virtual scrolling
-export function useVirtualScroll<T>(
+export const useVirtualScroll = <T,>(
     items: T[],
     containerRef: React.RefObject<HTMLElement>,
     itemHeight: number,
     overscan = 5
-) {
-    return useVirtualizer({
+) => useVirtualizer({
         count: items.length,
         getScrollElement: () => containerRef.current,
         estimateSize: () => itemHeight,
         overscan
     })
-}

@@ -1,23 +1,25 @@
-// @ts-nocheck
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types/database'
-import { useCallback, useEffect, useState } from 'react'
+import type { TableName, Row } from '@/types/database'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import type { UseSupabaseQueryOptions } from './types'
-
-type TablesMap = Database['public']['Tables']
 
 /**
  * Core hook for Supabase queries with real-time support
  */
-export function useSupabaseQuery<T extends keyof TablesMap>(
+export function useSupabaseQuery<T extends TableName>(
   tableName: T,
   options: UseSupabaseQueryOptions<T> = {}
 ) {
-  const [data, setData] = useState<Array<TablesMap[T]['Row']>>(options.initial ?? [])
+  const [data, setData] = useState<Array<Row<T>>>(options.initial || [])
   const [loading, setLoading] = useState(!options.initial)
   const [error, setError] = useState<string | null>(null)
+  
+  const optionsRef = useRef(options);
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -25,13 +27,14 @@ export function useSupabaseQuery<T extends keyof TablesMap>(
       void setError(null)
 
       const supabase = createClient()
-      let query = supabase.from(tableName).select(options.select || '*')
+      const currentOptions = optionsRef.current;
+      let query = supabase.from(tableName).select(currentOptions.select || '*')
 
       // Apply filters
-      if (options.filter) {
-        Object.entries(options.filter).forEach(([key, value]) => {
+      if (currentOptions.filter) {
+        Object.entries(currentOptions.filter).forEach(([key, value]) => {
           if (value === undefined) {return}
-          const column = key as keyof TablesMap[T]['Row'] & string
+          const column = key as string
           if (value === null) {
             query = query.is(column, null)
           } else {
@@ -41,27 +44,27 @@ export function useSupabaseQuery<T extends keyof TablesMap>(
       }
 
       // Apply ordering
-      if (options.orderBy) {
-        query = query.order(options.orderBy.column, {
-          ascending: options.orderBy.ascending ?? true,
+      if (currentOptions.orderBy) {
+        query = query.order(currentOptions.orderBy.column, {
+          ascending: currentOptions.orderBy.ascending || true,
         })
       }
 
       // Apply limit
-      if (options.limit) {
-        query = query.limit(options.limit)
+      if (currentOptions.limit) {
+        query = query.limit(currentOptions.limit)
       }
 
       const { data: result, error: queryError } = await query
 
       if (queryError) {throw queryError}
-      void setData(result || [])
-    } catch (_err) {
+      void setData((result || []) as unknown as Array<Row<T>>)
+    } catch (err) {
       void setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       void setLoading(false)
     }
-  }, [tableName, JSON.stringify(options)])
+  }, [tableName])
 
   useEffect(() => {
     // Skip initial fetch if we have initial data and refetchOnMount is false
@@ -77,24 +80,29 @@ export function useSupabaseQuery<T extends keyof TablesMap>(
       const channel = supabase
         .channel(`${tableName}-changes`)
         .on(
-          'postgres_changes',
+          'postgres_changes' as const,
           {
             event: '*',
             schema: 'public',
             table: tableName,
           },
-          (payload: any) => {
-            if (payload.eventType === 'INSERT') {
-              setData((prev) => [payload.new as TablesMap[T]['Row'], ...prev])
-            } else if (payload.eventType === 'UPDATE') {
+          (payload: unknown) => {
+            const typedPayload = payload as {
+              eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+              new: Row<T>;
+              old: Row<T>;
+            }
+            if (typedPayload.eventType === 'INSERT') {
+              setData((prev) => [typedPayload.new, ...prev])
+            } else if (typedPayload.eventType === 'UPDATE') {
               setData((prev) =>
-                prev.map((item: TablesMap[T]['Row']) =>
-                  item.id === (payload.new as TablesMap[T]['Row']).id ? payload.new as TablesMap[T]['Row'] : item
+                prev.map((item: Row<T>) =>
+                  (item as { id: string }).id === (typedPayload.new as { id: string }).id ? typedPayload.new : item
                 )
               )
-            } else if (payload.eventType === 'DELETE') {
+            } else if (typedPayload.eventType === 'DELETE') {
               setData((prev) =>
-                prev.filter((item: TablesMap[T]['Row']) => item.id !== (payload.old as TablesMap[T]['Row']).id)
+                prev.filter((item: Row<T>) => (item as { id: string }).id !== (typedPayload.old as { id: string }).id)
               )
             }
           }
@@ -102,10 +110,12 @@ export function useSupabaseQuery<T extends keyof TablesMap>(
         .subscribe()
 
       return () => {
-        supabase.removeChannel(channel)
+        void supabase.removeChannel(channel)
       }
     }
-  }, [tableName, fetchData, options.realtime, options.refetchOnMount])
+    
+    return undefined
+  }, [tableName, fetchData, options.realtime, options.refetchOnMount, options.initial])
 
   return {
     data,

@@ -1,6 +1,7 @@
 import { useResponsive } from './useResponsive'
 import type { MobileState } from './types'
 
+
 /**
  * Backward compatibility: useIsMobile returns boolean
  * @deprecated Use useResponsive() instead

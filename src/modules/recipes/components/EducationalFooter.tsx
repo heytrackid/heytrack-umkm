@@ -1,6 +1,9 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+
 
 /**
  * Educational footer cards component for UMKM guidance

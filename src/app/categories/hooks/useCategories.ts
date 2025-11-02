@@ -295,11 +295,9 @@ export function useCategories(): UseCategoriesReturn {
     const category = categories.find(c => c.id === categoryId)
     if (!category) {return}
 
-    if (confirm(`Apakah Anda yakin ingin menghapus kategori "${category.name}"?`)) {
-      setCategories(prev => prev.filter(cat => cat.id !== categoryId))
-      setSelectedItems(prev => prev.filter(id => id !== categoryId))
-      toast.success('Kategori berhasil dihapus!')
-    }
+    toast.error('Konfirmasi diperlukan. Gunakan komponen UI untuk konfirmasi penghapusan.', { 
+      icon: '⚠️' 
+    })
   }
 
   // Bulk operations
@@ -322,20 +320,9 @@ export function useCategories(): UseCategoriesReturn {
   const handleBulkDelete = () => {
     if (selectedItems.length === 0) {return}
 
-    const selectedCategories = filteredCategories.filter(category =>
-      selectedItems.includes(category.id)
-    )
-    const categoryNames = selectedCategories.map(category => category.name).join(', ')
-
-    const confirmed = window.confirm(
-      `Apakah Anda yakin ingin menghapus ${selectedItems.length} kategori berikut?\n\n${categoryNames}`
-    )
-
-    if (confirmed) {
-      setCategories(prev => prev.filter(cat => !selectedItems.includes(cat.id)))
-      void setSelectedItems([])
-      toast.success(`${selectedItems.length} kategori berhasil dihapus!`)
-    }
+    toast.error('Konfirmasi diperlukan. Gunakan komponen UI untuk konfirmasi penghapusan massal.', { 
+      icon: '⚠️' 
+    })
   }
 
   const handleBulkEdit = () => {

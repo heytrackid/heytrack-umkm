@@ -1,14 +1,10 @@
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { BarChart3 } from 'lucide-react'
 import { LazyBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
 import { type ProfitPeriodType, type ChartDataPoint, profitPeriodOptions } from '../constants'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
 
 interface ProductProfitChartProps {
   chartData: ChartDataPoint[]
@@ -21,6 +17,33 @@ interface ProductProfitChartProps {
   isMobile: boolean
   formatCurrency: (amount: number) => string
 }
+
+// Tooltip component extracted to avoid defining components during render
+const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) =>
+  ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { name: string } }> }) => {
+    if (active && payload?.length) {
+      return (
+        <div className="bg-background border rounded-lg p-3 shadow-lg">
+          <p className="font-medium mb-2">{payload[0].payload.name}</p>
+          <div className="space-y-1 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-blue-500" />
+              <span>Pendapatan: {formatCurrency(payload[0].value)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-orange-500" />
+              <span>HPP (COGS): {formatCurrency(payload[1].value)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-green-500" />
+              <span>Laba: {formatCurrency(payload[2].value)}</span>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    return null
+  }
 
 export const ProductProfitChart = ({
   chartData,
@@ -112,30 +135,7 @@ export const ProductProfitChart = ({
                   }}
                 />
                 <Tooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-background border rounded-lg p-3 shadow-lg">
-                          <p className="font-medium mb-2">{payload[0].payload.name}</p>
-                          <div className="space-y-1 text-sm">
-                            <div className="flex items-center gap-2">
-                              <div className="h-3 w-3 rounded-full bg-blue-500" />
-                              <span>Pendapatan: {formatCurrency(payload[0].value as number)}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="h-3 w-3 rounded-full bg-orange-500" />
-                              <span>HPP (COGS): {formatCurrency(payload[1].value as number)}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="h-3 w-3 rounded-full bg-green-500" />
-                              <span>Laba: {formatCurrency(payload[2].value as number)}</span>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    }
-                    return null
-                  }}
+                  content={ProductProfitChartTooltip(formatCurrency)}
                 />
                 <ChartLegend
                   wrapperStyle={{ paddingTop: '10px' }}

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import type { Notification } from '@/types/domain/notifications'
 
+
+
 interface UseNotificationsOptions {
   unreadOnly?: boolean
   category?: string
@@ -45,7 +47,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       const data = await response.json()
       setNotifications(data.notifications || [])
       setUnreadCount(data.unread_count || 0)
-    } catch (_err) {
+    } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setIsLoading(false)
@@ -65,7 +67,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       }
 
       await fetchNotifications()
-    } catch (_err) {
+    } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
   }, [fetchNotifications])
@@ -83,7 +85,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       }
 
       await fetchNotifications()
-    } catch (_err) {
+    } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
   }, [fetchNotifications])
@@ -101,7 +103,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       }
 
       await fetchNotifications()
-    } catch (_err) {
+    } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
   }, [fetchNotifications])

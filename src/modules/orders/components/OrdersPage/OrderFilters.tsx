@@ -1,10 +1,3 @@
-/**
- * Order Filters Component
- * Search and filter controls
- */
-
-'use client'
-
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -12,6 +5,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Filter, Search, XCircle } from 'lucide-react'
 import type { OrderStatus } from '@/app/orders/types/orders.types'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
+
+'use client'
+
+
+/**
+ * Order Filters Component
+ * Search and filter controls
+ */
+
+
 
 interface OrderFilters {
     status: OrderStatus[]

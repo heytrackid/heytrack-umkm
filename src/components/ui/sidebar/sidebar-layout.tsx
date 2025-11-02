@@ -1,11 +1,12 @@
-// Sidebar Layout Components
-// Header, Footer, Content, and layout-related components
-
 import type { ComponentProps } from 'react'
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+
+// Sidebar Layout Components
+// Header, Footer, Content, and layout-related components
+
 
 export const SidebarHeader = ({ className, ...props }: ComponentProps<'div'>) => (
     <div

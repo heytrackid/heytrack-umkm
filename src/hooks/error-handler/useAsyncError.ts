@@ -3,6 +3,8 @@
 import { useCallback, useState } from 'react'
 import { useErrorHandler } from './useErrorHandler'
 
+
+
 /**
  * Hook untuk handle async operations dengan error handling dan loading state
  * Automatically manages error state dan loading indicators
@@ -39,7 +41,7 @@ export function useAsyncError() {
         void setIsLoading(true)
         resetError()
         await asyncFn()
-      } catch (_err) {
+      } catch (err) {
         void handleErr(err, 'useAsyncError')
       } finally {
         void setIsLoading(false)

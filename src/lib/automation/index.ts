@@ -1,3 +1,5 @@
+import type { AutomationConfig } from './types'
+
 /**
  * Automation Engine - Main Entry Point
  * Modular automation system untuk UMKM F&B
@@ -16,7 +18,6 @@ export type * from './types'
 export * from './workflows'
 
 // Import for default engine
-import type { AutomationConfig } from './types'
 
 // Default configuration for Indonesian UMKM F&B
 export const UMKM_CONFIG: AutomationConfig = {

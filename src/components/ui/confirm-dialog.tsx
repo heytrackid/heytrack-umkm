@@ -24,6 +24,7 @@ interface ConfirmDialogProps {
   consequences?: string[]
   requireConfirmation?: boolean
   confirmationText?: string
+  loading?: boolean
 }
 
 export const ConfirmDialog = ({
@@ -45,7 +46,7 @@ export const ConfirmDialog = ({
   const canConfirm = !requireConfirmation || inputValue === confirmationText
 
   const handleConfirm = async () => {
-    if (!canConfirm) {return}
+    if (!canConfirm) { return }
 
     setIsLoading(true)
     try {
@@ -124,20 +125,19 @@ export function useConfirm() {
     confirmText?: string
     cancelText?: string
     variant?: 'default' | 'destructive'
-    onConfirm: () => void | Promise<void>
+    onConfirm?: () => void | Promise<void>
   }>({
     open: false,
     title: '',
     description: '',
-    onConfirm: () => { }
+    onConfirm: undefined
   })
 
-  const confirm = (options: Omit<typeof state, 'open'>) => new Promise<boolean>((resolve) => {
+  const confirm = (options: Omit<typeof state, 'open' | 'onConfirm'>) => new Promise<boolean>((resolve) => {
     setState({
       ...options,
       open: true,
       onConfirm: async () => {
-        await options.onConfirm()
         resolve(true)
       }
     })
@@ -146,6 +146,7 @@ export function useConfirm() {
   const ConfirmDialogComponent = () => (
     <ConfirmDialog
       {...state}
+      onConfirm={() => state.onConfirm?.()}
       onOpenChange={(open) => setState(prev => ({ ...prev, open }))}
     />
   )

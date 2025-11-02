@@ -1,8 +1,10 @@
 'use client'
-import { useEffect } from 'react'
 
+import { useEffect } from 'react'
 import { apiLogger } from '@/lib/logger'
 import { preloadChartBundle } from '@/components/lazy/index'
+
+
 
 /**
  * Network-aware preloading hook

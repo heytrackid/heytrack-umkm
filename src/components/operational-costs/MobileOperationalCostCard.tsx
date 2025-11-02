@@ -3,6 +3,8 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { MoreVertical, Edit, Trash2 } from 'lucide-react'
+import type { OperationalCostsTable } from '@/types/database'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,8 +13,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreVertical, Edit, Trash2 } from 'lucide-react'
-import type { OperationalCostsTable } from '@/types/database'
 
 type OperationalCost = OperationalCostsTable
 

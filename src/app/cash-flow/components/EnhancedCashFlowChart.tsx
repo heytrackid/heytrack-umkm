@@ -3,28 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
 import { TrendingUp, TrendingDown, BarChart3, LineChart as LineChartIcon, Download } from 'lucide-react'
-import {
-    LazyLineChart,
-    LazyBarChart,
-    LazyAreaChart,
-    Line,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ChartLegend,
-    ResponsiveContainer,
-    Area
-} from '@/components/charts/LazyCharts'
+import { LazyLineChart, LazyBarChart, LazyAreaChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ChartLegend, ResponsiveContainer, Area } from '@/components/charts/LazyCharts'
 import { useState } from 'react'
 import { type PeriodType, type ChartDataPoint, periodOptions } from '@/app/cash-flow/constants'
 
@@ -40,6 +21,54 @@ interface EnhancedCashFlowChartProps {
 }
 
 type ChartType = 'line' | 'bar' | 'area'
+
+interface TooltipPayload {
+    [key: string]: unknown;
+    payload?: ChartDataPoint;
+}
+
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayload[] }) => {
+    if (active && payload?.length) {
+        const data = payload[0]?.payload
+        if (!data) { return null }
+
+        return (
+            <div className="bg-background border rounded-lg p-3 shadow-lg">
+                <p className="font-semibold mb-2">{data.date}</p>
+                <div className="space-y-1.5 text-sm">
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2">
+                            <div className="h-3 w-3 rounded-full bg-green-500" />
+                            <span>Pemasukan</span>
+                        </div>
+                        <span className="font-semibold text-green-600">
+                            Rp {data.income.toLocaleString('id-ID')}
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2">
+                            <div className="h-3 w-3 rounded-full bg-red-500" />
+                            <span>Pengeluaran</span>
+                        </div>
+                        <span className="font-semibold text-red-600">
+                            Rp {data.expense.toLocaleString('id-ID')}
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4 pt-1 border-t">
+                        <div className="flex items-center gap-2">
+                            <div className="h-3 w-3 rounded-full bg-blue-500" />
+                            <span>Net</span>
+                        </div>
+                        <span className={`font-semibold ${data.net >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                            Rp {data.net.toLocaleString('id-ID')}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+    return null
+}
 
 const EnhancedCashFlowChart = ({
     chartData,
@@ -115,49 +144,6 @@ const EnhancedCashFlowChart = ({
         return value.toString()
     }
 
-    const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
-        if (active && payload?.length) {
-            const data = payload[0]?.payload as ChartDataPoint | undefined
-            if (!data) { return null }
-
-            return (
-                <div className="bg-background border rounded-lg p-3 shadow-lg">
-                    <p className="font-semibold mb-2">{data.date}</p>
-                    <div className="space-y-1.5 text-sm">
-                        <div className="flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-green-500" />
-                                <span>Pemasukan</span>
-                            </div>
-                            <span className="font-semibold text-green-600">
-                                Rp {data.income.toLocaleString('id-ID')}
-                            </span>
-                        </div>
-                        <div className="flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-red-500" />
-                                <span>Pengeluaran</span>
-                            </div>
-                            <span className="font-semibold text-red-600">
-                                Rp {data.expense.toLocaleString('id-ID')}
-                            </span>
-                        </div>
-                        <div className="flex items-center justify-between gap-4 pt-1 border-t">
-                            <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-blue-500" />
-                                <span>Net</span>
-                            </div>
-                            <span className={`font-semibold ${(payload[2]?.value as number) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                                Rp {payload[2]?.value ? payload[2].value.toLocaleString('id-ID') : 0}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            )
-        }
-        return null
-    }
-
     const renderChart = () => {
         const commonProps = {
             data: chartData,
@@ -184,7 +170,7 @@ const EnhancedCashFlowChart = ({
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                         <XAxis {...commonAxisProps.xAxis} />
                         <YAxis {...commonAxisProps.yAxis} />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={CustomTooltip} />
                         <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
                             formatter={(value: string) => {
@@ -222,7 +208,7 @@ const EnhancedCashFlowChart = ({
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                         <XAxis {...commonAxisProps.xAxis} />
                         <YAxis {...commonAxisProps.yAxis} />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={CustomTooltip} />
                         <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
                             formatter={(value: string) => {
@@ -246,7 +232,7 @@ const EnhancedCashFlowChart = ({
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                         <XAxis {...commonAxisProps.xAxis} />
                         <YAxis {...commonAxisProps.yAxis} />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={CustomTooltip} />
                         <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
                             formatter={(value: string) => {

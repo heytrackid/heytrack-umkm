@@ -1,4 +1,3 @@
-// @ts-nocheck
 import 'server-only'
 import ExcelJS from 'exceljs'
 import { createClient } from '@/utils/supabase/server'
@@ -6,6 +5,8 @@ import type { Database, RecipesTable, OrdersTable, IngredientsTable, CustomersTa
 import { formatCurrency } from '@/lib/currency'
 import { format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
+
+
 
 type Recipe = RecipesTable
 type Order = OrdersTable
@@ -44,47 +45,47 @@ export class GlobalExportService {
     return Buffer.from(buffer)
   }
 
-  private static async fetchRecipes(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+  private static async fetchRecipes(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<Recipe[]> {
     const { data, error } = await supabase
       .from('recipes')
       .select('id, name, servings, selling_price, cost_per_unit, is_active, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
     if (error) {throw error}
-    return data || []
+    return (data || []) as Recipe[]
   }
 
-  private static async fetchOrders(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+  private static async fetchOrders(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<Order[]> {
     const { data, error } = await supabase
       .from('orders')
       .select('id, order_no, customer_name, total_amount, status, order_date, created_at')
       .eq('user_id', userId)
       .order('order_date', { ascending: false })
     if (error) {throw error}
-    return data || []
+    return (data || []) as Order[]
   }
 
-  private static async fetchIngredients(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+  private static async fetchIngredients(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<Ingredient[]> {
     const { data, error } = await supabase
       .from('ingredients')
       .select('id, name, unit, current_stock, min_stock, weighted_average_cost, price_per_unit, created_at')
       .eq('user_id', userId)
       .order('name')
     if (error) {throw error}
-    return data || []
+    return (data || []) as Ingredient[]
   }
 
-  private static async fetchCustomers(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+  private static async fetchCustomers(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<Customer[]> {
     const { data, error } = await supabase
       .from('customers')
       .select('id, name, phone, email, address, created_at')
       .eq('user_id', userId)
       .order('name')
     if (error) {throw error}
-    return data || []
+    return (data || []) as Customer[]
   }
 
-  private static async fetchStockTransactions(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+  private static async fetchStockTransactions(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<StockTransaction[]> {
     const { data, error } = await supabase
       .from('stock_transactions')
       .select('id, ingredient_id, type, quantity, unit_price, created_at')
@@ -92,7 +93,7 @@ export class GlobalExportService {
       .order('created_at', { ascending: false })
       .limit(500)
     if (error) {throw error}
-    return data || []
+    return (data || []) as StockTransaction[]
   }
 
   private static async createRecipesSheet(workbook: ExcelJS.Workbook, recipes: Recipe[]) {
@@ -115,7 +116,7 @@ export class GlobalExportService {
     this.styleHeader(sheet)
 
     // Add data
-    recipes.forEach(recipe => {
+    recipes.forEach((recipe: Recipe) => {
       const margin = (recipe.selling_price || 0) - (recipe.cost_per_unit || 0)
       const marginPct = recipe.selling_price ? (margin / recipe.selling_price) * 100 : 0
 
@@ -174,7 +175,7 @@ export class GlobalExportService {
 
     this.styleHeader(sheet)
 
-    orders.forEach(order => {
+    orders.forEach((order: Order) => {
       sheet.addRow({
         order_no: order.order_no,
         customer_name: order.customer_name,
@@ -206,7 +207,7 @@ export class GlobalExportService {
 
     this.styleHeader(sheet)
 
-    ingredients.forEach(ingredient => {
+    ingredients.forEach((ingredient: Ingredient) => {
       const stockStatus = (ingredient.current_stock || 0) <= (ingredient.min_stock || 0) 
         ? 'Perlu Restock' 
         : 'Aman'
@@ -255,7 +256,7 @@ export class GlobalExportService {
 
     this.styleHeader(sheet)
 
-    customers.forEach(customer => {
+    customers.forEach((customer: Customer) => {
       sheet.addRow({
         name: customer.name,
         phone: customer.phone || '-',
@@ -281,7 +282,7 @@ export class GlobalExportService {
 
     this.styleHeader(sheet)
 
-    transactions.forEach(tx => {
+    transactions.forEach((tx: StockTransaction) => {
       const total = (tx.quantity || 0) * (tx.unit_price || 0)
       sheet.addRow({
         created_at: tx.created_at ? format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm', { locale: localeId }) : '',
@@ -360,7 +361,8 @@ export class GlobalExportService {
     sheet.getRow(1).height = 25
   }
 
-  private static translateStatus(status: string): string {
+  private static translateStatus(status: string | null): string {
+    if (!status) {return 'Unknown'}
     const statusMap: Record<string, string> = {
       pending: 'Menunggu',
       confirmed: 'Dikonfirmasi',
@@ -368,16 +370,27 @@ export class GlobalExportService {
       ready: 'Siap',
       completed: 'Selesai',
       cancelled: 'Dibatalkan',
+      PENDING: 'Menunggu',
+      CONFIRMED: 'Dikonfirmasi',
+      IN_PROGRESS: 'Produksi',
+      READY: 'Siap',
+      DELIVERED: 'Selesai',
+      CANCELLED: 'Dibatalkan',
     }
     return statusMap[status] || status
   }
 
-  private static translateTransactionType(type: string): string {
+  private static translateTransactionType(type: string | null): string {
+    if (!type) {return 'Unknown'}
     const typeMap: Record<string, string> = {
       purchase: 'Pembelian',
       usage: 'Pemakaian',
       adjustment: 'Penyesuaian',
       return: 'Retur',
+      PURCHASE: 'Pembelian',
+      USAGE: 'Pemakaian',
+      ADJUSTMENT: 'Penyesuaian',
+      RETURN: 'Retur',
     }
     return typeMap[type] || type
   }

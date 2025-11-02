@@ -5,12 +5,7 @@ import { DollarSign, ArrowUpCircle, ArrowDownCircle, TrendingUp, TrendingDown, A
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from '@/components/ui/tooltip'
 import type { CashFlowSummary } from '../constants'
 
 interface EnhancedSummaryCardsProps {
@@ -44,9 +39,9 @@ const EnhancedSummaryCards = ({
             ? (summary.total_expenses / summary.total_income) * 100
             : 0
 
-        if (ratio < 50) {return { status: 'excellent', color: 'text-green-600', label: 'Sangat Baik' }}
-        if (ratio < 70) {return { status: 'good', color: 'text-blue-600', label: 'Baik' }}
-        if (ratio < 90) {return { status: 'warning', color: 'text-yellow-600', label: 'Perhatian' }}
+        if (ratio < 50) { return { status: 'excellent', color: 'text-green-600', label: 'Sangat Baik' } }
+        if (ratio < 70) { return { status: 'good', color: 'text-blue-600', label: 'Baik' } }
+        if (ratio < 90) { return { status: 'warning', color: 'text-yellow-600', label: 'Perhatian' } }
         return { status: 'danger', color: 'text-red-600', label: 'Bahaya' }
     }
 
@@ -56,15 +51,15 @@ const EnhancedSummaryCards = ({
         : 0
 
     const renderTrendBadge = (value: number | undefined) => {
-        if (!value || value === 0) {return null}
+        if (!value || value === 0) { return null }
 
         const isPositive = value > 0
         return (
             <Badge
                 variant="secondary"
                 className={`${isPositive
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                        : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                    : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
                     }`}
             >
                 {isPositive ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
@@ -150,12 +145,12 @@ const EnhancedSummaryCards = ({
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
                             <span className="flex items-center gap-2">
                                 <div className={`p-2 rounded-lg ${summary.net_cash_flow >= 0
-                                        ? 'bg-blue-100 dark:bg-blue-900'
-                                        : 'bg-orange-100 dark:bg-orange-900'
+                                    ? 'bg-blue-100 dark:bg-blue-900'
+                                    : 'bg-orange-100 dark:bg-orange-900'
                                     }`}>
                                     <DollarSign className={`h-4 w-4 ${summary.net_cash_flow >= 0
-                                            ? 'text-blue-600 dark:text-blue-400'
-                                            : 'text-orange-600 dark:text-orange-400'
+                                        ? 'text-blue-600 dark:text-blue-400'
+                                        : 'text-orange-600 dark:text-orange-400'
                                         }`} />
                                 </div>
                                 Arus Kas Bersih
@@ -183,9 +178,9 @@ const EnhancedSummaryCards = ({
                 <CardContent className="pt-6">
                     <div className="flex items-start gap-4">
                         <div className={`p-3 rounded-full ${health.status === 'excellent' ? 'bg-green-100 dark:bg-green-900' :
-                                health.status === 'good' ? 'bg-blue-100 dark:bg-blue-900' :
-                                    health.status === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900' :
-                                        'bg-red-100 dark:bg-red-900'
+                            health.status === 'good' ? 'bg-blue-100 dark:bg-blue-900' :
+                                health.status === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900' :
+                                    'bg-red-100 dark:bg-red-900'
                             }`}>
                             {health.status === 'danger' || health.status === 'warning' ? (
                                 <AlertCircle className={`h-6 w-6 ${health.color}`} />

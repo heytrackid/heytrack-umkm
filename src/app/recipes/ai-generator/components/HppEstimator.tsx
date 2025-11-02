@@ -1,15 +1,17 @@
 'use client'
 
-/**
- * HPP Estimator Component
- * Sprint 1 Feature: Real-time HPP calculation
- */
-
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Calculator, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
+
+
+/**
+ * HPP Estimator Component
+ * Sprint 1 Feature: Real-time HPP calculation
+ */
+
 
 interface HppEstimatorProps {
     selectedIngredients: Array<{
@@ -60,7 +62,20 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
         ? ((targetPrice - estimatedHPP) / targetPrice) * 100
         : 0
 
-    const marginStatus = margin >= 50 ? 'excellent' : margin >= 30 ? 'good' : margin >= 20 ? 'fair' : 'low'
+    const getMarginStatus = (margin: number): string => {
+        if (margin >= 50) {
+            return 'excellent'
+        }
+        if (margin >= 30) {
+            return 'good'
+        }
+        if (margin >= 20) {
+            return 'fair'
+        }
+        return 'low'
+    }
+    
+    const marginStatus = getMarginStatus(margin)
 
     const getMarginColor = () => {
         if (margin >= 50) {return 'text-green-600 bg-green-50 dark:bg-green-900/20'}

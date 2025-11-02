@@ -8,27 +8,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { uiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import {
-  BarChart3,
-  Calendar,
-  Clock,
-  DollarSign,
-  Edit,
-  Eye,
-  Filter,
-  MessageCircle,
-  Plus,
-  Search,
-  ShoppingCart,
-  TrendingUp,
-  XCircle
-} from 'lucide-react'
 import { useState, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { arrayCalculations } from '@/lib/performance-optimized'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import dynamic from 'next/dynamic'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { useCurrency } from '@/hooks/useCurrency'
+import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
+import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
+import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
+import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
+
+
 
 // ✅ Code Splitting - Lazy load heavy components
 const OrderForm = dynamic(() => import('./OrderForm').then(mod => ({ default: mod.OrderForm })), {
@@ -40,20 +32,6 @@ const OrderDetailView = dynamic(() => import('./OrderDetailView').then(mod => ({
   loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
   ssr: false
 })
-
-// Types and constants
-import { useCurrency } from '@/hooks/useCurrency'
-import {
-  ORDER_STATUS_CONFIG
-} from '@/modules/orders/constants'
-import type {
-  Order,
-  OrderStatus
-} from '@/app/orders/types/orders.types'
-import {
-  ORDER_STATUS_LABELS,
-  PAYMENT_STATUS_LABELS
-} from '@/modules/orders/types'
 
 // Local types
 interface OrderFilters {
@@ -88,7 +66,7 @@ interface OrdersPageProps {
   enableAdvancedFeatures?: boolean
 }
 
-export default function OrdersPage({ }: OrdersPageProps) {
+const OrdersPage = (_props: OrdersPageProps) => {
   const { formatCurrency } = useCurrency()
   const queryClient = useQueryClient()
 
@@ -103,6 +81,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
     date_to: '',
     customer_search: ''
   })
+  const hasFiltersApplied = (filters.status?.length || 0) > 0 || Boolean(filters.customer_search?.trim())
 
   // ✅ Use TanStack Query for automatic caching
   const { data: ordersData, isLoading: loading, error: queryError } = useQuery({
@@ -118,9 +97,9 @@ export default function OrdersPage({ }: OrdersPageProps) {
     gcTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  const orders = Array.isArray(ordersData) ? ordersData : []
+  const orders = useMemo(() => (Array.isArray(ordersData) ? ordersData : []), [ordersData])
 
-  const error = queryError ? (queryError).message : null
+  const error = queryError ? getErrorMessage(queryError) : null
 
   // ✅ Calculate stats with useMemo for performance
   const stats = useMemo<OrderStats>(() => ({
@@ -405,11 +384,11 @@ export default function OrdersPage({ }: OrdersPageProps) {
                       <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex-1">
                           <div className="font-medium">{order.order_no}</div>
-                          <div className="text-sm text-muted-foreground">{order.customer_name ?? 'N/A'}</div>
+                          <div className="text-sm text-muted-foreground">{order.customer_name || 'N/A'}</div>
                           <div className="text-xs text-muted-foreground">{order.order_date ? formatDate(order.order_date) : 'N/A'}</div>
                         </div>
                         <div className="text-right">
-                          <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
+                          <div className="font-medium">{formatCurrency(order.total_amount || 0)}</div>
                           <Badge className={`text-xs ${getStatusColor(order.status)}`}>
                             {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'N/A'}
                           </Badge>
@@ -506,11 +485,11 @@ export default function OrdersPage({ }: OrdersPageProps) {
                 <div className="flex items-center justify-between text-sm">
                   <div className="text-muted-foreground">
                     Menampilkan <span className="font-semibold text-foreground">{orders.length}</span> pesanan
-                    {(filters.status?.length || filters.customer_search) && (
+                    {hasFiltersApplied && (
                       <span> (dari total {stats.total_orders} pesanan)</span>
                     )}
                   </div>
-                  {(filters.status?.length || filters.customer_search) && (
+                  {hasFiltersApplied && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -534,16 +513,16 @@ export default function OrdersPage({ }: OrdersPageProps) {
                   <div className="text-center">
                     <ShoppingCart className="h-16 w-16 mx-auto mb-4 text-gray-300" />
                     <h3 className="text-lg font-semibold mb-2">
-                      {filters.customer_search || filters.status?.length
+                      {hasFiltersApplied
                         ? 'Tidak Ada Pesanan yang Cocok'
                         : 'Belum Ada Pesanan'}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      {filters.customer_search || filters.status?.length
+                      {hasFiltersApplied
                         ? 'Coba ubah filter atau kata kunci pencarian'
                         : 'Klik tombol "Pesanan Baru" untuk membuat pesanan pertama'}
                     </p>
-                    {(filters.customer_search || filters.status?.length) ? (
+                    {hasFiltersApplied ? (
                       <Button
                         variant="outline"
                         onClick={() => setFilters({ status: [], payment_status: [], date_from: '', date_to: '', customer_search: '' })}
@@ -569,14 +548,14 @@ export default function OrdersPage({ }: OrdersPageProps) {
                         <div className="space-y-1">
                           <div className="font-semibold text-lg">{order.order_no}</div>
                           <div className="text-sm text-muted-foreground">
-                            {order.customer_name ?? 'N/A'} • {order.order_date ? formatDate(order.order_date) : 'N/A'}
+                            {order.customer_name || 'N/A'} • {order.order_date ? formatDate(order.order_date) : 'N/A'}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge className={getStatusColor(order.status)}>
                             {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'N/A'}
                           </Badge>
-                          <Badge className={getPaymentStatusColor(order.payment_status ?? null)}>
+                          <Badge className={getPaymentStatusColor(order.payment_status || null)}>
                             {order.payment_status && order.payment_status in PAYMENT_STATUS_LABELS ? PAYMENT_STATUS_LABELS[order.payment_status as keyof typeof PAYMENT_STATUS_LABELS] : 'N/A'}
                           </Badge>
                         </div>
@@ -591,7 +570,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
                         </div>
                         <div>
                           <div className="text-sm text-muted-foreground">Total Tagihan</div>
-                          <div className="font-medium text-lg">{formatCurrency(order.total_amount ?? 0)}</div>
+                          <div className="font-medium text-lg">{formatCurrency(order.total_amount || 0)}</div>
                         </div>
                         <div>
                           <div className="text-sm text-muted-foreground">Tanggal Kirim</div>
@@ -703,3 +682,5 @@ export default function OrdersPage({ }: OrdersPageProps) {
     </div >
   )
 }
+
+export default OrdersPage

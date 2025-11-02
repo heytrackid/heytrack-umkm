@@ -92,8 +92,8 @@ export async function POST(request: NextRequest) {
       category: body.category,
       template_content: body.template_content,
       variables: body.variables || [],
-      is_active: body.is_active ?? true,
-      is_default: body.is_default ?? false,
+      is_active: body.is_active || true,
+      is_default: body.is_default || false,
       user_id: user.id
     }
 

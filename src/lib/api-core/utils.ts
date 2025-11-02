@@ -1,9 +1,10 @@
+import { type NextRequest, NextResponse } from 'next/server'
+
 /**
  * Utilities Module
  * General utility functions for API operations
  */
 
-import { type NextRequest, NextResponse } from 'next/server'
 
 /**
  * Parse search parameters from request URL

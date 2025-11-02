@@ -1,8 +1,3 @@
-/**
- * Validation Module
- * API request validation utilities using Zod
- */
-
 import type { NextRequest, NextResponse } from 'next/server'
 import type { z } from 'zod'
 import { formatValidationErrors } from '@/lib/validations'
@@ -11,19 +6,26 @@ import type { ValidationResult } from './types'
 import { createErrorResponse } from './responses'
 
 /**
+ * Validation Module
+ * API request validation utilities using Zod
+ */
+
+
+/**
  * Validate request data with schema
  */
 export function validateRequestData<T>(
   data: unknown,
   schema: z.ZodSchema<T>
 ): ValidationResult<T> {
-  try {
-    const validatedData = schema.parse(data)
-    return { success: true, data: validatedData }
-  } catch (err) {
-    const errors = formatValidationErrors(err)
-    return { success: false, errors }
+  const result = schema.safeParse(data)
+
+  if (result.success) {
+    return { success: true, data: result.data }
   }
+
+  const errors = formatValidationErrors(result.error.issues)
+  return { success: false, errors }
 }
 
 /**

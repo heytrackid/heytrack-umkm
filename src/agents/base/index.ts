@@ -2,6 +2,7 @@ import { dbLogger } from '@/lib/logger'
 import type { Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ZodType } from 'zod'
+import { createClient } from '@/utils/supabase/client'
 
 /**
  * Structured environment for agent execution

@@ -1,3 +1,4 @@
+
 /**
  * AI Chatbot Types
  * Type definitions for chatbot functionality

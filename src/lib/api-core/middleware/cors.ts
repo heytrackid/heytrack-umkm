@@ -1,10 +1,11 @@
+import type { NextRequest, NextResponse } from 'next/server'
+import { createErrorResponse } from '@/lib/api-core/responses'
+
 /**
  * CORS Middleware Module
  * Cross-Origin Resource Sharing protection
  */
 
-import type { NextRequest, NextResponse } from 'next/server'
-import { createErrorResponse } from '@/lib/api-core/responses'
 
 /**
  * Create CORS middleware

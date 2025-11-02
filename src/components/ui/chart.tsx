@@ -1,9 +1,11 @@
-"use client"
+'use client';
 
 import { forwardRef, type ComponentProps, type ComponentType, type HTMLAttributes } from 'react'
 import * as RechartsPrimitive from "recharts"
-
 import { cn } from "@/lib/utils"
+
+
+
 
 // Chart container component
 const ChartContainer = forwardRef<
@@ -15,62 +17,50 @@ const ChartContainer = forwardRef<
     >["children"]
   }
 >(({ className, config, children, ...props }, ref) => (
-    <div ref={ref} className={cn("flex aspect-video justify-center text-xs", className)} {...props}>
-      <RechartsPrimitive.ResponsiveContainer width="100%" height="100%">
-        {children}
-      </RechartsPrimitive.ResponsiveContainer>
-    </div>
-  ))
-ChartContainer.displayName ="Chart"
+  <div ref={ref} className={cn("flex aspect-video justify-center text-xs", className)} {...props}>
+    <RechartsPrimitive.ResponsiveContainer width="100%" height="100%">
+      {children}
+    </RechartsPrimitive.ResponsiveContainer>
+  </div>
+))
+ChartContainer.displayName = "Chart"
 
 // Chart tooltip
 const ChartTooltip = RechartsPrimitive.Tooltip
 
 const ChartTooltipContent = forwardRef<
   HTMLDivElement,
-  ComponentProps<typeof RechartsPrimitive.Tooltip> &
-    HTMLAttributes<HTMLDivElement> & {
-      hideLabel?: boolean
-      hideIndicator?: boolean
-      indicator?:"line" |"dot" |"dashed"
-    }
+  HTMLAttributes<HTMLDivElement> & {
+    hideLabel?: boolean
+    hideIndicator?: boolean
+    indicator?: "line" | "dot" | "dashed"
+    active?: boolean
+    payload?: unknown
+    label?: unknown
+  }
 >(
-  ({ 
-    className, 
-    hideLabel = false, 
-    hideIndicator = false, 
-    indicator ="dot",
+  ({
+    className,
+    hideLabel = false,
+    hideIndicator = false,
+    indicator = "dot",
     // Filter out recharts-specific props that shouldn't be passed to DOM
     active,
     payload,
     label,
-    allowEscapeViewBox,
-    animationDuration,
-    animationEasing,
-    axisId,
-    contentStyle,
-    filterNull,
-    isAnimationActive,
-    itemSorter,
-    itemStyle,
-    labelStyle,
-    reverseDirection,
-    useTranslate3d,
-    wrapperStyle,
-    accessibilityLayer,
-    ...validDOMProps 
+    ...validDOMProps
   }, ref) => (
-      <div
-        ref={ref}
-        className={cn(
-         "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs",
-          className
-        )}
-        {...validDOMProps}
-      />
-    )
+    <div
+      ref={ref}
+      className={cn(
+        "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs",
+        className
+      )}
+      {...validDOMProps}
+    />
+  )
 )
-ChartTooltipContent.displayName ="ChartTooltipContent"
+ChartTooltipContent.displayName = "ChartTooltipContent"
 
 // Chart legend
 const ChartLegend = RechartsPrimitive.Legend
@@ -105,7 +95,7 @@ const ChartLegendContent = forwardRef<
     </div>
   )
 })
-ChartLegendContent.displayName ="ChartLegendContent"
+ChartLegendContent.displayName = "ChartLegendContent"
 
 // Main Chart component (alias for ChartContainer)
 const Chart = ChartContainer

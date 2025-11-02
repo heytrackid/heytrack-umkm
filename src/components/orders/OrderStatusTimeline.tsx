@@ -6,6 +6,8 @@ import { CheckCircle2, Clock, Package, Truck, XCircle } from 'lucide-react'
 import type { OrderStatus } from './types'
 import { useResponsive } from '@/hooks/useResponsive'
 
+
+
 interface OrderStatusTimelineProps {
     currentStatus: OrderStatus
     onStatusChange?: (status: OrderStatus) => void
@@ -49,10 +51,10 @@ const statusFlow: Array<{
         }
     ]
 
-export default function OrderStatusTimeline({
+const OrderStatusTimeline = ({
     currentStatus,
     onStatusChange
-}: OrderStatusTimelineProps) {
+}: OrderStatusTimelineProps) => {
     const { isMobile } = useResponsive()
 
     const currentIndex = statusFlow.findIndex(s => s.status === currentStatus)
@@ -245,3 +247,5 @@ export default function OrderStatusTimeline({
         </Card>
     )
 }
+
+export default OrderStatusTimeline

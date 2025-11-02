@@ -18,8 +18,8 @@ const AIChatbotPage = () => {
   const [input, setInput] = useState('')
 
   const handleSendMessage = async (messageText?: string) => {
-    const textToSend = messageText || input.trim()
-    if (!textToSend || isLoading) {return}
+    const textToSend = (messageText || input).trim()
+    if (textToSend.length === 0 || isLoading) { return }
 
     const userMessage = {
       id: Date.now().toString(),

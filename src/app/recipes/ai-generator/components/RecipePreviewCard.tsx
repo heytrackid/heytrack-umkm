@@ -1,13 +1,15 @@
-// Recipe Preview Card - Shows live preview as user types
-// Helps users understand what they'll get before generating
-// ✅ OPTIMIZED: Wrapped with React.memo to prevent unnecessary re-renders
-
 'use client'
 
 import { memo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChefHat, Package, DollarSign, Clock } from 'lucide-react'
 import type { AvailableIngredient } from './types'
+
+// Recipe Preview Card - Shows live preview as user types
+// Helps users understand what they'll get before generating
+// ✅ OPTIMIZED: Wrapped with React.memo to prevent unnecessary re-renders
+
+
 
 interface RecipePreviewCardProps {
   productName: string
@@ -188,16 +190,16 @@ const RecipePreviewCard = memo(({
       </CardContent>
     </Card>
   )
-}, (prevProps, nextProps) => 
-  // Custom comparison for better performance
-   (
-    prevProps.productName === nextProps.productName &&
-    prevProps.productType === nextProps.productType &&
-    prevProps.servings === nextProps.servings &&
-    prevProps.targetPrice === nextProps.targetPrice &&
-    prevProps.selectedIngredients.length === nextProps.selectedIngredients.length &&
-    prevProps.selectedIngredients.every((ing, idx) => ing === nextProps.selectedIngredients[idx])
-  )
+}, (prevProps, nextProps) =>
+// Custom comparison for better performance
+(
+  prevProps.productName === nextProps.productName &&
+  prevProps.productType === nextProps.productType &&
+  prevProps.servings === nextProps.servings &&
+  prevProps.targetPrice === nextProps.targetPrice &&
+  prevProps.selectedIngredients.length === nextProps.selectedIngredients.length &&
+  prevProps.selectedIngredients.every((ing, idx) => ing === nextProps.selectedIngredients[idx])
+)
 )
 
 RecipePreviewCard.displayName = 'RecipePreviewCard'

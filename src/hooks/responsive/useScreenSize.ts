@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import type { ScreenSizeState } from './types'
 
+
+
 /**
  * Get current screen size in pixels
  */

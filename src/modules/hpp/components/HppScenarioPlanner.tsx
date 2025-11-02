@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { useCurrency } from '@/hooks/useCurrency'
 import { Calculator, TrendingUp, TrendingDown, AlertTriangle, Sparkles } from 'lucide-react'
 import { useState } from 'react'
+import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
 import {
     Select,
     SelectContent,
@@ -15,7 +16,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
 
 interface Scenario {
     id: string
@@ -55,7 +55,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
         changePercent: number
     ) => {
         const ingredient = recipe.ingredients.find((item) => item.id === ingredientId)
-        if (!ingredient) {return null}
+        if (!ingredient) { return null }
 
         const originalCost = ingredient.unit_price * ingredient.quantity
         const multiplier = 1 + (changePercent / 100)
@@ -81,13 +81,13 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
     }
 
     const addScenario = () => {
-        if (!selectedIngredient) {return}
+        if (!selectedIngredient) { return }
 
         const ingredient = recipe.ingredients.find((item) => item.id === selectedIngredient)
-        if (!ingredient) {return}
+        if (!ingredient) { return }
 
         const impact = calculateScenario(selectedIngredient, changeType, changePercent)
-        if (!impact) {return}
+        if (!impact) { return }
 
         const newScenario: Scenario = {
             id: Date.now().toString(),
@@ -197,9 +197,9 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        {quickScenarios.map((scenario, idx) => (
+                        {quickScenarios.map((scenario) => (
                             <Button
-                                key={idx}
+                                key={scenario.label}
                                 variant="outline"
                                 className="h-auto py-3 flex flex-col items-center gap-2"
                                 onClick={() => applyQuickScenario(scenario.type, scenario.change)}
@@ -287,8 +287,8 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
                                 <div
                                     key={scenario.id}
                                     className={`p-4 rounded-lg border-2 ${isNegative
-                                            ? 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10'
-                                            : 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10'
+                                        ? 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10'
+                                        : 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10'
                                         }`}
                                 >
                                     <div className="flex items-start justify-between mb-3">

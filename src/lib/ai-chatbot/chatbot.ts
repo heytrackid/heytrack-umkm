@@ -1,13 +1,14 @@
-/**
- * Context-Aware AI Chatbot
- * Main chatbot implementation
- */
-
 import { AIClient, NLPProcessor } from '@/lib/ai'
 import { apiLogger } from '@/lib/logger'
 import { ContextManager } from './context-manager'
 import { ChatbotPromptBuilder } from './prompt-builder'
 import type { AIResponse } from './types'
+
+/**
+ * Context-Aware AI Chatbot
+ * Main chatbot implementation
+ */
+
 
 export class ContextAwareAI {
   private contextManager: ContextManager

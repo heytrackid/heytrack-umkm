@@ -1,9 +1,10 @@
+import { apiLogger } from '@/lib/logger'
+
 /**
  * API Client
  * Centralized API client with error handling and type safety
  */
 
-import { apiLogger } from '@/lib/logger'
 
 export interface ApiResponse<T = unknown> {
   success: boolean
@@ -44,9 +45,9 @@ export class ApiClient {
         }
       })
 
-      return await this.handleResponse<T>(response)
+      return this.handleResponse<T>(response)
     } catch (err) {
-      return this.handleError(err)
+      return this.handleError(err) as ApiResponse<T>
     }
   }
 
@@ -66,9 +67,9 @@ export class ApiClient {
         body: data ? JSON.stringify(data) : undefined
       })
 
-      return await this.handleResponse<T>(response)
+      return this.handleResponse<T>(response)
     } catch (err) {
-      return this.handleError(err)
+      return this.handleError(err) as ApiResponse<T>
     }
   }
 
@@ -88,9 +89,9 @@ export class ApiClient {
         body: data ? JSON.stringify(data) : undefined
       })
 
-      return await this.handleResponse<T>(response)
+      return this.handleResponse<T>(response)
     } catch (err) {
-      return this.handleError(err)
+      return this.handleError(err) as ApiResponse<T>
     }
   }
 
@@ -110,9 +111,9 @@ export class ApiClient {
         body: data ? JSON.stringify(data) : undefined
       })
 
-      return await this.handleResponse<T>(response)
+      return this.handleResponse<T>(response)
     } catch (err) {
-      return this.handleError(err)
+      return this.handleError(err) as ApiResponse<T>
     }
   }
 
@@ -133,7 +134,7 @@ export class ApiClient {
 
       return await this.handleResponse<T>(response)
     } catch (err) {
-      return this.handleError(err)
+      return this.handleError(err) as ApiResponse<T>
     }
   }
 

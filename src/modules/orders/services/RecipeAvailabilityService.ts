@@ -3,6 +3,8 @@ import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import type { RecipeOption } from '../types'
 
+
+
 /**
  * Service for handling recipe availability and ingredient checking
  * SERVER-ONLY: Uses server client for database operations
@@ -14,16 +16,16 @@ export class RecipeAvailabilityService {
   static checkIngredientAvailability(recipeIngredients: Array<{
     quantity: number
     ingredient: {
-      is_active: boolean
+      is_active: boolean | null
       current_stock: number | null
       reorder_point: number | null
     } | null
   }>): boolean {
     return recipeIngredients.every(ri => {
-      if (!ri.ingredient?.is_active) {return false}
+      if (!ri.ingredient || !ri.ingredient.is_active) {return false}
 
       // Check if current stock is above reorder point
-      const currentStock = (ri.ingredient.current_stock ?? 0) || 0
+      const currentStock = ri.ingredient.current_stock || 0
       const reorderPoint = ri.ingredient.reorder_point || 0
       const requiredQuantity = ri.quantity || 0
 
@@ -71,36 +73,31 @@ export class RecipeAvailabilityService {
       if (!recipes) {return []}
 
       // Process recipes and check availability
-      const recipeOptions: RecipeOption[] = await Promise.all(
-        recipes.map(async (recipe) => {
-          // Use recipe selling_price
-          const price = recipe.selling_price || 0
-          const estimatedMargin = 0.3 // Default 30% margin
+      const recipeOptions: RecipeOption[] = recipes.map((recipe) => {
+        const price = recipe.selling_price || 0
+        const estimatedMargin = 0.3 // Default 30% margin
 
-          // Check ingredient availability - recipe_ingredients from Supabase will be an array of objects
-          // Each object has ingredient property which is a single object due to the join in the query
-          const recipeIngredients = (recipe.recipe_ingredients || []).map(ri => ({
-            ...ri,
-            ingredient: ri.ingredient || null // Access the joined ingredient properly
-          }))
+        const recipeIngredients = (recipe.recipe_ingredients || []).map(ri => ({
+          ...ri,
+          ingredient: ri.ingredient || null
+        }))
 
-          const isAvailable = this.checkIngredientAvailability(recipeIngredients)
+        const isAvailable = this.checkIngredientAvailability(recipeIngredients)
 
-          return {
-            id: recipe.id,
-            name: recipe.name,
-            category: recipe.category || '',
-            servings: recipe.servings ?? 1,
-            description: recipe.description,
-            selling_price: price,
-            cost_per_unit: recipe.cost_per_unit || (price * 0.7), // Use DB value or estimate
-            margin_percentage: recipe.margin_percentage || estimatedMargin,
-            is_available: isAvailable,
-            prep_time: recipe.prep_time || null,
-            cook_time: recipe.cook_time || null
-          }
-        })
-      )
+        return {
+          id: recipe.id,
+          name: recipe.name,
+          category: recipe.category || '',
+          servings: recipe.servings || 1,
+          description: recipe.description,
+          selling_price: price,
+          cost_per_unit: recipe.cost_per_unit || (price * 0.7),
+          margin_percentage: recipe.margin_percentage || estimatedMargin,
+          is_available: isAvailable,
+          prep_time: recipe.prep_time || null,
+          cook_time: recipe.cook_time || null
+        }
+      })
 
       return recipeOptions
     } catch (err: unknown) {

@@ -3,6 +3,8 @@
 import { type ReactNode } from 'react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 
+
+
 interface ThemeProviderProps {
   children: ReactNode
   attribute?: 'class' | 'data-theme'

@@ -1,9 +1,11 @@
+import { type ReactNode, createElement, useMemo, useState, type UIEvent } from 'react'
+
+
 /**
  * Shared Table/Data Utilities
  * Common patterns for data tables, grids, and data display components
  */
 
-import { type ReactNode, createElement, useMemo, useState } from 'react'
 
 // Table column configuration types
 export interface TableColumn<T = unknown, TValue = unknown> {
@@ -44,8 +46,18 @@ export function sortData<T>(
     const aValue = getNestedValue(a, sortKey as string)
     const bValue = getNestedValue(b, sortKey as string)
 
-    if (aValue < bValue) {return direction === 'asc' ? -1 : 1}
-    if (aValue > bValue) {return direction === 'asc' ? 1 : -1}
+    const toComparable = (value: unknown): number | string => {
+      if (typeof value === 'number') {return value}
+      if (value instanceof Date) {return value.getTime()}
+      if (typeof value === 'boolean') {return value ? 1 : 0}
+      return String(value ?? '')
+    }
+
+    const aComparable = toComparable(aValue)
+    const bComparable = toComparable(bValue)
+
+    if (aComparable < bComparable) {return direction === 'asc' ? -1 : 1}
+    if (aComparable > bComparable) {return direction === 'asc' ? 1 : -1}
     return 0
   })
 }
@@ -214,12 +226,13 @@ export const commonColumns = {
     render: (_value: unknown, row: T) => render(row)
   }),
 
-  status: (key = 'status', statusMap?: Record<string, string>) => ({
+  status: <T>(key = 'status', statusMap?: Record<string, string>): TableColumn<T> => ({
     key,
     header: 'Status',
     width: 100,
-    render: (value: string) => {
-      const displayValue = statusMap?.[value] || value
+    render: (value: unknown) => {
+      const stringValue = String(value)
+      const displayValue = statusMap?.[stringValue] || stringValue
       const getStatusClasses = (status: string) => {
         switch (status) {
           case 'active':
@@ -236,24 +249,24 @@ export const commonColumns = {
       }
 
       return createElement('span', {
-        className: `px-2 py-1 text-xs rounded-full ${getStatusClasses(value)}`
+        className: `px-2 py-1 text-xs rounded-full ${getStatusClasses(stringValue)}`
       }, displayValue)
     }
   }),
 
-  currency: (key: string, header: string, width?: number) => ({
+  currency: <T>(key: string, header: string, width?: number): TableColumn<T> => ({
     key,
     header,
     width: width || 120,
     align: 'right' as const,
-    format: tableFormatters.currency
+    format: (value: unknown) => tableFormatters.currency(Number(value))
   }),
 
-  date: (key: string, header: string, width?: number) => ({
+  date: <T>(key: string, header: string, width?: number): TableColumn<T> => ({
     key,
     header,
     width: width || 100,
-    format: tableFormatters.date
+    format: (value: unknown) => tableFormatters.date(value as string | Date)
   })
 }
 

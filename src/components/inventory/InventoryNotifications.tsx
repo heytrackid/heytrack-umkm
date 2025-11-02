@@ -1,8 +1,3 @@
-/**
- * Inventory Notifications Component
- * Displays inventory-related notifications and alerts
- */
-
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -13,6 +8,13 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { AlertTriangle, Package, ShoppingCart, X } from 'lucide-react'
 import { uiLogger } from '@/lib/logger'
 import type { NotificationsTable } from '@/types/database'
+
+/**
+ * Inventory Notifications Component
+ * Displays inventory-related notifications and alerts
+ */
+
+
 
 type InventoryNotification = NotificationsTable & {
   metadata?: {
@@ -45,10 +47,11 @@ export const InventoryNotifications = () => {
 
       const data = await response.json()
       void setNotifications(data)
-    } catch (_err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+    } catch (err: unknown) {
+      const error = err as Error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       void setError(errorMessage)
-      uiLogger.error({ err }, 'Failed to fetch inventory notifications')
+      uiLogger.error({ error }, 'Failed to fetch inventory notifications')
     } finally {
       void setLoading(false)
     }
@@ -67,8 +70,9 @@ export const InventoryNotifications = () => {
           prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
         )
       }
-    } catch (_err) {
-      uiLogger.error({ err, notificationId }, 'Failed to mark notification as read')
+    } catch (err: unknown) {
+      const error = err as Error
+      uiLogger.error({ error, notificationId }, 'Failed to mark notification as read')
     }
   }
 
@@ -83,8 +87,9 @@ export const InventoryNotifications = () => {
       if (response.ok) {
         setNotifications(prev => prev.filter(n => n.id !== notificationId))
       }
-    } catch (_err) {
-      uiLogger.error({ err, notificationId }, 'Failed to dismiss notification')
+    } catch (err: unknown) {
+      const error = err as Error
+      uiLogger.error({ error, notificationId }, 'Failed to dismiss notification')
     }
   }
 
@@ -240,7 +245,7 @@ export const InventoryNotifications = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => window.location.href = notification.action_url!}
+                              onClick={() => window.location.href = notification.action_url || ''}
                             >
                               View Details
                             </Button>

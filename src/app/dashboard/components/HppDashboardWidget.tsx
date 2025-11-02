@@ -3,24 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Calculator,
-  AlertTriangle,
-  Target,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  BarChart3
-} from 'lucide-react'
+import { Calculator, AlertTriangle, Target, DollarSign, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react' 
 import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { dbLogger } from '@/lib/logger'
-import {
-  StatsCardSkeleton,
-  QuickActionsSkeleton
-} from '@/components/ui/skeletons/dashboard-skeletons'
+import { StatsCardSkeleton, QuickActionsSkeleton } from '@/components/ui/skeletons/dashboard-skeletons' 
 
 interface HppDashboardData {
   totalRecipes: number

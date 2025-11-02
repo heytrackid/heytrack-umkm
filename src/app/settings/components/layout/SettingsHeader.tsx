@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,7 +9,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { RotateCcw, Save } from 'lucide-react'
 
 

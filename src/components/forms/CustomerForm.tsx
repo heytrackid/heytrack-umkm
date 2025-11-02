@@ -16,6 +16,8 @@ import { FormField } from './shared/FormField'
 import type { CustomersTable } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
 
+
+
 type Customer = CustomersTable
 
 // Form schema without user_id (will be added on submit)
@@ -144,7 +146,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              checked={form.watch('is_active') ?? true}
+              checked={form.watch('is_active') || true}
               onCheckedChange={(checked) => form.setValue('is_active', checked === true)}
             />
             <Label>Aktif</Label>

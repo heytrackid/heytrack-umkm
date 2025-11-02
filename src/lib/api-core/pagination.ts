@@ -1,10 +1,11 @@
+import type { NextRequest } from 'next/server'
+import type { PaginationParams, PaginationState } from './types'
+
 /**
  * Pagination Module
  * Pagination utilities for API responses
  */
 
-import type { NextRequest } from 'next/server'
-import type { PaginationParams, PaginationState } from './types'
 
 /**
  * Extract pagination parameters from request
@@ -49,7 +50,7 @@ export function createPaginationMeta(
  */
 export function usePagination<T>(items: T[], params: PaginationParams) {
   const { page = 1, limit = 10, offset } = params
-  const actualOffset = offset ?? calculateOffset(page, limit)
+  const actualOffset = offset || calculateOffset(page, limit)
   const paginatedItems = items.slice(actualOffset, actualOffset + limit)
   const total = items.length
 

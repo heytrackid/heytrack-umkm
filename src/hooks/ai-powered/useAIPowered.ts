@@ -8,6 +8,8 @@ import { useFinancialAnalysis } from './useFinancialAnalysis'
 import { useSmartInsights } from './useSmartInsights'
 import type { AnalysisType } from './types'
 
+
+
 /**
  * React Hook for AI-Powered Business Intelligence
  * Provides intelligent insights powered by OpenRouter AI
@@ -85,11 +87,11 @@ export function useAIPowered() {
       return 'low'
     },
 
-    formatInsight: (insight: any, type: string) => ({
+    formatInsight: (insight: Record<string, unknown>, type: string) => ({
       ...insight,
       type,
-      confidence: insight.metadata?.confidence || 0.7,
-      timestamp: insight.metadata?.timestamp || new Date().toISOString(),
+      confidence: (insight.metadata as Record<string, unknown> | undefined)?.confidence as number || 0.7,
+      timestamp: (insight.metadata as Record<string, unknown> | undefined)?.timestamp as string || new Date().toISOString(),
       isAIPowered: true
     })
   }

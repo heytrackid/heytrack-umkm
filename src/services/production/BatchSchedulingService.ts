@@ -1,11 +1,13 @@
+import { apiLogger } from '@/lib/logger'
+import { isArrayOf, isProductionBatch, getErrorMessage } from '@/lib/type-guards'
+import type { ProductionsTable, ProductionsInsert, ProductionStatus } from '@/types/database'
+
+
 /**
  * Batch Scheduling Service
  * Manages production batch scheduling and execution
  */
 
-import { apiLogger } from '@/lib/logger'
-import { isArrayOf, isProductionBatch, getErrorMessage } from '@/lib/type-guards'
-import type { ProductionsTable, ProductionsInsert, ProductionStatus } from '@/types/database'
 
 // Use generated types
 export type ProductionBatch = ProductionsTable
@@ -23,6 +25,8 @@ export interface ProductionBatchWithDetails extends ProductionBatch {
   // Mapped fields from the API response
   batch_number?: string
   planned_date?: string
+  scheduled_start?: string
+  scheduled_end?: string
   actual_cost?: number
   unit?: string
 }
@@ -44,7 +48,7 @@ export interface TimelineSlot {
 }
 
 export interface SchedulingResult {
-  schedule: ProductionBatch[]
+  schedule: ProductionBatchWithDetails[]
   timeline: TimelineSlot[]
   resource_utilization: {
     oven_utilization: number

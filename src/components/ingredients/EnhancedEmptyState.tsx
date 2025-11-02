@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Package, Plus, BookOpen, Video } from 'lucide-react'
 
+
+
 interface EnhancedEmptyStateProps {
     onAdd: () => void
     showTutorial?: boolean

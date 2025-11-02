@@ -1,9 +1,10 @@
+import { apiLogger } from '@/lib/logger'
+
 /**
  * AI Client Module
  * Handles API calls to OpenRouter and OpenAI
  */
 
-import { apiLogger } from '@/lib/logger'
 
 export class AIClient {
   /**
@@ -14,7 +15,7 @@ export class AIClient {
     systemPrompt: string,
     model = 'meta-llama/llama-3.1-8b-instruct:free'
   ): Promise<string> {
-    return await this.callOpenRouter(prompt, systemPrompt, model)
+    return this.callOpenRouter(prompt, systemPrompt, model)
   }
 
   /**

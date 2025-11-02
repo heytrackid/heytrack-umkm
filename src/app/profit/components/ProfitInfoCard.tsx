@@ -1,10 +1,11 @@
+import { Card, CardContent } from '@/components/ui/card'
+import { AlertCircle } from 'lucide-react'
+
 /**
  * Profit Info Card Component
  * Information about WAC methodology
  */
 
-import { Card, CardContent } from '@/components/ui/card'
-import { AlertCircle } from 'lucide-react'
 
 export const ProfitInfoCard = () => (
     <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">

@@ -1,3 +1,6 @@
+import type { RecipesTable, IngredientsTable, OrdersTable, CustomersTable, OrderStatus, ProductionStatus } from '@/types/database'
+
+
 /**
  * Type Guards for Runtime Type Checking
  * 
@@ -8,7 +11,6 @@
  * - Unknown/any types
  */
 
-import type { RecipesTable, IngredientsTable, OrdersTable, CustomersTable } from '@/types/database'
 
 // ============================================================================
 // Basic Type Guards
@@ -265,8 +267,6 @@ export function isIngredientArray(value: unknown): value is Ingredient[] {
 // ============================================================================
 // Enum Type Guards
 // ============================================================================
-
-import type { OrderStatus, ProductionStatus } from '@/types/database'
 
 /**
  * Check if value is a valid order status

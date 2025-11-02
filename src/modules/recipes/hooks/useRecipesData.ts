@@ -1,5 +1,7 @@
-// import { useState, useEffect } from 'react'
 import type { RecipesTable } from '@/types/database'
+
+
+// import { useState, useEffect } from 'react'
 type Recipe = RecipesTable
 // import { useSupabaseCRUD } from '@/hooks'
 
@@ -38,7 +40,7 @@ export function useRecipesData(options: UseRecipesDataOptions = {}) {
     const searchLower = options.searchTerm.toLowerCase()
     return (
       recipe.name.toLowerCase().includes(searchLower) ||
-      (recipe.description ?? '').toLowerCase().includes(searchLower)
+      (recipe.description || '').toLowerCase().includes(searchLower)
     )
   })
 

@@ -1,3 +1,7 @@
+import type { ApiError, ApiResponse } from './api';
+import type { 
+
+
 /**
  * Type Guards and Assertions
  * Provides runtime type checking functions
@@ -14,8 +18,6 @@
  * Validation functions return detailed error information for debugging.
  */
 
-import type { ApiError, ApiResponse } from './api';
-import type { 
   CustomersTable, 
   IngredientsTable, 
   IngredientPurchasesTable, 
@@ -33,7 +35,7 @@ type Customer = CustomersTable;
 type Ingredient = IngredientsTable;
 type IngredientPurchase = IngredientPurchasesTable;
 type Order = OrdersTable;
-// type OrderItem = OrderItemsTable;
+type OrderItem = OrderItemsTable;
 type Recipe = RecipesTable;
 type RecipeIngredient = RecipeIngredientsTable;
 type Supplier = SuppliersTable;
@@ -386,7 +388,7 @@ export function isRecipeWithIngredients(value: unknown): value is Recipe & {
 
             // Check nested ingredient if present
             if (hasProperty(ri, 'ingredient')) {
-                return ri.ingredient === null || ri.ingredient === undefined || isIngredient(ri.ingredient);
+                return ri.ingredient === null || isIngredient(ri.ingredient);
             }
 
             return true;

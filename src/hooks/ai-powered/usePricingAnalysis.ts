@@ -3,6 +3,8 @@
 import { useCallback, useState } from 'react'
 import type { AIAnalysisState, PricingAnalysisRequest } from './types'
 
+
+
 /**
  * AI-Powered Pricing Analysis Hook
  * Provides intelligent pricing recommendations based on ingredients, competitors, and market conditions

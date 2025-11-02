@@ -1,9 +1,11 @@
+import { cn } from '@/lib/utils'
+
+
 /**
  * Consolidated Shared Module
  * Single source for all shared utilities, components, hooks, and common functionality
  */
 
-import { cn } from '@/lib/utils'
 
 // ============================================================================
 // SHARED UTILITIES
@@ -80,7 +82,7 @@ export function isUndefined(value: unknown): value is undefined {
 }
 
 export function isNullish(value: unknown): value is null | undefined {
-  return value === null || value === undefined
+  return value === null
 }
 
 export function isArray<T = unknown>(value: unknown): value is T[] {

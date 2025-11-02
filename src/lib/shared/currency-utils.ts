@@ -1,9 +1,11 @@
+import { type Currency, formatCurrency, getCurrentCurrency } from '@/lib/currency'
+
+
 /**
  * Shared Currency Utilities
  * Centralized currency formatting and utilities
  */
 
-import { type Currency, formatCurrency, getCurrentCurrency } from '@/lib/currency'
 
 // Enhanced currency formatting with consistent patterns
 export function formatPrice(amount: number): string {

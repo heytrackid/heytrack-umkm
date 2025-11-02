@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import {
     Select,
     SelectContent,
@@ -6,7 +7,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 
 interface PaginationProps {
     page: number

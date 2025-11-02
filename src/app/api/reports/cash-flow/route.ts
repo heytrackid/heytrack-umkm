@@ -38,6 +38,11 @@ interface Subcategory {
   count: number
 }
 
+const normalizeDateParam = (value?: string | null) => {
+  const trimmed = value?.trim()
+  return trimmed && trimmed.length > 0 ? trimmed : undefined
+}
+
 interface CategoryBreakdownProcessing {
   category: string
   total: number
@@ -75,8 +80,11 @@ export async function GET(request: NextRequest) {
     const periodParam = searchParams.get('period')
     const compare = searchParams.get('compare') === 'true'
     
-    const startDate = startDateParam || new Date(new Date().setDate(1)).toISOString().split('T')[0] // First day of current month
-    const endDate = endDateParam || new Date().toISOString().split('T')[0] // Today
+    const defaultStartDate = new Date(new Date().setDate(1)).toISOString().split('T')[0] // First day of current month
+    const defaultEndDate = new Date().toISOString().split('T')[0] // Today
+
+    const startDate = normalizeDateParam(startDateParam) || defaultStartDate
+    const endDate = normalizeDateParam(endDateParam) || defaultEndDate
     const period = periodParam || 'daily'
 
     // ✅ CRITICAL FIX: Filter by user_id for RLS
@@ -84,8 +92,8 @@ export async function GET(request: NextRequest) {
       .from('financial_records')
       .select('id, date, description, category, amount, reference')
       .eq('user_id', user.id) // ✅ RLS enforcement
-      .gte('date', startDateParam ? startDateParam : new Date(new Date().setDate(1)).toISOString().split('T')[0])
-      .lte('date', endDateParam ? endDateParam : new Date().toISOString().split('T')[0])
+      .gte('date', startDate)
+      .lte('date', endDate)
       .order('date', { ascending: true })
 
     if (transError) {
@@ -121,8 +129,8 @@ export async function GET(request: NextRequest) {
       comparison = await calculateComparison(
         supabase,
         user.id, // ✅ Pass user_id
-        (startDateParam ? startDateParam : new Date(new Date().setDate(1)).toISOString().split('T')[0]), 
-        (endDateParam ? endDateParam : new Date().toISOString().split('T')[0])
+        startDate,
+        endDate
       )
     }
 
@@ -183,25 +191,34 @@ function groupByPeriod(transactions: FinancialRecordPartial[], period: string) {
 
   transactions.forEach(transaction => {
     let key = ''
-    const date = new Date(transaction.date || '')
+    const date = transaction.date ? new Date(transaction.date) : null
 
     switch (period) {
       case 'daily':
-        key = transaction.date ?? ''
+        key = transaction.date || ''
         break
-      case 'weekly':
+      case 'weekly': {
+        if (!date || Number.isNaN(date.getTime())) {
+          key = ''
+          break
+        }
         const weekStart = new Date(date)
         weekStart.setDate(date.getDate() - date.getDay())
-        key = weekStart.toString() !== 'Invalid Date' ? (weekStart.toISOString().split('T')[0] ?? '') : ''
+        key = Number.isNaN(weekStart.getTime())
+          ? ''
+          : weekStart.toISOString().split('T')[0]
         break
+      }
       case 'monthly':
-        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        key = date && !Number.isNaN(date.getTime())
+          ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+          : ''
         break
       case 'yearly':
-        key = `${date.getFullYear()}`
+        key = date && !Number.isNaN(date.getTime()) ? `${date.getFullYear()}` : ''
         break
       default:
-        key = transaction.date ?? ''
+        key = transaction.date || ''
     }
 
     if (!grouped[key]) {
@@ -322,8 +339,15 @@ function calculateTrend(cashFlowByPeriod: PeriodCashFlow[]) {
 
   const avgCashFlow = cashFlowByPeriod.reduce((sum: number, p) => sum + p.net_cash_flow, 0) / cashFlowByPeriod.length
 
+  let direction: 'increasing' | 'decreasing' | 'stable' = 'stable'
+  if (change > 0) {
+    direction = 'increasing'
+  } else if (change < 0) {
+    direction = 'decreasing'
+  }
+
   return {
-    direction: (change > 0 ? 'increasing' : change < 0 ? 'decreasing' : 'stable'),
+    direction,
     change_amount: change,
     change_percentage: changePercentage,
     average_cash_flow: avgCashFlow,

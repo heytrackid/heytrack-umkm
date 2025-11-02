@@ -16,6 +16,11 @@ interface RouteContext {
 type OrderUpdate = OrdersUpdate
 type FinancialRecordUpdate = FinancialRecordsUpdate
 
+const normalizeDateValue = (value?: string | null) => {
+  const trimmed = value?.trim()
+  return trimmed && trimmed.length > 0 ? trimmed : undefined
+}
+
 // GET /api/orders/[id] - Get single order
 async function GET(
   _request: NextRequest,
@@ -193,12 +198,16 @@ async function PUT(
       updatedOrder.total_amount && 
       updatedOrder.total_amount > 0
     ) {
+      const incomeDate = normalizeDateValue(updatedOrder.delivery_date)
+        || normalizeDateValue(updatedOrder.order_date)
+        || new Date().toISOString().split('T')[0]
+
       const incomeData = {
         user_id: user.id,
         type: 'INCOME' as const,
         category: 'Revenue',
         amount: updatedOrder.total_amount,
-        date: updatedOrder.delivery_date || updatedOrder.order_date || new Date().toISOString().split('T')[0],
+        date: incomeDate,
         reference: `Order #${updatedOrder.order_no}${updatedOrder.customer_name ? ` - ${updatedOrder.customer_name}` : ''}`,
         description: `Income from order ${updatedOrder.order_no}`
       }

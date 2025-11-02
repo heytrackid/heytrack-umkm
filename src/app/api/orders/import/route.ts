@@ -12,6 +12,11 @@ type CustomerInsert = CustomersInsert
 type OrderInsert = OrdersInsert
 type OrderItemInsert = Omit<OrderItemsInsert, 'order_id'>
 
+const sanitizeOptionalString = (value?: string | null) => {
+  const trimmed = value?.trim()
+  return trimmed && trimmed.length > 0 ? trimmed : null
+}
+
 async function POST(request: NextRequest) {
   try {
     // 1. Authenticate
@@ -114,9 +119,9 @@ async function POST(request: NextRequest) {
       if (!customersToCreate.has(customerKey)) {
         customersToCreate.set(customerKey, {
           name: order.customer_name.trim(),
-          phone: order.customer_phone?.trim() || null,
-          email: order.customer_email?.trim() || null,
-          address: order.customer_address?.trim() || null,
+          phone: sanitizeOptionalString(order.customer_phone),
+          email: sanitizeOptionalString(order.customer_email),
+          address: sanitizeOptionalString(order.customer_address),
           user_id: user.id,
           is_active: true
         })
@@ -128,12 +133,12 @@ async function POST(request: NextRequest) {
         order: {
           order_no: order.order_no.trim(),
           customer_name: order.customer_name.trim(),
-          customer_phone: order.customer_phone?.trim() || null,
-          customer_address: order.customer_address?.trim() || null,
+          customer_phone: sanitizeOptionalString(order.customer_phone),
+          customer_address: sanitizeOptionalString(order.customer_address),
           status: (order.status ? order.status.toUpperCase() : 'PENDING') as OrderStatus,
           total_amount: totalPrice,
           delivery_date: order.delivery_date ? new Date(order.delivery_date).toISOString() : null,
-          notes: order.notes?.trim() || null,
+          notes: sanitizeOptionalString(order.notes),
           user_id: user.id
         },
         items: [{

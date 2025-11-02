@@ -1,7 +1,9 @@
-// Advanced validation utilities and rules
-
 import { z } from 'zod'
 import { VALIDATION_MESSAGES } from './constants'
+
+
+// Advanced validation utilities and rules
+
 
 // Common validation patterns
 export const validationPatterns = {
@@ -100,7 +102,7 @@ export const validationFunctions = {
     try {
       new URL(value)
       return validationPatterns.url.test(value)
-    } catch (_error) {
+    } catch (error) {
       return false
     }
   }
@@ -311,7 +313,7 @@ export const validationHelpers = {
     try {
       schema.parse(data)
       return true
-    } catch (_error) {
+    } catch (error) {
       return false
     }
   }

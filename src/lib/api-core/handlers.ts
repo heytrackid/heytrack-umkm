@@ -1,8 +1,3 @@
-/**
- * Route Handlers Module
- * Utilities for creating standardized API route handlers
- */
-
 import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { validateRequestData, validateRequestOrRespond } from './validation'
@@ -11,6 +6,12 @@ import { createErrorResponse, createSuccessResponse } from './responses'
 import { handleAPIError, createAPIErrorResponse } from './errors'
 import { apiCache } from './cache'
 import type { RouteHandlerConfig, RouteHandlerContext } from './types'
+
+/**
+ * Route Handlers Module
+ * Utilities for creating standardized API route handlers
+ */
+
 
 /**
  * Create standardized route handler with middleware support
@@ -25,7 +26,7 @@ export function createRouteHandler<T>(
       if (config.middleware) {
         for (const middleware of config.middleware) {
           const result = await middleware(request)
-          if (result) {
+          if (result instanceof NextResponse) {
             return result
           }
         }
@@ -34,7 +35,7 @@ export function createRouteHandler<T>(
       // Validate request data
       let validatedData: T | undefined
       if (config.validation?.body) {
-        const result = await validateRequestOrRespond(request, config.validation.body)
+        const result = await validateRequestOrRespond(request, config.validation.body as z.ZodType<T>)
         if (result instanceof NextResponse) {
           return result
         }
@@ -45,16 +46,21 @@ export function createRouteHandler<T>(
       if (config.validation?.query) {
         const { searchParams } = new URL(request.url)
         const queryData = Object.fromEntries(searchParams.entries())
-        const result = validateRequestData(queryData, config.validation.query)
+        const result = validateRequestData(queryData, config.validation.query as z.ZodType)
         if (!result.success) {
           return createErrorResponse('Query validation failed', 400, result.errors)
         }
       }
 
       // Extract pagination
-      let pagination: { page: number; limit: number; offset: number } | undefined
+      let pagination: { page: number; limit: number; offset: number; total: number; pages: number } | undefined
       if (config.pagination) {
-        pagination = extractPagination(request)
+        const paginationData = extractPagination(request)
+        pagination = {
+          ...paginationData,
+          total: paginationData.total || 0,
+          pages: paginationData.pages || 0
+        }
       }
 
       // Check cache

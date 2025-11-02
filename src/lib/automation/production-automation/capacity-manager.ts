@@ -1,9 +1,10 @@
+import type { Equipment, Staffing, ProductionCapacity } from './types'
+
 /**
  * Capacity Manager Module
  * Handles production capacity calculation and optimization
  */
 
-import type { Equipment, Staffing, ProductionCapacity } from './types'
 
 export class CapacityManager {
   /**

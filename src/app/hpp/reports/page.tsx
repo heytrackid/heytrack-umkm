@@ -1,4 +1,3 @@
-/* eslint-disable */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -11,25 +10,16 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import {
-  Download,
-  FileText,
-  FileSpreadsheet,
-  FileImage,
-  Calendar,
-  BarChart3,
-  LineChart,
-  Table,
-  TrendingUp
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { Download, FileText, FileSpreadsheet, FileImage, Calendar, BarChart3, LineChart, Table, TrendingUp, type LucideIcon } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
 import { useResponsive } from '@/hooks/useResponsive'
 import { PageHeader, SharedStatsCards } from '@/components/shared'
 import { HppCostTrendsChart } from '@/modules/hpp'
-import type { HppExportFormat, HppExportMetric } from '@/modules/hpp'
+
+type HppExportFormat = 'pdf' | 'excel' | 'csv' | 'json'
+type HppExportMetric = 'hpp' | 'margin' | 'cost_breakdown' | 'trends' | 'alerts' | 'recommendations'
 
 type ExportFormat = HppExportFormat
 type ExportMetric = HppExportMetric

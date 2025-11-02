@@ -1,9 +1,12 @@
-'use client'
-
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 
-interface MiniChartProps {
+'use client'
+
+
+
+
+export interface MiniChartProps {
   data: unknown[]
   type?: 'line' | 'bar'
   dataKey: string
@@ -25,7 +28,7 @@ const DynamicChart = dynamic(
   }
 )
 
-export default function MiniChart(props: MiniChartProps) {
+const MiniChart = (props: MiniChartProps) => {
   const { data, height = 60, className = '' } = props
 
   if (!data || data.length === 0) {
@@ -51,3 +54,5 @@ export default function MiniChart(props: MiniChartProps) {
     </div>
   )
 }
+
+export default MiniChart

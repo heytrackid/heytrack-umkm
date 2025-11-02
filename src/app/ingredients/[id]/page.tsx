@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-
 import AppLayout from '@/components/layout/app-layout'
 import { useSupabaseCRUD } from '@/hooks/supabase'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
@@ -14,8 +13,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/client'
 import { ArrowLeft, Package, Loader2 } from 'lucide-react'
 import type { IngredientsTable, IngredientsUpdate } from '@/types/database'
+
+
+
 
 type Ingredient = IngredientsTable
 type IngredientUpdate = IngredientsUpdate
@@ -64,9 +67,9 @@ const EditIngredientPage = () => {
                         name: data.name,
                         unit: data.unit as 'kg' | 'g' | 'l' | 'ml' | 'pcs' | 'dozen',
                         price_per_unit: data.price_per_unit,
-                        current_stock: data.current_stock ?? 0,
-                        min_stock: data.min_stock ?? 0,
-                        description: data.description ?? ''
+                        current_stock: data.current_stock || 0,
+                        min_stock: data.min_stock || 0,
+                        description: data.description || ''
                     })
                 }
             } catch (err: unknown) {
@@ -96,7 +99,7 @@ const EditIngredientPage = () => {
                 unit: data.unit,
                 price_per_unit: data.price_per_unit,
                 current_stock: data.current_stock,
-                min_stock: data.min_stock ?? 0,
+                min_stock: data.min_stock || 0,
                 description: data.description || null,
             }
 
@@ -181,9 +184,9 @@ const EditIngredientPage = () => {
                                         name: ingredient.name,
                                         unit: ingredient.unit as 'kg' | 'g' | 'l' | 'ml' | 'pcs' | 'dozen',
                                         price_per_unit: ingredient.price_per_unit,
-                                        current_stock: ingredient.current_stock ?? 0,
-                                        min_stock: ingredient.min_stock ?? 0,
-                                        description: ingredient.description ?? ''
+                                        current_stock: ingredient.current_stock || 0,
+                                        min_stock: ingredient.min_stock || 0,
+                                        description: ingredient.description || ''
                                     }}
                                 />
 

@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Calculator, TrendingUp, BarChart3, Bell, Plus, ArrowRight, Lightbulb } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+
+
+
 export const HppEmptyState = () => {
     const router = useRouter()
 

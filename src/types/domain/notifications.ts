@@ -1,5 +1,7 @@
 import type { NotificationsTable, NotificationsInsert, NotificationsUpdate } from '@/types/database'
 
+
+
 // Base types from generated schema
 export type Notification = NotificationsTable
 export type NotificationInsert = NotificationsInsert

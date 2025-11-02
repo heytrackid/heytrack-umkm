@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import type { RecipesTable } from '@/types/database'
-type Recipe = RecipesTable
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,11 +9,16 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Textarea } from '@/components/ui/textarea'
 import { CalendarIcon, Loader2 } from 'lucide-react'
+import { format } from 'date-fns'
 import { uiLogger } from '@/lib/logger'
 import { id as idLocale } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+
+
+type Recipe = RecipesTable
 
 interface ProductionFormDialogProps {
     open: boolean
@@ -50,7 +54,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
             } else {
                 setRecipes([])
             }
-        } catch (_error) {
+        } catch (error) {
             uiLogger.error({ error }, 'Error fetching recipes')
             toast.error('Gagal memuat daftar resep')
             setRecipes([])
@@ -95,7 +99,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
             onSuccess()
             onOpenChange(false)
             resetForm()
-        } catch (_error) {
+        } catch (error) {
             uiLogger.error({ error }, 'Error creating production batch')
             toast.error(error instanceof Error ? error.message : 'Gagal membuat batch produksi')
         } finally {

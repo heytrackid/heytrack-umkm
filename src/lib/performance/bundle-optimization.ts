@@ -1,3 +1,6 @@
+import { performanceLogger } from '@/lib/client-logger'
+
+
 /**
  * Bundle Optimization Utilities
  * 
@@ -8,7 +11,6 @@
  * 4. Defer non-critical code
  */
 
-import { performanceLogger } from '@/lib/client-logger'
 
 /**
  * Dynamically import heavy libraries only when needed

@@ -4,6 +4,8 @@ import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+
+
 // Use type instead of interface for consistency
 interface WacCalculation {
   ingredientId: string
@@ -30,9 +32,7 @@ export class WacEngineService {
   private supabase: SupabaseClient<Database> | null = null
 
   private async getSupabase() {
-    if (!this.supabase) {
-      this.supabase = await createClient()
-    }
+    this.supabase ||= await createClient()
     return this.supabase
   }
 
@@ -67,11 +67,13 @@ export class WacEngineService {
       let runningValue = 0
 
       for (const transaction of transactions) {
-        const quantity = Number(transaction.quantity)
-        const unitPrice = Number(transaction.unit_price)
-        const totalValue = Number(transaction.total_price) || (quantity * unitPrice)
+        const quantityRaw = Number(transaction.quantity)
+        const quantity = Number.isFinite(quantityRaw) ? quantityRaw : 0
+        const unitPriceRaw = Number(transaction.unit_price)
+        const unitPrice = Number.isFinite(unitPriceRaw) ? unitPriceRaw : 0
+        const totalPriceRaw = Number(transaction.total_price)
+        const totalValue = Number.isFinite(totalPriceRaw) ? totalPriceRaw : quantity * unitPrice
 
-        // Add to running totals
         runningQuantity += quantity
         runningValue += totalValue
       }
@@ -291,8 +293,12 @@ export class WacEngineService {
       let runningValue = 0
 
       for (const transaction of transactions) {
-        const quantity = Number(transaction.quantity)
-        const totalValue = Number(transaction.total_price) || (quantity * Number(transaction.unit_price))
+        const quantityRaw = Number(transaction.quantity)
+        const quantity = Number.isFinite(quantityRaw) ? quantityRaw : 0
+        const unitPriceRaw = Number(transaction.unit_price)
+        const unitPrice = Number.isFinite(unitPriceRaw) ? unitPriceRaw : 0
+        const totalPriceRaw = Number(transaction.total_price)
+        const totalValue = Number.isFinite(totalPriceRaw) ? totalPriceRaw : quantity * unitPrice
 
         runningQuantity += quantity
         runningValue += totalValue
@@ -300,7 +306,7 @@ export class WacEngineService {
         const wac = runningQuantity > 0 ? runningValue / runningQuantity : 0
 
         history.push({
-          date: transaction.created_at ?? new Date().toISOString(),
+          date: transaction.created_at || new Date().toISOString(),
           wac,
           transactionId: transaction.id
         })

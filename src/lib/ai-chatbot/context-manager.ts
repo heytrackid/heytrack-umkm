@@ -1,10 +1,11 @@
+import { apiLogger } from '@/lib/logger'
+import type { ChatContext } from './types'
+
 /**
  * Context Manager
  * Manages conversation context and history
  */
 
-import { apiLogger } from '@/lib/logger'
-import type { ChatContext } from './types'
 
 export class ContextManager {
   private context: ChatContext

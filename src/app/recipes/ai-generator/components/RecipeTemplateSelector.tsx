@@ -1,23 +1,23 @@
 'use client'
 
-/**
- * Recipe Template Selector
- * Sprint 1 Feature: Quick start with pre-made templates
- */
-
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Sparkles, Clock, TrendingUp } from 'lucide-react'
+import { getDifficultyColor, formatTime, getCategoryIcon } from '@/lib/utils/recipe-helpers'
+import { useCurrency } from '@/hooks/useCurrency'
 import {
     RECIPE_CATEGORIES,
     getTemplatesByCategory,
     type RecipeTemplate
 } from '@/lib/constants/recipe-templates'
-import { getDifficultyColor, formatTime, getCategoryIcon } from '@/lib/utils/recipe-helpers'
-import { useCurrency } from '@/hooks/useCurrency'
+
+/**
+ * Recipe Template Selector
+ * Sprint 1 Feature: Quick start with pre-made templates
+ */
 
 interface RecipeTemplateSelectorProps {
     onSelectTemplate: (template: RecipeTemplate) => void

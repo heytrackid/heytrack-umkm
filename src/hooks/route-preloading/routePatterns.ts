@@ -1,5 +1,6 @@
 import type { RoutePreloadingPatterns } from './types'
 
+
 /**
  * Route preloading patterns based on user behavior
  * Defines which routes and components should be preloaded for each page

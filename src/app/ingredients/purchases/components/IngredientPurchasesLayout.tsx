@@ -1,30 +1,18 @@
-// Ingredient Purchases Layout - Main Page with Lazy Components
-// Main layout component that orchestrates all lazy-loaded purchase management components
-
 'use client'
 
 import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import PrefetchLink from '@/components/ui/prefetch-link'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
 import { ShoppingCart } from 'lucide-react'
 import { apiLogger } from '@/lib/logger'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
-
-// Import components normally (lightweight UI components)
 import PurchaseStats from './PurchaseStats'
 import PurchaseForm from './PurchaseForm'
 import PurchasesTable from './PurchasesTable'
-
 import type { IngredientPurchase, AvailableIngredient } from './types'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+
 
 const IngredientPurchasesLayout = () => {
   const [purchases, setPurchases] = useState<IngredientPurchase[]>([])
@@ -103,7 +91,11 @@ const IngredientPurchasesLayout = () => {
 
     await fetchPurchases()
     await fetchIngredients() // Refresh untuk update WAC
-    alert('Pembelian berhasil ditambahkan! Stock dan WAC telah diperbarui.')
+    toast({
+      title: 'Berhasil',
+      description: 'Pembelian berhasil ditambahkan! Stock dan WAC telah diperbarui.',
+      variant: 'default',
+    })
   }
 
   // Show loading state while auth is initializing

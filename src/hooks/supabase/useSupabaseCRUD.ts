@@ -1,21 +1,20 @@
-// @ts-nocheck
+import { useEffect, useState } from 'react'
+import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/client'
+import type { Database, Tables } from '@/types/database'
+import { getErrorMessage } from '@/lib/type-guards'
+
 /**
  * Supabase CRUD Hook
  * Generic hook for CRUD operations with Supabase
  */
 
-import { useEffect, useState } from 'react'
-import { apiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types/database'
-import { getErrorMessage } from '@/lib/type-guards'
-import type { Tables } from '@/types/database'
 
 type TableKey = keyof Database['public']['Tables']
 
-type TableRow<TTable extends keyof Tables> = Tables[TTable]['Row']
-type TableInsert<TTable extends keyof Tables> = Tables[TTable]['Insert']
-type TableUpdate<TTable extends keyof Tables> = Tables[TTable]['Update']
+type TableRow<TTable extends TableKey> = Database['public']['Tables'][TTable]['Row']
+type TableInsert<TTable extends TableKey> = Database['public']['Tables'][TTable]['Insert']
+type TableUpdate<TTable extends TableKey> = Database['public']['Tables'][TTable]['Update']
 
 type TableFilters<TTable extends TableKey> = Partial<
   Record<keyof TableRow<TTable> & string, string | number | boolean | null>
@@ -59,7 +58,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       // Apply user_id filter for RLS (if user is authenticated)
       if (user) {
-        query = query.eq('user_id', user.id)
+        query = query.eq('user_id' as never, user.id as never)
       }
 
       // Apply filters
@@ -78,7 +77,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       // Apply ordering
       if (options?.orderBy) {
         query = query.order(options.orderBy.column, {
-          ascending: options.orderBy.ascending ?? true
+          ascending: options.orderBy.ascending || true
         })
       }
 
@@ -96,7 +95,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         rowCount: result?.length || 0 
       }, `Fetched rows from ${table}`)
       void setData(result)
-    } catch (_err) {
+    } catch (err) {
       if (process.env.NODE_ENV === 'development') {
         apiLogger.error({ error: err, table }, 'Error in fetchData')
       }
@@ -119,8 +118,8 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       const { data: result, error: readError } = await supabase
         .from(table)
         .select(options?.select || '*')
-        .eq('id', id)
-        .eq('user_id', user.id) // RLS filter
+        .eq('id' as never, id as never)
+        .eq('user_id' as never, user.id as never) // RLS filter
         .single() as { data: TableRow<TTable> | null; error: Error | null }
 
       if (readError) {
@@ -131,7 +130,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       }
 
       return result
-    } catch (_err) {
+    } catch (err) {
       if (process.env.NODE_ENV === 'development') {
         apiLogger.error({ error: err, table }, 'Error in read')
       }
@@ -154,8 +153,8 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       const { error: deleteError } = await supabase
         .from(table)
         .delete()
-        .eq('id', id)
-        .eq('user_id', user.id) // RLS filter
+        .eq('id' as never, id as never)
+        .eq('user_id' as never, user.id as never) // RLS filter
 
       if (deleteError) {
         if (process.env.NODE_ENV === 'development') {
@@ -166,7 +165,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       // Refresh data after delete
       await fetchData()
-    } catch (_err) {
+    } catch (err) {
       if (process.env.NODE_ENV === 'development') {
         apiLogger.error({ error: err, table }, 'Error in remove')
       }
@@ -194,7 +193,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       const { data: result, error: createError } = await supabase
         .from(table)
-        .insert([dataWithUser])
+        .insert([dataWithUser] as never)
         .select()
         .single() as { data: TableRow<TTable> | null; error: Error | null }
 
@@ -208,7 +207,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       // Refresh data after create
       await fetchData()
       return result
-    } catch (_err) {
+    } catch (err) {
       if (process.env.NODE_ENV === 'development') {
         apiLogger.error({ error: err, table }, 'Error in create')
       }
@@ -230,9 +229,9 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       const { data: result, error: updateError } = await supabase
         .from(table)
-        .update(updateData)
-        .eq('id', id)
-        .eq('user_id', user.id) // RLS filter
+        .update(updateData as never)
+        .eq('id' as never, id as never)
+        .eq('user_id' as never, user.id as never) // RLS filter
         .select()
         .single() as { data: TableRow<TTable> | null; error: Error | null }
 
@@ -246,7 +245,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       // Refresh data after update
       await fetchData()
       return result
-    } catch (_err) {
+    } catch (err) {
       if (process.env.NODE_ENV === 'development') {
         apiLogger.error({ error: err, table }, 'Error in update')
       }

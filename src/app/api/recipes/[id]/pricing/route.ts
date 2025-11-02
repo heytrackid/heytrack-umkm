@@ -64,14 +64,17 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
       // Transform the data structure to match RecipeWithIngredients
       // Supabase returns joined data as arrays, so we need to extract the first element
-      const transformedIngredients = (data.recipe_ingredients || []).map((ri: any) => {
-        const ingredient = Array.isArray(ri.ingredients) ? ri.ingredients[0] : ri.ingredients
+      const transformedIngredients = (data.recipe_ingredients || []).map((ri) => {
+        // Type guard to handle the ingredients property which might be an array or object
+        const ingredientArray = Array.isArray(ri.ingredients) ? ri.ingredients : [];
+        const ingredient = ingredientArray.length > 0 ? ingredientArray[0] : null;
+        
         return {
-          id: ri.id || '',
+          id: '',
           recipe_id: data.id,
           ingredient_id: ingredient?.id || '',
-          quantity: ri.quantity,
-          unit: ri.unit,
+          quantity: ri.quantity || 0,
+          unit: ri.unit || '',
           user_id: user.id,
           ingredient: ingredient || null
         } as RecipeIngredient & { ingredient: Ingredient | null }
@@ -102,12 +105,15 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
     
     // Calculate pricing using the original recipeData which should have the right structure
+    const sanitizedIngredients = (recipeForPricing.recipe_ingredients ?? [])
+        .filter((ri): ri is RecipeIngredient & { ingredient: Ingredient } => ri.ingredient !== null && ri.ingredient !== undefined)
+        .map((ri) => ({
+          ...ri,
+          ingredient: ri.ingredient
+        }))
     const pricingAnalysis = pricingAutomation.calculateSmartPricing({
-      ...recipeData,
-      recipe_ingredients: recipeForPricing.recipe_ingredients?.map(ri => ({
-        ...ri,
-        ingredient: ri.ingredient!
-      })) ?? []
+      ...recipeForPricing,
+      recipe_ingredients: sanitizedIngredients
     })
 
     return NextResponse.json({
@@ -115,11 +121,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       data: pricingAnalysis
     })
 
-  } catch (_err) {
-    apiLogger.error({ err }, 'Error calculating pricing')
-    return NextResponse.json({ 
+  } catch (err: unknown) {
+    const error = err as Error
+    apiLogger.error({ error }, 'Error calculating pricing')
+    return NextResponse.json({
       error: 'Internal server error',
-      message: err instanceof Error ? err.message : 'Unknown error'
+      message: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }

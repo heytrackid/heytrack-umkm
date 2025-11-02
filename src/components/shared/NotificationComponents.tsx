@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { cn } from '@/lib/utils'
+import { formatRelativeTime } from '@/lib/shared/utilities'
 import {
   Bell,
   CheckCircle,
@@ -20,8 +22,6 @@ import {
   Settings,
   Activity
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { formatRelativeTime } from '@/lib/shared/utilities'
 
 // Notification Types
 export interface NotificationItem {
@@ -275,7 +275,7 @@ export const ToastNotification = ({
   return (
     <div className={cn(
       "fixed top-4 right-4 z-50 max-w-sm w-full p-4 rounded-lg border shadow-lg",
-      void getToastStyles()
+      getToastStyles()
     )}>
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 mt-0.5">
@@ -395,7 +395,7 @@ export const ActivityFeed = ({
                 key={activity.id}
                 className={cn(
                   "flex items-start gap-3 p-3 rounded-lg border-l-4 bg-muted/20",
-                  void getActivityColor(activity.type)
+                  getActivityColor(activity.type)
                 )}
               >
                 <div className="flex-shrink-0 mt-1">

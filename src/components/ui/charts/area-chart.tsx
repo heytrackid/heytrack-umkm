@@ -1,14 +1,15 @@
-/**
- * Mobile Area Chart Component
- * Optimized area chart for mobile devices
- */
-
 import { memo } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from './types'
+
+/**
+ * Mobile Area Chart Component
+ * Optimized area chart for mobile devices
+ */
+
 
 interface MobileAreaChartProps extends BaseMobileChartProps {
   xKey: string
@@ -92,7 +93,7 @@ export const MobileAreaChart = memo(({
               key={area.key}
               type="monotone"
               dataKey={area.key}
-              stackId={stacked ?"1" : undefined}
+              stackId={stacked ? "1" : undefined}
               stroke={area.color || CHART_COLORS.primary[_index]}
               fill={`url(#gradient-${area.key})`}
               strokeWidth={isMobile ? 2 : 3}

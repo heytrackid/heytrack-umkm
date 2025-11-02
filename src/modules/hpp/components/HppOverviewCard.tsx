@@ -8,6 +8,9 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 
+
+
+
 interface HppOverviewCardProps {
     overview: {
         totalRecipes: number
@@ -101,8 +104,8 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
 
                     {/* Peringatan */}
                     <div className={`p-4 rounded-lg border ${overview.unreadAlerts > 0
-                            ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
-                            : 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
+                        ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+                        : 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
                         }`}>
                         <div className={`text-2xl font-bold mb-1 ${overview.unreadAlerts > 0 ? 'text-orange-600' : 'text-gray-400'
                             }`}>

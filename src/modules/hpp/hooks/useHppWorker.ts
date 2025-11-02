@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 import { apiLogger } from '@/lib/logger'
 import type { HppCalculationResult, MaterialBreakdown } from '@/modules/hpp/types'
 
+
+
+
 // Input data for worker calculation
 interface HppCalculationData {
   ingredients: Array<{

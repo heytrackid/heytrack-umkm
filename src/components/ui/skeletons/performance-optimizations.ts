@@ -1,3 +1,9 @@
+import { useCallback, useMemo } from 'react'
+import { apiLogger } from '@/lib/logger'
+    import('@/components').catch(() => {})
+    import('@/components').catch(() => {})
+    import('@/components').catch(() => {})
+
 /**
  * Performance Optimizations untuk Skeleton Loading System
  * 
@@ -5,9 +11,7 @@
  * skeleton loading dan memastikan smooth transitions.
  */
 
-import { useCallback, useMemo } from 'react'
 
-import { apiLogger } from '@/lib/logger'
 // Minimum loading duration untuk smooth UX
 export const MIN_LOADING_DURATION = {
   FAST: 300,    // For simple operations
@@ -90,9 +94,6 @@ export const ANIMATION_CONFIG = {
 export function preloadSkeletonComponents() {
   // Preload common skeleton components to avoid loading delays
   if (typeof window !== 'undefined') {
-    import('@/components').catch(() => {})
-    import('@/components').catch(() => {})
-    import('@/components').catch(() => {})
   }
 }
 
@@ -166,9 +167,9 @@ export const globalSkeletonMonitor = new SkeletonPerformanceMonitor()
 
 // Bundle size optimization - lazy load skeleton components
 export const LazySkeletons = {
-  Dashboard: () => import('@/components').then(m => m.StatsCardSkeleton),
-  Table: () => import('@/components').then(m => m.DataGridSkeleton),
-  Form: () => import('@/components').then(m => m.FormFieldSkeleton),
+  Dashboard: () => import('@/components/ui/skeleton').then(m => ({ default: m.Skeleton })),
+  Table: () => import('@/components/ui/skeleton').then(m => ({ default: m.Skeleton })),
+  Form: () => import('@/components/ui/skeleton').then(m => ({ default: m.Skeleton })),
 }
 
 // Memory optimization - cleanup skeleton cache periodically

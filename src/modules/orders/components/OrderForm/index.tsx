@@ -1,21 +1,23 @@
-/**
- * Order Form - Main Component (Refactored)
- * Modular architecture with separated sections + Code Splitting
- */
-
-'use client'
-
 import { Button } from '@/components/ui/button'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { AlertCircle } from 'lucide-react'
 import { memo, useState, type FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
-// import { ORDER_CONFIG } from '@/lib/constants'
+import { ORDER_CONFIG } from '@/modules/orders/constants'
 import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
 import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
 import { warningToast } from '@/hooks/use-toast'
 import type { RecipesTable, CustomersTable } from '@/types/database'
 import dynamic from 'next/dynamic'
+
+'use client'
+
+
+/**
+ * Order Form - Main Component (Refactored)
+ * Modular architecture with separated sections + Code Splitting
+ */
+
 
 // ✅ Code Splitting - Lazy load section components
 const CustomerSection = dynamic(() => import('./CustomerSection').then(mod => ({ default: mod.CustomerSection })), {
@@ -59,22 +61,22 @@ interface FormState {
 
 export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, error }: OrderFormProps) => {
     const [formData, setFormData] = useState<FormState>({
-        customer_name: order?.customer_name ?? '',
-        customer_phone: order?.customer_phone ?? '',
-        customer_address: order?.customer_address ?? '',
-        order_date: order?.order_date ?? new Date().toISOString().split('T')[0],
-        delivery_date: order?.delivery_date ?? '',
+        customer_name: order?.customer_name || '',
+        customer_phone: order?.customer_phone || '',
+        customer_address: order?.customer_address || '',
+        order_date: order?.order_date || new Date().toISOString().split('T')[0],
+        delivery_date: order?.delivery_date || '',
         delivery_time: order?.delivery_date?.includes('T')
-            ? order.delivery_date.split('T')[1]?.slice(0, 5) ?? ''
+            ? order.delivery_date.split('T')[1]?.slice(0, 5) || ''
             : '',
-        delivery_fee: order?.delivery_fee ?? ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
-        discount: order?.discount ?? 0,
-        tax_amount: order?.tax_amount ?? ORDER_CONFIG.DEFAULT_TAX_RATE,
+        delivery_fee: order?.delivery_fee || ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
+        discount: order?.discount || 0,
+        tax_amount: order?.tax_amount || ORDER_CONFIG.DEFAULT_TAX_RATE,
         payment_method: 'CASH',
-        paid_amount: order?.paid_amount ?? 0,
-        priority: order?.priority ?? ORDER_CONFIG.DEFAULT_PRIORITY,
-        notes: order?.notes ?? '',
-        special_instructions: order?.special_instructions ?? ''
+        paid_amount: order?.paid_amount || 0,
+        priority: order?.priority || ORDER_CONFIG.DEFAULT_PRIORITY,
+        notes: order?.notes || '',
+        special_instructions: order?.special_instructions || ''
     })
 
     const [orderItems, setOrderItems] = useState<OrderItemWithRecipe[]>(order?.items || [])
@@ -92,7 +94,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         queryKey: ['recipes', 'active'],
         queryFn: async () => {
             const response = await fetch('/api/recipes')
-            if (!response.ok) {throw new Error('Failed to fetch recipes')}
+            if (!response.ok) { throw new Error('Failed to fetch recipes') }
             const data: RecipesTable[] = await response.json()
             return data.filter(recipe => recipe.is_active)
         },
@@ -104,7 +106,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         queryKey: ['customers', 'all'],
         queryFn: async () => {
             const response = await fetch('/api/customers')
-            if (!response.ok) {throw new Error('Failed to fetch customers')}
+            if (!response.ok) { throw new Error('Failed to fetch customers') }
             return response.json() as Promise<Customer[]>
         },
         staleTime: 5 * 60 * 1000,
@@ -129,7 +131,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         }
 
         const firstRecipe = recipesData[0]
-        if (!firstRecipe) {return}
+        if (!firstRecipe) { return }
 
         const newItem: OrderItemWithRecipe = {
             id: `temp-${Date.now()}`,
@@ -137,18 +139,18 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             recipe_id: firstRecipe.id,
             product_name: firstRecipe.name,
             quantity: 1,
-            unit_price: firstRecipe.selling_price ?? 0,
-            total_price: firstRecipe.selling_price ?? 0,
+            unit_price: firstRecipe.selling_price || 0,
+            total_price: firstRecipe.selling_price || 0,
             special_requests: null,
             updated_at: null,
             user_id: '',
             recipe: {
                 id: firstRecipe.id,
                 name: firstRecipe.name,
-                price: firstRecipe.selling_price ?? 0,
-                category: firstRecipe.category ?? 'Uncategorized',
-                servings: firstRecipe.servings ?? 0,
-                description: firstRecipe.description ?? undefined
+                price: firstRecipe.selling_price || 0,
+                category: firstRecipe.category || 'Uncategorized',
+                servings: firstRecipe.servings || 0,
+                description: firstRecipe.description || undefined
             }
         }
         setOrderItems(prev => [...prev, newItem])
@@ -162,7 +164,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         setOrderItems(prev => {
             const updated = [...prev]
             const currentItem = updated[index]
-            if (!currentItem) {return updated}
+            if (!currentItem) { return updated }
 
             if (field === 'recipe_id') {
                 const selectedRecipe = recipesData.find(recipe => recipe.id === value)
@@ -174,24 +176,26 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                         recipe: {
                             id: selectedRecipe.id,
                             name: selectedRecipe.name,
-                            price: selectedRecipe.selling_price ?? currentItem.unit_price,
-                            category: selectedRecipe.category ?? 'Uncategorized',
-                            servings: selectedRecipe.servings ?? 0,
-                            description: selectedRecipe.description ?? undefined
+                            price: selectedRecipe.selling_price || currentItem.unit_price,
+                            category: selectedRecipe.category || 'Uncategorized',
+                            servings: selectedRecipe.servings || 0,
+                            description: selectedRecipe.description || undefined
                         },
-                        unit_price: selectedRecipe.selling_price ?? currentItem.unit_price,
-                        total_price: (selectedRecipe.selling_price ?? currentItem.unit_price) * currentItem.quantity
+                        unit_price: selectedRecipe.selling_price || currentItem.unit_price,
+                        total_price: (selectedRecipe.selling_price || currentItem.unit_price) * currentItem.quantity
                     }
                 }
             } else if (field === 'quantity') {
-                const qty = Number.parseInt(value as string, 10) || 0
+                const parsedQty = Number.parseInt(value as string, 10)
+                const qty = Number.isNaN(parsedQty) ? 0 : parsedQty
                 updated[index] = {
                     ...currentItem,
                     quantity: qty,
                     total_price: currentItem.unit_price * qty
                 }
             } else if (field === 'unit_price') {
-                const price = Number.parseFloat(value as string) || 0
+                const parsedPrice = Number.parseFloat(value as string)
+                const price = Number.isNaN(parsedPrice) ? 0 : parsedPrice
                 updated[index] = {
                     ...currentItem,
                     unit_price: price,
@@ -234,11 +238,11 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         setFieldErrors({})
 
         const orderData = {
-            order_no: order?.order_no ?? generateOrderNo(),
+            order_no: order?.order_no || generateOrderNo(),
             customer_name: formData.customer_name,
             customer_phone: formData.customer_phone,
             customer_address: formData.customer_address,
-            status: order?.status ?? 'pending',
+            status: order?.status || 'PENDING',
             order_date: formData.order_date,
             delivery_date: formData.delivery_date,
             delivery_time: formData.delivery_time,
@@ -249,7 +253,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             total_amount: totalAmount,
             paid_amount: formData.paid_amount,
             payment_method: formData.payment_method,
-            priority: formData.priority ?? 'normal',
+            priority: formData.priority || 'NORMAL',
             notes: formData.notes,
             special_instructions: formData.special_instructions,
             items: orderItems.map(item => ({
@@ -263,6 +267,14 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         }
 
         await onSubmit(orderData)
+    }
+
+    let submitButtonLabel = 'Buat Pesanan'
+    if (order) {
+        submitButtonLabel = 'Update Pesanan'
+    }
+    if (loading) {
+        submitButtonLabel = 'Menyimpan...'
     }
 
     return (
@@ -284,7 +296,13 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
 
                 <SwipeableTabsContent value="customer" className="space-y-4">
                     <CustomerSection
-                        formData={formData}
+                        formData={{
+                            customer_name: formData.customer_name,
+                            customer_phone: formData.customer_phone,
+                            customer_address: formData.customer_address,
+                            order_date: formData.order_date,
+                            priority: formData.priority ?? 'NORMAL'
+                        }}
                         fieldErrors={fieldErrors}
                         availableCustomers={customersData}
                         onInputChange={handleInputChange}
@@ -307,20 +325,31 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
 
                 <SwipeableTabsContent value="delivery" className="space-y-4">
                     <DeliverySection
-                        formData={formData}
-                        onInputChange={handleInputChange}
+                        formData={{
+                            delivery_date: formData.delivery_date,
+                            delivery_time: formData.delivery_time,
+                            delivery_fee: formData.delivery_fee,
+                            special_instructions: formData.special_instructions,
+                            notes: formData.notes
+                        }}
+                        onInputChange={handleInputChange as never}
                     />
                 </SwipeableTabsContent>
 
                 <SwipeableTabsContent value="payment" className="space-y-4">
                     <PaymentSection
-                        formData={formData}
+                        formData={{
+                            payment_method: formData.payment_method,
+                            paid_amount: formData.paid_amount,
+                            discount: formData.discount,
+                            tax_amount: formData.tax_amount
+                        }}
                         fieldErrors={fieldErrors}
                         subtotal={subtotal}
                         taxAmount={taxAmount}
                         totalAmount={totalAmount}
                         deliveryFee={formData.delivery_fee}
-                        onInputChange={handleInputChange}
+                        onInputChange={handleInputChange as never}
                         onClearError={handleClearError}
                     />
                 </SwipeableTabsContent>
@@ -331,7 +360,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                     Batal
                 </Button>
                 <Button type="submit" disabled={loading} className="flex-1">
-                    {loading ? 'Menyimpan...' : order ? 'Update Pesanan' : 'Buat Pesanan'}
+                    {submitButtonLabel}
                 </Button>
             </div>
         </form>

@@ -1,10 +1,6 @@
 'use client'
 import { useCallback } from 'react'
-
-import {
-  preloadChartBundle,
-  preloadModalComponent
-} from '@/components/lazy/index'
+import { preloadChartBundle, preloadModalComponent } from '@/components/lazy/index' 
 
 /**
  * Button interaction preloading hook
@@ -13,7 +9,7 @@ import {
 export const useButtonPreloading = () => {
   const preloadModalOnHover = useCallback((modalType: string) => {
     if (modalType.includes('form') || modalType.includes('detail')) {
-      preloadModalComponent(modalType as any).catch(() => {})
+      preloadModalComponent(modalType as Parameters<typeof preloadModalComponent>[0]).catch(() => {})
     }
   }, [])
 

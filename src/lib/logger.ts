@@ -1,3 +1,6 @@
+import pino from 'pino'
+
+
 /**
  * Pino Logger Configuration
  * 
@@ -6,8 +9,6 @@
  * - Production: JSON structured logs
  */
 
-import pino from 'pino'
-import type { SerializedError } from 'pino'
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 const isTest = process.env.NODE_ENV === 'test'
@@ -37,14 +38,15 @@ const logger = pino({
         ...Object.getOwnPropertyNames(err).reduce((acc, key) => {
           if (!['name', 'message', 'stack'].includes(key)) {
             try {
-              acc[key] = (err as any)[key as any];
+              const errorRecord = err as unknown as Record<string, unknown>
+              acc[key] = errorRecord[key]
             } catch {
               // If property can't be accessed, skip it
               acc[key] = '[Non-serializable]';
             }
           }
           return acc;
-        }, {} as Record<string, any>)
+        }, {} as Record<string, unknown>)
       })
   },
 })
@@ -53,6 +55,20 @@ const logger = pino({
  * Create a child logger with context
  */
 export const createLogger = (context: string) => logger.child({ context })
+
+/**
+ * Serialized error type for logging
+ */
+export interface SerializedError {
+  name: string
+  message: string
+  stack?: string
+  type: string
+  cause?: SerializedError
+  status?: number
+  statusCode?: number
+  [key: string]: unknown
+}
 
 /**
  * Helper to safely serialize errors for logging
@@ -74,16 +90,16 @@ export const serializeError = (error: unknown): Record<string, unknown> | Serial
     
     // Add request-specific properties if they exist
     if ('status' in error) {
-      serialized.status = (error as any).status
+      serialized.status = (error as Record<string, unknown>).status
     }
     if ('statusCode' in error) {
-      serialized.statusCode = (error as any).statusCode
+      serialized.statusCode = (error as Record<string, unknown>).statusCode
     }
     if ('code' in error) {
-      serialized.code = (error as any).code
+      serialized.code = (error as Record<string, unknown>).code
     }
     if ('errno' in error) {
-      serialized.errno = (error as any).errno
+      serialized.errno = (error as Record<string, unknown>).errno
     }
     
     return serialized
@@ -165,7 +181,7 @@ export const createDebugLogger = (context: string, userId?: string) => {
       baseLogger[level](logData, message);
     },
     
-    performanceDebug: (fn: () => any, operationName: string, userIdParam?: string) => {
+    performanceDebug: (fn: () => unknown, operationName: string, userIdParam?: string) => {
       // Use Date.now() for Edge Runtime compatibility
       const start = Date.now();
       

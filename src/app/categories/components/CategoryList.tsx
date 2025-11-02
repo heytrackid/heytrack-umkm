@@ -70,8 +70,7 @@ const CategoryList = ({
   onBulkEdit,
   onBulkDelete,
   onClearSelection
-}: CategoryListProps) {
-  return (
+}: CategoryListProps) => (
     <div className="space-y-6">
       {/* Header */}
       <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
@@ -148,7 +147,6 @@ const CategoryList = ({
         />
       </div>
     </div>
-  )
-}
+)
 
 export default CategoryList

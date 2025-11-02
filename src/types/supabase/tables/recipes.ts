@@ -1,3 +1,6 @@
+import type { 
+
+
 /**
  * Recipes Table Types
  * Re-exported from Supabase generated types
@@ -6,7 +9,6 @@
  * Always use generated types from @/types/supabase-generated
  */
 
-import type { 
   RecipesTable as RecipesTableType,
   RecipesInsert,
   RecipesUpdate,

@@ -8,6 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react'
+import type { RecipesTable, IngredientsTable, Database } from '@/types/database'
+import { uiLogger } from '@/lib/logger'
 import {
     Select,
     SelectContent,
@@ -15,9 +18,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react'
-import type { RecipesTable, IngredientsTable } from '@/types/database'
-import { uiLogger } from '@/lib/logger'
 
 type RecipeInsert = RecipesTable
 type Ingredient = IngredientsTable
@@ -93,12 +93,12 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
             // Load recipe ingredients from the response
             if (recipe.recipe_ingredients && Array.isArray(recipe.recipe_ingredients)) {
                 setRecipeIngredients(
-                    recipe.recipe_ingredients.map((ri: any) => ({
+                    recipe.recipe_ingredients.map((ri: Database['public']['Tables']['recipe_ingredients']['Row']) => ({
                         id: ri.id,
                         ingredient_id: ri.ingredient_id,
                         quantity: ri.quantity,
                         unit: ri.unit,
-                        notes: ri.notes || '',
+                        notes: '',
                     }))
                 )
             }

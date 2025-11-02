@@ -1,10 +1,12 @@
+import { z } from 'zod'
+
+
 /* eslint-disable */
 /**
  * Validation Caching System
  * Performance optimization for validation operations
  */
 
-import { z } from 'zod'
 
 // Cache entry interface
 interface ValidationCacheEntry<T> {
@@ -42,7 +44,7 @@ class ValidationCache {
       // Create a deterministic string representation of the data
       const dataString = JSON.stringify(data, Object.keys(data as any).sort())
       return `${schemaName}:${this.hashString(dataString)}`
-    } catch (_error) {
+    } catch (error) {
       // Fallback for non-serializable data
       return `${schemaName}:${Date.now()}:${Math.random()}`
     }
@@ -78,7 +80,7 @@ class ValidationCache {
     const entry = this.cache.get(key)
 
     if (entry && this.isValid(entry)) {
-      return entry
+      return entry as ValidationCacheEntry<T>
     }
 
     // Remove expired entry

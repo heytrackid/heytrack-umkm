@@ -1,14 +1,16 @@
-/**
- * Error Boundary Component
- * Catches JavaScript errors anywhere in the child component tree
- */
-
 'use client'
 
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { apiLogger } from '@/lib/logger'
+
+/**
+ * Error Boundary Component
+ * Catches JavaScript errors anywhere in the child component tree
+ */
+
+
 
 interface Props {
   children: ReactNode

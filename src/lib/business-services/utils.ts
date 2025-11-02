@@ -1,11 +1,13 @@
+import { InventoryServices } from './inventory'
+import { ProductionServices } from './production'
+import type { ProductionBatch, ReorderSummary } from './types'
+
+
 /**
  * Business Services Convenience Functions
  * Easy-to-use wrapper functions for common business operations
  */
 
-import { InventoryServices } from './inventory'
-import { ProductionServices } from './production'
-import type { ProductionBatch, ReorderSummary } from './types'
 
 /**
  * Check inventory reorder needs (convenience function)
@@ -52,9 +54,10 @@ export async function getProductionCapacity(recipeId: string) {
  * Quick production batch scheduling with validation
  */
 export async function quickScheduleProduction(recipeId: string, quantity: number, scheduledDate?: string) {
-  return productionServices.scheduleProductionBatch({
+  const batchData: Omit<ProductionBatch, 'id' | 'status'> = {
     recipe_id: recipeId,
     quantity,
-    scheduled_date: scheduledDate
-  })
+    scheduled_date: scheduledDate ?? new Date().toISOString()
+  }
+  return productionServices.scheduleProductionBatch(batchData)
 }

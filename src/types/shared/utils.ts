@@ -1,3 +1,5 @@
+
+
 /**
  * Utility Types
  * Provides helper types for common TypeScript patterns

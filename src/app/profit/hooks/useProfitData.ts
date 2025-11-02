@@ -1,13 +1,16 @@
+import { useState, useEffect } from 'react'
+import { apiLogger } from '@/lib/logger'
+import { useToast } from '@/hooks/use-toast'
+import type { ProfitData, ProfitFilters, ExportFormat } from '@/app/profit/components/types'
+
 /**
  * Profit Data Hook
  * Custom hook for managing profit report data fetching and state
  */
 
-import { useState, useEffect } from 'react'
-import { apiLogger } from '@/lib/logger'
-import type { ProfitData, ProfitFilters, ExportFormat } from '@/app/profit/components/types'
 
 export function useProfitData() {
+  const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [profitData, setProfitData] = useState<ProfitData | null>(null)
@@ -104,9 +107,14 @@ export function useProfitData() {
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-    } catch (_err) {
-      apiLogger.error({ error: err }, 'Error exporting report:')
-      alert('Gagal mengekspor laporan')
+    } catch (err: unknown) {
+      const error = err as Error
+      apiLogger.error({ error }, 'Error exporting report:')
+      toast({
+        title: 'Gagal',
+        description: 'Gagal mengekspor laporan',
+        variant: 'destructive',
+      })
     }
   }
 

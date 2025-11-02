@@ -1,12 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import type {
-  ColumnDef,
-  SortingState,
-  VisibilityState
-} from '@tanstack/react-table';
 import {
+  type ColumnDef,
+  type SortingState,
+  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
@@ -14,9 +12,6 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -31,6 +26,9 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
 interface DataTableProps<TData, TValue> {
@@ -95,8 +93,8 @@ export const DataTable = <TData, TValue>({
       <div className="flex items-center justify-between gap-4">
         {showSearch && searchableColumn && (
           <Input
-            placeholder={searchPlaceholder}
-            value={globalFilter ?? ''}
+            placeholder = {searchPlaceholder}
+            value={globalFilter || ''}
             onChange={(event) => setGlobalFilter(event.target.value)}
             className="max-w-sm"
           />

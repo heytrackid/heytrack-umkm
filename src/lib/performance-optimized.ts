@@ -1,11 +1,12 @@
+import { useCallback, useEffect, useMemo, useRef, useState, type DependencyList } from 'react'
+import { createLogger } from '@/lib/logger'
+
+
 /**
  * Advanced Performance Optimization Utilities
  * Extends base performance.ts with more advanced features
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { DependencyList, UIEvent as ReactUIEvent } from 'react'
-import { createLogger } from '@/lib/logger'
 
 const perfLogger = createLogger('PerformanceOptimized')
 
@@ -94,7 +95,7 @@ export function useVirtualScroll<T>(
   const totalHeight = items.length * itemHeight
   const offsetY = visibleRange.startIndex * itemHeight
 
-  const handleScroll = useCallback((e: ReactUIEvent<HTMLDivElement>) => {
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     void setScrollTop(e.currentTarget.scrollTop)
   }, [])
 
@@ -325,7 +326,9 @@ export function createMemoizedFunction<T extends (...args: Parameters<T>) => Ret
     // Limit cache size
     if (cache.size >= maxCacheSize) {
       const firstKey = cache.keys().next().value
-      cache.delete(firstKey)
+      if (typeof firstKey === 'string') {
+        cache.delete(firstKey)
+      }
     }
 
     cache.set(key, result)

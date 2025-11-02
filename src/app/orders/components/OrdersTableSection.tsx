@@ -1,22 +1,14 @@
-import { memo, useMemo, useState } from 'react'
+'use client'
+
+import { memo, useMemo, useState, useEffect } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, Eye, Edit, Trash2, MoreVertical } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import type { OrdersTable } from '@/types/database'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 
-type Order = OrdersTable
-
-// Extended type for table display
-interface OrderForTable extends Order {
-  // All fields are already in Order type
-}
+type OrderForTable = OrdersTable
 
 const OrdersTableSection = ({
   orders,
@@ -58,8 +50,8 @@ const OrdersTableSection = ({
   }, [orders, currentPage, pageSize])
 
   // Reset to page 1 when orders change
-  useMemo(() => {
-    void setCurrentPage(1)
+  useEffect(() => {
+    setCurrentPage(1)
   }, [orders.length])
 
   return (
@@ -83,7 +75,7 @@ const OrdersTableSection = ({
               <TableCell className="font-medium">{order.order_no}</TableCell>
               <TableCell>
                 <div className="flex flex-col">
-                  <span className="font-medium">{order.customer_name ?? '-'}</span>
+                  <span className="font-medium">{order.customer_name || '-'}</span>
                   {order.customer_phone && (
                     <span className="text-xs text-muted-foreground">{order.customer_phone}</span>
                   )}
@@ -102,7 +94,7 @@ const OrdersTableSection = ({
                 </span>
               </TableCell>
               <TableCell className="text-right font-medium">
-                {formatCurrency(order.total_amount ?? 0)}
+                {formatCurrency(order.total_amount || 0)}
               </TableCell>
               <TableCell className="text-center">
                 <DropdownMenu>

@@ -1,9 +1,10 @@
+import { z } from 'zod'
+
 /**
  * Authentication Error Handling Utilities
  * Provides user-friendly error messages and validation for auth operations
  */
 
-import { z } from 'zod'
 
 // ============================================================================
 // AUTH ERROR MESSAGES
@@ -84,7 +85,7 @@ export function validateEmail(email: string): {
   try {
     EmailSchema.parse(email)
     return { isValid: true }
-  } catch (_error) {
+  } catch (error) {
     if (error instanceof z.ZodError) {
       return {
         isValid: false,

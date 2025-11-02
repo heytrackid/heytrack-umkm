@@ -1,8 +1,10 @@
-// Server-only security utilities with DOMPurify
 import 'server-only'
-
 import DOMPurify from 'dompurify'
 import { JSDOM } from 'jsdom'
+
+
+// Server-only security utilities with DOMPurify
+
 
 // Create DOMPurify instance for server-side use  
 const {window} = new JSDOM('')

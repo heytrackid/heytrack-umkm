@@ -1,19 +1,8 @@
-/**
- * Order Workflow Handlers
- * Workflow automation handlers for order-related events
- */
-
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-// import { triggerWorkflow } from '@/lib/automation/workflows' TODO: benerin ini
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type {
 
-// Temporary stub for triggerWorkflow
-const triggerWorkflow = async (_workflow: string, _context: unknown) => {
-  automationLogger.warn('triggerWorkflow stub called')
-}
-
-import type { 
   Database,
   CustomersTable,
   OrdersTable,
@@ -26,22 +15,18 @@ import type {
   IngredientsUpdate,
   CustomersUpdate
 } from '@/types/database'
+import type { WorkflowContext, WorkflowResult } from '@/types/features/automation'
 
-// Workflow types
-export interface WorkflowResult {
-  success: boolean
-  message: string
-  data?: unknown
-  error?: string
-}
+/**
+ * Order Workflow Handlers
+ * Workflow automation handlers for order-related events
+ */
 
-export interface WorkflowContext {
-  event: {
-    entityId: string
-    data?: unknown
-  }
-  logger: typeof automationLogger
-  supabase?: SupabaseClient<Database>
+// import { triggerWorkflow } from '@/lib/automation/workflows' TODO: benerin ini
+
+// Temporary stub for triggerWorkflow
+const triggerWorkflow = async (_workflow: string, _context: unknown) => {
+  automationLogger.warn('triggerWorkflow stub called')
 }
 
 type CustomerRow = CustomersTable
@@ -79,8 +64,7 @@ export class OrderWorkflowHandlers {
    * Handle order completed event
    */
   static async handleOrderCompleted(context: WorkflowContext): Promise<WorkflowResult> {
-    const { event, logger } = context
-    const {supabase} = context
+    const { event, logger, supabase } = context
     const orderId = event.entityId
 
     logger.info({ orderId }, 'Processing order completed workflow')
@@ -162,8 +146,7 @@ export class OrderWorkflowHandlers {
    * Handle order cancelled event
    */
   static async handleOrderCancelled(context: WorkflowContext): Promise<WorkflowResult> {
-    const { event, logger } = context
-    const {supabase} = context
+    const { event, logger, supabase } = context
 
     logger.info({ orderId: event.entityId }, 'Processing order cancelled workflow')
 
@@ -249,28 +232,28 @@ export class OrderWorkflowHandlers {
    */
   private static async updateInventoryFromOrder(order: OrderWithRelations, supabase: SupabaseClient<Database>): Promise<void> {
     automationLogger.debug('Updating inventory from order items')
-    const transactionUserId = order.user_id ?? 'automation-system'
+    const transactionUserId = order.user_id || 'automation-system'
 
     for (const orderItem of order.order_items || []) {
       const {recipe} = orderItem
 
-      if (!recipe || !recipe.recipe_ingredients) {continue}
+      if (!recipe?.recipe_ingredients) {continue}
 
       for (const recipeIngredient of recipe.recipe_ingredients || []) {
         const {ingredient} = recipeIngredient
 
         if (!ingredient) {continue}
 
-        const usedQuantity = Number(recipeIngredient.quantity ?? 0) * Number(orderItem.quantity ?? 0)
+        const usedQuantity = Number(recipeIngredient.quantity || 0) * Number(orderItem.quantity || 0)
 
         // ✅ FIX: Only create stock transaction - trigger will auto-update current_stock
         const stockTransaction: StockTransactionInsert = {
           ingredient_id: ingredient.id,
           quantity: usedQuantity, // Positive value, trigger handles the deduction
           reference: `ORDER-${order.order_no}`,
-          total_price: usedQuantity * Number(ingredient.price_per_unit ?? 0),
+          total_price: usedQuantity * Number(ingredient.price_per_unit || 0),
           type: 'USAGE',
-          unit_price: ingredient.price_per_unit ?? null,
+          unit_price: ingredient.price_per_unit || null,
           user_id: transactionUserId,
           notes: `Used for order ${order.order_no} - ${ingredient.name}`
         }
@@ -290,17 +273,17 @@ export class OrderWorkflowHandlers {
         }, 'Stock transaction created, trigger will update stock')
 
         // Calculate new stock for alerts
-        const currentStock = Number(ingredient.current_stock ?? 0)
+        const currentStock = Number(ingredient.current_stock || 0)
         const newStock = currentStock - usedQuantity
         
         // Check for low stock alerts
-        const minStock = Number(ingredient.min_stock ?? 0)
+        const minStock = Number(ingredient.min_stock || 0)
         if (newStock <= minStock && newStock > 0) {
           await triggerWorkflow('inventory.low_stock', {
             ingredient: {
               id: ingredient.id,
               name: ingredient.name,
-              unit: ingredient.unit ?? '',
+              unit: ingredient.unit || '',
               min_stock: minStock
             },
             currentStock: newStock,
@@ -313,7 +296,7 @@ export class OrderWorkflowHandlers {
             ingredient: {
               id: ingredient.id,
               name: ingredient.name,
-              unit: ingredient.unit ?? ''
+              unit: ingredient.unit || ''
             },
             previousStock: currentStock
           })
@@ -328,27 +311,27 @@ export class OrderWorkflowHandlers {
    */
   private static async restoreInventoryFromCancelledOrder(order: OrderWithRelations, supabase: SupabaseClient<Database>): Promise<void> {
     automationLogger.debug('Restoring inventory from cancelled order')
-    const transactionUserId = order.user_id ?? 'automation-system'
+    const transactionUserId = order.user_id || 'automation-system'
 
     for (const orderItem of order.order_items || []) {
       const {recipe} = orderItem
 
-      if (!recipe || !recipe.recipe_ingredients) {continue}
+      if (!recipe?.recipe_ingredients) {continue}
 
       for (const recipeIngredient of recipe.recipe_ingredients || []) {
         const {ingredient} = recipeIngredient
         if (!ingredient) {continue}
 
-        const restoredQuantity = Number(recipeIngredient.quantity ?? 0) * Number(orderItem.quantity ?? 0)
+        const restoredQuantity = Number(recipeIngredient.quantity || 0) * Number(orderItem.quantity || 0)
 
         // ✅ FIX: Only create stock transaction - trigger will auto-update current_stock
         const stockTransaction: StockTransactionInsert = {
           ingredient_id: ingredient.id,
           quantity: restoredQuantity, // Positive ADJUSTMENT increases stock
           reference: `ORDER-CANCEL-${order.order_no}`,
-          total_price: restoredQuantity * Number(ingredient.price_per_unit ?? 0),
+          total_price: restoredQuantity * Number(ingredient.price_per_unit || 0),
           type: 'ADJUSTMENT',
-          unit_price: ingredient.price_per_unit ?? null,
+          unit_price: ingredient.price_per_unit || null,
           user_id: transactionUserId,
           notes: `Restored from cancelled order ${order.order_no} - ${ingredient.name}`
         }
@@ -379,7 +362,7 @@ export class OrderWorkflowHandlers {
     const financialRecord = {
       type: 'INCOME',
       category: 'Penjualan',
-      amount: order.total_amount ?? 0,
+      amount: order.total_amount || 0,
       description: `Penjualan - Order ${order.order_no}`,
       reference: `ORDER-${order.order_no}`,
       date: new Date().toISOString().split('T')[0],

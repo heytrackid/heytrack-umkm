@@ -1,13 +1,18 @@
+'use client'
+
+
+import { Card, CardContent } from '@/components/ui/card'
+import { useCurrency } from '@/hooks/useCurrency'
+import { BarChart3, Clock, DollarSign, ShoppingCart } from 'lucide-react'
+
+
+
 /**
  * Stats Cards Component
  * Displays order statistics overview
  */
 
-'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { useCurrency } from '@/hooks/useCurrency'
-import { BarChart3, Clock, DollarSign, ShoppingCart } from 'lucide-react'
 
 interface OrderStats {
     total_orders: number

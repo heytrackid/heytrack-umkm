@@ -1,3 +1,5 @@
+
+
 /**
  * Shared Date and Time Utilities
  * Consistent date formatting and manipulation across the application
@@ -247,18 +249,21 @@ export function getDateRangeForPeriod(
       end = endOfDay(now)
       break
     case 'yesterday':
-      const yesterday = addDays(now, -1)
-      start = startOfDay(yesterday)
-      end = endOfDay(yesterday)
-      break
-    case 'thisWeek':
+      {
+        const yesterday = addDays(now, -1)
+        start = startOfDay(yesterday)
+        end = endOfDay(yesterday)
+        break
+      }
+    case 'thisWeek': {
       start = new Date(now.setDate(now.getDate() - now.getDay()))
       start.setHours(0, 0, 0, 0)
       end = new Date(start)
       end.setDate(start.getDate() + 6)
       end.setHours(23, 59, 59, 999)
       break
-    case 'lastWeek':
+    }
+    case 'lastWeek': {
       const lastWeekStart = new Date(now.setDate(now.getDate() - now.getDay() - 7))
       start = new Date(lastWeekStart)
       start.setHours(0, 0, 0, 0)
@@ -266,23 +271,27 @@ export function getDateRangeForPeriod(
       end.setDate(lastWeekStart.getDate() + 6)
       end.setHours(23, 59, 59, 999)
       break
+    }
     case 'thisMonth':
       start = startOfMonth(now)
       end = endOfMonth(now)
       break
-    case 'lastMonth':
+    case 'lastMonth': {
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1)
       start = startOfMonth(lastMonth)
       end = endOfMonth(lastMonth)
       break
+    }
     case 'thisYear':
       start = new Date(now.getFullYear(), 0, 1)
       end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999)
       break
-    case 'lastYear':
-      start = new Date(now.getFullYear() - 1, 0, 1)
-      end = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999)
+    case 'lastYear': {
+      const lastYear = new Date(now.getFullYear() - 1, 0, 1)
+      start = new Date(lastYear)
+      end = new Date(lastYear.getFullYear(), 11, 31, 23, 59, 59, 999)
       break
+    }
     default:
       throw new Error(`Unknown period: ${period}`)
   }

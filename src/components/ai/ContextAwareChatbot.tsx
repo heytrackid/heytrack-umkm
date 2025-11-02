@@ -1,29 +1,15 @@
 'use client'
-
-/**
- * Context-Aware AI Chatbot Component - Enhanced UI/UX
- */
-
 import { useState, useRef, useEffect, type FormEvent } from 'react'
 import { useContextAwareChat } from '@/hooks/useContextAwareChat'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-  MessageCircle,
-  Send,
-  Loader2,
-  Plus,
-  History,
-  Sparkles,
-  AlertCircle,
-  Bot,
-  User,
-  X,
-  Minimize2,
-  Maximize2
-} from 'lucide-react'
+import { MessageCircle, Send, Loader2, Plus, History, Sparkles, AlertCircle, Bot, User, X, Minimize2, Maximize2 } from 'lucide-react'
+
+/** 
+ * Context-Aware AI Chatbot Component - Enhanced UI/UX 
+ */
 
 export const ContextAwareChatbot = () => {
   const {

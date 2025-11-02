@@ -3,14 +3,15 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, Package } from 'lucide-react'
-
 import { apiLogger } from '@/lib/logger'
+
+
+
 interface OrdersQuickActionsProps {
   _t?: unknown
 }
 
-const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
-  return (
+const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => (
     <Card>
       <CardContent className="p-4">
         <div className="flex flex-wrap gap-2">
@@ -36,6 +37,5 @@ const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
       </CardContent>
     </Card>
   )
-}
 
 export default OrdersQuickActions

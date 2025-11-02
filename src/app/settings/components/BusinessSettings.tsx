@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label'
 import { DollarSign } from 'lucide-react'
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 
+
+
 interface BusinessSettingsProps {
   settings: AppSettingsState
   onSettingChange: SettingsUpdateHandler

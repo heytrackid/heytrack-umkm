@@ -1,9 +1,5 @@
-/**
- * Shared Page Breadcrumb Component
- * Standardized breadcrumb navigation for pages
- */
-
 import { Fragment } from 'react'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -12,7 +8,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
+
+/**
+ * Shared Page Breadcrumb Component
+ * Standardized breadcrumb navigation for pages
+ */
 
 export interface BreadcrumbItem {
   label: string

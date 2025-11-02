@@ -1,7 +1,9 @@
 'use client'
-import { useCallback } from 'react'
 
+import { useCallback } from 'react'
 import { useRoutePreloading } from './useRoutePreloading'
+
+
 
 /**
  * Link hover preloading hook

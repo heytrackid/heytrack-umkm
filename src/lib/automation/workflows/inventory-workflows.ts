@@ -1,18 +1,19 @@
+import { automationLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
+import type { Database, NotificationsInsert } from '@/types/database'
+import type { Json } from '@/types/supabase-generated'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type {
+
+  WorkflowEventData,
+  WorkflowResult,
+  WorkflowContext
+} from '@/types/features/automation'
+
 /**
  * Inventory Workflow Handlers
  * Workflow automation handlers for inventory-related events
  */
-
-import { automationLogger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/type-guards'
-import {
-  type WorkflowEventData,
-  type WorkflowResult,
-  type WorkflowContext
-} from '@/lib/automation/types'
-import type { Database } from '@/types/database'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { NotificationsTable } from '@/types/features/notifications'
 
 export class InventoryWorkflowHandlers {
   /**
@@ -210,7 +211,11 @@ export class InventoryWorkflowHandlers {
     }
   ): Promise<void> {
     try {
-      const notification: NotificationsTable['Insert'] = {
+      const metadata = notificationData.metadata
+        ? JSON.parse(JSON.stringify(notificationData.metadata)) as Json
+        : undefined
+
+      const notification: NotificationsInsert = {
         type: notificationData.type,
         category: notificationData.category,
         title: notificationData.title,
@@ -219,7 +224,7 @@ export class InventoryWorkflowHandlers {
         entity_id: notificationData.entity_id,
         entity_type: notificationData.entity_type,
         action_url: notificationData.action_url,
-        metadata: notificationData.metadata,
+        metadata,
         is_read: false,
         is_dismissed: false,
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days from now

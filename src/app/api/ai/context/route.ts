@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       cached: false, // TODO: Implement cache detection
       expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
     });
-  } catch (_error) {
+  } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error(`Failed to load context: ${errorMessage}`);
     return NextResponse.json(
@@ -62,7 +62,7 @@ export async function DELETE() {
     await BusinessContextService.invalidateCache(user.id);
 
     return NextResponse.json({ success: true });
-  } catch (_error) {
+  } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error(`Failed to invalidate context: ${errorMessage}`);
     return NextResponse.json(

@@ -1,6 +1,7 @@
 import type { ComponentProps, HTMLAttributes } from 'react'
 import { cn } from "@/lib/utils"
 
+
 interface SkeletonProps {
   className?: string
 }

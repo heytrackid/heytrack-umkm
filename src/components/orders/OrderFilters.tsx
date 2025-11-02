@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useResponsive } from '@/hooks/useResponsive'
+
 import { Search, X } from 'lucide-react'
 import type { OrderFilters as OrderFiltersType } from './types'
+
+
 
 interface OrderFiltersProps {
   filters: OrderFiltersType
@@ -14,12 +16,12 @@ interface OrderFiltersProps {
   onReset: () => void
 }
 
-export default function OrderFilters({
+const OrderFilters = ({
   filters,
   onFiltersChange,
   onReset
-}: OrderFiltersProps) {
-  const { isMobile } = useResponsive()
+}: OrderFiltersProps) => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const handleFilterChange = (key: keyof OrderFiltersType, value: string) => {
     onFiltersChange({ ...filters, [key]: value })
@@ -180,3 +182,5 @@ export default function OrderFilters({
     </Card>
   )
 }
+
+export default OrderFilters

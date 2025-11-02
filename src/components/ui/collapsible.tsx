@@ -1,7 +1,9 @@
-"use client"
+'use client';
 
 import type { ComponentProps } from 'react'
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
+
+
 
 const Collapsible = ({
   ...props

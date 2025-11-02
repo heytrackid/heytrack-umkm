@@ -9,8 +9,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { getNonce } from '@/lib/nonce';
-// import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
 import "./globals.css";
+
+// import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,11 +28,11 @@ export const metadata: Metadata = {
   description: "Comprehensive culinary business management system with AI Assistant, COGS calculation, inventory management, orders tracking, and financial analytics for Indonesian SMEs",
 };
 
-export default async function RootLayout({
+const RootLayout = async ({
   children,
 }: Readonly<{
   children: ReactNode;
-}>) {
+}>) => {
   // Get CSP nonce for this request
   const nonce = await getNonce()
 
@@ -92,3 +93,5 @@ export default async function RootLayout({
     </html>
   );
 }
+
+export default RootLayout

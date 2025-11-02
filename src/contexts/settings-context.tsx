@@ -3,6 +3,8 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { uiLogger } from '@/lib/logger'
 
+
+
 export interface Currency {
   code: string
   symbol: string
@@ -110,7 +112,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
   const formatCurrency = (amount: number | null | undefined): string => {
     const { symbol, decimals } = settings.currency
-    const validAmount = amount ?? 0
+    const validAmount = amount || 0
     const formattedAmount = validAmount.toLocaleString('en-US', {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals

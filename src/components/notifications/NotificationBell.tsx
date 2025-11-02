@@ -3,11 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
 import { NotificationList } from './NotificationList'
 import { createClient } from '@/utils/supabase/client'
@@ -15,6 +10,11 @@ import type { Notification } from '@/types/domain/notifications'
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
 import { playNotificationSound, playUrgentNotificationSound, setSoundEnabled, setSoundVolume } from '@/lib/notifications/sound'
 import { apiLogger } from '@/lib/logger'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
 
 export const NotificationBell = () => {
     const [notifications, setNotifications] = useState<Notification[]>([])
@@ -93,7 +93,7 @@ export const NotificationBell = () => {
     }, [fetchPreferences])
 
     useEffect(() => {
-        if (!preferences) {return}
+        if (!preferences) { return }
 
         fetchNotifications()
 

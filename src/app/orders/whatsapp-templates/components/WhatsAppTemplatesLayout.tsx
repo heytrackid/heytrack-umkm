@@ -1,32 +1,23 @@
-// WhatsApp Templates Layout - Main Page
-// Main layout component for WhatsApp template management
-
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import AppLayout from '@/components/layout/app-layout'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Button } from '@/components/ui/button'
-import {
-    Breadcrumb,
-    BreadcrumbList,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbSeparator,
-    BreadcrumbPage
-} from '@/components/ui/breadcrumb'
 import { MessageCircle, Plus } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { uiLogger } from '@/lib/client-logger'
-
 import { type WhatsAppTemplate } from './types'
 import TemplatesTable from './TemplatesTable'
 import TemplateForm from './TemplateForm'
 import TemplatePreview from './TemplatePreview'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
 
-export default function WhatsAppTemplatesPage() {
+
+const WhatsAppTemplatesPage = () => {
     const [templates, setTemplates] = useState<WhatsAppTemplate[]>([])
     const [loading, setLoading] = useState(true)
     const [showDialog, setShowDialog] = useState(false)
@@ -34,6 +25,8 @@ export default function WhatsAppTemplatesPage() {
     const [previewTemplate, setPreviewTemplate] = useState<WhatsAppTemplate | null>(null)
     const [showPreview, setShowPreview] = useState(false)
     const [generatingDefaults, setGeneratingDefaults] = useState(false)
+    const [templateToDelete, setTemplateToDelete] = useState<WhatsAppTemplate | null>(null)
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
     const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
     const { toast } = useToast()
@@ -51,17 +44,13 @@ export default function WhatsAppTemplatesPage() {
         }
     }, [isAuthLoading, isAuthenticated, router, toast])
 
-    useEffect(() => {
-        void fetchTemplates()
-    }, [])
-
-    const fetchTemplates = async () => {
+    const fetchTemplates = useCallback(async () => {
         try {
-            void setLoading(true)
+            setLoading(true)
             const response = await fetch('/api/whatsapp-templates')
             if (response.ok) {
-                const data = await response.json()
-                void setTemplates(data)
+                const data: WhatsAppTemplate[] = await response.json()
+                setTemplates(data)
             } else {
                 toast({
                     title: 'Error',
@@ -69,30 +58,39 @@ export default function WhatsAppTemplatesPage() {
                     variant: 'destructive',
                 })
             }
-        } catch (_error) {
-            uiLogger.error('Error fetching WhatsApp templates', error)
+        } catch (error: unknown) {
+            uiLogger.error({ error: String(error) }, 'Error fetching WhatsApp templates')
             toast({
                 title: 'Error',
                 description: 'Terjadi kesalahan saat memuat template',
                 variant: 'destructive',
             })
         } finally {
-            void setLoading(false)
+            setLoading(false)
         }
-    }
+    }, [toast])
+
+    useEffect(() => {
+        void fetchTemplates()
+    }, [fetchTemplates])
 
     const handleEdit = (template: WhatsAppTemplate) => {
-        void setEditingTemplate(template)
-        void setShowDialog(true)
+        setEditingTemplate(template)
+        setShowDialog(true)
     }
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Apakah Anda yakin ingin menghapus template ini?')) {
+    const handleDeleteRequest = (template: WhatsAppTemplate) => {
+        setTemplateToDelete(template)
+        setIsConfirmOpen(true)
+    }
+
+    const handleDelete = useCallback(async () => {
+        if (!templateToDelete) {
             return
         }
 
         try {
-            const response = await fetch(`/api/whatsapp-templates/${id}`, {
+            const response = await fetch(`/api/whatsapp-templates/${templateToDelete.id}`, {
                 method: 'DELETE'
             })
 
@@ -109,15 +107,18 @@ export default function WhatsAppTemplatesPage() {
                     variant: 'destructive',
                 })
             }
-        } catch (_error) {
-            uiLogger.error('Error deleting WhatsApp template', error, { templateId: id })
+        } catch (error: unknown) {
+            uiLogger.error({ error: String(error), template: templateToDelete }, 'Error deleting WhatsApp template')
             toast({
                 title: 'Error',
                 description: 'Terjadi kesalahan saat menghapus template',
                 variant: 'destructive',
             })
+        } finally {
+            setTemplateToDelete(null)
+            setIsConfirmOpen(false)
         }
-    }
+    }, [fetchTemplates, templateToDelete, toast])
 
     const handleToggleDefault = async (template: WhatsAppTemplate) => {
         try {
@@ -143,8 +144,8 @@ export default function WhatsAppTemplatesPage() {
                     variant: 'destructive',
                 })
             }
-        } catch (_error) {
-            uiLogger.error('Error updating WhatsApp template', error, { template })
+        } catch (error: unknown) {
+            uiLogger.error({ error: String(error), template }, 'Error updating WhatsApp template')
             toast({
                 title: 'Error',
                 description: 'Terjadi kesalahan saat mengupdate template',
@@ -154,18 +155,18 @@ export default function WhatsAppTemplatesPage() {
     }
 
     const handlePreview = (template: WhatsAppTemplate) => {
-        void setPreviewTemplate(template)
-        void setShowPreview(true)
+        setPreviewTemplate(template)
+        setShowPreview(true)
     }
 
     const handleDuplicate = (template: WhatsAppTemplate) => {
-        void setEditingTemplate({
+        setEditingTemplate({
             ...template,
             id: '', // Clear ID for new template
             name: `${template.name} (Copy)`,
             is_default: false
         } as WhatsAppTemplate)
-        void setShowDialog(true)
+        setShowDialog(true)
     }
 
     const handleSuccess = async () => {
@@ -174,12 +175,12 @@ export default function WhatsAppTemplatesPage() {
             description: editingTemplate?.id ? 'Template berhasil diupdate' : 'Template berhasil dibuat',
         })
         await fetchTemplates()
-        void setEditingTemplate(null)
+        setEditingTemplate(null)
     }
 
     const handleGenerateDefaults = async () => {
         try {
-            void setGeneratingDefaults(true)
+            setGeneratingDefaults(true)
             const response = await fetch('/api/whatsapp-templates/generate-defaults', {
                 method: 'POST'
             })
@@ -192,22 +193,22 @@ export default function WhatsAppTemplatesPage() {
                 })
                 await fetchTemplates()
             } else {
-                const error = await response.json()
+                const errorBody: { message?: string } = await response.json()
                 toast({
                     title: 'Gagal membuat template',
-                    description: error.message || 'Terjadi kesalahan',
+                    description: errorBody.message || 'Terjadi kesalahan',
                     variant: 'destructive',
                 })
             }
-        } catch (_error) {
-            uiLogger.error('Error generating default templates', error)
+        } catch (error: unknown) {
+            uiLogger.error({ error: String(error) }, 'Error generating default templates')
             toast({
                 title: 'Error',
                 description: 'Terjadi kesalahan saat membuat template default',
                 variant: 'destructive',
             })
         } finally {
-            void setGeneratingDefaults(false)
+            setGeneratingDefaults(false)
         }
     }
 
@@ -361,7 +362,7 @@ export default function WhatsAppTemplatesPage() {
                     templates={templates}
                     loading={loading}
                     onEdit={handleEdit}
-                    onDelete={handleDelete}
+                    onDelete={handleDeleteRequest}
                     onToggleDefault={handleToggleDefault}
                     onPreview={handlePreview}
                     onDuplicate={handleDuplicate}
@@ -381,7 +382,25 @@ export default function WhatsAppTemplatesPage() {
                     onOpenChange={setShowPreview}
                     template={previewTemplate}
                 />
+
+                <ConfirmDialog
+                    open={isConfirmOpen}
+                    onOpenChange={(open) => {
+                        setIsConfirmOpen(open)
+                        if (!open) {
+                            setTemplateToDelete(null)
+                        }
+                    }}
+                    title="Hapus template WhatsApp?"
+                    description={`Template "${templateToDelete?.name || 'ini'}" akan dihapus secara permanen.`}
+                    confirmText="Hapus"
+                    cancelText="Batal"
+                    variant="destructive"
+                    onConfirm={handleDelete}
+                />
             </div>
         </AppLayout>
     )
 }
+
+export default WhatsAppTemplatesPage

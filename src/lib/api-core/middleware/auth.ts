@@ -1,10 +1,11 @@
+import type { NextRequest, NextResponse } from 'next/server'
+import { createErrorResponse } from '@/lib/api-core/responses'
+
 /**
  * Authentication Middleware Module
  * User authentication and authorization
  */
 
-import type { NextRequest, NextResponse } from 'next/server'
-import { createErrorResponse } from '@/lib/api-core/responses'
 
 /**
  * Create authentication middleware

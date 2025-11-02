@@ -1,23 +1,25 @@
-/**
- * Consolidated Supabase Client Utilities
- * Single source for all Supabase client operations and utilities
- */
-
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
 import { apiLogger } from '@/lib/logger'
 
+
+/**
+ * Consolidated Supabase Client Utilities
+ * Single source for all Supabase client operations and utilities
+ */
+
+
 // ============================================================================
 // TYPE UTILITIES
 // ============================================================================
 
-import type { Tables, TablesInsert, TablesUpdate } from '@/types/database'
-
-type TableName = keyof Database['public']['Tables']
-type TableRow<T extends TableName> = Tables<T>
-type TableInsert<T extends TableName> = TablesInsert<T>
-type TableUpdate<T extends TableName> = TablesUpdate<T>
+// Import types from database
+type Tables = Database['public']['Tables']
+type TableName = keyof Tables
+type TableRow<T extends TableName> = Tables[T]['Row']
+type TableInsert<T extends TableName> = Tables[T]['Insert']
+type TableUpdate<T extends TableName> = Tables[T]['Update']
 
 // Query Result Types
 export interface QueryResult<T> {
@@ -44,7 +46,7 @@ export async function typedInsert<T extends TableName>(
 ) {
   const result = await supabase
     .from(table)
-    .insert(data)
+    .insert(data as never)
     .select()
 
   // Log error if there's one, but don't crash the function
@@ -74,8 +76,8 @@ export async function typedUpdate<T extends TableName>(
 ) {
   const result = await supabase
     .from(table)
-    .update(data)
-    .eq('id', id)
+    .update(data as never)
+    .eq('id', id as never)
     .select()
 
   // Log error if there's one, but don't crash the function
@@ -106,7 +108,7 @@ export async function typedDelete<T extends TableName>(
   const result = await supabase
     .from(table)
     .delete()
-    .eq('id', id)
+    .eq('id', id as never)
     .select()
 
   // Log error if there's one, but don't crash the function
@@ -147,9 +149,9 @@ export async function typedSelect<T extends TableName>(
       if (value === undefined) {return}
       const column = key
       if (value === null) {
-        queryBuilder = queryBuilder.is(column, null)
+        queryBuilder = queryBuilder.is(column as never, null)
       } else {
-        queryBuilder = queryBuilder.eq(column, value)
+        queryBuilder = queryBuilder.eq(column as never, value as never)
       }
     })
   }
@@ -157,7 +159,7 @@ export async function typedSelect<T extends TableName>(
   // Apply ordering
   if (query?.orderBy) {
     queryBuilder = queryBuilder.order(query.orderBy.column, {
-      ascending: query.orderBy.ascending ?? true
+      ascending: query.orderBy.ascending || true
     })
   }
 
@@ -214,7 +216,7 @@ export async function isAuthenticated() {
     const supabase = getSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
     return !!user
-  } catch (_error) {
+  } catch (error) {
     return false
   }
 }
@@ -242,7 +244,7 @@ export async function signOut() {
     const { error } = await supabase.auth.signOut()
     if (error) {throw error}
     return { success: true }
-  } catch (_error) {
+  } catch (error) {
     return { success: false, error }
   }
 }

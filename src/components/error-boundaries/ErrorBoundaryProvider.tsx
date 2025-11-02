@@ -1,11 +1,11 @@
+import type { ReactNode } from 'react';
+import EnhancedErrorBoundary from '@/components/error-boundaries/EnhancedErrorBoundary';
+
 /**
  * Error Boundary Provider Component
  * Wraps the application to catch and handle UI errors gracefully
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
-import EnhancedErrorBoundary from '@/components/error-boundaries/EnhancedErrorBoundary';
 
 interface ErrorBoundaryProviderProps {
   children: ReactNode;

@@ -1,9 +1,8 @@
-// @ts-nocheck
-// Business Context Service - Aggregates business data for AI context
-
 import { createClient } from '@/utils/supabase/server'
-import type { Database } from '@/types/database'
+import { logger } from '@/lib/logger'
+import type { Json } from '@/types/supabase-generated'
 import type {
+
   BusinessContext,
   RecipeSummary,
   IngredientSummary,
@@ -13,7 +12,8 @@ import type {
   QuickStat,
   BusinessInsight,
 } from '@/types/features/chat'
-import { logger } from '@/lib/logger';
+
+// Business Context Service - Aggregates business data for AI context
 
 const CONTEXT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -146,7 +146,13 @@ export class BusinessContextService {
       .order('created_at', { ascending: false })
       .limit(10);
 
-    return data || [];
+    return (data || []).map(order => ({
+      id: order.id,
+      customer_name: order.customer_name ?? 'Unknown customer',
+      total_amount: order.total_amount ?? 0,
+      status: order.status ?? 'UNKNOWN',
+      created_at: order.created_at ?? new Date().toISOString()
+    }));
   }
 
   /**
@@ -267,10 +273,12 @@ export class BusinessContextService {
 
     const expiresAt = new Date(Date.now() + CONTEXT_CACHE_TTL);
 
+    const serializableContext = JSON.parse(JSON.stringify(context)) as Json
+
     await supabase.from('chat_context_cache').upsert({
       user_id: userId,
       context_type: 'full_context',
-      data: context,
+      data: serializableContext,
       expires_at: expiresAt.toISOString(),
     });
   }
@@ -370,16 +378,16 @@ export class BusinessContextService {
   }
 
   private static async loadInsights(
-    supabase: Awaited<ReturnType<typeof createClient>>,
-    userId: string
+    _supabase: Awaited<ReturnType<typeof createClient>>,
+    _userId: string
   ): Promise<BusinessInsight[]> {
     // Return empty array for now - business_insights table may not exist yet
     return []
   }
 
   private static async loadQuickStats(
-    supabase: Awaited<ReturnType<typeof createClient>>,
-    userId: string
+    _supabase: Awaited<ReturnType<typeof createClient>>,
+    _userId: string
   ): Promise<QuickStat[]> {
     // Return empty array for now - business_quick_stats table may not exist yet
     return []

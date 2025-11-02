@@ -1,10 +1,3 @@
-/**
- * Items Section Component
- * Handles order items management
- */
-
-'use client'
-
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,6 +5,14 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
 import type { OrderItemWithRecipe } from '@/app/orders/types/orders-db.types'
 import type { RecipesTable } from '@/types/database'
+
+'use client'
+
+
+/**
+ * Items Section Component
+ * Handles order items management
+ */
 
 interface ItemsSectionProps {
     orderItems: OrderItemWithRecipe[]
@@ -53,7 +54,7 @@ export const ItemsSection = ({
                     size="sm"
                     onClick={() => {
                         onAddItem()
-                        if (fieldErrors['items']) {onClearError('items')}
+                        if (fieldErrors['items']) { onClearError('items') }
                     }}
                     className="w-full sm:w-auto"
                 >
@@ -76,13 +77,78 @@ export const ItemsSection = ({
                 </div>
             ) : (
                 <div className="space-y-3">
-                    {orderItems.map((item, index: number) => (
-                        <div key={item.id || index} className="border rounded-lg overflow-hidden">
-                            {/* Mobile View */}
-                            <div className="block sm:hidden">
-                                <div className="p-3 space-y-3">
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex-1">
+                    {orderItems.map((item, index: number) => {
+                        const itemKey = item.id || `${item.recipe_id || 'recipe'}-${item.product_name || 'product'}-${item.total_price || '0'}-${item.special_requests || 'none'}`
+                        return (
+                            <div key={itemKey} className="border rounded-lg overflow-hidden">
+                                {/* Mobile View */}
+                                <div className="block sm:hidden">
+                                    <div className="p-3 space-y-3">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <Label className="text-xs font-medium text-muted-foreground">Produk</Label>
+                                                <select
+                                                    className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
+                                                    value={item.recipe_id}
+                                                    onChange={(e) => onUpdateItem(index, 'recipe_id', e.target.value)}
+                                                >
+                                                    {availableRecipes.map(recipe => (
+                                                        <option key={recipe.id} value={recipe.id}>
+                                                            {recipe.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-muted-foreground hover:text-destructive ml-2 mt-4"
+                                                onClick={() => onRemoveItem(index)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <Label className="text-xs font-medium text-muted-foreground">Jumlah</Label>
+                                                <Input
+                                                    type="number"
+                                                    className="text-sm mt-1"
+                                                    value={item.quantity}
+                                                    onChange={(e) => onUpdateItem(index, 'quantity', e.target.value)}
+                                                    min="1"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs font-medium text-muted-foreground">Total</Label>
+                                                <Input
+                                                    className="text-sm font-medium mt-1 bg-gray-50"
+                                                    value={formatCurrency(item.total_price)}
+                                                    readOnly
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <Label className="text-xs font-medium text-muted-foreground">Harga Satuan (Rp)</Label>
+                                            <Input
+                                                type="number"
+                                                className="text-sm mt-1"
+                                                value={item.unit_price}
+                                                onChange={(e) => onUpdateItem(index, 'unit_price', e.target.value)}
+                                                min="0"
+                                                step="500"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Desktop View */}
+                                <div className="hidden sm:flex sm:items-center gap-3 p-4">
+                                    <div className="flex-1 grid grid-cols-4 gap-3">
+                                        <div>
                                             <Label className="text-xs font-medium text-muted-foreground">Produk</Label>
                                             <select
                                                 className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
@@ -96,18 +162,6 @@ export const ItemsSection = ({
                                                 ))}
                                             </select>
                                         </div>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-muted-foreground hover:text-destructive ml-2 mt-4"
-                                            onClick={() => onRemoveItem(index)}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-3">
                                         <div>
                                             <Label className="text-xs font-medium text-muted-foreground">Jumlah</Label>
                                             <Input
@@ -119,6 +173,17 @@ export const ItemsSection = ({
                                             />
                                         </div>
                                         <div>
+                                            <Label className="text-xs font-medium text-muted-foreground">Harga Satuan (Rp)</Label>
+                                            <Input
+                                                type="number"
+                                                className="text-sm mt-1"
+                                                value={item.unit_price}
+                                                onChange={(e) => onUpdateItem(index, 'unit_price', e.target.value)}
+                                                min="0"
+                                                step="500"
+                                            />
+                                        </div>
+                                        <div>
                                             <Label className="text-xs font-medium text-muted-foreground">Total</Label>
                                             <Input
                                                 className="text-sm font-medium mt-1 bg-gray-50"
@@ -127,81 +192,19 @@ export const ItemsSection = ({
                                             />
                                         </div>
                                     </div>
-
-                                    <div>
-                                        <Label className="text-xs font-medium text-muted-foreground">Harga Satuan (Rp)</Label>
-                                        <Input
-                                            type="number"
-                                            className="text-sm mt-1"
-                                            value={item.unit_price}
-                                            onChange={(e) => onUpdateItem(index, 'unit_price', e.target.value)}
-                                            min="0"
-                                            step="500"
-                                        />
-                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="text-muted-foreground hover:text-destructive"
+                                        onClick={() => onRemoveItem(index)}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
                                 </div>
                             </div>
-
-                            {/* Desktop View */}
-                            <div className="hidden sm:flex sm:items-center gap-3 p-4">
-                                <div className="flex-1 grid grid-cols-4 gap-3">
-                                    <div>
-                                        <Label className="text-xs font-medium text-muted-foreground">Produk</Label>
-                                        <select
-                                            className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
-                                            value={item.recipe_id}
-                                            onChange={(e) => onUpdateItem(index, 'recipe_id', e.target.value)}
-                                        >
-                                            {availableRecipes.map(recipe => (
-                                                <option key={recipe.id} value={recipe.id}>
-                                                    {recipe.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs font-medium text-muted-foreground">Jumlah</Label>
-                                        <Input
-                                            type="number"
-                                            className="text-sm mt-1"
-                                            value={item.quantity}
-                                            onChange={(e) => onUpdateItem(index, 'quantity', e.target.value)}
-                                            min="1"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs font-medium text-muted-foreground">Harga Satuan (Rp)</Label>
-                                        <Input
-                                            type="number"
-                                            className="text-sm mt-1"
-                                            value={item.unit_price}
-                                            onChange={(e) => onUpdateItem(index, 'unit_price', e.target.value)}
-                                            min="0"
-                                            step="500"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs font-medium text-muted-foreground">Total</Label>
-                                        <Input
-                                            className="text-sm font-medium mt-1 bg-gray-50"
-                                            value={formatCurrency(item.total_price)}
-                                            readOnly
-                                        />
-                                    </div>
-                                </div>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="text-muted-foreground hover:text-destructive"
-                                    onClick={() => onRemoveItem(index)}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </div>
-                    ))}
-
+                        )
+                    })}
                     <div className="pt-3 border-t">
                         <div className="flex justify-between items-center text-sm font-medium">
                             <span>Subtotal:</span>

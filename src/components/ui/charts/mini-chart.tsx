@@ -1,12 +1,13 @@
+import { memo } from 'react'
+import { cn } from '@/lib/utils'
+import { Line, LineChart, Area, AreaChart, Bar, BarChart, ResponsiveContainer } from 'recharts'
+import { type ChartDataPoint, CHART_COLORS } from './types'
+
 /**
  * Mini Chart Component
  * Small charts for dashboard cards
  */
 
-import { memo } from 'react'
-import { cn } from '@/lib/utils'
-import { Line, LineChart, Area, AreaChart, Bar, BarChart, ResponsiveContainer } from 'recharts'
-import { type ChartDataPoint, CHART_COLORS } from './types'
 
 interface MiniChartProps {
   data: ChartDataPoint[]

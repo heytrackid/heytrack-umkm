@@ -1,10 +1,11 @@
+import { NextResponse } from 'next/server'
+import type { APIError } from './types'
+
 /**
  * Error Handling Module
  * API error handling and response utilities
  */
 
-import { NextResponse } from 'next/server'
-import type { APIError } from './types'
 
 /**
  * Handle API errors and convert to standardized format
@@ -15,7 +16,7 @@ export function handleAPIError(error: unknown): APIError {
       message: error.message,
       statusCode: 500,
       code: 'INTERNAL_ERROR',
-      details: error.stack
+      details: error.stack as Record<string, unknown> | undefined
     }
   }
 
@@ -31,7 +32,7 @@ export function handleAPIError(error: unknown): APIError {
     message: 'An unexpected error occurred',
     statusCode: 500,
     code: 'UNKNOWN_ERROR',
-    details: error
+    details: error as Record<string, unknown> | undefined
   }
 }
 

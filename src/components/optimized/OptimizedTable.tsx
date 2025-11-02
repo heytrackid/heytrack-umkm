@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Edit2, Trash2, Eye } from 'lucide-react'
 
+
+
 // Define types
 interface ColumnDefinition<T> {
   key: keyof T | string
@@ -67,7 +69,7 @@ const OptimizedTableRowComponent = <T extends { id: string | number }>({
           ? column.render(value, item)
           : formatValue
             ? formatValue(column.key as string, value, item)
-            : String(value ?? '')
+            : String(value || '')
 
         return (
           <TableCell key={column.key as string}>

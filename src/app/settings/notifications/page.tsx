@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -15,16 +17,14 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { apiLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 import { Volume2, Bell, Clock, Layers } from 'lucide-react'
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
-import { DEFAULT_NOTIFICATION_PREFERENCES } from '@/types/domain/notification-preferences'
 import { testNotificationSound, testUrgentSound } from '@/lib/notifications/sound'
 import AppLayout from '@/components/layout/app-layout'
 
-export default function NotificationSettingsPage() {
+const NotificationSettingsPage = () => {
     const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
@@ -32,7 +32,7 @@ export default function NotificationSettingsPage() {
     // Helper to convert null to undefined for React components
     const toBool = (value: boolean | null | undefined): boolean => value === true
 
-    const toNumber = (value: number | null | undefined): number => value ?? 0.5
+    const toNumber = (value: number | null | undefined): number => value || 0.5
 
     useEffect(() => {
         fetchPreferences()
@@ -46,7 +46,7 @@ export default function NotificationSettingsPage() {
                 const data = await response.json()
                 setPreferences(data)
             }
-        } catch (_error) {
+        } catch (error) {
             apiLogger.error({ error }, 'Failed to fetch preferences')
             toast.error('Gagal memuat pengaturan')
         } finally {
@@ -55,7 +55,7 @@ export default function NotificationSettingsPage() {
     }
 
     const savePreferences = async () => {
-        if (!preferences) {return}
+        if (!preferences) { return }
 
         try {
             setIsSaving(true)
@@ -70,7 +70,7 @@ export default function NotificationSettingsPage() {
             } else {
                 toast.error('Gagal menyimpan pengaturan')
             }
-        } catch (_error) {
+        } catch (error) {
             apiLogger.error({ error }, 'Failed to save preferences')
             toast.error('Gagal menyimpan pengaturan')
         } finally {
@@ -82,7 +82,7 @@ export default function NotificationSettingsPage() {
         key: K,
         value: NotificationPreferences[K]
     ) => {
-        if (!preferences) {return}
+        if (!preferences) { return }
         setPreferences({ ...preferences, [key]: value })
     }
 
@@ -469,7 +469,18 @@ export default function NotificationSettingsPage() {
                 <div className="flex flex-col sm:flex-row justify-end gap-3">
                     <Button
                         variant="outline"
-                        onClick={() => setPreferences({ ...DEFAULT_NOTIFICATION_PREFERENCES, user_id: preferences.user_id, id: preferences.id, created_at: preferences.created_at, updated_at: preferences.updated_at } as NotificationPreferences)}
+                        onClick={() => {
+                            if (preferences) {
+                                setPreferences({
+                                    ...preferences,
+                                    sound_enabled: true,
+                                    sound_volume: 50,
+                                    quiet_hours_enabled: false,
+                                    quiet_hours_start: '22:00',
+                                    quiet_hours_end: '07:00'
+                                })
+                            }
+                        }}
                         className="w-full sm:w-auto"
                     >
                         Reset ke Default
@@ -482,3 +493,5 @@ export default function NotificationSettingsPage() {
         </AppLayout>
     )
 }
+
+export default NotificationSettingsPage

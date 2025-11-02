@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 
+
+
 // Progressive loading for heavy data operations
 interface ProgressiveLoaderProps {
   children: ReactNode
@@ -93,14 +95,19 @@ export const ProgressiveLoader = ({
 }
 
 // Lazy data table dengan progressive loading
-export const ProgressiveDataTable = ({
+type TableColumn<T extends Record<string, ReactNode>> = {
+  header: string
+  accessor: keyof T
+}
+
+export const ProgressiveDataTable = <T extends Record<string, ReactNode>>({
   data,
   columns,
   pageSize = 10,
   virtualizeThreshold = 100
 }: {
-  data: unknown[]
-  columns: unknown[]
+  data: T[]
+  columns: Array<TableColumn<T>>
   pageSize?: number
   virtualizeThreshold?: number
 }) => {
@@ -219,7 +226,7 @@ export const StatsCardSkeleton = () => (
 )
 
 // Virtual table loader for heavy datasets
-const VirtualizedTableLoader = ({ data }: any) =>
+const VirtualizedTableLoader = <T extends { length?: number }>({ data }: { data?: T; columns?: unknown }) =>
 // Simulate heavy data processing
 (
   <div className="p-4 border rounded-lg bg-muted/50">
@@ -232,12 +239,18 @@ const VirtualizedTableLoader = ({ data }: any) =>
 
 
 // Simple table view for smaller datasets
-const SimpleTableView = ({ data, columns }: any) => (
+const SimpleTableView = <T extends Record<string, ReactNode>>({
+  data,
+  columns
+}: {
+  data: T[];
+  columns: Array<TableColumn<T>>
+}) => (
   <div className="overflow-x-auto">
     <table className="w-full border-collapse">
       <thead>
         <tr className="border-b">
-          {columns?.map((col: any, i: number) => (
+          {columns?.map((col, i: number) => (
             <th key={i} className="p-2 text-left font-medium">
               {col.header}
             </th>
@@ -245,11 +258,11 @@ const SimpleTableView = ({ data, columns }: any) => (
         </tr>
       </thead>
       <tbody>
-        {data.map((row: any, i: number) => (
+        {data.map((row, i: number) => (
           <tr key={i} className="border-b hover:bg-muted/50">
-            {columns.map((col: any, j: number) => (
+            {columns.map((col, j: number) => (
               <td key={j} className="p-2">
-                {row[col.accessor]}
+                {row[col.accessor] ?? null}
               </td>
             ))}
           </tr>
@@ -307,15 +320,16 @@ export function useProgressiveData<T>(
       void setError(null)
       const result = await fetchFunction()
       void setData(result)
-    } catch (_err) {
-      void setError(err as Error)
+    } catch (err: unknown) {
+      const error = err as Error
+      void setError(error)
     } finally {
       void setLoading(false)
     }
   }
 
   const retry = () => {
-    setRetryCount
+    setRetryCount((prev) => prev + 1)
     void loadData()
   }
 

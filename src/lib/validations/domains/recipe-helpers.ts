@@ -1,10 +1,12 @@
+import { z } from 'zod'
+import { RecipeInsertSchema, type RecipeInsert, type RecipeUpdate } from './recipe'
+
+
 /**
  * Recipe Validation Helpers
  * Domain-specific validation helpers for recipe-related business rules
  */
 
-import { z } from 'zod'
-import { RecipeInsertSchema, type RecipeInsert, type RecipeUpdate } from './recipe'
 
 // Re-export for convenience
 export { RecipeUpdateSchema } from './recipe'
@@ -77,7 +79,7 @@ export class RecipeValidationHelpers {
   static validateInsert(data: unknown): { success: boolean; data?: RecipeInsert; errors?: string[] } {
     try {
       const validatedData = EnhancedRecipeInsertSchema.parse(data)
-      return { success: true, data: validatedData }
+      return { success: true, data: validatedData as RecipeInsert }
     } catch (err) {
       if (err instanceof z.ZodError) {
         const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
@@ -204,8 +206,8 @@ export class RecipeValidationHelpers {
 
     recipes.forEach((recipe, index) => {
       const result = this.validateInsert(recipe)
-      if (result.success) {
-        valid.push(result.data)
+      if (result.success && result.data) {
+        valid.push(result.data as Record<string, unknown>)
       } else {
         invalid.push({
           index,

@@ -1,10 +1,11 @@
-// Financial Report Component
-// Handles financial data filtering, calculations, and display
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
 import type { FinancialRecordsTable } from '@/types/database'
+
+// Financial Report Component
+// Handles financial data filtering, calculations, and display
+
 
 type FinancialRecord = FinancialRecordsTable
 
@@ -15,13 +16,13 @@ interface FinancialReportProps {
   }
 }
 
-export default function FinancialReport({ dateRange }: FinancialReportProps) {
+const FinancialReport = ({ dateRange }: FinancialReportProps) => {
   const { formatCurrency } = useCurrency()
   const { data: financialRecords } = useSupabaseCRUD<'financial_records'>('financial_records')
 
   // Calculate financial report
-  const financialData = (financialRecords ?? []).filter((record): record is FinancialRecord & { date: string } => {
-    if (!record.date) {return false}
+  const financialData = (financialRecords || []).filter((record): record is FinancialRecord & { date: string } => {
+    if (!record.date) { return false }
     const recordDate = new Date(record.date).toISOString().split('T')[0]
     return recordDate >= dateRange.start && recordDate <= dateRange.end
   })
@@ -99,3 +100,5 @@ export default function FinancialReport({ dateRange }: FinancialReportProps) {
     </div>
   )
 }
+
+export default FinancialReport

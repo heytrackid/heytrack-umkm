@@ -1,9 +1,15 @@
-// Use generated types from Supabase
 import type { OrdersTable, OrderItemsTable, OrderStatus as OrderStatusEnum } from '@/types/database'
+
+// Use generated types from Supabase
 
 export type Order = OrdersTable
 export type OrderItem = OrderItemsTable
 export type OrderStatus = OrderStatusEnum
+
+// Order with items for display
+export type OrderWithItems = Order & {
+  order_items?: OrderItem[]
+}
 
 // Extended types for UI
 export type PaymentStatus = 
@@ -17,6 +23,19 @@ export type Priority =
   | 'high'
   | 'urgent'
 
+export type OrderFormItem = {
+  id?: string
+  order_id?: string
+  recipe_id: string
+  product_name: string | null
+  quantity: number
+  unit_price: number
+  total_price: number
+  special_requests: string | null
+  updated_at?: string | null
+  user_id?: string
+}
+
 export interface OrderFormData {
   customer_name: string
   customer_phone: string
@@ -25,18 +44,7 @@ export interface OrderFormData {
   delivery_time: string
   priority: Priority | null
   notes?: string | null
-  order_items: Array<{
-    id?: string
-    order_id?: string
-    recipe_id: string
-    product_name: string | null
-    quantity: number
-    unit_price: number
-    total_price: number
-    special_requests: string | null
-    updated_at?: string | null
-    user_id?: string
-  }>
+  order_items: OrderFormItem[]
 }
 
 export interface OrderStats {

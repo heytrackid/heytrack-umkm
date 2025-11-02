@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils'
 import { Button } from './button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
+
+
 interface SwipeableTabsProps extends ComponentProps<typeof TabsPrimitive.Root> {
   children: React.ReactNode
 }

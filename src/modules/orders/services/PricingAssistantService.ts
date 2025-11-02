@@ -2,6 +2,8 @@ import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import type { RecipesTable } from '@/types/database'
 
+
+
 type Recipe = RecipesTable
 
 interface PricingRecommendation {
@@ -53,10 +55,10 @@ export class PricingAssistantService {
         throw new Error(`Recipe not found: ${recipeId}`)
       }
       
-      const recipe = data
+      const recipe = data as RecipesTable
 
       // Get HPP calculation - simplified for now
-      const hppValue = (recipe.selling_price ?? 0) * 0.7 // Estimate 70% cost
+      const hppValue = (recipe.selling_price || 0) * 0.7 // Estimate 70% cost
 
       // Analyze market factors
       const marketFactors = await this.analyzeMarketFactors(recipe)
@@ -67,7 +69,7 @@ export class PricingAssistantService {
       // Calculate price recommendations
       const recommendations = this.calculatePriceRecommendations(
         hppValue,
-        recipe.selling_price ?? 0,
+        recipe.selling_price || 0,
         strategy,
         marketFactors
       )
@@ -77,7 +79,7 @@ export class PricingAssistantService {
 
       const result: PricingRecommendation = {
         recipeId,
-        currentPrice: recipe.selling_price ?? 0,
+        currentPrice: recipe.selling_price || 0,
         recommendedPrice: recommendations.recommendedPrice,
         hppValue,
         minPrice: recommendations.minPrice,
@@ -106,16 +108,18 @@ export class PricingAssistantService {
       const supabase = createClient()
       
       // Get competitor prices from similar recipes in same category
-      const { data: similarRecipes, error } = await supabase
+      const { data: similarRecipes } = await supabase
         .from('recipes')
         .select('selling_price')
-        .eq('category', recipe.category ?? '')
+        .eq('category', recipe.category || '')
         .eq('user_id', recipe.user_id)
         .neq('id', recipe.id)
         .not('selling_price', 'is', null)
         .limit(10)
 
-      const competitorPrices = similarRecipes?.map(r => r.selling_price ?? 0) || []
+      const competitorPrices = (similarRecipes as Array<{ selling_price: number | null }> || [])
+        .map(r => r.selling_price || 0)
+        .filter(price => price > 0)
 
       // Determine demand level based on recipe usage
       const demandLevel = this.calculateDemandLevel(recipe.times_made || 0)
@@ -289,8 +293,12 @@ export class PricingAssistantService {
       riskFactors.push('Limited competitor data, pricing based on assumptions')
     }
 
-    const riskLevel = riskFactors.length === 0 ? 'low' :
-                     riskFactors.length <= 2 ? 'medium' : 'high'
+    let riskLevel: 'low' | 'medium' | 'high' = 'low'
+    if (riskFactors.length > 2) {
+      riskLevel = 'high'
+    } else if (riskFactors.length > 0) {
+      riskLevel = 'medium'
+    }
 
     return {
       riskLevel,
@@ -331,9 +339,8 @@ export class PricingAssistantService {
   /**
    * Bulk pricing recommendations for multiple recipes
    */
-  static async generateBulkPricingRecommendations(recipeIds: string[], userId: string): Promise<PricingRecommendation[]> {
-    const promises = recipeIds.map(id => this.generatePricingRecommendation(id, userId))
-    return Promise.all(promises)
+  static generateBulkPricingRecommendations(recipeIds: string[], userId: string): Promise<PricingRecommendation[]> {
+    return Promise.all(recipeIds.map(id => this.generatePricingRecommendation(id, userId)))
   }
 
   /**
@@ -355,6 +362,8 @@ export class PricingAssistantService {
     try {
       const supabase = createClient()
       
+      type RecipePricingRow = { id: string; name: string | null; selling_price: number | null }
+
       const { data: recipes, error } = await supabase
         .from('recipes')
         .select('id, name, selling_price')
@@ -363,11 +372,13 @@ export class PricingAssistantService {
 
       if (error) {throw error}
 
-      const totalRecipes = recipes?.length || 0
-      const recipesWithPricing = recipes?.filter((r: Recipe) => r.selling_price && r.selling_price > 0).length || 0
+      const recipeRows: RecipePricingRow[] = recipes ?? []
+
+      const totalRecipes = recipeRows.length
+      const recipesWithPricing = recipeRows.filter((r) => (r.selling_price ?? 0) > 0).length
 
       // Calculate margins (simplified - would need HPP data)
-      const margins = recipes?.map(() => 30) || [] // Default 30% margin
+      const margins = recipeRows.map(() => 30) // Default 30% margin
       const averageMargin = margins.length > 0
         ? margins.reduce((sum, margin) => sum + margin, 0) / margins.length
         : 0
@@ -380,15 +391,15 @@ export class PricingAssistantService {
       }
 
       // Pricing opportunities (recipes with low margins that could be optimized)
-      const pricingOpportunities = recipes
-        ?.filter(r => (r.selling_price ?? 0) < 50000)
-        .map(r => ({
+      const pricingOpportunities = recipeRows
+        .filter((r): r is RecipePricingRow & { selling_price: number } => typeof r.selling_price === 'number' && r.selling_price < 50000)
+        .map((r) => ({
           recipeId: r.id,
-          recipeName: r.name,
+          recipeName: r.name ?? 'Unknown recipe',
           currentMargin: 25,
           potentialMargin: 35, // Target margin
           savings: 0 // Would need HPP calculation
-        })) || []
+        }))
 
       return {
         totalRecipes,

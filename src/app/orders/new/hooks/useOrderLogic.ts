@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import type { FormEvent } from 'react'
 import type { RecipesTable, CustomersTable } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isArrayOf, isRecipe, isCustomer } from '@/lib/type-guards'
+
+
 
 type Recipe = RecipesTable
 type Customer = CustomersTable
@@ -149,12 +150,13 @@ export const useOrderLogic = () => {
     }
     
     const firstRecipe = availableRecipes[0]
+    const fallbackPrice = firstRecipe.selling_price || 0
     const newItem: OrderItem = {
       recipe_id: firstRecipe.id,
       product_name: firstRecipe.name,
       quantity: 1,
-      unit_price: firstRecipe.selling_price || 0,
-      total_price: firstRecipe.selling_price || 0,
+      unit_price: fallbackPrice,
+      total_price: fallbackPrice,
       special_requests: ''
     }
     
@@ -179,18 +181,20 @@ export const useOrderLogic = () => {
           }
         }
       } else if (field === 'quantity') {
-        const qty = parseInt(String(value)) || 0
+        const qty = Number.parseInt(String(value), 10)
+        const safeQuantity = Number.isNaN(qty) ? 0 : qty
         updated[index] = {
           ...currentItem,
-          quantity: qty,
-          total_price: qty * currentItem.unit_price
+          quantity: safeQuantity,
+          total_price: safeQuantity * currentItem.unit_price
         }
       } else if (field === 'unit_price') {
-        const price = parseFloat(String(value)) || 0
+        const price = Number.parseFloat(String(value))
+        const safePrice = Number.isNaN(price) ? 0 : price
         updated[index] = {
           ...currentItem,
-          unit_price: price,
-          total_price: currentItem.quantity * price
+          unit_price: safePrice,
+          total_price: currentItem.quantity * safePrice
         }
       } else {
         updated[index] = { ...currentItem, [field]: value }
@@ -275,15 +279,36 @@ export const useOrderLogic = () => {
       })
       
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || await response.text() || 'Gagal menyimpan pesanan')
+        const responseClone = response.clone()
+        let errorMessage = 'Gagal menyimpan pesanan'
+
+        try {
+          const errorData = await response.json()
+          const apiMessage = typeof errorData?.error === 'string' ? errorData.error.trim() : ''
+          if (apiMessage.length > 0) {
+            errorMessage = apiMessage
+          } else {
+            const fallbackText = (await responseClone.text()).trim()
+            if (fallbackText.length > 0) {
+              errorMessage = fallbackText
+            }
+          }
+        } catch {
+          const fallbackText = (await responseClone.text()).trim()
+          if (fallbackText.length > 0) {
+            errorMessage = fallbackText
+          }
+        }
+
+        throw new Error(errorMessage)
       }
       
       // Redirect to orders page with success message
       void router.push('/orders?success=true')
       
-    } catch (_err) {
-      const message = getErrorMessage(err)
+    } catch (err: unknown) {
+      const error = err as Error
+      const message = getErrorMessage(error)
       void setError(message)
     } finally {
       void setIsSubmitting(false)

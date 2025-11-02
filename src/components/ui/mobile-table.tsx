@@ -3,14 +3,15 @@
 import { type ReactNode, useState, useCallback, useMemo, memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { useResponsive } from '@/hooks/useResponsive'
+import { cn } from '@/lib/utils'
+import { Input } from './input'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { useResponsive } from '@/hooks/useResponsive'
-import { cn } from '@/lib/utils'
 import {
   MoreHorizontal,
   Search,
@@ -18,10 +19,9 @@ import {
   SortDesc,
   Trash2
 } from 'lucide-react'
-import { Input } from './input'
 
 // Types for mobile table
-export interface MobileTableColumn<T = Record<string, unknown>> {
+export interface MobileTableColumn<T extends Record<string, unknown> = Record<string, unknown>> {
   key: string
   label: string
   accessor: keyof T | ((item: T) => ReactNode)
@@ -31,7 +31,7 @@ export interface MobileTableColumn<T = Record<string, unknown>> {
   render?: (value: unknown, item: T) => ReactNode
 }
 
-export interface MobileTableAction<T = Record<string, unknown>> {
+export interface MobileTableAction<T extends Record<string, unknown> = Record<string, unknown>> {
   label: string
   icon?: ReactNode
   onClick: (item: T) => void
@@ -39,7 +39,7 @@ export interface MobileTableAction<T = Record<string, unknown>> {
   show?: (item: T) => boolean
 }
 
-interface MobileTableProps<T = Record<string, unknown>> {
+interface MobileTableProps<T extends Record<string, unknown> = Record<string, unknown>> {
   data: T[]
   columns: Array<MobileTableColumn<T>>
   actions?: Array<MobileTableAction<T>>
@@ -63,7 +63,7 @@ interface MobileTableProps<T = Record<string, unknown>> {
  * - Custom comparison function for data prop
  * - useCallback for event handlers
  */
-export const MobileTable = memo(({
+export const MobileTable = memo(<T extends Record<string, unknown>>({
   data,
   columns,
   actions = [],
@@ -175,7 +175,7 @@ export const MobileTable = memo(({
   }
 
   // Get cell value
-  const getCellValue = (item: T, column: MobileTableColumn<T>) => {
+  const getCellValue = (item: T, column: MobileTableColumn<T>): React.ReactNode => {
     if (column.render) {
       const value = typeof column.accessor === 'function'
         ? column.accessor(item)
@@ -187,7 +187,7 @@ export const MobileTable = memo(({
       return column.accessor(item)
     }
 
-    return item[column.accessor]
+    return item[column.accessor] as React.ReactNode
   }
 
   // Render card view for mobile

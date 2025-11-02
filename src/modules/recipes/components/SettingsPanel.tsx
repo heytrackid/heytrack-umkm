@@ -1,5 +1,3 @@
-'use client'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,6 +7,11 @@ import { Calculator, Package } from 'lucide-react'
 import type { PricingMethod } from '@/modules/recipes/types'
 import { UMKMTooltip } from './UMKMTooltip'
 import { useSettings } from '@/contexts/settings-context'
+
+'use client'
+
+
+
 
 // Method descriptions for UMKM
 const getPricingMethodDescription = (method: PricingMethod) => {

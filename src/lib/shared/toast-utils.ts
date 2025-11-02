@@ -1,9 +1,11 @@
+import type { useToast } from '@/hooks/use-toast'
+
+
 /**
  * Shared Toast Utilities
  * Consistent toast notification patterns across the application
  */
 
-import type { useToast } from '@/hooks/use-toast'
 
 // Toast presets for common actions
 export const TOAST_PRESETS = {

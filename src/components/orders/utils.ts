@@ -1,6 +1,7 @@
 import type { OrderStatus, PaymentStatus, Priority, StatusInfo } from './types'
 import { formatCurrentCurrency } from '@/shared'
 
+
 // Order Status Configurations
 export const orderStatuses: Record<OrderStatus, StatusInfo> = {
   'PENDING': { label: 'Menunggu', color: 'bg-yellow-100 text-yellow-800' },
@@ -55,6 +56,15 @@ export function calculateOrderTotal(orderItems: Array<{quantity: number; unit_pr
 
 // Format currency
 export const formatCurrency = formatCurrentCurrency
+
+const PRIORITY_VALUES: readonly Priority[] = ['low', 'normal', 'high', 'urgent'] as const
+
+export function normalizePriority(value: unknown, fallback: Priority = 'normal'): Priority {
+  if (PRIORITY_VALUES.includes(value as Priority)) {
+    return value as Priority
+  }
+  return fallback
+}
 
 export { formatDate } from '@/shared'
 

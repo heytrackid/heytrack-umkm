@@ -1,10 +1,12 @@
+import type { RecipeTemplate } from '@/lib/constants/recipe-templates'
+import { uiLogger } from '@/lib/logger'
+
+
 /**
  * Recipe Helper Utilities
  * Smart suggestions and calculations for recipe generation
  */
 
-import type { RecipeTemplate } from '@/lib/constants/recipe-templates'
-import { uiLogger } from '@/lib/logger'
 
 export interface IngredientSuggestion {
   name: string

@@ -1,9 +1,11 @@
+import { z } from 'zod'
+
+
 /**
  * Settings Validation
  * Validation schemas and functions for application settings
  */
 
-import { z } from 'zod'
 
 // Business info validation schema
 export const BusinessInfoSchema = z.object({

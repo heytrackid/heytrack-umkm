@@ -8,14 +8,7 @@ import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import { AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb' 
 import { StatsSkeleton, CardSkeleton } from '@/components/ui'
 import { PageHeader } from '@/components/layout/PageHeader'
 
@@ -28,6 +21,13 @@ import CategoryBreakdown from './components/CategoryBreakdown'
 import FilterPeriod from './components/FilterPeriod'
 
 import { useEnhancedCashFlow } from './hooks/useEnhancedCashFlow'
+
+// Summary cards skeleton component
+const SummaryCardsSkeleton = () => (
+  Array.from({ length: 3 }, (_, i) => (
+    <div key={`summary-card-${i}`} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
+  ))
+)
 
 const CashFlowPage = () => {
   const { formatCurrency } = useSettings()
@@ -131,9 +131,7 @@ const CashFlowPage = () => {
 
             {/* Summary Cards Loading */}
             <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
-              {Array.from({ length: 3 }, (_, i) => (
-                <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
-              ))}
+              <SummaryCardsSkeleton />
             </div>
 
             {/* Chart Loading */}

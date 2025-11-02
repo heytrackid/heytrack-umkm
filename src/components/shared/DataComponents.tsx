@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 import {
   Search,
   Filter,
@@ -19,7 +20,6 @@ import {
   SortAsc,
   SortDesc
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 // Search Component
 interface SearchInputProps {

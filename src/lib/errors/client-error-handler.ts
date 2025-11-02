@@ -1,11 +1,12 @@
-// @ts-nocheck
+import { toast } from '@/hooks/use-toast';
+import { apiLogger } from '@/lib/logger';
+
+
 /**
  * Client-Side API Error Handler
  * Handles errors from API calls on the client side
  */
 
-import { toast } from '@/hooks/use-toast';
-import { apiLogger } from '@/lib/logger';
 
 export interface ApiResponse<T = any> {
   data?: T;

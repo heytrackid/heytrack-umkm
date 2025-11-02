@@ -1,7 +1,9 @@
-// Theme and color management utilities
-
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+
+
+// Theme and color management utilities
+
 
 // Utility function to merge class names
 export function cn(...inputs: ClassValue[]) {
@@ -9,7 +11,27 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Color palette definitions
-export const colors = {
+type ColorShade = 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950
+
+type ColorScale = Record<ColorShade, string>
+
+type Colors = {
+  primary: ColorScale
+  success: ColorScale
+  warning: ColorScale
+  error: ColorScale
+  gray: ColorScale
+  brand: {
+    primary: string
+    secondary: string
+    accent: string
+  }
+}
+
+const paletteColorKeys = ['primary', 'success', 'warning', 'error', 'gray'] as const
+type PaletteColorKey = typeof paletteColorKeys[number]
+
+export const colors: Colors = {
   // Primary colors
   primary: {
     50: '#eff6ff',
@@ -122,37 +144,41 @@ export const statusColors = {
 // Theme utilities
 export const themeUtils = {
   // Get color by path
-  getColor: (path: string, shade: keyof typeof colors.primary = 500) => {
+  getColor: (path: string, shade: ColorShade = 500) => {
     const [colorName] = path.split('.')
-    const colorGroup = colors[colorName as keyof typeof colors]
-    if (!colorGroup) {return colors.gray[500]}
-    return colorGroup[shade] || colorGroup[500]
+    if (isPaletteColor(colorName)) {
+      const colorGroup = colors[colorName]
+      return colorGroup[shade] ?? colorGroup[500]
+    }
+    return colors.gray[500]
   },
 
   // Get status color
-  getStatusColor: (status: string, shade: keyof typeof colors.primary = 500) => {
+  getStatusColor: (status: string, shade: ColorShade = 500) => {
     const statusColor = statusColors[status as keyof typeof statusColors]
     if (!statusColor) {return colors.gray[shade]}
     return statusColor[shade] || statusColor[500]
   },
 
   // Generate color variants
-  generateVariants: (baseColor: string) => 
-    // This would generate lighter/darker variants
-    // For now, return the base color
-     ({
-      50: baseColor,
-      100: baseColor,
-      200: baseColor,
-      300: baseColor,
-      400: baseColor,
-      500: baseColor,
-      600: baseColor,
-      700: baseColor,
-      800: baseColor,
-      900: baseColor,
-    })
+  generateVariants: (baseColor: string): ColorScale => ({
+    50: baseColor,
+    100: baseColor,
+    200: baseColor,
+    300: baseColor,
+    400: baseColor,
+    500: baseColor,
+    600: baseColor,
+    700: baseColor,
+    800: baseColor,
+    900: baseColor,
+    950: baseColor,
+  })
   ,
+}
+
+function isPaletteColor(colorName: string): colorName is PaletteColorKey {
+  return (paletteColorKeys as readonly string[]).includes(colorName)
 }
 
 // Spacing utilities

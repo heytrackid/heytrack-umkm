@@ -3,11 +3,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Building } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { validateBusinessInfoSettings } from '@/lib/settings-validation'
 import { useToast } from '@/hooks/use-toast'
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+
+
 
 type BusinessSettingsState = AppSettingsState['general']
 
@@ -38,9 +41,8 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
       const validatedData = validateBusinessInfoSettings(newSettings)
       void setErrors({})
       // If validation passes, update parent
-      onSettingChange('general', field, validatedData[field as keyof typeof validatedData] ?? value)
-    } catch (_err) {
-      // Don't update parent if validation fails, but allow user to continue typing
+      onSettingChange('general', field, validatedData[field as keyof typeof validatedData] || value)
+    } catch (err) {      // Don't update parent if validation fails, but allow user to continue typing
       if (err instanceof Error) {
         // Extract field-specific errors if possible
         const errorMessage = err.message
@@ -56,7 +58,7 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
     try {
       validateBusinessInfoSettings(localSettings)
       void setErrors({})
-    } catch (_err) {
+    } catch (err) {
       if (err instanceof Error) {
         toast({
           title: 'Pengaturan Tidak Valid',

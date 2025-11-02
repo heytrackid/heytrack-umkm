@@ -1,6 +1,8 @@
+import { apiLogger } from '@/lib/logger'
+
+
 // Shared API utilities and helpers
 
-import { apiLogger } from '@/lib/logger'
 
 // API response types
 export interface ApiResponse<T> {
@@ -23,7 +25,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   }
 }
 
-export interface ApiError {
+export interface ApiErrorInterface {
   readonly code: string
   readonly message: string
   readonly details?: Record<string, unknown>
@@ -61,24 +63,20 @@ export const API_ERROR_CODES = {
 /**
  * API Error class for consistent error handling
  */
-export class ApiError extends Error {
-  public readonly code: string
-  public readonly statusCode: number
-  public readonly details?: Record<string, any>
-
+export class ApiErrorClass extends Error implements ApiErrorInterface {
   constructor(
     message: string,
-    code: string = API_ERROR_CODES.UNKNOWN_ERROR,
-    statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    details?: Record<string, unknown>
+    public readonly code: string = API_ERROR_CODES.UNKNOWN_ERROR,
+    public readonly statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    public readonly details?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'ApiError'
-    this.code = code
-    this.statusCode = statusCode
-    this.details = details
   }
 }
+
+// Export as ApiError for backward compatibility
+export { ApiErrorClass as ApiError }
 
 /**
  * Create standardized API response
@@ -178,7 +176,7 @@ export const retryWithBackoff = async <T>(
       const jitter = Math.random() * 0.1 * exponentialDelay
       const delay = exponentialDelay + jitter
 
-      apiLogger.warn({ error, attempt: attempt + 1, maxRetries: maxRetries + 1, delay }, 'API call failed, retrying')
+      apiLogger.warn({ error: err, attempt: attempt + 1, maxRetries: maxRetries + 1, delay }, 'API call failed, retrying')
       await sleep(delay)
     }
   }
@@ -193,7 +191,7 @@ export const apiCache = {
   // Simple in-memory cache
   cache: new Map<string, { data: unknown; timestamp: number; ttl: number }>(),
 
-  set: (key: string, data: unknown, ttl: number = DEFAULT_API_CONFIG.cacheTimeout) => {
+  set: <T>(key: string, data: T, ttl: number = DEFAULT_API_CONFIG.cacheTimeout) => {
     apiCache.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -201,7 +199,7 @@ export const apiCache = {
     })
   },
 
-  get: (key: string) => {
+  get: <T>(key: string): T | null => {
     const cached = apiCache.cache.get(key)
     if (!cached) {return null}
 
@@ -210,7 +208,7 @@ export const apiCache = {
       return null
     }
 
-    return cached.data
+    return cached.data as T
   },
 
   clear: (key?: string) => {
@@ -245,7 +243,7 @@ export const apiRequest = async <T>(
   // Check cache first
   if (finalConfig.cache) {
     const cacheKey = `${options.method || 'GET'}-${url}`
-    const cached = apiCache.get(cacheKey)
+    const cached = apiCache.get<T>(cacheKey)
     if (cached) {
       apiLogger.debug({ url }, 'Cache hit')
       return cached
@@ -278,9 +276,9 @@ export const apiRequest = async <T>(
       clearTimeout(timeoutId)
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
+        const errorData = await response.json().catch(() => ({})) as { message?: string; code?: string; details?: Record<string, unknown> }
 
-        throw new ApiError(
+        throw new ApiErrorClass(
           errorData.message || `HTTP ${response.status}: ${response.statusText}`,
           errorData.code || API_ERROR_CODES.UNKNOWN_ERROR,
           response.status,
@@ -288,7 +286,7 @@ export const apiRequest = async <T>(
         )
       }
 
-      const data = await response.json()
+      const data = await response.json() as T
       const duration = Date.now() - startTime
 
       apiLogger.debug({ url, duration }, 'API call completed')
@@ -303,12 +301,12 @@ export const apiRequest = async <T>(
     } catch (err) {
       clearTimeout(timeoutId)
 
-      if (err instanceof ApiError) {
+      if (err instanceof ApiErrorClass) {
         throw err
       }
 
       if (err instanceof DOMException && err.name === 'AbortError') {
-        throw new ApiError(
+        throw new ApiErrorClass(
           'Request timeout',
           API_ERROR_CODES.TIMEOUT_ERROR,
           HTTP_STATUS.BAD_REQUEST
@@ -316,14 +314,14 @@ export const apiRequest = async <T>(
       }
 
       if (err instanceof TypeError && err.message.includes('fetch')) {
-        throw new ApiError(
+        throw new ApiErrorClass(
           'Network error - please check your connection',
           API_ERROR_CODES.NETWORK_ERROR,
           HTTP_STATUS.BAD_REQUEST
         )
       }
 
-      throw new ApiError(
+      throw new ApiErrorClass(
         err instanceof Error ? err.message : 'Unknown error occurred',
         API_ERROR_CODES.UNKNOWN_ERROR,
         HTTP_STATUS.INTERNAL_SERVER_ERROR

@@ -1,14 +1,10 @@
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Calendar } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { type ProfitPeriodType, filterProfitPeriodOptions } from '../constants'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select' 
 
 interface ProfitPeriodFilterProps {
   selectedPeriod: ProfitPeriodType

@@ -7,6 +7,8 @@ import { CrudForm, FormActions } from '@/components/ui/crud-form'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { uiLogger } from '@/lib/logger'
 
+
+
 interface BaseModalProps {
   isOpen: boolean
   onClose: () => void
@@ -47,7 +49,7 @@ export const CreateModal = <T extends Record<string, unknown>>({
   const handleSubmit = async (data: T) => {
     try {
       await onSubmit(data)
-    } catch (_error) {
+    } catch (error) {
       uiLogger.error({ error }, 'Create error:')
     }
   }
@@ -89,7 +91,7 @@ export const EditModal = <T extends Record<string, unknown>>({
   const handleSubmit = async (data: T) => {
     try {
       await onSubmit(data)
-    } catch (_error) {
+    } catch (error) {
       uiLogger.error({ error }, 'Edit error:')
     }
   }
@@ -130,7 +132,7 @@ export const DeleteModal = ({
   const handleConfirm = async () => {
     try {
       await onConfirm()
-    } catch (_error) {
+    } catch (error) {
       uiLogger.error({ error }, 'Delete error:')
     }
   }
@@ -139,7 +141,7 @@ export const DeleteModal = ({
     <ConfirmDialog
       open={isOpen}
       onOpenChange={(open) => !open && onClose()}
-      title={`Hapus ${entityName}`}
+      title = {`Hapus ${entityName}`}
       description={`Apakah Anda yakin ingin menghapus "${itemName || entityName}"? Tindakan ini tidak dapat dibatalkan.`}
       onConfirm={handleConfirm}
       confirmText="Ya, Hapus"

@@ -1,10 +1,11 @@
+import { useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+
 /**
  * Simple Preloading Hooks
  * Lightweight preloading utilities for links and buttons
  */
 
-import { useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 
 /**
  * Hook for preloading links on hover

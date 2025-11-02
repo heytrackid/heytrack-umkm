@@ -1,21 +1,21 @@
-// @ts-nocheck
-/**
- * Centralized Error Response Handler for API Routes
- * Provides consistent error responses across all API endpoints
- */
+import { NextResponse } from 'next/server'
+import { apiLogger } from '../logger'
+import {
 
-import { NextResponse } from 'next/server';
-import { 
-  AppError, 
-  ValidationError, 
-  AuthenticationError, 
-  AuthorizationError, 
+  AppError,
+  ValidationError,
+  AuthenticationError,
+  AuthorizationError,
   NotFoundError,
   DatabaseError,
   ExternalServiceError,
   RateLimitError
-} from './app-error';
-import { apiLogger } from '../logger';
+} from './app-error'
+
+/**
+ * Centralized Error Response Handler for API Routes
+ * Provides consistent error responses across all API endpoints
+ */
 
 // Export AppError as APIError for backward compatibility
 export { AppError as APIError } from './app-error';
@@ -246,7 +246,7 @@ export function withAPIErrorHandler<T extends Record<string, any>>(
 ) {
   return async (req: Request, ctx: T): Promise<NextResponse> => {
     try {
-      return await handler(req, ctx);
+      return handler(req, ctx);
     } catch (error) {
       return handleAPIError(error, context || `API Route: ${req.url}`);
     }

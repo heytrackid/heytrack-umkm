@@ -1,13 +1,16 @@
+import { dbLogger } from '@/lib/logger'
+import { executeTransaction, createOperation } from './transactions'
+import type { TransactionOperation } from './transactions'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database, OrdersInsert, OrderItemsInsert, FinancialRecordsInsert } from '@/types/database'
+
+
 /**
  * Order Transaction Helpers
  * 
  * Provides transaction-safe order creation with proper rollback
  */
 
-import { dbLogger } from '@/lib/logger'
-import { executeTransaction, createOperation } from './transactions'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, OrdersInsert, OrderItemsInsert, FinancialRecordsInsert } from '@/types/database'
 
 type OrderInsert = OrdersInsert
 type OrderItemInsert = OrderItemsInsert
@@ -37,7 +40,7 @@ export async function createOrderWithTransaction(
   let orderItemIds: string[] = []
   let financialRecordId: string | undefined
 
-  const operations = [
+  const operations: TransactionOperation[] = [
     // Operation 1: Create order
     createOperation(
       'create_order',
@@ -74,14 +77,9 @@ export async function createOrderWithTransaction(
       async () => {
         if (!orderId) {throw new Error('Order ID not available')}
 
-        const itemsWithOrderId = data.items.map(item => ({
-          recipe_id: item.recipe_id,
-          product_name: item.product_name,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          total_price: item.total_price,
-          special_requests: item.special_requests,
-          order_id: orderId,
+        const itemsWithOrderId: OrderItemInsert[] = data.items.map(item => ({
+          ...item,
+          order_id: orderId as string,
           user_id: userId,
         }))
 

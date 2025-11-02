@@ -6,6 +6,12 @@ import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
+import { useMobile } from '@/hooks/useResponsive'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { createClient } from '@/utils/supabase/client'
+import Sidebar from './sidebar'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 import {
   ArrowLeft,
   Menu,
@@ -14,8 +20,6 @@ import {
   User,
   X
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-// Supabase auth components
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,11 +33,6 @@ import {
   SheetTitle,
   SheetTrigger
 } from "@/components/ui/sheet"
-import { useMobile } from '@/hooks/useResponsive'
-import type { User as SupabaseUser } from '@supabase/supabase-js'
-import { createClient } from '@/utils/supabase/client'
-import Sidebar from './sidebar'
-import { NotificationBell } from '@/components/notifications/NotificationBell'
 
 interface MobileHeaderProps {
   title?: string
@@ -79,8 +78,9 @@ const MobileHeader = ({
       try {
         const { data: { user } } = await supabase.auth.getUser()
         void setUser(user)
-      } catch (_err) {
-        uiLogger.error({ error: err }, 'Error getting user:')
+      } catch (err: unknown) {
+        const error = err as Error
+        uiLogger.error({ error }, 'Error getting user:')
       } finally {
         void setLoading(false)
       }
@@ -91,7 +91,7 @@ const MobileHeader = ({
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event: string, session: { user: SupabaseUser | null } | null) => {
-        void setUser(session?.user ?? null)
+        void setUser(session?.user || null)
         void setLoading(false)
       }
     )

@@ -1,6 +1,3 @@
-// Route-level Error Boundary
-// Wraps individual routes/pages to isolate errors
-
 'use client'
 
 import { Component, type ComponentType, type ErrorInfo, type ReactNode } from 'react'
@@ -8,6 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
 import { apiLogger } from '@/lib/logger'
+
+// Route-level Error Boundary
+// Wraps individual routes/pages to isolate errors
+
+
 
 interface Props {
   children: ReactNode

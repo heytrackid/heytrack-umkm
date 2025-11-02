@@ -1,9 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, IngredientsTable } from '@/types/database'
-import { NotificationService } from '@/modules/notifications/services/NotificationService'
 import { apiLogger } from '@/lib/logger'
+import { NotificationService } from '@/modules/notifications/services/NotificationService'
+import type { Database } from '@/types/database'
 
-type Ingredient = IngredientsTable
+
 
 export class InventoryNotificationService {
   /**
@@ -20,7 +20,6 @@ export class InventoryNotificationService {
         .select('id, name, current_stock, min_stock, reorder_point')
         .eq('user_id', userId)
         .eq('is_active', true)
-        .lt('current_stock', supabase.rpc('min_stock'))
 
       if (error) {
         apiLogger.error({ error, userId }, 'Failed to check low stock alerts')
@@ -35,6 +34,11 @@ export class InventoryNotificationService {
       for (const ingredient of ingredients) {
         const currentStock = ingredient.current_stock || 0
         const minStock = ingredient.min_stock || 0
+        
+        // Skip if stock is above minimum
+        if (currentStock >= minStock) {
+          continue
+        }
 
         // Check if notification already exists (avoid spam)
         const { data: existingNotification } = await supabase

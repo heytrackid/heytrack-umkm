@@ -6,6 +6,8 @@ import { ORDER_CONFIG } from '@/lib/constants'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 import type { OrderItemCalculation, OrderPricing } from '../types'
 
+
+
 type Recipe = RecipesTable
 type RecipeIngredient = RecipeIngredientsTable
 type Ingredient = IngredientsTable
@@ -98,11 +100,12 @@ export class OrderPricingService {
           }
 
           // Use recipe selling price as unit price
-          const unit_price = item.custom_price || recipe.selling_price || 0
-          const total_price = unit_price * item.quantity
+          const baseUnitPrice = item.custom_price || recipe.selling_price || 0
+          const unit_price = baseUnitPrice
+          const total_price = baseUnitPrice * item.quantity
           
           // Try to get real HPP calculation
-          let estimated_cost = unit_price * ORDER_CONFIG.DEFAULT_HPP_PERCENTAGE // Fallback estimate
+          let estimated_cost = baseUnitPrice * ORDER_CONFIG.DEFAULT_HPP_PERCENTAGE // Fallback estimate
           
           try {
             const latestHpp = await hppCalculator.getLatestHpp(supabase, recipe.id, recipe.user_id)
@@ -148,7 +151,8 @@ export class OrderPricingService {
             estimated_cost,
             total_cost,
             profit,
-            margin_percentage
+            margin_percentage,
+            cost_per_unit: estimated_cost
           }
         })
       )

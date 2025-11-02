@@ -1,11 +1,14 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+'use client'
+
+
 /**
  * Status Summary Component
  * Shows order status distribution
  */
 
-'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface StatusSummaryProps {
     stats: {

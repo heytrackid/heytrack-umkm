@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 
 import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/client'
+
 const AuthCallbackPage = () => {
   const router = useRouter()
   const supabase = createClient()
@@ -25,8 +27,9 @@ const AuthCallbackPage = () => {
         } else {
           void router.push('/auth/login')
         }
-      } catch (_err) {
-        apiLogger.error({ err }, 'Unexpected error in auth callback:')
+      } catch (err: unknown) {
+        const error = err as Error
+        apiLogger.error({ error }, 'Unexpected error in auth callback:')
         void router.push('/auth/login?error=unexpected_error')
       }
     }

@@ -8,6 +8,9 @@ import { Loader2, AlertTriangle, Calculator, ShoppingBag, Zap, TrendingUp, Trend
 import { useCurrency } from '@/hooks/useCurrency'
 import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
 
+
+
+
 interface CostCalculationCardProps {
     recipe: RecipeWithCosts
     onRecalculate: () => void
@@ -73,19 +76,23 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                             Bahan-bahan
                         </div>
                         <div className="space-y-2 pl-6">
-                            {recipe.ingredients.map((ingredient, index) => (
-                                <div key={index} className="flex justify-between items-center text-sm">
-                                    <span className="text-muted-foreground">
-                                        {ingredient.name} ({ingredient.quantity} {ingredient.unit})
-                                        {ingredient.unit_price === 0 && (
-                                            <span className="ml-2 text-xs text-red-600">⚠️ Belum ada harga</span>
-                                        )}
-                                    </span>
-                                    <span className="font-medium">
-                                        {formatCurrency(ingredient.quantity * ingredient.unit_price)}
-                                    </span>
-                                </div>
-                            ))}
+                            {recipe.ingredients.map((ingredient) => {
+                                const ingredientKey = ingredient.id || `${ingredient.name}-${ingredient.unit}-${ingredient.quantity}`
+
+                                return (
+                                    <div key={ingredientKey} className="flex justify-between items-center text-sm">
+                                        <span className="text-muted-foreground">
+                                            {ingredient.name} ({ingredient.quantity} {ingredient.unit})
+                                            {ingredient.unit_price === 0 && (
+                                                <span className="ml-2 text-xs text-red-600">⚠️ Belum ada harga</span>
+                                            )}
+                                        </span>
+                                        <span className="font-medium">
+                                            {formatCurrency(ingredient.quantity * ingredient.unit_price)}
+                                        </span>
+                                    </div>
+                                )
+                            })}
                             <div className="flex justify-between items-center text-sm pt-2 border-t">
                                 <span className="font-medium">Subtotal Bahan</span>
                                 <span className="font-semibold">{formatCurrency(ingredientsCost)}</span>

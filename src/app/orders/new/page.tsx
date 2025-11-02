@@ -6,37 +6,15 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Badge } from '@/components/ui/badge'
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage
-} from '@/components/ui/breadcrumb'
-import {
-  ArrowLeft,
-  ShoppingCart,
-  User,
-  CreditCard,
-  Truck,
-  Package,
-  AlertCircle
-} from 'lucide-react'
 import { OrderFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
-
-// Import hooks
 import { useOrderLogic } from './hooks/useOrderLogic'
-
-// ============= IMPORTS (No lazy loading for form steps) =============
-// Form steps are lightweight, no need for code splitting
 import OrderCustomerStep from './_components/OrderCustomerStep'
 import OrderItemsStep from './_components/OrderItemsStep'
 import OrderDeliveryStep from './_components/OrderDeliveryStep'
 import OrderPaymentStep from './_components/OrderPaymentStep'
 import OrderSummary from './_components/OrderSummary'
-
-// ============= MAIN PAGE COMPONENT =============
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb' 
+import { ArrowLeft, ShoppingCart, User, CreditCard, Truck, Package, AlertCircle } from 'lucide-react' 
 
 const NewOrderPage = () => {
   const {

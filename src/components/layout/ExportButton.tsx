@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { uiLogger } from '@/lib/logger'
 
+
+
 export const ExportButton = () => {
     const [isExporting, setIsExporting] = useState(false)
 
@@ -32,8 +34,8 @@ export const ExportButton = () => {
             document.body.removeChild(a)
 
             toast.success('Export berhasil!')
-        } catch (_error) {
-            uiLogger.error({ error }, 'Export error')
+        } catch (error: unknown) {
+            uiLogger.error({ error: String(error) }, 'Export error')
             toast.error('Export gagal. Silakan coba lagi.')
         } finally {
             setIsExporting(false)

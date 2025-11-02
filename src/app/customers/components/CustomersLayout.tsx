@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { useDebounce } from '@/hooks/useDebounce'
 import { apiLogger } from '@/lib/logger'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 // Shared components
 import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
@@ -48,6 +49,7 @@ const CustomersLayout = () => {
 
   const [customers, setCustomers] = useState<CustomersTableType[]>([])
   const { toast } = useToast()
+  const { confirm } = useConfirm()
 
   // Fetch customers on mount - auth is handled by middleware
   useEffect(() => {
@@ -131,9 +133,12 @@ const CustomersLayout = () => {
       .map(customer => customer.name)
       .join(', ')
 
-    const confirmed = window.confirm(
-      `⚠️ Yakin ingin menghapus ${selectedItems.length} pelanggan berikut?\n\n${customerNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
-    )
+    const confirmed = await confirm({
+      title: `Hapus ${selectedItems.length} Pelanggan?`,
+      description: `Anda akan menghapus ${selectedItems.length} pelanggan berikut:\n\n${customerNames}\n\nTindakan ini tidak bisa dibatalkan!`,
+      confirmText: 'Hapus',
+      variant: 'destructive'
+    })
 
     if (confirmed) {
       try {
@@ -180,9 +185,12 @@ const CustomersLayout = () => {
   }
 
   const handleDeleteCustomer = async (customer: Customer) => {
-    const confirmed = window.confirm(
-      `⚠️ KONFIRMASI PENGHAPUSAN\n\nYakin ingin menghapus pelanggan:\n"${customer.name}"\n\n❗ PERHATIAN: Tindakan ini tidak bisa dibatalkan!`
-    )
+    const confirmed = await confirm({
+      title: 'Hapus Pelanggan?',
+      description: `Yakin ingin menghapus pelanggan "${customer.name}"?\n\nPerhatian: Tindakan ini tidak bisa dibatalkan!`,
+      confirmText: 'Hapus',
+      variant: 'destructive'
+    })
 
     if (confirmed) {
       try {

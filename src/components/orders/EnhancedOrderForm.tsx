@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import type { RecipesTable } from '@/types/database'
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
-type Recipe = RecipesTable
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -12,6 +11,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { LabelWithTooltip } from '@/components/ui/tooltip-helper'
 import { useResponsive } from '@/hooks/useResponsive'
+import type { Order, OrderFormData, Priority, OrderFormItem } from './types'
+import { calculateOrderTotal, normalizePriority } from './utils'
+import { validateOrderData } from '@/lib/validations/form-validations'
+import { useCurrency } from '@/hooks/useCurrency'
+import { apiLogger } from '@/lib/logger'
 import {
     Plus,
     Trash2,
@@ -27,11 +31,7 @@ import {
     Search,
     ShoppingCart
 } from 'lucide-react'
-import type { Order, OrderFormData, Priority, OrderItem } from './types'
-import { calculateOrderTotal } from './utils'
-import { validateOrderData } from '@/lib/validations/form-validations'
-import { useCurrency } from '@/hooks/useCurrency'
-import { apiLogger } from '@/lib/logger'
+import { isRecipe } from '@/lib/type-guards'
 
 interface EnhancedOrderFormProps {
     order?: Order
@@ -40,12 +40,14 @@ interface EnhancedOrderFormProps {
     loading?: boolean
 }
 
-export default function EnhancedOrderForm({
+type Recipe = RecipesTable
+
+const EnhancedOrderForm = ({
     order,
     onSave,
     onCancel,
     loading = false
-}: EnhancedOrderFormProps) {
+}: EnhancedOrderFormProps) => {
     const { isMobile } = useResponsive()
     const { formatCurrency } = useCurrency()
 
@@ -76,15 +78,15 @@ export default function EnhancedOrderForm({
                 customer_address: order.customer_address || '',
                 delivery_date: order.delivery_date ? order.delivery_date.split('T')[0] : '',
                 delivery_time: order.delivery_time || '10:00',
-                priority: (order.priority || 'normal') as Priority,
+                priority: normalizePriority(order.priority),
                 notes: order.notes || '',
                 order_items: (order as OrderWithRelations).items?.map(item => ({
                     recipe_id: item.recipe_id,
-                    product_name: item.product_name ?? null,
+                    product_name: item.product_name || null,
                     quantity: item.quantity,
                     unit_price: item.unit_price,
                     total_price: item.total_price,
-                    special_requests: item.special_requests ?? null
+                    special_requests: item.special_requests || null
                 })) || []
             })
             setCurrentStep(3) // Skip to items if editing
@@ -109,11 +111,15 @@ export default function EnhancedOrderForm({
     const fetchRecipes = async () => {
         try {
             const response = await fetch('/api/recipes')
-            if (response.ok) {
-                const data = await response.json()
-                setRecipes(data)
-                setFilteredRecipes(data)
-            }
+            if (!response.ok) { return }
+
+            const payload = await response.json()
+            const recipeList: Recipe[] = Array.isArray(payload)
+                ? payload.filter((item): item is Recipe => isRecipe(item))
+                : []
+
+            setRecipes(recipeList)
+            setFilteredRecipes(recipeList)
         } catch (err: unknown) {
             apiLogger.error({ err }, 'Error fetching recipes')
         }
@@ -130,16 +136,18 @@ export default function EnhancedOrderForm({
     }
 
     const addOrderItem = () => {
+        const newItem: OrderFormItem = {
+            recipe_id: '',
+            product_name: null,
+            quantity: 1,
+            special_requests: null,
+            total_price: 0,
+            unit_price: 0
+        }
+
         setFormData(prev => ({
             ...prev,
-            order_items: [...prev.order_items, {
-                recipe_id: '',
-                product_name: null,
-                quantity: 1,
-                special_requests: null,
-                total_price: 0,
-                unit_price: 0
-            }]
+            order_items: [...prev.order_items, newItem]
         }))
     }
 
@@ -160,32 +168,27 @@ export default function EnhancedOrderForm({
             }))
         } else {
             // Add new item
+            const newItem: OrderFormItem = {
+                recipe_id: recipe.id,
+                product_name: recipe.name,
+                quantity: 1,
+                unit_price: recipe.selling_price || 0,
+                total_price: recipe.selling_price || 0,
+                special_requests: null
+            }
+
             setFormData(prev => ({
                 ...prev,
-                order_items: [...prev.order_items, {
-                    recipe_id: recipe.id,
-                    product_name: recipe.name,
-                    quantity: 1,
-                    unit_price: recipe.selling_price || 0,
-                    total_price: recipe.selling_price || 0,
-                    special_requests: null
-                }]
+                order_items: [...prev.order_items, newItem]
             }))
         }
         setSearchTerm('')
     }
 
-    const updateOrderItem = (
+    const updateOrderItem = <K extends keyof OrderFormItem>(
         index: number,
-        field: keyof {
-            recipe_id: string
-            product_name: string | null
-            quantity: number
-            unit_price: number
-            total_price: number
-            special_requests: string | null
-        },
-        value: string | number | null
+        field: K,
+        value: OrderFormItem[K]
     ) => {
         setFormData(prev => ({
             ...prev,
@@ -203,7 +206,7 @@ export default function EnhancedOrderForm({
     }
 
     const handleSubmit = () => {
-        const validationErrors = validateOrderData(formData as unknown as Record<string, unknown>)
+        const validationErrors = validateOrderData(formData)
         if (validationErrors.length > 0) {
             setErrors(validationErrors)
             return
@@ -225,6 +228,7 @@ export default function EnhancedOrderForm({
     const totalItems = formData.order_items.reduce((sum, item) => sum + item.quantity, 0)
 
     // Step 1: Customer Info
+    // eslint-disable-next-line react/no-unstable-nested-components
     const CustomerInfoStep = () => (
         <Card>
             <CardHeader>
@@ -280,6 +284,7 @@ export default function EnhancedOrderForm({
     )
 
     // Step 2: Delivery Info
+    // eslint-disable-next-line react/no-unstable-nested-components
     const DeliveryInfoStep = () => (
         <Card>
             <CardHeader>
@@ -376,6 +381,7 @@ export default function EnhancedOrderForm({
     )
 
     // Step 3: Order Items
+    // eslint-disable-next-line react/no-unstable-nested-components
     const OrderItemsStep = () => (
         <div className="space-y-4">
             {/* Product Search */}
@@ -633,3 +639,5 @@ export default function EnhancedOrderForm({
         </div>
     )
 }
+
+export default EnhancedOrderForm

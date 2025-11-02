@@ -4,6 +4,8 @@ import { createClient } from '@/utils/supabase/server'
 import type { OrdersTable, OrderItemsTable, RecipesTable } from '@/types/database'
 import type { RecipeOption } from '../types'
 
+
+
 /**
  * Service for handling recipe recommendations based on order history
  * SERVER-ONLY: Uses server client for database operations
@@ -28,7 +30,12 @@ export class RecipeRecommendationService {
               id,
               name,
               category,
-              price
+              selling_price,
+              cost_per_unit,
+              margin_percentage,
+              prep_time,
+              cook_time,
+              servings
             )
           )
         `)
@@ -54,7 +61,7 @@ export class RecipeRecommendationService {
 
       type OrderQueryResult = Order & {
         order_items: Array<OrderItem & {
-          recipe: Array<Pick<Recipe, 'id' | 'name' | 'category' | 'selling_price'>> | null
+          recipe: Array<Pick<Recipe, 'id' | 'name' | 'category' | 'selling_price' | 'cost_per_unit' | 'margin_percentage' | 'prep_time' | 'cook_time'>> | null
         }> | null
       }
 
@@ -65,7 +72,11 @@ export class RecipeRecommendationService {
           id: string
           name: string
           category: string | null
-          price: number | null
+          selling_price: number | null
+          cost_per_unit: number | null
+          margin_percentage: number | null
+          prep_time: number | null
+          cook_time: number | null
         }
       }
       const recipeFrequency = new Map<string, RecipeFrequencyData>()
@@ -86,7 +97,11 @@ export class RecipeRecommendationService {
                   id: recipe.id,
                   name: recipe.name,
                   category: recipe.category,
-                  price: recipe.selling_price
+                  selling_price: recipe.selling_price,
+                  cost_per_unit: recipe.cost_per_unit,
+                  margin_percentage: recipe.margin_percentage,
+                  prep_time: recipe.prep_time,
+                  cook_time: recipe.cook_time
                 }
               })
             }
@@ -98,7 +113,7 @@ export class RecipeRecommendationService {
       const recommendations = Array.from(recipeFrequency.entries())
         .sort((a, b) => b[1].count - a[1].count)
         .slice(0, limit)
-        .map(([recipeId, data]) => ({
+        .map(([, data]) => ({
           id: data.recipe.id,
           name: data.recipe.name,
           category: data.recipe.category,

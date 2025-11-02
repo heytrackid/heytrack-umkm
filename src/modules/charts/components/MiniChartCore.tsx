@@ -1,7 +1,10 @@
-'use client'
-
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
+
+'use client'
+
+
+
 
 // Dynamically import recharts components to reduce bundle size
 const LineChart = dynamic(
@@ -43,36 +46,36 @@ interface MiniChartCoreProps {
   className?: string
 }
 
-export default function MiniChartCore({
+const MiniChartCore = ({
   data,
   type = 'line',
   dataKey,
   color = '#3b82f6',
   height = 60,
   className = ''
-}: MiniChartCoreProps) {
-  return (
-    <div className={className} style={{ height }}>
-      <Suspense fallback={<div className="w-full h-full bg-muted animate-pulse rounded" />}>
-        <ResponsiveContainer width="100%" height="100%">
-          {type === 'line' ? (
-            <LineChart data={data}>
-              <Line
-                type="monotone"
-                dataKey={dataKey}
-                stroke={color}
-                strokeWidth={2}
-                dot={false}
-                activeDot={false}
-              />
-            </LineChart>
-          ) : (
-            <BarChart data={data}>
-              <Bar dataKey={dataKey} fill={color} />
-            </BarChart>
-          )}
-        </ResponsiveContainer>
-      </Suspense>
-    </div>
-  )
-}
+}: MiniChartCoreProps) => (
+  <div className={className} style={{ height }}>
+    <Suspense fallback={<div className="w-full h-full bg-muted animate-pulse rounded" />}>
+      <ResponsiveContainer width="100%" height="100%">
+        {type === 'line' ? (
+          <LineChart data={data}>
+            <Line
+              type="monotone"
+              dataKey={dataKey}
+              stroke={color}
+              strokeWidth={2}
+              dot={false}
+              activeDot={false}
+            />
+          </LineChart>
+        ) : (
+          <BarChart data={data}>
+            <Bar dataKey={dataKey} fill={color} />
+          </BarChart>
+        )}
+      </ResponsiveContainer>
+    </Suspense>
+  </div>
+)
+
+export default MiniChartCore

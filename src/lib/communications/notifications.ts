@@ -1,10 +1,12 @@
+import { automationLogger } from '@/lib/logger'
+import type { SmartNotification, NotificationRule, NotificationConfig } from './types'
+
+
 /**
  * Smart Notification System Module
  * Intelligent notification system with rules and real-time updates
  */
 
-import { automationLogger } from '@/lib/logger'
-import type { SmartNotification, NotificationRule, NotificationConfig } from './types'
 
 export class SmartNotificationSystem {
   private static instance: SmartNotificationSystem
@@ -158,7 +160,7 @@ export class SmartNotificationSystem {
     }
 
     if (condition.operator === 'contains') {
-      return String(value).toLowerCase().includes(String(condition.value ?? '').toLowerCase())
+      return String(value).toLowerCase().includes(String(condition.value || '').toLowerCase())
     }
 
     const numericValue = typeof value === 'number' ? value : Number(value)

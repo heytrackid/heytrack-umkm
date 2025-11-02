@@ -2,15 +2,26 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-// import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
 import { useResponsive } from '@/hooks/useResponsive'
-
-// UI Components
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { MobileRecipeCard } from './MobileRecipeCard'
+import { RecipeStatsCards } from './RecipeStatsCards'
+import { DeleteModal } from '@/components/ui'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { useRecipes } from '@/hooks/supabase/entities'
+import { useSupabaseCRUD } from '@/hooks/supabase'
+import { usePagination } from '@/hooks/usePagination'
+import { SimplePagination } from '@/components/ui/simple-pagination'
+import type { RecipesTable } from '@/types/database'
+
+
+// import { useSettings } from '@/contexts/settings-context'
+
 import {
     Select,
     SelectContent,
@@ -39,24 +50,16 @@ import {
     Users,
     X
 } from 'lucide-react'
-import { PageHeader } from '@/components/layout/PageHeader'
+
+// UI Components
 
 // Feature Components
-import { MobileRecipeCard } from './MobileRecipeCard'
-import { RecipeStatsCards } from './RecipeStatsCards'
-import { DeleteModal } from '@/components/ui'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 
 // Hooks
-import { useRecipes } from '@/hooks/supabase/entities'
-import { useSupabaseCRUD } from '@/hooks/supabase'
-import { usePagination } from '@/hooks/usePagination'
 
 // Components
-import { SimplePagination } from '@/components/ui/simple-pagination'
 
 // Types
-import type { RecipesTable } from '@/types/database'
 
 type Recipe = RecipesTable
 type CategoryFilter = 'all' | 'bread' | 'pastry' | 'cake' | 'cookie' | 'other'
@@ -89,15 +92,15 @@ export const EnhancedRecipesPage = () => {
                 const matchesSearch =
                     !searchTerm ||
                     recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (recipe.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
+                    (recipe.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
 
                 // Category filter
                 const matchesCategory =
-                    categoryFilter === 'all' || (recipe.category ?? 'other') === categoryFilter
+                    categoryFilter === 'all' || (recipe.category || 'other') === categoryFilter
 
                 // Difficulty filter
                 const matchesDifficulty =
-                    difficultyFilter === 'all' || (recipe.difficulty ?? 'medium') === difficultyFilter
+                    difficultyFilter === 'all' || (recipe.difficulty || 'medium') === difficultyFilter
 
                 // Only show active recipes
                 return matchesSearch && matchesCategory && matchesDifficulty && recipe.is_active
@@ -401,7 +404,7 @@ export const EnhancedRecipesPage = () => {
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="text-2xl">{getCategoryIcon(recipe.category ?? 'other')}</span>
+                                                <span className="text-2xl">{getCategoryIcon(recipe.category || 'other')}</span>
                                                 <h3 className="font-semibold text-lg">{recipe.name}</h3>
                                             </div>
                                             {recipe.description && (
@@ -463,10 +466,10 @@ export const EnhancedRecipesPage = () => {
                                         </Badge>
                                         <Badge variant="outline" className="flex items-center gap-1">
                                             <Clock className="h-3 w-3" />
-                                            {(recipe.prep_time ?? 0) + (recipe.cook_time ?? 0)} menit
+                                            {(recipe.prep_time || 0) + (recipe.cook_time || 0)} menit
                                         </Badge>
-                                        <Badge className={getDifficultyColor(recipe.difficulty ?? 'medium')}>
-                                            {getDifficultyLabel(recipe.difficulty ?? 'medium')}
+                                        <Badge className={getDifficultyColor(recipe.difficulty || 'medium')}>
+                                            {getDifficultyLabel(recipe.difficulty || 'medium')}
                                         </Badge>
                                     </div>
                                 </div>

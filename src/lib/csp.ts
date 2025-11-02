@@ -1,3 +1,5 @@
+
+
  
 // src/lib/csp.ts
 /**
@@ -43,8 +45,8 @@ export function getStrictCSP(nonce: string, isDev = false): string {
 }
 
 export function getHashBasedCSP(hashes: { scripts?: string[]; styles?: string[] }, isDev = false): string {
-  const scriptHashes = (hashes.scripts ?? []).map(h => `'${h}'`).join(' ')
-  const styleHashes = (hashes.styles ?? []).map(h => `'${h}'`).join(' ')
+  const scriptHashes = (hashes.scripts || []).map(h => `'${h}'`).join(' ')
+  const styleHashes = (hashes.styles || []).map(h => `'${h}'`).join(' ')
   const scriptSrc = isDev
     ? `script-src 'self' ${scriptHashes} 'strict-dynamic' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://vercel.live;`
     : `script-src 'self' ${scriptHashes} 'strict-dynamic' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com;`

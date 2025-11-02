@@ -1,9 +1,10 @@
+import type { SaleData, ExpenseData, Ingredient, FinancialMetrics } from '@/lib/automation/types'
+
 /**
  * Metrics Calculator Module
  * Handles core financial metrics calculation
  */
 
-import type { SaleData, ExpenseData, Ingredient, FinancialMetrics } from '@/lib/automation/types'
 
 export class MetricsCalculator {
   /**

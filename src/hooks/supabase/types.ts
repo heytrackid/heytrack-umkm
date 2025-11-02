@@ -1,5 +1,6 @@
 import type { Database, Tables, TablesUpdate } from '@/types/database'
 
+
 type TablesMap = Database['public']['Tables']
 
 export interface UseSupabaseQueryOptions<T extends keyof TablesMap> {

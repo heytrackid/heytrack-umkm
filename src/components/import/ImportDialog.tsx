@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useRef } from 'react'
 import {
     Dialog,
@@ -8,11 +7,11 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { uiLogger } from '@/lib/logger'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Upload, Download, FileText, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { uiLogger } from '@/lib/logger'
 
 interface ImportDialogProps {
     open: boolean
@@ -21,8 +20,8 @@ interface ImportDialogProps {
     description: string
     templateUrl: string
     templateFilename: string
-    onImport: (data: any[]) => Promise<{ success: boolean; count?: number; error?: string; details?: any[] }>
-    parseCSV: (text: string) => any[]
+    onImport: (data: unknown[]) => Promise<{ success: boolean; count?: number; error?: string; details?: unknown[] }>
+    parseCSV: (text: string) => unknown[]
 }
 
 export const ImportDialog = ({
@@ -41,7 +40,7 @@ export const ImportDialog = ({
         success: boolean
         count?: number
         error?: string
-        details?: Array<{ row: number; error: string }>
+        details?: Array<{ row: number; error: string }> | unknown[]
     } | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const { toast } = useToast()
@@ -63,7 +62,7 @@ export const ImportDialog = ({
     }
 
     const handleImport = async () => {
-        if (!file) {return}
+        if (!file) { return }
 
         setLoading(true)
         setResult(null)
@@ -102,8 +101,8 @@ export const ImportDialog = ({
                 }, 2000)
             }
 
-        } catch (_error) {
-            uiLogger.error({ error }, 'Import error')
+        } catch (error: unknown) {
+            uiLogger.error({ error: String(error) }, 'Import error')
             setResult({
                 success: false,
                 error: 'Terjadi kesalahan saat import'
@@ -223,11 +222,14 @@ export const ImportDialog = ({
                                                     <div className="mt-2 space-y-1 text-sm">
                                                         <p className="font-medium">Error detail:</p>
                                                         <ul className="list-disc list-inside space-y-1 max-h-32 overflow-y-auto">
-                                                            {result.details.slice(0, 10).map((detail, idx) => (
-                                                                <li key={idx}>
-                                                                    Baris {detail.row}: {detail.error}
-                                                                </li>
-                                                            ))}
+                                                            {result.details.slice(0, 10).map((detail, idx) => {
+                                                                const errorDetail = detail as { row: number; error: string }
+                                                                return (
+                                                                    <li key={idx}>
+                                                                        Baris {errorDetail.row}: {errorDetail.error}
+                                                                    </li>
+                                                                )
+                                                            })}
                                                             {result.details.length > 10 && (
                                                                 <li className="text-muted-foreground">
                                                                     ... dan {result.details.length - 10} error lainnya

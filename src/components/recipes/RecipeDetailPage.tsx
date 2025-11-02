@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DeleteModal } from '@/components/ui'
+import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import { createClient } from '@/utils/supabase/client'
+import { useAuth } from '@/hooks/useAuth'
 import {
     ChefHat,
     Edit,
@@ -16,9 +19,6 @@ import {
     Users,
     ArrowLeft,
 } from 'lucide-react'
-import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
-import { createClient } from '@/utils/supabase/client'
-import { useAuth } from '@/hooks/useAuth'
 
 type RecipeRow = RecipesTable
 type RecipeIngredientRow = RecipeIngredientsTable
@@ -202,7 +202,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                     </Button>
                     <div>
                         <h1 className="text-3xl font-bold flex items-center gap-2">
-                            <span className="text-3xl">{getCategoryIcon(recipe.category ?? 'other')}</span>
+                            <span className="text-3xl">{getCategoryIcon(recipe.category || 'other')}</span>
                             {recipe.name}
                         </h1>
                         {recipe.description && (
@@ -245,7 +245,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Persiapan</p>
-                                <p className="text-2xl font-bold">{recipe.prep_time ?? 0} menit</p>
+                                <p className="text-2xl font-bold">{recipe.prep_time || 0} menit</p>
                             </div>
                             <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
                         </div>
@@ -257,7 +257,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Memasak</p>
-                                <p className="text-2xl font-bold">{recipe.cook_time ?? 0} menit</p>
+                                <p className="text-2xl font-bold">{recipe.cook_time || 0} menit</p>
                             </div>
                             <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
                         </div>
@@ -269,8 +269,8 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Kesulitan</p>
-                                <Badge className={getDifficultyColor(recipe.difficulty ?? 'medium')}>
-                                    {getDifficultyLabel(recipe.difficulty ?? 'medium')}
+                                <Badge className={getDifficultyColor(recipe.difficulty || 'medium')}>
+                                    {getDifficultyLabel(recipe.difficulty || 'medium')}
                                 </Badge>
                             </div>
                             <ChefHat className="h-8 w-8 text-gray-600 dark:text-gray-400" />

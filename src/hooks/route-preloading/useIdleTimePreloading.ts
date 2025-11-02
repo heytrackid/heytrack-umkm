@@ -1,8 +1,10 @@
 'use client'
+
 import { useEffect } from 'react'
+import { preloadChartBundle } from '@/components/lazy/index'
+
 
 // Removed unused import: apiLogger
-import { preloadChartBundle } from '@/components/lazy/index'
 
 /**
  * Time-based preloading hook

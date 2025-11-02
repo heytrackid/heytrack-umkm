@@ -1,14 +1,20 @@
 'use client'
 
+'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+
 import { usePagination } from '@/hooks/usePagination'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Search, Plus, Package, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { useSettings } from '@/contexts/settings-context'
+import type { OrdersTable, OrderStatus } from '@/types/database'
+import type { PaginatedResponse } from '@/lib/validations/pagination'
 import {
     Select,
     SelectContent,
@@ -16,11 +22,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Search, Plus, Package, Clock, CheckCircle, XCircle } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { useSettings } from '@/contexts/settings-context'
-import type { OrdersTable, OrderStatus } from '@/types/database'
-import type { PaginatedResponse } from '@/lib/validations/pagination'
 
 type Order = OrdersTable
 
@@ -81,7 +82,7 @@ export const OrdersListWithPagination = () => {
 
             setOrders(result.data)
             setTotalItems(result.meta.total)
-        } catch (_error) {
+        } catch (error) {
             toast({
                 title: 'Error',
                 description: 'Gagal memuat data pesanan',
@@ -109,7 +110,7 @@ export const OrdersListWithPagination = () => {
     }
 
     const getStatusBadge = (status: OrderStatus) => {
-        const statusConfig: Record<OrderStatus, { label: string; icon: any; className: string }> = {
+        const statusConfig: Record<OrderStatus, { label: string; icon: React.ComponentType<any>; className: string }> = {
             PENDING: { label: 'Pending', icon: Clock, className: 'bg-yellow-100 text-yellow-700' },
             CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle, className: 'bg-blue-100 text-blue-700' },
             IN_PROGRESS: { label: 'Sedang Diproses', icon: Package, className: 'bg-purple-100 text-purple-700' },
@@ -169,7 +170,7 @@ export const OrdersListWithPagination = () => {
                                 <SelectItem value="all">Semua Status</SelectItem>
                                 <SelectItem value="PENDING">Pending</SelectItem>
                                 <SelectItem value="CONFIRMED">Dikonfirmasi</SelectItem>
-                                <SelectItem value="IN_PRODUCTION">Produksi</SelectItem>
+                                <SelectItem value="IN_PROGRESS">Produksi</SelectItem>
                                 <SelectItem value="READY">Siap</SelectItem>
                                 <SelectItem value="DELIVERED">Terkirim</SelectItem>
                                 <SelectItem value="CANCELLED">Dibatalkan</SelectItem>

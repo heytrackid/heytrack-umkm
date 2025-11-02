@@ -8,6 +8,8 @@ import { Separator } from '@/components/ui/separator'
 import { User, Upload } from 'lucide-react'
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 
+
+
 interface ProfileSettingsProps {
   settings: AppSettingsState
   onSettingChange: SettingsUpdateHandler

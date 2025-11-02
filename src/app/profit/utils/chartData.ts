@@ -1,10 +1,11 @@
+import { useMemo } from 'react'
+import type { ProfitData, ProductChartData } from '@/app/profit/components/types'
+
 /**
  * Profit Report Utilities
  * Utility functions for profit report data processing
  */
 
-import { useMemo } from 'react'
-import type { ProfitData, ProductChartData } from '@/app/profit/components/types'
 
 export function useProductChartData(profitData: ProfitData | null): ProductChartData[] {
   return useMemo(() => {

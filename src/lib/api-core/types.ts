@@ -1,9 +1,10 @@
+import type { NextRequest, NextResponse } from 'next/server'
+
 /**
  * API Core Module Types
  * Centralized type definitions for API core functionality
  */
 
-import type { NextRequest } from 'next/server'
 
 // ============================================================================
 // CACHE TYPES
@@ -113,7 +114,7 @@ export interface RouteHandlerConfig {
     query?: unknown // z.ZodSchema
     params?: unknown // z.ZodSchema
   }
-  middleware?: Array<(request: NextRequest) => Promise<unknown> | unknown>
+  middleware?: Array<(request: NextRequest) => Promise<NextResponse | void> | NextResponse | void>
   pagination?: boolean
   caching?: {
     key: string

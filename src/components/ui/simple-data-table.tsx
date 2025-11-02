@@ -1,4 +1,3 @@
-/* eslint-disable */
 'use client'
 
 import { type ReactNode, useState, useEffect, useMemo } from 'react'
@@ -7,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 import {
   Search,
   Filter,
@@ -32,24 +32,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 
-interface SimpleColumn<T> {
-  key: keyof T | string
+type SortableValue = string | number | boolean | Date | null | undefined
+
+export interface SimpleColumn<T, TValue = unknown> {
+  key: keyof T
   header: string
-  render?: (value: unknown, item: T) => ReactNode
+  accessor?: (item: T) => TValue
+  render?: (value: TValue, item: T) => ReactNode
   sortable?: boolean
+  sortAccessor?: (item: T) => SortableValue
   filterable?: boolean
   filterType?: 'text' | 'select'
   filterOptions?: Array<{ label: string; value: string }>
   hideOnMobile?: boolean
 }
 
-interface SimpleDataTableProps<T> {
+interface SimpleDataTableProps<T, TValue = unknown> {
   title?: string
   description?: string
   data: T[]
-  columns: Array<SimpleColumn<T>>
+  columns: Array<SimpleColumn<T, TValue>>
   searchPlaceholder?: string
   onAdd?: () => void
   onView?: (item: T) => void
@@ -64,7 +67,7 @@ interface SimpleDataTableProps<T> {
   initialPageSize?: number
 }
 
-export const SimpleDataTable = <T extends Record<string, unknown>>({
+export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[keyof T]>({
   title,
   description,
   data,
@@ -81,7 +84,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>>({
   enablePagination = true,
   pageSizeOptions,
   initialPageSize
-}: SimpleDataTableProps<T>) => {
+}: SimpleDataTableProps<T, TValue>) => {
   const { isMobile } = useMobile()
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
@@ -107,18 +110,19 @@ export const SimpleDataTable = <T extends Record<string, unknown>>({
 
   // Filter data berdasarkan search dan filter
   const filteredData = data.filter(item => {
-    // Search filter
-    const matchesSearch = !searchTerm ||
-      columns.some(col => {
-        const value = getValue(item, col.key)
-        return value != null && String(value).toLowerCase().includes(searchTerm.toLowerCase())
-      })
+    const searchLower = searchTerm.toLowerCase()
 
-    // Column filters
+    const matchesSearch = !searchTerm || columns.some(col => {
+      const value = getColumnValue(item, col)
+      return value != null && String(value).toLowerCase().includes(searchLower)
+    })
+
     const matchesFilters = Object.entries(filters).every(([key, filterValue]) => {
       if (!filterValue || filterValue === 'all') { return true }
-      const itemValue = getValue(item, key)
-      return String(itemValue) === filterValue
+      const column = columns.find(col => String(col.key) === key)
+      if (!column) { return true }
+      const itemValue = getColumnValue(item, column)
+      return String(itemValue ?? '') === filterValue
     })
 
     return matchesSearch && matchesFilters
@@ -126,14 +130,22 @@ export const SimpleDataTable = <T extends Record<string, unknown>>({
 
   // Sort data
   const sortedData = sortBy ? [...filteredData].sort((a, b) => {
-    const aVal = getValue(a, sortBy)
-    const bVal = getValue(b, sortBy)
+    const column = columns.find(col => String(col.key) === sortBy)
+    if (!column) { return 0 }
 
-    if (sortOrder === 'asc') {
-      return aVal > bVal ? 1 : -1
-    } 
-      return aVal < bVal ? 1 : -1
-    
+    const rawA = column.sortAccessor ? column.sortAccessor(a) : getColumnValue(a, column)
+    const rawB = column.sortAccessor ? column.sortAccessor(b) : getColumnValue(b, column)
+
+    const aVal = toSortableValue(rawA)
+    const bVal = toSortableValue(rawB)
+
+    if (aVal === bVal) { return 0 }
+    if (aVal == null) { return sortOrder === 'asc' ? -1 : 1 }
+    if (bVal == null) { return sortOrder === 'asc' ? 1 : -1 }
+
+    if (aVal < bVal) { return sortOrder === 'asc' ? -1 : 1 }
+    if (aVal > bVal) { return sortOrder === 'asc' ? 1 : -1 }
+    return 0
   }) : filteredData
 
   const totalItems = sortedData.length
@@ -146,12 +158,20 @@ export const SimpleDataTable = <T extends Record<string, unknown>>({
     ? sortedData.slice(pageStart - 1, pageEnd)
     : sortedData
 
-  function getValue(item: T, key: keyof T | string): unknown {
-    if (typeof key === 'string' && key.includes('.')) {
-      return key.split('.').reduce((obj, k) => obj?.[k], item)
-    }
-    return item[key as keyof T]
+function getColumnValue(item: T, column: SimpleColumn<T, TValue>): TValue {
+  if (column.accessor) {
+    return column.accessor(item)
   }
+  return item[column.key] as TValue
+}
+
+function toSortableValue(value: unknown): SortableValue {
+  if (value instanceof Date) { return value.getTime() }
+  if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean' || value == null) {
+    return value as SortableValue
+  }
+  return String(value)
+}
 
   useEffect(() => {
     if (!enablePagination) { return }
@@ -196,8 +216,8 @@ export const SimpleDataTable = <T extends Record<string, unknown>>({
       columns.map(col => col.header).join(','),
       ...sortedData.map(item =>
         columns.map(col => {
-          const value = getValue(item, col.key)
-          return `"${String(value || '')}"`
+          const value = getColumnValue(item, col)
+          return `"${String(value ?? '')}"`
         }).join(',')
       )
     ].join('\n')
@@ -320,10 +340,13 @@ export const SimpleDataTable = <T extends Record<string, unknown>>({
                               {col.header}:
                             </span>
                             <div className="text-sm flex-1 text-right">
-                              {col.render
-                                ? col.render(getValue(item, col.key), item)
-                                : String(getValue(item, col.key) || '-')
-                              }
+                              {(() => {
+                                const value = getColumnValue(item, col)
+                                if (col.render) {
+                                  return col.render(value, item)
+                                }
+                                return value == null ? '-' : String(value)
+                              })()}
                             </div>
                           </div>
                         ))
@@ -422,10 +445,20 @@ export const SimpleDataTable = <T extends Record<string, unknown>>({
                           key={String(col.key)}
                           className={`p-2 ${col.hideOnMobile ? 'hidden sm:table-cell' : ''}`}
                         >
-                          {col.render
-                            ? col.render(getValue(item, col.key), item)
-                            : String(getValue(item, col.key) || '-')
-                          }
+                          {(() => {
+                            const value = getColumnValue(item, col)
+                            if (col.render) {
+                              return col.render(value, item)
+                            }
+                            if (typeof value === 'boolean') {
+                              return (
+                                <Badge variant={value ? "default" : "secondary"}>
+                                  {value ? 'Yes' : 'No'}
+                                </Badge>
+                              )
+                            }
+                            return value == null ? '-' : String(value)
+                          })()}
                         </td>
                       ))}
                       {(onView || onEdit || onDelete) && (

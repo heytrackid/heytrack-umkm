@@ -1,17 +1,15 @@
-// @ts-nocheck - Complex Supabase generic constraints
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
 import { useCallback, useState } from 'react'
 import type { CRUDOptions } from './types'
-import type { Database } from '@/types/database'
-
-type TablesMap = Database['public']['Tables']
+import type { TableName, Row, Insert, Update } from '@/types/database'
+import { typed } from '@/types/type-utilities'
 
 /**
  * CRUD operations for Supabase tables
  */
-export function useSupabaseCRUD<T extends keyof TablesMap>(
+export function useSupabaseCRUD<T extends TableName>(
   table: T,
   options: CRUDOptions = {}
 ) {
@@ -50,16 +48,16 @@ export function useSupabaseCRUD<T extends keyof TablesMap>(
     }
   }, [showSuccessToast, successMessages])
 
-  const createRecord = useCallback(async (data: TablesMap[T]['Insert']) => {
+  const createRecord = useCallback(async (data: Insert<T>) => {
     void setLoading(true)
     void setError(null)
 
     try {
-      const supabase = createClient()
+      const supabase = typed(createClient())
 
       const { data: result, error } = await supabase
         .from(table)
-        .insert(data)
+        .insert(data as never)
         .select('*')
         .single()
 
@@ -77,17 +75,17 @@ export function useSupabaseCRUD<T extends keyof TablesMap>(
     }
   }, [table, handleError, handleSuccess])
 
-  const updateRecord = useCallback(async (id: string, data: TablesMap[T]['Update']) => {
+  const updateRecord = useCallback(async (id: string, data: Update<T>) => {
     void setLoading(true)
     void setError(null)
 
     try {
-      const supabase = createClient()
+      const supabase = typed(createClient())
 
       const { data: result, error } = await supabase
         .from(table)
-        .update(data)
-        .eq('id', id)
+        .update(data as never)
+        .eq('id', id as never)
         .select('*')
         .single()
 
@@ -114,12 +112,12 @@ export function useSupabaseCRUD<T extends keyof TablesMap>(
     void setError(null)
 
     try {
-      const supabase = createClient()
+      const supabase = typed(createClient())
 
       const { error } = await supabase
         .from(table)
         .delete()
-        .eq('id', id)
+        .eq('id', id as never)
 
       if (error) {
         throw new Error((error instanceof Error ? error.message : String(error)))

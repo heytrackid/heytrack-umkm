@@ -1,11 +1,13 @@
+import { useEffect, useRef, useCallback } from 'react'
+import { createLogger } from '@/lib/logger'
+
+
 /**
  * Performance Utilities
  * 
  * Helper functions for optimizing performance
  */
 
-import { useEffect, useRef, useCallback } from 'react'
-import { createLogger } from '@/lib/logger'
 
 const perfLogger = createLogger('Performance')
 
@@ -166,14 +168,12 @@ export function isSlowConnection(): boolean {
     connection?: NetworkInformation, 
     mozConnection?: NetworkInformation, 
     webkitConnection?: NetworkInformation 
-  }).connection || 
-  (navigator as any).mozConnection || 
+  }).connection || (navigator as any).mozConnection || 
   (navigator as any).webkitConnection
   
   if (!connection) {return false}
   
-  return connection.effectiveType === 'slow-2g' || 
-         connection.effectiveType === '2g' ||
+  return connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g' ||
          connection.saveData === true
 }
 

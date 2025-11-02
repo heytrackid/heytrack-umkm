@@ -1,11 +1,14 @@
+'use client'
+
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+
 /**
  * Hook for using HPP Calculator Web Worker
  * Offloads heavy calculations to prevent UI blocking
  */
 
-'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface HppCalculationInput {
   ingredients: Array<{

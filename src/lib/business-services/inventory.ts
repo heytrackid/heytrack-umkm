@@ -1,3 +1,8 @@
+import type { ReorderSummary } from './types'
+import type { Database, IngredientsTable } from '@/types/database'
+import { inventoryLogger } from '@/lib/logger'
+
+
 /**
  * Inventory Services
  * Service for inventory management operations
@@ -5,9 +10,6 @@
 
 
 
-import type { ReorderSummary } from './types'
-import type { Database, IngredientsTable } from '@/types/database'
-import { inventoryLogger } from '@/lib/logger'
 
 type Ingredient = IngredientsTable
 

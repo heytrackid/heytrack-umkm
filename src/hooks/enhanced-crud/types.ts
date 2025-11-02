@@ -1,5 +1,6 @@
 import type { Database, TablesUpdate } from '@/types/database'
 
+
 type TablesMap = Database['public']['Tables']
 
 export interface EnhancedCRUDOptions {

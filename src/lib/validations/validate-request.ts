@@ -1,3 +1,7 @@
+import { type NextRequest, NextResponse } from 'next/server'
+import { type z, ZodError } from 'zod'
+
+
 /**
  * Request Validation Helper
  * 
@@ -5,8 +9,6 @@
  * Provides consistent error handling and type safety
  */
 
-import { type NextRequest, NextResponse } from 'next/server'
-import { type z, ZodError } from 'zod'
 
 /**
  * Validation result type

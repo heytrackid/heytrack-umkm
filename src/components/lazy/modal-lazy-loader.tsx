@@ -1,9 +1,12 @@
 'use client'
 
-import { lazy, Suspense, useState, useCallback } from 'react'
+import { lazy, Suspense, useState, useCallback, type ComponentType } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import(/* webpackChunkName: "modal-customer-form" */ '@/components/forms/CustomerForm').then(m => ({ default: m.CustomerForm }))
+
+
 
 // Modal Loading Skeleton
 const ModalLoadingSkeleton = ({ title }: { title?: string }) => (
@@ -51,7 +54,8 @@ export const LazyOrderForm = lazy(() =>
 )
 
 export const LazyCustomerForm = lazy(() =>
-  import(/* webpackChunkName: "modal-customer-form" */ '@/components/forms/CustomerForm').then(m => ({ default: m.CustomerForm }))
+  import(/* webpackChunkName: "modal-customer-form" */ '@/components/forms/CustomerForm')
+    .then(m => ({ default: m.CustomerForm }))
     .catch(() => ({ default: FormPlaceholder }))
 )
 
@@ -83,7 +87,7 @@ interface LazyModalProps {
   title: string
   component: 'ingredient-form' | 'order-form' | 'customer-form' | 'recipe-form' | 'finance-form' |
   'order-detail' | 'customer-detail' | 'inventory-detail'
-  props?: any
+  props?: Record<string, unknown>
   size?: 'sm' | 'md' | 'lg' | 'xl'
   mobile?: boolean
 }
@@ -108,6 +112,7 @@ export const LazyModal = ({
       case 'order-detail': return LazyOrderDetail
       case 'customer-detail': return LazyCustomerDetail
       case 'inventory-detail': return LazyInventoryDetail
+      // eslint-disable-next-line react/no-unstable-nested-components
       default: return () => <div>Informasi</div>
     }
   }
@@ -123,7 +128,23 @@ export const LazyModal = ({
   }
 
   const Component = getComponent()
+  const ComponentToRender = Component as ComponentType<Record<string, unknown>>
   const isFormComponent = component.includes('form')
+
+  const defaultProps = (() => {
+    switch (component) {
+      case 'customer-form':
+        return {
+          onSubmit: async () => {
+            // Fallback to avoid runtime crash if caller forgets to pass handler
+          }
+        }
+      default:
+        return {}
+    }
+  })()
+
+  const mergedProps = { ...defaultProps, ...(props ?? {}) }
 
   if (mobile) {
     return (
@@ -136,7 +157,7 @@ export const LazyModal = ({
             <Suspense fallback={
               isFormComponent ? <FormLoadingSkeleton /> : <ModalLoadingSkeleton title={title} />
             }>
-              <Component {...props} onClose={onClose} />
+              <ComponentToRender {...mergedProps} />
             </Suspense>
           </div>
         </SheetContent>
@@ -153,7 +174,7 @@ export const LazyModal = ({
         <Suspense fallback={
           isFormComponent ? <FormLoadingSkeleton /> : <ModalLoadingSkeleton title={title} />
         }>
-          <Component {...props} onClose={onClose} />
+          <ComponentToRender {...mergedProps} />
         </Suspense>
       </DialogContent>
     </Dialog>
@@ -166,7 +187,7 @@ export const useLazyModal = () => {
     isOpen: boolean
     component: LazyModalProps['component'] | null
     title: string
-    props: unknown
+    props: Record<string, unknown> | undefined
     size: LazyModalProps['size']
   }>({
     isOpen: false,

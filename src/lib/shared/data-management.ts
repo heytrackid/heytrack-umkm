@@ -1,10 +1,13 @@
-/* eslint-disable */
 'use client'
-
-// Shared data management and caching utilities
 
 import { useCallback, useEffect, useState } from 'react'
 import { logger } from '@/lib/logger'
+
+
+/* eslint-disable */
+
+// Shared data management and caching utilities
+
 
 // Cache implementation
 class MemoryCache {
@@ -18,7 +21,7 @@ class MemoryCache {
     })
   }
 
-  get(key: string) {
+  get<T = unknown>(key: string): T | null {
     const item = this.cache.get(key)
     if (!item) {return null}
 
@@ -27,7 +30,7 @@ class MemoryCache {
       return null
     }
 
-    return item.data
+    return item.data as T
   }
 
   delete(key: string) {
@@ -87,7 +90,7 @@ export function useCachedData<T>(
 
     // Check cache first unless forcing refresh
     if (!force) {
-      const cached = globalCache.get(key)
+      const cached = globalCache.get<T>(key)
       if (cached) {
         void setData(cached)
         return
@@ -100,7 +103,7 @@ export function useCachedData<T>(
     try {
       const result = await fetcher()
       void setData(result)
-      globalCache.set(key, result, ttl)
+      globalCache.set<T>(key, result, ttl)
     } catch (err) {
       void setError(err as Error)
     } finally {
@@ -113,7 +116,7 @@ export function useCachedData<T>(
       void fetchData()
     } else {
       // Try to get from cache first
-      const cached = globalCache.get(key)
+      const cached = globalCache.get<T>(key)
       if (cached) {
         void setData(cached)
       } else {
@@ -161,7 +164,7 @@ export function useDataSync<T>(
 
   const updateData = useCallback((updater: T | ((prev: T) => T)) => {
     setData(prev => {
-      const newData = typeof updater === 'function' ? (updater as Function)(prev) : updater
+      const newData = typeof updater === 'function' ? (updater as (prev: T) => T)(prev) : updater
       // Cache the updated data
       globalCache.set(key, newData)
       return newData

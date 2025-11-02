@@ -1,11 +1,12 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { OrderWorkflowHandlers } from '@/lib/automation/workflows/order-workflows'
+import type { WorkflowContext, WorkflowResult } from '@/types/features/automation'
+
 /**
  * Order Workflow Tests
  * Tests for automated order processing workflows
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { OrderWorkflowHandlers } from '@/lib/automation/workflows/order-workflows'
-import type { WorkflowContext, WorkflowResult } from '@/lib/automation/types'
 
 // Mock Supabase client
 const mockSupabase = {
@@ -49,7 +50,16 @@ describe('OrderWorkflowHandlers', () => {
         enabled: true,
         maxConcurrentJobs: 5,
         retryAttempts: 3,
-        notificationEnabled: true
+        notificationEnabled: true,
+        defaultProfitMargin: 0.3,
+        minimumProfitMargin: 0.15,
+        maximumProfitMargin: 0.6,
+        autoReorderDays: 7,
+        safetyStockMultiplier: 1.5,
+        productionLeadTime: 2,
+        batchOptimizationThreshold: 10,
+        lowProfitabilityThreshold: 0.2,
+        cashFlowWarningDays: 30
       }
     }
   })
@@ -85,13 +95,13 @@ describe('OrderWorkflowHandlers', () => {
       mockSupabase.from.mockReturnValueOnce({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
-            single: vi.fn(() => Promise.resolve({ data: null, error: { message: 'Order not found' } }))
+            single: vi.fn(() => Promise.resolve({ data: null, error: { message: 'Order not found' } as unknown }))
           }))
         })),
         update: vi.fn(),
         insert: vi.fn(),
         delete: vi.fn()
-      })
+      } as unknown as ReturnType<typeof mockSupabase.from>)
 
       const result = await OrderWorkflowHandlers.handleOrderCompleted(context)
 
@@ -120,7 +130,7 @@ describe('OrderWorkflowHandlers', () => {
         })),
         insert: vi.fn(() => Promise.resolve({ error: null })),
         delete: vi.fn()
-      })
+      } as unknown as ReturnType<typeof mockSupabase.from>)
 
       const result = await OrderWorkflowHandlers.handleOrderCompleted(context)
 
@@ -166,7 +176,7 @@ describe('OrderWorkflowHandlers', () => {
         delete: vi.fn(() => ({
           eq: vi.fn(() => Promise.resolve({ error: null }))
         }))
-      })
+      } as unknown as ReturnType<typeof mockSupabase.from>)
 
       const result = await OrderWorkflowHandlers.handleOrderCancelled(context)
 

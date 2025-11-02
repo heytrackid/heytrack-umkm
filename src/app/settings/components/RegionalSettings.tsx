@@ -8,6 +8,8 @@ import { Settings, RotateCcw } from 'lucide-react'
 import { useState } from 'react'
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 
+
+
 interface RegionalSettingsProps {
   settings: AppSettingsState
   onSettingChange: SettingsUpdateHandler
@@ -53,9 +55,9 @@ export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettings
             <Settings className="h-5 w-5" />
             Pengaturan Regional
           </div>
-          <Button 
-            size="sm" 
-            variant="outline" 
+          <Button
+            size="sm"
+            variant="outline"
             onClick={handleResetCurrency}
             disabled={isResetting}
             className="text-xs"

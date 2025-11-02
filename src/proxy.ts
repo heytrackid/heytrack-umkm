@@ -4,6 +4,8 @@ import { middlewareLogger } from '@/lib/logger'
 import { generateNonce, getStrictCSP } from '@/lib/csp'
 import { updateSession } from '@/utils/supabase/middleware'
 
+
+
 const PROTECTED_ROUTES = new Set([
   '/dashboard',
   '/orders',
@@ -73,7 +75,7 @@ export async function proxy(request: NextRequest) {
       const result = await updateSession(request)
       user = result.user
       response = result.response
-    } catch (_error) {
+    } catch (error) {
       // If auth fails, continue without user (they'll be redirected to login if needed)
       middlewareLogger.debug({ error }, 'Middleware auth error')
       user = null
@@ -134,7 +136,7 @@ export async function proxy(request: NextRequest) {
     }
 
     return response
-  } catch (_error) {
+  } catch (error) {
     middlewareLogger.error({ error }, 'Middleware error')
     // Return basic response with CSP on error
     const errorResponse = NextResponse.next()

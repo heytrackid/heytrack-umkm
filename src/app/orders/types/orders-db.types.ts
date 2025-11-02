@@ -1,9 +1,10 @@
+import type { OrdersTable, OrderItemsTable, OrderStatus, PaymentMethod } from '@/types/database'
+
 /**
  * Order types that match the actual Supabase database schema
  * These types are generated based on the actual database structure
  */
 
-import type { OrdersTable, OrderItemsTable, OrderStatus, PaymentMethod } from '@/types/database'
 
 // Base types from database
 export type OrderRow = OrdersTable
@@ -12,7 +13,7 @@ export type { OrderStatus, PaymentMethod }
 
 // Backwards compatible aliases
 export type Order = OrderRow
-export // type OrderItem = OrderItemRow
+export type OrderItem = OrderItemRow
 
 // Extended types with relations for UI
 export interface OrderWithItems extends OrderRow {

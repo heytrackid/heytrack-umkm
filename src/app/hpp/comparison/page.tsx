@@ -7,14 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import {
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Target,
-  Package,
-  Users
-} from 'lucide-react'
+import { BarChart3, TrendingUp, TrendingDown, Target, Package, Users } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
@@ -45,7 +38,7 @@ interface BenchmarkData {
   totalProduction: number
 }
 
-const ComparisonAnalyticsPage = () {
+const ComparisonAnalyticsPage = () => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const [recipes, setRecipes] = useState<RecipeComparison[]>([])
@@ -129,9 +122,9 @@ const ComparisonAnalyticsPage = () {
           title="Recipe Comparison"
           description="Benchmarking dan analisis komparatif antar resep"
         />
-        
+
         {/* Stats Cards */}
-        <SharedStatsCards 
+        <SharedStatsCards
           stats={[
             {
               title: "Total Recipes",

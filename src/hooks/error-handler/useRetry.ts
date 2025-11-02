@@ -2,6 +2,8 @@
 
 import { useCallback, useState } from 'react'
 import { useErrorHandler } from './useErrorHandler'
+
+
 // Removed unused import: RetryOptions
 
 /**
@@ -53,7 +55,7 @@ export function useRetry(maxRetries = 3, initialDelay = 1000) {
           void setRetryCount(0)
           void setIsRetrying(false)
           return result
-        } catch (_error) {
+        } catch (error) {
           lastError = error as Error
 
           if (attempt < maxRetries) {

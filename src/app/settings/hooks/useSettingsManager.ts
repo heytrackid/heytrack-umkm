@@ -3,12 +3,7 @@ import { useSettings } from '@/contexts/settings-context'
 import { useLoading } from '@/hooks/loading'
 import { toast } from 'react-hot-toast'
 import { apiLogger } from '@/lib/logger'
-import {
-  DEFAULT_APP_SETTINGS,
-  normalizeSettings,
-  type AppSettingsState,
-  type SettingsUpdateHandler,
-} from '@/app/settings/types'
+import { DEFAULT_APP_SETTINGS, normalizeSettings, type AppSettingsState, type SettingsUpdateHandler, } from '@/app/settings/types' 
 
 const LOADING_KEYS = {
   LOAD_SETTINGS: 'loadSettings',

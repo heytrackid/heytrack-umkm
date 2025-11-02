@@ -1,5 +1,8 @@
 'use client'
 
+import { Button } from "@/components/ui/button"
+import { AlertTriangle, Trash2, CheckCircle, type LucideIcon } from "lucide-react"
+import type { ReactNode } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,9 +13,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { AlertTriangle, Trash2, CheckCircle } from "lucide-react"
-import type { ReactNode } from "react"
 
 interface ConfirmationDialogProps {
   open: boolean
@@ -24,7 +24,7 @@ interface ConfirmationDialogProps {
   variant?: 'default' | 'destructive' | 'success' | 'warning'
   onConfirm: () => void | Promise<void>
   loading?: boolean
-  icon?: ReactNode
+  icon?: LucideIcon
 }
 
 const variantConfig = {
@@ -76,9 +76,9 @@ export const ConfirmationDialog = ({
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
             <div className={`rounded-full p-2 ${variant === 'destructive' ? 'bg-red-100' :
-                variant === 'success' ? 'bg-green-100' :
-                  variant === 'warning' ? 'bg-orange-100' :
-                    'bg-blue-100'
+              variant === 'success' ? 'bg-green-100' :
+                variant === 'warning' ? 'bg-orange-100' :
+                  'bg-blue-100'
               }`}>
               <IconComponent className={`h-5 w-5 ${config.iconColor}`} />
             </div>

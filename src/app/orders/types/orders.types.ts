@@ -1,4 +1,5 @@
 import type { OrdersTable, OrderItemsTable, CustomersTable, OrderStatus, PaymentMethod } from '@/types/database'
+
 // Orders module types and interfaces with multi-currency support
 // Use generated types from Supabase as base
 export type Order = OrdersTable

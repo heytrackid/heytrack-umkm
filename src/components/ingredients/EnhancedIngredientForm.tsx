@@ -6,11 +6,12 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { FormField, FormGrid } from '@/components/ui/crud-form'
-import { LabelWithTooltip, UMKM_TOOLTIPS } from '@/components/ui/tooltip-helper'
 import { AlertTriangle, Info, TrendingUp } from 'lucide-react'
 import { useSettings } from '@/contexts/settings-context'
 import type { SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import type { IngredientsTable } from '@/types/database'
+
+
 
 type Ingredient = IngredientsTable
 
@@ -26,7 +27,7 @@ export const EnhancedIngredientForm = ({
     initialData
 }: EnhancedIngredientFormProps) => {
     const { formatCurrency } = useSettings()
-    const { register, watch, formState: { errors } } = form
+    const { register, watch, formState: { errors }, setValue } = form
 
     const currentStock = watch('current_stock')
     const minStock = watch('min_stock')
@@ -37,17 +38,16 @@ export const EnhancedIngredientForm = ({
 
     useEffect(() => {
         if (mode === 'edit' && initialData) {
-            const changed =
-                currentStock !== initialData.current_stock ||
-                minStock !== initialData.min_stock ||
+            const changed = (currentStock || 0) !== initialData.current_stock ||
+                (minStock || 0) !== initialData.min_stock ||
                 pricePerUnit !== initialData.price_per_unit
             setHasChanges(changed)
         }
     }, [currentStock, minStock, pricePerUnit, initialData, mode])
 
-    // Validation warnings
-    const showMinStockWarning = minStock > 0 && currentStock > 0 && currentStock <= minStock
-    const showOutOfStockWarning = currentStock <= 0
+    // Validation warnings (with handling for potentially undefined values)
+    const showMinStockWarning = (minStock || 0) > 0 && (currentStock || 0) > 0 && (currentStock || 0) <= (minStock || 0)
+    const showOutOfStockWarning = (currentStock || 0) <= 0
     const totalValue = (pricePerUnit || 0) * (currentStock || 0)
 
     const unitOptions = [
@@ -129,21 +129,23 @@ export const EnhancedIngredientForm = ({
                             label="Nama Bahan"
                             name="name"
                             type="text"
-                            {...register('name')}
                             error={errors.name?.message}
                             required
                             placeholder="Contoh: Tepung Terigu"
                             autoFocus={mode === 'create'}
+                            value={watch('name') || ''}
+                            onChange={(_, value) => form.setValue('name', value as string)}
                         />
 
                         <FormField
                             label="Satuan"
                             name="unit"
                             type="select"
-                            {...register('unit')}
                             error={errors.unit?.message}
                             required
                             options={unitOptions}
+                            value={watch('unit') || ''}
+                            onChange={(_, value) => setValue('unit', value as string)}
                         />
                     </FormGrid>
                 </div>
@@ -156,24 +158,26 @@ export const EnhancedIngredientForm = ({
                             label="Harga per Unit"
                             name="price_per_unit"
                             type="number"
-                            {...register('price_per_unit', { valueAsNumber: true })}
                             error={errors.price_per_unit?.message}
                             required
                             min={0}
                             step={0.01}
                             placeholder="0"
+                            value={watch('price_per_unit') || 0}
+                            onChange={(_, value) => setValue('price_per_unit', value as number)}
                         />
 
                         <FormField
                             label="Stok Saat Ini"
                             name="current_stock"
                             type="number"
-                            {...register('current_stock', { valueAsNumber: true })}
                             error={errors.current_stock?.message}
                             required
                             min={0}
                             step={0.01}
                             placeholder="0"
+                            value={watch('current_stock') || 0}
+                            onChange={(_, value) => setValue('current_stock', value as number)}
                         />
                     </FormGrid>
 
@@ -181,13 +185,14 @@ export const EnhancedIngredientForm = ({
                         label="Stok Minimum"
                         name="min_stock"
                         type="number"
-                        {...register('min_stock', { valueAsNumber: true })}
                         error={errors.min_stock?.message}
                         required
                         min={0}
                         step={0.01}
                         placeholder="0"
                         hint="Anda akan mendapat notifikasi jika stok mencapai batas ini"
+                        value={watch('min_stock') || 0}
+                        onChange={(_, value) => setValue('min_stock', value as number)}
                     />
 
                     {/* Total Value Display */}
@@ -210,8 +215,9 @@ export const EnhancedIngredientForm = ({
                         label="Deskripsi"
                         name="description"
                         type="text"
-                        {...register('description')}
                         placeholder="Catatan atau deskripsi tambahan"
+                        value={watch('description') || ''}
+                        onChange={(_, value) => setValue('description', value as string)}
                     />
                 </div>
             </div>

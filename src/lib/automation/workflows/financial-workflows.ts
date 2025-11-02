@@ -1,11 +1,12 @@
+import { automationLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
+import type { WorkflowEventData, WorkflowResult, WorkflowContext } from '@/types/features/automation'
+
 /**
  * Financial Workflow Handlers
  * Workflow automation handlers for financial-related events
  */
 
-import { automationLogger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/type-guards'
-import type { WorkflowEventData, WorkflowResult, WorkflowContext } from '@/lib/automation/types'
 
 export class FinancialWorkflowHandlers {
   /**
@@ -32,13 +33,13 @@ export class FinancialWorkflowHandlers {
 
     const { ingredientId, oldPrice, newPrice, priceChange, affectedRecipes } = data
 
-    logger.info({
+    logger.info('Processing ingredient price change', {
       ingredientId,
       oldPrice,
       newPrice,
       priceChange: priceChange.toFixed(2),
       affectedRecipesCount: affectedRecipes?.length || 0
-    }, 'Processing ingredient price change')
+    })
 
     try {
       // Generate smart notifications for significant changes
@@ -57,10 +58,10 @@ export class FinancialWorkflowHandlers {
       }
 
     } catch (error: unknown) {
-      logger.error({
+      logger.error('Failed to process ingredient price change', {
         ingredientId,
         error: getErrorMessage(error)
-      }, 'Failed to process ingredient price change')
+      })
 
       return {
         success: false,
@@ -93,12 +94,12 @@ export class FinancialWorkflowHandlers {
 
     const { costId, costName, oldAmount, newAmount } = data
 
-    logger.info({
+    logger.info('Processing operational cost change', {
       costId,
       costName,
       oldAmount,
       newAmount
-    }, 'Processing operational cost change')
+    })
 
     try {
       // Calculate impact
@@ -109,13 +110,13 @@ export class FinancialWorkflowHandlers {
 
       // Trigger pricing reviews for significant changes
       if (Math.abs(costChange) > 10) {
-        logger.warn({
+        logger.warn('Significant operational cost change detected', {
           costChange: costChange.toFixed(1)
-        }, 'Significant operational cost change detected')
+        })
 
         // TODO: Trigger pricing review workflow
         setTimeout(async () => {
-          logger.info({ costId }, 'Pricing review triggered for cost change')
+          logger.info('Pricing review triggered for cost change', { costId })
         }, 3000)
       }
 
@@ -132,10 +133,10 @@ export class FinancialWorkflowHandlers {
       }
 
     } catch (error: unknown) {
-      logger.error({
+      logger.error('Failed to process operational cost change', {
         costId,
         error: getErrorMessage(error)
-      }, 'Failed to process operational cost change')
+      })
 
       return {
         success: false,

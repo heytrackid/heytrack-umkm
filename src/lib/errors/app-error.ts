@@ -1,4 +1,5 @@
-// @ts-nocheck
+
+
 /**
  * Standardized Application Error Classes
  * This file defines consistent error types for the application
@@ -23,7 +24,7 @@ export class AppError extends Error {
     super(message);
     this.name = this.constructor.name;
     this.code = options?.code;
-    this.status = options?.status ?? 500;
+    this.status = options?.status || 500;
     this.details = options?.details;
     this.timestamp = new Date().toISOString();
     

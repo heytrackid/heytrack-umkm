@@ -2,13 +2,17 @@
 
 import { useMemo } from 'react'
 import { LazyAreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import clsx from 'clsx'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { Currency } from '@/lib/currency'
 import { formatCurrency as formatCurrencyUtil } from '@/lib/currency'
 import { useCurrency } from '@/hooks/useCurrency'
+import type { Currency } from '@/shared'
 import { uiLogger } from '@/lib/logger'
+
+
+
+
 
 export interface HppCostTrendPoint {
   date: string
@@ -32,7 +36,7 @@ const generateFallbackData = (): HppCostTrendPoint[] => Array.from({ length: 14 
   const averageHpp = 25000 + Math.random() * 8000
   const spread = 2000 + Math.random() * 2000
   return {
-    date: baseDate.toISOString().split('T')[0] ?? '',
+    date: baseDate.toISOString().split('T')[0] || '',
     averageHpp,
     bestHpp: averageHpp - spread,
     worstHpp: averageHpp + spread,
@@ -48,7 +52,7 @@ export const HppCostTrendsChart = ({
   currency
 }: HppCostTrendsChartProps) => {
   const { currency: defaultCurrency } = useCurrency()
-  const resolvedCurrency = currency ?? defaultCurrency
+  const resolvedCurrency = currency || defaultCurrency
 
   const chartData = useMemo(() => {
     if (data && data.length > 0) { return data }
@@ -89,10 +93,10 @@ export const HppCostTrendsChart = ({
               fontSize={12}
             />
             <Tooltip
-              formatter={(value: number, name: string) => [formatCurrencyValue(value), legendLabel(name)]}
+              formatter={(value: ValueType) => formatCurrencyValue(Number(value))}
               labelFormatter={(value: string) => `Tanggal: ${value}`}
             />
-            {showLegend && <ChartLegend formatter={(value) => legendLabel(value)} />}
+            {showLegend && <ChartLegend formatter={(value) => legendLabel(String(value))} />}
             <Area
               type="monotone"
               dataKey="bestHpp"

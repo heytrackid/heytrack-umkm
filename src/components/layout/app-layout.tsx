@@ -10,16 +10,15 @@ import { cn } from '@/lib/utils'
 import { Search, User } from 'lucide-react'
 import MobileHeader from './mobile-header'
 import Sidebar from './sidebar'
-// Supabase auth
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { createClient } from '@/utils/supabase/client'
+import { useRouter } from 'next/navigation'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import type { User as SupabaseUser } from '@supabase/supabase-js'
-import { createClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/navigation'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -47,8 +46,9 @@ const AppLayout = memo(({
       try {
         const { data: { user } } = await supabase.auth.getUser()
         void setUser(user)
-      } catch (_err) {
-        uiLogger.error({ err }, 'Error getting user:')
+      } catch (err: unknown) {
+        const error = err as Error
+        uiLogger.error({ error }, 'Error getting user:')
       } finally {
         void setLoading(false)
       }
@@ -59,7 +59,7 @@ const AppLayout = memo(({
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        void setUser(session?.user ?? null)
+        void setUser(session?.user || null)
         void setLoading(false)
       }
     )

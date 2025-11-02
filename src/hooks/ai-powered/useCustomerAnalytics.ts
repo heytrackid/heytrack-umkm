@@ -3,6 +3,8 @@
 import { useCallback, useState } from 'react'
 import type { AIAnalysisState, CustomerAnalyticsRequest } from './types'
 
+
+
 /**
  * AI-Powered Customer Analytics Hook
  * Provides intelligent customer behavior analysis, segmentation, and marketing recommendations

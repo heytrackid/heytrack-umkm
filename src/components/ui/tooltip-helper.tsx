@@ -1,10 +1,10 @@
+import { HelpCircle } from "lucide-react"
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { HelpCircle } from "lucide-react"
 
 interface TooltipHelperProps {
     content: string
@@ -25,22 +25,22 @@ export const TooltipHelper = ({
     side = "top",
     className = ""
 }: TooltipHelperProps) => (
-        <TooltipProvider delayDuration={200}>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <span className={`inline-flex items-center gap-1 cursor-help ${className}`}>
-                        {children}
-                        {showIcon && (
-                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" />
-                        )}
-                    </span>
-                </TooltipTrigger>
-                <TooltipContent side={side} className="max-w-xs text-sm">
-                    <p>{content}</p>
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
-    )
+    <TooltipProvider delayDuration={200}>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <span className={`inline-flex items-center gap-1 cursor-help ${className}`}>
+                    {children}
+                    {showIcon && (
+                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" />
+                    )}
+                </span>
+            </TooltipTrigger>
+            <TooltipContent side={side} className="max-w-xs text-sm">
+                <p>{content}</p>
+            </TooltipContent>
+        </Tooltip>
+    </TooltipProvider>
+)
 
 /**
  * Wrapper untuk label dengan tooltip
@@ -56,12 +56,12 @@ export const LabelWithTooltip = ({
     required?: boolean
     className?: string
 }) => (
-        <label className={`text-sm font-medium flex items-center gap-1 ${className}`}>
-            {label}
-            {required && <span className="text-destructive">*</span>}
-            <TooltipHelper content={tooltip} />
-        </label>
-    )
+    <label className={`text-sm font-medium flex items-center gap-1 ${className}`}>
+        {label}
+        {required && <span className="text-destructive">*</span>}
+        <TooltipHelper content={tooltip} />
+    </label>
+)
 
 /**
  * Kamus istilah teknis ke bahasa UMKM

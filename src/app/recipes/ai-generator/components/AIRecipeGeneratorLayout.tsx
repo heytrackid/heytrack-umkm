@@ -1,6 +1,3 @@
-// AI Recipe Generator Layout - Enhanced Interactive Version
-// Improved UX with live preview, quick mode, and better guidance
-
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -12,9 +9,10 @@ import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/client'
+import { typedInsert } from '@/lib/supabase-client'
+import type { RecipesInsert, RecipeIngredientsInsert, IngredientsTable } from '@/types/database'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
-
-// Import components normally (lightweight UI components)
 import { RecipeTemplateSelector } from './RecipeTemplateSelector'
 import { HppEstimator } from './HppEstimator'
 import { SmartIngredientSelector } from './SmartIngredientSelector'
@@ -24,7 +22,14 @@ import GeneratedRecipeDisplay from './GeneratedRecipeDisplay'
 import RecipePreviewCard from './RecipePreviewCard'
 import RecipeGeneratorForm from './RecipeGeneratorForm'
 
-export default function AIRecipeGeneratorPage() {
+// AI Recipe Generator Layout - Enhanced Interactive Version
+// Improved UX with live preview, quick mode, and better guidance
+
+
+
+// Import components normally (lightweight UI components)
+
+const AIRecipeGeneratorPage = () => {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
@@ -100,14 +105,24 @@ export default function AIRecipeGeneratorPage() {
   }, [])
 
   const fetchIngredients = async () => {
-    const supabase = createSupabaseClient()
+    const supabase = createClient()
     const { data, error } = await supabase
       .from('ingredients')
       .select('*')
       .order('name')
+      .returns<IngredientsTable[]>()
 
     if (!error && data) {
-      void setAvailableIngredients(data)
+      const ingredients: AvailableIngredient[] = data.map((item) => ({
+        id: item.id,
+        name: item.name,
+        unit: item.unit,
+        price_per_unit: item.price_per_unit,
+        current_stock: item.current_stock,
+        minimum_stock: item.min_stock ?? undefined
+      }))
+
+      void setAvailableIngredients(ingredients)
     }
   }
 
@@ -145,7 +160,7 @@ export default function AIRecipeGeneratorPage() {
     void setGeneratedRecipe(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -196,7 +211,7 @@ export default function AIRecipeGeneratorPage() {
     if (!generatedRecipe) { return }
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -204,7 +219,7 @@ export default function AIRecipeGeneratorPage() {
       }
 
       // Save recipe to database
-      const recipeInsert = {
+      const recipeInsert: RecipesInsert = {
         user_id: user.id,
         name: generatedRecipe.name,
         category: generatedRecipe.category,
@@ -212,39 +227,44 @@ export default function AIRecipeGeneratorPage() {
         prep_time: generatedRecipe.prep_time_minutes,
         cook_time: generatedRecipe.bake_time_minutes,
         description: generatedRecipe.description,
-        instructions: generatedRecipe.instructions as any, // JSON type
+        instructions: JSON.stringify(generatedRecipe.instructions), // Convert to JSON string
         is_active: true
       }
 
-      const { data: recipeResult, error: recipeError } = await supabase
-        .from('recipes')
-        .insert(recipeInsert as any)
-        .select()
-        .single()
+      const { data: recipeRows, error: recipeError } = await typedInsert(supabase as never, 'recipes', recipeInsert)
 
       if (recipeError) { throw recipeError }
-      const recipe = recipeResult as any
+      const recipe = recipeRows?.[0]
+      if (!recipe) {
+        throw new Error('Failed to create recipe record')
+      }
 
       // Save recipe ingredients
-      const recipeIngredients = generatedRecipe.ingredients.map((ing) => {
-        const ingredient = availableIngredients.find(
-          i => i.name.toLowerCase() === ing.name.toLowerCase()
-        )
+      const recipeIngredients: RecipeIngredientsInsert[] = generatedRecipe.ingredients
+        .map((ing) => {
+          const ingredient = availableIngredients.find(
+            i => i.name.toLowerCase() === ing.name.toLowerCase()
+          )
 
-        return {
-          recipe_id: recipe.id,
-          ingredient_id: ingredient?.id || '',
-          quantity: ing.quantity,
-          unit: ing.unit,
-          user_id: user.id
-        }
-      })
+          if (!ingredient) {
+            return null
+          }
 
-      const { error: ingredientsError } = await supabase
-        .from('recipe_ingredients')
-        .insert(recipeIngredients as any)
+          return {
+            recipe_id: recipe.id,
+            ingredient_id: ingredient.id,
+            quantity: ing.quantity,
+            unit: ing.unit,
+            user_id: user.id
+          }
+        })
+        .filter((value): value is RecipeIngredientsInsert => value !== null)
 
-      if (ingredientsError) { throw ingredientsError }
+      if (recipeIngredients.length > 0) {
+        const { error: ingredientsError } = await typedInsert(supabase as never, 'recipe_ingredients', recipeIngredients)
+
+        if (ingredientsError) { throw ingredientsError }
+      }
 
       toast({
         title: '✅ Resep berhasil disimpan!',
@@ -371,7 +391,14 @@ export default function AIRecipeGeneratorPage() {
             {/* Sprint 1: Smart Ingredient Selector */}
             {!generatedRecipe && (
               <SmartIngredientSelector
-                availableIngredients={availableIngredients}
+                availableIngredients={availableIngredients.map(ing => ({
+                  id: ing.id,
+                  name: ing.name,
+                  unit: ing.unit,
+                  price_per_unit: ing.price_per_unit,
+                  current_stock: ing.current_stock ?? 0,
+                  minimum_stock: ing.minimum_stock ?? undefined
+                }))}
                 selectedIngredients={selectedIngredients}
                 onSelectionChange={setSelectedIngredients}
                 productType={productType}
@@ -387,8 +414,11 @@ export default function AIRecipeGeneratorPage() {
                 selectedIngredients={availableIngredients
                   .filter(ing => selectedIngredients.includes(ing.id))
                   .map(ing => ({
-                    ...ing,
-                    minimum_stock: ing.minimum_stock || 0
+                    id: ing.id,
+                    name: ing.name,
+                    unit: ing.unit,
+                    price_per_unit: ing.price_per_unit,
+                    current_stock: ing.current_stock ?? 0
                   }))}
                 servings={servings}
                 targetPrice={targetPrice ? parseFloat(targetPrice) : undefined}
@@ -467,3 +497,5 @@ export default function AIRecipeGeneratorPage() {
     </AppLayout>
   )
 }
+
+export default AIRecipeGeneratorPage

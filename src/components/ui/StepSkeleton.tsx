@@ -1,10 +1,11 @@
+import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
+
 /**
  * Step Skeleton Component
  * For wizard/multi-step forms
  */
 
-import { cn } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 
 interface StepSkeletonProps {
   className?: string

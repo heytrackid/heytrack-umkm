@@ -1,10 +1,12 @@
-"use client"
+'use client';
 
 import type { ComponentProps } from 'react'
 import * as AccordionPrimitive from"@radix-ui/react-accordion"
 import { ChevronDownIcon } from"lucide-react"
-
 import { cn } from"@/lib/utils"
+
+
+
 
 const Accordion = ({
   ...props

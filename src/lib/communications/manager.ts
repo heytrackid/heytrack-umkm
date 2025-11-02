@@ -1,12 +1,14 @@
+import { WhatsAppService } from './whatsapp'
+import { SmartNotificationSystem } from './notifications'
+import { EmailService } from './email'
+import type { CommunicationConfig, OrderData, SmartNotification } from './types'
+
+
 /**
  * Communications Manager Module
  * Unified manager for all communication services
  */
 
-import { WhatsAppService } from './whatsapp'
-import { SmartNotificationSystem } from './notifications'
-import { EmailService } from './email'
-import type { CommunicationConfig, OrderData, SmartNotification } from './types'
 
 export class CommunicationsManager {
   private static instance: CommunicationsManager;
@@ -71,7 +73,7 @@ export class CommunicationsManager {
       priority: 'medium' as const,
       title: `Pesanan ${orderData.id}`,
       message: `Status pesanan: ${orderData.status}`,
-      data: orderData,
+      data: JSON.parse(JSON.stringify(orderData)) as Record<string, unknown>,
       status: 'sent' as const
     };
 

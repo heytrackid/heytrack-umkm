@@ -1,10 +1,13 @@
+import { z } from 'zod'
+import { CustomerInsertSchema, type CustomerInsertInput, type CustomerUpdateInput } from './customer'
+import type { CustomersInsert, CustomersUpdate } from '@/types/database'
+
+
 /**
  * Customer Validation Helpers
  * Domain-specific validation helpers for customer-related business rules
  */
 
-import { z } from 'zod'
-import { CustomerInsertSchema, type CustomerInsert, type CustomerUpdate } from './customer'
 
 // Re-export for convenience
 export { CustomerUpdateSchema } from './customer'
@@ -62,10 +65,10 @@ export class CustomerValidationHelpers {
   /**
    * Validate customer data with enhanced business rules
    */
-  static validateInsert(data: unknown): { success: boolean; data?: CustomerInsert; errors?: string[] } {
+  static validateInsert(data: unknown): { success: boolean; data?: CustomersInsert; errors?: string[] } {
     try {
       const validatedData = EnhancedCustomerInsertSchema.parse(data)
-      return { success: true, data: validatedData }
+      return { success: true, data: validatedData as CustomersInsert }
     } catch (err) {
       if (err instanceof z.ZodError) {
         const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
@@ -78,7 +81,7 @@ export class CustomerValidationHelpers {
   /**
    * Validate customer update data
    */
-  static validateUpdate(data: unknown): { success: boolean; data?: CustomerUpdate; errors?: string[] } {
+  static validateUpdate(data: unknown): { success: boolean; data?: CustomersUpdate; errors?: string[] } {
     try {
       const validatedData = EnhancedCustomerUpdateSchema.parse(data)
       return { success: true, data: validatedData }
@@ -115,15 +118,15 @@ export class CustomerValidationHelpers {
    * Validate bulk customer import data
    */
   static validateBulkImport(customers: unknown[]): {
-    valid: CustomerInsert[]
+    valid: CustomersInsert[]
     invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: CustomerInsert[] = []
+    const valid: CustomersInsert[] = []
     const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     customers.forEach((customer, index) => {
       const result = this.validateInsert(customer)
-      if (result.success) {
+      if (result.success && result.data) {
         valid.push(result.data)
       } else {
         invalid.push({

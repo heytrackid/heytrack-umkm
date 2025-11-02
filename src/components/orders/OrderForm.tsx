@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import type { RecipesTable } from '@/types/database'
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
-type Recipe = RecipesTable
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -12,12 +11,16 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react'
-import type { Order, OrderFormData, Priority, OrderItem } from './types'
-import { calculateOrderTotal } from './utils'
+import type { Order, OrderFormData, Priority, OrderFormItem } from './types'
+import { calculateOrderTotal, normalizePriority } from './utils'
 import { validateOrderData } from '@/lib/validations/form-validations'
 import { useCurrency } from '@/hooks/useCurrency'
-
 import { apiLogger } from '@/lib/logger'
+import { isRecipe } from '@/lib/type-guards'
+
+
+type Recipe = RecipesTable
+
 
 interface OrderFormProps {
   order?: Order // For editing existing order
@@ -26,12 +29,12 @@ interface OrderFormProps {
   loading?: boolean
 }
 
-export default function OrderForm({
+const OrderForm = ({
   order,
   onSave,
   onCancel,
   loading = false
-}: OrderFormProps) {
+}: OrderFormProps) => {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
   const [formData, setFormData] = useState<OrderFormData>({
@@ -41,7 +44,7 @@ export default function OrderForm({
     customer_address: '',
     delivery_date: '',
     delivery_time: '10:00',
-    priority: 'normal' as Priority,
+    priority: 'normal',
     notes: '',
     order_items: []
   })
@@ -52,21 +55,21 @@ export default function OrderForm({
   useEffect(() => {
     if (order) {
       setFormData({
-        customer_name: order.customer_name ?? '',
-        customer_phone: order.customer_phone ?? '',
-        // customer_email: order.customer_email ?? '', // Field doesn't exist in DB
-        customer_address: order.customer_address ?? '',
+        customer_name: order.customer_name || '',
+        customer_phone: order.customer_phone || '',
+        // customer_email: order.customer_email || '', // Field doesn't exist in DB
+        customer_address: order.customer_address || '',
         delivery_date: order.delivery_date ? order.delivery_date.split('T')[0] : '',
-        delivery_time: order.delivery_time ?? '10:00',
-        priority: (order.priority ?? 'normal') as Priority,
-        notes: order.notes ?? '',
+        delivery_time: order.delivery_time || '10:00',
+        priority: normalizePriority(order.priority),
+        notes: order.notes || '',
         order_items: (order as OrderWithRelations).items?.map(item => ({
           recipe_id: item.recipe_id,
-          product_name: item.product_name ?? null,
+          product_name: item.product_name || null,
           quantity: item.quantity,
           unit_price: item.unit_price,
           total_price: item.total_price,
-          special_requests: item.special_requests ?? null
+          special_requests: item.special_requests || null
         })) || []
       })
     }
@@ -80,10 +83,14 @@ export default function OrderForm({
   const fetchRecipes = async () => {
     try {
       const response = await fetch('/api/recipes')
-      if (response.ok) {
-        const data = await response.json()
-        void setRecipes(data)
-      }
+      if (!response.ok) { return }
+
+      const payload = await response.json()
+      const recipeList: Recipe[] = Array.isArray(payload)
+        ? payload.filter((item): item is Recipe => isRecipe(item))
+        : []
+
+      void setRecipes(recipeList)
     } catch (err: unknown) {
       apiLogger.error({ err }, 'Error fetching recipes')
     }
@@ -100,30 +107,25 @@ export default function OrderForm({
   }
 
   const addOrderItem = () => {
+    const newItem: OrderFormItem = {
+      recipe_id: '',
+      product_name: null,
+      quantity: 1,
+      unit_price: 0,
+      total_price: 0,
+      special_requests: null
+    }
+
     setFormData(prev => ({
       ...prev,
-      order_items: [...prev.order_items, {
-        recipe_id: '',
-        product_name: null,
-        quantity: 1,
-        unit_price: 0,
-        total_price: 0,
-        special_requests: null
-      }]
+      order_items: [...prev.order_items, newItem]
     }))
   }
 
-  const updateOrderItem = (
+  const updateOrderItem = <K extends keyof OrderFormItem>(
     index: number,
-    field: keyof {
-      recipe_id: string
-      product_name: string | null
-      quantity: number
-      unit_price: number
-      total_price: number
-      special_requests: string | null
-    },
-    value: string | number | null
+    field: K,
+    value: OrderFormItem[K]
   ) => {
     setFormData(prev => ({
       ...prev,
@@ -155,7 +157,7 @@ export default function OrderForm({
   }
 
   const handleSubmit = () => {
-    const validationErrors = validateOrderData(formData as unknown as Record<string, unknown>)
+    const validationErrors = validateOrderData(formData)
     if (validationErrors.length > 0) {
       void setErrors(validationErrors)
       return
@@ -413,3 +415,5 @@ export default function OrderForm({
     </div>
   )
 }
+
+export default OrderForm

@@ -1,3 +1,5 @@
+
+
 /**
  * Common Supabase Types
  * Shared types used across all table definitions

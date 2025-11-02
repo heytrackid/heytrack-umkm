@@ -143,7 +143,7 @@ export const CategoryTable = ({
                     <TableCell>
                       <div className="flex flex-wrap gap-1 max-w-48">
                         {category.commonIngredients.slice(0, 3).map((ingredient, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
+                          <Badge key={`${category.id}-${ingredient}-${index}`} variant="secondary" className="text-xs">
                             {ingredient}
                           </Badge>
                         ))}
@@ -215,7 +215,7 @@ export const CategoryTable = ({
               }
             </p>
             {!searchTerm && (
-              <Button onClick={() => { }}>
+              <Button onClick={() => {}}>
                 <Tags className="h-4 w-4 mr-2" />
                 Tambah Kategori Pertama
               </Button>

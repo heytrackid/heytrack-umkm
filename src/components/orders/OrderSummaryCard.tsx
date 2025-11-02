@@ -1,10 +1,12 @@
-// ✅ OPTIMIZED: Memoized to prevent unnecessary re-renders in lists
 'use client'
 
 import { memo } from 'react'
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import type { Order, PaymentStatus, Priority } from './types'
+import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
+import { useCurrency } from '@/hooks/useCurrency'
 import {
     Package,
     Calendar,
@@ -14,9 +16,8 @@ import {
     MapPin,
     AlertCircle
 } from 'lucide-react'
-import type { Order, PaymentStatus, Priority } from './types'
-import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
-import { useCurrency } from '@/hooks/useCurrency'
+
+// ✅ OPTIMIZED: Memoized to prevent unnecessary re-renders in lists
 
 interface OrderSummaryCardProps {
     order: Order
@@ -124,16 +125,16 @@ const OrderSummaryCard = memo(({
             </CardContent>
         </Card>
     )
-}, (prevProps, nextProps) => 
-    // Custom comparison - only re-render if order data actually changed
-     (
-        prevProps.order.id === nextProps.order.id &&
-        prevProps.order.status === nextProps.order.status &&
-        prevProps.order.payment_status === nextProps.order.payment_status &&
-        prevProps.order.total_amount === nextProps.order.total_amount &&
-        prevProps.order.updated_at === nextProps.order.updated_at &&
-        prevProps.showActions === nextProps.showActions
-    )
+}, (prevProps, nextProps) =>
+// Custom comparison - only re-render if order data actually changed
+(
+    prevProps.order.id === nextProps.order.id &&
+    prevProps.order.status === nextProps.order.status &&
+    prevProps.order.payment_status === nextProps.order.payment_status &&
+    prevProps.order.total_amount === nextProps.order.total_amount &&
+    prevProps.order.updated_at === nextProps.order.updated_at &&
+    prevProps.showActions === nextProps.showActions
+)
 )
 
 OrderSummaryCard.displayName = 'OrderSummaryCard'

@@ -1,3 +1,11 @@
+import { MetricsCalculator } from './metrics-calculator'
+import { TrendAnalyzer } from './trend-analyzer'
+import { AlertGenerator } from './alert-generator'
+import { RecommendationEngine } from './recommendation-engine'
+import { BreakEvenAnalyzer } from './break-even-analyzer'
+import { ProjectionEngine } from './projection-engine'
+import { PricingOptimizer } from './pricing-optimizer'
+
 /**
  * Financial Automation System Orchestrator
  * Main coordinator for financial automation functionality
@@ -14,15 +22,9 @@ import type {
   BreakEvenResult,
   ROIResult,
   PricingOptimizationResult,
-  HistoricalData
+  HistoricalData,
+  ProjectionResult
 } from './types'
-import { MetricsCalculator } from './metrics-calculator'
-import { TrendAnalyzer } from './trend-analyzer'
-import { AlertGenerator } from './alert-generator'
-import { RecommendationEngine } from './recommendation-engine'
-import { BreakEvenAnalyzer } from './break-even-analyzer'
-import { ProjectionEngine } from './projection-engine'
-import { PricingOptimizer } from './pricing-optimizer'
 
 export class FinancialAutomation {
   constructor(private config: AutomationConfig) {}
@@ -68,7 +70,7 @@ export class FinancialAutomation {
   projectFinancialPerformance(
     historicalData: HistoricalData[],
     projectionMonths = 12
-  ): { projections: Array<{ month: string; revenue: number; expenses: number; profit: number }>; trends: Record<string, number> } {
+  ): ProjectionResult | { error: string } {
     return ProjectionEngine.projectFinancialPerformance(historicalData, projectionMonths)
   }
 

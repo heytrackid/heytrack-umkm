@@ -1,12 +1,14 @@
+'use client'
+
+import { useVirtualScroll } from '@/lib/performance-optimized'
+import { type ReactNode, memo } from 'react'
+
 /**
  * Virtualized List Component
  * Renders only visible items for better performance with large lists
  */
 
-'use client'
 
-import { useVirtualScroll } from '@/lib/performance-optimized'
-import { type ReactNode, memo } from 'react'
 
 interface VirtualizedListProps<T> {
   items: T[]
@@ -18,7 +20,7 @@ interface VirtualizedListProps<T> {
   emptyMessage?: string
 }
 
-function VirtualizedListComponent<T>({
+const VirtualizedListComponent = <T,>({
   items,
   itemHeight,
   containerHeight,
@@ -26,7 +28,7 @@ function VirtualizedListComponent<T>({
   keyExtractor,
   className = '',
   emptyMessage = 'Tidak ada data'
-}: VirtualizedListProps<T>) {
+}: VirtualizedListProps<T>) => {
   const { visibleItems, totalHeight, offsetY, handleScroll, visibleRange } =
     useVirtualScroll(items, itemHeight, containerHeight)
 

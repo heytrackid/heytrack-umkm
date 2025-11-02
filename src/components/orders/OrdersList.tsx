@@ -2,7 +2,6 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
-
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,6 +10,8 @@ import { TablePaginationControls } from '@/components/ui/table-pagination-contro
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { OrderStatusBadge, OrderProgress } from '@/components/orders/OrderStatusBadge'
 import { useCurrency } from '@/hooks/useCurrency'
+import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
+import { getPaymentInfo, getPriorityInfo } from './utils'
 import {
   Clock,
   DollarSign,
@@ -20,8 +21,6 @@ import {
   Trash2,
   Plus
 } from 'lucide-react'
-import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
-import { getPaymentInfo, getPriorityInfo } from './utils'
 
 interface OrdersListProps {
   orders: Order[]

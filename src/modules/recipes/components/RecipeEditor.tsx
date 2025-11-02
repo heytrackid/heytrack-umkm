@@ -6,6 +6,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { useToast } from '@/hooks/use-toast'
+import { Plus, Trash2, Save, X, ChefHat, Clock, Users, DollarSign } from 'lucide-react'
+import { useState } from 'react'
+import { useCurrency } from '@/hooks/useCurrency'
 import {
     Select,
     SelectContent,
@@ -13,9 +17,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Plus, Trash2, Save, X, ChefHat, Clock, Users, DollarSign } from 'lucide-react'
-import { useState } from 'react'
-import { useCurrency } from '@/hooks/useCurrency'
 
 interface RecipeIngredient {
     id?: string
@@ -75,6 +76,7 @@ export const RecipeEditor = ({
     onCancel
 }: RecipeEditorProps) => {
     const { formatCurrency } = useCurrency()
+    const { toast } = useToast()
     const [saving, setSaving] = useState(false)
     const [recipe, setRecipe] = useState<RecipeData>(initialData || {
         name: '',
@@ -105,10 +107,10 @@ export const RecipeEditor = ({
     const totalTime = recipe.prep_time_minutes + recipe.cook_time_minutes
 
     const addIngredient = () => {
-        if (!newIngredient.ingredient_id || newIngredient.quantity <= 0) {return}
+        if (!newIngredient.ingredient_id || newIngredient.quantity <= 0) { return }
 
         const ingredient = availableIngredients.find(i => i.id === newIngredient.ingredient_id)
-        if (!ingredient) {return}
+        if (!ingredient) { return }
 
         setRecipe({
             ...recipe,
@@ -139,7 +141,7 @@ export const RecipeEditor = ({
     }
 
     const addStep = () => {
-        if (!newStep.instruction.trim()) {return}
+        if (!newStep.instruction.trim()) { return }
 
         setRecipe({
             ...recipe,
@@ -172,7 +174,7 @@ export const RecipeEditor = ({
         const newSteps = [...recipe.steps]
         const targetIndex = direction === 'up' ? index - 1 : index + 1
 
-        if (targetIndex < 0 || targetIndex >= newSteps.length) {return}
+        if (targetIndex < 0 || targetIndex >= newSteps.length) { return }
 
         [newSteps[index], newSteps[targetIndex]] = [newSteps[targetIndex], newSteps[index]]
 
@@ -184,12 +186,20 @@ export const RecipeEditor = ({
 
     const handleSave = async () => {
         if (!recipe.name.trim()) {
-            alert('Nama resep harus diisi!')
+            toast({
+                title: 'Validasi Gagal',
+                description: 'Nama resep harus diisi!',
+                variant: 'destructive',
+            })
             return
         }
 
         if (recipe.ingredients.length === 0) {
-            alert('Minimal harus ada 1 bahan!')
+            toast({
+                title: 'Validasi Gagal',
+                description: 'Minimal harus ada 1 bahan!',
+                variant: 'destructive',
+            })
             return
         }
 
@@ -419,9 +429,10 @@ export const RecipeEditor = ({
                         {recipe.ingredients.map((ing, idx) => {
                             const cost = ing.quantity * ing.price_per_unit
                             const percent = totalCost > 0 ? (cost / totalCost) * 100 : 0
+                            const ingredientKey = ing.ingredient_id || `${ing.ingredient_name}-${idx}`
 
                             return (
-                                <div key={idx} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-lg border">
+                                <div key={ingredientKey} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-lg border">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className="font-medium">{ing.ingredient_name}</span>
@@ -500,49 +511,52 @@ export const RecipeEditor = ({
 
                     {/* Steps List */}
                     <div className="space-y-2">
-                        {recipe.steps.map((step, idx) => (
-                            <div key={idx} className="flex gap-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                                <div className="flex flex-col gap-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => moveStep(idx, 'up')}
-                                        disabled={idx === 0}
-                                        className="h-6 w-6 p-0"
-                                    >
-                                        ↑
-                                    </Button>
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center font-bold text-blue-600">
-                                        {step.step_number}
+                        {recipe.steps.map((step, idx) => {
+                            const stepKey = step.id || `step-${step.step_number}-${idx}`
+                            return (
+                                <div key={stepKey} className="flex gap-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
+                                    <div className="flex flex-col gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => moveStep(idx, 'up')}
+                                            disabled={idx === 0}
+                                            className="h-6 w-6 p-0"
+                                        >
+                                            ↑
+                                        </Button>
+                                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center font-bold text-blue-600">
+                                            {step.step_number}
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => moveStep(idx, 'down')}
+                                            disabled={idx === recipe.steps.length - 1}
+                                            className="h-6 w-6 p-0"
+                                        >
+                                            ↓
+                                        </Button>
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm mb-2">{step.instruction}</p>
+                                        {step.duration_minutes && (
+                                            <Badge variant="outline" className="text-xs gap-1">
+                                                <Clock className="h-3 w-3" />
+                                                {step.duration_minutes} menit
+                                            </Badge>
+                                        )}
                                     </div>
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => moveStep(idx, 'down')}
-                                        disabled={idx === recipe.steps.length - 1}
-                                        className="h-6 w-6 p-0"
+                                        onClick={() => removeStep(idx)}
                                     >
-                                        ↓
+                                        <Trash2 className="h-4 w-4 text-red-600" />
                                     </Button>
                                 </div>
-                                <div className="flex-1">
-                                    <p className="text-sm mb-2">{step.instruction}</p>
-                                    {step.duration_minutes && (
-                                        <Badge variant="outline" className="text-xs gap-1">
-                                            <Clock className="h-3 w-3" />
-                                            {step.duration_minutes} menit
-                                        </Badge>
-                                    )}
-                                </div>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => removeStep(idx)}
-                                >
-                                    <Trash2 className="h-4 w-4 text-red-600" />
-                                </Button>
-                            </div>
-                        ))}
+                            )
+                        })}
 
                         {recipe.steps.length === 0 && (
                             <div className="text-center py-8 text-muted-foreground">

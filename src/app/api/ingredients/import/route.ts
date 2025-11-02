@@ -8,6 +8,19 @@ export const runtime = 'nodejs'
 
 type IngredientInsert = IngredientsInsert
 
+const sanitizeString = (value?: string | null, fallback?: string | null) => {
+  const trimmed = value?.trim()
+  if (trimmed && trimmed.length > 0) {
+    return trimmed
+  }
+
+  if (fallback !== undefined) {
+    return fallback
+  }
+
+  return null
+}
+
 export async function POST(request: NextRequest) {
   try {
     // 1. Authenticate
@@ -69,9 +82,9 @@ export async function POST(request: NextRequest) {
         current_stock: isNaN(currentStock) ? 0 : currentStock,
         min_stock: isNaN(minStock) ? 0 : minStock,
         weighted_average_cost: pricePerUnit, // Initial WAC = price_per_unit
-        description: ing.description?.trim() || null,
-        category: ing.category?.trim() || 'General',
-        supplier: ing.supplier?.trim() || null,
+        description: sanitizeString(ing.description),
+        category: sanitizeString(ing.category, 'General'),
+        supplier: sanitizeString(ing.supplier),
         user_id: user.id,
         is_active: true
       })

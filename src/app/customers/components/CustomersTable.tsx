@@ -2,34 +2,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import {
-  ChevronLeft,
-  ChevronRight,
-  Edit2,
-  Eye,
-  Mail,
-  MoreHorizontal,
-  Phone,
-  Plus,
-  Trash2,
-  Users
-} from 'lucide-react'
+import { ChevronLeft, ChevronRight, Edit2, Eye, Mail, MoreHorizontal, Phone, Plus, Trash2, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { CustomersTable } from '@/types/database'
 
@@ -158,12 +135,12 @@ const CustomersTable = ({
                   </TableCell>
                   <TableCell>
                     <span className="font-medium text-green-600">
-                      {formatCurrency(customer.total_spent ?? 0)}
+                      {formatCurrency(customer.total_spent || 0)}
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="font-medium">
-                      {customer.total_orders ?? 0}
+                      {customer.total_orders || 0}
                     </span>
                   </TableCell>
                   <TableCell>

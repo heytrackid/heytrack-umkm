@@ -3,6 +3,10 @@
 import { useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { cn } from '@/lib/utils'
+import type { Notification } from '@/types/domain/notifications'
 import {
     AlertCircle,
     AlertTriangle,
@@ -17,11 +21,7 @@ import {
     Check,
     RefreshCw,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
 // import { Separator } from '@/components/ui/separator'
-import { cn } from '@/lib/utils'
-import type { Notification } from '@/types/domain/notifications'
 
 interface NotificationListProps {
     notifications: Notification[]
@@ -161,10 +161,10 @@ export const NotificationList = ({
                 ) : (
                     <div className="divide-y">
                         {filteredNotifications.map((notification) => {
-                            const TypeIcon = typeIcons[notification.type]
-                            const CategoryIcon = categoryIcons[notification.category]
-                            const typeColor = typeColors[notification.type]
-                            const priorityColor = priorityColors[notification.priority || 'normal']
+                            const TypeIcon = typeIcons[notification.type as keyof typeof typeIcons] || Info
+                            const CategoryIcon = categoryIcons[notification.category as keyof typeof categoryIcons] || Settings
+                            const typeColor = typeColors[notification.type as keyof typeof typeColors] || 'text-muted-foreground'
+                            const priorityColor = priorityColors[(notification.priority || 'normal') as keyof typeof priorityColors] || 'border-l-blue-400'
 
                             return (
                                 <div
@@ -247,17 +247,17 @@ export const NotificationList = ({
 }
 
 const Bell = ({ className }: { className?: string }) => (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-        >
-            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-        </svg>
-    )
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </svg>
+)

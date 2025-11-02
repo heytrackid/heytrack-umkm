@@ -1,24 +1,29 @@
-/**
- * Delivery Section Component
- * Handles delivery information
- */
-
-'use client'
-
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { safeNumber } from '@/lib/type-guards'
 
+'use client'
+
+
+/**
+ * Delivery Section Component
+ * Handles delivery information
+ */
+
+interface DeliveryFormData {
+    delivery_date: string
+    delivery_time: string
+    delivery_fee: number
+    notes: string
+    special_instructions: string
+}
+
+type DeliveryField = keyof DeliveryFormData
+
 interface DeliverySectionProps {
-    formData: {
-        delivery_date: string
-        delivery_time: string
-        delivery_fee: number
-        notes: string
-        special_instructions: string
-    }
-    onInputChange: <K extends keyof any>(field: K, value: any) => void
+    formData: DeliveryFormData
+    onInputChange: <K extends DeliveryField>(field: K, value: DeliveryFormData[K]) => void
 }
 
 export const DeliverySection = ({ formData, onInputChange }: DeliverySectionProps) => (

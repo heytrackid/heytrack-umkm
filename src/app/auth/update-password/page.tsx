@@ -6,10 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import {
-  getAuthErrorMessage,
-  validatePassword,
-} from '@/lib/auth-errors'
+import { getAuthErrorMessage, validatePassword, } from '@/lib/auth-errors'
 import { Check, CheckCircle, Eye, EyeOff, Loader2, Lock, X } from 'lucide-react'
 import Link from 'next/link'
 import { type FormEvent, useState, useTransition } from 'react'
@@ -31,11 +28,11 @@ const UpdatePasswordPage = () => {
   // Password strength calculation
   const getPasswordStrength = (pwd: string) => {
     let strength = 0
-    if (pwd.length >= 8) {strength++}
-    if (pwd.length >= 12) {strength++}
-    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) {strength++}
-    if (/\d/.test(pwd)) {strength++}
-    if (/[^a-zA-Z\d]/.test(pwd)) {strength++}
+    if (pwd.length >= 8) { strength++ }
+    if (pwd.length >= 12) { strength++ }
+    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) { strength++ }
+    if (/\d/.test(pwd)) { strength++ }
+    if (/[^a-zA-Z\d]/.test(pwd)) { strength++ }
     return strength
   }
 
@@ -211,7 +208,7 @@ const UpdatePasswordPage = () => {
                     <div className="flex gap-1">
                       {[...Array(5)].map((_, i) => (
                         <div
-                          key={i}
+                          key={`bar-${i}`}
                           className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-slate-200 dark:bg-slate-700'
                             }`}
                         />
@@ -229,8 +226,8 @@ const UpdatePasswordPage = () => {
                     <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Persyaratan Password:
                     </p>
-                    {passwordRequirements.map((req, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs transition-all duration-200">
+                    {passwordRequirements.map((req) => (
+                      <div key={req.label} className="flex items-center gap-2 text-xs transition-all duration-200">
                         {req.met ? (
                           <Check className="h-3 w-3 text-green-600 dark:text-green-400 transition-all duration-200" />
                         ) : (

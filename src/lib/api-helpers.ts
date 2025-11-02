@@ -1,3 +1,4 @@
+
 /**
  * API Helper Functions
  * Utility functions for safe type conversions in API routes

@@ -11,13 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { Loader2, Save, X, User, Phone, Mail, MapPin, Tag, Percent, FileText } from 'lucide-react'
@@ -85,7 +81,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
             customer_type: (customer?.customer_type as 'retail' | 'wholesale' | 'vip' | 'regular') || 'regular',
             discount_percentage: customer?.discount_percentage?.toString() || '',
             notes: customer?.notes || '',
-            is_active: customer?.is_active ?? true,
+            is_active: customer?.is_active || true,
         },
     })
 
@@ -323,7 +319,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
                             <Switch
                                 id="is_active"
                                 checked={isActive}
-                                onCheckedChange={(checked) => setValue('is_active', checked)}
+                                onCheckedChange={(checked: boolean) => setValue('is_active', checked)}
                             />
                         </div>
                     </div>

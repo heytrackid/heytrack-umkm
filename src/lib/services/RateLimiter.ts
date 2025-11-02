@@ -1,9 +1,10 @@
-// @ts-nocheck
+import { logger } from '@/lib/logger'
+
+
 /**
  * Rate Limiter Service - Prevent API abuse
  */
 
-import { logger } from '@/lib/logger'
 
 interface RateLimitEntry {
   count: number

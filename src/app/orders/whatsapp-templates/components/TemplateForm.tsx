@@ -1,6 +1,3 @@
-// Template Form Component
-// Form dialog for creating and editing WhatsApp templates
-
 'use client'
 
 import { useState, useEffect, type FormEvent } from 'react'
@@ -9,28 +6,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { uiLogger } from '@/lib/client-logger'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle
-} from '@/components/ui/dialog'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from '@/components/ui/select'
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from '@/components/ui/accordion'
+import { Textarea } from '@/components/ui/textarea'
 import { Info, Copy, Check } from 'lucide-react'
 import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, type WhatsAppTemplate, type TemplateFormData } from './types'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from '@/components/ui/accordion'
 
 interface TemplateFormProps {
     showDialog: boolean
@@ -39,12 +20,12 @@ interface TemplateFormProps {
     onSuccess: () => void
 }
 
-export default function TemplateForm({
+const TemplateForm = ({
     showDialog,
     onOpenChange,
     editingTemplate,
     onSuccess
-}: TemplateFormProps) {
+}: TemplateFormProps) => {
     const [formData, setFormData] = useState<TemplateFormData>({
         name: '',
         description: '',
@@ -69,8 +50,8 @@ export default function TemplateForm({
                 category: editingTemplate.category,
                 template_content: editingTemplate.template_content,
                 variables: vars,
-                is_active: editingTemplate.is_active ?? true,
-                is_default: editingTemplate.is_default ?? false
+                is_active: editingTemplate.is_active || true,
+                is_default: editingTemplate.is_default || false
             })
         } else {
             resetForm()
@@ -95,24 +76,25 @@ export default function TemplateForm({
     }
 
     const copyVariable = (variableName: string) => {
-        navigator.clipboard.writeText(`{${variableName}}`)
+        void navigator.clipboard.writeText(`{${variableName}}`)
         setCopiedVariable(variableName)
         setTimeout(() => setCopiedVariable(null), 2000)
     }
 
-    const loadDefaultTemplate = (templateIndex: number) => {
-        const template = DEFAULT_TEMPLATES[templateIndex]
-        if (template) {
-            setFormData({
-                name: template.name,
-                description: template.description,
-                category: template.category,
-                template_content: template.template_content,
-                variables: template.variables,
-                is_active: true,
-                is_default: false
-            })
+    const loadDefaultTemplate = (template: (typeof DEFAULT_TEMPLATES)[number]) => {
+        if (!template) {
+            return
         }
+
+        setFormData({
+            name: template.name,
+            description: template.description || '',
+            category: template.category,
+            template_content: template.template_content,
+            variables: template.variables || [],
+            is_active: true,
+            is_default: false
+        })
     }
 
     const handleSubmit = async (e: FormEvent) => {
@@ -144,8 +126,8 @@ export default function TemplateForm({
                     resetForm()
                 }
             }
-        } catch (_error) {
-            uiLogger.error('Error saving template', error)
+        } catch (error: unknown) {
+            uiLogger.error({ error: String(error) }, 'Error saving template')
         }
     }
 
@@ -185,13 +167,13 @@ export default function TemplateForm({
                                 Mulai dengan Template Default
                             </Label>
                             <div className="grid grid-cols-2 gap-2">
-                                {DEFAULT_TEMPLATES.map((template, index) => (
+                                {DEFAULT_TEMPLATES.map((template) => (
                                     <Button
-                                        key={index}
+                                        key={template.name}
                                         type="button"
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => loadDefaultTemplate(index)}
+                                        onClick={() => loadDefaultTemplate(template)}
                                         className="justify-start text-left"
                                     >
                                         {template.name}
@@ -291,7 +273,7 @@ export default function TemplateForm({
                                                     <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
                                                         <div className="flex items-center justify-between">
                                                             <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {`{${  variable.name  }}`}
+                                                                {`{${variable.name}}`}
                                                             </code>
                                                             <Button
                                                                 type="button"
@@ -327,7 +309,7 @@ export default function TemplateForm({
                                                     <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
                                                         <div className="flex items-center justify-between">
                                                             <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {`{${  variable.name  }}`}
+                                                                {`{${variable.name}}`}
                                                             </code>
                                                             <Button
                                                                 type="button"
@@ -363,7 +345,7 @@ export default function TemplateForm({
                                                     <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
                                                         <div className="flex items-center justify-between">
                                                             <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {`{${  variable.name  }}`}
+                                                                {`{${variable.name}}`}
                                                             </code>
                                                             <Button
                                                                 type="button"
@@ -399,7 +381,7 @@ export default function TemplateForm({
                                                     <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
                                                         <div className="flex items-center justify-between">
                                                             <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {`{${  variable.name  }}`}
+                                                                {`{${variable.name}}`}
                                                             </code>
                                                             <Button
                                                                 type="button"
@@ -435,7 +417,7 @@ export default function TemplateForm({
                                                     <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
                                                         <div className="flex items-center justify-between">
                                                             <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {`{${  variable.name  }}`}
+                                                                {`{${variable.name}}`}
                                                             </code>
                                                             <Button
                                                                 type="button"
@@ -498,3 +480,5 @@ export default function TemplateForm({
         </Dialog>
     )
 }
+
+export default TemplateForm

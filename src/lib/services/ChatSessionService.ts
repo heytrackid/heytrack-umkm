@@ -1,16 +1,23 @@
-// @ts-nocheck
-// Chat Session Service - Manages chat session persistence
-
 import { createClient } from '@/utils/supabase/server'
-import type { Database } from '@/types/database';
+import { apiLogger as logger } from '@/lib/logger'
+import type { Json } from '@/types/supabase-generated'
+
+class SessionNotFoundError extends Error {
+  constructor(sessionId: string) {
+    super(`Session not found: ${sessionId}`)
+    this.name = 'SessionNotFoundError'
+  }
+}
 import type {
+
   ChatSession,
   ChatMessage,
   SessionListItem,
   BusinessContext,
-} from '@/types/features/chat';
-import { SessionNotFoundError } from '@/types/features/chat';
-import { logger } from '@/lib/logger';
+  MessageMetadata,
+} from '@/types/features/chat'
+
+// Chat Session Service - Manages chat session persistence
 
 export class ChatSessionService {
   /**
@@ -23,12 +30,14 @@ export class ChatSessionService {
   ): Promise<ChatSession> {
     const supabase = await createClient();
 
+    const serializedSnapshot = JSON.parse(JSON.stringify(contextSnapshot)) as Json
+
     const { data, error } = await supabase
       .from('chat_sessions')
       .insert({
         user_id: userId,
         title,
-        context_snapshot: contextSnapshot,
+        context_snapshot: serializedSnapshot,
       })
       .select()
       .single();
@@ -39,7 +48,11 @@ export class ChatSessionService {
     }
 
     logger.info({ sessionId: data.id, userId }, 'Chat session created');
-    return data;
+
+    return {
+      ...data,
+      context_snapshot: (data.context_snapshot as BusinessContext | null) ?? {},
+    }
   }
 
   /**
@@ -63,7 +76,10 @@ export class ChatSessionService {
       throw new SessionNotFoundError(sessionId);
     }
 
-    return data;
+    return {
+      ...data,
+      context_snapshot: (data.context_snapshot as BusinessContext | null) ?? {},
+    }
   }
 
   /**
@@ -182,7 +198,7 @@ export class ChatSessionService {
         session_id: sessionId,
         role,
         content,
-        metadata,
+        metadata: JSON.parse(JSON.stringify(metadata)) as Json,
       })
       .select()
       .single();
@@ -198,7 +214,10 @@ export class ChatSessionService {
       .update({ updated_at: new Date().toISOString() })
       .eq('id', sessionId);
 
-    return data;
+    return {
+      ...data,
+      metadata: (data.metadata as MessageMetadata | null) ?? {},
+    } as ChatMessage
   }
 
   /**
@@ -226,7 +245,10 @@ export class ChatSessionService {
       throw new Error('Failed to get messages');
     }
 
-    return data || [];
+    return (data || []).map(message => ({
+      ...message,
+      metadata: (message.metadata as MessageMetadata | null) ?? {},
+    })) as ChatMessage[]
   }
 
   /**
@@ -240,6 +262,6 @@ export class ChatSessionService {
       return cleaned;
     }
     
-    return `${cleaned.substring(0, maxLength - 3)  }...`;
+    return `${cleaned.substring(0, maxLength - 3)}...`;
   }
 }

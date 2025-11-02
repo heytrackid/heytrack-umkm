@@ -4,6 +4,8 @@ import { useMemo } from 'react'
 import { useIngredients } from '@/hooks'
 import type { IngredientsTable } from '@/types/database'
 
+
+
 type Ingredient = IngredientsTable
 
 export interface ReorderSuggestion {

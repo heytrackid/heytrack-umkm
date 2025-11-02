@@ -1,10 +1,11 @@
-// Sales Report Component
-// Handles sales data filtering, calculations, and display
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
 import type { OrdersTable } from '@/types/database'
+
+// Sales Report Component
+// Handles sales data filtering, calculations, and display
+
 
 type Order = OrdersTable
 
@@ -15,12 +16,12 @@ interface SalesReportProps {
   }
 }
 
-export default function SalesReport({ dateRange }: SalesReportProps) {
+const SalesReport = ({ dateRange }: SalesReportProps) => {
   const { formatCurrency } = useCurrency()
   const { data: orders } = useSupabaseCRUD<'orders'>('orders')
 
   // Calculate sales report
-  const salesData = (orders ?? []).filter((order): order is Order & { created_at: string } => {
+  const salesData = (orders || []).filter((order): order is Order & { created_at: string } => {
     if (!order.created_at) { return false }
     const orderDate = new Date(order.created_at).toISOString().split('T')[0]
     return orderDate >= dateRange.start && orderDate <= dateRange.end
@@ -29,7 +30,7 @@ export default function SalesReport({ dateRange }: SalesReportProps) {
   const salesStats = salesData.reduce<{ totalOrders: number; totalRevenue: number; completedOrders: number; pendingOrders: number }>(
     (stats, order) => {
       stats.totalOrders += 1
-      stats.totalRevenue += order.total_amount ?? 0
+      stats.totalRevenue += order.total_amount || 0
 
       if (order.status === 'DELIVERED') {
         stats.completedOrders += 1
@@ -103,7 +104,7 @@ export default function SalesReport({ dateRange }: SalesReportProps) {
                     {new Date(order.created_at).toLocaleDateString('id-ID')}
                   </p>
                 </div>
-                <p className="font-semibold">{formatCurrency(order.total_amount ?? 0)}</p>
+                <p className="font-semibold">{formatCurrency(order.total_amount || 0)}</p>
               </div>
             ))}
           </div>
@@ -112,3 +113,5 @@ export default function SalesReport({ dateRange }: SalesReportProps) {
     </div>
   )
 }
+
+export default SalesReport

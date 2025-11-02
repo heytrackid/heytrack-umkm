@@ -1,3 +1,5 @@
+
+
 // Security Utilities
 // Input sanitization, validation, and security helpers
 
@@ -86,7 +88,7 @@ export class RateLimiter {
     const windowStart = now - windowMs
 
     // Get existing requests for this identifier
-    const requests = this.requests.get(identifier) ?? []
+    const requests = this.requests.get(identifier) || []
 
     // Remove old requests outside the window
     const validRequests = requests.filter(time => time > windowStart)
@@ -104,7 +106,7 @@ export class RateLimiter {
   }
 
   static getRemainingRequests(identifier: string, maxRequests = 100): number {
-    const requests = this.requests.get(identifier) ?? []
+    const requests = this.requests.get(identifier) || []
     return Math.max(0, maxRequests - requests.length)
   }
 
@@ -143,6 +145,7 @@ export class SecurityHeaders {
     // Deprecation warning shown in development only (console allowed for deprecation notices)
      
     if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
       console.warn('SecurityHeaders.getCSPHeader is deprecated. Use getStrictCSP from @/lib/csp instead.')
     }
     const policies = [

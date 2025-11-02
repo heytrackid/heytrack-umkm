@@ -1,10 +1,11 @@
+import type { Database, IngredientsTable } from '@/types/database'
+
 /**
  * Notification System Module Types
  * Type definitions for notification system functionality
  */
 
 // Use generated types for database entities
-import type { Database, IngredientsTable } from '@/types/database'
 
 export interface SmartNotification {
   type: 'critical' | 'warning' | 'info' | 'success'

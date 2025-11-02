@@ -1,9 +1,5 @@
-/**
- * Orders Page - Main Component (Refactored & Modular)
- * Split into smaller, focused components
- */
-
 'use client'
+
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -11,12 +7,25 @@ import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTr
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { uiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import { Calendar, MessageCircle, Package, Plus, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
+import { Calendar, MessageCircle, Plus, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { arrayCalculations } from '@/lib/performance-optimized'
 import dynamic from 'next/dynamic'
 import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
+import { StatsCards } from './StatsCards'
+import { StatusSummary } from './StatusSummary'
+import { OrderFilters } from './OrderFilters'
+import { DashboardView } from './DashboardView'
+import { OrdersList } from './OrdersList'
+
+
+/**
+ * Orders Page - Main Component (Refactored & Modular)
+ * Split into smaller, focused components
+ */
+
+
 
 // ✅ Code Splitting - Lazy load heavy components
 const OrderForm = dynamic(() => import('../OrderForm').then(mod => ({ default: mod.OrderForm })), {
@@ -30,11 +39,6 @@ const OrderDetailView = dynamic(() => import('../OrderDetailView').then(mod => (
 })
 
 // Import modular components
-import { StatsCards } from './StatsCards'
-import { StatusSummary } from './StatusSummary'
-import { OrderFilters } from './OrderFilters'
-import { DashboardView } from './DashboardView'
-import { OrdersList } from './OrdersList'
 
 interface OrderFilters {
     status: OrderStatus[]
@@ -67,7 +71,7 @@ interface OrdersPageProps {
     enableAdvancedFeatures?: boolean
 }
 
-export default function OrdersPage({ }: OrdersPageProps) {
+const OrdersPage = (_props: OrdersPageProps) => {
     const queryClient = useQueryClient()
 
     type ActiveView = 'dashboard' | 'list' | 'calendar' | 'analytics'
@@ -80,13 +84,14 @@ export default function OrdersPage({ }: OrdersPageProps) {
         date_to: '',
         customer_search: ''
     })
+    const hasFiltersApplied = (filters.status?.length || 0) > 0 || Boolean(filters.customer_search?.trim())
 
     // Fetch orders
     const { data: ordersData, isLoading: loading, error: queryError } = useQuery({
         queryKey: ['orders', 'all'],
         queryFn: async () => {
             const response = await fetch('/api/orders')
-            if (!response.ok) {throw new Error('Failed to fetch orders')}
+            if (!response.ok) { throw new Error('Failed to fetch orders') }
             const data = await response.json()
             return Array.isArray(data) ? data : []
         },
@@ -96,11 +101,11 @@ export default function OrdersPage({ }: OrdersPageProps) {
 
     // Ensure orders is always an array
     const orders = useMemo(() => {
-        if (!ordersData) {return []}
+        if (!ordersData) { return [] }
         return Array.isArray(ordersData) ? ordersData : []
     }, [ordersData])
 
-    const error = queryError ? (queryError).message : null
+    const error = queryError ? getErrorMessage(queryError) : null
 
     // Calculate stats with safe array operations
     const stats = useMemo<OrderStats>(() => {
@@ -275,7 +280,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
                     />
                     <OrdersList
                         orders={orders}
-                        hasFilters={!!(filters.customer_search || filters.status?.length)}
+                        hasFilters={hasFiltersApplied}
                         onCreateOrder={handleCreateOrder}
                         onViewOrder={handleViewOrder}
                         onEditOrder={handleEditOrder}
@@ -350,3 +355,5 @@ export default function OrdersPage({ }: OrdersPageProps) {
         </div>
     )
 }
+
+export default OrdersPage

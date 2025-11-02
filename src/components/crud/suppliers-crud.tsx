@@ -3,18 +3,20 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod';
-
 import { useSuppliers } from '@/hooks';
 import { useSupabaseCRUD } from '@/hooks/supabase';
-import { SimpleDataTable } from '@/components/ui/simple-data-table';
+import { SimpleDataTable, type SimpleColumn } from '@/components/ui/simple-data-table';
 import { SupplierFormSchema, type SupplierForm } from '@/lib/validations/form-validations';
-
-// Shared components
 import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields';
 import { CreateModal, EditModal, DeleteModal } from '@/components/ui';
-
 import { apiLogger } from '@/lib/logger'
 import type { SuppliersTable, SuppliersInsert, SuppliersUpdate } from '@/types/database'
+
+
+
+
+// Shared components
+
 
 type Supplier = SuppliersTable
 
@@ -52,7 +54,7 @@ export const SuppliersCRUD = () => {
     }
   });
 
-  const columns = [
+  const columns: Array<SimpleColumn<Supplier>> = [
     {
       key: 'name',
       header: 'Name',
@@ -60,18 +62,21 @@ export const SuppliersCRUD = () => {
     {
       key: 'contact_person',
       header: 'Contact Person',
-      render: (value: unknown) => (value as string) || '-',
+      accessor: (supplier) => supplier.contact_person,
+      render: (value) => (value as string | null) || '-',
     },
     {
       key: 'phone',
       header: 'Phone',
-      render: (value: unknown) => (value as string) || '-',
+      accessor: (supplier) => supplier.phone,
+      render: (value) => (value as string | null) || '-',
       hideOnMobile: true,
     },
     {
       key: 'email',
       header: 'Email',
-      render: (value: unknown) => (value as string) || '-',
+      accessor: (supplier) => supplier.email,
+      render: (value) => (value as string | null) || '-',
       hideOnMobile: true,
     },
   ];

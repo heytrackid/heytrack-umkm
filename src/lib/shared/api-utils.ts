@@ -1,12 +1,15 @@
+import { type NextRequest, NextResponse } from 'next/server'
+import { getErrorMessage } from '@/shared'
+import { apiLogger } from '@/lib/logger'
+import type { ZodSchema } from 'zod'
+
+
 /* eslint-disable */
 /**
  * Shared API Utilities
  * Common API response patterns and utilities
  */
 
-import { type NextRequest, NextResponse } from 'next/server'
-import { getErrorMessage } from '@/shared'
-import { apiLogger } from '@/lib/logger'
 
 // API Response helpers
 export function createSuccessResponse<T>(
@@ -67,7 +70,6 @@ export function createPaginatedResponse<T>(
 }
 
 // Request validation helpers
-import type { ZodSchema } from 'zod'
 
 export async function validateRequestData<T>(
   request: NextRequest,
@@ -186,6 +188,9 @@ export function logAPIRequest(
   additionalData?: unknown
 ) {
   const url = new URL(request.url)
+  const extra = (typeof additionalData === 'object' && additionalData !== null)
+    ? additionalData as Record<string, unknown>
+    : undefined
   const logData = {
     method: request.method,
     path: url.pathname,
@@ -193,7 +198,7 @@ export function logAPIRequest(
     userId,
     userAgent: request.headers.get('user-agent'),
     ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
-    ...additionalData
+    ...(extra ?? {})
   }
 
   apiLogger.info(logData, 'API Request')

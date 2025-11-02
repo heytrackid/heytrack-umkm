@@ -1,9 +1,10 @@
+import type { BreakEvenResult } from './types'
+
 /**
  * Break-even Analyzer Module
  * Handles break-even analysis calculations
  */
 
-import type { BreakEvenResult } from './types'
 
 export class BreakEvenAnalyzer {
   /**

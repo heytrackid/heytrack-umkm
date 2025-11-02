@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     const sanitizedMessage = message
       .trim()
       .substring(0, 2000) // Max 2000 characters
-      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ''); // Remove control characters
+      .split('').filter(char => char.charCodeAt(0) >= 32 && char.charCodeAt(0) !== 127).join(''); // Remove control characters
 
     if (sanitizedMessage.length === 0) {
       return NextResponse.json(
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
         fallback_used: fallbackUsed,
       },
     });
-  } catch (_error) {
+  } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error(`Error in enhanced chat API: ${errorMessage}`);
 

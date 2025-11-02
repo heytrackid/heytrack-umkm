@@ -4,6 +4,9 @@ import { type ReactNode, lazy, Suspense } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { uiLogger } from '@/lib/logger'
+import(/* webpackChunkName: "recharts" */ 'recharts')
+
+
 
 // Chart Loading Skeleton Component
 const ChartLoadingSkeleton = ({ title, height = 'h-64' }: { title?: string, height?: string }) => (
@@ -147,7 +150,12 @@ export const BarWithSuspense = (props: ChartElementProps) => (
   </Suspense>
 )
 
-export const AreaWithSuspense = (props: ChartElementProps) => (
+interface AreaProps extends ChartElementProps {
+  dataKey: string | number;
+  [key: string]: unknown;
+}
+
+export const AreaWithSuspense = (props: AreaProps) => (
   <Suspense fallback={null}>
     <LazyArea {...props} />
   </Suspense>
@@ -160,10 +168,10 @@ export const CellWithSuspense = (props: ChartElementProps) => (
 )
 
 // Chart Bundle Preloader
-export const preloadChartBundle = () => 
+export const preloadChartBundle = () => {
   // Preload the entire recharts bundle when user interacts with dashboard
-   import(/* webpackChunkName: "recharts" */ 'recharts')
-
+  return import('recharts')
+}
 
 // Chart Type Detection for Dynamic Loading
 export type ChartType = 'line' | 'bar' | 'area' | 'pie' | 'composed'

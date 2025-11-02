@@ -1,6 +1,4 @@
-'use client'
-import type { CustomersTable } from '@/types/database'
-type Customer = CustomersTable
+import type { CustomersTable, RecipesTable } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -8,14 +6,17 @@ import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTr
 import { Textarea } from '@/components/ui/textarea'
 import { useCurrency } from '@/hooks/useCurrency'
 import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
-import { memo, useEffect, useState, type FormEvent } from 'react'
+import { memo, useState, type FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ORDER_CONFIG, ORDER_PRIORITIES } from '@/lib/constants'
 import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
 import { calculateOrderTotals, generateOrderNo } from '../utils/helpers'
 import { warningToast } from '@/hooks/use-toast'
-import type { RecipesTable } from '@/types/database'
 import { safeNumber } from '@/lib/type-guards'
+
+'use client'
+
+type Customer = CustomersTable
 
 interface FormState {
   customer_name: string
@@ -42,22 +43,22 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
   const [showNewCustomer, setShowNewCustomer] = useState(false)
 
   const [formData, setFormData] = useState<FormState>({
-    customer_name: order?.customer_name ?? '',
-    customer_phone: order?.customer_phone ?? '',
-    customer_address: order?.customer_address ?? '',
-    order_date: order?.order_date ?? new Date().toISOString().split('T')[0],
-    delivery_date: order?.delivery_date ?? '',
+    customer_name: order?.customer_name || '',
+    customer_phone: order?.customer_phone || '',
+    customer_address: order?.customer_address || '',
+    order_date: order?.order_date || new Date().toISOString().split('T')[0],
+    delivery_date: order?.delivery_date || '',
     delivery_time: order?.delivery_date?.includes('T')
-      ? order.delivery_date.split('T')[1]?.slice(0, 5) ?? ''
+      ? order.delivery_date.split('T')[1]?.slice(0, 5) || ''
       : '',
-    delivery_fee: order?.delivery_fee ?? ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
-    discount: order?.discount ?? 0,
-    tax_amount: order?.tax_amount ?? ORDER_CONFIG.DEFAULT_TAX_RATE,
-    payment_method: 'cash',
-    paid_amount: order?.paid_amount ?? 0,
-    priority: order?.priority ?? ORDER_CONFIG.DEFAULT_PRIORITY,
-    notes: order?.notes ?? '',
-    special_instructions: order?.special_instructions ?? ''
+    delivery_fee: order?.delivery_fee || ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
+    discount: order?.discount || 0,
+    tax_amount: order?.tax_amount || ORDER_CONFIG.DEFAULT_TAX_RATE,
+    payment_method: 'CASH',
+    paid_amount: order?.paid_amount || 0,
+    priority: order?.priority || ORDER_CONFIG.DEFAULT_PRIORITY,
+    notes: order?.notes || '',
+    special_instructions: order?.special_instructions || ''
   })
 
   const [orderItems, setOrderItems] = useState<OrderItemWithRecipe[]>(order?.items || [])
@@ -97,6 +98,13 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
   // Use data directly from query (no need for local state)
   const availableRecipes = recipesData || []
   const availableCustomers = customersData || []
+  let submitButtonLabel = 'Simpan Pesanan'
+  if (order) {
+    submitButtonLabel = 'Update Pesanan'
+  }
+  if (loading) {
+    submitButtonLabel = 'Menyimpan...'
+  }
 
   const handleInputChange = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -126,8 +134,8 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
       recipe_id: firstRecipe.id,
       product_name: firstRecipe.name,
       quantity: 1,
-      unit_price: firstRecipe.selling_price ?? 0,
-      total_price: firstRecipe.selling_price ?? 0,
+      unit_price: firstRecipe.selling_price || 0,
+      total_price: firstRecipe.selling_price || 0,
       special_requests: null
     }
     setOrderItems(prev => [...prev, newItem as OrderItemWithRecipe])
@@ -167,24 +175,26 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             recipe: {
               id: selectedRecipe.id,
               name: selectedRecipe.name,
-              price: selectedRecipe.selling_price ?? currentItem.unit_price,
-              category: selectedRecipe.category ?? 'Uncategorized',
-              servings: selectedRecipe.servings ?? 0,
-              description: selectedRecipe.description ?? undefined
+              price: selectedRecipe.selling_price || currentItem.unit_price,
+              category: selectedRecipe.category || 'Uncategorized',
+              servings: selectedRecipe.servings || 0,
+              description: selectedRecipe.description || undefined
             },
-            unit_price: selectedRecipe.selling_price ?? currentItem.unit_price,
-            total_price: (selectedRecipe.selling_price ?? currentItem.unit_price) * currentItem.quantity
+            unit_price: selectedRecipe.selling_price || currentItem.unit_price,
+            total_price: (selectedRecipe.selling_price || currentItem.unit_price) * currentItem.quantity
           }
         }
       } else if (field === 'quantity') {
-        const qty = Number.parseInt(value as string, 10) || 0
+        const parsedQty = Number.parseInt(value as string, 10)
+        const qty = Number.isNaN(parsedQty) ? 0 : parsedQty
         updated[index] = {
           ...currentItem,
           quantity: qty,
           total_price: currentItem.unit_price * qty
         }
       } else if (field === 'unit_price') {
-        const price = Number.parseFloat(value as string) || 0
+        const parsedPrice = Number.parseFloat(value as string)
+        const price = Number.isNaN(parsedPrice) ? 0 : parsedPrice
         updated[index] = {
           ...currentItem,
           unit_price: price,
@@ -228,11 +238,11 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     setFieldErrors({})
 
     const orderData = {
-      order_no: order?.order_no ?? generateOrderNo(),
+      order_no: order?.order_no || generateOrderNo(),
       customer_name: formData.customer_name,
       customer_phone: formData.customer_phone,
       customer_address: formData.customer_address,
-      status: order?.status ?? 'pending',
+      status: order?.status || 'PENDING',
       order_date: formData.order_date,
       delivery_date: formData.delivery_date,
       delivery_time: formData.delivery_time,
@@ -243,7 +253,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
       total_amount: totalAmount,
       paid_amount: formData.paid_amount,
       payment_method: formData.payment_method,
-      priority: formData.priority ?? 'normal',
+      priority: formData.priority || 'NORMAL',
       notes: formData.notes,
       special_instructions: formData.special_instructions,
       items: orderItems.map(item => ({
@@ -251,7 +261,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         quantity: item.quantity,
         unit_price: item.unit_price,
         total_price: item.total_price,
-        notes: item.special_requests ?? ''
+        notes: item.special_requests || ''
       }))
     }
 
@@ -388,7 +398,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               <Label htmlFor="priority" className="text-sm font-medium">Prioritas</Label>
               <select
                 className="w-full p-2 border border-input rounded-md bg-background mt-1"
-                value={formData.priority ?? 'normal'}
+                value={formData.priority || 'normal'}
                 onChange={(e) => handleInputChange('priority', e.target.value as Order['priority'])}
               >
                 {Object.entries(ORDER_PRIORITIES).map(([key, config]) => (
@@ -444,12 +454,76 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             </div>
           ) : (
             <div className="space-y-3">
-              {orderItems.map((item, index: number) => (
-                <div key={item.id || index} className="border rounded-lg overflow-hidden">
-                  <div className="block sm:hidden">
-                    <div className="p-3 space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
+              {orderItems.map((item, index: number) => {
+                const itemKey = item.id || `${item.recipe_id || 'recipe'}-${item.product_name || 'product'}-${item.total_price || '0'}-${item.special_requests || 'none'}`
+                return (
+                  <div key={itemKey} className="border rounded-lg overflow-hidden">
+                    <div className="block sm:hidden">
+                      <div className="p-3 space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <Label className="text-xs font-medium text-muted-foreground">Produk</Label>
+                            <select
+                              className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
+                              value={item.recipe_id}
+                              onChange={(e) => updateOrderItem(index, 'recipe_id', e.target.value)}
+                            >
+                              {availableRecipes.map(recipe => (
+                                <option key={recipe.id} value={recipe.id}>
+                                  {recipe.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground hover:text-destructive ml-2 mt-4"
+                            onClick={() => removeOrderItem(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-xs font-medium text-muted-foreground">Jumlah</Label>
+                            <Input
+                              type="number"
+                              className="text-sm mt-1"
+                              value={item.quantity}
+                              onChange={(e) => updateOrderItem(index, 'quantity', e.target.value)}
+                              min="1"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs font-medium text-muted-foreground">Total</Label>
+                            <Input
+                              className="text-sm font-medium mt-1 bg-gray-50"
+                              value={formatCurrency(item.total_price)}
+                              readOnly
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-xs font-medium text-muted-foreground">Harga Satuan (Rp)</Label>
+                          <Input
+                            type="number"
+                            className="text-sm mt-1"
+                            value={item.unit_price}
+                            onChange={(e) => updateOrderItem(index, 'unit_price', e.target.value)}
+                            min="0"
+                            step="500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="hidden sm:flex sm:items-center gap-3 p-4">
+                      <div className="flex-1 grid grid-cols-4 gap-3">
+                        <div>
                           <Label className="text-xs font-medium text-muted-foreground">Produk</Label>
                           <select
                             className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
@@ -463,18 +537,6 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                             ))}
                           </select>
                         </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-muted-foreground hover:text-destructive ml-2 mt-4"
-                          onClick={() => removeOrderItem(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
                         <div>
                           <Label className="text-xs font-medium text-muted-foreground">Jumlah</Label>
                           <Input
@@ -486,6 +548,17 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                           />
                         </div>
                         <div>
+                          <Label className="text-xs font-medium text-muted-foreground">Harga Satuan (Rp)</Label>
+                          <Input
+                            type="number"
+                            className="text-sm mt-1"
+                            value={item.unit_price}
+                            onChange={(e) => updateOrderItem(index, 'unit_price', e.target.value)}
+                            min="0"
+                            step="500"
+                          />
+                        </div>
+                        <div>
                           <Label className="text-xs font-medium text-muted-foreground">Total</Label>
                           <Input
                             className="text-sm font-medium mt-1 bg-gray-50"
@@ -494,79 +567,19 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                           />
                         </div>
                       </div>
-
-                      <div>
-                        <Label className="text-xs font-medium text-muted-foreground">Harga Satuan (Rp)</Label>
-                        <Input
-                          type="number"
-                          className="text-sm mt-1"
-                          value={item.unit_price}
-                          onChange={(e) => updateOrderItem(index, 'unit_price', e.target.value)}
-                          min="0"
-                          step="500"
-                        />
-                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="text-muted-foreground hover:text-destructive"
+                        onClick={() => removeOrderItem(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-
-                  <div className="hidden sm:flex sm:items-center gap-3 p-4">
-                    <div className="flex-1 grid grid-cols-4 gap-3">
-                      <div>
-                        <Label className="text-xs font-medium text-muted-foreground">Produk</Label>
-                        <select
-                          className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
-                          value={item.recipe_id}
-                          onChange={(e) => updateOrderItem(index, 'recipe_id', e.target.value)}
-                        >
-                          {availableRecipes.map(recipe => (
-                            <option key={recipe.id} value={recipe.id}>
-                              {recipe.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <Label className="text-xs font-medium text-muted-foreground">Jumlah</Label>
-                        <Input
-                          type="number"
-                          className="text-sm mt-1"
-                          value={item.quantity}
-                          onChange={(e) => updateOrderItem(index, 'quantity', e.target.value)}
-                          min="1"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs font-medium text-muted-foreground">Harga Satuan (Rp)</Label>
-                        <Input
-                          type="number"
-                          className="text-sm mt-1"
-                          value={item.unit_price}
-                          onChange={(e) => updateOrderItem(index, 'unit_price', e.target.value)}
-                          min="0"
-                          step="500"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs font-medium text-muted-foreground">Total</Label>
-                        <Input
-                          className="text-sm font-medium mt-1 bg-gray-50"
-                          value={formatCurrency(item.total_price)}
-                          readOnly
-                        />
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="text-muted-foreground hover:text-destructive"
-                      onClick={() => removeOrderItem(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
 
               <div className="pt-3 border-t">
                 <div className="flex justify-between items-center text-sm font-medium">
@@ -645,11 +658,11 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 value={formData.payment_method}
                 onChange={(e) => handleInputChange('payment_method', e.target.value as PaymentMethod)}
               >
-                <option value="cash">Tunai</option>
-                <option value="transfer">Transfer Bank</option>
-                <option value="qris">QRIS</option>
-                <option value="card">Kartu Debit/Kredit</option>
-                <option value="ewallet">E-Wallet (GoPay, OVO, dll)</option>
+                <option value="CASH">Tunai</option>
+                <option value="BANK_TRANSFER">Transfer Bank</option>
+                <option value="CREDIT_CARD">Kartu Debit/Kredit</option>
+                <option value="DIGITAL_WALLET">E-Wallet (GoPay, OVO, dll)</option>
+                <option value="OTHER">Lainnya</option>
               </select>
             </div>
             <div>
@@ -750,7 +763,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             Batalkan
           </Button>
           <Button type="submit" disabled={loading} className="order-1 sm:order-2">
-            {loading ? "Menyimpan..." : order ? "Update Pesanan" : "Simpan Pesanan"}
+            {submitButtonLabel}
           </Button>
         </div>
       </SwipeableTabs>

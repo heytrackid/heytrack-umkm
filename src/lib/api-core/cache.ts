@@ -1,9 +1,10 @@
+import type { CacheEntry, CacheConfig } from './types'
+
 /**
  * Cache Module
  * API response caching and deduplication system
  */
 
-import type { CacheEntry, CacheConfig } from './types'
 
 export class APICache {
   private cache = new Map<string, CacheEntry<unknown>>()

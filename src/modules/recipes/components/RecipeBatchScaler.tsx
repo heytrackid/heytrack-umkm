@@ -1,21 +1,17 @@
-'use client'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useToast } from '@/hooks/use-toast'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Scale, TrendingUp, Package, DollarSign, Download, Calculator } from 'lucide-react'
-import { useState } from 'react'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
+import { useMemo, useState } from 'react'
+
+
+'use client'
+
 
 interface RecipeBatchScalerProps {
     recipe: {
@@ -27,6 +23,7 @@ interface RecipeBatchScalerProps {
             quantity: number
             unit: string
             ingredient?: {
+                id?: string
                 name: string
                 price_per_unit: number
                 stock_quantity?: number
@@ -37,49 +34,56 @@ interface RecipeBatchScalerProps {
 
 export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
     const { formatCurrency } = useCurrency()
-    const [targetServings, setTargetServings] = useState(recipe.servings)
-    const [targetBatches, setTargetBatches] = useState(1)
+    const { toast } = useToast()
+    const baseServings = Math.max(1, recipe.servings || 1)
+    const baseCost = recipe.total_cost || 0
 
-    const scaleFactor = (targetServings * targetBatches) / recipe.servings
-    const scaledCost = recipe.total_cost * scaleFactor
+    const [targetServings, setTargetServings] = useState<number>(baseServings)
+    const [targetBatches, setTargetBatches] = useState<number>(1)
 
-    // Quick scale buttons
-    const quickScales = [
+    const safeServings = targetServings > 0 ? targetServings : 1
+    const safeBatches = targetBatches > 0 ? targetBatches : 1
+    const totalServings = safeServings * safeBatches
+    const scaleFactor = totalServings / baseServings
+    const scaledCost = baseCost * scaleFactor
+    const costPerServing = totalServings > 0 ? scaledCost / totalServings : 0
+
+    const quickScales = useMemo(() => ([
         { label: '2x', multiplier: 2 },
         { label: '5x', multiplier: 5 },
         { label: '10x', multiplier: 10 },
-        { label: '20x', multiplier: 20 },
-    ]
+        { label: '20x', multiplier: 20 }
+    ]), [])
 
     const applyQuickScale = (multiplier: number) => {
         setTargetBatches(multiplier)
-        setTargetServings(recipe.servings)
+        setTargetServings(baseServings)
     }
 
-    // Check stock availability
-    const checkStockAvailability = () => {
+    const stockIssues = useMemo(() => {
         const issues: string[] = []
-
-        recipe.recipe_ingredients?.forEach(ri => {
-            if (!ri.ingredient) {return}
+        recipe.recipe_ingredients?.forEach((ri) => {
+            if (!ri.ingredient) { return }
             const needed = ri.quantity * scaleFactor
             const available = ri.ingredient.stock_quantity || 0
-
             if (available < needed) {
                 issues.push(`${ri.ingredient.name}: butuh ${needed.toFixed(2)} ${ri.unit}, tersedia ${available.toFixed(2)} ${ri.unit}`)
             }
         })
-
         return issues
-    }
+    }, [recipe.recipe_ingredients, scaleFactor])
 
-    const stockIssues = checkStockAvailability()
     const hasStockIssues = stockIssues.length > 0
 
     const exportShoppingList = () => {
-        // TODO: Implement export functionality
-        alert('Export shopping list akan segera tersedia!')
+        toast({
+            title: 'Fitur akan segera tersedia',
+            description: 'Export shopping list akan segera tersedia!',
+            variant: 'default'
+        })
     }
+
+    const recipeIngredients = recipe.recipe_ingredients || []
 
     return (
         <div className="space-y-4">
@@ -101,11 +105,11 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-blue-600">{recipe.servings}</div>
+                            <div className="text-lg font-bold text-blue-600">{baseServings}</div>
                             <div className="text-xs text-muted-foreground">Resep Asli</div>
                         </div>
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-green-600">{targetServings * targetBatches}</div>
+                            <div className="text-lg font-bold text-green-600">{totalServings}</div>
                             <div className="text-xs text-muted-foreground">Target Produksi</div>
                         </div>
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
@@ -133,21 +137,24 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                     <div>
                         <Label className="mb-2 block">Quick Scale</Label>
                         <div className="grid grid-cols-4 gap-2">
-                            {quickScales.map((scale) => (
-                                <Button
-                                    key={scale.label}
-                                    variant={targetBatches === scale.multiplier && targetServings === recipe.servings ? "default" : "outline"}
-                                    onClick={() => applyQuickScale(scale.multiplier)}
-                                    className="h-auto py-3"
-                                >
-                                    <div className="text-center">
-                                        <div className="text-lg font-bold">{scale.label}</div>
-                                        <div className="text-xs opacity-70">
-                                            {recipe.servings * scale.multiplier} porsi
+                            {quickScales.map((scale) => {
+                                const isActive = safeBatches === scale.multiplier && safeServings === baseServings
+                                return (
+                                    <Button
+                                        key={scale.label}
+                                        variant={isActive ? 'default' : 'outline'}
+                                        onClick={() => applyQuickScale(scale.multiplier)}
+                                        className="h-auto py-3"
+                                    >
+                                        <div className="text-center">
+                                            <div className="text-lg font-bold">{scale.label}</div>
+                                            <div className="text-xs opacity-70">
+                                                {baseServings * scale.multiplier} porsi
+                                            </div>
                                         </div>
-                                    </div>
-                                </Button>
-                            ))}
+                                    </Button>
+                                )
+                            })}
                         </div>
                     </div>
 
@@ -159,11 +166,14 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                 id="servings"
                                 type="number"
                                 value={targetServings}
-                                onChange={(e) => setTargetServings(Number(e.target.value))}
+                                onChange={(e) => {
+                                    const value = Number(e.target.value)
+                                    setTargetServings(Number.isFinite(value) ? Math.max(1, value) : 1)
+                                }}
                                 min={1}
                             />
                             <p className="text-xs text-muted-foreground mt-1">
-                                Resep asli: {recipe.servings} porsi
+                                Resep asli: {baseServings} porsi
                             </p>
                         </div>
 
@@ -173,11 +183,14 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                 id="batches"
                                 type="number"
                                 value={targetBatches}
-                                onChange={(e) => setTargetBatches(Number(e.target.value))}
+                                onChange={(e) => {
+                                    const value = Number(e.target.value)
+                                    setTargetBatches(Number.isFinite(value) ? Math.max(1, value) : 1)
+                                }}
                                 min={1}
                             />
                             <p className="text-xs text-muted-foreground mt-1">
-                                Total: {targetServings * targetBatches} porsi
+                                Total: {totalServings} porsi
                             </p>
                         </div>
                     </div>
@@ -194,7 +207,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
                                 <div className="text-muted-foreground">Total Porsi</div>
-                                <div className="font-bold text-lg">{targetServings * targetBatches}</div>
+                                <div className="font-bold text-lg">{totalServings}</div>
                             </div>
                             <div>
                                 <div className="text-muted-foreground">Total Biaya</div>
@@ -202,11 +215,11 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                             </div>
                             <div>
                                 <div className="text-muted-foreground">Biaya per Porsi</div>
-                                <div className="font-medium">{formatCurrency(scaledCost / (targetServings * targetBatches))}</div>
+                                <div className="font-medium">{formatCurrency(costPerServing)}</div>
                             </div>
                             <div>
                                 <div className="text-muted-foreground">Jumlah Batch</div>
-                                <div className="font-medium">{targetBatches} batch</div>
+                                <div className="font-medium">{safeBatches} batch</div>
                             </div>
                         </div>
                     </div>
@@ -227,8 +240,8 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                             <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-3">
                                 Beberapa bahan tidak mencukupi untuk produksi ini:
                             </p>
-                            {stockIssues.map((issue, idx) => (
-                                <div key={idx} className="text-sm p-2 bg-white dark:bg-gray-900 rounded border border-yellow-200 dark:border-yellow-800">
+                            {stockIssues.map((issue) => (
+                                <div key={issue} className="text-sm p-2 bg-white dark:bg-gray-900 rounded border border-yellow-200 dark:border-yellow-800">
                                     {issue}
                                 </div>
                             ))}
@@ -268,17 +281,18 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {recipe.recipe_ingredients?.map((ri, idx) => {
-                                if (!ri.ingredient) {return null}
+                            {recipeIngredients.map((ri) => {
+                                if (!ri.ingredient) { return null }
 
                                 const originalQty = ri.quantity
                                 const scaledQty = ri.quantity * scaleFactor
                                 const stock = ri.ingredient.stock_quantity || 0
                                 const cost = scaledQty * ri.ingredient.price_per_unit
                                 const isEnough = stock >= scaledQty
+                                const ingredientKey = `${ri.ingredient.id || ri.ingredient.name}-${ri.unit}-${ri.quantity}`
 
                                 return (
-                                    <TableRow key={idx}>
+                                    <TableRow key={ingredientKey}>
                                         <TableCell className="font-medium">
                                             {ri.ingredient.name}
                                         </TableCell>
@@ -325,7 +339,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                     {formatCurrency(scaledCost)}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
-                                    {formatCurrency(scaledCost / (targetServings * targetBatches))} per porsi
+                                    {formatCurrency(costPerServing)} per porsi
                                 </div>
                             </div>
                         </div>

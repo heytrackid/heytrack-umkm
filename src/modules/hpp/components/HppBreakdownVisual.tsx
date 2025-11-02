@@ -5,6 +5,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useToast } from '@/hooks/use-toast'
+import { useMemo, useState } from 'react'
+import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
+import type { RecipeIngredientWithPrice } from '@/modules/hpp/types'
 import {
     ChevronDown,
     ChevronUp,
@@ -15,14 +19,11 @@ import {
     Download,
     Info
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
-import type { RecipeIngredientWithPrice } from '@/modules/hpp/types'
 
 interface IngredientDisplay extends RecipeIngredientWithPrice {
     category?: string
@@ -39,6 +40,7 @@ interface HppBreakdownVisualProps {
 }
 
 export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVisualProps) => {
+    const { toast } = useToast()
     const { formatCurrency } = useCurrency()
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['ingredients']))
 
@@ -73,12 +75,12 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 }
 
                 return {
-                    id: record.ingredient_id ?? Math.random().toString(36).slice(2),
-                    name: record.ingredient?.name ?? 'Unknown',
-                    quantity: record.quantity ?? 0,
-                    unit: record.unit ?? 'unit',
-                    unit_price: record.ingredient?.weighted_average_cost ?? record.ingredient?.price_per_unit ?? 0,
-                    category: record.ingredient?.category ?? undefined
+                    id: record.ingredient_id || Math.random().toString(36).slice(2),
+                    name: record.ingredient?.name || 'Unknown',
+                    quantity: record.quantity || 0,
+                    unit: record.unit || 'unit',
+                    unit_price: record.ingredient?.weighted_average_cost || record.ingredient?.price_per_unit || 0,
+                    category: record.ingredient?.category || undefined
                 }
             })
         }
@@ -107,14 +109,18 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
     // Group ingredients by category
     const ingredientsByCategory = ingredients.reduce((acc, item) => {
         const category = item.category || 'Lainnya'
-        if (!acc[category]) {acc[category] = []}
+        if (!acc[category]) { acc[category] = [] }
         acc[category].push(item)
         return acc
     }, {} as Record<string, IngredientDisplay[]>)
 
     const exportToPDF = () => {
         // TODO: Implement PDF export
-        alert('Export PDF akan segera tersedia!')
+        toast({
+            title: 'Fitur akan segera tersedia',
+            description: 'Export PDF akan segera tersedia!',
+            variant: 'default',
+        })
     }
 
     return (

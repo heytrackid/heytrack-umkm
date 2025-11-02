@@ -1,10 +1,12 @@
+import { automationLogger } from '@/lib/logger'
+import type { EmailConfig } from './types'
+
+
 /**
  * Email Service Module
  * Email communication service for notifications and updates
  */
 
-import { automationLogger } from '@/lib/logger'
-import type { EmailConfig } from './types'
 
 export class EmailService {
   private config: EmailConfig;

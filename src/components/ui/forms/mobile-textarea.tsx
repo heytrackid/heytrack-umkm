@@ -1,13 +1,14 @@
-/**
- * Mobile Textarea Component
- * Optimized textarea for mobile devices with character count
- */
-
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Textarea } from '../textarea'
 import { Label } from '../label'
+
+/**
+ * Mobile Textarea Component
+ * Optimized textarea for mobile devices with character count
+ */
+
 
 interface MobileTextareaProps {
   label?: string
@@ -49,9 +50,9 @@ export const MobileTextarea = ({
       {label && (
         <Label
           className={cn(
-           "text-sm font-medium",
-            isMobile &&"text-base",
-            error &&"text-destructive"
+            "text-sm font-medium",
+            isMobile && "text-base",
+            error && "text-destructive"
           )}
         >
           {label}
@@ -75,10 +76,10 @@ export const MobileTextarea = ({
           rows={isMobile ? Math.max(rows, 3) : rows}
           maxLength={maxLength}
           className={cn(
-           "transition-all duration-200 resize-none",
-            isMobile &&"text-base", // Better readability on mobile
-            error &&"border-destructive focus-visible:ring-destructive",
-            isFocused &&"ring-2 ring-ring ring-offset-2"
+            "transition-all duration-200 resize-none",
+            isMobile && "text-base", // Better readability on mobile
+            error && "border-destructive focus-visible:ring-destructive",
+            isFocused && "ring-2 ring-ring ring-offset-2"
           )}
         />
       </div>
@@ -86,16 +87,16 @@ export const MobileTextarea = ({
       {/* Character count and hint/error */}
       <div className="flex justify-between items-start">
         <p className={cn(
-         "text-sm",
-          error ?"text-destructive" :"text-muted-foreground"
+          "text-sm",
+          error ? "text-destructive" : "text-muted-foreground"
         )}>
           {error || hint}
         </p>
 
         {maxLength && (
           <span className={cn(
-           "text-xs",
-            currentLength > maxLength * 0.9 ?"text-destructive" :"text-muted-foreground"
+            "text-xs",
+            currentLength > maxLength * 0.9 ? "text-destructive" : "text-muted-foreground"
           )}>
             {currentLength}/{maxLength}
           </span>

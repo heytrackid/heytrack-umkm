@@ -1,10 +1,12 @@
+import { z } from 'zod'
+import { UUIDSchema, DateStringSchema, NonNegativeNumberSchema } from '@/lib/validations/base-validations'
+
+
 /**
  * Common API Validation Schemas
  * Shared validation schemas for common API operations
  */
 
-import { z } from 'zod'
-import { UUIDSchema, DateStringSchema, NonNegativeNumberSchema } from '@/lib/validations/base-validations'
 
 // Pagination schemas
 export const PaginationSchema = z.object({
@@ -15,11 +17,11 @@ export const PaginationSchema = z.object({
 })
 
 export const PaginationQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1).catch(1),
-  limit: z.coerce.number().int().min(1).max(100).default(10).catch(10),
-  search: z.string().nullable().optional().transform(val => val ?? undefined),
-  sort_by: z.string().nullable().optional().transform(val => val ?? undefined),
-  sort_order: z.enum(['asc', 'desc']).nullable().default('desc').catch('desc'),
+  page: z.coerce.number().int().min(1).default(1).catch(() => 1),
+  limit: z.coerce.number().int().min(1).max(100).default(10).catch(() => 10),
+  search: z.string().nullable().optional().transform(val => val || undefined),
+  sort_by: z.string().nullable().optional().transform(val => val || undefined),
+  sort_order: z.enum(['asc', 'desc']).default('desc').catch(() => 'desc' as const),
 })
 
 // Date range schemas
@@ -78,7 +80,7 @@ export const BulkDeleteSchema = z.object({
 
 export const BulkUpdateSchema = z.object({
   ids: z.array(UUIDSchema).min(1, 'At least one ID is required'),
-  updates: z.record(z.unknown()),
+  updates: z.record(z.string(), z.unknown()),
   reason: z.string().max(500).optional(),
 })
 
@@ -89,7 +91,7 @@ export const ReportQuerySchema = z.object({
   start_date: DateStringSchema,
   end_date: DateStringSchema,
   include_charts: z.boolean().default(true),
-  filters: z.record(z.any()).optional(),
+  filters: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const SalesQuerySchema = z.object({

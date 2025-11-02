@@ -1,8 +1,7 @@
-/**
- * Production Planner Module
- * Core production planning logic
- */
-
+import type { OrderForProduction } from './types'
+import { AvailabilityChecker } from './availability-checker'
+import { TimeCalculator } from './time-calculator'
+import { ProductionRecommendations } from './recommendations'
 import type {
   Recipe,
   RecipeIngredient,
@@ -13,10 +12,11 @@ import type {
   AvailabilityCheck,
   AutomationConfig
 } from '@/lib/automation/types'
-import type { OrderForProduction } from './types'
-import { AvailabilityChecker } from './availability-checker'
-import { TimeCalculator } from './time-calculator'
-import { ProductionRecommendations } from './recommendations'
+
+/**
+ * Production Planner Module
+ * Core production planning logic
+ */
 
 export class ProductionPlanner {
   /**

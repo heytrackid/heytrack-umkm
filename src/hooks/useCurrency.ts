@@ -1,9 +1,10 @@
+import { useSettings } from '@/contexts/settings-context'
+import type { Currency } from '@/shared'
+
 /**
  * Custom hook for currency formatting using settings context
  */
 
-import { useSettings } from '@/contexts/settings-context'
-import type { Currency } from '@/shared'
 
 interface UseCurrencyReturn {
   formatPrice: (amount: number) => string

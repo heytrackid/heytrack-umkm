@@ -2,10 +2,7 @@ import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/respo
 import { withValidation } from '@/lib/api-core/middleware'
 import { handleDatabaseError } from '@/lib/errors'
 import { createClient } from '@/utils/supabase/server'
-import {
-  IdParamSchema,
-  IngredientUpdateSchema
-} from '@/lib/validations'
+import { IdParamSchema, IngredientUpdateSchema } from '@/lib/validations' 
 import type { NextRequest } from 'next/server'
 import type { IngredientsTable } from '@/types/database'
 import { isValidUUID } from '@/lib/type-guards'

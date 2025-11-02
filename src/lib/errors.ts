@@ -1,9 +1,11 @@
+import { apiLogger } from '@/lib/logger'
+
+
 /**
  * Consolidated Error Handling Module
  * Single source for all error handling including auth errors, API errors, and general error utilities
  */
 
-import { apiLogger } from '@/lib/logger'
 
 // ============================================================================
 // GENERAL ERROR HANDLING

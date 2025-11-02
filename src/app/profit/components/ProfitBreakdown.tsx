@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import type { ProfitData } from './types'
 
+
 interface ProfitBreakdownProps {
   summary: ProfitData['summary']
   formatCurrency: (amount: number) => string

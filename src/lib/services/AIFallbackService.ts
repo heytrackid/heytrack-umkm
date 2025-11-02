@@ -1,8 +1,9 @@
-// @ts-nocheck
-// AI Fallback Service - Handles AI service failures gracefully
-
 import type { BusinessContext } from '@/types/features/chat';
 import { logger } from '@/lib/logger';
+
+
+// AI Fallback Service - Handles AI service failures gracefully
+
 
 interface CachedResponse {
   query: string;
@@ -19,7 +20,7 @@ export class AIFallbackService {
    */
   static async getResponseWithFallback(
     query: string,
-    context: BusinessContext,
+    _context: BusinessContext,
     aiServiceFn: () => Promise<string>
   ): Promise<{ response: string; fallbackUsed: boolean }> {
     try {
@@ -41,14 +42,14 @@ export class AIFallbackService {
       }
 
       // Try rule-based response
-      const ruleBased = this.getRuleBasedResponse(query, context);
+      const ruleBased = this.getRuleBasedResponse(query, _context);
       if (ruleBased) {
         logger.info('Using rule-based response');
         return { response: ruleBased, fallbackUsed: true };
       }
 
       // Return helpful error message
-      const errorResponse = this.getHelpfulError(query, context);
+      const errorResponse = this.getHelpfulError(query, _context);
       return { response: errorResponse, fallbackUsed: true };
     }
   }
@@ -72,18 +73,18 @@ export class AIFallbackService {
    * Get cached response if available and not expired
    */
   private static getCachedResponse(query: string): string | null {
-    const key = this.normalizeQuery(query);
-    const cached = this.responseCache.get(key);
+      const key = this.normalizeQuery(query);
+      const cached = this.responseCache.get(key);
 
-    if (!cached) {return null;}
+      if (!cached) {return null;}
 
-    const age = Date.now() - cached.timestamp;
-    if (age > this.CACHE_TTL) {
-      this.responseCache.delete(key);
-      return null;
-    }
+      const age = Date.now() - cached.timestamp;
+      if (age > this.CACHE_TTL) {
+        this.responseCache.delete(key);
+        return null;
+      }
 
-    return cached.response;
+      return cached.response;
   }
 
   /**
@@ -106,8 +107,7 @@ export class AIFallbackService {
 
     // Stock-related queries
     if (
-      normalized.includes('stok') ||
-      normalized.includes('stock') ||
+      normalized.includes('stok') || normalized.includes('stock') ||
       normalized.includes('restock')
     ) {
       return this.getStockResponse(context);

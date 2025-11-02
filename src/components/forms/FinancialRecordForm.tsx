@@ -11,12 +11,12 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { FormField } from './shared/FormField'
+import type { FinancialRecordsTable } from '@/types/database'
 import {
   FinancialRecordSchema,
   type FinancialRecordFormData
 } from '@/lib/validations'
-import { FormField } from './shared/FormField'
-import type { FinancialRecordsTable } from '@/types/database'
 
 type FinancialRecord = FinancialRecordsTable
 
@@ -38,7 +38,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
       description: initialData?.description || '',
       date: initialData?.date || new Date().toISOString(),
       payment_method: initialData?.payment_method || 'CASH',
-      is_recurring: initialData?.is_recurring ?? false,
+      is_recurring: initialData?.is_recurring || false,
       notes: initialData?.notes || '',
       ...initialData
     }
@@ -54,7 +54,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
       if (!initialData) {
         form.reset()
       }
-    } catch (err: unknown) {
+    } catch (_err: unknown) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan catatan keuangan',

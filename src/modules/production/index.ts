@@ -1,10 +1,13 @@
-// Production module - use generated Supabase types
-import type { 
-  ProductionsTable, 
-  ProductionsInsert, 
+import { uiLogger } from '@/lib/logger'
+import type {
+
+  ProductionsTable,
+  ProductionsInsert,
   ProductionsUpdate,
-  ProductionStatus as ProductionStatusEnum 
+  ProductionStatus as ProductionStatusEnum
 } from '@/types/database'
+
+// Production module - use generated Supabase types
 
 // Base types from generated schema
 export type Production = ProductionsTable
@@ -27,7 +30,6 @@ export interface ProductionSchedule {
 }
 
 // Placeholder exports to resolve module imports
-import { uiLogger } from '@/lib/logger'
 
 export const ProductionModule = {
   scheduleBatch: (batchData: Partial<ProductionBatch>) => {

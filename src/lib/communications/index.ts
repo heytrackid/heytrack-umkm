@@ -1,4 +1,9 @@
-// @ts-nocheck
+import { WhatsAppService } from './whatsapp'
+import { SmartNotificationSystem } from './notifications'
+import { CommunicationsManager } from './manager'
+import type { SmartNotification } from './types'
+
+
 /**
  * Communications Module - Main Entry Point
  * Unified communication services for WhatsApp, notifications, and email
@@ -14,10 +19,6 @@ export { EmailService } from './email'
 export { CommunicationsManager } from './manager'
 
 // Re-export convenience functions for backward compatibility
-import { WhatsAppService } from './whatsapp'
-import { SmartNotificationSystem } from './notifications'
-import { CommunicationsManager } from './manager'
-import type { SmartNotification } from './types'
 
 /**
  * Send WhatsApp message (convenience function)

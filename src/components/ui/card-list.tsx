@@ -1,12 +1,13 @@
+import { cn } from '@/lib/utils'
+import type { ReactNode } from 'react'
+import { Badge } from './badge'
+import { Card, CardContent } from './card'
+
 /**
  * Card List Component
  * Mobile-friendly alternative to tables
  */
 
-import { cn } from '@/lib/utils'
-import type { ReactNode } from 'react'
-import { Badge } from './badge'
-import { Card, CardContent } from './card'
 
 interface CardListItem {
   id: string
@@ -82,7 +83,7 @@ export const DataCard = ({
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           <h3 className="font-semibold truncate-desktop-only">{title}</h3>
           {badge && (
-            <Badge variant={badge.variant || 'default'} className="text-xs flex-shrink-0">
+            <Badge variant = {badge.variant || 'default'} className="text-xs flex-shrink-0">
               {badge.label}
             </Badge>
           )}

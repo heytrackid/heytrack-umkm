@@ -1,10 +1,12 @@
+import { z } from 'zod'
+import { UUIDSchema, NonNegativeNumberSchema, DateStringSchema } from '@/lib/validations/base-validations'
+
+
 /**
  * Finance Validation Schemas
  * Validation schemas for finance-related operations
  */
 
-import { z } from 'zod'
-import { UUIDSchema, NonNegativeNumberSchema, DateStringSchema } from '@/lib/validations/base-validations'
 
 // Financial record schemas
 export const FinancialRecordInsertSchema = z.object({

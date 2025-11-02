@@ -1,24 +1,8 @@
-/**
- * Shared Empty and Error States
- * Reusable empty states and error displays
- */
-
 import type { ComponentType } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import {
-  AlertTriangle,
-  FileX,
-  Search,
-  Package,
-  Users,
-  ShoppingCart,
-  Calculator,
-  RefreshCw,
-  Plus,
-  Home
-} from 'lucide-react'
+import { /** * Shared Empty and Error States * Reusable empty states and error displays */ AlertTriangle, FileX, Search, Package, Users, ShoppingCart, Calculator, RefreshCw, Plus, Home } from 'lucide-react' 
 
 // Empty state for different contexts
 interface EmptyStateProps {
@@ -315,4 +299,3 @@ export const PermissionError = ({ resource = "halaman ini" }: { resource?: strin
   )
 
 // Import React for types
-import type React from 'react'

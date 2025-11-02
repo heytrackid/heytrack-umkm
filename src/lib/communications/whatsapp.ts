@@ -1,12 +1,13 @@
-// @ts-nocheck
+import { automationLogger } from '@/lib/logger'
+import { formatCurrentCurrency } from '@/lib/currency'
+import type { WhatsAppTemplate, WhatsAppConfig, OrderData } from './types'
+
+
 /**
  * WhatsApp Service Module
  * WhatsApp messaging service for order notifications and customer communication
  */
 
-import { automationLogger } from '@/lib/logger'
-import { formatCurrentCurrency } from '@/lib/currency'
-import type { WhatsAppTemplate, WhatsAppConfig, OrderData } from './types'
 
 export class WhatsAppService {
   private config: WhatsAppConfig;

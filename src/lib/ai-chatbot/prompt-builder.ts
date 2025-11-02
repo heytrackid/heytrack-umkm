@@ -1,9 +1,10 @@
+import type { ChatContext, BusinessData } from './types'
+
 /**
  * Chatbot Prompt Builder
  * Builds context-aware system prompts
  */
 
-import type { ChatContext, BusinessData } from './types'
 
 export class ChatbotPromptBuilder {
   /**

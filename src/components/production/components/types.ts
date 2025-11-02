@@ -1,7 +1,10 @@
+import type { ProductionBatchWithDetails } from '@/services/production/BatchSchedulingService'
+
 // Production Components Types
 // Type definitions for production batch execution components
 
-import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
+
+export type ProductionBatch = ProductionBatchWithDetails
 
 export interface BatchExecutionState {
   batch: ProductionBatch

@@ -1,12 +1,14 @@
+'use client'
+
+import Image from 'next/image'
+import { useState } from 'react'
+
 /**
  * Optimized Image Component
  * Lazy loading with blur placeholder and WebP support
  */
 
-'use client'
 
-import Image from 'next/image'
-import { useState } from 'react'
 
 interface OptimizedImageProps {
   src: string

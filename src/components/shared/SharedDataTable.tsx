@@ -1,10 +1,12 @@
-/* eslint-disable */
 'use client'
 
 import { type ReactNode, useEffect, useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { EmptyState } from '@/components/ui/empty-state'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +15,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Search,
   Plus,
@@ -24,8 +25,8 @@ import {
   Download,
   RefreshCw
 } from 'lucide-react'
-import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
-import { EmptyState } from '@/components/ui/empty-state'
+
+/* eslint-disable */
 
 interface Column<T> {
   key: keyof T | string
@@ -141,11 +142,10 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
   const processedData = useMemo(() => {
     let filtered = data.filter(item => {
       // Search filter
-      const matchesSearch = !searchTerm ||
-        columns.some(col => {
-          const value = getValue(item, col.key)
-          return value != null && String(value).toLowerCase().includes(searchTerm.toLowerCase())
-        })
+      const matchesSearch = !searchTerm || columns.some(col => {
+        const value = getValue(item, col.key)
+        return value != null && String(value).toLowerCase().includes(searchTerm.toLowerCase())
+      })
 
       // Column filters
       const matchesFilters = Object.entries(filters).every(([key, filterValue]) => {
@@ -169,8 +169,8 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
           return 0
         }
 
-        const aText = String(aVal ?? '')
-        const bText = String(bVal ?? '')
+        const aText = String(aVal || '')
+        const bText = String(bVal || '')
         if (aText < bText) { return sortOrder === 'asc' ? -1 : 1 }
         if (aText > bText) { return sortOrder === 'asc' ? 1 : -1 }
         return 0
@@ -360,7 +360,7 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
           <EmptyState
             title={emptyMessage}
             description={emptyDescription}
-            action={onAdd ? { label: addButtonText, onClick: onAdd } : undefined}
+            actions={onAdd ? [{ label: addButtonText, onClick: onAdd }] : undefined}
           />
         ) : (
           <div className="space-y-4">

@@ -4,14 +4,7 @@ import { Fragment } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 
 // Import components directly for better parallel loading
 import CategoryList from './components/CategoryList'
@@ -32,7 +25,7 @@ const getBreadcrumbItems = (currentView: string) => [
   }] : [])
 ]
 
-export default function CategoriesPage() {
+const CategoriesPage = () => {
   const { isMobile } = useResponsive()
 
   // Use the custom hook for all categories logic
@@ -70,7 +63,7 @@ export default function CategoriesPage() {
         <Breadcrumb>
           <BreadcrumbList>
             {getBreadcrumbItems(currentView).map((item, index) => (
-              <Fragment key={index}>
+              <Fragment key={item.label}>
                 <BreadcrumbItem>
                   {item.href ? (
                     <BreadcrumbLink asChild>
@@ -137,3 +130,5 @@ export default function CategoriesPage() {
     </AppLayout >
   )
 }
+
+export default CategoriesPage

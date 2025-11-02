@@ -1,16 +1,6 @@
-import {
-  createSuccessResponse,
-  createErrorResponse,
-  handleAPIError,
-  withQueryValidation,
-  PaginationSchema,
-  calculateOffset,
-  createPaginationMeta
-} from '@/lib/api-core'
+import { createSuccessResponse, createErrorResponse, handleAPIError, withQueryValidation, PaginationSchema, calculateOffset, createPaginationMeta } from '@/lib/api-core' 
 import { z } from 'zod'
-import {
-  IngredientInsertSchema
-} from '@/lib/validations/domains/ingredient'
+import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient' 
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest } from 'next/server'
 import type { IngredientsInsert } from '@/types/database'

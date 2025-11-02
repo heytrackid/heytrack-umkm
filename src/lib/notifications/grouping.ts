@@ -1,5 +1,6 @@
-// @ts-nocheck
 import type { Notification } from '@/types/domain/notifications'
+
+
 
 export interface GroupedNotification {
   id: string
@@ -29,7 +30,7 @@ export function groupNotifications(
   const now = new Date().getTime()
 
   for (const notification of notifications) {
-    const createdAt = new Date(notification.created_at).getTime()
+    const createdAt = new Date(notification.created_at || new Date()).getTime()
     const ageSeconds = (now - createdAt) / 1000
 
     // Don't group if too old
@@ -44,7 +45,7 @@ export function groupNotifications(
         message: notification.message,
         count: 1,
         notifications: [notification],
-        latest_created_at: notification.created_at,
+        latest_created_at: notification.created_at || new Date().toISOString(),
         priority: notification.priority || 'normal',
       })
       continue
@@ -60,8 +61,8 @@ export function groupNotifications(
       group.notifications.push(notification)
       
       // Update to latest timestamp
-      if (new Date(notification.created_at) > new Date(group.latest_created_at)) {
-        group.latest_created_at = notification.created_at
+      if (new Date(notification.created_at || new Date()) > new Date(group.latest_created_at)) {
+        group.latest_created_at = notification.created_at || new Date().toISOString()
         group.title = notification.title
         group.message = notification.message
       }
@@ -83,7 +84,7 @@ export function groupNotifications(
         message: notification.message,
         count: 1,
         notifications: [notification],
-        latest_created_at: notification.created_at,
+        latest_created_at: notification.created_at || new Date().toISOString(),
         priority: notification.priority || 'normal',
       })
     }
@@ -124,12 +125,11 @@ export function getGroupedMessage(group: GroupedNotification): string {
   const entityNames = new Set<string>()
   for (const notif of group.notifications) {
     if (notif.metadata && typeof notif.metadata === 'object') {
-      const metadata = notif.metadata as Record<string, any>
-      const name = metadata.ingredient_name || 
-                   metadata.recipe_name || 
-                   metadata.order_no || 
-                   metadata.customer_name
-      if (name) {
+      const metadata = notif.metadata as Record<string, unknown>
+      const name = (metadata.ingredient_name as string) || (metadata.recipe_name as string) || 
+                   (metadata.order_no as string) || 
+                   (metadata.customer_name as string)
+      if (name && typeof name === 'string') {
         entityNames.add(name)
       }
     }
@@ -160,8 +160,8 @@ export function shouldGroup(
   if (notif1.entity_type !== notif2.entity_type) {return false}
 
   // Within time window
-  const time1 = new Date(notif1.created_at).getTime()
-  const time2 = new Date(notif2.created_at).getTime()
+  const time1 = new Date(notif1.created_at || new Date()).getTime()
+  const time2 = new Date(notif2.created_at || new Date()).getTime()
   const diffSeconds = Math.abs(time1 - time2) / 1000
 
   return diffSeconds <= timeWindowSeconds

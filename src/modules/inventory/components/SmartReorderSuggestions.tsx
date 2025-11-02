@@ -1,20 +1,18 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { IngredientsTable } from '@/types/database'
-type Ingredient = IngredientsTable
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { useCurrency } from '@/hooks/useCurrency'
-import {
-    ShoppingCart,
-    TrendingUp,
-    Calendar,
-    Package,
-    Sparkles,
-    AlertCircle
-} from 'lucide-react'
+
 import { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useCurrency } from '@/hooks/useCurrency'
+import type { IngredientsTable } from '@/types/database'
+import { ShoppingCart, TrendingUp, Calendar, Package, Sparkles, AlertCircle } from 'lucide-react'
+
+
+
+
+type Ingredient = IngredientsTable
 
 interface ReorderSuggestion {
     ingredient: Ingredient
@@ -42,13 +40,13 @@ export const SmartReorderSuggestions = ({
     // Generate smart suggestions
     const suggestions: ReorderSuggestion[] = ingredients
         .filter(ing => {
-            const currentStock = ing.current_stock ?? 0
-            const minStock = ing.min_stock ?? 0
+            const currentStock = ing.current_stock || 0
+            const minStock = ing.min_stock || 0
             return currentStock <= minStock
         })
         .map(ing => {
-            const currentStock = ing.current_stock ?? 0
-            const minStock = ing.min_stock ?? 0
+            const currentStock = ing.current_stock || 0
+            const minStock = ing.min_stock || 0
             const avgDailyUsage = usageHistory[ing.id] || (minStock * 0.1) // fallback estimate
             const daysUntilOut = avgDailyUsage > 0 ? Math.floor(currentStock / avgDailyUsage) : 0
 
@@ -80,7 +78,7 @@ export const SmartReorderSuggestions = ({
                 ingredient: ing,
                 suggestedQuantity,
                 urgency,
-                estimatedCost: suggestedQuantity * (ing.price_per_unit ?? 0),
+                estimatedCost: suggestedQuantity * (ing.price_per_unit || 0),
                 reason,
                 daysUntilOut: daysUntilOut > 0 ? daysUntilOut : undefined
             }
@@ -274,14 +272,14 @@ export const SmartReorderSuggestions = ({
                                             <div className="p-2 bg-gray-50 dark:bg-gray-900 rounded">
                                                 <div className="text-xs text-muted-foreground mb-1">Current Stock</div>
                                                 <div className="font-medium">
-                                                    {(suggestion.ingredient.current_stock ?? 0)} {suggestion.ingredient.unit ?? ''}
+                                                    {(suggestion.ingredient.current_stock || 0)} {suggestion.ingredient.unit || ''}
                                                 </div>
                                             </div>
 
                                             <div className="p-2 bg-gray-50 dark:bg-gray-900 rounded">
                                                 <div className="text-xs text-muted-foreground mb-1">Min Stock</div>
                                                 <div className="font-medium">
-                                                    {(suggestion.ingredient.min_stock ?? 0)} {suggestion.ingredient.unit ?? ''}
+                                                    {(suggestion.ingredient.min_stock || 0)} {suggestion.ingredient.unit || ''}
                                                 </div>
                                             </div>
 
@@ -290,7 +288,7 @@ export const SmartReorderSuggestions = ({
                                                     Suggested Order
                                                 </div>
                                                 <div className="font-bold text-purple-600">
-                                                    {suggestion.suggestedQuantity} {suggestion.ingredient.unit ?? ''}
+                                                    {suggestion.suggestedQuantity} {suggestion.ingredient.unit || ''}
                                                 </div>
                                             </div>
 
@@ -312,9 +310,9 @@ export const SmartReorderSuggestions = ({
                                             <div className="flex items-start gap-2 text-sm">
                                                 <TrendingUp className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
                                                 <div className="text-blue-800 dark:text-blue-200">
-                                                    <strong>AI Recommendation:</strong> Order {suggestion.suggestedQuantity} {suggestion.ingredient.unit ?? ''}
+                                                    <strong>AI Recommendation:</strong> Order {suggestion.suggestedQuantity} {suggestion.ingredient.unit || ''}
                                                     {' '}(2x minimum stock) untuk safety buffer.
-                                                    Harga per unit: {formatCurrency(suggestion.ingredient.price_per_unit ?? 0)}.
+                                                    Harga per unit: {formatCurrency(suggestion.ingredient.price_per_unit || 0)}.
                                                 </div>
                                             </div>
                                         </div>

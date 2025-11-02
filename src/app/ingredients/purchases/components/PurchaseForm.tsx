@@ -1,32 +1,18 @@
-// Purchase Form Component - Lazy Loaded
-// Form dialog for adding new ingredient purchases
+'use client'
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
+import { useToast } from '@/hooks/use-toast'
 import { Plus } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IngredientPurchaseInsertSchema, type IngredientPurchaseInsert } from '@/lib/validations/database-validations'
 import type { AvailableIngredient } from './types'
 import { uiLogger } from '@/lib/logger'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface PurchaseFormProps {
   ingredients: AvailableIngredient[]
@@ -43,6 +29,7 @@ interface PurchaseFormProps {
 
 const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const { toast } = useToast()
 
   const form = useForm<IngredientPurchaseInsert>({
     resolver: zodResolver(IngredientPurchaseInsertSchema),
@@ -79,9 +66,14 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
 
       void setIsDialogOpen(false)
       onSuccess()
-    } catch (_err) {
-      uiLogger.error({ err }, 'Error creating purchase')
-      alert('Gagal menambahkan pembelian')
+    } catch (err: unknown) {
+      const error = err as Error
+      uiLogger.error({ error }, 'Error creating purchase')
+      toast({
+        title: 'Gagal',
+        description: 'Gagal menambahkan pembelian',
+        variant: 'destructive',
+      })
     }
   }
 

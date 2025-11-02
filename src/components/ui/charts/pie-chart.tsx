@@ -1,14 +1,15 @@
-/**
- * Mobile Pie Chart Component
- * Optimized pie chart for mobile devices
- */
-
 import { memo } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Pie, PieChart, Cell, Tooltip, Legend, ResponsiveContainer, type PieLabelRenderProps } from 'recharts'
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from './types'
+
+/**
+ * Mobile Pie Chart Component
+ * Optimized pie chart for mobile devices
+ */
+
 
 interface MobilePieChartProps extends BaseMobileChartProps {
   valueKey: string
@@ -34,25 +35,31 @@ export const MobilePieChart = memo(({
   const { isMobile } = useResponsive()
 
   const renderLabel = (props: PieLabelRenderProps) => {
-    const { cx, cy, midAngle, innerRadius, outerRadius, percent } = props
-    if (!showLabels || !percent || percent < 0.05) { return null } // Don't show labels for slices < 5%
+    const { cx, cy, midAngle, innerRadius: propsInnerRadius, outerRadius: propsOuterRadius, percent } = props
+    const percentValue = typeof percent === 'number' ? percent : 0
+    if (!showLabels || percentValue < 0.05) { return null } // Don't show labels for slices < 5%
 
     const RADIAN = Math.PI / 180
-    const radius = (innerRadius || 0) + ((outerRadius || 0) - (innerRadius || 0)) * 0.5
-    const x = Number(cx || 0) + radius * Math.cos(-Number(midAngle || 0) * RADIAN)
-    const y = Number(cy || 0) + radius * Math.sin(-Number(midAngle || 0) * RADIAN)
+    const innerR = typeof propsInnerRadius === 'number' ? propsInnerRadius : 0
+    const outerR = typeof propsOuterRadius === 'number' ? propsOuterRadius : 0
+    const radius = innerR + (outerR - innerR) * 0.5
+    const cxValue = typeof cx === 'number' ? cx : 0
+    const cyValue = typeof cy === 'number' ? cy : 0
+    const midAngleValue = typeof midAngle === 'number' ? midAngle : 0
+    const x = cxValue + radius * Math.cos(-midAngleValue * RADIAN)
+    const y = cyValue + radius * Math.sin(-midAngleValue * RADIAN)
 
     return (
       <text
         x={x}
         y={y}
         fill="white"
-        textAnchor={x > Number(cx || 0) ? 'start' : 'end'}
+        textAnchor={x > cxValue ? 'start' : 'end'}
         dominantBaseline="central"
         fontSize={isMobile ? 10 : 12}
         fontWeight="medium"
       >
-        {`${(percent * 100).toFixed(0)}%`}
+        {`${(percentValue * 100).toFixed(0)}%`}
       </text>
     )
   }

@@ -1,7 +1,5 @@
 'use client'
 
-// Shared business logic components and utilities
-
 import { type ReactNode, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,6 +7,8 @@ import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { cn } from '@/lib/utils'
+import { formatCurrency, formatNumber } from '@/lib/shared/utilities'
+import type { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
 import {
   TrendingUp,
   TrendingDown,
@@ -21,10 +21,10 @@ import {
   BarChart3,
   LineChart
 } from 'lucide-react'
-import { formatCurrency, formatNumber } from '@/lib/shared/utilities'
+
+// Shared business logic components and utilities
 
 // Inventory Status Components
-import type { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
 
 // Define a UI-specific type that extends the database type with UI-specific fields
 interface BaseInventoryAlert extends DatabaseInventoryAlert {

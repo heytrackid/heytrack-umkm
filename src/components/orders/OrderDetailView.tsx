@@ -6,6 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
+import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import OrderStatusTimeline from './OrderStatusTimeline'
 import {
     ArrowLeft,
     Edit,
@@ -22,11 +27,6 @@ import {
     Printer,
     Share2
 } from 'lucide-react'
-import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
-import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useResponsive } from '@/hooks/useResponsive'
-import OrderStatusTimeline from './OrderStatusTimeline'
 
 interface OrderDetailViewProps {
     order: Order
@@ -36,15 +36,15 @@ interface OrderDetailViewProps {
     onUpdateStatus: (status: OrderStatus) => void
 }
 
-export default function OrderDetailView({
+const OrderDetailView = ({
     order,
     onEdit,
     onDelete,
     onBack,
     onUpdateStatus
-}: OrderDetailViewProps) {
+}: OrderDetailViewProps) => {
     const { formatCurrency } = useCurrency()
-    const { isMobile } = useResponsive()
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
     const handleDelete = () => {
@@ -369,3 +369,5 @@ export default function OrderDetailView({
         </div>
     )
 }
+
+export default OrderDetailView

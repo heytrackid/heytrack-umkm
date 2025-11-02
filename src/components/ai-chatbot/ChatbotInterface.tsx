@@ -8,8 +8,10 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 import DataVisualization from './DataVisualization';
-
 import { apiLogger } from '@/lib/logger'
+
+
+
 
 // Extended message type for UI with additional properties
 interface ExtendedChatMessage {
@@ -132,10 +134,10 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
             sessionId: result.session_id,
             conversationHistory: messages
               .filter(m => m.role !== 'system')
-              .map(({ role, content, timestamp }) => ({ 
-                role: role as 'user' | 'assistant', 
-                content, 
-                timestamp 
+              .map(({ role, content, timestamp }) => ({
+                role: role as 'user' | 'assistant',
+                content,
+                timestamp
               })),
           });
         }
@@ -243,86 +245,85 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
   };
 
   // Message bubble component
+  // eslint-disable-next-line react/no-unstable-nested-components
   const MessageBubble = ({ message }: { message: ExtendedChatMessage }) => {
     const isUser = message.role === 'user';
     const isSystem = message.role === 'system';
 
     return (
-      <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 w-full`}>
-        <div className={`flex ${isUser ? 'flex-row-reverse' : 'flex-row'} items-start max-w-[85%] min-w-0 gap-2`}>
-          {/* Avatar */}
-          <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isUser ? 'bg-blue-500' : isSystem ? 'bg-green-500' : 'bg-gray-500'
+      <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+        {/* Avatar */}
+        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isUser ? 'bg-blue-500' : isSystem ? 'bg-green-500' : 'bg-gray-500'
+          }`}>
+          {isUser ? (
+            <User className="h-4 w-4 text-white" />
+          ) : isSystem ? (
+            <MessageCircle className="h-4 w-4 text-white" />
+          ) : (
+            <Bot className="h-4 w-4 text-white" />
+          )}
+        </div>
+
+        {/* Message content */}
+        <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} flex-1 min-w-0 overflow-hidden`}>
+          <div className={`px-4 py-3 rounded-2xl w-full break-words overflow-hidden shadow-sm ${isUser
+            ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
+            : isSystem
+              ? 'bg-gradient-to-br from-green-50 to-green-100 text-green-900 border border-green-200'
+              : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
             }`}>
-            {isUser ? (
-              <User className="h-4 w-4 text-white" />
-            ) : isSystem ? (
-              <MessageCircle className="h-4 w-4 text-white" />
-            ) : (
-              <Bot className="h-4 w-4 text-white" />
+            <div className="whitespace-pre-wrap text-sm leading-relaxed break-words overflow-wrap-anywhere word-break-break-word prose prose-sm max-w-none">
+              {message.content}
+            </div>
+
+            {/* Action buttons */}
+            {message.actions && message.actions.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {message.actions.map((action: ChatAction, index: number) => (
+                  <Button
+                    key={`${action.type}-${index}`}
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleActionClick(action)}
+                    disabled={isLoading}
+                    className="text-xs h-8"
+                  >
+                    {getActionIcon(action.type)}
+                    <span className="ml-1">{action.label}</span>
+                  </Button>
+                ))}
+              </div>
+            )}
+
+            {/* Data visualization */}
+            {message.data && (message.role === 'assistant' || message.role === 'system') && (
+              <div className="mt-3">
+                {(() => {
+                  // Determine visualization type based on message data structure
+                  const data = message.data as Record<string, unknown> | undefined;
+                  if (data?.profitMargin !== undefined) {
+                    return <DataVisualization type="financial" data={data} compact />;
+                  } if (data?.criticalItems) {
+                    return <DataVisualization type="inventory" data={data} compact />;
+                  } if (data?.topCustomers) {
+                    return <DataVisualization type="customers" data={data} compact />;
+                  } if (data?.topRecipes) {
+                    return <DataVisualization type="products" data={data} compact />;
+                  } if (data?.analysis) {
+                    return <DataVisualization type="analysis" data={data} compact />;
+                  }
+                  return null;
+                })()}
+              </div>
             )}
           </div>
 
-          {/* Message content */}
-          <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} flex-1 min-w-0 overflow-hidden`}>
-            <div className={`px-4 py-3 rounded-2xl w-full break-words overflow-hidden shadow-sm ${isUser
-              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
-              : isSystem
-                ? 'bg-gradient-to-br from-green-50 to-green-100 text-green-900 border border-green-200'
-                : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
-              }`}>
-              <div className="whitespace-pre-wrap text-sm leading-relaxed break-words overflow-wrap-anywhere word-break-break-word prose prose-sm max-w-none">
-                {message.content}
-              </div>
-
-              {/* Action buttons */}
-              {message.actions && message.actions.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {message.actions.map((action: ChatAction, index: number) => (
-                    <Button
-                      key={`${action.type}-${index}`}
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleActionClick(action)}
-                      disabled={isLoading}
-                      className="text-xs h-8"
-                    >
-                      {getActionIcon(action.type)}
-                      <span className="ml-1">{action.label}</span>
-                    </Button>
-                  ))}
-                </div>
-              )}
-
-              {/* Data visualization */}
-              {message.data && (message.role === 'assistant' || message.role === 'system') && (
-                <div className="mt-3">
-                  {(() => {
-                    // Determine visualization type based on message data structure
-                    const {data} = message;
-                    if (data.profitMargin !== undefined) {
-                      return <DataVisualization type="financial" data={data} compact />;
-                    } if (data.criticalItems) {
-                      return <DataVisualization type="inventory" data={data} compact />;
-                    } if (data.topCustomers) {
-                      return <DataVisualization type="customers" data={data} compact />;
-                    } if (data.topRecipes) {
-                      return <DataVisualization type="products" data={data} compact />;
-                    } if (data.analysis) {
-                      return <DataVisualization type="analysis" data={data} compact />;
-                    }
-                    return null;
-                  })()}
-                </div>
-              )}
-            </div>
-
-            {/* Timestamp */}
-            <div className="text-xs text-gray-500 mt-1">
-              {new Date(message.timestamp).toLocaleTimeString('id-ID', {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </div>
+          {/* Timestamp */}
+          <div className="text-xs text-gray-500 mt-1">
+            {new Date(message.timestamp).toLocaleTimeString('id-ID', {
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
           </div>
         </div>
       </div>
@@ -330,6 +331,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
   };
 
   // Quick action buttons with smart suggestions
+  // eslint-disable-next-line react/no-unstable-nested-components
   const QuickActions = () => (
     <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 border-t">
       <p className="text-xs font-medium text-gray-700 mb-2">💡 Coba tanyakan:</p>
@@ -496,6 +498,6 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
       </CardContent>
     </Card>
   );
-};
+}
 
 export default ChatbotInterface;

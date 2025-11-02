@@ -5,6 +5,8 @@ import { useSupabaseCRUD } from '@/hooks/supabase'
 import { useToast } from '@/hooks/use-toast'
 import type { Database } from '@/types/database'
 
+
+
 /**
  * Generic CRUD hook for common operations
  */
@@ -29,7 +31,7 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
         description: "Data berhasil ditambahkan",
       })
       return result
-    } catch (_err) {
+    } catch (err) {
       toast({
         title: "Error",
         description: "Gagal menambahkan data",
@@ -50,7 +52,7 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
         description: "Data berhasil diperbarui",
       })
       return result
-    } catch (_err) {
+    } catch (err) {
       toast({
         title: "Error",
         description: "Gagal memperbarui data",
@@ -71,7 +73,7 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
         description: "Data berhasil dihapus",
       })
       return result
-    } catch (_err) {
+    } catch (err) {
       toast({
         title: "Error",
         description: "Gagal menghapus data",
@@ -200,7 +202,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     try {
       const item = window.localStorage.getItem(key)
       return item ? JSON.parse(item) : defaultValue
-    } catch (_error) {
+    } catch (error) {
       return defaultValue
     }
   })
@@ -213,7 +215,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore))
       }
-    } catch (_err) {
+    } catch (err) {
       // Storage error handled silently
     }
   }, [key, value])
@@ -224,7 +226,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(key)
       }
-    } catch (_err) {
+    } catch (err) {
       // Storage error handled silently
     }
   }, [key, defaultValue])

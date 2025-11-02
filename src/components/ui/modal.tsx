@@ -1,6 +1,7 @@
 import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;

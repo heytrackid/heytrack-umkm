@@ -1,7 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database, NotificationsInsert } from '@/types/database'
 import type { CreateNotificationParams } from '@/types/domain/notifications'
+import type { Json } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
+
+
 
 type NotificationInsert = NotificationsInsert
 
@@ -15,6 +18,10 @@ export class NotificationService {
     params: CreateNotificationParams
   ): Promise<void> {
     try {
+      const metadata: Json | undefined = params.metadata
+        ? JSON.parse(JSON.stringify(params.metadata)) as Json
+        : undefined
+
       const notification: NotificationInsert = {
         user_id: userId,
         type: params.type,
@@ -25,7 +32,7 @@ export class NotificationService {
         entity_type: params.entity_type,
         entity_id: params.entity_id,
         action_url: params.action_url,
-        metadata: params.metadata || {},
+        metadata,
         expires_at: params.expires_at,
       }
 

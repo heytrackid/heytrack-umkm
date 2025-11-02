@@ -3,12 +3,12 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { apiLogger } from '@/lib/logger'
+import { useRoutePreloading } from '@/hooks/useRoutePreloading'
 import {
   useSmartPreloading,
   useIdleTimePreloading,
   useNetworkAwarePreloading
 } from '@/hooks/route-preloading'
-import { useRoutePreloading } from '@/hooks/useRoutePreloading'
 
 interface PreloadingMetrics {
   currentRoute: string
@@ -109,24 +109,24 @@ export const PreloadingProvider = ({
     if (debug) {
       apiLogger.info(`🛣️ Route changed to: ${pathname}`)
       apiLogger.info(`📊 Preloaded routes: ${preloadedRoutes.size}`)
-      apiLogger.info(`🧩 Preloaded components: ${preloadedComponents.size}`)
+      apiLogger.info(`🧩 Preloaded components: ${_preloadedComponents.size}`)
     }
-  }, [pathname, preloadedRoutes.size, preloadedComponents.size, debug])
+  }, [pathname, preloadedRoutes.size, _preloadedComponents.size, debug])
 
   // Performance monitoring
   const getMetrics = (): PreloadingMetrics => ({
     currentRoute: pathname,
     preloadedRoutesCount: preloadedRoutes.size,
-    preloadedComponentsCount: preloadedComponents.size,
+    preloadedComponentsCount: _preloadedComponents.size,
     preloadedRoutes: Array.from(preloadedRoutes),
-    preloadedComponents: Array.from(preloadedComponents)
+    preloadedComponents: Array.from(_preloadedComponents)
   })
 
   // Context value
   const value: PreloadingContextType = {
     isPreloading,
     preloadedRoutes,
-    preloadedComponents,
+    preloadedComponents: _preloadedComponents,
     preloadRoute,
     getMetrics
   }

@@ -3,24 +3,12 @@
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  DashboardHeaderSkeleton,
-  RecentOrdersSkeleton,
-  StatsCardSkeleton,
-  StockAlertSkeleton
-} from '@/components/ui/skeletons/dashboard-skeletons'
+import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
-import {
-  BarChart3,
-  ChefHat,
-  Package,
-  ShoppingCart,
-  Target,
-  Calculator
-} from 'lucide-react'
+import { BarChart3, ChefHat, Package, ShoppingCart, Target, Calculator } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -78,25 +66,56 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
   // Transform API response to match DashboardData structure
   return {
     stats: {
-      totalSales: data.revenue?.total || 0,
-      totalOrders: data.orders?.total || 0,
-      totalCustomers: data.customers?.total || 0,
-      totalIngredients: data.inventory?.total || 0,
-      salesGrowth: parseFloat(data.revenue?.growth || '0'),
+      totalSales: data.revenue?.total ?? 0,
+      totalOrders: data.orders?.total ?? 0,
+      totalCustomers: data.customers?.total ?? 0,
+      totalIngredients: data.inventory?.total ?? 0,
+      salesGrowth: parseFloat(data.revenue?.growth ?? '0'),
       ordersGrowth: 0, // Not provided by API yet
       customersGrowth: 0, // Not provided by API yet
-      ingredientsLow: data.inventory?.lowStock || 0
+      ingredientsLow: data.inventory?.lowStock ?? 0
     },
     orders: {
-      recent: data.orders?.recent || []
+      recent: data.orders?.recent ?? []
     },
     inventory: {
-      lowStockAlerts: data.inventory?.lowStockAlerts || []
+      lowStockAlerts: data.inventory?.lowStockAlerts ?? []
     }
   }
 }
 
-export default function Dashboard() {
+// Dashboard Skeleton Component
+const DashboardSkeleton = () => (
+  <div className="space-y-6">
+    {/* Stats Cards Loading */}
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {Array.from({ length: 4 }, (_, i) => (
+        <StatsCardSkeleton key={i} />
+      ))}
+    </div>
+
+    {/* Recent Orders & Stock Alerts Loading */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <RecentOrdersSkeleton />
+      <StockAlertSkeleton />
+    </div>
+
+    {/* HPP Widget Loading */}
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <BarChart3 className="h-5 w-5" />
+          Analisis HPP
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+      </CardContent>
+    </Card>
+  </div>
+)
+
+const Dashboard = () => {
   const { formatCurrency } = useCurrency()
   const [currentTime, setCurrentTime] = useState(new Date())
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth()
@@ -163,7 +182,7 @@ export default function Dashboard() {
 
   if (error) {
     // Log error using client-safe logger
-    queryLogger.error('Dashboard data loading error', error)
+    queryLogger.error('Dashboard data loading error')
 
     return (
       <AppLayout>
@@ -190,11 +209,11 @@ export default function Dashboard() {
         <PageHeader
           title="Beranda"
           description={`${currentTime.toLocaleDateString('id-ID', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}${user ? `, Selamat datang kembali, ${user.email?.split('@')[0]}! 👋` : ''}`}
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })}${user ? `, Selamat datang kembali, ${user.email?.split('@')[0]}! 👋` : ''}`}
         />
 
         {/* Empty State - Show when user has no data */}
@@ -240,41 +259,7 @@ export default function Dashboard() {
         )}
 
         {/* Main Dashboard Content - Single Suspense boundary to prevent cascading loading */}
-        <Suspense fallback={
-          <div className="space-y-6">
-            {/* Stats Cards Loading */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {Array.from({ length: 4 }, (_, i) => (
-                <StatsCardSkeleton key={i} />
-              ))}
-            </div>
-
-            {/* Recent Orders & Stock Alerts Loading */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <RecentOrdersSkeleton />
-              <StockAlertSkeleton />
-            </div>
-
-            {/* HPP Widget Loading */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="h-5 w-5" />
-                  HPP & Costing Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="animate-pulse space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="h-16 bg-gray-200 rounded" />
-                    <div className="h-16 bg-gray-200 rounded" />
-                  </div>
-                  <div className="h-32 bg-gray-200 rounded" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        }>
+        <Suspense fallback={<DashboardSkeleton />}>
           {/* Stats Cards */}
           <StatsCardsSection
             stats={dashboardData?.stats ? {
@@ -354,7 +339,9 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-      </div >
-    </AppLayout >
+      </div>
+    </AppLayout>
   )
 }
+
+export default Dashboard

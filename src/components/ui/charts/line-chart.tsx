@@ -1,14 +1,15 @@
-/**
- * Mobile Line Chart Component
- * Optimized line chart for mobile devices
- */
-
 import { memo } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from './types'
+
+/**
+ * Mobile Line Chart Component
+ * Optimized line chart for mobile devices
+ */
+
 
 interface MobileLineChartProps extends BaseMobileChartProps {
   xKey: string
@@ -79,7 +80,7 @@ export const MobileLineChart = memo(({
           {lines.map((line, _index) => (
             <Line
               key={line.key}
-              type={curved ?"monotone" :"linear"}
+              type={curved ? "monotone" : "linear"}
               dataKey={line.key}
               stroke={line.color || CHART_COLORS.primary[_index % CHART_COLORS.primary.length]}
               strokeWidth={line.strokeWidth || (isMobile ? 2 : 3)}

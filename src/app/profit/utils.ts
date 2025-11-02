@@ -1,5 +1,6 @@
 import type { ProfitData, ProfitPeriodType, ChartDataPoint } from './constants'
 
+
 /**
  * Calculate date range based on period type
  */

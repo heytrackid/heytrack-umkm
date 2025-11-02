@@ -1,4 +1,10 @@
-// @ts-nocheck
+import { dbLogger } from '@/lib/logger'
+import { HPP_CONFIG } from '@/lib/constants/hpp-config'
+import { isRecipeWithIngredients } from '@/lib/type-guards'
+import type { Database, RecipesTable, RecipeIngredientsTable, IngredientsTable, HppCalculationsTable } from '@/types/database'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+
 /**
  * Consolidated HPP Calculator Service
  * Handles all HPP (Harga Pokok Produksi) calculations
@@ -7,11 +13,6 @@
  * DO NOT create duplicate services.
  */
 
-import { dbLogger } from '@/lib/logger'
-import { HPP_CONFIG } from '@/lib/constants/hpp-config'
-import { isRecipeWithIngredients } from '@/lib/type-guards'
-import type { Database, RecipesTable, RecipeIngredientsTable, IngredientsTable, HppCalculationsTable } from '@/types/database'
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 type _Recipe = RecipesTable
 type RecipeIngredient = RecipeIngredientsTable
@@ -92,19 +93,22 @@ export class HppCalculatorService {
 
       for (const ri of recipeIngredients) {
         const ingredient = ri.ingredients
-        if (!ingredient) {
+        if (!ingredient || typeof ingredient !== 'object' || !('id' in ingredient) || !('name' in ingredient)) {
           this.logger.warn({ ingredient_id: ri.ingredient_id }, 'Ingredient not found for recipe ingredient')
           continue
         }
+        
+        // Type assertion after validation
+        const validIngredient = ingredient as { id: string; name: string; price_per_unit: number; weighted_average_cost: number; unit: string }
 
         const quantity = Number(ri.quantity)
         // Use WAC if available, otherwise use current price
-        const unit_price = Number(ingredient.weighted_average_cost || ingredient.price_per_unit || 0)
+        const unit_price = Number(validIngredient.weighted_average_cost || validIngredient.price_per_unit || 0)
         const total_cost = quantity * unit_price
 
         material_breakdown.push({
-          ingredient_id: ingredient.id,
-          ingredient_name: ingredient.name,
+          ingredient_id: validIngredient.id,
+          ingredient_name: validIngredient.name,
           quantity,
           unit: ri.unit,
           unit_price,
@@ -125,7 +129,7 @@ export class HppCalculatorService {
         supabase,
         recipeId,
         userId,
-        recipeIngredients
+        recipeIngredients as unknown as Array<RecipeIngredient & { ingredients: Ingredient | null }>
       )
 
       // Calculate total HPP

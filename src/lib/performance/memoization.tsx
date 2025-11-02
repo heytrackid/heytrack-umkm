@@ -1,7 +1,7 @@
+import { memo, useMemo, useCallback, type ComponentType, type DependencyList } from 'react'
+
 'use client'
 
-import { memo, useMemo, useCallback } from 'react'
-import type { ComponentType } from 'react'
 
 /**
  * Higher-order component for memoization with custom comparison
@@ -18,7 +18,7 @@ export function withMemo<P extends object>(
  */
 export function useMemoizedValue<T>(
     factory: () => T,
-    deps: React.DependencyList
+    deps: DependencyList
 ): T {
     return useMemo(factory, deps)
 }
@@ -26,9 +26,9 @@ export function useMemoizedValue<T>(
 /**
  * Memoize callback functions
  */
-export function useMemoizedCallback<T extends (...args: any[]) => any>(
+export function useMemoizedCallback<T extends (...args: unknown[]) => unknown>(
     callback: T,
-    deps: React.DependencyList
+    deps: DependencyList
 ): T {
     return useCallback(callback, deps)
 }
@@ -43,8 +43,7 @@ export function shallowEqual<T extends object>(objA: T, objB: T): boolean {
 
     if (
         typeof objA !== 'object' ||
-        objA === null ||
-        typeof objB !== 'object' ||
+        objA === null || typeof objB !== 'object' ||
         objB === null
     ) {
         return false
@@ -72,35 +71,38 @@ export function shallowEqual<T extends object>(objA: T, objB: T): boolean {
 /**
  * Deep comparison for complex objects
  */
-export function deepEqual(objA: any, objB: any): boolean {
-    if (Object.is(objA, objB)) {
-        return true
-    }
+export function deepEqual(objA: unknown, objB: unknown): boolean {
+  if (Object.is(objA, objB)) {
+    return true
+  }
 
+  if (
+      typeof objA !== 'object' ||
+      objA === null ||
+      typeof objB !== 'object' ||
+      objB === null
+  ) {
+    return false
+  }
+
+  const recordA = objA as Record<string, unknown>
+  const recordB = objB as Record<string, unknown>
+
+  const keysA = Object.keys(recordA)
+  const keysB = Object.keys(recordB)
+
+  if (keysA.length !== keysB.length) {
+    return false
+  }
+
+  for (const key of keysA) {
     if (
-        typeof objA !== 'object' ||
-        objA === null ||
-        typeof objB !== 'object' ||
-        objB === null
+        !Object.prototype.hasOwnProperty.call(recordB, key) ||
+        !deepEqual(recordA[key], recordB[key])
     ) {
-        return false
+      return false
     }
-
-    const keysA = Object.keys(objA)
-    const keysB = Object.keys(objB)
-
-    if (keysA.length !== keysB.length) {
-        return false
-    }
-
-    for (const key of keysA) {
-        if (
-            !Object.prototype.hasOwnProperty.call(objB, key) ||
-            !deepEqual(objA[key], objB[key])
-        ) {
-            return false
-        }
-    }
+  }
 
     return true
 }

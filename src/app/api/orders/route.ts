@@ -15,6 +15,11 @@ type FinancialRecordInsert = FinancialRecordsInsert
 type FinancialRecordUpdate = FinancialRecordsUpdate
 type OrderInsert = OrdersInsert
 
+const normalizeDateValue = (value?: string | null) => {
+  const trimmed = value?.trim()
+  return trimmed && trimmed.length > 0 ? trimmed : undefined
+}
+
 // GET /api/orders - Get all orders
 async function GET(request: NextRequest) {
   try {
@@ -231,15 +236,19 @@ async function POST(request: NextRequest) {
 
     // If order is DELIVERED, create income record first
     if (orderStatus === 'DELIVERED' && validatedData.total_amount && validatedData.total_amount > 0) {
-    const incomeData: FinancialRecordInsert = {
-          user_id: user.id,
-          type: 'INCOME',
-          category: 'Revenue',
-          amount: validatedData.total_amount,
-          date: validatedData.delivery_date || validatedData.order_date || new Date().toISOString().split('T')[0],
-          reference: `Order #${validatedData.order_no}${validatedData.customer_name ? ` - ${  validatedData.customer_name}` : ''}`,
-          description: `Income from order ${validatedData.order_no}`
-        }
+      const incomeDate = normalizeDateValue(validatedData.delivery_date)
+        || normalizeDateValue(validatedData.order_date)
+        || new Date().toISOString().split('T')[0]
+
+      const incomeData: FinancialRecordInsert = {
+        user_id: user.id,
+        type: 'INCOME',
+        category: 'Revenue',
+        amount: validatedData.total_amount,
+        date: incomeDate,
+        reference: `Order #${validatedData.order_no}${validatedData.customer_name ? ` - ${  validatedData.customer_name}` : ''}`,
+        description: `Income from order ${validatedData.order_no}`
+      }
     
     const { data: incomeRecord, error: incomeError } = await supabase
         .from('financial_records')
@@ -324,11 +333,11 @@ async function POST(request: NextRequest) {
     if (validatedData.items && validatedData.items.length > 0) {
       const orderItems = validatedData.items.map((item) => ({
         recipe_id: item.recipe_id,
-        product_name: item.product_name ?? null,
+        product_name: item.product_name || null,
         quantity: item.quantity,
         unit_price: item.unit_price,
         total_price: item.total_price || (item.quantity * item.unit_price),
-        special_requests: item.special_requests ?? null,
+        special_requests: item.special_requests || null,
         order_id: createdOrder.id,
         user_id: user.id
       }))

@@ -1,9 +1,11 @@
+import type { 
+
+
 /**
  * Auth Feature Types
  * Re-exported from Supabase generated types
  */
 
-import type { 
   UserProfilesTable as UserProfilesTableType,
   UserProfilesInsert,
   UserProfilesUpdate,

@@ -1,9 +1,10 @@
-// Purchase Stats Component - Lazy Loaded
-// Displays purchase statistics and metrics cards
-
 import { Card, CardContent } from '@/components/ui/card'
 import { DollarSign, Package, ShoppingCart, TrendingUp, type LucideIcon } from 'lucide-react'
 import type { IngredientPurchase, PurchaseStats } from './types'
+
+// Purchase Stats Component - Lazy Loaded
+// Displays purchase statistics and metrics cards
+
 
 interface PurchaseStatsProps {
   purchases: IngredientPurchase[]

@@ -1,12 +1,13 @@
+import type { ReactNode } from 'react'
+import { useResponsive } from '@/hooks/useResponsive'
+import { cn } from '@/lib/utils'
+import type { TooltipEntry } from './types'
+
 /**
  * Mobile Tooltip Component
  * Optimized tooltip for mobile chart interactions
  */
 
-import type { ReactNode } from 'react'
-import { useResponsive } from '@/hooks/useResponsive'
-import { cn } from '@/lib/utils'
-import type { TooltipEntry } from './types'
 
 // Mobile-optimized tooltip component
 interface MobileTooltipProps {

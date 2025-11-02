@@ -1,43 +1,25 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { ProductionBatchesTable, RecipesTable, ProductionStatus } from '@/types/database'
+import type { ProductionStatus, ProductionBatchesTable, RecipesTable } from '@/types/database'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-
-// Use production_batches table (not productions)
-type ProductionBatch = ProductionBatchesTable
-type Recipe = RecipesTable
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import {
-    Factory,
-    Plus,
-    Search,
-    Calendar,
-    Clock,
-    CheckCircle,
-    XCircle,
-    TrendingUp,
-    Package,
-    Play,
-    BarChart3,
-    Filter,
-    Download,
-    RefreshCw
-} from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
+import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { apiLogger } from '@/lib/logger'
 import { ProductionFormDialog } from './ProductionFormDialog'
+import { Factory, Plus, Search, Calendar, Clock, CheckCircle, XCircle, TrendingUp, Package, Play, BarChart3, Filter, Download, RefreshCw } from 'lucide-react'
 
 // Extended type for production page display
-interface ProductionWithRecipe extends ProductionBatch {
-    recipe?: Pick<Recipe, 'name'> | null
+interface ProductionWithRecipe extends ProductionBatchesTable {
+    recipe?: Pick<RecipesTable, 'name'> | null
     // Override status to use the enum type
     status: ProductionStatus
 }
@@ -87,7 +69,7 @@ export const EnhancedProductionPage = () => {
                 const data = await response.json()
                 setProductions(data)
             }
-        } catch (_error) {
+        } catch (error) {
             apiLogger.error({ error }, 'Error fetching productions')
         } finally {
             setLoading(false)
@@ -116,16 +98,18 @@ export const EnhancedProductionPage = () => {
                 case 'today':
                     matchesDate = prodDate.toDateString() === today.toDateString()
                     break
-                case 'week':
+                case 'week': {
                     const weekAgo = new Date(today)
                     weekAgo.setDate(weekAgo.getDate() - 7)
                     matchesDate = prodDate >= weekAgo
                     break
-                case 'month':
+                }
+                case 'month': {
                     const monthAgo = new Date(today)
                     monthAgo.setMonth(monthAgo.getMonth() - 1)
                     matchesDate = prodDate >= monthAgo
                     break
+                }
             }
         }
 
@@ -172,7 +156,7 @@ export const EnhancedProductionPage = () => {
             if (response.ok) {
                 await fetchProductions()
             }
-        } catch (_error) {
+        } catch (error) {
             apiLogger.error({ error }, 'Error starting production')
         }
     }
@@ -191,7 +175,7 @@ export const EnhancedProductionPage = () => {
             if (response.ok) {
                 await fetchProductions()
             }
-        } catch (_error) {
+        } catch (error) {
             apiLogger.error({ error }, 'Error completing production')
         }
     }

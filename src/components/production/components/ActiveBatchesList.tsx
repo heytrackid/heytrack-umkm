@@ -1,5 +1,3 @@
-// Active Batches List Component - Lazy Loaded
-// Displays the list of active and scheduled production batches
 'use client'
 
 import { Button } from '@/components/ui/button'
@@ -11,7 +9,10 @@ import { CheckCircle, ChefHat, Pause, Play, Timer } from 'lucide-react'
 import { format } from 'date-fns'
 import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
 import type { BatchExecutionState } from './types'
-import { PRODUCTION_STEPS } from './types'
+
+// Active Batches List Component - Lazy Loaded
+// Displays the list of active and scheduled production batches
+
 
 // Define the status type for production batches based on the enum
 type ProductionStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
@@ -21,13 +22,13 @@ interface ActiveBatchesListProps {
   executionStates: Map<string, BatchExecutionState>
   selectedBatch: string | null
   onBatchSelect: (batchId: string) => void
-  onBatchUpdate?: (batchId: string, status: ProductionStatus, notes?: string) => void
+  onBatchUpdate?: (batchId: string, updates: Partial<ProductionBatch>) => void
   onStartBatch: (batch: ProductionBatch) => void
   onPauseBatch: (batchId: string) => void
   onCompleteBatch: (batchId: string) => void
 }
 
-export default function ActiveBatchesList({
+const ActiveBatchesList = ({
   batches,
   executionStates,
   selectedBatch,
@@ -36,7 +37,7 @@ export default function ActiveBatchesList({
   onStartBatch,
   onPauseBatch,
   onCompleteBatch
-}: ActiveBatchesListProps) {
+}: ActiveBatchesListProps) => {
   const getStatusColor = (status: ProductionStatus) => {
     switch (status) {
       case 'PLANNED': return 'bg-gray-500'
@@ -48,12 +49,20 @@ export default function ActiveBatchesList({
   }
 
   const getCurrentStepName = (stepKey: string) => {
-    const step = PRODUCTION_STEPS.find(s => s.key === stepKey)
+    // Import PRODUCTION_STEPS from types if needed
+    const steps = [
+      { key: 'prep', name: 'Preparation' },
+      { key: 'mixing', name: 'Mixing' },
+      { key: 'cooking', name: 'Cooking' },
+      { key: 'cooling', name: 'Cooling' },
+      { key: 'packaging', name: 'Packaging' }
+    ]
+    const step = steps.find((s: { key: string; name: string }) => s.key === stepKey)
     return step?.name || 'Unknown Step'
   }
 
   // Filter batches to show relevant ones
-  const activeBatches = batches.filter(b => 
+  const activeBatches = batches.filter(b =>
     (b.status === 'PLANNED' || b.status === 'IN_PROGRESS')
   )
 
@@ -93,12 +102,12 @@ export default function ActiveBatchesList({
                           Quantity: {batch.quantity || 0} | Status: {batch.status}
                         </p>
                       </div>
-                      <Badge className={`${getStatusColor(batch.status)} text-white`}>
-                        {batch.status}
+                      <Badge className={`${getStatusColor((batch.status || 'PLANNED') as ProductionStatus)} text-white`}>
+                        {batch.status || 'PLANNED'}
                       </Badge>
                     </div>
 
-                    {state && batch.status === 'IN_PROGRESS' && (
+                    {state && batch.status && batch.status === 'IN_PROGRESS' && (
                       <>
                         <div className="space-y-2">
                           <div className="flex justify-between text-xs">
@@ -139,7 +148,7 @@ export default function ActiveBatchesList({
                       </>
                     )}
 
-                    {batch.status === 'PLANNED' && (
+                    {batch.status && batch.status === 'PLANNED' && (
                       <div className="flex gap-2 mt-3">
                         <Button
                           variant="default"
@@ -170,3 +179,5 @@ export default function ActiveBatchesList({
     </Card>
   )
 }
+
+export default ActiveBatchesList

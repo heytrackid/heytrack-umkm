@@ -1,22 +1,16 @@
+import { useState, useRef } from 'react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { getErrorMessage } from '@/lib/type-guards'
+import { uiLogger } from '@/lib/logger'
+import { Upload, FileText, CheckCircle, AlertTriangle, Download, X, ArrowRight } from 'lucide-react'
+
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Progress } from '@/components/ui/progress'
-import { uiLogger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/type-guards'
-import {
-    Upload,
-    FileText,
-    CheckCircle,
-    AlertTriangle,
-    Download,
-    X,
-    ArrowRight
-} from 'lucide-react'
-import { useState, useRef } from 'react'
+
 
 interface ImportRow {
     row: number
@@ -41,7 +35,7 @@ export const BulkImportWizard = ({ onImport, onCancel }: BulkImportWizardProps) 
     const [currentStep, setCurrentStep] = useState<Step>('upload')
     const [_file, setFile] = useState<File | null>(null)
     const [parsedData, setParsedData] = useState<ImportRow[]>([])
-    const [_importing, setImporting] = useState(false)
+    const [isImporting, setIsImporting] = useState(false)
     const [importProgress, setImportProgress] = useState(0)
     const [importResults, setImportResults] = useState<{ success: number; failed: number }>({ success: 0, failed: 0 })
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -54,7 +48,7 @@ export const BulkImportWizard = ({ onImport, onCancel }: BulkImportWizardProps) 
         const selectedFile = e.target.files?.[0]
         if (selectedFile) {
             setFile(selectedFile)
-            parseFile(selectedFile)
+            void parseFile(selectedFile)
         }
     }
 
@@ -135,7 +129,7 @@ export const BulkImportWizard = ({ onImport, onCancel }: BulkImportWizardProps) 
         const validRows = parsedData.filter(row => row.errors.length === 0)
 
         setCurrentStep('import')
-        setImporting(true)
+        setIsImporting(true)
         setImportProgress(0)
 
         try {
@@ -156,7 +150,7 @@ export const BulkImportWizard = ({ onImport, onCancel }: BulkImportWizardProps) 
             const message = getErrorMessage(error)
             uiLogger.error({ error: message }, 'Import failed')
         } finally {
-            setImporting(false)
+            setIsImporting(false)
         }
     }
 
@@ -189,23 +183,32 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
 
         return (
             <div className="flex items-center justify-between mb-6">
-                {steps.map((step, index) => (
-                    <div key={step.id} className="flex items-center flex-1">
-                        <div className="flex flex-col items-center flex-1">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${index < currentIndex ? 'bg-green-500 text-white' :
-                                index === currentIndex ? 'bg-blue-500 text-white' :
-                                    'bg-gray-200 text-gray-500'
-                                }`}>
-                                {index < currentIndex ? <CheckCircle className="h-5 w-5" /> : index + 1}
+                {steps.map((step, index) => {
+                    const isCompleted = index < currentIndex
+                    const isCurrent = index === currentIndex
+                    const circleClasses = isCompleted
+                        ? 'bg-green-500 text-white'
+                        : isCurrent
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-200 text-gray-500'
+                    const connectorClasses = index < currentIndex
+                        ? 'bg-green-500'
+                        : 'bg-gray-200'
+
+                    return (
+                        <div key={step.id} className="flex items-center flex-1">
+                            <div className="flex flex-col items-center flex-1">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${circleClasses}`}>
+                                    {isCompleted ? <CheckCircle className="h-5 w-5" /> : index + 1}
+                                </div>
+                                <div className="text-xs mt-2 font-medium">{step.label}</div>
                             </div>
-                            <div className="text-xs mt-2 font-medium">{step.label}</div>
+                            {index < steps.length - 1 && (
+                                <div className={`h-1 flex-1 mx-2 ${connectorClasses}`} />
+                            )}
                         </div>
-                        {index < steps.length - 1 && (
-                            <div className={`h-1 flex-1 mx-2 ${index < currentIndex ? 'bg-green-500' : 'bg-gray-200'
-                                }`} />
-                        )}
-                    </div>
-                ))}
+                    )
+                })}
             </div>
         )
     }

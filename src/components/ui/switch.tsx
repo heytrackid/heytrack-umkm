@@ -1,8 +1,10 @@
-"use client"
+'use client';
 
 import { forwardRef } from 'react'
-
 import { cn } from"@/lib/utils"
+
+
+
 
 // Simple switch implementation without external dependencies
 interface SwitchProps {

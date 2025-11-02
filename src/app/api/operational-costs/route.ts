@@ -163,12 +163,12 @@ export async function POST(request: NextRequest) {
       amount: validatedData.amount,
       description: validatedData.description || '',
       expense_date: validatedData.date,
-      supplier: validatedData.vendor_name ?? undefined,
+      supplier: validatedData.vendor_name || undefined,
       payment_method: 'CASH',
       status: validatedData.is_paid ? 'paid' : 'pending',
       receipt_number: validatedData.invoice_number,
       is_recurring: validatedData.is_recurring,
-      recurring_frequency: validatedData.recurring_frequency ?? undefined,
+      recurring_frequency: validatedData.recurring_frequency || undefined,
       tags: []
     }
 

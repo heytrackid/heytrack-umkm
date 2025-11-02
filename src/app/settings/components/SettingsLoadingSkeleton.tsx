@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 
+
 export const SettingsLoadingSkeleton = () => (
     <div className="space-y-4">
       {/* Quick Links Skeleton */}

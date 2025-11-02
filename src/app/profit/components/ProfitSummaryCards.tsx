@@ -1,13 +1,8 @@
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Package,
-  ArrowUpRight,
-  ArrowDownRight
-} from 'lucide-react'
 import type { ProfitData } from './types'
+import { TrendingUp, TrendingDown, DollarSign, Package, ArrowUpRight, ArrowDownRight } from 'lucide-react' 
 
 interface ProfitSummaryCardsProps {
   summary: ProfitData['summary']

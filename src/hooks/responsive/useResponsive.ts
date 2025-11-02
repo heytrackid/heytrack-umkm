@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { type ScreenSize, type ResponsiveState, BREAKPOINTS } from './types'
 
+
+
 // Removed unused constants: MOBILE_BREAKPOINT, TABLET_BREAKPOINT
 
 /**

@@ -1,13 +1,15 @@
-/**
- * Lazy-loaded Chart Components
- * Reduces initial bundle size by loading charts only when needed
- */
-
 'use client'
 
 import dynamic from 'next/dynamic'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+/**
+ * Lazy-loaded Chart Components
+ * Reduces initial bundle size by loading charts only when needed
+ */
+
+
 
 // Loading component for charts
 const ChartSkeleton = () => (
@@ -89,15 +91,15 @@ interface LazyChartWrapperProps {
 }
 
 export const LazyChartWrapper = ({ title, description, children }: LazyChartWrapperProps) => (
-        <Card>
-            {(title || description) && (
-                <CardHeader>
-                    {title && <CardTitle>{title}</CardTitle>}
-                    {description && <p className="text-sm text-muted-foreground">{description}</p>}
-                </CardHeader>
-            )}
-            <CardContent>
-                {children}
-            </CardContent>
-        </Card>
-    )
+    <Card>
+        {(title || description) && (
+            <CardHeader>
+                {title && <CardTitle>{title}</CardTitle>}
+                {description && <p className="text-sm text-muted-foreground">{description}</p>}
+            </CardHeader>
+        )}
+        <CardContent>
+            {children}
+        </CardContent>
+    </Card>
+)

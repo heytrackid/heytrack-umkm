@@ -5,6 +5,8 @@ import { Bell, Volume2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
+
+
 /**
  * Quick links component for settings shortcuts
  */

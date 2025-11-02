@@ -1,4 +1,6 @@
 import { apiLogger } from '@/lib/logger'
+
+
 /**
  * Currency utilities - Single source of truth
  * Works with settings context for dynamic currency support
@@ -35,7 +37,7 @@ export const currencies: Currency[] = [
 ]
 
 export const DEFAULT_CURRENCY: Currency =
-  currencies.find((currency) => currency.code === 'IDR') ?? currencies[0]
+  currencies.find((currency) => currency.code === 'IDR') || currencies[0]
 
 // Extended currency configurations
 export const currencyConfigs: Record<string, CurrencyConfig> = {

@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Lock, Eye, EyeOff, Shield } from 'lucide-react'
 
+
+
 /**
  * Security settings component for password changes
  */

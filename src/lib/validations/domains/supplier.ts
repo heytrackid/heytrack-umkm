@@ -1,10 +1,12 @@
+import { z } from 'zod'
+import { EmailSchema, PhoneSchema, NonNegativeNumberSchema } from '@/lib/validations/base-validations'
+
+
 /**
  * Supplier Validation Schemas
  * Validation schemas for supplier-related operations
  */
 
-import { z } from 'zod'
-import { UUIDSchema, EmailSchema, PhoneSchema, NonNegativeNumberSchema } from '@/lib/validations/base-validations'
 
 // Supplier database schemas
 export const SupplierInsertSchema = z.object({

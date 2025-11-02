@@ -1,10 +1,3 @@
-/* eslint-disable */
-// @ts-nocheck
-/**
- * Centralized Error Handling Utilities
- * Provides consistent error handling across the application
- */
-
 import { NextResponse } from 'next/server';
 import { apiLogger } from '../logger';
 import {
@@ -16,7 +9,8 @@ import {
   DatabaseError,
   ExternalServiceError,
   RateLimitError,
-} from './app-error';
+} from './app-error'; 
+
 
 /**
  * Create a standardized error response
@@ -53,7 +47,7 @@ export function createErrorResponse(
         error: 'Validation failed',
         code: 'VALIDATION_ERROR',
         status: 400,
-        details: error.issues?.map((issue: any) => ({
+        details: error.issues?.map((issue: { path?: (string | number)[]; message: string }) => ({
           field: issue.path?.join('.'),
           message: issue.message,
         })),
@@ -65,7 +59,7 @@ export function createErrorResponse(
 
   // Handle Supabase errors
   if (isSupabaseError(error)) {
-    const supabaseError = error; // Supabase error type
+    const supabaseError = error
     return NextResponse.json(
       {
         error: supabaseError.message || 'Database error occurred',
@@ -83,9 +77,10 @@ export function createErrorResponse(
 
   // Handle regular Error objects
   if (error instanceof Error) {
+    const standardError = error
     return NextResponse.json(
       {
-        error: error.message,
+        error: standardError.message,
         code: 'INTERNAL_ERROR',
         status: 500,
         timestamp: new Date().toISOString(),
@@ -121,14 +116,19 @@ function isZodError(error: unknown): error is { issues: Array<{ path: string[]; 
 /**
  * Type guard to check if an error is a Supabase error
  */
-function isSupabaseError(error: unknown): error is any {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    'message' in error &&
-    typeof (error as any).message === 'string'
-  );
+interface SupabaseErrorShape {
+  message: string
+  status?: number
+  code?: string
+  hint?: string | null
+  details?: string | null
+}
+
+function isSupabaseError(error: unknown): error is SupabaseErrorShape {
+  if (typeof error !== 'object' || error === null) {return false}
+
+  const candidate = error as Partial<SupabaseErrorShape>
+  return typeof candidate.message === 'string'
 }
 
 /**
@@ -253,7 +253,7 @@ export async function handleAPIRouteError(
   context?: string
 ): Promise<NextResponse> {
   try {
-    return await fn();
+    return fn();
   } catch (error) {
     return createErrorResponse(error, context);
   }

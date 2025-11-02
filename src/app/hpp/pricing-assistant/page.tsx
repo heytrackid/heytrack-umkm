@@ -8,15 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import {
-  DollarSign,
-  TrendingUp,
-  Target,
-  AlertTriangle,
-  CheckCircle,
-  Lightbulb,
-  Calculator
-} from 'lucide-react'
+import { DollarSign, TrendingUp, Target, AlertTriangle, CheckCircle, Lightbulb, Calculator } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
@@ -154,9 +146,9 @@ const PricingAssistantPage = () => {
           description="Rekomendasi harga jual cerdas berdasarkan HPP, pasar, dan kompetitor"
           breadcrumbs={pricingBreadcrumbs}
         />
-        
+
         {/* Stats Cards */}
-        <SharedStatsCards 
+        <SharedStatsCards
           stats={[
             {
               title: "Total Recommendations",
@@ -214,7 +206,7 @@ const PricingAssistantPage = () => {
 
             <Button
               onClick={generateRecommendation}
-              disabled={analyzing || loading || !selectedRecipe}
+              disabled={(analyzing || loading) || !selectedRecipe}
               className="w-full md:w-auto"
             >
               {analyzing ? 'Menganalisis...' : 'Generate Recommendation'}

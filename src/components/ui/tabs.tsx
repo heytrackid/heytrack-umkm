@@ -1,9 +1,11 @@
-"use client"
+'use client';
 
 import type { ComponentProps } from 'react'
 import * as TabsPrimitive from"@radix-ui/react-tabs"
-
 import { cn } from"@/lib/utils"
+
+
+
 
 const Tabs = ({
   className,

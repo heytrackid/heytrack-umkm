@@ -4,6 +4,8 @@ import { Fragment, type ReactNode } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { getStatusColor, getStatusText } from '@/lib/shared/utilities'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,7 +14,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
 import {
   Plus,
   RefreshCw,
@@ -22,7 +23,6 @@ import {
   ArrowLeft,
   AlertCircle
 } from 'lucide-react'
-import { getStatusColor, getStatusText } from '@/lib/shared/utilities'
 
 interface BreadcrumbItem {
   label: string

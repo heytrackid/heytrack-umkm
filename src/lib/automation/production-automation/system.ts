@@ -1,15 +1,6 @@
-/**
- * Production Automation System Orchestrator
- * Main coordinator for production automation functionality
- */
-
-import type {
-  Recipe,
-  RecipeIngredient,
-  Ingredient,
-  ProductionPlan,
-  AutomationConfig
-} from '@/lib/automation/types'
+import { ProductionPlanner } from './production-planner'
+import { CapacityManager } from './capacity-manager'
+import { TimeCalculator } from './time-calculator'
 import type {
   OrderForProduction,
   Equipment,
@@ -18,9 +9,17 @@ import type {
   WorkingHours,
   ScheduledProductionItem
 } from './types'
-import { ProductionPlanner } from './production-planner'
-import { CapacityManager } from './capacity-manager'
-import { TimeCalculator } from './time-calculator'
+import type { AutomationConfig, ProductionPlan } from '@/types/features/automation'
+import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+
+type Recipe = RecipesTable
+type RecipeIngredient = RecipeIngredientsTable
+type Ingredient = IngredientsTable
+
+/**
+ * Production Automation System Orchestrator
+ * Main coordinator for production automation functionality
+ */
 
 export class ProductionAutomation {
   constructor(private config: AutomationConfig) {}
@@ -50,9 +49,9 @@ export class ProductionAutomation {
    * Schedule production orders with optimal timing
    */
   scheduleOptimalProduction(
-    plan: Array<{ recipeId: string; quantity: number; priority: number }>, // ProductionPlanItem[]
+    plan: Array<{ recipeId: string; quantity: number; priority: number; deliveryDate: Date; production: { estimatedDuration: number } }>,
     workingHours: WorkingHours
   ): ScheduledProductionItem[] {
-    return TimeCalculator.scheduleOptimalProduction(plan, workingHours)
+    return TimeCalculator.scheduleOptimalProduction(plan, workingHours) as unknown as ScheduledProductionItem[]
   }
 }

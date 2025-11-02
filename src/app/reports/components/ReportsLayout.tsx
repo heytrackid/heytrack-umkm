@@ -1,7 +1,9 @@
-// Reports Layout - Main structure and navigation
-// Contains breadcrumbs, header, and date range picker
-
+import { useState, type ReactNode } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,21 +12,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import {
-  BarChart3,
-  Calendar
-} from 'lucide-react'
-import { useState, type ReactNode } from 'react'
-
-// Import report components normally (lightweight UI components)
+import { BarChart3, Calendar } from 'lucide-react'
 import SalesReport from './SalesReport'
 import InventoryReport from './InventoryReport'
 import FinancialReport from './FinancialReport'
 import EnhancedProfitReport from './EnhancedProfitReport'
+
+// Reports Layout - Main structure and navigation
+// Contains breadcrumbs, header, and date range picker
 
 interface ReportsLayoutProps {
   children?: ReactNode

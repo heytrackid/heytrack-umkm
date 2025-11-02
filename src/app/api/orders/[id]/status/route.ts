@@ -1,5 +1,5 @@
 import 'server-only'
-import { triggerWorkflow } from '@/lib/automation-engine'
+import { triggerWorkflow } from '@/lib/automation/workflows/index'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
@@ -68,7 +68,7 @@ export async function PUT(
         .insert([{
           type: 'INCOME',
           category: 'Revenue',
-          amount: currentOrder.total_amount ?? 0,
+          amount: currentOrder.total_amount || 0,
           date: (currentOrder.delivery_date || currentOrder.order_date || new Date().toISOString().split('T')[0]),
           reference: `Order #${currentOrder.order_no || ''}${currentOrder.customer_name ? ` - ${  currentOrder.customer_name}` : ''}`,
           description: `Income from order ${currentOrder.order_no || ''}`,
@@ -171,7 +171,7 @@ export async function PUT(
       financial: {
         income_recorded: !!incomeRecordId,
         income_record_id: incomeRecordId,
-        amount: incomeRecordId ? (currentOrder.total_amount ?? 0) : null
+        amount: incomeRecordId ? (currentOrder.total_amount || 0) : null
       },
       message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing and income tracking' : ''}`
     })

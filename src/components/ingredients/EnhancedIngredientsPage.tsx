@@ -1,5 +1,6 @@
 'use client'
 
+
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSettings } from '@/contexts/settings-context'
@@ -9,22 +10,18 @@ import { usePagination } from '@/hooks/usePagination'
 import { useToast } from '@/hooks/use-toast'
 import { useMobile } from '@/hooks/useResponsive'
 import type { IngredientsTable } from '@/types/database'
-
-// Enhanced Components
 import { StockBadge } from './StockBadge'
 import { MobileIngredientList } from './MobileIngredientCard'
 import { IngredientFormDialog } from './IngredientFormDialog'
-
-// UX Components
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-
-// UI Components
 import { DeleteModal } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+
 import { SimplePagination } from '@/components/ui/simple-pagination'
+import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X, Plus } from 'lucide-react'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -40,9 +37,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X, Plus } from 'lucide-react'
-
-// Toast helpers
 import {
     ingredientDeletedToast,
     genericErrorToast,
@@ -82,13 +76,12 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
 
         return ingredients.filter(item => {
             // Search filter
-            const matchesSearch = !searchTerm ||
-                item.name.toLowerCase().includes(searchTerm.toLowerCase())
+            const matchesSearch = !searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase())
 
             // Stock filter
             let matchesStock = true
-            const currentStock = item.current_stock ?? 0
-            const minStock = item.min_stock ?? 0
+            const currentStock = item.current_stock || 0
+            const minStock = item.min_stock || 0
 
             if (stockFilter === 'low') {
                 matchesStock = currentStock > 0 && currentStock <= minStock
@@ -165,7 +158,7 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
         setCategoryFilter('all')
     }
 
-    const hasActiveFilters = searchTerm || stockFilter !== 'all' || categoryFilter !== 'all'
+    const hasActiveFilters = (searchTerm || false) || stockFilter !== 'all' || categoryFilter !== 'all'
 
     // Empty state
     if (!loading && (!ingredients || ingredients.length === 0)) {
@@ -291,8 +284,8 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
                                 </thead>
                                 <tbody>
                                     {paginatedData.map((item) => {
-                                        const currentStock = item.current_stock ?? 0
-                                        const minStock = item.min_stock ?? 0
+                                        const currentStock = item.current_stock || 0
+                                        const minStock = item.min_stock || 0
                                         const totalValue = currentStock * item.price_per_unit
                                         return (
                                             <tr key={item.id} className="border-b hover:bg-muted/30 transition-colors">
@@ -441,7 +434,7 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
                 onClose={() => setIsDeleteDialogOpen(false)}
                 onConfirm={handleConfirmDelete}
                 entityName="Bahan Baku"
-                itemName={selectedIngredient?.name ?? ''}
+                itemName={selectedIngredient?.name || ''}
                 isLoading={loading}
             />
 

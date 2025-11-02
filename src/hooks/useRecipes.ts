@@ -1,13 +1,14 @@
-/**
- * React Query hooks for Recipes
- * Provides caching, automatic refetching, and optimistic updates
- */
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { RecipesTable, RecipesInsert, RecipesUpdate } from '@/types/database'
+
+/**
+ * React Query hooks for Recipes
+ * Provides caching, automatic refetching, and optimistic updates
+ */
+
 
 type Recipe = RecipesTable
 type RecipeInsert = RecipesInsert

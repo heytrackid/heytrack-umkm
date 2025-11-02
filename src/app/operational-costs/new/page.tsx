@@ -5,14 +5,16 @@ import { OperationalCostFormPage } from '@/components/operational-costs/Operatio
 import AppLayout from '@/components/layout/app-layout'
 import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
-export default function NewOperationalCostPage() {
-    return (
-        <AppLayout pageTitle="Tambah Biaya Operasional">
-            <div className="p-6">
-                <Suspense fallback={<DataGridSkeleton rows={6} />}>
-                    <OperationalCostFormPage mode="create" />
-                </Suspense>
-            </div>
-        </AppLayout>
-    )
-}
+
+
+const NewOperationalCostPage = () => (
+    <AppLayout pageTitle="Tambah Biaya Operasional">
+        <div className="p-6">
+            <Suspense fallback={<DataGridSkeleton rows={6} />}>
+                <OperationalCostFormPage mode="create" />
+            </Suspense>
+        </div>
+    </AppLayout>
+)
+
+export default NewOperationalCostPage

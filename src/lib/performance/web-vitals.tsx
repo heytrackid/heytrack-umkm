@@ -1,9 +1,11 @@
-// @ts-nocheck
+import { useEffect } from 'react'
+import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from 'web-vitals'
+import { performanceLogger } from '@/lib/client-logger'
+
 'use client'
 
-import { useEffect } from 'react'
-import { onCLS, onFCP, onFID, onLCP, onTTFB, type Metric } from 'web-vitals'
-import { performanceLogger } from '@/lib/client-logger'
+
+
 
 /**
  * Web Vitals tracking
@@ -11,10 +13,10 @@ import { performanceLogger } from '@/lib/client-logger'
 export function useWebVitals(onMetric?: (metric: Metric) => void) {
     useEffect(() => {
         const handleMetric = (metric: Metric) => {
-            performanceLogger.info({ 
-                name: metric.name, 
+            performanceLogger.info({
+                name: metric.name,
                 value: metric.value,
-                rating: metric.rating 
+                rating: metric.rating
             }, `Web Vitals: ${metric.name}`)
 
             // Send to analytics
@@ -38,7 +40,7 @@ export function useWebVitals(onMetric?: (metric: Metric) => void) {
         // Track all Core Web Vitals
         onCLS(handleMetric)
         onFCP(handleMetric)
-        onFID(handleMetric)
+        onINP(handleMetric)
         onLCP(handleMetric)
         onTTFB(handleMetric)
     }, [onMetric])
@@ -77,10 +79,10 @@ export function useLongTaskTracking() {
     usePerformanceObserver(['longtask'], (entries) => {
         entries.forEach((entry) => {
             if (entry.duration > 50) {
-                performanceLogger.warn({ 
+                performanceLogger.warn({
                     duration: entry.duration,
                     startTime: entry.startTime,
-                    name: entry.name 
+                    name: entry.name
                 }, `Long task detected: ${entry.duration}ms`)
 
                 // Send to analytics
@@ -101,9 +103,8 @@ export function useLongTaskTracking() {
  */
 export function useResourceTiming() {
     usePerformanceObserver(['resource'], (entries) => {
-        const slowResources = entries.filter((entry: any) =>
-            entry.duration > 1000 // Resources taking > 1s
-        )
+        const resourceEntries = entries.filter((entry): entry is PerformanceResourceTiming => entry.entryType === 'resource')
+        const slowResources = resourceEntries.filter((entry) => entry.duration > 1000)
 
         if (slowResources.length > 0) {
             performanceLogger.warn({ count: slowResources.length, resources: slowResources }, 'Slow resources detected')
@@ -137,11 +138,9 @@ export function getPerformanceMetrics() {
         lcp: paint.find(entry => entry.name === 'largest-contentful-paint')?.startTime,
 
         // Memory (if available)
-        memory: (performance as any).memory ? {
-            usedJSHeapSize: (performance as any).memory.usedJSHeapSize,
-            totalJSHeapSize: (performance as any).memory.totalJSHeapSize,
-            jsHeapSizeLimit: (performance as any).memory.jsHeapSizeLimit
-        } : null
+        memory: ('memory' in performance && (performance as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory) ?
+            (performance as { memory: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory
+            : null
     }
 }
 

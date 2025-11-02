@@ -1,10 +1,3 @@
-/**
- * Order Card Component
- * Single order display card
- */
-
-'use client'
-
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -14,6 +7,16 @@ import { Edit, Eye } from 'lucide-react'
 import type { Order } from '@/modules/orders/types'
 import type { OrderStatus, PaymentStatus } from '@/types/database'
 import { ORDER_STATUS_CONFIG, ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/constants'
+
+'use client'
+
+
+/**
+ * Order Card Component
+ * Single order display card
+ */
+
+
 
 interface OrderCardProps {
     order: Order
@@ -32,13 +35,17 @@ export const OrderCard = ({ order, onView, onEdit, onUpdateStatus }: OrderCardPr
     })
 
     const getStatusColor = (status: OrderStatus | null) => {
-        if (!status) {return 'bg-gray-100 text-gray-800'}
+        if (!status) { return 'bg-gray-100 text-gray-800' }
         const config = ORDER_STATUS_CONFIG[status]
-        if (!config) {return 'bg-gray-100 text-gray-800'}
+        if (!config) { return 'bg-gray-100 text-gray-800' }
         return config.color
     }
 
     const getPaymentStatusColor = (_status: PaymentStatus | null) => 'bg-gray-100 text-gray-800'
+
+    const paymentStatusLabel = order.payment_status && order.payment_status in PAYMENT_STATUS_LABELS
+        ? PAYMENT_STATUS_LABELS[order.payment_status as keyof typeof PAYMENT_STATUS_LABELS]
+        : 'N/A'
 
     return (
         <Card className="hover:shadow-md transition-shadow">
@@ -47,15 +54,15 @@ export const OrderCard = ({ order, onView, onEdit, onUpdateStatus }: OrderCardPr
                     <div className="space-y-1">
                         <div className="font-semibold text-lg">{order.order_no}</div>
                         <div className="text-sm text-muted-foreground">
-                            {order.customer_name ?? 'N/A'} • {order.order_date ? formatDate(order.order_date) : 'N/A'}
+                            {order.customer_name || 'N/A'} • {order.order_date ? formatDate(order.order_date) : 'N/A'}
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <Badge className={getStatusColor(order.status)}>
                             {order.status ? ORDER_STATUS_LABELS[order.status] : 'N/A'}
                         </Badge>
-                        <Badge className={getPaymentStatusColor(order.payment_status ?? null)}>
-                            {order.payment_status ? PAYMENT_STATUS_LABELS[order.payment_status] : 'N/A'}
+                        <Badge className={getPaymentStatusColor(order.payment_status || null)}>
+                            {paymentStatusLabel}
                         </Badge>
                     </div>
                 </div>
@@ -67,7 +74,7 @@ export const OrderCard = ({ order, onView, onEdit, onUpdateStatus }: OrderCardPr
                     </div>
                     <div>
                         <div className="text-sm text-muted-foreground">Total Tagihan</div>
-                        <div className="font-medium text-lg">{formatCurrency(order.total_amount ?? 0)}</div>
+                        <div className="font-medium text-lg">{formatCurrency(order.total_amount || 0)}</div>
                     </div>
                     <div>
                         <div className="text-sm text-muted-foreground">Tanggal Kirim</div>

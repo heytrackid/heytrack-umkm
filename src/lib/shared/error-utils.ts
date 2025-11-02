@@ -1,11 +1,13 @@
+import { useToast } from '@/hooks/use-toast'
+import { getErrorMessage } from '@/shared'
+import { logger } from '@/lib/logger'
+
+
 /**
  * Shared Error Handling Utilities
  * Consistent error handling patterns across the application
  */
 
-import { useToast } from '@/hooks/use-toast'
-import { getErrorMessage } from '@/shared'
-import { logger } from '@/lib/logger'
 
 // Error types
 export interface AppError {
@@ -111,7 +113,7 @@ export function handleAPIResponse<T>(
 // Form error handling
 export function formatFormErrors(errors: Record<string, unknown>): string[] {
   return Object.entries(errors).map(([field, error]) => {
-    const message = typeof error === 'string' ? error : (error as any)?.message || 'Invalid value'
+    const message = typeof error === 'string' ? error : (error as { message?: string })?.message || 'Invalid value'
     return `${field}: ${message}`
   })
 }

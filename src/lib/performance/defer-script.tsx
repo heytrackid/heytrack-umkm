@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
+
 'use client'
 
-import { useEffect, useState } from 'react'
+
+
 
 /**
  * Hook to defer loading of non-critical features

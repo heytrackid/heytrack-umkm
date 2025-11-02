@@ -1,7 +1,8 @@
-// @ts-nocheck
 'use client'
 
 import { useSupabaseQuery } from './core'
+
+
 
 /**
  * Entity-specific hooks for common database operations
@@ -51,7 +52,7 @@ export function useSuppliers(options?: { realtime?: boolean }) {
 // Expenses
 export function useExpenses(options?: { realtime?: boolean }) {
   return useSupabaseQuery('expenses', {
-    orderBy: { column: 'date', ascending: false },
+    orderBy: { column: 'expense_date', ascending: false },
     realtime: options?.realtime,
   })
 }
@@ -76,7 +77,7 @@ export function useFinancialRecords(options?: {
 
   return useSupabaseQuery('financial_records', {
     filter,
-    orderBy: { column: 'date', ascending: false },
+    orderBy: { column: 'created_at', ascending: false },
     realtime: options?.realtime,
   })
 }

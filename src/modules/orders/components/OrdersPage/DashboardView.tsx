@@ -1,10 +1,3 @@
-/**
- * Dashboard View Component
- * Overview dashboard with recent orders and charts
- */
-
-'use client'
-
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,6 +6,16 @@ import { BarChart3, Clock, Plus, ShoppingCart } from 'lucide-react'
 import type { Order } from '@/app/orders/types/orders.types'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS } from '@/modules/orders/types'
+
+'use client'
+
+
+/**
+ * Dashboard View Component
+ * Overview dashboard with recent orders and charts
+ */
+
+
 
 interface DashboardViewProps {
     orders: Order[]
@@ -29,9 +32,9 @@ export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => 
     })
 
     const getStatusColor = (status: string | null) => {
-        if (!status) {return 'bg-gray-100 text-gray-800'}
+        if (!status) { return 'bg-gray-100 text-gray-800' }
         const config = ORDER_STATUS_CONFIG[status as keyof typeof ORDER_STATUS_CONFIG]
-        if (!config) {return 'bg-gray-100 text-gray-800'}
+        if (!config) { return 'bg-gray-100 text-gray-800' }
         return config.color
     }
 
@@ -69,11 +72,11 @@ export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => 
                                 <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
                                     <div className="flex-1">
                                         <div className="font-medium">{order.order_no}</div>
-                                        <div className="text-sm text-muted-foreground">{order.customer_name ?? 'N/A'}</div>
+                                        <div className="text-sm text-muted-foreground">{order.customer_name || 'N/A'}</div>
                                         <div className="text-xs text-muted-foreground">{order.order_date ? formatDate(order.order_date) : 'N/A'}</div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
+                                        <div className="font-medium">{formatCurrency(order.total_amount || 0)}</div>
                                         <Badge className={`text-xs ${getStatusColor(order.status)}`}>
                                             {order.status ? ORDER_STATUS_LABELS[order.status] : 'N/A'}
                                         </Badge>

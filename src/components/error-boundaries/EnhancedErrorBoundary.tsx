@@ -1,11 +1,12 @@
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { apiLogger } from '@/lib/logger';
+
 /**
  * Enhanced Error Boundary Component
  * Provides better error handling and user feedback for UI errors
  */
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { apiLogger } from '@/lib/logger';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -31,7 +32,7 @@ class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBou
   }
 
   override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    const {errorId} = this.state;
+    const { errorId } = this.state;
 
     // Log the error with additional context
     apiLogger.error({
@@ -77,7 +78,7 @@ class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBou
             {this.state.errorId && (
               <p className="text-sm text-red-500 mb-4">Error ID: {this.state.errorId}</p>
             )}
-            <Button 
+            <Button
               onClick={this.resetError}
               variant="destructive"
               className="mt-4"

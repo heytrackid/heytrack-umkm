@@ -1,4 +1,6 @@
-import type { 
+import type { Database as DatabaseType } from './supabase-generated'
+
+import type {
   Tables as SupabaseTables, 
   TablesInsert as SupabaseTablesInsert, 
   TablesUpdate as SupabaseTablesUpdate,
@@ -17,6 +19,17 @@ export type {
 
 // Re-export Json type from supabase-generated
 export type { Json } from './supabase-generated'
+
+// Import Database type for generic helpers
+
+// Generic type helpers for table operations
+export type TableName = keyof DatabaseType['public']['Tables']
+export type Row<T extends TableName> = DatabaseType['public']['Tables'][T]['Row']
+export type Insert<T extends TableName> = DatabaseType['public']['Tables'][T]['Insert']
+export type Update<T extends TableName> = DatabaseType['public']['Tables'][T]['Update']
+
+// Helper type for nested relations
+export type WithNestedRelation<T, K extends string, R> = T & { [P in K]: R }
 
 // Table Row types (for SELECT queries) - using Tables helper from supabase-generated
 export type AppSettingsTable = SupabaseTables<'app_settings'>

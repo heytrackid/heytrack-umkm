@@ -1,3 +1,4 @@
+
 /**
  * Profit Report Module Types
  * Type definitions for profit reporting functionality

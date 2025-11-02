@@ -1,3 +1,7 @@
+import { NLPProcessor } from './nlp-processor'
+import { BusinessAI } from './business'
+import { apiLogger } from '@/lib/logger'
+
 /**
  * AI Module - Main Export
  * Consolidated AI functionality with modular architecture
@@ -25,9 +29,6 @@ export type {
 } from './business'
 
 // Convenience functions
-import { NLPProcessor } from './nlp-processor'
-import { BusinessAI } from './business'
-import { apiLogger } from '@/lib/logger'
 
 export async function processChatbotQuery(query: string) {
   return NLPProcessor.processChatbotQuery(query)

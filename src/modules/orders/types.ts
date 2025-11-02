@@ -32,7 +32,8 @@ export type Order = OrdersTable
 export type OrderInsert = OrdersInsert
 export type OrderUpdate = OrdersUpdate
 
-
+// Re-export enums from database
+export type { PaymentMethod, OrderStatus } from '@/types/database'
 
 // Custom types (not in database enums)
 export type PaymentStatus = 'PENDING' | 'PAID' | 'PARTIAL' | 'REFUNDED'
@@ -53,9 +54,6 @@ export interface OrderItemWithRecipe extends OrderItem {
 export type Payment = PaymentsTable
 export type PaymentInsert = PaymentsInsert
 export type PaymentUpdate = PaymentsUpdate
-
-// Re-export database enums
-export type { OrderStatus } from '@/types/database'
 
 // Extended Order type with relations for UI
 export interface OrderWithRelations extends Order {

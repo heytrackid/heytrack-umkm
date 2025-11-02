@@ -1,9 +1,11 @@
+import type { Database } from '@/types/database'
+
+
 /**
  * Helper functions for type-safe Supabase inserts
  * Workaround for Supabase SSR client type inference issues
  */
 
-import type { Database } from '@/types/database'
 
 type TablesMap = Database['public']['Tables']
 type TableName = keyof TablesMap

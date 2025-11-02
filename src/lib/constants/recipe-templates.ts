@@ -1,3 +1,5 @@
+
+
 /**
  * Recipe Templates for Various FnB Categories
  * Comprehensive templates for Indonesian UMKM culinary businesses

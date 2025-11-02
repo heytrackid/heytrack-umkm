@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect, type ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -7,22 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+'use client'
+
 import { useCurrency } from '@/hooks/useCurrency'
-import {
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Activity,
-  Clock,
-  Zap,
-  Info,
-  RefreshCw,
-  Eye,
-  ArrowRight
-} from 'lucide-react'
+import { CheckCircle2, AlertTriangle, XCircle, TrendingUp, TrendingDown, DollarSign, Activity, Clock, Zap, Info, RefreshCw, Eye, ArrowRight } from 'lucide-react'
 
 interface SyncStatus {
   isEnabled: boolean
@@ -69,7 +55,26 @@ interface AutoSyncData {
   cashflow: CashflowSummary
 }
 
-export default function AutoSyncFinancialDashboard() {
+const UMKMTooltip = ({ title, content, children }: { title: string, content: string, children: ReactNode }) => (
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="flex items-center gap-1 cursor-help">
+          {children}
+          <Info className="h-3 w-3 text-gray-400" />
+        </div>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-80 p-3">
+        <div className="space-y-1">
+          <h4 className="font-semibold text-sm">{title}</h4>
+          <p className="text-xs text-gray-600">{content}</p>
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+)
+
+const AutoSyncFinancialDashboard = () => {
   const { formatCurrency } = useCurrency()
   const [data, setData] = useState<AutoSyncData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -94,8 +99,9 @@ export default function AutoSyncFinancialDashboard() {
       } else {
         void setError(result.error || 'Failed to fetch auto-sync data')
       }
-    } catch (_err) {
-      void setError(err instanceof Error ? err.message : 'Unknown error')
+    } catch (err: unknown) {
+      const error = err as Error
+      void setError(error instanceof Error ? error.message : 'Unknown error')
     } finally {
       void setLoading(false)
       void setRefreshing(false)
@@ -127,24 +133,7 @@ export default function AutoSyncFinancialDashboard() {
     }
   }
 
-  const UMKMTooltip = ({ title, content, children }: { title: string, content: string, children: ReactNode }) => (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center gap-1 cursor-help">
-            {children}
-            <Info className="h-3 w-3 text-gray-400" />
-          </div>
-        </TooltipTrigger>
-        <TooltipContent className="max-w-80 p-3">
-          <div className="space-y-1">
-            <h4 className="font-semibold text-sm">{title}</h4>
-            <p className="text-xs text-gray-600">{content}</p>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  )
+
 
   // Prevent hydration mismatch
   if (!isMounted || loading) {
@@ -412,3 +401,5 @@ export default function AutoSyncFinancialDashboard() {
     </div>
   )
 }
+
+export default AutoSyncFinancialDashboard

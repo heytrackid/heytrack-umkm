@@ -1,3 +1,9 @@
+import type { ProductionBatch } from './types'
+import type { Database, RecipesTable, IngredientsTable } from '@/types/database'
+import { productionLogger } from '@/lib/logger'
+import { isIngredient } from '@/lib/type-guards'
+
+
 /**
  * Production Services
  * Service for production management operations
@@ -5,10 +11,6 @@
 
 
 
-import type { ProductionBatch } from './types'
-import type { Database, RecipesTable, IngredientsTable } from '@/types/database'
-import { productionLogger } from '@/lib/logger'
-import { isIngredient } from '@/lib/type-guards'
 
 type Recipe = RecipesTable
 type Ingredient = IngredientsTable

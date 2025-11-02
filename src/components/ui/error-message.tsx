@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { cn } from '@/lib/utils'
+import { useState } from 'react'
 import {
     AlertCircle,
     WifiOff,
@@ -15,7 +16,6 @@ import {
     ChevronUp,
     XCircle
 } from 'lucide-react'
-import { useState } from 'react'
 
 interface ErrorMessageProps {
     title?: string
@@ -190,7 +190,7 @@ export const ErrorMessage = ({
                             )}
                         </div>
 
-                        {showTechnicalDetails && error && (
+                        {showTechnicalDetails && error !== undefined && error !== null && (
                             <div className="mt-4 w-full">
                                 <Button
                                     variant="ghost"
@@ -213,7 +213,7 @@ export const ErrorMessage = ({
 
                                 {showDetails && (
                                     <pre className="mt-2 p-3 bg-muted rounded text-xs text-left overflow-auto max-h-32">
-                                        {error instanceof Error ? error.stack : String(error)}
+                                        {String(error instanceof Error ? (error.stack || error.message) : error)}
                                     </pre>
                                 )}
                             </div>
@@ -239,7 +239,7 @@ export const ErrorMessage = ({
                     <div className="bg-muted rounded-lg p-4 mb-6 text-left">
                         <p className="font-medium text-sm mb-2">Saran:</p>
                         <ul className="space-y-1 text-sm text-muted-foreground">
-                            {suggestions.map((suggestion, index) => (
+                            {suggestions.map((suggestion: string, index: number) => (
                                 <li key={index} className="flex items-start gap-2">
                                     <span className="text-primary mt-0.5">•</span>
                                     <span>{suggestion}</span>
@@ -264,7 +264,7 @@ export const ErrorMessage = ({
                     )}
                 </div>
 
-                {showTechnicalDetails && error && (
+                {showTechnicalDetails && error !== undefined && error !== null && (
                     <div className="mt-6">
                         <Button
                             variant="ghost"
@@ -287,7 +287,7 @@ export const ErrorMessage = ({
 
                         {showDetails && (
                             <pre className="mt-3 p-4 bg-muted rounded text-xs text-left overflow-auto max-h-48">
-                                {error instanceof Error ? error.stack : String(error)}
+                                {String(error instanceof Error ? (error.stack || error.message) : error)}
                             </pre>
                         )}
                     </div>

@@ -1,14 +1,15 @@
-/**
- * Mobile Bar Chart Component
- * Optimized bar chart for mobile devices
- */
-
 import { memo } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from './types'
+
+/**
+ * Mobile Bar Chart Component
+ * Optimized bar chart for mobile devices
+ */
+
 
 interface MobileBarChartProps extends BaseMobileChartProps {
   xKey: string
@@ -40,7 +41,7 @@ export const MobileBarChart = memo(({
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          layout={horizontal ?"horizontal" :"vertical"}
+          layout={horizontal ? "horizontal" : "vertical"}
           margin={{
             top: 5,
             right: isMobile ? 10 : 30,
@@ -53,14 +54,14 @@ export const MobileBarChart = memo(({
           )}
           <XAxis
             dataKey={horizontal ? undefined : xKey}
-            type={horizontal ?"number" :"category"}
+            type={horizontal ? "number" : "category"}
             axisLine={false}
             tickLine={false}
             tick={{ fontSize: isMobile ? 10 : 12 }}
           />
           <YAxis
             dataKey={horizontal ? xKey : undefined}
-            type={horizontal ?"category" :"number"}
+            type={horizontal ? "category" : "number"}
             axisLine={false}
             tickLine={false}
             tick={{ fontSize: isMobile ? 10 : 12 }}

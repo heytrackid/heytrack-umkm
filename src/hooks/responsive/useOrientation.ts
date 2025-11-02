@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+
+
 /**
  * Detect device orientation
  */

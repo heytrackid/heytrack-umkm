@@ -3,6 +3,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
 
+
+
+
+
 // Create a client
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -18,7 +22,7 @@ const createQueryClient = () => new QueryClient({
       // Only refetch if data is stale
       refetchInterval: false,
       // Keep previous data while fetching new data (prevents loading states)
-      placeholderData: (previousData) => previousData,
+      placeholderData: (previousData: unknown) => previousData,
     },
     mutations: {
       retry: 2,
@@ -67,7 +71,7 @@ export const cachePresets = {
   }
 }
 
-export default function QueryProvider({ children }: { children: ReactNode }) {
+const QueryProvider = ({ children }: { children: ReactNode }) => {
   // Create a new QueryClient instance for each request to ensure data is not shared
   const [queryClient] = useState(() => createQueryClient())
 
@@ -77,3 +81,5 @@ export default function QueryProvider({ children }: { children: ReactNode }) {
     </QueryClientProvider>
   )
 }
+
+export default QueryProvider

@@ -15,6 +15,9 @@ import { HppScenarioPlanner } from './HppScenarioPlanner'
 import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle, ArrowRight, Calculator, TrendingUp, BarChart3 } from 'lucide-react'
 
+
+
+
 export const UnifiedHppPage = memo(() => {
   const {
     recipes,
@@ -25,8 +28,7 @@ export const UnifiedHppPage = memo(() => {
     selectedRecipeId,
     setSelectedRecipeId,
     calculateHpp,
-    updatePrice,
-    markAlertAsRead
+    updatePrice
   } = useUnifiedHpp()
 
   const [marginPercentage, setMarginPercentage] = useState(60)
@@ -71,9 +73,7 @@ export const UnifiedHppPage = memo(() => {
     })
   }, [recipe, updatePrice])
 
-  const handleMarkAlertAsRead = useCallback((alertId: string) => {
-    markAlertAsRead.mutate(alertId)
-  }, [markAlertAsRead])
+
 
   // Calculate progress steps
   const step1Complete = !!selectedRecipeId && selectedRecipeId !== 'new'

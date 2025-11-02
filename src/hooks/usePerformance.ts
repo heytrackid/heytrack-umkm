@@ -1,10 +1,10 @@
-// @ts-nocheck
+import { useEffect, useState, useCallback } from 'react'
+
 /**
  * Performance Optimization Utilities
  * Collection of performance monitoring and optimization helpers
  */
 
-import { useEffect, useState, useCallback } from 'react'
 
 // Performance monitoring hook
 export function usePerformanceMonitor(componentName: string) {
@@ -120,8 +120,13 @@ export function usePerformanceLogger(eventName: string, delay = 1000) {
       // Debounced analytics call
       const timeoutId = setTimeout(() => {
         if (typeof window !== 'undefined' && 'gtag' in window && typeof (window as any).gtag === 'function') {
+          const payload =
+            typeof data === 'object' && data !== null
+              ? data as Record<string, unknown>
+              : { value: data }
+
           ;(window as any).gtag('event', eventName, {
-            ...data,
+            ...payload,
             timestamp,
             page_path: window.location.pathname
           })

@@ -4,7 +4,9 @@ import type {
   ResponsiveValue,
   ColumnPriority
 } from '@/types/responsive';
+
 import { BREAKPOINTS, DEVICE_BREAKPOINTS } from '@/types/responsive';
+
 
 // Utility functions for responsive design
 
@@ -70,7 +72,7 @@ export function getResponsiveValue<T>(
     return value;
   }
 
-  const responsiveValues = value as Partial<Record<Breakpoint, _T>>;
+  const responsiveValues = value as Partial<Record<Breakpoint, T>>;
   
   // Check current breakpoint first, then fall back to smaller breakpoints
   const breakpointOrder: Breakpoint[] = ['2xl', 'xl', 'lg', 'md', 'sm', 'xs'];
@@ -132,8 +134,7 @@ export function isTouchDevice(): boolean {
   if (typeof window === 'undefined') {return false;}
   
   return (
-    'ontouchstart' in window ||
-    navigator.maxTouchPoints > 0
+    'ontouchstart' in window || navigator.maxTouchPoints > 0
   );
 }
 

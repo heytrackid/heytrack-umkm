@@ -4,6 +4,10 @@ import { lazy, Suspense, type ComponentProps, type ComponentType } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 
+type LazyImport<T extends ComponentType<Record<string, unknown>>> = () => Promise<{ default: T }>
+
+
+
 // Loading skeletons for different components
 export const TableSkeleton = () => (
   <div className="space-y-3">
@@ -52,10 +56,10 @@ interface LazyWrapperProps {
   props?: Record<string, unknown>
 }
 
-export const LazyWrapper = ({ 
-  component: Component, 
-  loadingComponent: LoadingComponent = TableSkeleton, 
-  props = {} 
+export const LazyWrapper = ({
+  component: Component,
+  loadingComponent: LoadingComponent = TableSkeleton,
+  props = {}
 }: LazyWrapperProps) => (
   <Suspense fallback={<LoadingComponent />}>
     <Component {...props} />
@@ -68,12 +72,12 @@ export const createLazyComponent = <T extends ComponentType<Record<string, unkno
   loadingComponent?: ComponentType
 ) => {
   const LazyComponent = lazy(importFunc)
-  
+
   return (props: ComponentProps<T>) => (
-    <LazyWrapper 
-      component={LazyComponent as ComponentType<unknown>} 
+    <LazyWrapper
+      component={LazyComponent as ComponentType<unknown>}
       loadingComponent={loadingComponent}
-      props={props} 
+      props={props}
     />
   )
 }

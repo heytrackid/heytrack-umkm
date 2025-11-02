@@ -1,10 +1,3 @@
-/**
- * Payment Section Component
- * Handles payment information and summary
- */
-
-'use client'
-
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCurrency } from '@/hooks/useCurrency'
@@ -12,20 +5,32 @@ import { AlertCircle } from 'lucide-react'
 import { safeNumber } from '@/lib/type-guards'
 import type { PaymentMethod } from '@/app/orders/types/orders-db.types'
 
+'use client'
+
+
+/**
+ * Payment Section Component
+ * Handles payment information and summary
+ */
+
+interface PaymentFormData {
+    payment_method: PaymentMethod
+    discount: number
+    tax_amount: number
+    paid_amount: number
+}
+
+type PaymentField = keyof PaymentFormData
+
 interface PaymentSectionProps {
-    formData: {
-        payment_method: PaymentMethod
-        discount: number
-        tax_amount: number
-        paid_amount: number
-    }
+    formData: PaymentFormData
     fieldErrors: Record<string, string>
     subtotal: number
     taxAmount: number
     totalAmount: number
     deliveryFee: number
-    onInputChange: <K extends keyof any>(field: K, value: any) => void
-    onClearError: (field: string) => void
+    onInputChange: <K extends PaymentField>(field: K, value: PaymentFormData[K]) => void
+    onClearError: (field: PaymentField) => void
 }
 
 export const PaymentSection = ({
@@ -91,7 +96,7 @@ export const PaymentSection = ({
                         value={formData.paid_amount}
                         onChange={(e) => {
                             onInputChange('paid_amount', safeNumber(e.target.value, 0))
-                            if (fieldErrors['paid_amount']) {onClearError('paid_amount')}
+                            if (fieldErrors['paid_amount']) { onClearError('paid_amount') }
                         }}
                         min="0"
                         step="1000"

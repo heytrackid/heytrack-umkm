@@ -1,3 +1,6 @@
+import { getWorkflowAutomation } from './automation/workflows'
+
+
 /**
  * Automation Engine - Modular Workflow System
  * Re-exports from modular automation system for backward compatibility
@@ -15,7 +18,6 @@ export type { AutomationConfig } from './automation/types'
 export type { WorkflowEvent, WorkflowEventData } from './automation/types'
 
 // Import for backward compatibility
-import { getWorkflowAutomation } from './automation/workflows'
 
 // Export the default instance for backwards compatibility
 export const automationEngine = getWorkflowAutomation()

@@ -1,9 +1,10 @@
+import { NextResponse } from 'next/server'
+
 /**
  * API Response Caching Utilities
  * Provides HTTP caching headers and in-memory cache
  */
 
-import { NextResponse } from 'next/server'
 
 export interface CacheConfig {
   maxAge?: number // seconds
@@ -62,7 +63,9 @@ class MemoryCache {
     // Limit cache size
     if (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value
-      this.cache.delete(firstKey)
+      if (typeof firstKey === 'string') {
+        this.cache.delete(firstKey)
+      }
     }
 
     this.cache.set(key, {
@@ -72,7 +75,11 @@ class MemoryCache {
     })
   }
 
-  get<T>(key: string): T | null {
+  get<T>(key: string | undefined): T | null {
+    if (!key) {
+      return null
+    }
+    
     const item = this.cache.get(key)
 
     if (!item) {
@@ -127,7 +134,7 @@ export function generateCacheKey(
 
   const sortedParams = Object.keys(params)
     .sort()
-    .map((key) => `${key}=${params[key]}`)
+    .map((key) => `${key}=${params[key] || ''}`)
     .join('&')
 
   return `${endpoint}?${sortedParams}`
@@ -149,7 +156,7 @@ export async function cachedFetch<T>(
 
   // Fetch and cache
   const data = await fetcher()
-  apiCache.set(key, data, ttl ?? undefined)
+  apiCache.set(key, data, ttl || undefined)
 
   return data
 }

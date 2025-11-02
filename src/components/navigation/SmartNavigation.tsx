@@ -1,23 +1,12 @@
-'use client'
-
 import { Fragment, type ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+'use client'
+
 import { cn } from '@/lib/utils'
 import { useLinkPreloading, useButtonPreloading } from '@/hooks/useSimplePreloading'
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  Users,
-  Package,
-  Utensils,
-  DollarSign,
-  Settings,
-  BarChart3,
-  Plus,
-  Search
-} from 'lucide-react'
+import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search } from 'lucide-react'
 
 // Smart Link component with preloading
 interface SmartLinkProps {
@@ -47,7 +36,7 @@ export const SmartLink = ({
     void setIsHovered(true)
     if (preloadOnHover) {
       setTimeout(() => {
-        linkPreloading.onMouseEnter(href)
+        linkPreloading.handleMouseEnter(href)
       }, preloadDelay)
     }
   }
@@ -66,7 +55,7 @@ export const SmartLink = ({
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onFocus={() => linkPreloading.onFocus(href)}
+      onFocus={() => linkPreloading.handleMouseEnter(href)}
     >
       {children}
     </Link>
@@ -93,7 +82,7 @@ export const SmartButton = ({
   variant = "default",
   size = "default"
 }: SmartButtonProps) => {
-  const { preloadModalOnHover } = useButtonPreloading()
+  const { preload: preloadModalOnHover } = useButtonPreloading()
 
   const handleMouseEnter = () => {
     if (preloadOnHover && modalType) {
@@ -234,13 +223,13 @@ export const SmartActionButton = ({
 
 // Smart Search Component (preloads search results)
 export const SmartSearchButton = () => {
-  const { preloadTableOnHover } = useButtonPreloading()
+  const { preload: preloadTableOnHover } = useButtonPreloading()
 
   return (
     <Button
       variant="outline"
       size="sm"
-      onMouseEnter={() => preloadTableOnHover()}
+      onMouseEnter={() => preloadTableOnHover('/tables')}
     >
       <Search className="h-4 w-4 mr-2" />
       Search

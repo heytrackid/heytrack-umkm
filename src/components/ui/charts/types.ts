@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+
 /**
  * Chart Types and Constants
  * Shared types and constants for all chart components

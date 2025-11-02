@@ -1,10 +1,11 @@
+import type { SaleData, ExpenseData, FinancialTrend } from '@/lib/automation/types'
+import type { WeeklyData } from './types'
+
 /**
  * Trend Analyzer Module
  * Handles financial trend analysis and forecasting
  */
 
-import type { SaleData, ExpenseData, FinancialTrend } from '@/lib/automation/types'
-import type { WeeklyData } from './types'
 
 export class TrendAnalyzer {
   /**

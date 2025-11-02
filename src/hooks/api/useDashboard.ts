@@ -5,6 +5,8 @@ import { createClient } from '@/utils/supabase/client'
 import type { OrdersTable, IngredientsTable, CustomersTable } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { cachePresets } from '@/providers/QueryProvider'
+
+
 // Dashboard stats type
 export interface DashboardStats {
   revenue: {

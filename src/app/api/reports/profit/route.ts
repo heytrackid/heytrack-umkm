@@ -11,7 +11,7 @@ export const runtime = 'nodejs'
 
 
 type Order = OrdersTable
-// type OrderItem = OrderItemsTable
+type OrderItem = OrderItemsTable
 type FinancialRecord = FinancialRecordsTable
 /**
  * GET /api/reports/profit
@@ -280,7 +280,7 @@ async function calculateProfitMetrics(
     totalCOGS += orderCOGS
 
     // Group by period
-    const orderDate = order.delivery_date || order.order_date || new Date().toISOString()
+    const orderDate = (order.delivery_date || order.order_date) || new Date().toISOString()
     const periodKey = getPeriodKey(orderDate, period)
     
     if (!profitByPeriod[periodKey]) {

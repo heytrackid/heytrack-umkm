@@ -1,10 +1,12 @@
+import { z } from 'zod'
+import { UUIDSchema, PositiveNumberSchema, NonNegativeNumberSchema } from '@/lib/validations/base-validations'
+
+
 /**
  * Ingredient Validation Schemas
  * Validation schemas for ingredient-related operations
  */
 
-import { z } from 'zod'
-import { UUIDSchema, PositiveNumberSchema, NonNegativeNumberSchema } from '@/lib/validations/base-validations'
 
 // Ingredient database schemas
 export const IngredientInsertSchema = z.object({

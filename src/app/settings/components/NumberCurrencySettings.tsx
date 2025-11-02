@@ -6,6 +6,8 @@ import { DollarSign } from 'lucide-react'
 import { useSettings, currencies } from '@/contexts/settings-context'
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 
+
+
 interface NumberCurrencySettingsProps {
   settings: AppSettingsState
   onSettingChange: SettingsUpdateHandler

@@ -1,3 +1,5 @@
+
+
 /**
  * Error Types
  * Provides type-safe error classes and error handling utilities

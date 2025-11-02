@@ -1,10 +1,11 @@
+import { formatCurrency } from '@/lib/currency'
+import type { PriceOption, PricingOptimizationResult } from './types'
+
 /**
  * Pricing Optimizer Module
  * Handles pricing optimization and analysis
  */
 
-import { formatCurrency } from '@/lib/currency'
-import type { PriceOption, PricingOptimizationResult } from './types'
 
 export class PricingOptimizer {
   /**

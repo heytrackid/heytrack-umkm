@@ -1,7 +1,5 @@
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
-
-// Import existing components
 import { BusinessInfoSettings } from '@/app/settings/components/BusinessInfoSettings'
 import { BusinessSettings } from '@/app/settings/components/BusinessSettings'
 import { NotificationSettings } from '@/app/settings/components/NotificationSettings'
@@ -12,6 +10,9 @@ import { UIThemeSettings } from '@/app/settings/components/UIThemeSettings'
 import { DateTimeSettings } from '@/app/settings/components/DateTimeSettings'
 import { NumberCurrencySettings } from '@/app/settings/components/NumberCurrencySettings'
 import { DangerZone } from '@/app/settings/components/DangerZone'
+
+
+// Import existing components
 
 interface SettingsTabsProps {
   activeTab: string

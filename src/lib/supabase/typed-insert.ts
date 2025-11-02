@@ -1,9 +1,11 @@
+import type { Tables, TablesInsert as SupabaseTablesInsert, TablesUpdate as SupabaseTablesUpdate, Database } from '@/types/database'
+
+
 /**
  * Helper untuk typed inserts ke Supabase
  * Workaround untuk issue dengan Supabase type inference
  */
 
-import type { Tables, TablesInsert as SupabaseTablesInsert, TablesUpdate as SupabaseTablesUpdate, Database } from '@/types/database'
 
 // Helper type untuk extract Insert types - re-export from database.ts
 export type TablesInsert<T extends keyof Database['public']['Tables']> = SupabaseTablesInsert<T>

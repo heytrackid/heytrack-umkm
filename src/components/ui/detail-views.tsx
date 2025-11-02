@@ -1,13 +1,14 @@
 import type { ComponentType, ReactNode } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { ArrowLeft, Edit, Trash2, MoreHorizontal, Download, Share, Plus } from 'lucide-react'
+
 /**
  * Shared Detail View Components
  * Reusable detail view layouts and patterns
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Edit, Trash2, MoreHorizontal, Download, Share, Plus } from 'lucide-react'
 
 // Detail view header with back button and actions
 interface DetailHeaderProps {
@@ -316,4 +317,3 @@ export const DetailTimeline = ({ items, title = "Riwayat Aktivitas" }: DetailTim
 }
 
 // Import React for types
-import type React from 'react'

@@ -1,8 +1,3 @@
-/**
- * ProductionCapacityManager
- * Manages production capacity settings, resource allocation, and constraints
- * Provides interface for configuring oven capacity, labor, equipment, and schedules
- */
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -10,38 +5,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Slider } from '@/components/ui/slider'
-import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import {
-  Oven,
-  Users,
-  Clock,
-  Settings,
-  Save,
-  RotateCcw,
-  Plus,
-  Minus,
-  AlertCircle,
-  CheckCircle,
-  TrendingUp,
-  Calendar,
-  Zap
-} from 'lucide-react'
-import { format } from 'date-fns'
-
+import { Users, Clock, Settings, Save, RotateCcw, Plus, Minus, AlertCircle, TrendingUp, Zap } from 'lucide-react'
 import type {
   ProductionConstraints
-} from '@/services/production/BatchSchedulingService';
+} from '@/services/production/BatchSchedulingService'
 import {
   batchSchedulingService
 } from '@/services/production/BatchSchedulingService'
+
+/**
+ * ProductionCapacityManager
+ * Manages production capacity settings, resource allocation, and constraints
+ * Provides interface for configuring oven capacity, labor, equipment, and schedules
+ */
 
 interface ProductionCapacityManagerProps {
   onCapacityUpdate?: (constraints: ProductionConstraints) => void
@@ -73,10 +56,10 @@ const DEFAULT_CONSTRAINTS: ProductionConstraints = {
   cleanup_time_minutes: 10
 }
 
-export default function ProductionCapacityManager({
+const ProductionCapacityManager = ({
   onCapacityUpdate,
   className = ''
-}: ProductionCapacityManagerProps) {
+}: ProductionCapacityManagerProps) => {
   const [constraints, setConstraints] = useState<ProductionConstraints>(DEFAULT_CONSTRAINTS)
   const [originalConstraints, setOriginalConstraints] = useState<ProductionConstraints>(DEFAULT_CONSTRAINTS)
   const [loading, setLoading] = useState(false)
@@ -88,7 +71,7 @@ export default function ProductionCapacityManager({
 
   // Load current constraints on mount
   useEffect(() => {
-    void loadCurrentConstraints()
+    loadCurrentConstraints()
   }, [])
 
   // Track changes
@@ -241,7 +224,7 @@ export default function ProductionCapacityManager({
 
           <div className="flex items-center gap-2">
             {hasChanges && (
-              <Button variant="outline" size="sm" onClick={handleReset}>
+              <Button variant = "outline" size="sm" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4 mr-1" />
                 Reset
               </Button>
@@ -302,7 +285,7 @@ export default function ProductionCapacityManager({
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Oven className="h-5 w-5" />
+                  <Settings className="h-5 w-5" />
                   Equipment Capacity
                 </CardTitle>
               </CardHeader>
@@ -613,3 +596,5 @@ export default function ProductionCapacityManager({
     </Card>
   )
 }
+
+export default ProductionCapacityManager

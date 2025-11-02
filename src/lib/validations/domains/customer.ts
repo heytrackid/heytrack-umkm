@@ -1,7 +1,9 @@
+import { z } from 'zod'
+
+
 // Customer Domain Validation Schemas
 // Source of truth for customer data validation
 
-import { z } from 'zod'
 
 /**
  * Customer Insert Schema

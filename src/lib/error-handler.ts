@@ -1,9 +1,11 @@
+import { apiLogger } from './logger'
+
+
 /**
  * Error Handler Utility
  * Centralized error handling and logging
  */
 
-import { apiLogger } from './logger'
 
 export interface ErrorContext {
   component?: string

@@ -1,3 +1,5 @@
+
+
 // Shared utilities for formatting, calculations, and common operations
 
 /**
@@ -270,42 +272,42 @@ export function safeLocalStorage() {
   const isAvailable = typeof window !== 'undefined' && !!window.localStorage
 
   return {
-    get: <T = unknown>(key: string, defaultValue: T | null = null) => {
+    get: <T>(key: string, defaultValue: T | null = null): T | null => {
       if (!isAvailable) {return defaultValue}
       try {
         const item = window.localStorage.getItem(key)
-        return item ? JSON.parse(item) : defaultValue
-      } catch (_error) {
+        return item ? JSON.parse(item) as T : defaultValue
+      } catch {
         return defaultValue
       }
     },
 
-    set: <T = unknown>(key: string, value: T) => {
+    set: <T>(key: string, value: T): boolean => {
       if (!isAvailable) {return false}
       try {
         window.localStorage.setItem(key, JSON.stringify(value))
         return true
-      } catch (_error) {
+      } catch {
         return false
       }
     },
 
-    remove: (key: string) => {
+    remove: (key: string): boolean => {
       if (!isAvailable) {return false}
       try {
         window.localStorage.removeItem(key)
         return true
-      } catch (_error) {
+      } catch {
         return false
       }
     },
 
-    clear: () => {
+    clear: (): boolean => {
       if (!isAvailable) {return false}
       try {
         window.localStorage.clear()
         return true
-      } catch (_error) {
+      } catch {
         return false
       }
     }

@@ -2,21 +2,20 @@
 
 import { useState } from 'react'
 import type { IngredientsTable } from '@/types/database'
-type Ingredient = IngredientsTable
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-// import { Badge } from '@/components/ui/badge'
+import { useSettings } from '@/contexts/settings-context'
+import { StockBadge, CompactStockIndicator } from './StockBadge'
+import { cn } from '@/lib/utils'
 import {
-    // Eye,
     Edit,
     Trash2,
     ChevronDown,
     ChevronUp,
     ShoppingCart
 } from 'lucide-react'
-import { useSettings } from '@/contexts/settings-context'
-import { StockBadge, CompactStockIndicator } from './StockBadge'
-import { cn } from '@/lib/utils'
+
+type Ingredient = IngredientsTable
 
 interface MobileIngredientCardProps {
     ingredient: Ingredient
@@ -46,9 +45,9 @@ export const MobileIngredientCard = ({
     const { formatCurrency } = useSettings()
     const [isExpanded, setIsExpanded] = useState(false)
 
-    const isLowStock = (ingredient.current_stock ?? 0) <= (ingredient.min_stock ?? 0)
-    const isOutOfStock = (ingredient.current_stock ?? 0) <= 0
-    const totalValue = (ingredient.price_per_unit ?? 0) * (ingredient.current_stock ?? 0)
+    const isLowStock = (ingredient.current_stock || 0) <= (ingredient.min_stock || 0)
+    const isOutOfStock = (ingredient.current_stock || 0) <= 0
+    const totalValue = (ingredient.price_per_unit || 0) * (ingredient.current_stock || 0)
 
     return (
         <Card className={cn(
@@ -66,7 +65,7 @@ export const MobileIngredientCard = ({
                                 {ingredient.name}
                             </h3>
                             <p className="text-sm text-muted-foreground">
-                                {formatCurrency(ingredient.price_per_unit ?? 0)}/{ingredient.unit ?? ''}
+                                {formatCurrency(ingredient.price_per_unit || 0)}/{ingredient.unit || ''}
                             </p>
                         </div>
                         <Button
@@ -86,14 +85,14 @@ export const MobileIngredientCard = ({
                     {/* Stock Indicator */}
                     <div className="flex items-center justify-between">
                         <CompactStockIndicator
-                            currentStock={ingredient.current_stock ?? 0}
-                            minStock={ingredient.min_stock ?? 0}
-                            unit={ingredient.unit ?? ''}
+                            currentStock={ingredient.current_stock || 0}
+                            minStock={ingredient.min_stock || 0}
+                            unit={ingredient.unit || ''}
                         />
                         <StockBadge
-                            currentStock={ingredient.current_stock ?? 0}
-                            minStock={ingredient.min_stock ?? 0}
-                            unit={ingredient.unit ?? ''}
+                            currentStock={ingredient.current_stock || 0}
+                            minStock={ingredient.min_stock || 0}
+                            unit={ingredient.unit || ''}
                             compact
                             showIcon={false}
                         />
@@ -107,7 +106,7 @@ export const MobileIngredientCard = ({
                                 <div>
                                     <p className="text-muted-foreground mb-1">Stok Minimum</p>
                                     <p className="font-medium">
-                                        {ingredient.min_stock ?? 0} {ingredient.unit ?? ''}
+                                        {ingredient.min_stock || 0} {ingredient.unit || ''}
                                     </p>
                                 </div>
                                 <div>

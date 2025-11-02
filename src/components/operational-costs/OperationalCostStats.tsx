@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Receipt, TrendingUp, DollarSign, BarChart3 } from 'lucide-react'
 import type { OperationalCostsTable } from '@/types/database'
 
+
+
 type OperationalCost = OperationalCostsTable
 
 interface OperationalCostStatsProps {

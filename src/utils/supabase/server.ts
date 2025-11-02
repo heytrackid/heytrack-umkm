@@ -1,8 +1,10 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { SupabaseClient } from '@supabase/supabase-js'
-
 import type { Database } from '@/types/database'
+
+
+
 
 const REQUIRED_ENV_VARS = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY'] as const
 
@@ -29,13 +31,10 @@ export async function createClient(): Promise<SupabaseClient<Database>> {
 
   const cookieStore = await cookies()
 
-  return createServerClient<Database>(
-    process.env['NEXT_PUBLIC_SUPABASE_URL']!,
-    process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!,
+  const client = createServerClient<Database>(
+    process.env['NEXT_PUBLIC_SUPABASE_URL'] || '',
+    process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] || '',
     {
-      db: {
-        schema: 'public',
-      },
       cookies: {
         getAll() {
           return cookieStore.getAll()
@@ -53,5 +52,7 @@ export async function createClient(): Promise<SupabaseClient<Database>> {
         },
       },
     }
-  ) as SupabaseClient<Database>
+  )
+  
+  return client as unknown as SupabaseClient<Database>
 }

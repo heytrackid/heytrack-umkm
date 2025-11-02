@@ -11,7 +11,7 @@ interface MessageBubbleProps {
 
 export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps) => {
   const renderMessageData = (data: unknown) => {
-    if (!data) {return null}
+    if (!data) { return null }
     return (
       <div className="mt-3 p-3 bg-background/50 rounded border">
         <pre className="text-xs overflow-x-auto">
@@ -53,9 +53,9 @@ export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps
           <div className="mt-3 space-y-2">
             <p className="text-xs text-muted-foreground font-medium">Coba tanyakan:</p>
             <div className="flex flex-wrap gap-2">
-              {message.suggestions.map((suggestion, index) => (
+              {message.suggestions.map((suggestion) => (
                 <Button
-                  key={index}
+                  key={`${message.id}-${suggestion}`}
                   variant="outline"
                   size="sm"
                   className="text-xs h-7"

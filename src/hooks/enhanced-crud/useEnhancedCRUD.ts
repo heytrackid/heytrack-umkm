@@ -1,114 +1,27 @@
-// @ts-nocheck
 'use client'
 
 import { useCallback, useState } from 'react'
 import { successToast } from '@/hooks/use-toast'
 import { createClient as createSupabaseClient } from '@/utils/supabase/client'
-import type { 
-  AppSettingsTable, AppSettingsInsert, AppSettingsUpdate,
-  ChatContextCacheTable, ChatContextCacheInsert, ChatContextCacheUpdate,
-  ChatMessagesTable, ChatMessagesInsert, ChatMessagesUpdate,
-  ChatSessionsTable, ChatSessionsInsert, ChatSessionsUpdate,
-  ConversationHistoryTable, ConversationHistoryInsert, ConversationHistoryUpdate,
-  ConversationSessionsTable, ConversationSessionsInsert, ConversationSessionsUpdate,
-  CustomersTable, CustomersInsert, CustomersUpdate,
-  DailySalesSummaryTable, DailySalesSummaryInsert, DailySalesSummaryUpdate,
-  ErrorLogsTable, ErrorLogsInsert, ErrorLogsUpdate,
-  ExpensesTable, ExpensesInsert, ExpensesUpdate,
-  FinancialRecordsTable, FinancialRecordsInsert, FinancialRecordsUpdate,
-  HppAlertsTable, HppAlertsInsert, HppAlertsUpdate,
-  HppCalculationsTable, HppCalculationsInsert, HppCalculationsUpdate,
-  HppHistoryTable, HppHistoryInsert, HppHistoryUpdate,
-  HppRecommendationsTable, HppRecommendationsInsert, HppRecommendationsUpdate,
-  IngredientPurchasesTable, IngredientPurchasesInsert, IngredientPurchasesUpdate,
-  IngredientsTable, IngredientsInsert, IngredientsUpdate,
-  InventoryAlertsTable, InventoryAlertsInsert, InventoryAlertsUpdate,
-  InventoryReorderRulesTable, InventoryReorderRulesInsert, InventoryReorderRulesUpdate,
-  InventoryStockLogsTable, InventoryStockLogsInsert, InventoryStockLogsUpdate,
-  NotificationPreferencesTable, NotificationPreferencesInsert, NotificationPreferencesUpdate,
-  NotificationsTable, NotificationsInsert, NotificationsUpdate,
-  OperationalCostsTable, OperationalCostsInsert, OperationalCostsUpdate,
-  OrderItemsTable, OrderItemsInsert, OrderItemsUpdate,
-  OrdersTable, OrdersInsert, OrdersUpdate,
-  PaymentsTable, PaymentsInsert, PaymentsUpdate,
-  PerformanceLogsTable, PerformanceLogsInsert, PerformanceLogsUpdate,
-  ProductionBatchesTable, ProductionBatchesInsert, ProductionBatchesUpdate,
-  ProductionSchedulesTable, ProductionSchedulesInsert, ProductionSchedulesUpdate,
-  ProductionsTable, ProductionsInsert, ProductionsUpdate,
-  RecipeIngredientsTable, RecipeIngredientsInsert, RecipeIngredientsUpdate,
-  RecipesTable, RecipesInsert, RecipesUpdate,
-  StockTransactionsTable, StockTransactionsInsert, StockTransactionsUpdate,
-  SupplierIngredientsTable, SupplierIngredientsInsert, SupplierIngredientsUpdate,
-  SuppliersTable, SuppliersInsert, SuppliersUpdate,
-  UsageAnalyticsTable, UsageAnalyticsInsert, UsageAnalyticsUpdate,
-  UserProfilesTable, UserProfilesInsert, UserProfilesUpdate,
-  WhatsappTemplatesTable, WhatsappTemplatesInsert, WhatsappTemplatesUpdate
-} from '@/types/database'
 import type { EnhancedCRUDOptions } from './types'
 import { handleCRUDError, validateCRUDInputs, validateBulkInputs } from './utils'
-import { getErrorMessage } from '@/lib/type-guards'
-
-// Mapping table names to their corresponding types
-interface TableMap {
-  // App settings
-  'app_settings': { row: AppSettingsTable; insert: AppSettingsInsert; update: AppSettingsUpdate }
-  'chat_context_cache': { row: ChatContextCacheTable; insert: ChatContextCacheInsert; update: ChatContextCacheUpdate }
-  'chat_messages': { row: ChatMessagesTable; insert: ChatMessagesInsert; update: ChatMessagesUpdate }
-  'chat_sessions': { row: ChatSessionsTable; insert: ChatSessionsInsert; update: ChatSessionsUpdate }
-  'conversation_history': { row: ConversationHistoryTable; insert: ConversationHistoryInsert; update: ConversationHistoryUpdate }
-  'conversation_sessions': { row: ConversationSessionsTable; insert: ConversationSessionsInsert; update: ConversationSessionsUpdate }
-  'customers': { row: CustomersTable; insert: CustomersInsert; update: CustomersUpdate }
-  'daily_sales_summary': { row: DailySalesSummaryTable; insert: DailySalesSummaryInsert; update: DailySalesSummaryUpdate }
-  'error_logs': { row: ErrorLogsTable; insert: ErrorLogsInsert; update: ErrorLogsUpdate }
-  'expenses': { row: ExpensesTable; insert: ExpensesInsert; update: ExpensesUpdate }
-  'financial_records': { row: FinancialRecordsTable; insert: FinancialRecordsInsert; update: FinancialRecordsUpdate }
-  'hpp_alerts': { row: HppAlertsTable; insert: HppAlertsInsert; update: HppAlertsUpdate }
-  'hpp_calculations': { row: HppCalculationsTable; insert: HppCalculationsInsert; update: HppCalculationsUpdate }
-  'hpp_history': { row: HppHistoryTable; insert: HppHistoryInsert; update: HppHistoryUpdate }
-  'hpp_recommendations': { row: HppRecommendationsTable; insert: HppRecommendationsInsert; update: HppRecommendationsUpdate }
-  'ingredient_purchases': { row: IngredientPurchasesTable; insert: IngredientPurchasesInsert; update: IngredientPurchasesUpdate }
-  'ingredients': { row: IngredientsTable; insert: IngredientsInsert; update: IngredientsUpdate }
-  'inventory_alerts': { row: InventoryAlertsTable; insert: InventoryAlertsInsert; update: InventoryAlertsUpdate }
-  'inventory_reorder_rules': { row: InventoryReorderRulesTable; insert: InventoryReorderRulesInsert; update: InventoryReorderRulesUpdate }
-  'inventory_stock_logs': { row: InventoryStockLogsTable; insert: InventoryStockLogsInsert; update: InventoryStockLogsUpdate }
-  'notification_preferences': { row: NotificationPreferencesTable; insert: NotificationPreferencesInsert; update: NotificationPreferencesUpdate }
-  'notifications': { row: NotificationsTable; insert: NotificationsInsert; update: NotificationsUpdate }
-  'operational_costs': { row: OperationalCostsTable; insert: OperationalCostsInsert; update: OperationalCostsUpdate }
-  'order_items': { row: OrderItemsTable; insert: OrderItemsInsert; update: OrderItemsUpdate }
-  'orders': { row: OrdersTable; insert: OrdersInsert; update: OrdersUpdate }
-  'payments': { row: PaymentsTable; insert: PaymentsInsert; update: PaymentsUpdate }
-  'performance_logs': { row: PerformanceLogsTable; insert: PerformanceLogsInsert; update: PerformanceLogsUpdate }
-  'production_batches': { row: ProductionBatchesTable; insert: ProductionBatchesInsert; update: ProductionBatchesUpdate }
-  'production_schedules': { row: ProductionSchedulesTable; insert: ProductionSchedulesInsert; update: ProductionSchedulesUpdate }
-  'productions': { row: ProductionsTable; insert: ProductionsInsert; update: ProductionsUpdate }
-  'recipe_ingredients': { row: RecipeIngredientsTable; insert: RecipeIngredientsInsert; update: RecipeIngredientsUpdate }
-  'recipes': { row: RecipesTable; insert: RecipesInsert; update: RecipesUpdate }
-  'stock_transactions': { row: StockTransactionsTable; insert: StockTransactionsInsert; update: StockTransactionsUpdate }
-  'supplier_ingredients': { row: SupplierIngredientsTable; insert: SupplierIngredientsInsert; update: SupplierIngredientsUpdate }
-  'suppliers': { row: SuppliersTable; insert: SuppliersInsert; update: SuppliersUpdate }
-  'usage_analytics': { row: UsageAnalyticsTable; insert: UsageAnalyticsInsert; update: UsageAnalyticsUpdate }
-  'user_profiles': { row: UserProfilesTable; insert: UserProfilesInsert; update: UserProfilesUpdate }
-  'whatsapp_templates': { row: WhatsappTemplatesTable; insert: WhatsappTemplatesInsert; update: WhatsappTemplatesUpdate }
-}
+import { getErrorMessage } from '@/types/type-utilities'
+import type { TableName, Row, Insert, Update } from '@/types/database'
+import { typed } from '@/types/type-utilities'
 
 /**
  * Enhanced CRUD hook with toast notifications and error handling
  * 
  * Generic type parameters:
  * - TTable: Table name from database
- * - TRow: Row type for query results
- * - TInsert: Insert type for create operations
- * - TUpdate: Update type for update operations
  */
-export function useEnhancedCRUD<
-  TTable extends keyof TableMap,
-  TRow = TableMap[TTable]['row'],
-  TInsert = TableMap[TTable]['insert'],
-  TUpdate = TableMap[TTable]['update']
->(
+export function useEnhancedCRUD<TTable extends TableName>(
   table: TTable,
   options: EnhancedCRUDOptions = {}
 ) {
+  type TRow = Row<TTable>
+  type TInsert = Insert<TTable>
+  type TUpdate = Update<TTable>
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -141,11 +54,11 @@ export function useEnhancedCRUD<
     void setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = typed(createSupabaseClient())
 
       const { data: result, error } = await supabase
         .from(table)
-        .insert(data)
+        .insert(data as never)
         .select()
         .single() as { data: TRow | null; error: Error | null }
 
@@ -170,12 +83,12 @@ export function useEnhancedCRUD<
     void setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = typed(createSupabaseClient())
 
       const { data: result, error } = await supabase
         .from(table)
-        .update(data)
-        .eq('id', id)
+        .update(data as never)
+        .eq('id', id as never)
         .select()
         .single() as { data: TRow | null; error: Error | null }
 
@@ -204,13 +117,13 @@ export function useEnhancedCRUD<
     void setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = typed(createSupabaseClient())
 
       // Check if record exists first
       const { data: existingRecord, error: fetchError } = await supabase
         .from(table)
         .select('*')
-        .eq('id', id)
+        .eq('id', id as never)
         .single() as { data: TRow | null; error: Error | null }
 
       if (fetchError || !existingRecord) {
@@ -220,7 +133,7 @@ export function useEnhancedCRUD<
       const { error } = await supabase
         .from(table)
         .delete()
-        .eq('id', id)
+        .eq('id', id as never)
 
       if (error) {
         throw new Error((error instanceof Error ? error.message : String(error)))
@@ -243,11 +156,11 @@ export function useEnhancedCRUD<
     void setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = typed(createSupabaseClient())
 
       const { data: result, error } = await supabase
         .from(table)
-        .insert(records)
+        .insert(records as never)
         .select() as { data: TRow[] | null; error: Error | null }
 
       if (error) {
@@ -279,14 +192,14 @@ export function useEnhancedCRUD<
     void setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = typed(createSupabaseClient())
       const results: TRow[] = []
 
       for (const update of updates) {
         const { data: result, error } = await supabase
           .from(table)
-          .update(update.data)
-          .eq('id', update.id)
+          .update(update.data as never)
+          .eq('id', update.id as never)
           .select()
           .single() as { data: TRow | null; error: Error | null }
 
@@ -320,12 +233,12 @@ export function useEnhancedCRUD<
     void setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = typed(createSupabaseClient())
 
       const { error } = await supabase
         .from(table)
         .delete()
-        .in('id', ids)
+        .in('id', ids as never)
 
       if (error) {
         throw new Error(getErrorMessage(error))

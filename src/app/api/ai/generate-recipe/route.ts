@@ -371,7 +371,7 @@ async function callAIServiceWithRetry(prompt: string, maxRetries = 3): Promise<s
             const result = await callAIService(prompt)
             apiLogger.info({ attempt }, 'AI service call successful')
             return result
-        } catch (_error) {
+        } catch (error: unknown) {
             lastError = error as Error
             apiLogger.warn({ attempt, maxRetries, error }, 'AI service call failed')
             
@@ -439,12 +439,15 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
 
         if (!response.ok) {
             const error = await response.json()
-            throw new Error(`OpenRouter API error: ${error.error?.message || 'Unknown error'}`)
+            const apiMessage = typeof error.error?.message === 'string' && error.error.message.trim().length > 0
+                ? error.error.message
+                : 'Unknown error'
+            throw new Error(`OpenRouter API error: ${apiMessage}`)
         }
 
         const data = await response.json()
         return data.choices[0].message.content
-    } catch (_error) {
+    } catch (error) {
         apiLogger.error({ error }, 'OpenRouter API call failed, trying fallback model')
         
         try {
@@ -453,7 +456,7 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`,
-                    'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
+                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
                     'X-Title': 'HeyTrack AI Recipe Generator'
                 },
                 body: JSON.stringify({
@@ -485,7 +488,10 @@ Generate professional UMKM recipes with accurate measurements.`
 
             if (!fallbackResponse.ok) {
                 const fallbackError = await fallbackResponse.json()
-                throw new Error(`OpenRouter fallback API error: ${fallbackError.error?.message || 'Unknown error'}`)
+                const fallbackMessage = typeof fallbackError.error?.message === 'string' && fallbackError.error.message.trim().length > 0
+                    ? fallbackError.error.message
+                    : 'Unknown error'
+                throw new Error(`OpenRouter fallback API error: ${fallbackMessage}`)
             }
 
             const fallbackData = await fallbackResponse.json()

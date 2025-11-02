@@ -1,11 +1,12 @@
+import { type FormEvent, type ReactNode } from 'react'
+import { cn } from '@/lib/utils'
+import { useResponsive } from '@/hooks/useResponsive'
+
 /**
  * Mobile Form Container Component
  * Responsive form container with mobile optimizations
  */
 
-import { type FormEvent, type ReactNode } from 'react'
-import { cn } from '@/lib/utils'
-import { useResponsive } from '@/hooks/useResponsive'
 
 interface MobileFormProps {
   children: ReactNode

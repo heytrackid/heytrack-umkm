@@ -1,12 +1,9 @@
-// Core Sidebar Components
-// Main sidebar structure and layout components
-
 import type { ComponentProps, CSSProperties } from 'react'
 import { PanelLeftIcon } from "lucide-react"
-
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useSidebar } from "./sidebar-context"
 import {
   Sheet,
   SheetContent,
@@ -14,7 +11,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { useSidebar } from "./sidebar-context"
+
+// Core Sidebar Components
+// Main sidebar structure and layout components
 
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
@@ -176,13 +175,13 @@ export const SidebarRail = ({ className, ...props }: ComponentProps<'button'>) =
 }
 
 export const SidebarInset = ({ className, ...props }: ComponentProps<'main'>) => (
-    <main
-      data-slot="sidebar-inset"
-      className={cn(
-        "bg-background relative flex w-full flex-1 flex-col",
-        "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]: md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
-        className
-      )}
-      {...props}
-    />
-  )
+  <main
+    data-slot="sidebar-inset"
+    className={cn(
+      "bg-background relative flex w-full flex-1 flex-col",
+      "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]: md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
+      className
+    )}
+    {...props}
+  />
+)

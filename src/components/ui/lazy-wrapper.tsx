@@ -1,11 +1,12 @@
+import { Suspense, lazy, Component, type ComponentType, type ReactNode, useEffect, type FC } from 'react'
+import { Loader2 } from 'lucide-react'
+import { uiLogger } from '@/lib/logger'
+
 /**
  * Lazy Wrapper Component
  * Provides consistent lazy loading with skeletons and error boundaries
  */
 
-import { Suspense, lazy, Component, type ComponentType, type ReactNode, useEffect } from 'react'
-import { Loader2 } from 'lucide-react'
-import { uiLogger } from '@/lib/logger'
 
 // Lazy loading wrapper with consistent loading states
 export const LazyWrapper = ({
@@ -74,17 +75,21 @@ class ErrorBoundary extends Component<
 }
 
 // Utility function to create lazy components with consistent patterns
-export function createLazyComponent<TProps = Record<string, unknown>>(
-  importFunc: () => Promise<{ default: ComponentType<TProps> }>,
+export function createLazyComponent(
+  importFunc: () => Promise<{ default: ComponentType<Record<string, unknown>> }>,
   fallback?: ReactNode
-) {
+): ComponentType<Record<string, unknown>> {
   const LazyComponent = lazy(importFunc)
 
-  return (props: TProps) => (
+  const WrappedComponent: FC<Record<string, unknown>> = (props) => (
     <LazyWrapper fallback={fallback}>
       <LazyComponent {...props} />
     </LazyWrapper>
   )
+
+  WrappedComponent.displayName = 'LazyComponent'
+
+  return WrappedComponent
 }
 
 // Preload utility for critical components
@@ -112,7 +117,7 @@ export function usePerformanceMonitor(componentName: string) {
       interface WindowWithGtag extends Window {
         gtag?: (event: string, action: string, params: Record<string, unknown>) => void
       }
-      
+
       const win = window as WindowWithGtag
       if (typeof window !== 'undefined' && win.gtag) {
         win.gtag('event', 'component_load_time', {
@@ -158,6 +163,6 @@ export function logBundleSize() {
       return () => observer.disconnect()
     }
   }
-  
+
   return null
 }

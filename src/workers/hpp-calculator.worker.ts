@@ -1,9 +1,11 @@
+import type { RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+
+
 /**
  * Web Worker for HPP Calculations
  * Offloads heavy calculations from main thread
  */
 
-import type { RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 
 type RecipeIngredient = RecipeIngredientsTable
 type Ingredient = IngredientsTable

@@ -1,15 +1,16 @@
 import type { ReactNode } from 'react'
-import type { UseFormReturn } from 'react-hook-form'
-/**
- * Shared CRUD Modal Components
- * Reusable modal components for CRUD operations
- */
-
+import type { UseFormReturn, FieldValues } from 'react-hook-form'
 import { Modal } from '@/components/ui/modal'
 import { CrudForm, FormActions } from '@/components/ui/crud-form'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Button } from '@/components/ui/button'
 import { Pencil, Trash2 } from 'lucide-react'
+
+/**
+ * Shared CRUD Modal Components
+ * Reusable modal components for CRUD operations
+ */
+
 
 interface CrudModalProps {
   isOpen: boolean
@@ -42,10 +43,10 @@ export const CrudModal = ({
   </Modal>
 )
 
-interface CreateModalProps<T = Record<string, unknown>, FormData = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
+interface CreateModalProps<FormData extends FieldValues = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
   entityName: string
   form: UseFormReturn<FormData>
-  onSubmit: (data: T) => Promise<void>
+  onSubmit: (data: FormData) => Promise<void>
   isLoading?: boolean
   children: ReactNode
 }
@@ -53,14 +54,14 @@ interface CreateModalProps<T = Record<string, unknown>, FormData = Record<string
 /**
  * Create modal with form
  */
-export const CreateModal = <T = Record<string, unknown>, FormData = Record<string, unknown>>({
+export const CreateModal = <FormData extends FieldValues = Record<string, unknown>>({
   entityName,
   form,
   onSubmit,
   isLoading,
   children,
   ...modalProps
-}: CreateModalProps<T, FormData>) => (
+}: CreateModalProps<FormData>) => (
     <CrudModal
       {...modalProps}
       title={`Tambah ${entityName} Baru`}
@@ -77,10 +78,10 @@ export const CreateModal = <T = Record<string, unknown>, FormData = Record<strin
     </CrudModal>
   )
 
-interface EditModalProps<T = Record<string, unknown>, FormData = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
+interface EditModalProps<FormData extends FieldValues = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
   entityName: string
   form: UseFormReturn<FormData>
-  onSubmit: (data: T) => Promise<void>
+  onSubmit: (data: FormData) => Promise<void>
   isLoading?: boolean
   children: ReactNode
 }
@@ -88,14 +89,14 @@ interface EditModalProps<T = Record<string, unknown>, FormData = Record<string, 
 /**
  * Edit modal with form
  */
-export const EditModal = <T = Record<string, unknown>, FormData = Record<string, unknown>>({
+export const EditModal = <FormData extends FieldValues = Record<string, unknown>>({
   entityName,
   form,
   onSubmit,
   isLoading,
   children,
   ...modalProps
-}: EditModalProps<T, FormData>) => (
+}: EditModalProps<FormData>) => (
     <CrudModal
       {...modalProps}
       title={`Edit ${entityName}`}
@@ -182,5 +183,4 @@ export const CrudActionButtons = ({
   </div>
 )
 
-// Import React for types
-import type React from 'react'
+// React types are imported via type imports at the top

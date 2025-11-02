@@ -9,16 +9,16 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
-import {
-  RecipeFormSchema,
-  type RecipeForm as RecipeFormData
-} from '@/lib/validations/domains/recipe'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { FormField } from './shared/FormField'
 import type { RecipesTable } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
+import {
+  RecipeFormSchema,
+  type RecipeForm as RecipeFormData
+} from '@/lib/validations/domains/recipe'
 
 type Recipe = RecipesTable
 
@@ -42,8 +42,8 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
       instructions: typeof initialData?.instructions === 'string' ? [] : initialData?.instructions || [],
       difficulty: (initialData?.difficulty as 'EASY' | 'MEDIUM' | 'HARD') || 'MEDIUM',
       category: initialData?.category || '',
-      is_active: initialData?.is_active ?? true,
-      is_available: initialData?.is_available ?? true,
+      is_active: initialData?.is_active || true,
+      is_available: initialData?.is_available || true,
       selling_price: initialData?.selling_price || 0,
       ingredients: []
     }

@@ -4,10 +4,21 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ChefHat, TrendingUp, Calculator, BarChart3 } from 'lucide-react'
 import type { RecipesTable } from '@/types/database'
 
+
+
 type Recipe = RecipesTable
 
 interface RecipeStatsCardsProps {
     recipes: Recipe[]
+}
+
+const getDifficultyLabel = (difficulty: string): string => {
+    const labels: Record<string, string> = {
+        'EASY': 'Mudah',
+        'MEDIUM': 'Sedang',
+        'HARD': 'Sulit'
+    }
+    return labels[difficulty] || difficulty
 }
 
 export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
@@ -16,17 +27,20 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
     const activeRecipes = recipes.filter((r) => r.is_active).length
 
     // Calculate average difficulty (for display purposes)
-    const difficultyMap = { easy: 1, medium: 2, hard: 3 }
-    const avgDifficulty =
+    const difficultyMap = { EASY: 1, MEDIUM: 2, HARD: 3 }
+    const avgDifficultyNum =
         recipes.length > 0
-            ? recipes.reduce((sum, r) => sum + (difficultyMap[(r.difficulty ?? 'medium') as keyof typeof difficultyMap] || 2), 0) /
+            ? recipes.reduce((sum, r) => sum + (difficultyMap[(r.difficulty || 'MEDIUM') as keyof typeof difficultyMap] || 2), 0) /
             recipes.length
             : 0
+
+    // Convert average to difficulty label
+    const avgDifficulty = avgDifficultyNum <= 1.5 ? 'EASY' : avgDifficultyNum <= 2.5 ? 'MEDIUM' : 'HARD'
 
     // Find most common category
     const categoryCount = recipes.reduce(
         (acc, r) => {
-            const category = r.category ?? 'other';
+            const category = r.category || 'other';
             acc[category] = (acc[category] || 0) + 1
             return acc
         },
@@ -68,7 +82,7 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">Tingkat Kesulitan</p>
                             <p className="text-2xl font-bold">
-                                {avgDifficulty < 1.5 ? 'Mudah' : avgDifficulty < 2.5 ? 'Sedang' : 'Sulit'}
+                                {getDifficultyLabel(avgDifficulty)}
                             </p>
                             <p className="text-xs text-muted-foreground">rata-rata</p>
                         </div>

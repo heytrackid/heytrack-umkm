@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useMemo, useState, useCallback, useEffect } from 'react'
-import type { ComponentType, SVGProps } from 'react'
+import { useMemo, useState, useCallback, useEffect, type ComponentType, type SVGProps } from 'react'
 import { cn } from '@/lib/utils'
+import { ExportButton } from './ExportButton'
+import { LogoutButton } from './LogoutButton'
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -31,8 +32,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { ExportButton } from './ExportButton'
-import { LogoutButton } from './LogoutButton'
 
 interface SidebarItem {
   label: string

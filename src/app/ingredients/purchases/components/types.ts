@@ -1,7 +1,8 @@
+import type { IngredientPurchasesTable, IngredientsTable } from '@/types/database'
+
 // Ingredient Purchases Types
 // Type definitions for ingredient purchase management
 
-import type { IngredientPurchasesTable, IngredientsTable } from '@/types/database'
 
 type IngredientPurchaseBase = IngredientPurchasesTable
 type Ingredient = IngredientsTable

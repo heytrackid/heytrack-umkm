@@ -1,10 +1,12 @@
+import { z } from 'zod'
+import { OrderInsertSchema, type OrderInsert, type OrderUpdate } from './order'
+
+
 /**
  * Order Validation Helpers
  * Domain-specific validation helpers for order-related business rules
  */
 
-import { z } from 'zod'
-import { OrderInsertSchema, type OrderInsert, type OrderUpdate } from './order'
 
 // Re-export for convenience
 export { OrderUpdateSchema } from './order'

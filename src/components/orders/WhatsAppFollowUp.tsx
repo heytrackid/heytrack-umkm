@@ -15,8 +15,10 @@ import type { OrderData } from '@/lib/communications/types';
 import { WhatsAppService } from '@/lib/communications/whatsapp';
 import { toast } from 'react-hot-toast';
 import { useSettings } from '@/contexts/settings-context';
-
 import { apiLogger } from '@/lib/logger'
+
+
+
 interface OrderItemData {
   recipe_name: string;
   quantity: number;
@@ -67,7 +69,7 @@ const WhatsAppFollowUp = ({
     delivery_date: order.delivery_date,
     status: order.status,
     items: order.order_items?.map((item: OrderItemData) => ({
-      name: item.recipe_name || item.name || 'Product',
+      name: (item.recipe_name || item.name) || 'Product',
       quantity: item.quantity || 1,
       price: item.price_per_unit || 0
     })) || [],
@@ -145,7 +147,7 @@ const WhatsAppFollowUp = ({
       setCopied(type);
       toast.success('Berhasil disalin!');
       setTimeout(() => setCopied(null), 2000);
-    } catch (err: unknown) {
+    } catch (_err: unknown) {
       toast.error('Gagal menyalin text');
     }
   };

@@ -1,3 +1,6 @@
+import type { 
+
+
 /**
  * Type Guards for Runtime Type Validation
  * 
@@ -5,7 +8,6 @@
  * like Supabase queries, API responses, etc.
  */
 
-import type { 
   Database,
   HppCalculationsTable,
   CustomersTable,
@@ -373,9 +375,10 @@ export function ensureArray<T>(data: T | T[] | null | undefined): T[] {
  * Type guard for recipe ingredient item (deep validation)
  */
 interface RecipeIngredientItem {
+  ingredient_id: string
   quantity: number
   unit: string
-  ingredient: {
+  ingredients: {
     id: string
     name: string
     price_per_unit: number
@@ -389,11 +392,12 @@ function isRecipeIngredientItem(value: unknown): value is RecipeIngredientItem {
   return (
     typeof value.quantity === 'number' &&
     typeof value.unit === 'string' &&
-    isRecord(value.ingredient) &&
-    typeof value.ingredient.id === 'string' &&
-    typeof value.ingredient.name === 'string' &&
-    typeof value.ingredient.price_per_unit === 'number' &&
-    typeof value.ingredient.unit === 'string'
+    typeof value.ingredient_id === 'string' &&
+    isRecord(value.ingredients) &&
+    typeof value.ingredients.id === 'string' &&
+    typeof value.ingredients.name === 'string' &&
+    typeof value.ingredients.price_per_unit === 'number' &&
+    typeof value.ingredients.unit === 'string'
   )
 }
 

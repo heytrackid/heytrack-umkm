@@ -1,7 +1,9 @@
-/* eslint-disable */
 import { NextRequest, NextResponse } from 'next/server'
 import { APISecurity } from './index'
 import { apiLogger } from '@/lib/logger'
+
+
+/* eslint-disable */
 
 /**
  * API Security Middleware
@@ -61,7 +63,7 @@ class InMemoryRateLimiter {
     const windowStart = now - windowMs
 
     // Get existing requests for this identifier
-    const requests = this.requests.get(identifier) ?? []
+    const requests = this.requests.get(identifier) || []
 
     // Remove old requests outside the window
     const validRequests = requests.filter(time => time > windowStart)
@@ -157,7 +159,7 @@ export function withSecurity<Params extends {} = {}>(
     }
 
     // 4. Request body sanitization
-    let sanitizedBody: any = undefined
+    let sanitizedBody: Record<string, unknown> | undefined = undefined
     
     if (mergedConfig.sanitizeInputs && req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'DELETE') {
       try {
@@ -188,7 +190,7 @@ export function withSecurity<Params extends {} = {}>(
       }
       
       // Flatten the data for security checks
-      const flatData = flattenObject(checkData)
+      const flatData = flattenObject(checkData as Record<string, unknown>)
       
       for (const [key, value] of Object.entries(flatData)) {
         if (typeof value === 'string') {
@@ -243,7 +245,7 @@ export function withSecurity<Params extends {} = {}>(
       response.headers.set('X-XSS-Protection', '1; mode=block')
       
       return response
-    } catch (_error) {
+    } catch (error) {
       // Log handler errors
       apiLogger.error({ error, url, clientIP }, 'Handler error in security middleware')
       throw error
@@ -252,11 +254,17 @@ export function withSecurity<Params extends {} = {}>(
 }
 
 // Helper function to flatten nested objects for security checks
-function flattenObject(obj: any, prefix = '', result: Record<string, any> = {}): Record<string, any> {
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+function flattenObject(obj: unknown, prefix = '', result: Record<string, unknown> = {}): Record<string, unknown> {
+  if (typeof obj !== 'object' || obj === null) {
+    return result
+  }
+
+  const record = obj as Record<string, unknown>
+
+  for (const key in record) {
+    if (Object.prototype.hasOwnProperty.call(record, key)) {
       const newKey = prefix ? `${prefix}.${key}` : key
-      const value = obj[key]
+      const value = record[key]
       
       if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         flattenObject(value, newKey, result)

@@ -1,6 +1,6 @@
-/* eslint-disable */
 'use client'
 
+/* eslint-disable */
 import dynamic from 'next/dynamic'
 import { Legend } from 'recharts'
 import {
@@ -161,9 +161,7 @@ export default function InventoryTrendsChart({
           />
           <ChartTooltip
             cursor={false}
-            content={<ChartTooltipContent
-              formatter={(value) => [Number(value).toLocaleString('id-ID'), null]}
-            />}
+            content={<ChartTooltipContent />}
           />
           <Line
             dataKey="stock"

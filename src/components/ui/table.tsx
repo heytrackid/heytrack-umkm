@@ -1,8 +1,10 @@
-"use client"
+'use client';
 
 import type { ComponentProps } from 'react'
-
 import { cn } from"@/lib/utils"
+
+
+
 
 const Table = ({ className, ...props }: ComponentProps<'table'>) => (
     <div

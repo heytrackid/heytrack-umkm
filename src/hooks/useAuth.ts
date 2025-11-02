@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
@@ -8,6 +7,8 @@ import { useEffect, useState } from 'react'
 import type { UserProfilesTable } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+
+
 
 type UserProfile = UserProfilesTable
 interface AuthState {
@@ -80,7 +81,7 @@ export function useAuth() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        apiLogger.info('Auth state changed:', event)
+        apiLogger.info({ event }, 'Auth state changed')
 
         setAuthState({
           user: session?.user || null,

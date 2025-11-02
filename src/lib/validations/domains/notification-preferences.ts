@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+
+
 export const NotificationPreferencesUpdateSchema = z.object({
   // Category preferences
   inventory_enabled: z.boolean().optional(),

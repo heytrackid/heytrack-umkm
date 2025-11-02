@@ -1,10 +1,5 @@
 'use client'
 
-/**
- * Smart Ingredient Selector
- * Sprint 1 Feature: Auto-suggest ingredients based on product type
- */
-
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,6 +9,13 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Package, Search, Sparkles, AlertCircle } from 'lucide-react'
 import { getSmartIngredientSuggestions } from '@/lib/utils/recipe-helpers'
 import { useCurrency } from '@/hooks/useCurrency'
+
+
+/**
+ * Smart Ingredient Selector
+ * Sprint 1 Feature: Auto-suggest ingredients based on product type
+ */
+
 
 interface SmartIngredientSelectorProps {
     availableIngredients: Array<{
@@ -99,11 +101,11 @@ export const SmartIngredientSelector = ({
     }
 
     const getStockStatus = (ingredient: typeof availableIngredients[0]) => {
-        if ((ingredient.current_stock ?? 0) === 0) {
+        if ((ingredient.current_stock || 0) === 0) {
             return { label: 'Habis', color: 'bg-red-500' }
         }
-        const minimumStock = ingredient.minimum_stock ?? 0
-        if ((ingredient.current_stock ?? 0) < minimumStock) {
+        const minimumStock = ingredient.minimum_stock || 0
+        if ((ingredient.current_stock || 0) < minimumStock) {
             return { label: 'Menipis', color: 'bg-yellow-500' }
         }
         return { label: 'Tersedia', color: 'bg-green-500' }

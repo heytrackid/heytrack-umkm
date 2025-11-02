@@ -2,6 +2,8 @@
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { useState } from 'react'
+import type { Order } from './types'
 import {
     Phone,
     MessageSquare,
@@ -9,14 +11,12 @@ import {
     Copy,
     Check
 } from 'lucide-react'
-import { useState } from 'react'
-import type { Order } from './types'
 
 interface OrderQuickActionsProps {
     order: Order
 }
 
-export default function OrderQuickActions({ order }: OrderQuickActionsProps) {
+const OrderQuickActions = ({ order }: OrderQuickActionsProps) => {
     const [copiedField, setCopiedField] = useState<string | null>(null)
 
     const copyToClipboard = async (text: string, field: string) => {
@@ -96,7 +96,7 @@ export default function OrderQuickActions({ order }: OrderQuickActionsProps) {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => copyToClipboard(order.customer_phone!, 'phone')}
+                                onClick={() => copyToClipboard(order.customer_phone || '', 'phone')}
                                 className="flex items-center gap-2"
                             >
                                 {copiedField === 'phone' ? (
@@ -132,3 +132,5 @@ export default function OrderQuickActions({ order }: OrderQuickActionsProps) {
         </Card>
     )
 }
+
+export default OrderQuickActions

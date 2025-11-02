@@ -1,17 +1,27 @@
+import { automationLogger } from '@/lib/logger'
+import type { WorkflowEvent, WorkflowEventData, WorkflowContext, WorkflowResult, AutomationConfig } from '@/types/features/automation'
+
 /**
  * Base Workflow Automation
  * Core workflow automation system with event processing
  */
 
-import { automationLogger } from '@/lib/logger'
-import type { WorkflowEvent, WorkflowEventData, WorkflowContext, WorkflowResult, AutomationConfig } from './types'
 
 export abstract class BaseWorkflowAutomation {
   protected config: AutomationConfig = {
     enabled: true,
     maxConcurrentJobs: 5,
     retryAttempts: 3,
-    notificationEnabled: true
+    notificationEnabled: true,
+    defaultProfitMargin: 0.3,
+    minimumProfitMargin: 0.15,
+    maximumProfitMargin: 0.6,
+    autoReorderDays: 7,
+    safetyStockMultiplier: 1.5,
+    productionLeadTime: 2,
+    batchOptimizationThreshold: 10,
+    lowProfitabilityThreshold: 0.2,
+    cashFlowWarningDays: 30
   }
 
   private eventQueue: WorkflowEventData[] = []

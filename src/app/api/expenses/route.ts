@@ -133,10 +133,10 @@ async function GET(request: NextRequest) {
 
     interface ExpensePartial { amount: number; category: string }
     
-    const todayTotal = todayExpenses?.reduce((sum: number, exp: ExpensePartial) =>
-      sum + safeParseAmount(exp.amount), 0) || 0
-    const monthTotal = monthExpenses?.reduce((sum: number, exp: ExpensePartial) =>
-      sum + safeParseAmount(exp.amount), 0) || 0
+    const todayTotal = (todayExpenses || []).reduce((sum: number, exp: ExpensePartial) =>
+      sum + safeParseAmount(exp.amount), 0)
+    const monthTotal = (monthExpenses || []).reduce((sum: number, exp: ExpensePartial) =>
+      sum + safeParseAmount(exp.amount), 0)
 
     // Category breakdown
     const categoryBreakdown = monthExpenses?.reduce((acc: Record<string, number>, exp: ExpensePartial) => {

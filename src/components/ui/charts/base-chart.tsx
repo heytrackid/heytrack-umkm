@@ -1,8 +1,3 @@
-/**
- * Base Mobile Chart Component
- * Shared chart container with mobile optimizations
- */
-
 import { type ReactNode, useState } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
@@ -11,6 +6,12 @@ import { Badge } from '../badge'
 import { Button } from '../button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../card'
 import type { BaseMobileChartProps } from './types'
+
+/**
+ * Base Mobile Chart Component
+ * Shared chart container with mobile optimizations
+ */
+
 
 const BaseMobileChart = ({
   data: _data,

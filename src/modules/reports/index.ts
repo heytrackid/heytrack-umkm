@@ -1,3 +1,6 @@
+import { uiLogger } from '@/lib/logger'
+
+
 // Reports module - basic exports for now
 export interface ReportConfig {
   id: string
@@ -16,7 +19,6 @@ export interface Report<T = unknown> {
 }
 
 // Placeholder exports to resolve module imports
-import { uiLogger } from '@/lib/logger'
 
 export const ReportsModule = {
   generateReport: (config: ReportConfig) => {

@@ -1,11 +1,11 @@
+import { useQuery, type UseQueryOptions, type QueryKey } from '@tanstack/react-query'
+import { useCallback, useMemo } from 'react'
+
 /**
  * Optimized Query Hook
  * Wrapper around React Query with performance optimizations
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
-import type { QueryKey } from '@tanstack/react-query'
-import { useCallback, useMemo } from 'react'
 
 interface OptimizedQueryOptions<T> extends Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryKey' | 'queryFn'> {
   // Custom options

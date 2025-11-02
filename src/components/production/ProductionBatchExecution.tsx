@@ -1,29 +1,18 @@
-/**
- * ProductionBatchExecution
- * Interface for starting, monitoring, and completing production batches
- * Provides real-time status updates and batch control functionality
- */
 'use client'
 
 import { useEffect, useState } from 'react'
 import { differenceInMinutes, format } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import { ProductionDataIntegration } from '@/services/production/ProductionDataIntegration'
-import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
 
-// Import production components normally (lightweight UI components)
+import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
 import ProductionOverview from './components/ProductionOverview'
 import ActiveBatchesList from './components/ActiveBatchesList'
 import BatchDetails from './components/BatchDetails'
 import CompletedBatches from './components/CompletedBatches'
-
-import type {
-  BatchExecutionState,
-} from './components/types'
+import { PRODUCTION_STEPS, QUALITY_CHECKS, type BatchExecutionState } from './components/types'
 
 // Import constants that are still needed
-import { PRODUCTION_STEPS, QUALITY_CHECKS } from './components/types'
 
 interface ProductionBatchExecutionProps {
   batches: ProductionBatch[]
@@ -32,16 +21,16 @@ interface ProductionBatchExecutionProps {
   className?: string
 }
 
-export default function ProductionBatchExecution({
+const ProductionBatchExecution = ({
   batches,
   onBatchUpdate,
   onBatchSelect,
   className = ''
-}: ProductionBatchExecutionProps) {
+}: ProductionBatchExecutionProps) => {
   const [selectedBatch, setSelectedBatch] = useState<string | null>(null)
   const [executionStates, setExecutionStates] = useState<Map<string, BatchExecutionState>>(new Map())
   const [currentNotes, setCurrentNotes] = useState('')
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null)
+
 
   const { toast } = useToast()
 
@@ -50,7 +39,6 @@ export default function ProductionBatchExecution({
     const interval = setInterval(() => {
       void updateBatchProgress()
     }, 30000)
-    void setRefreshInterval(interval)
 
     return () => {
       if (interval) { clearInterval(interval) }
@@ -81,10 +69,10 @@ export default function ProductionBatchExecution({
     const newStates = new Map(executionStates)
     let hasUpdates = false
 
-    for (const [batchId, state] of newStates.entries()) {
+    for (const [_batchId, state] of newStates.entries()) {
       if (state.batch.status === 'IN_PROGRESS' && state.startTime) {
         const elapsed = differenceInMinutes(new Date(), state.startTime)
-        const estimatedDuration = state.batch.estimated_duration || 60 // fallback to 60 minutes if not provided
+        const estimatedDuration = state.batch?.estimated_duration ?? 60 // fallback to 60 minutes if not provided
         const newProgress = Math.min(100, (elapsed / estimatedDuration) * 100)
 
         if (Math.abs(newProgress - state.actualProgress) > 1) {
@@ -107,7 +95,7 @@ export default function ProductionBatchExecution({
 
   const handleStartBatch = (batch: ProductionBatch) => {
     const now = new Date()
-    const estimatedEnd = new Date(now.getTime() + (batch.estimated_duration || 60) * 60 * 1000)
+    const estimatedEnd = new Date(now.getTime() + (batch.estimated_duration ?? 60) * 60 * 1000)
 
     const newState: BatchExecutionState = {
       batch: { ...batch, status: 'IN_PROGRESS' },
@@ -124,7 +112,7 @@ export default function ProductionBatchExecution({
     newStates.set(batch.id, newState)
     void setExecutionStates(newStates)
 
-    onBatchUpdate?.(batch.id, 'IN_PROGRESS', `Batch started at ${format(now, 'HH:mm')}`)
+    onBatchUpdate?.(batch.id, { status: 'IN_PROGRESS' })
     toast({
       title: 'Batch Started',
       description: `Started production of ${batch.recipe_id || 'Batch'}`,
@@ -146,7 +134,7 @@ export default function ProductionBatchExecution({
     newStates.set(batchId, newState)
     void setExecutionStates(newStates)
 
-    onBatchUpdate?.(batchId, 'PLANNED', `Batch paused at ${format(new Date(), 'HH:mm')}`)
+    onBatchUpdate?.(batchId, { status: 'PLANNED' })
     toast({
       title: 'Batch Paused',
       description: `Paused production of ${state.batch.recipe_id || 'Batch'}`,
@@ -192,7 +180,7 @@ export default function ProductionBatchExecution({
       // Note: UpdateProductionProgress is not defined in the service, so we'll just log for now
       apiLogger.info({ batchId, status: 'COMPLETED' }, 'Production completed, updating system')
 
-      onBatchUpdate?.(batchId, 'COMPLETED', `Batch completed at ${format(completedAt, 'HH:mm')}`)
+      onBatchUpdate?.(batchId, { status: 'COMPLETED', completed_at: completedAt.toISOString() })
       toast({
         title: 'Batch Completed',
         description: `Completed production of ${state.batch.recipe_id || 'Batch'}`,
@@ -272,7 +260,7 @@ export default function ProductionBatchExecution({
           selectedBatch={selectedBatch}
           onBatchSelect={(batchId) => {
             void setSelectedBatch(batchId)
-            onBatchSelect?.(batches.find(b => b.id === batchId))
+            onBatchSelect?.(batchId)
           }}
           onBatchUpdate={onBatchUpdate}
           onStartBatch={handleStartBatch}
@@ -298,5 +286,4 @@ export default function ProductionBatchExecution({
   )
 }
 
-// Import constants that are still needed
-import { PRODUCTION_STEPS } from './components/types'
+export default ProductionBatchExecution

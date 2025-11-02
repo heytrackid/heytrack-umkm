@@ -5,6 +5,8 @@ import { EnhancedOperationalCostsPage } from '@/components/operational-costs/Enh
 import AppLayout from '@/components/layout/app-layout'
 import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
+
+
 const OperationalCostsPage = () => (
   <AppLayout pageTitle="Biaya Operasional">
     <div className="p-6">

@@ -1,12 +1,13 @@
+import { cn } from '@/lib/utils'
+import { useResponsive } from '@/hooks/useResponsive'
+import { Label } from '../label'
+import { Checkbox } from '../checkbox'
+
 /**
  * Mobile Checkbox Component
  * Optimized checkbox for mobile devices with larger touch targets
  */
 
-import { cn } from '@/lib/utils'
-import { useResponsive } from '@/hooks/useResponsive'
-import { Label } from '../label'
-import { Checkbox } from '../checkbox'
 
 interface MobileCheckboxProps {
   label?: string
@@ -43,18 +44,18 @@ export const MobileCheckbox = ({
           disabled={disabled}
           required={required}
           className={cn(
-           "transition-all duration-200",
-            isMobile &&"h-5 w-5", // Larger touch target on mobile
-            error &&"border-destructive data-[state=checked]:bg-destructive"
+            "transition-all duration-200",
+            isMobile && "h-5 w-5", // Larger touch target on mobile
+            error && "border-destructive data-[state=checked]:bg-destructive"
           )}
         />
         {label && (
           <Label
             className={cn(
-             "text-sm font-medium cursor-pointer",
-              isMobile &&"text-base",
-              error &&"text-destructive",
-              disabled &&"opacity-50 cursor-not-allowed"
+              "text-sm font-medium cursor-pointer",
+              isMobile && "text-base",
+              error && "text-destructive",
+              disabled && "opacity-50 cursor-not-allowed"
             )}
           >
             {label}
@@ -66,8 +67,8 @@ export const MobileCheckbox = ({
       {/* Hint or Error message */}
       {(hint || error) && (
         <p className={cn(
-         "text-sm ml-8", // Align with checkbox label
-          error ?"text-destructive" :"text-muted-foreground"
+          "text-sm ml-8", // Align with checkbox label
+          error ? "text-destructive" : "text-muted-foreground"
         )}>
           {error || hint}
         </p>

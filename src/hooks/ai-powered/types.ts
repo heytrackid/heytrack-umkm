@@ -1,3 +1,4 @@
+
 /**
  * AI-Powered Business Intelligence Types
  * Type definitions for AI analysis requests and responses

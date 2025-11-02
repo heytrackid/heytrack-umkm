@@ -1,16 +1,18 @@
-// Reports Page - Code Split Version
-// This page now uses lazy-loaded report components for better performance
-
 'use client'
 
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-
 import { ReportsLayout } from './components/ReportsLayout'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { PageHeader } from '@/components/layout/PageHeader'
+
+// Reports Page - Code Split Version
+// This page now uses lazy-loaded report components for better performance
+
+
+
 
 const ReportsPage = () => {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()

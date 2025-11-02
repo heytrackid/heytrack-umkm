@@ -1,10 +1,11 @@
-// @ts-nocheck
+import { apiLogger } from '../logger'
+
+
 /**
  * Error Monitoring Service
  * Integrates with external error monitoring services like Sentry, LogRocket, etc.
  */
 
-import { apiLogger } from '../logger'
 
 interface ErrorEvent {
   message: string
@@ -89,6 +90,12 @@ class ErrorMonitoringService {
       return
     }
 
+    const tags: Record<string, string> = {
+      ...(context.tags ?? {}),
+      environment: this.config.environment ?? 'development',
+      release: this.config.release ?? '1.0.0'
+    }
+
     const errorEvent: ErrorEvent = {
       message: error.message,
       stack: error.stack,
@@ -96,11 +103,7 @@ class ErrorMonitoringService {
       timestamp: new Date().toISOString(),
       context: context.extra,
       user: context.user,
-      tags: {
-        ...context.tags,
-        environment: this.config.environment,
-        release: this.config.release
-      },
+      tags,
       level: context.level || 'error',
       url: typeof window !== 'undefined' ? window.location.href : undefined,
       userAgent: typeof window !== 'undefined' 
@@ -142,16 +145,18 @@ class ErrorMonitoringService {
       return
     }
 
+    const tags: Record<string, string> = {
+      ...(context.tags ?? {}),
+      environment: this.config.environment ?? 'development',
+      release: this.config.release ?? '1.0.0'
+    }
+
     const errorEvent: ErrorEvent = {
       message,
       timestamp: new Date().toISOString(),
       context: context.extra,
       user: context.user,
-      tags: {
-        ...context.tags,
-        environment: this.config.environment,
-        release: this.config.release
-      },
+      tags,
       level,
       url: typeof window !== 'undefined' ? window.location.href : undefined,
       userAgent: typeof window !== 'undefined' 
@@ -163,11 +168,20 @@ class ErrorMonitoringService {
     
     if (processedEvent) {
       if (process.env.NODE_ENV === 'development' || !this.config.dsn) {
-        apiLogger[level === 'error' || level === 'fatal' ? 'error' : level]({
+        type LogLevelKey = NonNullable<ErrorEvent['level']>
+        const levelMap: Record<LogLevelKey, 'error' | 'warn' | 'info' | 'debug'> = {
+          fatal: 'error',
+          error: 'error',
+          warning: 'warn',
+          info: 'info',
+          debug: 'debug'
+        }
+        const logLevel = levelMap[level ?? 'error']
+        apiLogger[logLevel]({
           ...processedEvent
         }, `Captured message (${level})`)
       } else {
-        this.sendError(processedEvent)
+        void this.sendError(processedEvent)
       }
     }
   }
@@ -228,29 +242,35 @@ class ErrorMonitoringService {
    * Setup global error handlers
    */
   private setupGlobalHandlers(): void {
+    if (typeof window === 'undefined') {return}
+    
     // Global error handler for uncaught errors
     window.addEventListener('error', (event) => {
-      this.captureException(event.error, {
-        level: 'error',
-        extra: {
-          filename: event.filename,
-          lineno: event.lineno,
-          colno: event.colno,
-        }
-      })
+      const errorEvent = event as unknown as { error: Error; filename?: string; lineno?: number; colno?: number }
+      if (errorEvent.error) {
+        this.captureException(errorEvent.error, {
+          level: 'error',
+          extra: {
+            filename: errorEvent.filename,
+            lineno: errorEvent.lineno,
+            colno: errorEvent.colno,
+          }
+        })
+      }
     })
 
     // Global promise rejection handler
     window.addEventListener('unhandledrejection', (event) => {
-      const error = event.reason instanceof Error 
-        ? event.reason 
-        : new Error(String(event.reason))
+      const rejectionEvent = event as unknown as { reason: unknown }
+      const error = rejectionEvent.reason instanceof Error 
+        ? rejectionEvent.reason 
+        : new Error(String(rejectionEvent.reason))
       
       this.captureException(error, {
         level: 'error',
         extra: {
           promise: true,
-          reason: event.reason
+          reason: rejectionEvent.reason
         }
       })
     })

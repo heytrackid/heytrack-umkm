@@ -1,16 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import { apiLogger } from '@/lib/logger'
+import { useToast } from '@/hooks/use-toast'
 import type {
   ProfitData,
   ProfitPeriodType,
   ChartDataPoint
 } from '../constants'
-import {
-  calculateProfitDateRange,
-  prepareProductChartData,
-  validateProfitData,
-  exportProfitReport
-} from '../utils'
+import { calculateProfitDateRange, prepareProductChartData, validateProfitData, exportProfitReport } from '../utils' 
 
 interface UseProfitReportReturn {
   // State
@@ -42,6 +38,7 @@ interface UseProfitReportReturn {
 }
 
 export function useProfitReport(): UseProfitReportReturn {
+  const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [profitData, setProfitData] = useState<ProfitData | null>(null)
@@ -95,9 +92,14 @@ export function useProfitReport(): UseProfitReportReturn {
     try {
       const filename = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
       exportProfitReport(profitData, format, filename)
-    } catch (_err) {
-      apiLogger.error({ error: err }, 'Error exporting report:')
-      alert('Gagal mengekspor laporan')
+    } catch (err: unknown) {
+      const error = err as Error
+      apiLogger.error({ error: error.message }, 'Error exporting report:')
+      toast({
+        title: 'Gagal',
+        description: 'Gagal mengekspor laporan',
+        variant: 'destructive',
+      })
     }
   }
 

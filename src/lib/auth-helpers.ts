@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import type { User } from '@supabase/supabase-js'
 
+
 /**
  * Require authenticated user
  * Returns user or error response

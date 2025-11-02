@@ -1,12 +1,14 @@
+'use client'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { type ReactNode, memo } from 'react'
+
 /**
  * Memoized Card Components
  * Prevents unnecessary re-renders of card components
  */
 
-'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { type ReactNode, memo } from 'react'
 
 interface StatCardProps {
   title: string
@@ -78,7 +80,7 @@ interface ListCardProps<T> {
   emptyMessage?: string
 }
 
-export const MemoizedListCard = memo(({
+export const MemoizedListCard = memo(<T,>({ 
   items,
   renderItem,
   keyExtractor,

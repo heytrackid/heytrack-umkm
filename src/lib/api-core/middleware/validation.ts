@@ -1,12 +1,13 @@
+import type { NextRequest, NextResponse } from 'next/server'
+import type { z } from 'zod'
+import { validateRequestData } from '@/lib/api-core/validation'
+import { createErrorResponse } from '@/lib/api-core/responses'
+
 /**
  * Validation Middleware Module
  * Request validation middleware using Zod schemas
  */
 
-import type { NextRequest, NextResponse } from 'next/server'
-import type { z } from 'zod'
-import { validateRequestData } from '@/lib/api-core/validation'
-import { createErrorResponse } from '@/lib/api-core/responses'
 
 /**
  * Create validation middleware for request body
@@ -22,7 +23,7 @@ export function withValidation<T>(schema: z.ZodSchema<T>) {
       }
 
       return result.data!
-    } catch (err) {
+    } catch (_err) {
       return createErrorResponse('Invalid request body', 400)
     }
   }

@@ -3,6 +3,8 @@ import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import type { RecipesTable } from '@/types/database'
 
+
+
 type Recipe = RecipesTable
 
 /**
@@ -43,8 +45,8 @@ export class ProductionTimeService {
       items.forEach(item => {
         const recipe = recipes?.find((r) => r.id === item.recipe_id)
         if (recipe) {
-          const prep_time = (recipe.prep_time ?? 0) * item.quantity
-          const cook_time = (recipe.cook_time ?? 0) * item.quantity
+          const prep_time = (recipe.prep_time || 0) * item.quantity
+          const cook_time = (recipe.cook_time || 0) * item.quantity
 
           total_prep_time += prep_time
           total_cook_time += cook_time
