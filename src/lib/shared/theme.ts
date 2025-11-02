@@ -15,7 +15,7 @@ type ColorShade = 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950
 
 type ColorScale = Record<ColorShade, string>
 
-type Colors = {
+interface Colors {
   primary: ColorScale
   success: ColorScale
   warning: ColorScale

@@ -44,7 +44,7 @@ export async function updateSession(request: NextRequest) {
     if (data?.user && !error) {
       user = data.user
     }
-  } catch (error) {
+  } catch (_error) {
     // AuthSessionMissingError is expected for unauthenticated users
     // Don't log as error, just continue with null user
     user = null

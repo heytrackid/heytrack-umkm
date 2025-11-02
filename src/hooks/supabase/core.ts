@@ -34,7 +34,7 @@ export function useSupabaseQuery<T extends TableName>(
       if (currentOptions.filter) {
         Object.entries(currentOptions.filter).forEach(([key, value]) => {
           if (value === undefined) {return}
-          const column = key as string
+          const column = key
           if (value === null) {
             query = query.is(column, null)
           } else {

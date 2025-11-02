@@ -47,7 +47,7 @@ export function createErrorResponse(
         error: 'Validation failed',
         code: 'VALIDATION_ERROR',
         status: 400,
-        details: error.issues?.map((issue: { path?: (string | number)[]; message: string }) => ({
+        details: error.issues?.map((issue: { path?: Array<string | number>; message: string }) => ({
           field: issue.path?.join('.'),
           message: issue.message,
         })),

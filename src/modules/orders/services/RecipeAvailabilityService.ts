@@ -22,7 +22,7 @@ export class RecipeAvailabilityService {
     } | null
   }>): boolean {
     return recipeIngredients.every(ri => {
-      if (!ri.ingredient || !ri.ingredient.is_active) {return false}
+      if (!ri.ingredient?.is_active) {return false}
 
       // Check if current stock is above reorder point
       const currentStock = ri.ingredient.current_stock || 0

@@ -1,4 +1,4 @@
-// @ts-nocheck - Complex form/modal type constraints
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, type ChangeEvent, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react';
 import { Eye, EyeOff, ChevronDown, AlertCircle, Check } from 'lucide-react';
 
@@ -115,20 +115,20 @@ export const FormField = (props: FormFieldProps) => {
     onBlur: handleBlur,
     ...restProps
   };
-  
+
   const inputSpecificProps = {
     ...commonInputProps,
     className: getInputClasses(),
     onChange: handleChange,
   };
-  
+
   const textareaSpecificProps = {
     ...commonInputProps,
     className: `${getInputClasses()} resize-vertical min-h-[80px] ${icon ? 'pl-10' : ''}`,
     rows,
     onChange: handleChange,
   };
-  
+
   const selectSpecificProps = {
     ...commonInputProps,
     className: `${getInputClasses()} appearance-none pr-10 ${icon ? 'pl-10' : ''}`,

@@ -25,7 +25,7 @@ export class ProductionRecommendations {
         .slice(0, 3)
 
       criticalShortages.forEach((shortage: { shortage: number; ingredient: { unit: string; name: string } | null }) => {
-        const ingredient = shortage.ingredient
+        const {ingredient} = shortage
         if (!ingredient) {return}
         recommendations.push(
           `📦 Need ${shortage.shortage} ${ingredient.unit} more of ${ingredient.name}`
@@ -144,7 +144,7 @@ export class ProductionRecommendations {
 
     plan.forEach((item) => {
       item.recipe.recipe_ingredients.forEach((ri: { ingredient: { id: string; name: string } | null; quantity: number }) => {
-        const ingredient = ri.ingredient
+        const {ingredient} = ri
         if (!ingredient) {return}
         const ingredientId = ingredient.id
         if (!ingredientUsage[ingredientId]) {

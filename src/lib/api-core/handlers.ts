@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
+import type { z } from 'zod'
 import { validateRequestData, validateRequestOrRespond } from './validation'
 import { extractPagination } from './pagination'
 import { createErrorResponse, createSuccessResponse } from './responses'

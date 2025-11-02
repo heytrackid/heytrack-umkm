@@ -362,7 +362,7 @@ export class PricingAssistantService {
     try {
       const supabase = createClient()
       
-      type RecipePricingRow = { id: string; name: string | null; selling_price: number | null }
+      interface RecipePricingRow { id: string; name: string | null; selling_price: number | null }
 
       const { data: recipes, error } = await supabase
         .from('recipes')

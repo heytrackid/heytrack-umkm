@@ -1,11 +1,11 @@
-import type {
-  Breakpoint,
-  ScreenSize,
-  ResponsiveValue,
-  ColumnPriority
+import {
+  type Breakpoint,
+  type ScreenSize,
+  type ResponsiveValue,
+  type ColumnPriority,
+  BREAKPOINTS,
+  DEVICE_BREAKPOINTS
 } from '@/types/responsive';
-
-import { BREAKPOINTS, DEVICE_BREAKPOINTS } from '@/types/responsive';
 
 
 // Utility functions for responsive design

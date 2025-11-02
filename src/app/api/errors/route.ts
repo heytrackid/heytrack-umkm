@@ -51,9 +51,9 @@ async function POST(request: NextRequest) {
         const supabase = await createClient()
         const errorLogData: ErrorLogsInsert = {
           user_id: userId,
-          endpoint: sanitizedErrorData.url || 'unknown',
+          endpoint: sanitizedErrorData.url ?? 'unknown',
           error_message: sanitizedErrorData.message,
-          error_type: body.errorType || 'ClientError',
+          error_type: body.errorType ?? 'ClientError',
           stack_trace: sanitizedErrorData.stack,
           timestamp: sanitizedErrorData.timestamp,
           metadata: {
@@ -121,8 +121,8 @@ async function GET(request: NextRequest) {
     // }
 
     const { searchParams } = new URL(request.url)
-    const limit = parseInt(searchParams.get('limit') || '50', 10)
-    const offset = parseInt(searchParams.get('offset') || '0', 10)
+    const limit = parseInt(searchParams.get('limit') ?? '50', 10)
+    const offset = parseInt(searchParams.get('offset') ?? '0', 10)
 
     // Fetch recent errors from database
     const { data: errors, error: queryError } = await supabase

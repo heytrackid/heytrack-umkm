@@ -335,7 +335,7 @@ export function useNetworkMonitor() {
     window.addEventListener('offline', handleOffline)
 
     if ((navigator as any).connection) {
-      const connection = (navigator as any).connection
+      const {connection} = (navigator as any)
       connection.addEventListener('change', updateNetworkInfo)
     }
 
@@ -344,7 +344,7 @@ export function useNetworkMonitor() {
       window.removeEventListener('offline', handleOffline)
 
       if ((navigator as any).connection) {
-        const connection = (navigator as any).connection
+        const {connection} = (navigator as any)
         connection.removeEventListener('change', updateNetworkInfo)
       }
     }

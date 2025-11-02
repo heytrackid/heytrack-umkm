@@ -181,7 +181,7 @@ export function safeGetWithDefault<T extends DataObject, K extends keyof T, D>(
 ): T[K] | D {
   if (obj === null || obj === undefined) {return defaultValue}
   const value = obj[key]
-  return value === undefined ? defaultValue : value
+  return value ?? defaultValue
 }
 
 /* -------------------------------------------------------------------------- */
@@ -418,7 +418,9 @@ export type TypedSupabaseClient = SupabaseClient<Database>
 /**
  * Helper untuk cast Supabase client dengan type safety
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function typed(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   client: SupabaseClient<Database, any, any>
 ): TypedSupabaseClient {
   return client as unknown as TypedSupabaseClient

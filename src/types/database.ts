@@ -1,6 +1,5 @@
-import type { Database as DatabaseType } from './supabase-generated'
-
 import type {
+  Database as DatabaseType,
   Tables as SupabaseTables, 
   TablesInsert as SupabaseTablesInsert, 
   TablesUpdate as SupabaseTablesUpdate,

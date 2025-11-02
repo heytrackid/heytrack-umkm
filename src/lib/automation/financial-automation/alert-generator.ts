@@ -72,7 +72,7 @@ export class AlertGenerator {
     }
 
     const getSeverity = (type: FinancialAlert['type']): number =>
-      severityOrder[type as keyof typeof severityOrder] ?? 0
+      severityOrder[type] ?? 0
 
     return alerts.sort((a, b) => getSeverity(b.type) - getSeverity(a.type))
   }

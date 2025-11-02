@@ -122,7 +122,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
             }
 
             const basePayload: OperationalCostInsert = {
-                amount: formData.amount!,
+                amount: formData.amount,
                 category: formData.category || 'utilities',
                 description: formData.description,
                 user_id: user.id,

@@ -89,7 +89,7 @@ export class RecommendationEngine {
       return acc
     }, {})
 
-    const topExpenseCategoryEntry = (Object.entries(expensesByCategory) as Array<[string, number]>)
+    const topExpenseCategoryEntry = (Object.entries(expensesByCategory))
       .sort(([,a], [,b]) => b - a)[0]
 
     const topExpenseCategory: [string, number] | undefined = topExpenseCategoryEntry

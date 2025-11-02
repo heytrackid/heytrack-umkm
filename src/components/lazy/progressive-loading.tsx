@@ -95,7 +95,7 @@ export const ProgressiveLoader = ({
 }
 
 // Lazy data table dengan progressive loading
-type TableColumn<T extends Record<string, ReactNode>> = {
+interface TableColumn<T extends Record<string, ReactNode>> {
   header: string
   accessor: keyof T
 }

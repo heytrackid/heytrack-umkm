@@ -1,4 +1,4 @@
-// @ts-nocheck - Complex form/modal type constraints
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
@@ -213,9 +213,9 @@ export const SharedModalForm = <T extends Record<string, unknown>>({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
       <div
         className={`bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-y-auto ${size === 'sm' ? 'max-w-md' :
-            size === 'md' ? 'max-w-lg' :
-              size === 'lg' ? 'max-w-2xl' :
-                'max-w-4xl'
+          size === 'md' ? 'max-w-lg' :
+            size === 'lg' ? 'max-w-2xl' :
+              'max-w-4xl'
           }`}
       >
         <div className="p-6">

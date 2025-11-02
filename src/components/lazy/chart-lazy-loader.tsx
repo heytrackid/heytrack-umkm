@@ -168,10 +168,10 @@ export const CellWithSuspense = (props: ChartElementProps) => (
 )
 
 // Chart Bundle Preloader
-export const preloadChartBundle = () => {
+export const preloadChartBundle = () => 
   // Preload the entire recharts bundle when user interacts with dashboard
-  return import('recharts')
-}
+   import('recharts')
+
 
 // Chart Type Detection for Dynamic Loading
 export type ChartType = 'line' | 'bar' | 'area' | 'pie' | 'composed'

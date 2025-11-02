@@ -23,7 +23,7 @@ export type Priority =
   | 'high'
   | 'urgent'
 
-export type OrderFormItem = {
+export interface OrderFormItem {
   id?: string
   order_id?: string
   recipe_id: string
