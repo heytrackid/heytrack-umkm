@@ -33,7 +33,7 @@ export function useSettingsManager() {
     void loadSettings()
   }, [])
 
-  const loadSettings = async () => {
+  const loadSettings = () => {
     try {
       void startLoading(LOADING_KEYS.LOAD_SETTINGS)
 
@@ -66,7 +66,7 @@ export function useSettingsManager() {
     void setIsUnsavedChanges(true)
   }
 
-  const handleSave = async () => {
+  const handleSave = () => {
     void setIsSaving(true)
 
     try {

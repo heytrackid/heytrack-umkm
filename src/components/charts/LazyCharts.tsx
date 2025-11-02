@@ -92,7 +92,7 @@ interface LazyChartWrapperProps {
 
 export const LazyChartWrapper = ({ title, description, children }: LazyChartWrapperProps) => (
     <Card>
-        {(title || description) && (
+        {(title ?? description) && (
             <CardHeader>
                 {title && <CardTitle>{title}</CardTitle>}
                 {description && <p className="text-sm text-muted-foreground">{description}</p>}

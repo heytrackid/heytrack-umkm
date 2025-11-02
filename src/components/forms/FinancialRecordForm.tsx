@@ -32,14 +32,14 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
   const form = useForm<FinancialRecordFormData>({
     resolver: zodResolver(FinancialRecordSchema),
     defaultValues: {
-      type: initialData?.type || 'EXPENSE',
-      category: initialData?.category || '',
-      amount: initialData?.amount || 0,
-      description: initialData?.description || '',
-      date: initialData?.date || new Date().toISOString(),
-      payment_method: initialData?.payment_method || 'CASH',
-      is_recurring: initialData?.is_recurring || false,
-      notes: initialData?.notes || '',
+      type: initialData?.type ?? 'EXPENSE',
+      category: initialData?.category ?? '',
+      amount: initialData?.amount ?? 0,
+      description: initialData?.description ?? '',
+      date: initialData?.date ?? new Date().toISOString(),
+      payment_method: initialData?.payment_method ?? 'CASH',
+      is_recurring: initialData?.is_recurring ?? false,
+      notes: initialData?.notes ?? '',
       ...initialData
     }
   })
@@ -229,7 +229,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
 
           <Button
             type="submit"
-            disabled={isLoading || !form.formState.isValid}
+            disabled={isLoading ?? !form.formState.isValid}
             className="w-full"
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

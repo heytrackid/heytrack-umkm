@@ -106,7 +106,7 @@ export const OperationalCostFormDialog = ({
 
             if (!response.ok) {
                 const error = await response.json()
-                throw new Error(error.error || 'Gagal menyimpan biaya')
+                throw new Error(error.error ?? 'Gagal menyimpan biaya')
             }
 
             toast({
@@ -143,7 +143,7 @@ export const OperationalCostFormDialog = ({
                                 <Label htmlFor="description">Nama Biaya *</Label>
                                 <Input
                                     id="description"
-                                    value={formData.description || ''}
+                                    value={formData.description ?? ''}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     placeholder="Contoh: Listrik Bulanan"
                                     required
@@ -153,7 +153,7 @@ export const OperationalCostFormDialog = ({
                             <div className="space-y-2">
                                 <Label htmlFor="category">Kategori</Label>
                                 <Select
-                                    value={formData.category || 'utilities'}
+                                    value={formData.category ?? 'utilities'}
                                     onValueChange={(value) => setFormData({ ...formData, category: value })}
                                 >
                                     <SelectTrigger id="category">
@@ -178,7 +178,7 @@ export const OperationalCostFormDialog = ({
                                     type="number"
                                     min="0"
                                     step="1000"
-                                    value={formData.amount || ''}
+                                    value={formData.amount ?? ''}
                                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
                                     placeholder="0"
                                     required
@@ -188,7 +188,7 @@ export const OperationalCostFormDialog = ({
                             <div className="space-y-2">
                                 <Label htmlFor="frequency">Frekuensi</Label>
                                 <Select
-                                    value={formData.frequency || 'monthly'}
+                                    value={formData.frequency ?? 'monthly'}
                                     onValueChange={(value) => setFormData({ ...formData, frequency: value })}
                                 >
                                     <SelectTrigger id="frequency">
@@ -208,7 +208,7 @@ export const OperationalCostFormDialog = ({
                             <Label htmlFor="notes">Catatan (Opsional)</Label>
                             <Textarea
                                 id="notes"
-                                value={formData.notes || ''}
+                                value={formData.notes ?? ''}
                                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                 placeholder="Catatan tambahan tentang biaya ini..."
                                 rows={3}
@@ -218,7 +218,7 @@ export const OperationalCostFormDialog = ({
                         <div className="flex items-center space-x-2">
                             <Checkbox
                                 id="recurring"
-                                checked={formData.recurring || false}
+                                checked={formData.recurring ?? false}
                                 onCheckedChange={(checked) =>
                                     setFormData({ ...formData, recurring: checked as boolean })
                                 }

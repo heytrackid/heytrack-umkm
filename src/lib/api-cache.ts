@@ -134,7 +134,7 @@ export function generateCacheKey(
 
   const sortedParams = Object.keys(params)
     .sort()
-    .map((key) => `${key}=${params[key] || ''}`)
+    .map((key) => `${key}=${params[key] ?? ''}`)
     .join('&')
 
   return `${endpoint}?${sortedParams}`
@@ -156,7 +156,7 @@ export async function cachedFetch<T>(
 
   // Fetch and cache
   const data = await fetcher()
-  apiCache.set(key, data, ttl || undefined)
+  apiCache.set(key, data, ttl ?? undefined)
 
   return data
 }

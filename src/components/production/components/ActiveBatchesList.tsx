@@ -58,7 +58,7 @@ const ActiveBatchesList = ({
       { key: 'packaging', name: 'Packaging' }
     ]
     const step = steps.find((s: { key: string; name: string }) => s.key === stepKey)
-    return step?.name || 'Unknown Step'
+    return step?.name ?? 'Unknown Step'
   }
 
   // Filter batches to show relevant ones
@@ -102,8 +102,8 @@ const ActiveBatchesList = ({
                           Quantity: {batch.quantity || 0} | Status: {batch.status}
                         </p>
                       </div>
-                      <Badge className={`${getStatusColor((batch.status || 'PLANNED') as ProductionStatus)} text-white`}>
-                        {batch.status || 'PLANNED'}
+                      <Badge className={`${getStatusColor((batch.status ?? 'PLANNED') as ProductionStatus)} text-white`}>
+                        {batch.status ?? 'PLANNED'}
                       </Badge>
                     </div>
 
@@ -126,7 +126,7 @@ const ActiveBatchesList = ({
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation()
-                              onPauseBatch(batch.id)
+      onPauseBatch(batch.id)
                             }}
                           >
                             <Pause className="h-3 w-3 mr-1" />

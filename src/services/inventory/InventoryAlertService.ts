@@ -45,9 +45,9 @@ export class InventoryAlertService {
       const alerts: PendingInventoryAlert[] = []
 
       for (const ingredient of ingredients) {
-        const currentStock = ingredient.current_stock || 0
-        const minStock = ingredient.min_stock || 0
-        const reorderPoint = ingredient.reorder_point || minStock
+        const currentStock = ingredient.current_stock ?? 0
+        const minStock = ingredient.min_stock ?? 0
+        const reorderPoint = ingredient.reorder_point ?? minStock
 
         // Out of stock
         if (currentStock <= 0) {
@@ -149,9 +149,9 @@ export class InventoryAlertService {
       const supabase = await createClient()
       
       for (const ingredient of ingredients) {
-        const currentStock = ingredient.current_stock || 0
-        const minStock = ingredient.min_stock || 0
-        const reorderPoint = ingredient.reorder_point || minStock
+        const currentStock = ingredient.current_stock ?? 0
+        const minStock = ingredient.min_stock ?? 0
+        const reorderPoint = ingredient.reorder_point ?? minStock
 
         // If stock is now above reorder point, deactivate alerts
         if (currentStock > reorderPoint) {
@@ -189,9 +189,9 @@ export class InventoryAlertService {
         return
       }
 
-      const currentStock = ingredient.current_stock || 0
-      const minStock = ingredient.min_stock || 0
-      const reorderPoint = ingredient.reorder_point || minStock
+      const currentStock = ingredient.current_stock ?? 0
+      const minStock = ingredient.min_stock ?? 0
+      const reorderPoint = ingredient.reorder_point ?? minStock
 
       // Deactivate old alerts if stock is now OK
       if (currentStock > reorderPoint) {

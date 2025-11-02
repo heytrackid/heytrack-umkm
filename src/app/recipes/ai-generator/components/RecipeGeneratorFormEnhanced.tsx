@@ -71,8 +71,8 @@ const RecipeGeneratorFormEnhanced = ({
   mode,
 }: RecipeGeneratorFormProps) => {
   const currentProductType = productTypes.find(p => p.value === productType)
-  const servingsLabel = currentProductType?.unit || 'porsi'
-  const servingsExample = currentProductType?.example || '5 porsi'
+  const servingsLabel = currentProductType?.unit ?? 'porsi'
+  const servingsExample = currentProductType?.example ?? '5 porsi'
 
   const toggleDietaryRestriction = (value: string) => {
     if (dietaryRestrictions.includes(value)) {

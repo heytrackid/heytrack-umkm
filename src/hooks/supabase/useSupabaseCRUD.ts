@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
-import type { Database, Tables } from '@/types/database'
+import type { Database } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
 
 /**
@@ -10,7 +10,7 @@ import { getErrorMessage } from '@/lib/type-guards'
  */
 
 
-type TableKey = keyof Database['public']['Tables']
+type TableKey = keyof Database['public']['Tables'] & string
 
 type TableRow<TTable extends TableKey> = Database['public']['Tables'][TTable]['Row']
 type TableInsert<TTable extends TableKey> = Database['public']['Tables'][TTable]['Insert']
@@ -54,7 +54,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       // Get authenticated user for RLS
       const { data: { user } } = await supabase.auth.getUser()
       
-      let query = supabase.from(table).select(options?.select || '*')
+      let query = supabase.from(table).select(options?.select ?? '*')
 
       // Apply user_id filter for RLS (if user is authenticated)
       if (user) {
@@ -77,7 +77,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       // Apply ordering
       if (options?.orderBy) {
         query = query.order(options.orderBy.column, {
-          ascending: options.orderBy.ascending || true
+          ascending: options.orderBy.ascending ?? true
         })
       }
 
@@ -92,7 +92,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       apiLogger.debug({ 
         table, 
-        rowCount: result?.length || 0 
+        rowCount: result?.length ?? 0 
       }, `Fetched rows from ${table}`)
       void setData(result)
     } catch (err) {
@@ -117,7 +117,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       const { data: result, error: readError } = await supabase
         .from(table)
-        .select(options?.select || '*')
+        .select(options?.select ?? '*')
         .eq('id' as never, id as never)
         .eq('user_id' as never, user.id as never) // RLS filter
         .single() as { data: TableRow<TTable> | null; error: Error | null }

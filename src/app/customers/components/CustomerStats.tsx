@@ -33,10 +33,10 @@ const CustomerStats = ({
     total: customers.length,
     active: customers.filter(c => c.is_active).length,
     averageSpent: customers.length > 0
-      ? customers.reduce((sum, c) => sum + (c.total_spent || 0), 0) / customers.length
+      ? customers.reduce((sum, c) => sum + (c.total_spent ?? 0), 0) / customers.length
       : 0,
     averageOrders: customers.length > 0
-      ? customers.reduce((sum, c) => sum + (c.total_orders || 0), 0) / customers.length
+      ? customers.reduce((sum, c) => sum + (c.total_orders ?? 0), 0) / customers.length
       : 0
   }
 

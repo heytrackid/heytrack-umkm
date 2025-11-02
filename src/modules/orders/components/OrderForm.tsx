@@ -1,3 +1,5 @@
+'use client'
+
 import type { CustomersTable, RecipesTable } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +16,6 @@ import { calculateOrderTotals, generateOrderNo } from '../utils/helpers'
 import { warningToast } from '@/hooks/use-toast'
 import { safeNumber } from '@/lib/type-guards'
 
-'use client'
 
 type Customer = CustomersTable
 
@@ -43,25 +44,25 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
   const [showNewCustomer, setShowNewCustomer] = useState(false)
 
   const [formData, setFormData] = useState<FormState>({
-    customer_name: order?.customer_name || '',
-    customer_phone: order?.customer_phone || '',
-    customer_address: order?.customer_address || '',
-    order_date: order?.order_date || new Date().toISOString().split('T')[0],
-    delivery_date: order?.delivery_date || '',
+    customer_name: order?.customer_name ?? '',
+    customer_phone: order?.customer_phone ?? '',
+    customer_address: order?.customer_address ?? '',
+    order_date: order?.order_date ?? new Date().toISOString().split('T')[0],
+    delivery_date: order?.delivery_date ?? '',
     delivery_time: order?.delivery_date?.includes('T')
       ? order.delivery_date.split('T')[1]?.slice(0, 5) || ''
       : '',
-    delivery_fee: order?.delivery_fee || ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
-    discount: order?.discount || 0,
-    tax_amount: order?.tax_amount || ORDER_CONFIG.DEFAULT_TAX_RATE,
+    delivery_fee: order?.delivery_fee ?? ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
+    discount: order?.discount ?? 0,
+    tax_amount: order?.tax_amount ?? ORDER_CONFIG.DEFAULT_TAX_RATE,
     payment_method: 'CASH',
-    paid_amount: order?.paid_amount || 0,
-    priority: order?.priority || ORDER_CONFIG.DEFAULT_PRIORITY,
-    notes: order?.notes || '',
-    special_instructions: order?.special_instructions || ''
+    paid_amount: order?.paid_amount ?? 0,
+    priority: order?.priority ?? ORDER_CONFIG.DEFAULT_PRIORITY,
+    notes: order?.notes ?? '',
+    special_instructions: order?.special_instructions ?? ''
   })
 
-  const [orderItems, setOrderItems] = useState<OrderItemWithRecipe[]>(order?.items || [])
+  const [orderItems, setOrderItems] = useState<OrderItemWithRecipe[]>(order?.items ?? [])
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const { subtotal, taxAmount, totalAmount } = calculateOrderTotals(
@@ -115,8 +116,8 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     setFormData(prev => ({
       ...prev,
       customer_name: customer.name,
-      customer_phone: customer.phone || '',
-      customer_address: customer.address || ''
+      customer_phone: customer.phone ?? '',
+      customer_address: customer.address ?? ''
     }))
     setCustomerSearch('')
   }
@@ -134,8 +135,8 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
       recipe_id: firstRecipe.id,
       product_name: firstRecipe.name,
       quantity: 1,
-      unit_price: firstRecipe.selling_price || 0,
-      total_price: firstRecipe.selling_price || 0,
+      unit_price: firstRecipe.selling_price ?? 0,
+      total_price: firstRecipe.selling_price ?? 0,
       special_requests: null
     }
     setOrderItems(prev => [...prev, newItem as OrderItemWithRecipe])
@@ -175,13 +176,13 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             recipe: {
               id: selectedRecipe.id,
               name: selectedRecipe.name,
-              price: selectedRecipe.selling_price || currentItem.unit_price,
-              category: selectedRecipe.category || 'Uncategorized',
-              servings: selectedRecipe.servings || 0,
-              description: selectedRecipe.description || undefined
+              price: selectedRecipe.selling_price ?? currentItem.unit_price,
+              category: selectedRecipe.category ?? 'Uncategorized',
+              servings: selectedRecipe.servings ?? 0,
+              description: selectedRecipe.description ?? undefined
             },
-            unit_price: selectedRecipe.selling_price || currentItem.unit_price,
-            total_price: (selectedRecipe.selling_price || currentItem.unit_price) * currentItem.quantity
+            unit_price: selectedRecipe.selling_price ?? currentItem.unit_price,
+            total_price: (selectedRecipe.selling_price ?? currentItem.unit_price) * currentItem.quantity
           }
         }
       } else if (field === 'quantity') {
@@ -238,11 +239,11 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     setFieldErrors({})
 
     const orderData = {
-      order_no: order?.order_no || generateOrderNo(),
+      order_no: order?.order_no ?? generateOrderNo(),
       customer_name: formData.customer_name,
       customer_phone: formData.customer_phone,
       customer_address: formData.customer_address,
-      status: order?.status || 'PENDING',
+      status: order?.status ?? 'PENDING',
       order_date: formData.order_date,
       delivery_date: formData.delivery_date,
       delivery_time: formData.delivery_time,
@@ -253,7 +254,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
       total_amount: totalAmount,
       paid_amount: formData.paid_amount,
       payment_method: formData.payment_method,
-      priority: formData.priority || 'NORMAL',
+      priority: formData.priority ?? 'NORMAL',
       notes: formData.notes,
       special_instructions: formData.special_instructions,
       items: orderItems.map(item => ({
@@ -261,7 +262,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         quantity: item.quantity,
         unit_price: item.unit_price,
         total_price: item.total_price,
-        notes: item.special_requests || ''
+        notes: item.special_requests ?? ''
       }))
     }
 
@@ -398,7 +399,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               <Label htmlFor="priority" className="text-sm font-medium">Prioritas</Label>
               <select
                 className="w-full p-2 border border-input rounded-md bg-background mt-1"
-                value={formData.priority || 'normal'}
+                value={formData.priority ?? 'normal'}
                 onChange={(e) => handleInputChange('priority', e.target.value as Order['priority'])}
               >
                 {Object.entries(ORDER_PRIORITIES).map(([key, config]) => (
@@ -455,7 +456,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
           ) : (
             <div className="space-y-3">
               {orderItems.map((item, index: number) => {
-                const itemKey = item.id || `${item.recipe_id || 'recipe'}-${item.product_name || 'product'}-${item.total_price || '0'}-${item.special_requests || 'none'}`
+                const itemKey = item.id ?? `${item.recipe_id ?? 'recipe'}-${item.product_name ?? 'product'}-${item.total_price ?? '0'}-${item.special_requests ?? 'none'}`
                 return (
                   <div key={itemKey} className="border rounded-lg overflow-hidden">
                     <div className="block sm:hidden">

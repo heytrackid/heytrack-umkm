@@ -83,7 +83,7 @@ export const DataCard = ({
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           <h3 className="font-semibold truncate-desktop-only">{title}</h3>
           {badge && (
-            <Badge variant = {badge.variant || 'default'} className="text-xs flex-shrink-0">
+            <Badge variant = {badge.variant ?? 'default'} className="text-xs flex-shrink-0">
               {badge.label}
             </Badge>
           )}

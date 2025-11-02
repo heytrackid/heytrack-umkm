@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -6,7 +8,6 @@ import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
 import type { OrderItemWithRecipe } from '@/app/orders/types/orders-db.types'
 import type { RecipesTable } from '@/types/database'
 
-'use client'
 
 
 /**
@@ -78,7 +79,7 @@ export const ItemsSection = ({
             ) : (
                 <div className="space-y-3">
                     {orderItems.map((item, index: number) => {
-                        const itemKey = item.id || `${item.recipe_id || 'recipe'}-${item.product_name || 'product'}-${item.total_price || '0'}-${item.special_requests || 'none'}`
+                        const itemKey = item.id ?? `${item.recipe_id ?? 'recipe'}-${item.product_name ?? 'product'}-${item.total_price ?? '0'}-${item.special_requests ?? 'none'}`
                         return (
                             <div key={itemKey} className="border rounded-lg overflow-hidden">
                                 {/* Mobile View */}

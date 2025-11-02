@@ -75,7 +75,7 @@ const OrdersTableSection = ({
               <TableCell className="font-medium">{order.order_no}</TableCell>
               <TableCell>
                 <div className="flex flex-col">
-                  <span className="font-medium">{order.customer_name || '-'}</span>
+                  <span className="font-medium">{order.customer_name ?? '-'}</span>
                   {order.customer_phone && (
                     <span className="text-xs text-muted-foreground">{order.customer_phone}</span>
                   )}
@@ -94,7 +94,7 @@ const OrdersTableSection = ({
                 </span>
               </TableCell>
               <TableCell className="text-right font-medium">
-                {formatCurrency(order.total_amount || 0)}
+                {formatCurrency(order.total_amount ?? 0)}
               </TableCell>
               <TableCell className="text-center">
                 <DropdownMenu>

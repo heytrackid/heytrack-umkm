@@ -14,7 +14,7 @@ export class SeasonalNotifications {
     const notifications: SmartNotification[] = []
     const now = new Date()
     const month = now.getMonth() + 1 // 1-12
-    const day = now.getDate()
+    const _day = now.getDate()
 
     // Holiday season preparations
     const holidays = [

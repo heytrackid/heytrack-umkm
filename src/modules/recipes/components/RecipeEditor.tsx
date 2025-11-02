@@ -78,7 +78,7 @@ export const RecipeEditor = ({
     const { formatCurrency } = useCurrency()
     const { toast } = useToast()
     const [saving, setSaving] = useState(false)
-    const [recipe, setRecipe] = useState<RecipeData>(initialData || {
+    const [recipe, setRecipe] = useState<RecipeData>(initialData ?? {
         name: '',
         description: '',
         category: 'other',
@@ -377,7 +377,7 @@ export const RecipeEditor = ({
                                         setNewIngredient({
                                             ...newIngredient,
                                             ingredient_id: v,
-                                            unit: ing?.unit || 'gram'
+                                            unit: ing?.unit ?? 'gram'
                                         })
                                     }}
                                 >
@@ -512,7 +512,7 @@ export const RecipeEditor = ({
                     {/* Steps List */}
                     <div className="space-y-2">
                         {recipe.steps.map((step, idx) => {
-                            const stepKey = step.id || `step-${step.step_number}-${idx}`
+                            const stepKey = step.id ?? `step-${step.step_number}-${idx}`
                             return (
                                 <div key={stepKey} className="flex gap-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
                                     <div className="flex flex-col gap-2">

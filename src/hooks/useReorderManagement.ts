@@ -59,10 +59,10 @@ export function useReorderManagement() {
     let lowCount = 0
 
     ingredients.forEach((ingredient: Ingredient) => {
-      const currentStock = ingredient.current_stock || 0
-      const minStock = ingredient.min_stock || 0
-      const maxStock = ingredient.max_stock || 0
-      const reorderPoint = ingredient.reorder_point || minStock
+      const currentStock = ingredient.current_stock ?? 0
+      const minStock = ingredient.min_stock ?? 0
+      const maxStock = ingredient.max_stock ?? 0
+      const reorderPoint = ingredient.reorder_point ?? minStock
       const unitCost = ingredient.price_per_unit || 0
 
       // Only suggest reorder if stock is at or below reorder point
@@ -104,8 +104,8 @@ export function useReorderManagement() {
           total_cost: Math.ceil(suggestedQuantity) * unitCost,
           priority,
           reason,
-          supplier: ingredient.supplier || undefined,
-          lead_time_days: ingredient.lead_time || undefined
+          supplier: ingredient.supplier ?? undefined,
+          lead_time_days: ingredient.lead_time ?? undefined
         })
       }
     })
@@ -147,7 +147,7 @@ export function usePurchaseOrderGenerator() {
   const generatePurchaseOrder = (suggestions: ReorderSuggestion[]) => {
     // Group by supplier for efficient purchasing
     const bySupplier = suggestions.reduce((acc, item) => {
-      const supplier = item.supplier || 'Unknown Supplier'
+      const supplier = item.supplier ?? 'Unknown Supplier'
       if (!acc[supplier]) {
         acc[supplier] = []
       }

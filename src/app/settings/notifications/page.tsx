@@ -32,10 +32,10 @@ const NotificationSettingsPage = () => {
     // Helper to convert null to undefined for React components
     const toBool = (value: boolean | null | undefined): boolean => value === true
 
-    const toNumber = (value: number | null | undefined): number => value || 0.5
+    const toNumber = (value: number | null | undefined): number => value ?? 0.5
 
     useEffect(() => {
-        fetchPreferences()
+        void fetchPreferences()
     }, [])
 
     const fetchPreferences = async () => {
@@ -445,7 +445,7 @@ const NotificationSettingsPage = () => {
                                         <Label className="text-wrap-mobile">Mulai</Label>
                                         <input
                                             type="time"
-                                            value={preferences.quiet_hours_start?.substring(0, 5) || '22:00'}
+                                            value={preferences.quiet_hours_start?.substring(0, 5) ?? '22:00'}
                                             onChange={(e) => updatePreference('quiet_hours_start', `${e.target.value}:00`)}
                                             className="w-full px-3 py-2 border rounded-md dark:bg-background dark:border-border"
                                         />
@@ -454,7 +454,7 @@ const NotificationSettingsPage = () => {
                                         <Label className="text-wrap-mobile">Selesai</Label>
                                         <input
                                             type="time"
-                                            value={preferences.quiet_hours_end?.substring(0, 5) || '07:00'}
+                                            value={preferences.quiet_hours_end?.substring(0, 5) ?? '07:00'}
                                             onChange={(e) => updatePreference('quiet_hours_end', `${e.target.value}:00`)}
                                             className="w-full px-3 py-2 border rounded-md dark:bg-background dark:border-border"
                                         />

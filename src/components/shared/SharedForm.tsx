@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { useForm, type Path, type DefaultValues } from 'react-hook-form'
+import { useForm, type Path, type PathValue, type DefaultValues, type Resolver, type FieldValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { z } from 'zod'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,7 +19,7 @@ interface FormSection {
 interface FormFieldConfig {
   name: string
   label: string
-  type: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'date' | 'checkbox'
+  type: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'date'
   required?: boolean
   placeholder?: string
   hint?: string
@@ -32,10 +31,10 @@ interface FormFieldConfig {
   validation?: z.ZodTypeAny
 }
 
-interface SharedFormProps<T extends Record<string, unknown>> {
+interface SharedFormProps<T extends FieldValues> {
   // Form configuration
   sections: FormSection[]
-  schema: z.ZodSchema<T>
+  schema: z.ZodTypeAny
 
   // Form state
   defaultValues?: Partial<T>
@@ -67,7 +66,7 @@ interface SharedFormProps<T extends Record<string, unknown>> {
  * - Responsive design
  * - Type-safe form handling
  */
-export const SharedForm = <T extends Record<string, unknown>>({
+export const SharedForm = <T extends FieldValues>({
   sections,
   schema,
   defaultValues,
@@ -81,8 +80,10 @@ export const SharedForm = <T extends Record<string, unknown>>({
   className = "",
   compact = false
 }: SharedFormProps<T>) => {
+  const resolver = zodResolver(schema as any) as Resolver<T>
+
   const form = useForm<T>({
-    resolver: zodResolver(schema),
+    resolver,
     defaultValues: defaultValues as DefaultValues<T> | undefined,
   })
 
@@ -121,28 +122,35 @@ export const SharedForm = <T extends Record<string, unknown>>({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {section.fields.map((field, fieldIndex) => (
-                  <div
-                    key={fieldIndex}
-                    className={field.type === 'textarea' ? 'md:col-span-2' : ''}
-                  >
-                    <FormField
-                      label={field.label}
-                      name={field.name}
-                      type={field.type}
-                      {...form.register(field.name as Path<T>)}
-                      error={form.formState.errors[field.name as keyof typeof form.formState.errors]?.message}
-                      required={field.required}
-                      placeholder={field.placeholder}
-                      hint={field.hint}
-                      options={field.options}
-                      min={field.min}
-                      max={field.max}
-                      step={field.step}
-                      rows={field.rows}
-                    />
-                  </div>
-                ))}
+                {section.fields.map((field, fieldIndex) => {
+                  const fieldPath = field.name as Path<T>
+                  const error = form.formState.errors[fieldPath]?.message
+                  const errorMessage = typeof error === 'string' ? error : undefined
+
+                  return (
+                    <div
+                      key={fieldIndex}
+                      className={field.type === 'textarea' ? 'md:col-span-2' : ''}
+                    >
+                      <FormField
+                        label={field.label}
+                        name={field.name}
+                        type={field.type}
+                        value={form.watch(fieldPath) as unknown}
+                        onChange={(_, value) => form.setValue(fieldPath, value as PathValue<T, Path<T>>)}
+                        error={errorMessage}
+                        required={field.required}
+                        placeholder={field.placeholder}
+                        hint={field.hint}
+                        options={field.options}
+                        min={field.min}
+                        max={field.max}
+                        step={field.step}
+                        rows={field.rows}
+                      />
+                    </div>
+                  )
+                })}
               </div>
             </div>
           ))}
@@ -167,12 +175,12 @@ export const SharedForm = <T extends Record<string, unknown>>({
 /**
  * Hook for creating shared forms with validation
  */
-export function useSharedForm<T extends Record<string, unknown>>(
-  schema: z.ZodSchema<T>,
+export function useSharedForm<T extends FieldValues>(
+  schema: z.ZodTypeAny,
   defaultValues?: Partial<T>
 ) {
   const form = useForm<T>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema as any) as Resolver<T>,
     defaultValues: defaultValues as DefaultValues<T> | undefined,
   })
 
@@ -220,7 +228,7 @@ export const SharedModalForm = <T extends Record<string, unknown>>({
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold">{modalTitle || formProps.title}</h2>
+            <h2 className="text-xl font-semibold">{modalTitle ?? formProps.title}</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600"

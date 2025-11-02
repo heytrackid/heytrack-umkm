@@ -89,8 +89,8 @@ export async function PUT(
       type: validatedData.type,
       category: validatedData.category,
       amount: validatedData.amount,
-      description: validatedData.description || undefined,
-      reference: validatedData.reference_id || undefined
+      description: validatedData.description ?? undefined,
+      reference: validatedData.reference_id ?? undefined
     }
 
     // Update with RLS enforcement

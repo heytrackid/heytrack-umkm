@@ -76,7 +76,7 @@ const AutomationPage = () => {
           errorData && typeof errorData.error === 'string' && errorData.error.trim().length > 0
             ? errorData.error
             : null
-        throw new Error(apiMessage || 'Failed to run task')
+        throw new Error(apiMessage ?? 'Failed to run task')
       }
 
       const data = await response.json()
@@ -187,7 +187,7 @@ const AutomationPage = () => {
             <div className="space-y-3">
               <div className="flex items-center text-sm text-gray-600">
                 <Clock className="w-4 h-4 mr-2" />
-                Last run: {formatDate(status?.automation.autoReorder.lastRun || null)}
+                Last run: {formatDate(status?.automation.autoReorder.lastRun ?? null)}
               </div>
               <Button
                 onClick={() => runTask('reorder')}
@@ -226,7 +226,7 @@ const AutomationPage = () => {
             <div className="space-y-3">
               <div className="flex items-center text-sm text-gray-600">
                 <Clock className="w-4 h-4 mr-2" />
-                Last run: {formatDate(status?.automation.smartNotifications.lastRun || null)}
+                Last run: {formatDate(status?.automation.smartNotifications.lastRun ?? null)}
               </div>
               <Button
                 onClick={() => runTask('notifications')}
@@ -265,7 +265,7 @@ const AutomationPage = () => {
             <div className="space-y-3">
               <div className="flex items-center text-sm text-gray-600">
                 <Clock className="w-4 h-4 mr-2" />
-                Last run: {formatDate(status?.automation.automationEngine.lastRun || null)}
+                Last run: {formatDate(status?.automation.automationEngine.lastRun ?? null)}
               </div>
               <Button
                 onClick={() => runTask('engine')}

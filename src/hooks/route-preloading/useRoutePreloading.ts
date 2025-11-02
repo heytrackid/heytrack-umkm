@@ -78,7 +78,7 @@ export const useRoutePreloading = () => {
         apiLogger.info({ priority, currentRoute, duration: (endTime - startTime).toFixed(2) }, 'Preloaded resources')
       }
 
-    } catch (err: unknown) {
+    } catch (_err: unknown) {
       // Failed to preload resources
     }
   }, [pathname, router])

@@ -158,8 +158,8 @@ export async function POST(request: NextRequest) {
             type: 'EXPENSE',
             category: 'Pembelian Bahan Baku',
             amount: totalHarga,
-            description: `Pembelian: ${ingredientData.name} (${qtyBeli} ${ingredientData.unit}) dari ${validatedData.supplier || 'Supplier'}`,
-            date: validatedData.purchase_date || new Date().toISOString().split('T')[0]
+            description: `Pembelian: ${ingredientData.name} (${qtyBeli} ${ingredientData.unit}) dari ${validatedData.supplier ?? 'Supplier'}`,
+            date: validatedData.purchase_date ?? new Date().toISOString().split('T')[0]
         }
         
         const { data: transaction, error: transactionError } = await supabase
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
             quantity: qtyBeli,
             unit_price: hargaSatuan,
             total_price: totalHarga,
-            purchase_date: validatedData.purchase_date || new Date().toISOString().split('T')[0],
+            purchase_date: validatedData.purchase_date ?? new Date().toISOString().split('T')[0],
             notes: validatedData.notes
         }
         
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
         // 3. Update ingredient stock (atomic operation to prevent race condition)
         // TODO: Create PostgreSQL function for atomic increment
         // For now, use optimistic locking with current_stock check
-        const newStock = (ingredientData.current_stock || 0) + qtyBeli
+        const newStock = (ingredientData.current_stock ?? 0) + qtyBeli
 
         const stockUpdate = {
             current_stock: newStock
@@ -234,7 +234,7 @@ export async function POST(request: NextRequest) {
             .eq('id', validatedData.ingredient_id)
             .eq('user_id', user.id)
             // Add optimistic lock: only update if current_stock hasn't changed
-            .eq('current_stock', ingredientData.current_stock || 0)
+            .eq('current_stock', ingredientData.current_stock ?? 0)
 
         if (stockError) {
             apiLogger.error({ error: stockError }, 'Error updating stock (possible race condition):')
@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
         // 4. Create stock ledger entry
         const stockLog: InventoryStockLogsInsert = {
             ingredient_id: validatedData.ingredient_id,
-            quantity_before: ingredientData.current_stock || 0,
+            quantity_before: ingredientData.current_stock ?? 0,
             quantity_after: newStock,
             quantity_changed: qtyBeli,
             change_type: 'increase',

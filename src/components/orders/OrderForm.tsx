@@ -55,21 +55,21 @@ const OrderForm = ({
   useEffect(() => {
     if (order) {
       setFormData({
-        customer_name: order.customer_name || '',
-        customer_phone: order.customer_phone || '',
+        customer_name: order.customer_name ?? '',
+        customer_phone: order.customer_phone ?? '',
         // customer_email: order.customer_email || '', // Field doesn't exist in DB
-        customer_address: order.customer_address || '',
+        customer_address: order.customer_address ?? '',
         delivery_date: order.delivery_date ? order.delivery_date.split('T')[0] : '',
-        delivery_time: order.delivery_time || '10:00',
+        delivery_time: order.delivery_time ?? '10:00',
         priority: normalizePriority(order.priority),
-        notes: order.notes || '',
+        notes: order.notes ?? '',
         order_items: (order as OrderWithRelations).items?.map(item => ({
           recipe_id: item.recipe_id,
-          product_name: item.product_name || null,
+          product_name: item.product_name ?? null,
           quantity: item.quantity,
           unit_price: item.unit_price,
           total_price: item.total_price,
-          special_requests: item.special_requests || null
+          special_requests: item.special_requests ?? null
         })) || []
       })
     }
@@ -234,7 +234,7 @@ const OrderForm = ({
             <div className="space-y-2">
               <Label>Alamat Pengiriman</Label>
               <Textarea
-                value={formData.customer_address || ''}
+                value={formData.customer_address ?? ''}
                 onChange={(e) => handleInputChange('customer_address', e.target.value)}
                 placeholder=""
                 rows={3}
@@ -273,7 +273,7 @@ const OrderForm = ({
             <div className="space-y-2">
               <Label>Tingkat Prioritas</Label>
               <Select
-                value={formData.priority || 'normal'}
+                value={formData.priority ?? 'normal'}
                 onValueChange={(value: Priority) => handleInputChange('priority', value)}
               >
                 <SelectTrigger>
@@ -290,7 +290,7 @@ const OrderForm = ({
             <div className="space-y-2">
               <Label>Catatan Pesanan</Label>
               <Textarea
-                value={formData.notes || ''}
+                value={formData.notes ?? ''}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
                 placeholder=""
                 rows={3}
@@ -379,7 +379,7 @@ const OrderForm = ({
                   <div className="mt-3">
                     <Label>Catatan (Opsional)</Label>
                     <Input
-                      value={item.special_requests || ''}
+                      value={item.special_requests ?? ''}
                       onChange={(e) => updateOrderItem(index, 'special_requests', e.target.value)}
                       placeholder=""
                     />

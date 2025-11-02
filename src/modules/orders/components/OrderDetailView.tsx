@@ -1,3 +1,5 @@
+'use client'
+
 import { Badge } from '@/components/ui/badge'
 import type { OrdersTable, OrderItemsTable } from '@/types/database'
 import { Button } from '@/components/ui/button'
@@ -7,7 +9,6 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { MapPin, Phone, Users } from 'lucide-react'
 import { getPriorityInfo, getStatusInfo } from '../utils/helpers'
 
-'use client'
 
 
 type Order = OrdersTable
@@ -23,14 +24,14 @@ interface OrderDetailViewProps {
 
 export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
   const { formatCurrency } = useCurrency()
-  const statusInfo = getStatusInfo(order.status || 'PENDING')
-  const priorityInfo = getPriorityInfo(order.priority || 'MEDIUM')
-  const orderItems: OrderItem[] = order.order_items || []
-  const totalAmount = order.total_amount || 0
-  const taxAmount = order.tax_amount || 0
-  const discountAmount = order.discount || 0
-  const deliveryFee = order.delivery_fee || 0
-  const paidAmount = order.paid_amount || 0
+  const statusInfo = getStatusInfo(order.status ?? 'PENDING')
+  const priorityInfo = getPriorityInfo(order.priority ?? 'MEDIUM')
+  const orderItems: OrderItem[] = order.order_items ?? []
+  const totalAmount = order.total_amount ?? 0
+  const taxAmount = order.tax_amount ?? 0
+  const discountAmount = order.discount ?? 0
+  const deliveryFee = order.delivery_fee ?? 0
+  const paidAmount = order.paid_amount ?? 0
   const subtotal = totalAmount - taxAmount + discountAmount - deliveryFee
   const outstandingAmount = totalAmount > paidAmount ? totalAmount - paidAmount : 0
   const totalItemCount = orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0)
@@ -74,7 +75,7 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Tanggal Kirim:</span>
-                  <span>{order.delivery_date} {order.delivery_time || ''}</span>
+                  <span>{order.delivery_date} {order.delivery_time ?? ''}</span>
                 </div>
               </div>
             </div>
@@ -131,7 +132,7 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
         <div className="space-y-2">
           {orderItems.length > 0 ? (
             orderItems.map((item: OrderItem) => {
-              const itemKey = item.id || item.recipe_id || `${item.product_name || 'item'}-${item.quantity || 0}`
+              const itemKey = item.id ?? item.recipe_id ?? `${item.product_name ?? 'item'}-${item.quantity ?? 0}`
               return (
                 <div key={itemKey} className="flex justify-between items-center p-3 bg-muted rounded-lg">
                   <div>

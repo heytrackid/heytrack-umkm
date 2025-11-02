@@ -43,15 +43,15 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
     }
   })
 
-  const handleSubmit = async (data: IngredientPurchaseInsert) => {
+  const handleSubmit = (data: IngredientPurchaseInsert) => {
     try {
-      await onSubmit({
+      onSubmit({
         ingredient_id: data.ingredient_id,
         quantity: data.quantity,
         unit_price: data.unit_price,
-        supplier: data.supplier || undefined,
+        supplier: data.supplier ?? undefined,
         purchase_date: data.purchase_date,
-        notes: data.notes || undefined
+        notes: data.notes ?? undefined
       })
 
       // Reset form

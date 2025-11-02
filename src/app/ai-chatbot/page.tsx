@@ -18,7 +18,7 @@ const AIChatbotPage = () => {
   const [input, setInput] = useState('')
 
   const handleSendMessage = async (messageText?: string) => {
-    const textToSend = (messageText || input).trim()
+    const textToSend = (messageText ?? input).trim()
     if (textToSend.length === 0 || isLoading) { return }
 
     const userMessage = {
@@ -41,7 +41,7 @@ const AIChatbotPage = () => {
         content: response.message,
         timestamp: new Date(),
         suggestions: response.suggestions,
-        data: (response.data || {}) as Record<string, unknown>
+        data: (response.data ?? {}) as Record<string, unknown>
       }
 
       addMessage(assistantMessage)

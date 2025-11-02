@@ -1,5 +1,5 @@
-import type { RecipeWithIngredients, RecipeIngredientWithDetails } from '@/types/query-results'
-import type { Database, RecipesTable, IngredientsTable } from '@/types/database'
+import type { RecipeWithIngredients} from '@/types/query-results'
+import type {RecipesTable, IngredientsTable } from '@/types/database'
 
 
 /**
@@ -18,14 +18,14 @@ type Ingredient = IngredientsTable
  * Supabase returns arrays for joins, this helper extracts the first item
  */
 export function extractFirst<T>(arr: T[] | null | undefined): T | null {
-  return arr?.[0] || null
+  return arr?.[0] ?? null
 }
 
 /**
  * Extract all elements from Supabase join result, filtering out nulls
  */
 export function extractAll<T>(arr: T[] | null | undefined): T[] {
-  return arr?.filter((item): item is T => item !== null && item !== undefined) || []
+  return arr?.filter((item): item is T => item !== null && item !== undefined) ?? []
 }
 
 /**
@@ -60,14 +60,14 @@ export function transformRecipeWithIngredients(
 ): RecipeWithIngredients {
   return {
     ...recipe,
-    recipe_ingredients: (recipe.recipe_ingredients || []).map(ri => ({
+    recipe_ingredients: (recipe.recipe_ingredients ?? []).map(ri => ({
       id: ri.id,
       recipe_id: ri.recipe_id,
       ingredient_id: ri.ingredient_id,
       quantity: ri.quantity,
       unit: ri.unit,
       user_id: ri.user_id,
-      ingredient: extractFirst(ri.ingredient) || {
+      ingredient: extractFirst(ri.ingredient) ?? {
         id: ri.ingredient_id,
         name: 'Unknown',
         unit: ri.unit,
@@ -98,7 +98,7 @@ export function transformRecipeWithIngredients(
  */
 export function calculateRecipeCOGS(recipe: RecipeWithIngredients): number {
   if (!recipe.recipe_ingredients || recipe.recipe_ingredients.length === 0) {
-    return recipe.cost_per_unit || 0
+    return recipe.cost_per_unit ?? 0
   }
 
   let totalCost = 0

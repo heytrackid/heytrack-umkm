@@ -47,7 +47,7 @@ export const RestockSuggestionsPanel = () => {
         )
     }
 
-    const { data: suggestions, summary } = data || { data: [], summary: {} }
+    const { data: suggestions, summary } = data ?? { data: [], summary: {} }
 
     const getUrgencyIcon = (urgency: string) => {
         switch (urgency) {
@@ -81,8 +81,8 @@ export const RestockSuggestionsPanel = () => {
                 <div className="flex items-center justify-between">
                     <CardTitle>Restock Suggestions</CardTitle>
                     <div className="flex gap-2">
-                        <Badge variant="destructive">{summary.critical || 0} Critical</Badge>
-                        <Badge variant="default">{summary.high || 0} High</Badge>
+                        <Badge variant="destructive">{summary.critical ?? 0} Critical</Badge>
+                        <Badge variant="default">{summary.high ?? 0} High</Badge>
                     </div>
                 </div>
             </CardHeader>

@@ -72,11 +72,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         return {
           id: '',
           recipe_id: data.id,
-          ingredient_id: ingredient?.id || '',
+          ingredient_id: ingredient?.id ?? '',
           quantity: ri.quantity || 0,
           unit: ri.unit || '',
           user_id: user.id,
-          ingredient: ingredient || null
+          ingredient: ingredient ?? null
         } as RecipeIngredient & { ingredient: Ingredient | null }
       })
 
@@ -92,15 +92,15 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     // Transform recipeData to match expected type with proper null handling
     const recipeForPricing: RecipeWithIngredients = {
       ...recipeData,
-      servings: recipeData?.servings || 1,
-      recipe_ingredients: (recipeData?.recipe_ingredients || []).map((ri) => ({
+      servings: recipeData?.servings ?? 1,
+      recipe_ingredients: (recipeData?.recipe_ingredients ?? []).map((ri) => ({
         id: ri?.id || '',
         recipe_id: ri?.recipe_id || '',
         ingredient_id: ri?.ingredient_id || '',
         quantity: ri?.quantity || 0,
         unit: ri?.unit || '',
         user_id: ri?.user_id || '',
-        ingredient: ri?.ingredient || null
+        ingredient: ri?.ingredient ?? null
       }))
     }
     

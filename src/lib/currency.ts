@@ -37,7 +37,7 @@ export const currencies: Currency[] = [
 ]
 
 export const DEFAULT_CURRENCY: Currency =
-  currencies.find((currency) => currency.code === 'IDR') || currencies[0]
+  currencies.find((currency) => currency.code === 'IDR') ?? currencies[0]
 
 // Extended currency configurations
 export const currencyConfigs: Record<string, CurrencyConfig> = {
@@ -179,8 +179,8 @@ export function getCurrentCurrency(): Currency {
         }
       }
     }
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error loading currency settings')
+  } catch (_err: unknown) {
+    apiLogger.error({ _err }, 'Error loading currency settings')
   }
 
   return DEFAULT_CURRENCY
@@ -230,7 +230,7 @@ export function formatCurrencyIntl(amount: number, currency: Currency): string {
     }).format(amount)
     
     return `${currency.symbol} ${formatted}`
-  } catch (err: unknown) {
+  } catch (_err: unknown) {
     // Fallback to basic formatting
     return formatCurrency(amount, currency)
   }

@@ -42,7 +42,7 @@ export async function GET() {
       unit: 'pcs', // Default unit since recipes table doesn't have unit column
       // Add missing fields with default values
       priority: 5, // Default priority (assuming 1-10 scale)
-      estimated_duration: batch.recipe?.cook_time || 30, // Default to 30 minutes if not available
+      estimated_duration: batch.recipe?.cook_time ?? 30, // Default to 30 minutes if not available
     })) || []
 
     return NextResponse.json(mappedBatches);
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
       unit: 'pcs', // Default unit since recipes table doesn't have unit column
       // Add missing fields with default values
       priority: 5, // Default priority (assuming 1-10 scale)
-      estimated_duration: batch.recipe?.cook_time || 30, // Default to 30 minutes if not available
+      estimated_duration: batch.recipe?.cook_time ?? 30, // Default to 30 minutes if not available
     }
 
     // Invalidate cache

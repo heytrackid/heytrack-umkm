@@ -64,8 +64,8 @@ export class OrderPricingService {
           .single()
 
         if (!error && customer) {
-          discountPercentage = customer.discount_percentage || 0
-          customerLoyaltyPoints = customer.loyalty_points || 0
+          discountPercentage = customer.discount_percentage ?? 0
+          customerLoyaltyPoints = customer.loyalty_points ?? 0
           customerInfo = {
             name: customer.name,
             discount_percentage: discountPercentage,
@@ -79,7 +79,7 @@ export class OrderPricingService {
 
       // Apply loyalty points (1 point = Rp 1000)
       const loyaltyPointsUsed = Math.min(
-        options.use_loyalty_points || 0,
+        options.use_loyalty_points ?? 0,
         customerLoyaltyPoints,
         Math.floor(subtotal / 1000) // Max 1 point per 1000 rupiah
       )
@@ -89,11 +89,11 @@ export class OrderPricingService {
       const afterDiscount = subtotal - discountAmount - loyaltyDiscount
 
       // Calculate tax
-      const taxRate = options.tax_rate || 0
+      const taxRate = options.tax_rate ?? 0
       const taxAmount = (afterDiscount * taxRate) / 100
 
       // Add delivery fee
-      const deliveryFee = options.delivery_fee || 0
+      const deliveryFee = options.delivery_fee ?? 0
 
       // Calculate total
       const totalAmount = afterDiscount + taxAmount + deliveryFee
@@ -154,9 +154,9 @@ export class OrderPricingService {
 
       // Update customer
       const updateData: TablesUpdate<'customers'> = {
-        loyalty_points: (customer.loyalty_points || 0) + pointsEarned - pointsUsed,
-        total_orders: (customer.total_orders || 0) + 1,
-        total_spent: (customer.total_spent || 0) + orderAmount,
+        loyalty_points: (customer.loyalty_points ?? 0) + pointsEarned - pointsUsed,
+        total_orders: (customer.total_orders ?? 0) + 1,
+        total_spent: (customer.total_spent ?? 0) + orderAmount,
         last_order_date: new Date().toISOString().split('T')[0],
         updated_at: new Date().toISOString()
       }
@@ -174,7 +174,7 @@ export class OrderPricingService {
         customerId,
         pointsEarned,
         pointsUsed,
-        newBalance: (customer.loyalty_points || 0) + pointsEarned - pointsUsed
+        newBalance: (customer.loyalty_points ?? 0) + pointsEarned - pointsUsed
       }, 'Customer loyalty updated')
 
     } catch (error) {
@@ -209,12 +209,12 @@ export class OrderPricingService {
         throw new Error('Customer not found')
       }
 
-      const loyaltyPoints = customer.loyalty_points || 0
-      const totalOrders = customer.total_orders || 0
-      const totalSpent = customer.total_spent || 0
+      const loyaltyPoints = customer.loyalty_points ?? 0
+      const totalOrders = customer.total_orders ?? 0
+      const totalSpent = customer.total_spent ?? 0
 
       return {
-        discount_percentage: customer.discount_percentage || 0,
+        discount_percentage: customer.discount_percentage ?? 0,
         loyalty_points: loyaltyPoints,
         loyalty_value: loyaltyPoints * 1000, // 1 point = Rp 1000
         total_orders: totalOrders,

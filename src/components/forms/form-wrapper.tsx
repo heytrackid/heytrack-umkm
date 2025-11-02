@@ -9,14 +9,14 @@ interface FormWrapperProps extends Omit<FormHTMLAttributes<HTMLFormElement>, 'on
   children: ReactNode
   isLoading?: boolean
   error?: string | null
-  onError?: (error: Error) => void
+  _onError?: (error: Error) => void
 }
 
 /**
  * FormWrapper - Unified form component with consistent error handling
  */
 export const FormWrapper = forwardRef<HTMLFormElement, FormWrapperProps>(
-  ({ children, isLoading, error, className, onError, ...props }, ref) => (
+  ({ children, isLoading, error, className, _onError, ...props }, ref) => (
       <form ref={ref} className={cn('space-y-6', className)} {...props}>
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">

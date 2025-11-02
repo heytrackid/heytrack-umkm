@@ -39,10 +39,7 @@ export const SidebarProvider = ({
   defaultOpen = true,
   open: openProp,
   onOpenChange: setOpenProp,
-  className,
-  style,
   children,
-  ...props
 }: SidebarProviderProps) => {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = useState(false)
@@ -64,7 +61,7 @@ export const SidebarProvider = ({
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = useState(getInitialOpenState)
-  const open = openProp || _open
+  const open = openProp ?? _open
   const setOpen = useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === "function" ? value(open) : value

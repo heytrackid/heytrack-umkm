@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -5,8 +7,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { AlertCircle } from 'lucide-react'
 import type { CustomersTable } from '@/types/database'
 import { useState } from 'react'
-
-'use client'
 
 
 /**
@@ -47,8 +47,8 @@ export const CustomerSection = ({
     const selectCustomer = (customer: Customer | undefined) => {
         if (!customer) { return }
         onInputChange('customer_name', customer.name)
-        onInputChange('customer_phone', customer.phone || '')
-        onInputChange('customer_address', customer.address || '')
+        onInputChange('customer_phone', customer.phone ?? '')
+        onInputChange('customer_address', customer.address ?? '')
         setCustomerSearch('')
     }
 

@@ -50,7 +50,7 @@ class ClientLogger {
       }
     } else {
       data = obj
-      message = msg || ''
+      message = msg ?? ''
     }
 
     const logEntry = {

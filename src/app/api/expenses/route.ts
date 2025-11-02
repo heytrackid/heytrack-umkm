@@ -87,7 +87,7 @@ async function GET(request: NextRequest) {
     }
 
     // Add sorting
-    const sortField = sort_by || 'expense_date'
+    const sortField = sort_by ?? 'expense_date'
     const sortDirection = sort_order === 'asc'
     query = query.order(sortField, { ascending: sortDirection })
 
@@ -133,9 +133,9 @@ async function GET(request: NextRequest) {
 
     interface ExpensePartial { amount: number; category: string }
     
-    const todayTotal = (todayExpenses || []).reduce((sum: number, exp: ExpensePartial) =>
+    const todayTotal = (todayExpenses ?? []).reduce((sum: number, exp: ExpensePartial) =>
       sum + safeParseAmount(exp.amount), 0)
-    const monthTotal = (monthExpenses || []).reduce((sum: number, exp: ExpensePartial) =>
+    const monthTotal = (monthExpenses ?? []).reduce((sum: number, exp: ExpensePartial) =>
       sum + safeParseAmount(exp.amount), 0)
 
     // Category breakdown
@@ -143,7 +143,7 @@ async function GET(request: NextRequest) {
       const category = safeString(exp.category, 'Uncategorized')
       acc[category] = (acc[category] || 0) + safeParseAmount(exp.amount)
       return acc
-    }, {} as Record<string, number>) || {}
+    }, {} as Record<string, number>) ?? {}
 
     return NextResponse.json({ 
       data: expenses, 
@@ -196,7 +196,7 @@ async function POST(request: NextRequest) {
     const insertPayload: FinancialRecordsInsert = {
       ...validatedData,
       user_id: user.id,
-      description: validatedData.description || '',
+      description: validatedData.description ?? '',
     }
 
     // Insert financial record with proper typing

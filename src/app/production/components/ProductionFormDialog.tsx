@@ -39,7 +39,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
 
     useEffect(() => {
         if (open) {
-            fetchRecipes()
+            void fetchRecipes()
         }
     }, [open])
 
@@ -92,7 +92,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
 
             if (!response.ok) {
                 const error = await response.json()
-                throw new Error(error.message || 'Gagal membuat batch produksi')
+                throw new Error(error.message ?? 'Gagal membuat batch produksi')
             }
 
             toast.success('Batch produksi berhasil dibuat')

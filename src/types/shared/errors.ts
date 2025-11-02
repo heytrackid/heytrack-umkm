@@ -105,7 +105,7 @@ export class DatabaseError extends TypedError {
 export class ExternalServiceError extends TypedError {
     constructor(service: string, message?: string) {
         super(
-            message || `External service '${service}' failed`,
+            message ?? `External service '${service}' failed`,
             'EXTERNAL_SERVICE_ERROR',
             502,
             { service }

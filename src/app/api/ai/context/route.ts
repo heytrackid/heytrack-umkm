@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     }
 
     const {searchParams} = request.nextUrl;
-    const currentPage = searchParams.get('page') || undefined;
+    const currentPage = searchParams.get('page') ?? undefined;
 
     const context = await BusinessContextService.loadContext(
       user.id,

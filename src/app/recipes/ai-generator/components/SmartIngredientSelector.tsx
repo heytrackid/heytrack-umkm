@@ -104,7 +104,7 @@ export const SmartIngredientSelector = ({
         if ((ingredient.current_stock || 0) === 0) {
             return { label: 'Habis', color: 'bg-red-500' }
         }
-        const minimumStock = ingredient.minimum_stock || 0
+        const minimumStock = ingredient.minimum_stock ?? 0
         if ((ingredient.current_stock || 0) < minimumStock) {
             return { label: 'Menipis', color: 'bg-yellow-500' }
         }

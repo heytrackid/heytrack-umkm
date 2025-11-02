@@ -24,12 +24,12 @@ const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps) => {
   const { data: ingredients } = useSupabaseCRUD<'ingredients'>('ingredients')
 
   // Calculate inventory report
-  const ingredientList = ingredients || []
+  const ingredientList = ingredients ?? []
 
   const inventoryStats = ingredientList.reduce<InventoryStats>(
     (stats, ingredient) => {
-      const currentStock = ingredient.current_stock || 0
-      const minimumStock = ingredient.min_stock || 0
+      const currentStock = ingredient.current_stock ?? 0
+      const minimumStock = ingredient.min_stock ?? 0
 
       if (currentStock <= minimumStock) {
         stats.lowStock += 1

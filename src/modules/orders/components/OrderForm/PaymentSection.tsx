@@ -1,3 +1,5 @@
+'use client'
+
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCurrency } from '@/hooks/useCurrency'
@@ -5,7 +7,6 @@ import { AlertCircle } from 'lucide-react'
 import { safeNumber } from '@/lib/type-guards'
 import type { PaymentMethod } from '@/app/orders/types/orders-db.types'
 
-'use client'
 
 
 /**

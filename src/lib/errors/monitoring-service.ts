@@ -12,8 +12,8 @@ interface ErrorEvent {
   stack?: string
   name?: string
   timestamp: string
-  context?: Record<string, unknown>
-  user?: {
+  _context?: Record<string, unknown>
+  _user?: {
     id?: string
     email?: string
     username?: string
@@ -42,12 +42,12 @@ class ErrorMonitoringService {
     this.config = {
       enabled: true,
       environment: process.env.NODE_ENV || 'development',
-      release: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
+      release: process.env.NEXT_PUBLIC_APP_VERSION ?? '1.0.0',
       sampleRate: 1.0,
       beforeSend: (event) => event,
       ...config
     }
-    this.enabled = this.config.enabled || false
+    this.enabled = this.config.enabled ?? false
   }
 
   /**
@@ -56,7 +56,7 @@ class ErrorMonitoringService {
   init(config?: MonitoringServiceConfig) {
     if (config) {
       this.config = { ...this.config, ...config }
-      this.enabled = this.config.enabled || false
+      this.enabled = this.config.enabled ?? false
     }
     
     // Set up global error handlers
@@ -73,8 +73,8 @@ class ErrorMonitoringService {
    */
   captureException(
     error: Error, 
-    context: {
-      user?: ErrorEvent['user']
+    _context: {
+      _user?: ErrorEvent['_user']
       tags?: ErrorEvent['tags']
       extra?: Record<string, unknown>
       level?: ErrorEvent['level']
@@ -86,12 +86,12 @@ class ErrorMonitoringService {
     }
 
     // Skip if sample rate is lower than random value
-    if (Math.random() > (this.config.sampleRate || 1.0)) {
+    if (Math.random() > (this.config.sampleRate ?? 1.0)) {
       return
     }
 
     const tags: Record<string, string> = {
-      ...(context.tags ?? {}),
+      ...(_context.tags ?? {}),
       environment: this.config.environment ?? 'development',
       release: this.config.release ?? '1.0.0'
     }
@@ -101,10 +101,10 @@ class ErrorMonitoringService {
       stack: error.stack,
       name: error.name,
       timestamp: new Date().toISOString(),
-      context: context.extra,
-      user: context.user,
+      _context: _context.extra,
+      _user: _context._user,
       tags,
-      level: context.level || 'error',
+      level: _context.level ?? 'error',
       url: typeof window !== 'undefined' ? window.location.href : undefined,
       userAgent: typeof window !== 'undefined' 
         ? window.navigator.userAgent 
@@ -112,7 +112,7 @@ class ErrorMonitoringService {
     }
 
     // Apply beforeSend hook if provided
-    const processedEvent = this.config.beforeSend?.(errorEvent) || errorEvent
+    const processedEvent = this.config.beforeSend?.(errorEvent) ?? errorEvent
     
     if (processedEvent) {
       // Log to console in development or if no external service is configured
@@ -134,8 +134,8 @@ class ErrorMonitoringService {
   captureMessage(
     message: string, 
     level: ErrorEvent['level'] = 'error',
-    context: {
-      user?: ErrorEvent['user']
+    _context: {
+      _user?: ErrorEvent['_user']
       tags?: ErrorEvent['tags']
       extra?: Record<string, unknown>
     } = {}
@@ -146,7 +146,7 @@ class ErrorMonitoringService {
     }
 
     const tags: Record<string, string> = {
-      ...(context.tags ?? {}),
+      ...(_context.tags ?? {}),
       environment: this.config.environment ?? 'development',
       release: this.config.release ?? '1.0.0'
     }
@@ -154,8 +154,8 @@ class ErrorMonitoringService {
     const errorEvent: ErrorEvent = {
       message,
       timestamp: new Date().toISOString(),
-      context: context.extra,
-      user: context.user,
+      _context: _context.extra,
+      _user: _context._user,
       tags,
       level,
       url: typeof window !== 'undefined' ? window.location.href : undefined,
@@ -164,7 +164,7 @@ class ErrorMonitoringService {
         : undefined,
     }
 
-    const processedEvent = this.config.beforeSend?.(errorEvent) || errorEvent
+    const processedEvent = this.config.beforeSend?.(errorEvent) ?? errorEvent
     
     if (processedEvent) {
       if (process.env.NODE_ENV === 'development' || !this.config.dsn) {
@@ -225,16 +225,16 @@ class ErrorMonitoringService {
   /**
    * Set user context for error reporting
    */
-  setUser(user: ErrorEvent['user']): void {
-    // Store user context for future error events
+  setUser(_user: ErrorEvent['_user']): void {
+    // Store _user _context for future error events
     // Implementation depends on specific monitoring service
   }
 
   /**
    * Set extra context for error reporting
    */
-  setContext(key: string, context: Record<string, unknown>): void {
-    // Store context for future error events
+  setContext(_key: string, _context: Record<string, unknown>): void {
+    // Store _context for future error events
     // Implementation depends on specific monitoring service
   }
 
@@ -296,8 +296,8 @@ class ErrorMonitoringService {
   getStatus(): { enabled: boolean; environment: string; release: string } {
     return {
       enabled: this.enabled,
-      environment: this.config.environment || 'development',
-      release: this.config.release || '1.0.0'
+      environment: this.config.environment ?? 'development',
+      release: this.config.release ?? '1.0.0'
     }
   }
 }

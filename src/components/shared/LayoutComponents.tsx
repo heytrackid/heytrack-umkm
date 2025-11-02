@@ -1,7 +1,6 @@
 'use client'
 
 import { Fragment, useState, type ReactNode } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -9,15 +8,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { cn } from '@/lib/utils'
-import { useResponsive } from '@/hooks/responsive'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,26 +17,11 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import {
-  ChevronDown,
   ChevronRight,
   Menu,
-  X,
-  Home,
-  Settings,
-  User,
-  Bell,
-  Search,
-  Filter,
   Grid,
   List,
   Table,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  MoreHorizontal,
-  ArrowLeft,
-  RefreshCw
 } from 'lucide-react'
 
 interface BreadcrumbItem {
@@ -322,7 +297,7 @@ export const Section = ({
 
   return (
     <section className={cn("space-y-4", variantClasses[variant], className)}>
-      {(title || subtitle || description || actions) && (
+      {(title ?? subtitle ?? description ?? actions) && (
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="space-y-1">
             {title && (
@@ -383,7 +358,7 @@ export const DataView = ({
   return (
     <div className={cn("space-y-4", className)}>
       {/* Header */}
-      {(title || searchComponent || filterComponent || actions) && (
+      {(title ?? searchComponent ?? filterComponent ?? actions) && (
         <div className="flex flex-col lg:flex-row lg:items-center gap-4">
           <div className="flex-1">
             {title && (
@@ -443,7 +418,7 @@ export const DataView = ({
         ) : children ? (
           children
         ) : (
-          emptyState || (
+          emptyState ?? (
             <div className="text-center py-12 text-muted-foreground">
               Tidak ada data tersedia
             </div>
@@ -608,7 +583,7 @@ export const MobileNav = ({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        {trigger || (
+        {trigger ?? (
           <Button variant="ghost" size="sm">
             <Menu className="h-5 w-5" />
           </Button>

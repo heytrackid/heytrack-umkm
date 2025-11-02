@@ -46,8 +46,8 @@ export function useOrders() {
             const contentType = response.headers.get('content-type')
             if (contentType?.includes('application/json')) {
               const errorJson = await response.json()
-              errorMessage = errorJson.error || errorJson.message || errorMessage
-              errorDetails = errorJson.details || errorJson
+              errorMessage = errorJson.error ?? errorJson.message ?? errorMessage
+              errorDetails = errorJson.details ?? errorJson
             } else {
               errorMessage = await response.text()
             }
@@ -95,7 +95,7 @@ export function useOrders() {
           // Map order_items to items for compatibility
           const mappedOrders = json.data.map((order: OrderWithItems) => ({
             ...order,
-            items: order.order_items || []
+            items: order.order_items ?? []
           }))
           
           return mappedOrders as Order[]
@@ -128,7 +128,7 @@ export function useOrders() {
     retryDelay: 1000,
   })
 
-  const orders = useMemo(() => ordersResponse || [], [ordersResponse])
+  const orders = useMemo(() => ordersResponse ?? [], [ordersResponse])
   const error = queryError ? queryError.message : null
 
   // Manual refetch function
@@ -141,8 +141,8 @@ export function useOrders() {
     // Search filter  
     const searchMatch = !filters.searchTerm || 
       (order.order_no?.toLowerCase().includes(filters.searchTerm.toLowerCase()) || false) || 
-      (order.customer_name?.toLowerCase().includes(filters.searchTerm.toLowerCase()) || false) ||
-      (order.customer_phone?.toLowerCase().includes(filters.searchTerm.toLowerCase()) || false)
+      (order.customer_name?.toLowerCase().includes(filters.searchTerm.toLowerCase()) ?? false) ||
+      (order.customer_phone?.toLowerCase().includes(filters.searchTerm.toLowerCase()) ?? false)
 
     // Status filter
     const statusMatch = filters.status === 'all' || order.status === filters.status
@@ -168,9 +168,9 @@ export function useOrders() {
     completedOrders: orders.filter(o => o.status === 'DELIVERED').length,
     totalRevenue: orders
       .filter(o => o.status === 'DELIVERED')
-      .reduce((sum, o) => sum + (o.total_amount || 0), 0),
+      .reduce((sum, o) => sum + (o.total_amount ?? 0), 0),
     averageOrderValue: orders.length > 0 
-      ? orders.reduce((sum, o) => sum + (o.total_amount || 0), 0) / orders.length 
+      ? orders.reduce((sum, o) => sum + (o.total_amount ?? 0), 0) / orders.length 
       : 0
   }), [orders])
 
@@ -187,7 +187,7 @@ export function useOrders() {
           order_no: generateOrderNo(),
           customer_name: orderData.customer_name,
           customer_phone: orderData.customer_phone || null,
-          customer_address: orderData.customer_address || null,
+          customer_address: orderData.customer_address ?? null,
           order_date: new Date().toISOString().split('T')[0],
           delivery_date: orderData.delivery_date || null,
           delivery_time: orderData.delivery_time || null,
@@ -199,11 +199,11 @@ export function useOrders() {
           discount_amount: 0,
           delivery_fee: 0,
           total_amount: totalAmount,
-          notes: orderData.notes || null,
+          notes: orderData.notes ?? null,
           special_instructions: null,
           items: orderData.order_items.map(item => ({
             recipe_id: item.recipe_id,
-            product_name: item.product_name || null,
+            product_name: item.product_name ?? null,
             quantity: item.quantity,
             unit_price: item.unit_price,
             total_price: item.quantity * item.unit_price,
@@ -228,7 +228,7 @@ export function useOrders() {
           let errorMessage = 'Failed to create order'
           try {
             const errorData = await response.json()
-            errorMessage = errorData.error || errorData.message || errorMessage
+            errorMessage = errorData.error ?? errorData.message ?? errorMessage
             queryLogger.error({ 
               status: response.status,
               error: errorData 
@@ -284,12 +284,12 @@ export function useOrders() {
       const updatedData = {
         customer_name: orderData.customer_name,
         customer_phone: orderData.customer_phone || null,
-        customer_address: orderData.customer_address || null,
+        customer_address: orderData.customer_address ?? null,
         delivery_date: orderData.delivery_date || null,
         delivery_time: orderData.delivery_time || null,
         subtotal: totalAmount,
         total_amount: totalAmount,
-        notes: orderData.notes || null
+        notes: orderData.notes ?? null
       }
 
       const response = await fetch(`/api/orders/${orderId}`, {
@@ -300,7 +300,7 @@ export function useOrders() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to update order')
+        throw new Error(errorData.error ?? 'Failed to update order')
       }
 
       const data = await response.json()

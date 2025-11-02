@@ -105,8 +105,8 @@ export function useHppOverview() {
       return response.json()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
-      queryClient.invalidateQueries({ queryKey: ['hpp-alerts'] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp-alerts'] })
       toast({
         title: 'Success',
         description: 'All alerts marked as read'

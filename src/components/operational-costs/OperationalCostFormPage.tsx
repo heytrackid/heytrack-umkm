@@ -123,7 +123,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
 
             const basePayload: OperationalCostInsert = {
                 amount: formData.amount,
-                category: formData.category || 'utilities',
+                category: formData.category ?? 'utilities',
                 description: formData.description,
                 user_id: user.id,
                 is_active: formData.is_active ?? true,
@@ -142,13 +142,13 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                 basePayload.date = formData.date
             }
             if (formData.payment_method !== undefined) {
-                basePayload.payment_method = formData.payment_method || null
+                basePayload.payment_method = formData.payment_method ?? null
             }
             if (formData.supplier !== undefined) {
-                basePayload.supplier = formData.supplier || null
+                basePayload.supplier = formData.supplier ?? null
             }
             if (formData.reference !== undefined) {
-                basePayload.reference = formData.reference || null
+                basePayload.reference = formData.reference ?? null
             }
 
             if (mode === 'create') {
@@ -219,7 +219,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                                 <Label htmlFor="description">Nama Biaya *</Label>
                                 <Input
                                     id="description"
-                                    value={formData.description || ''}
+                                    value={formData.description ?? ''}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     placeholder="Contoh: Listrik Bulanan"
                                     required
@@ -229,7 +229,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                             <div className="space-y-2">
                                 <Label htmlFor="category">Kategori</Label>
                                 <Select
-                                    value={formData.category || 'utilities'}
+                                    value={formData.category ?? 'utilities'}
                                     onValueChange={(value) => setFormData({ ...formData, category: value })}
                                 >
                                     <SelectTrigger id="category">
@@ -254,7 +254,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                                     type="number"
                                     min="0"
                                     step="1000"
-                                    value={formData.amount || ''}
+                                    value={formData.amount ?? ''}
                                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
                                     placeholder="0"
                                     required
@@ -264,7 +264,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                             <div className="space-y-2">
                                 <Label htmlFor="frequency">Frekuensi</Label>
                                 <Select
-                                    value={formData.frequency || 'monthly'}
+                                    value={formData.frequency ?? 'monthly'}
                                     onValueChange={(value) => setFormData({ ...formData, frequency: value })}
                                 >
                                     <SelectTrigger id="frequency">
@@ -284,7 +284,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                             <Label htmlFor="notes">Catatan (Opsional)</Label>
                             <Textarea
                                 id="notes"
-                                value={formData.notes || ''}
+                                value={formData.notes ?? ''}
                                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                 placeholder="Catatan tambahan tentang biaya ini..."
                                 rows={3}
@@ -294,7 +294,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                         <div className="flex items-center space-x-2">
                             <Checkbox
                                 id="recurring"
-                                checked={formData.recurring || false}
+                                checked={formData.recurring ?? false}
                                 onCheckedChange={(checked) =>
                                     setFormData({ ...formData, recurring: checked as boolean })
                                 }

@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/client'
 import { useCallback, useState } from 'react'
 import type { CRUDOptions } from './types'
-import type { TableName, Row, Insert, Update } from '@/types/database'
+import type { TableName, Insert, Update } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 
 /**
@@ -23,22 +23,22 @@ export function useSupabaseCRUD<T extends TableName>(
     customErrorHandler
   } = options
 
-  const handleError = useCallback((error: Error, operation: 'create' | 'update' | 'delete') => {
+  const handleError = useCallback((error: Error, _operation: 'create' | 'update' | 'delete') => {
     const errorMessage = error.message || 'Terjadi kesalahan tak terduga'
     void setError(errorMessage)
 
     if (customErrorHandler) {
-      customErrorHandler(error, operation)
+      customErrorHandler(error, _operation)
     } else if (showErrorToast) {
       // Error toast would be shown here if needed
     }
   }, [customErrorHandler, showErrorToast])
 
-  const handleSuccess = useCallback((operation: 'create' | 'update' | 'delete') => {
+  const handleSuccess = useCallback((_operation: 'create' | 'update' | 'delete') => {
     void setError(null)
 
     if (showSuccessToast) {
-      const defaultMessages = {
+      const _defaultMessages = {
         create: 'Data berhasil ditambahkan',
         update: 'Data berhasil diperbarui',
         delete: 'Data berhasil dihapus'

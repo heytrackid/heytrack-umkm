@@ -59,7 +59,7 @@ const AppLayout = memo(({
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        void setUser(session?.user || null)
+        void setUser(session?.user ?? null)
         void setLoading(false)
       }
     )

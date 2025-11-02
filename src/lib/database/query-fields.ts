@@ -231,7 +231,7 @@ export function selectFields<T extends keyof typeof HPP_FIELDS>(
   view: T
 ): string
 export function selectFields(table: string, view: string): string {
-  const fieldMaps: Record<string, any> = {
+  const fieldMaps: Record<string, Record<string, string>> = {
     recipes: RECIPE_FIELDS,
     orders: ORDER_FIELDS,
     ingredients: INGREDIENT_FIELDS,
@@ -241,7 +241,7 @@ export function selectFields(table: string, view: string): string {
     hpp_calculations: HPP_FIELDS,
   }
   
-  return fieldMaps[table]?.[view] || '*'
+  return fieldMaps[table]?.[view] ?? '*'
 }
 
 /**

@@ -84,7 +84,7 @@ export function useHppCalculatorWorker() {
           if (e.data.success) {
             resolve(e.data.data)
           } else {
-            const errorMsg = e.data.error || 'Calculation failed'
+            const errorMsg = e.data.error ?? 'Calculation failed'
             void setError(errorMsg)
             reject(new Error(errorMsg))
           }

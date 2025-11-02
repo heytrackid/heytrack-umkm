@@ -124,7 +124,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                 safeOrders.filter(o => o.payment_status === 'UNPAID'),
                 'total_amount'
             ),
-            paid_revenue: safeOrders.reduce((sum, o) => sum + (o.paid_amount || 0), 0),
+            paid_revenue: safeOrders.reduce((sum, o) => sum + (o.paid_amount ?? 0), 0),
             average_order_value: arrayCalculations.average(safeOrders, 'total_amount'),
             total_customers: new Set(safeOrders.filter(o => o.customer_id).map(o => o.customer_id)).size,
             repeat_customers: 0,

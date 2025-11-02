@@ -42,7 +42,7 @@ export function useOrderPricing() {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || 'Failed to calculate order price')
+        throw new Error(error.error ?? 'Failed to calculate order price')
       }
 
       return response.json() as Promise<OrderPricingResult>

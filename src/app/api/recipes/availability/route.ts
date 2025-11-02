@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const recipeId = searchParams.get('recipe_id')
-    const quantity = parseInt(searchParams.get('quantity') || '1', 10)
+    const quantity = parseInt(searchParams.get('quantity') ?? '1', 10)
 
     if (!recipeId) {
       return NextResponse.json(

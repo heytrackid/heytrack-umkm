@@ -40,13 +40,13 @@ export const SmartReorderSuggestions = ({
     // Generate smart suggestions
     const suggestions: ReorderSuggestion[] = ingredients
         .filter(ing => {
-            const currentStock = ing.current_stock || 0
-            const minStock = ing.min_stock || 0
+            const currentStock = ing.current_stock ?? 0
+            const minStock = ing.min_stock ?? 0
             return currentStock <= minStock
         })
         .map(ing => {
-            const currentStock = ing.current_stock || 0
-            const minStock = ing.min_stock || 0
+            const currentStock = ing.current_stock ?? 0
+            const minStock = ing.min_stock ?? 0
             const avgDailyUsage = usageHistory[ing.id] || (minStock * 0.1) // fallback estimate
             const daysUntilOut = avgDailyUsage > 0 ? Math.floor(currentStock / avgDailyUsage) : 0
 
@@ -272,14 +272,14 @@ export const SmartReorderSuggestions = ({
                                             <div className="p-2 bg-gray-50 dark:bg-gray-900 rounded">
                                                 <div className="text-xs text-muted-foreground mb-1">Current Stock</div>
                                                 <div className="font-medium">
-                                                    {(suggestion.ingredient.current_stock || 0)} {suggestion.ingredient.unit || ''}
+                                                    {(suggestion.ingredient.current_stock ?? 0)} {suggestion.ingredient.unit ?? ''}
                                                 </div>
                                             </div>
 
                                             <div className="p-2 bg-gray-50 dark:bg-gray-900 rounded">
                                                 <div className="text-xs text-muted-foreground mb-1">Min Stock</div>
                                                 <div className="font-medium">
-                                                    {(suggestion.ingredient.min_stock || 0)} {suggestion.ingredient.unit || ''}
+                                                    {(suggestion.ingredient.min_stock ?? 0)} {suggestion.ingredient.unit ?? ''}
                                                 </div>
                                             </div>
 

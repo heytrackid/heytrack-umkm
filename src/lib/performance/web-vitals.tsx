@@ -1,8 +1,9 @@
+'use client'
+
 import { useEffect } from 'react'
 import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from 'web-vitals'
 import { performanceLogger } from '@/lib/client-logger'
 
-'use client'
 
 
 

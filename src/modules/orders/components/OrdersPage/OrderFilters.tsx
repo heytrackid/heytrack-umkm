@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -6,7 +8,6 @@ import { Filter, Search, XCircle } from 'lucide-react'
 import type { OrderStatus } from '@/app/orders/types/orders.types'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 
-'use client'
 
 
 /**
@@ -51,7 +52,7 @@ export const OrderFilters = ({
                                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Cari nama pelanggan atau nomor pesanan..."
-                                    value={filters.customer_search || ''}
+                                    value={filters.customer_search ?? ''}
                                     onChange={(e) => onFilterChange({ ...filters, customer_search: e.target.value })}
                                     className="pl-8"
                                 />

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, Trash2, CheckCircle, type LucideIcon } from "lucide-react"
-import type { ReactNode } from "react"
+import type  from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,7 +63,7 @@ export const ConfirmationDialog = ({
   icon
 }: ConfirmationDialogProps) => {
   const config = variantConfig[variant]
-  const IconComponent = icon || config.icon
+  const IconComponent = icon ?? config.icon
 
   const handleConfirm = async () => {
     await onConfirm()
@@ -91,7 +91,7 @@ export const ConfirmationDialog = ({
         <AlertDialogFooter className="flex flex-row gap-2 justify-end">
           <AlertDialogCancel asChild>
             <Button variant="outline" disabled={loading}>
-              {cancelText || "Batal"}
+              {cancelText ?? "Batal"}
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
@@ -106,7 +106,7 @@ export const ConfirmationDialog = ({
                   Informasi
                 </>
               ) : (
-                confirmText || "Konfirmasi"
+                confirmText ?? "Konfirmasi"
               )}
             </Button>
           </AlertDialogAction>

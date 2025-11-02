@@ -4,13 +4,6 @@ import { useEffect, useRef, type ComponentProps } from 'react'
 import { type DayButton, DayPicker, getDefaultClassNames, type WeekNumberProps } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react"
-
-
 const Calendar = ({
   className,
   classNames,

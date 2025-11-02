@@ -11,12 +11,12 @@ import { cn } from "@/lib/utils"
 const ChartContainer = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement> & {
-    config?: Record<string, { label?: string; icon?: ComponentType; color?: string }>
+    _config?: Record<string, { _label?: string; icon?: ComponentType; color?: string }>
     children: ComponentProps<
       typeof RechartsPrimitive.ResponsiveContainer
     >["children"]
   }
->(({ className, config, children, ...props }, ref) => (
+>(({ className, _config, children, ...props }, ref) => (
   <div ref={ref} className={cn("flex aspect-video justify-center text-xs", className)} {...props}>
     <RechartsPrimitive.ResponsiveContainer width="100%" height="100%">
       {children}
@@ -31,23 +31,23 @@ const ChartTooltip = RechartsPrimitive.Tooltip
 const ChartTooltipContent = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement> & {
-    hideLabel?: boolean
-    hideIndicator?: boolean
-    indicator?: "line" | "dot" | "dashed"
-    active?: boolean
-    payload?: unknown
-    label?: unknown
+    _hideLabel?: boolean
+    _hideIndicator?: boolean
+    _indicator?: "line" | "dot" | "dashed"
+    _active?: boolean
+    _payload?: unknown
+    _label?: unknown
   }
 >(
   ({
     className,
-    hideLabel = false,
-    hideIndicator = false,
-    indicator = "dot",
+    _hideLabel = false,
+    _hideIndicator = false,
+    _indicator = "dot",
     // Filter out recharts-specific props that shouldn't be passed to DOM
-    active,
-    payload,
-    label,
+    _active,
+    _payload,
+    _label,
     ...validDOMProps
   }, ref) => (
     <div
@@ -68,10 +68,10 @@ const ChartLegend = RechartsPrimitive.Legend
 const ChartLegendContent = forwardRef<
   HTMLDivElement,
   ComponentProps<'div'> & {
-    payload?: Array<{ value: string; type?: string; color?: string }>
+    _payload?: Array<{ value: string; type?: string; color?: string }>
   }
->(({ className, payload, ...props }, ref) => {
-  if (!payload?.length) {
+>(({ className, _payload, ...props }, ref) => {
+  if (!_payload?.length) {
     return null
   }
 
@@ -81,7 +81,7 @@ const ChartLegendContent = forwardRef<
       className={cn("flex items-center justify-center gap-4 text-sm", className)}
       {...props}
     >
-      {payload.map((item, index: number) => (
+      {_payload.map((item, index: number) => (
         <div key={`legend-${index}`} className="flex items-center gap-1.5">
           <div
             className="h-2 w-2 rounded-full"

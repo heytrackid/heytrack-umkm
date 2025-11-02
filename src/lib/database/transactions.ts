@@ -197,7 +197,7 @@ export async function retryWithBackoff<T>(
     }
   }
 
-  throw lastError || new Error('Max retries exceeded')
+  throw lastError ?? new Error('Max retries exceeded')
 }
 
 /**

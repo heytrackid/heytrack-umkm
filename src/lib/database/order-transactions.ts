@@ -1,6 +1,5 @@
 import { dbLogger } from '@/lib/logger'
-import { executeTransaction, createOperation } from './transactions'
-import type { TransactionOperation } from './transactions'
+import { executeTransaction, createOperation, type TransactionOperation } from './transactions'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database, OrdersInsert, OrderItemsInsert, FinancialRecordsInsert } from '@/types/database'
 
@@ -117,8 +116,8 @@ export async function createOrderWithTransaction(
           user_id: userId,
           type: 'INCOME',
           category: 'SALES',
-          amount: data.order.total_amount || 0,
-          date: data.order.order_date || new Date().toISOString(),
+          amount: data.order.total_amount ?? 0,
+          date: data.order.order_date ?? new Date().toISOString(),
           reference: `Order ${orderId}`,
           description: `Income from order ${data.order.order_no}`,
         }
@@ -153,7 +152,7 @@ export async function createOrderWithTransaction(
   const result = await executeTransaction(operations, { logProgress: true })
 
   if (!result.success) {
-    throw result.error || new Error('Transaction failed')
+    throw result.error ?? new Error('Transaction failed')
   }
 
   if (!orderId) {

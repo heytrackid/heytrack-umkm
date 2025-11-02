@@ -80,8 +80,8 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
 
             // Stock filter
             let matchesStock = true
-            const currentStock = item.current_stock || 0
-            const minStock = item.min_stock || 0
+            const currentStock = item.current_stock ?? 0
+            const minStock = item.min_stock ?? 0
 
             if (stockFilter === 'low') {
                 matchesStock = currentStock > 0 && currentStock <= minStock
@@ -93,7 +93,7 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
 
             // Category filter
             const matchesCategory = categoryFilter === 'all' ||
-                (item.category || 'Lainnya') === categoryFilter
+                (item.category ?? 'Lainnya') === categoryFilter
 
             return matchesSearch && matchesStock && matchesCategory
         }).sort((a, b) => a.name.localeCompare(b.name))
@@ -284,8 +284,8 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
                                 </thead>
                                 <tbody>
                                     {paginatedData.map((item) => {
-                                        const currentStock = item.current_stock || 0
-                                        const minStock = item.min_stock || 0
+                                        const currentStock = item.current_stock ?? 0
+                                        const minStock = item.min_stock ?? 0
                                         const totalValue = currentStock * item.price_per_unit
                                         return (
                                             <tr key={item.id} className="border-b hover:bg-muted/30 transition-colors">
@@ -434,7 +434,7 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
                 onClose={() => setIsDeleteDialogOpen(false)}
                 onConfirm={handleConfirmDelete}
                 entityName="Bahan Baku"
-                itemName={selectedIngredient?.name || ''}
+                itemName={selectedIngredient?.name ?? ''}
                 isLoading={loading}
             />
 

@@ -28,7 +28,7 @@ export class NotificationService {
         category: params.category,
         title: params.title,
         message: params.message,
-        priority: params.priority || 'normal',
+        priority: params.priority ?? 'normal',
         entity_type: params.entity_type,
         entity_id: params.entity_id,
         action_url: params.action_url,

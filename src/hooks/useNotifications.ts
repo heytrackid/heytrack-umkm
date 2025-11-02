@@ -45,8 +45,8 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       }
 
       const data = await response.json()
-      setNotifications(data.notifications || [])
-      setUnreadCount(data.unread_count || 0)
+      setNotifications(data.notifications ?? [])
+      setUnreadCount(data.unread_count ?? 0)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {

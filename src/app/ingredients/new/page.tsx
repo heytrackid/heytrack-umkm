@@ -52,7 +52,7 @@ const NewIngredientPage = () => {
       } = await supabase.auth.getUser()
 
       if (authError || !user) {
-        throw authError || new Error('User not authenticated')
+        throw authError ?? new Error('User not authenticated')
       }
 
       const payload: IngredientInsert = {
@@ -60,8 +60,8 @@ const NewIngredientPage = () => {
         unit: data.unit,
         price_per_unit: data.price_per_unit,
         current_stock: data.current_stock,
-        min_stock: data.min_stock || 0,
-        description: data.description || null,
+        min_stock: data.min_stock ?? 0,
+        description: data.description ?? null,
         user_id: user.id,
         is_active: true,
         weighted_average_cost: 0

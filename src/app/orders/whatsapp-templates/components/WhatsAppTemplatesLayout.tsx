@@ -189,14 +189,14 @@ const WhatsAppTemplatesPage = () => {
                 const data = await response.json()
                 toast({
                     title: '🎉 Template Siap Digunakan!',
-                    description: `${data.templates?.length || 8} template WhatsApp sudah dibuat dan siap kamu edit!`,
+                    description: `${data.templates?.length ?? 8} template WhatsApp sudah dibuat dan siap kamu edit!`,
                 })
                 await fetchTemplates()
             } else {
                 const errorBody: { message?: string } = await response.json()
                 toast({
                     title: 'Gagal membuat template',
-                    description: errorBody.message || 'Terjadi kesalahan',
+                    description: errorBody.message ?? 'Terjadi kesalahan',
                     variant: 'destructive',
                 })
             }
@@ -392,7 +392,7 @@ const WhatsAppTemplatesPage = () => {
                         }
                     }}
                     title="Hapus template WhatsApp?"
-                    description={`Template "${templateToDelete?.name || 'ini'}" akan dihapus secara permanen.`}
+                    description={`Template "${templateToDelete?.name ?? 'ini'}" akan dihapus secara permanen.`}
                     confirmText="Hapus"
                     cancelText="Batal"
                     variant="destructive"

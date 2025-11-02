@@ -92,13 +92,13 @@ export class OrderValidationService {
           const ingredient = ri.ingredient?.[0]
           
           if (!ingredient?.is_active) {
-            errors.push(`Ingredient ${ingredient?.name || 'unknown'} untuk ${typedRecipe.name} tidak tersedia`)
+            errors.push(`Ingredient ${ingredient?.name ?? 'unknown'} untuk ${typedRecipe.name} tidak tersedia`)
             continue
           }
 
           const requiredQuantity = ri.quantity * item.quantity
-          const currentStock = ingredient.current_stock || 0
-          const reorderPoint = ingredient.reorder_point || 0
+          const currentStock = ingredient.current_stock ?? 0
+          const reorderPoint = ingredient.reorder_point ?? 0
 
           if (currentStock < requiredQuantity) {
             errors.push(

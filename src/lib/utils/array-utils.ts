@@ -16,7 +16,7 @@ export function filterMapSlice<T, R>(
   limit?: number
 ): R[] {
   const result: R[] = []
-  const maxItems = limit || array.length
+  const maxItems = limit ?? array.length
   
   for (let i = 0; i < array.length && result.length < maxItems; i++) {
     if (predicate(array[i])) {

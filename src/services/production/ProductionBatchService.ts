@@ -51,7 +51,7 @@ export class ProductionBatchService {
   static async createBatchFromOrders(
     orderIds: string[],
     userId: string,
-    plannedDate?: string
+    _plannedDate?: string
   ): Promise<{
     success: boolean
     batch_id?: string
@@ -109,7 +109,7 @@ export class ProductionBatchService {
             recipe_id: item.recipe_id,
             recipe_name: recipe.name,
             total_quantity: item.quantity,
-            cost_per_unit: safeGet(recipe, 'cost_per_unit') || 0,
+            cost_per_unit: safeGet(recipe, 'cost_per_unit') ?? 0,
             order_count: 1
           })
         }
@@ -244,7 +244,7 @@ export class ProductionBatchService {
         if (existing) {
           existing.total_quantity += item.quantity
           existing.order_count += 1
-          existing.estimated_cost += (safeGet(recipe, 'cost_per_unit') || 0) * item.quantity
+          existing.estimated_cost += (safeGet(recipe, 'cost_per_unit') ?? 0) * item.quantity
           if (isUrgent) {existing.urgent_count += 1}
           const deliveryDate = safeGet(order, 'delivery_date')
           if (deliveryDate && typeof deliveryDate === 'string' && (!existing.earliest_delivery || deliveryDate < existing.earliest_delivery)) {
@@ -257,7 +257,7 @@ export class ProductionBatchService {
             recipe_name: recipe.name,
             total_quantity: item.quantity,
             order_count: 1,
-            estimated_cost: (recipe.cost_per_unit || 0) * item.quantity,
+            estimated_cost: (recipe.cost_per_unit ?? 0) * item.quantity,
             urgent_count: isUrgent ? 1 : 0,
             earliest_delivery: typeof deliveryDate === 'string' ? deliveryDate : null
           })
@@ -321,7 +321,7 @@ export class ProductionBatchService {
       const updateData: Update<'productions'> = {
         status: 'COMPLETED',
         completed_at: new Date().toISOString(),
-        labor_cost: actualCosts.labor_cost || 0,
+        labor_cost: actualCosts.labor_cost ?? 0,
         updated_at: new Date().toISOString()
       }
 

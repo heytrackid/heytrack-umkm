@@ -1,3 +1,5 @@
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,9 +10,6 @@ import { useToast } from '@/hooks/use-toast'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Scale, TrendingUp, Package, DollarSign, Download, Calculator } from 'lucide-react'
 import { useMemo, useState } from 'react'
-
-
-'use client'
 
 
 interface RecipeBatchScalerProps {
@@ -65,7 +64,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
         recipe.recipe_ingredients?.forEach((ri) => {
             if (!ri.ingredient) { return }
             const needed = ri.quantity * scaleFactor
-            const available = ri.ingredient.stock_quantity || 0
+            const available = ri.ingredient.stock_quantity ?? 0
             if (available < needed) {
                 issues.push(`${ri.ingredient.name}: butuh ${needed.toFixed(2)} ${ri.unit}, tersedia ${available.toFixed(2)} ${ri.unit}`)
             }
@@ -83,7 +82,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
         })
     }
 
-    const recipeIngredients = recipe.recipe_ingredients || []
+    const recipeIngredients = recipe.recipe_ingredients ?? []
 
     return (
         <div className="space-y-4">
@@ -286,10 +285,10 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
 
                                 const originalQty = ri.quantity
                                 const scaledQty = ri.quantity * scaleFactor
-                                const stock = ri.ingredient.stock_quantity || 0
+                                const stock = ri.ingredient.stock_quantity ?? 0
                                 const cost = scaledQty * ri.ingredient.price_per_unit
                                 const isEnough = stock >= scaledQty
-                                const ingredientKey = `${ri.ingredient.id || ri.ingredient.name}-${ri.unit}-${ri.quantity}`
+                                const ingredientKey = `${ri.ingredient.id ?? ri.ingredient.name}-${ri.unit}-${ri.quantity}`
 
                                 return (
                                     <TableRow key={ingredientKey}>

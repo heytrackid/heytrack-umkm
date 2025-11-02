@@ -32,8 +32,8 @@ export class InventoryNotificationService {
 
       // Create notifications for each low stock ingredient
       for (const ingredient of ingredients) {
-        const currentStock = ingredient.current_stock || 0
-        const minStock = ingredient.min_stock || 0
+        const currentStock = ingredient.current_stock ?? 0
+        const minStock = ingredient.min_stock ?? 0
         
         // Skip if stock is above minimum
         if (currentStock >= minStock) {

@@ -82,7 +82,7 @@ export const OrdersListWithPagination = () => {
 
             setOrders(result.data)
             setTotalItems(result.meta.total)
-        } catch (error) {
+        } catch (_error) {
             toast({
                 title: 'Error',
                 description: 'Gagal memuat data pesanan',
@@ -223,7 +223,7 @@ export const OrdersListWithPagination = () => {
                                     <div className="flex-1 space-y-2">
                                         <div className="flex items-center gap-3">
                                             <h3 className="font-semibold text-lg">#{order.order_no}</h3>
-                                            {getStatusBadge(order.status || 'PENDING')}
+                                            {getStatusBadge(order.status ?? 'PENDING')}
                                         </div>
                                         <div className="text-sm text-muted-foreground space-y-1">
                                             <p>Pelanggan: {order.customer_name}</p>
@@ -235,7 +235,7 @@ export const OrdersListWithPagination = () => {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-2xl font-bold">
-                                            {formatCurrency(order.total_amount || 0)}
+                                            {formatCurrency(order.total_amount ?? 0)}
                                         </p>
                                         {order.items && order.items.length > 0 && (
                                             <p className="text-sm text-muted-foreground mt-1">

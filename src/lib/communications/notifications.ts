@@ -114,7 +114,7 @@ export class SmartNotificationSystem {
   /**
    * Evaluate rules against data
    */
-  evaluateRules(data: Record<string, any>, category: SmartNotification['category']): void {
+  evaluateRules(data: Record<string, unknown>, category: SmartNotification['category']): void {
     if (!this.config.enableSmartRules) {return;}
 
     for (const rule of this.rules) {
@@ -160,7 +160,7 @@ export class SmartNotificationSystem {
     }
 
     if (condition.operator === 'contains') {
-      return String(value).toLowerCase().includes(String(condition.value || '').toLowerCase())
+      return String(value).toLowerCase().includes(String(condition.value ?? '').toLowerCase())
     }
 
     const numericValue = typeof value === 'number' ? value : Number(value)

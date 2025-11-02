@@ -185,7 +185,7 @@ const AIRecipeGeneratorPage = () => {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || 'Failed to generate recipe')
+        throw new Error(error.error ?? 'Failed to generate recipe')
       }
 
       const data = await response.json()
@@ -261,7 +261,7 @@ const AIRecipeGeneratorPage = () => {
         .filter((value): value is RecipeIngredientsInsert => value !== null)
 
       if (recipeIngredients.length > 0) {
-        const { error: ingredientsError } = await typedInsert(supabase as never, 'recipe_ingredients', recipeIngredients)
+      const { error: ingredientsError } = await typedInsert(supabase as never, 'recipe_ingredients', recipeIngredients)
 
         if (ingredientsError) { throw ingredientsError }
       }

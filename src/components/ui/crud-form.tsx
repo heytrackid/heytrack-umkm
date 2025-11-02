@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { useState, type ChangeEvent, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react';
 import { Eye, EyeOff, ChevronDown, AlertCircle, Check } from 'lucide-react';
 
@@ -29,7 +29,7 @@ export const FormField = (props: FormFieldProps) => {
     label,
     name,
     type = 'text',
-    value: propValue,
+    value: _propValue,
     onChange: propOnChange,
     onBlur: propOnBlur,
     error,
@@ -47,13 +47,13 @@ export const FormField = (props: FormFieldProps) => {
     fullWidth = true,
     // Extract react-hook-form specific props if present
     onChange: rhfOnChange,
-    onBlur: rhfOnBlur,
+    onBlur: _rhfOnBlur,
     value: rhfValue,
     ...restProps
   } = props;
 
   // Determine if we're using react-hook-form by checking for its props
-  const isUsingRHF = rhfOnChange !== undefined || rhfValue !== undefined;
+  const _isUsingRHF = rhfOnChange !== undefined || rhfValue !== undefined;
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -127,13 +127,13 @@ export const FormField = (props: FormFieldProps) => {
     className: `${getInputClasses()} resize-vertical min-h-[80px] ${icon ? 'pl-10' : ''}`,
     rows,
     onChange: handleChange,
-  };
+  } as unknown as React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
   const selectSpecificProps = {
     ...commonInputProps,
     className: `${getInputClasses()} appearance-none pr-10 ${icon ? 'pl-10' : ''}`,
     onChange: handleChange,
-  };
+  } as unknown as React.SelectHTMLAttributes<HTMLSelectElement>;
 
   return (
     <div className={`${fullWidth ? 'w-full' : ''} mb-4 sm:mb-6`}>
@@ -171,7 +171,7 @@ export const FormField = (props: FormFieldProps) => {
               {...selectSpecificProps}
             >
               <option value="" disabled>
-                {placeholder || "Pilih opsi"}
+                {placeholder ?? "Pilih opsi"}
               </option>
               {options.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -221,7 +221,7 @@ export const FormField = (props: FormFieldProps) => {
       </div>
 
       {/* Help Text */}
-      {(error || success) && (
+      {(error ?? success) && (
         <div className="mt-2 flex items-start space-x-1">
           {error && (
             <>
@@ -313,7 +313,7 @@ export const FormSection = ({
   className = '',
 }: FormSectionProps) => (
   <div className={`space-y-4 sm:space-y-6 ${className}`}>
-    {(title || description) && (
+    {(title ?? description) && (
       <div className="border-b border-gray-200 pb-4">
         {title && (
           <h3 className="text-lg font-medium text-gray-900 sm:text-xl">

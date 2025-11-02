@@ -1,8 +1,9 @@
+'use client'
+
 import { useState } from 'react'
 import { CalendarIcon, Clock } from 'lucide-react'
 import { format, addDays, startOfToday } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-'use client'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'

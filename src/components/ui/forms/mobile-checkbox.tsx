@@ -65,12 +65,12 @@ export const MobileCheckbox = ({
       </div>
 
       {/* Hint or Error message */}
-      {(hint || error) && (
+      {(hint ?? error) && (
         <p className={cn(
           "text-sm ml-8", // Align with checkbox label
           error ? "text-destructive" : "text-muted-foreground"
         )}>
-          {error || hint}
+          {error ?? hint}
         </p>
       )}
     </div>

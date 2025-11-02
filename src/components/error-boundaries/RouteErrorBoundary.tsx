@@ -40,7 +40,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    const routeName = this.props.routeName || 'Unknown Route'
+    const routeName = this.props.routeName ?? 'Unknown Route'
 
     apiLogger.error({
       error: error.message,
@@ -71,7 +71,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
 
   override render() {
     if (this.state.hasError) {
-      const routeName = this.props.routeName || 'this page'
+      const routeName = this.props.routeName ?? 'this page'
       const maxRetries = 3
 
       return (
@@ -133,7 +133,7 @@ export function withRouteErrorBoundary<P extends object>(
     </RouteErrorBoundary>
   )
 
-  WrappedComponent.displayName = `withRouteErrorBoundary(${Component.displayName || Component.name})`
+  WrappedComponent.displayName = `withRouteErrorBoundary(${Component.displayName ?? Component.name})`
 
   return WrappedComponent
 }

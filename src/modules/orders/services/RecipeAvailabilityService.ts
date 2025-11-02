@@ -25,8 +25,8 @@ export class RecipeAvailabilityService {
       if (!ri.ingredient?.is_active) {return false}
 
       // Check if current stock is above reorder point
-      const currentStock = ri.ingredient.current_stock || 0
-      const reorderPoint = ri.ingredient.reorder_point || 0
+      const currentStock = ri.ingredient.current_stock ?? 0
+      const reorderPoint = ri.ingredient.reorder_point ?? 0
       const requiredQuantity = ri.quantity || 0
 
       return currentStock >= Math.max(reorderPoint, requiredQuantity)
@@ -74,7 +74,7 @@ export class RecipeAvailabilityService {
 
       // Process recipes and check availability
       const recipeOptions: RecipeOption[] = recipes.map((recipe) => {
-        const price = recipe.selling_price || 0
+        const price = recipe.selling_price ?? 0
         const estimatedMargin = 0.3 // Default 30% margin
 
         const recipeIngredients = (recipe.recipe_ingredients || []).map(ri => ({
@@ -87,15 +87,15 @@ export class RecipeAvailabilityService {
         return {
           id: recipe.id,
           name: recipe.name,
-          category: recipe.category || '',
-          servings: recipe.servings || 1,
+          category: recipe.category ?? '',
+          servings: recipe.servings ?? 1,
           description: recipe.description,
           selling_price: price,
-          cost_per_unit: recipe.cost_per_unit || (price * 0.7),
-          margin_percentage: recipe.margin_percentage || estimatedMargin,
+          cost_per_unit: recipe.cost_per_unit ?? (price * 0.7),
+          margin_percentage: recipe.margin_percentage ?? estimatedMargin,
           is_available: isAvailable,
-          prep_time: recipe.prep_time || null,
-          cook_time: recipe.cook_time || null
+          prep_time: recipe.prep_time ?? null,
+          cook_time: recipe.cook_time ?? null
         }
       })
 

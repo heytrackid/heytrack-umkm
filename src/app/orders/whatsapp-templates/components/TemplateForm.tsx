@@ -42,16 +42,16 @@ const TemplateForm = ({
             // Convert variables to array format if it's an object
             const vars = Array.isArray(editingTemplate.variables)
                 ? editingTemplate.variables
-                : Object.keys(editingTemplate.variables || {})
+                : Object.keys(editingTemplate.variables ?? {})
 
             setFormData({
                 name: editingTemplate.name,
-                description: editingTemplate.description || '',
+                description: editingTemplate.description ?? '',
                 category: editingTemplate.category,
                 template_content: editingTemplate.template_content,
                 variables: vars,
-                is_active: editingTemplate.is_active || true,
-                is_default: editingTemplate.is_default || false
+                is_active: editingTemplate.is_active ?? true,
+                is_default: editingTemplate.is_default ?? false
             })
         } else {
             resetForm()

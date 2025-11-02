@@ -99,7 +99,7 @@ export const SuspenseWrapper = ({
 
   return (
     <ErrorBoundary fallback={errorFallback}>
-      <Suspense fallback={fallback || <LoadingComponent />}>
+      <Suspense fallback={fallback ?? <LoadingComponent />}>
         {children}
       </Suspense>
     </ErrorBoundary>

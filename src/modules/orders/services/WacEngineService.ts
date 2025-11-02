@@ -32,7 +32,7 @@ export class WacEngineService {
   private supabase: SupabaseClient<Database> | null = null
 
   private async getSupabase() {
-    this.supabase ||= await createClient()
+    this.supabase ??= await createClient()
     return this.supabase
   }
 
@@ -106,12 +106,12 @@ export class WacEngineService {
 
       // Get current WAC
       const currentWac = await this.calculateIngredientWac(ingredientId)
-      const oldWac = currentWac?.currentWac || 0
+      const oldWac = currentWac?.currentWac ?? 0
 
       // Calculate new WAC with the additional purchase
       const purchaseValue = newQuantity * unitPrice
-      const newTotalQuantity = (currentWac?.totalQuantity || 0) + newQuantity
-      const newTotalValue = (currentWac?.totalValue || 0) + purchaseValue
+      const newTotalQuantity = (currentWac?.totalQuantity ?? 0) + newQuantity
+      const newTotalValue = (currentWac?.totalValue ?? 0) + purchaseValue
       const newWac = newTotalQuantity > 0 ? newTotalValue / newTotalQuantity : 0
 
       const result: WacUpdateResult = {
@@ -306,7 +306,7 @@ export class WacEngineService {
         const wac = runningQuantity > 0 ? runningValue / runningQuantity : 0
 
         history.push({
-          date: transaction.created_at || new Date().toISOString(),
+          date: transaction.created_at ?? new Date().toISOString(),
           wac,
           transactionId: transaction.id
         })

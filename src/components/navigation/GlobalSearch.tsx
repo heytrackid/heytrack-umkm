@@ -56,22 +56,22 @@ export const GlobalSearch = memo(() => {
   // Filter results based on debounced search
   const filteredIngredients = (ingredients as IngredientItem[] | undefined)?.filter((item: IngredientItem) =>
     item.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
-  ).slice(0, 5) || []
+  ).slice(0, 5) ?? []
 
   const filteredOrders = (orders as OrderItem[] | undefined)?.filter((item: OrderItem) =>
     item.order_no?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
     item.customer_name?.toLowerCase().includes(debouncedSearch.toLowerCase())
-  ).slice(0, 5) || []
+  ).slice(0, 5) ?? []
 
   const filteredCustomers = (customers as CustomerItem[] | undefined)?.filter((item: CustomerItem) =>
     item.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
     item.email?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
     item.phone?.includes(debouncedSearch)
-  ).slice(0, 5) || []
+  ).slice(0, 5) ?? []
 
   const filteredRecipes = (recipes as RecipeItem[] | undefined)?.filter((item: RecipeItem) =>
     item.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
-  ).slice(0, 5) || []
+  ).slice(0, 5) ?? []
 
   // Quick actions
   const quickActions: QuickAction[] = [

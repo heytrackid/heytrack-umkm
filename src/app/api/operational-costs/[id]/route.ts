@@ -99,9 +99,9 @@ export async function PUT(
 
     // Build update object
     const updatePayload: OperationalCostsUpdate = {
-      category: validatedData.category || undefined,
+      category: validatedData.category ?? undefined,
       amount: validatedData.amount,
-      description: validatedData.description || undefined,
+      description: validatedData.description ?? undefined,
       date: validatedData.date,
       recurring: validatedData.is_recurring,
       frequency: validatedData.recurring_frequency,

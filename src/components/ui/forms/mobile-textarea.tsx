@@ -43,7 +43,7 @@ export const MobileTextarea = ({
 }: MobileTextareaProps) => {
   const [isFocused, setIsFocused] = useState(false)
   const { isMobile } = useResponsive()
-  const currentLength = value?.length || defaultValue?.length || 0
+  const currentLength = value?.length ?? defaultValue?.length ?? 0
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -90,7 +90,7 @@ export const MobileTextarea = ({
           "text-sm",
           error ? "text-destructive" : "text-muted-foreground"
         )}>
-          {error || hint}
+          {error ?? hint}
         </p>
 
         {maxLength && (

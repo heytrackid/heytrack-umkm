@@ -82,7 +82,7 @@ export const DataGrid = ({ children, className, variant = 'default' }: DataGridP
   }
 
   return (
-    <div className={`${gridClasses[variant]} ${className || ''}`}>
+    <div className={`${gridClasses[variant]} ${className ?? ''}`}>
       {children}
     </div>
   )
@@ -109,7 +109,7 @@ export const ContentCard = ({
   noPadding = false
 }: ContentCardProps) => (
   <Card className={className}>
-    {(title || headerActions) && (
+    {(title ?? headerActions) && (
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>

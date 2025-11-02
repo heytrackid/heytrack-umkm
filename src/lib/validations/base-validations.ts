@@ -57,7 +57,7 @@ export const EnvSchema = z.object({
   // CRON_SECRET: z.string().optional(),
 }).refine((env) => 
   // At least one AI service must be configured
-   env.OPENAI_API_KEY || env.ANTHROPIC_API_KEY
+   env.OPENAI_API_KEY ?? env.ANTHROPIC_API_KEY
 , {
   message: 'At least one AI service (OpenAI or Anthropic) must be configured',
   path: ['OPENAI_API_KEY']
@@ -74,7 +74,7 @@ export function validateEnvironment(): EnvConfig {
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-    NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
+    NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
     NODE_ENV: process.env.NODE_ENV || 'development',
     // CRON_SECRET: process.env.CRON_SECRET, // Removed
   }
@@ -142,7 +142,7 @@ export function validateInput(data: unknown, rules?: Record<string, unknown>): {
 
   const objData = data as Record<string, unknown>
 
-  for (const [field, rule] of Object.entries(rules || {})) {
+  for (const [field, rule] of Object.entries(rules ?? {})) {
     const value = objData[field]
 
     if (rule && typeof rule === 'object') {

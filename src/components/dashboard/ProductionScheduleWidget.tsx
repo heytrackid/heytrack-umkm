@@ -46,7 +46,7 @@ export const ProductionScheduleWidget = () => {
         )
     }
 
-    const { production_schedule, pending_orders, low_stock_alerts, summary } = data || {}
+    const { production_schedule, pending_orders, low_stock_alerts, summary } = data ?? {}
 
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -57,9 +57,9 @@ export const ProductionScheduleWidget = () => {
                     <Package className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{summary?.total_batches_today || 0}</div>
+                    <div className="text-2xl font-bold">{summary?.total_batches_today ?? 0}</div>
                     <p className="text-xs text-muted-foreground">
-                        {summary?.planned_batches || 0} planned, {summary?.in_progress_batches || 0} in progress
+                        {summary?.planned_batches ?? 0} planned, {summary?.in_progress_batches ?? 0} in progress
                     </p>
                 </CardContent>
             </Card>
@@ -70,9 +70,9 @@ export const ProductionScheduleWidget = () => {
                     <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{summary?.pending_orders_count || 0}</div>
+                    <div className="text-2xl font-bold">{summary?.pending_orders_count ?? 0}</div>
                     <p className="text-xs text-muted-foreground">
-                        {summary?.urgent_orders || 0} urgent
+                        {summary?.urgent_orders ?? 0} urgent
                     </p>
                 </CardContent>
             </Card>
@@ -83,9 +83,9 @@ export const ProductionScheduleWidget = () => {
                     <AlertCircle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{low_stock_alerts?.length || 0}</div>
+                    <div className="text-2xl font-bold">{low_stock_alerts?.length ?? 0}</div>
                     <p className="text-xs text-muted-foreground">
-                        {summary?.critical_stock_items || 0} critical
+                        {summary?.critical_stock_items ?? 0} critical
                     </p>
                 </CardContent>
             </Card>
@@ -102,7 +102,7 @@ export const ProductionScheduleWidget = () => {
                             : 0}%
                     </div>
                     <p className="text-xs text-muted-foreground">
-                        {summary?.completed_batches || 0} of {summary?.total_batches_today || 0} completed
+                        {summary?.completed_batches ?? 0} of {summary?.total_batches_today ?? 0} completed
                     </p>
                 </CardContent>
             </Card>
@@ -152,7 +152,7 @@ export const ProductionScheduleWidget = () => {
                                     <div className="flex-1">
                                         <p className="font-medium">{order.order_no}</p>
                                         <p className="text-sm text-muted-foreground">
-                                            {order.customer_name || 'No customer'} • {order.delivery_date || 'No date'}
+                                            {order.customer_name ?? 'No customer'} • {order.delivery_date ?? 'No date'}
                                         </p>
                                     </div>
                                     {order.production_priority === 'URGENT' && (

@@ -19,6 +19,7 @@ type Ingredient = IngredientsTable
 export class OrderPricingService {
   /**
    * Calculate pricing for order items
+   * ✅ NEW: Supports customer_id for automatic discount application
    */
   static async calculateOrderPricing(
     items: Array<{
@@ -30,17 +31,40 @@ export class OrderPricingService {
       tax_rate?: number
       discount_amount?: number
       discount_percentage?: number
+      customer_id?: string  // ✅ NEW: Auto-apply customer discount
     } = {}
   ): Promise<OrderPricing> {
     try {
       const {
         tax_rate = ORDER_CONFIG.DEFAULT_TAX_RATE,
-        discount_amount = 0,
-        discount_percentage = 0
+        discount_amount: initialDiscountAmount = 0,
+        discount_percentage: initialDiscountPercentage = 0,
+        customer_id
       } = options
+      
+      const discount_amount = initialDiscountAmount
+      let discount_percentage = initialDiscountPercentage
+
+      // ✅ NEW: Auto-apply customer discount if customer_id provided
+      const supabase = await createClient()
+      
+      if (customer_id && discount_percentage === 0 && discount_amount === 0) {
+        const { data: customer } = await supabase
+          .from('customers')
+          .select('discount_percentage, loyalty_points')
+          .eq('id', customer_id)
+          .single()
+
+        if (customer?.discount_percentage) {
+          discount_percentage = Number(customer.discount_percentage)
+          dbLogger.info({ 
+            customerId: customer_id, 
+            discount: discount_percentage 
+          }, 'Applied customer discount')
+        }
+      }
 
       // Get recipe details for pricing
-      const supabase = await createClient()
       const recipeIds = items.map(item => item.recipe_id)
       const { data: recipes, error } = await supabase
         .from('recipes')
@@ -100,7 +124,7 @@ export class OrderPricingService {
           }
 
           // Use recipe selling price as unit price
-          const baseUnitPrice = item.custom_price || recipe.selling_price || 0
+          const baseUnitPrice = item.custom_price ?? recipe.selling_price ?? 0
           const unit_price = baseUnitPrice
           const total_price = baseUnitPrice * item.quantity
           

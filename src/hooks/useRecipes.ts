@@ -82,7 +82,7 @@ export function useCreateRecipe() {
       
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to create recipe')
+        throw new Error(error.message ?? 'Failed to create recipe')
       }
       
       return response.json()
@@ -126,7 +126,7 @@ export function useUpdateRecipe() {
       
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to update recipe')
+        throw new Error(error.message ?? 'Failed to update recipe')
       }
       
       return response.json()
@@ -169,7 +169,7 @@ export function useDeleteRecipe() {
       
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to delete recipe')
+        throw new Error(error.message ?? 'Failed to delete recipe')
       }
       
       return response.json()

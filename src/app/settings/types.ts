@@ -116,24 +116,24 @@ export const normalizeSettings = (
   settings: Partial<AppSettingsState> | null | undefined,
   contextSettings?: SettingsContextState
 ): AppSettingsState => {
-  const merged: Partial<AppSettingsState> = settings || {}
+  const merged: Partial<AppSettingsState> = settings ?? {}
 
   const general: GeneralSettings = {
     ...DEFAULT_APP_SETTINGS.general,
-    ...(merged.general || {}),
+    ...(merged.general ?? {}),
   }
 
   const user: UserSettings = {
     ...DEFAULT_APP_SETTINGS.user,
-    ...(merged.user || {}),
+    ...(merged.user ?? {}),
   }
 
   const notifications: NotificationSettings = {
     ...DEFAULT_APP_SETTINGS.notifications,
-    ...(merged.notifications || {}),
+    ...(merged.notifications ?? {}),
   }
 
-  const systemSource: Partial<SystemSettings> = merged.system || {}
+  const systemSource: Partial<SystemSettings> = merged.system ?? {}
   const parsedDefaultTax = Number(systemSource.defaultTax)
   const parsedLowStock = Number(systemSource.lowStockThreshold)
 
@@ -144,14 +144,14 @@ export const normalizeSettings = (
     lowStockThreshold: Number.isFinite(parsedLowStock) ? parsedLowStock : DEFAULT_APP_SETTINGS.system.lowStockThreshold,
   }
 
-  const uiSource: Partial<UISettings> = merged.ui || {}
+  const uiSource: Partial<UISettings> = merged.ui ?? {}
   const ui: UISettings = {
     ...DEFAULT_APP_SETTINGS.ui,
     ...uiSource,
-    language: (uiSource.language) || DEFAULT_APP_SETTINGS.ui.language,
-    theme: (uiSource.theme) || DEFAULT_APP_SETTINGS.ui.theme,
-    dateFormat: (uiSource.dateFormat) || DEFAULT_APP_SETTINGS.ui.dateFormat,
-    timeFormat: (uiSource.timeFormat) || DEFAULT_APP_SETTINGS.ui.timeFormat,
+    language: (uiSource.language) ?? DEFAULT_APP_SETTINGS.ui.language,
+    theme: (uiSource.theme) ?? DEFAULT_APP_SETTINGS.ui.theme,
+    dateFormat: (uiSource.dateFormat) ?? DEFAULT_APP_SETTINGS.ui.dateFormat,
+    timeFormat: (uiSource.timeFormat) ?? DEFAULT_APP_SETTINGS.ui.timeFormat,
   }
 
   if (contextSettings) {

@@ -8,7 +8,7 @@ import { apiLogger } from '@/lib/logger';
  */
 
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   success: boolean;
@@ -24,47 +24,48 @@ export class ApiErrorHandler {
     }, 'Client API Error');
 
     let message = 'An unexpected error occurred';
-    let code = 'UNKNOWN_ERROR';
+    let _code = 'UNKNOWN_ERROR';
 
     if (error instanceof Error) {
-      message = error.message;
-      code = error.name;
+      const { message: errorMessage, name } = error;
+      message = errorMessage;
+      _code = name;
     } else if (typeof error === 'string') {
       message = error;
     }
 
     // Handle specific error types
     if (typeof error === 'object' && error !== null) {
-      const errorObj = error as any;
+      const errorObj = error as { status?: number; message?: string; code?: string };
       if (errorObj.status) {
         switch (errorObj.status) {
           case 400:
-            message = errorObj.message || 'Bad request';
-            code = 'BAD_REQUEST';
+            message = errorObj.message ?? 'Bad request';
+            _code = 'BAD_REQUEST';
             break;
           case 401:
             message = 'Authentication required';
-            code = 'AUTH_REQUIRED';
+            _code = 'AUTH_REQUIRED';
             break;
           case 403:
             message = 'Access denied';
-            code = 'ACCESS_DENIED';
+            _code = 'ACCESS_DENIED';
             break;
           case 404:
             message = 'Resource not found';
-            code = 'NOT_FOUND';
+            _code = 'NOT_FOUND';
             break;
           case 429:
             message = 'Too many requests';
-            code = 'RATE_LIMITED';
+            _code = 'RATE_LIMITED';
             break;
           case 500:
             message = 'Internal server error';
-            code = 'INTERNAL_ERROR';
+            _code = 'INTERNAL_ERROR';
             break;
           default:
-            message = errorObj.message || `Server error (${errorObj.status})`;
-            code = `SERVER_ERROR_${errorObj.status}`;
+            message = errorObj.message ?? `Server error (${errorObj.status})`;
+            _code = `SERVER_ERROR_${errorObj.status}`;
         }
       }
     }
@@ -96,7 +97,7 @@ export class ApiErrorHandler {
     
     const error = {
       status: response.status,
-      message: errorData.message || response.statusText,
+      message: errorData.message ?? response.statusText,
       details: errorData.details,
     };
 
@@ -116,9 +117,9 @@ export class ApiErrorHandler {
       return {
         data,
         success: true,
-      };
+      } as ApiResponse<T>;
     } catch (error) {
-      return this.handle(error, context, showNotification);
+      return this.handle(error, context, showNotification) as ApiResponse<T>;
     }
   }
 }

@@ -125,9 +125,9 @@ export async function PUT(
         const ingredientsToInsert: RecipeIngredientsInsert[] = 
           recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
             recipe_id: id,
-            ingredient_id: ingredient.ingredient_id || ingredient.bahan_id || '',
-            quantity: ingredient.quantity || ingredient.qty_per_batch || 0,
-            unit: ingredient.unit || 'g',
+            ingredient_id: ingredient.ingredient_id ?? ingredient.bahan_id ?? '',
+            quantity: ingredient.quantity ?? ingredient.qty_per_batch ?? 0,
+            unit: ingredient.unit ?? 'g',
             notes: ingredient.notes,
             user_id: user.id
           }))

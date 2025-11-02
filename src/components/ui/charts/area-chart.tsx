@@ -61,12 +61,12 @@ export const MobileAreaChart = memo(({
               >
                 <stop
                   offset="5%"
-                  stopColor={area.color || CHART_COLORS.primary[_index]}
+                  stopColor={area.color ?? CHART_COLORS.primary[_index]}
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor={area.color || CHART_COLORS.primary[_index]}
+                  stopColor={area.color ?? CHART_COLORS.primary[_index]}
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -94,7 +94,7 @@ export const MobileAreaChart = memo(({
               type="monotone"
               dataKey={area.key}
               stackId={stacked ? "1" : undefined}
-              stroke={area.color || CHART_COLORS.primary[_index]}
+              stroke={area.color ?? CHART_COLORS.primary[_index]}
               fill={`url(#gradient-${area.key})`}
               strokeWidth={isMobile ? 2 : 3}
               name={area.name}

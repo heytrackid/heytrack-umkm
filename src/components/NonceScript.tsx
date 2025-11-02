@@ -19,8 +19,8 @@ export const NonceScript = async ({
 
     return (
         <Script
-            id={id || 'inline-script'}
-            nonce={nonce || undefined}
+            id={id ?? 'inline-script'}
+            nonce={nonce ?? undefined}
             {...props}
         >
             {children}

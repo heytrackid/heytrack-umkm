@@ -65,8 +65,8 @@ const ComparisonAnalyticsPage = () => {
       const response = await fetch(`/api/hpp/comparison?${params.toString()}`)
       if (response.ok) {
         const data = await response.json()
-        void setRecipes(data.recipes || [])
-        void setBenchmark(data.benchmark || null)
+        void setRecipes(data.recipes ?? [])
+        void setBenchmark(data.benchmark ?? null)
       }
     } catch (err: unknown) {
       dbLogger.error({ err }, 'Failed to load comparison data')
@@ -306,7 +306,7 @@ const ComparisonAnalyticsPage = () => {
         </Card>
 
         {/* Top Performers */}
-        {benchmark && (benchmark.topPerformer || benchmark.worstPerformer) && (
+        {benchmark && (benchmark.topPerformer ?? benchmark.worstPerformer) && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {benchmark.topPerformer && (
               <Card>

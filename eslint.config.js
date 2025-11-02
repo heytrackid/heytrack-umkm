@@ -53,24 +53,23 @@ export default [
       "no-implied-eval": "error",
       "no-new-func": "error",
       "no-return-await": "error",
-      "require-await": "warn",
+      "require-await": "error",
       "no-throw-literal": "error",
-      "no-unused-expressions": ["warn", { 
+      "no-unused-expressions": ["error", { 
         allowShortCircuit: true, 
         allowTernary: true 
       }],
       "no-useless-concat": "error",
       "no-useless-return": "error",
-      "no-useless-catch": "warn",
-      "no-throw-literal": "warn",
-      "no-prototype-builtins": "warn",
-      "no-control-regex": "warn",
-      "no-empty-pattern": "warn",
+      "no-useless-catch": "error",
+      "no-prototype-builtins": "error",
+      "no-control-regex": "error",
+      "no-empty-pattern": "error",
       "no-duplicate-imports": "error",
-      "no-nested-ternary": "warn",
+      "no-nested-ternary": "error",
       "no-unneeded-ternary": "error",
       "object-shorthand": ["error", "always"],
-      "prefer-destructuring": ["warn", {
+      "prefer-destructuring": ["error", {
         array: false,
         object: true,
       }],
@@ -101,9 +100,9 @@ export default [
       "@typescript-eslint/array-type": ["error", { default: "array-simple" }],
       "@typescript-eslint/no-inferrable-types": "error",
       "@typescript-eslint/no-unnecessary-type-assertion": "error",
-      "@typescript-eslint/prefer-nullish-coalescing": "warn",
-      "@typescript-eslint/prefer-optional-chain": "warn",
-      "@typescript-eslint/no-non-null-assertion": "warn",
+      "@typescript-eslint/prefer-nullish-coalescing": "error",
+      "@typescript-eslint/prefer-optional-chain": "error",
+      "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/ban-ts-comment": [
         "error",
         {
@@ -113,10 +112,10 @@ export default [
           minimumDescriptionLength: 10,
         },
       ],
-      "@typescript-eslint/no-floating-promises": "warn",
-      "@typescript-eslint/await-thenable": "warn",
-      "@typescript-eslint/no-unsafe-declaration-merging": "warn",
-      "@typescript-eslint/no-empty-object-type": "warn",
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/await-thenable": "error",
+      "@typescript-eslint/no-unsafe-declaration-merging": "error",
+      "@typescript-eslint/no-empty-object-type": "error",
       "@typescript-eslint/no-misused-promises": [
         "error",
         {
@@ -148,8 +147,8 @@ export default [
       "react/jsx-boolean-value": ["error", "never"],
       "react/jsx-no-useless-fragment": ["error", { allowExpressions: true }],
       "react/jsx-pascal-case": "error",
-      "react/no-array-index-key": "warn",
-      "react/no-danger": "warn",
+      "react/no-array-index-key": "error",
+      "react/no-danger": "error",
       "react/no-unstable-nested-components": "error",
       "react/function-component-definition": [
         "error",
@@ -162,8 +161,8 @@ export default [
       // ============================================
       // REACT HOOKS RULES
       // ============================================
-      "react-hooks/rules-of-hooks": "warn",
-      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "error",
 
       // ============================================
       // HEYTRACK CUSTOM RULES
@@ -176,7 +175,7 @@ export default [
       "arrow-body-style": ["error", "as-needed"],
       "prefer-arrow-callback": ["error", { allowNamedFunctions: false }],
       "no-restricted-syntax": [
-        "warn", // Enums are acceptable in some cases
+        "error", // Enums are acceptable in some cases
         {
           selector: "TSEnumDeclaration",
           message: "Use const objects or union types instead of enums",
@@ -202,8 +201,8 @@ export default [
   {
     files: ["src/app/api/**/*.ts"],
     rules: {
-      "@typescript-eslint/no-floating-promises": "warn", // Fire-and-forget is common in APIs
-      "require-await": "warn", // Often false positive
+      "@typescript-eslint/no-floating-promises": "error", // Fire-and-forget is common in APIs
+      "require-await": "error", // Often false positive
     },
   },
 

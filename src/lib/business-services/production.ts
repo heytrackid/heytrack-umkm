@@ -1,5 +1,5 @@
 import type { ProductionBatch } from './types'
-import type { Database, RecipesTable, IngredientsTable } from '@/types/database'
+import type {RecipesTable, IngredientsTable } from '@/types/database'
 import { productionLogger } from '@/lib/logger'
 import { isIngredient } from '@/lib/type-guards'
 
@@ -41,7 +41,7 @@ export class ProductionServices {
         .single()
 
       if (recipeError || !recipe) {
-        throw new Error(`Recipe not found or inactive: ${batch.recipe_id}`)
+        throw new Error(`_Recipe not found or inactive: ${batch.recipe_id}`)
       }
 
       // Check if we have enough ingredients for production
@@ -58,7 +58,7 @@ export class ProductionServices {
         id: batchId,
         status: 'pending',
         scheduled_date: batch.scheduled_date || new Date().toISOString(),
-        notes: batch.notes || `Production batch for ${recipe.name}`
+        notes: batch.notes ?? `Production batch for ${recipe.name}`
       }
 
       // TODO: Save to production_batches table when it's implemented
@@ -110,10 +110,10 @@ export class ProductionServices {
         .single()
 
       if (recipeError || !recipe) {
-        throw new Error(`Recipe not found: ${recipeId}`)
+        throw new Error(`_Recipe not found: ${recipeId}`)
       }
 
-      const recipeIngredients = (recipe).recipe_ingredients || []
+      const recipeIngredients = (recipe).recipe_ingredients ?? []
       const insufficientIngredients: string[] = []
       const requiredIngredients: Array<{
         ingredient_id: string
@@ -139,14 +139,14 @@ export class ProductionServices {
         
         const ingredient = ri.ingredients
         const requiredQuantity = ri.quantity_needed * quantity
-        const availableQuantity = ingredient.current_stock || 0
+        const availableQuantity = ingredient.current_stock ?? 0
 
         requiredIngredients.push({
           ingredient_id: ingredient.id,
           ingredient_name: ingredient.name,
           required_quantity: requiredQuantity,
           available_quantity: availableQuantity,
-          unit: ingredient.unit || 'pcs'
+          unit: ingredient.unit ?? 'pcs'
         })
 
         if (availableQuantity < requiredQuantity) {
@@ -192,7 +192,7 @@ export class ProductionServices {
       }
 
       // Update stock levels for each ingredient
-      for (const ri of recipeIngredients || []) {
+      for (const ri of recipeIngredients ?? []) {
         if (!ri.ingredients) {
           productionLogger.warn({ recipeId, ingredientId: ri.ingredient_id }, 'Missing ingredient data for recipe ingredient')
           continue
@@ -206,7 +206,7 @@ export class ProductionServices {
         
         const ingredient = ri.ingredients
         const requiredQuantity = ri.quantity_needed * quantity
-        const newStock = Math.max(0, (ingredient.current_stock || 0) - requiredQuantity)
+        const newStock = Math.max(0, (ingredient.current_stock ?? 0) - requiredQuantity)
 
         const { error: updateError } = await supabase
           .from('ingredients')
@@ -295,7 +295,7 @@ export class ProductionServices {
         .single()
 
       if (error || !recipe) {
-        throw new Error(`Recipe not found: ${recipeId}`)
+        throw new Error(`_Recipe not found: ${recipeId}`)
       }
 
       // Simple capacity calculation based on available ingredients

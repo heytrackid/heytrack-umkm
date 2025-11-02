@@ -78,8 +78,8 @@ export async function GET() {
     const averageMargin = recipesWithMargin.length > 0
       ? recipesWithMargin.reduce((sum, recipe) => {
           const hppCalc = recipeHppMap.get(recipe.id)
-          const hpp = hppCalc?.total_hpp || 0
-          const sellingPrice = recipe.selling_price || 0
+          const hpp = hppCalc?.total_hpp ?? 0
+          const sellingPrice = recipe.selling_price ?? 0
           const margin = sellingPrice > 0 ? ((sellingPrice - hpp) / sellingPrice) * 100 : 0
           return sum + margin
         }, 0) / recipesWithMargin.length
@@ -88,8 +88,8 @@ export async function GET() {
     const topRecipes = recipes
       ?.map(recipe => {
         const hppCalc = recipeHppMap.get(recipe.id)
-        const hpp = hppCalc?.total_hpp || 0
-        const sellingPrice = recipe.selling_price || 0
+        const hpp = hppCalc?.total_hpp ?? 0
+        const sellingPrice = recipe.selling_price ?? 0
         const margin = sellingPrice > 0 ? ((sellingPrice - hpp) / sellingPrice) * 100 : 0
         
         return {
@@ -97,7 +97,7 @@ export async function GET() {
           name: recipe.name,
           hpp_value: hpp,
           margin_percentage: margin,
-          last_updated: hppCalc?.created_at || ''
+          last_updated: hppCalc?.created_at ?? ''
         }
       })
       .filter(r => r.hpp_value > 0)
@@ -112,7 +112,7 @@ export async function GET() {
         const recipe = recipes?.find(r => r.id === alert.recipe_id)
         return {
           recipe_id: alert.recipe_id,
-          recipe_name: recipe?.name || 'Unknown Recipe',
+          recipe_name: recipe?.name ?? 'Unknown Recipe',
           change_percentage: 10, // Placeholder - would need to calculate from alert data
           direction: alert.alert_type === 'PRICE_INCREASE' ? 'increase' as const : 'decrease' as const
         }

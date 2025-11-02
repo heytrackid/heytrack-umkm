@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('end_date')
 
     // Create cache key based on query parameters
-    const cacheKey = `${cacheKeys.hpp.calculations}:${user.id}:${page}:${limit}:${search || ''}:${sort_by || ''}:${sort_order || ''}:${recipeId || ''}:${startDate || ''}:${endDate || ''}`
+    const cacheKey = `${cacheKeys.hpp.calculations}:${user.id}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${startDate ?? ''}:${endDate ?? ''}`
 
     // Wrap database query with caching
     const getCalculations = async () => {
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Apply sorting
-      const sortColumn = sort_by || 'calculation_date'
+      const sortColumn = sort_by ?? 'calculation_date'
       const sortDirection = sort_order || 'desc'
       query = query.order(sortColumn, { ascending: sortDirection === 'asc' })
 
@@ -100,10 +100,10 @@ export async function GET(request: NextRequest) {
 
       return {
         calculations: data || [],
-        total: count || 0,
+        total: count ?? 0,
         page,
         limit,
-        totalPages: Math.ceil((count || 0) / limit)
+        totalPages: Math.ceil((count ?? 0) / limit)
       }
     }
 

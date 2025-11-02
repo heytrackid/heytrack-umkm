@@ -72,21 +72,21 @@ const EnhancedOrderForm = ({
     useEffect(() => {
         if (order) {
             setFormData({
-                customer_name: order.customer_name || '',
-                customer_phone: order.customer_phone || '',
+                customer_name: order.customer_name ?? '',
+                customer_phone: order.customer_phone ?? '',
                 // customer_email: order.customer_name || '', // Field doesn't exist in DB
-                customer_address: order.customer_address || '',
+                customer_address: order.customer_address ?? '',
                 delivery_date: order.delivery_date ? order.delivery_date.split('T')[0] : '',
-                delivery_time: order.delivery_time || '10:00',
+                delivery_time: order.delivery_time ?? '10:00',
                 priority: normalizePriority(order.priority),
-                notes: order.notes || '',
+                notes: order.notes ?? '',
                 order_items: (order as OrderWithRelations).items?.map(item => ({
                     recipe_id: item.recipe_id,
-                    product_name: item.product_name || null,
+                    product_name: item.product_name ?? null,
                     quantity: item.quantity,
                     unit_price: item.unit_price,
                     total_price: item.total_price,
-                    special_requests: item.special_requests || null
+                    special_requests: item.special_requests ?? null
                 })) || []
             })
             setCurrentStep(3) // Skip to items if editing
@@ -172,8 +172,8 @@ const EnhancedOrderForm = ({
                 recipe_id: recipe.id,
                 product_name: recipe.name,
                 quantity: 1,
-                unit_price: recipe.selling_price || 0,
-                total_price: recipe.selling_price || 0,
+                unit_price: recipe.selling_price ?? 0,
+                total_price: recipe.selling_price ?? 0,
                 special_requests: null
             }
 
@@ -272,7 +272,7 @@ const EnhancedOrderForm = ({
                         Alamat Pengiriman (Opsional)
                     </Label>
                     <Textarea
-                        value={formData.customer_address || ''}
+                        value={formData.customer_address ?? ''}
                         onChange={(e) => handleInputChange('customer_address', e.target.value)}
                         placeholder="Masukkan alamat lengkap"
                         rows={3}
@@ -337,7 +337,7 @@ const EnhancedOrderForm = ({
                         />
                     </div>
                     <Select
-                        value={formData.priority || 'normal'}
+                        value={formData.priority ?? 'normal'}
                         onValueChange={(value: Priority) => handleInputChange('priority', value)}
                     >
                         <SelectTrigger className="text-base">
@@ -369,7 +369,7 @@ const EnhancedOrderForm = ({
                 <div className="space-y-2">
                     <Label>Catatan Pesanan (Opsional)</Label>
                     <Textarea
-                        value={formData.notes || ''}
+                        value={formData.notes ?? ''}
                         onChange={(e) => handleInputChange('notes', e.target.value)}
                         placeholder="Tambahkan catatan khusus untuk pesanan ini"
                         rows={3}
@@ -418,7 +418,7 @@ const EnhancedOrderForm = ({
                                         )}
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-medium">{formatCurrency(recipe.selling_price || 0)}</p>
+                                        <p className="font-medium">{formatCurrency(recipe.selling_price ?? 0)}</p>
                                         <Plus className="h-4 w-4 text-primary ml-auto" />
                                     </div>
                                 </button>
@@ -457,7 +457,7 @@ const EnhancedOrderForm = ({
                                 <div key={index} className="border rounded-lg p-4 space-y-3">
                                     <div className="flex justify-between items-start gap-3">
                                         <div className="flex-1">
-                                            <p className="font-medium">{item.product_name || 'Produk belum dipilih'}</p>
+                                            <p className="font-medium">{item.product_name ?? 'Produk belum dipilih'}</p>
                                             <div className="flex items-center gap-4 mt-2">
                                                 <div className="flex items-center gap-2">
                                                     <Button
@@ -499,7 +499,7 @@ const EnhancedOrderForm = ({
                                     <div className="space-y-2">
                                         <Label className="text-sm">Catatan Item (Opsional)</Label>
                                         <Input
-                                            value={item.special_requests || ''}
+                                            value={item.special_requests ?? ''}
                                             onChange={(e) => updateOrderItem(index, 'special_requests', e.target.value)}
                                             placeholder="Contoh: Tanpa gula, extra pedas"
                                             className="text-sm"

@@ -31,12 +31,12 @@ export async function POST(request: NextRequest) {
     }
 
     const pricing = await OrderPricingService.calculateOrderPrice(
-      customer_id || null,
+      customer_id ?? null,
       items,
       {
-        delivery_fee: delivery_fee || 0,
-        tax_rate: tax_rate || 0,
-        use_loyalty_points: use_loyalty_points || 0
+        delivery_fee: delivery_fee ?? 0,
+        tax_rate: tax_rate ?? 0,
+        use_loyalty_points: use_loyalty_points ?? 0
       }
     )
 

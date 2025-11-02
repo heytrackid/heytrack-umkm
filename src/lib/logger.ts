@@ -140,7 +140,7 @@ export const logError = (
   context?: ErrorContext
 ) => {
   logger.error({
-    ...(context || {}),
+    ...(context ?? {}),
     error: serializeError(error),
   }, message)
 }
@@ -167,7 +167,7 @@ export const createDebugLogger = (context: string, userId?: string) => {
   return {
     ...baseLogger,
     debugWithContext: (message: string, additionalContext?: Record<string, unknown>, options?: DebugOptions) => {
-      const logData: Record<string, unknown> = { ...additionalContext || {} };
+      const logData: Record<string, unknown> = { ...additionalContext ?? {} };
       
       if (options?.includeTimestamp) {
         logData.timestamp = new Date().toISOString();
@@ -177,7 +177,7 @@ export const createDebugLogger = (context: string, userId?: string) => {
         logData.userId = userId;
       }
       
-      const level = options?.logLevel || 'debug';
+      const level = options?.logLevel ?? 'debug';
       baseLogger[level](logData, message);
     },
     

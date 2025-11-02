@@ -38,7 +38,7 @@ export class PricingAutomation {
         ingredientCost,
         overheadCost,
         totalCost,
-        costPerServing: totalCost / (recipe.servings || 1)
+        costPerServing: totalCost / (recipe.servings ?? 1)
       },
       pricing: competitivePricing,
       analysis: profitabilityAnalysis,

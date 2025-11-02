@@ -13,7 +13,7 @@ export const useSmartPreloading = () => {
   useEffect(() => {
     // Track user navigation patterns
     const navigationHistory = JSON.parse(
-      localStorage.getItem('user_navigation_patterns') || '[]'
+      localStorage.getItem('user_navigation_patterns') ?? '[]'
     ).slice(-10) // Keep last 10 routes
 
     // Add current route to history

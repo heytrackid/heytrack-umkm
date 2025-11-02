@@ -72,7 +72,7 @@ export const MobileBarChart = memo(({
             <Bar
               key={bar.key}
               dataKey={bar.key}
-              fill={bar.color || CHART_COLORS.primary[_index % CHART_COLORS.primary.length]}
+              fill={bar.color ?? CHART_COLORS.primary[_index % CHART_COLORS.primary.length]}
               radius={isMobile ? 4 : 6}
               name={bar.name}
             />

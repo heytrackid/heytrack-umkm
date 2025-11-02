@@ -62,7 +62,7 @@ const HppRecommendationsPage = () => {
       const response = await fetch(`/api/hpp/recommendations?${params.toString()}`)
       if (response.ok) {
         const data = await response.json()
-        void setRecommendations(data.recommendations || [])
+        void setRecommendations(data.recommendations ?? [])
       }
     } catch (err: unknown) {
       dbLogger.error({ err }, 'Failed to load recommendations')
@@ -76,7 +76,7 @@ const HppRecommendationsPage = () => {
     }
   }
 
-  const markAsImplemented = async (recommendationId: string) => {
+  const markAsImplemented = (recommendationId: string) => {
     try {
       // In a real implementation, this would call an API to update the recommendation
       toast({

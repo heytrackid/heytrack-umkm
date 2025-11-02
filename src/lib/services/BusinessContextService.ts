@@ -103,8 +103,8 @@ export class BusinessContextService {
     return data?.map(r => ({
       id: r.id,
       name: r.name,
-      hpp: r.cost_per_unit || 0
-    })) || [];
+      hpp: r.cost_per_unit ?? 0
+    })) ?? [];
   }
 
   /**
@@ -125,10 +125,10 @@ export class BusinessContextService {
       data?.map((ing) => ({
         id: ing.id,
         name: ing.name,
-        stock: ing.current_stock || 0,
+        stock: ing.current_stock ?? 0,
         unit: ing.unit,
-        low_stock: (ing.current_stock || 0) <= (ing.min_stock || 0),
-      })) || []
+        low_stock: (ing.current_stock ?? 0) <= (ing.min_stock ?? 0),
+      })) ?? []
     );
   }
 
@@ -146,7 +146,7 @@ export class BusinessContextService {
       .order('created_at', { ascending: false })
       .limit(10);
 
-    return (data || []).map(order => ({
+    return (data ?? []).map(order => ({
       id: order.id,
       customer_name: order.customer_name ?? 'Unknown customer',
       total_amount: order.total_amount ?? 0,
@@ -183,10 +183,10 @@ export class BusinessContextService {
     }
 
     return {
-      average_hpp: current?.total_hpp || 0,
+      average_hpp: current?.total_hpp ?? 0,
       trend,
       alerts_count: alertsCount || 0,
-      last_updated: current?.created_at || new Date().toISOString(),
+      last_updated: current?.created_at ?? new Date().toISOString(),
     };
   }
 
@@ -209,7 +209,7 @@ export class BusinessContextService {
       .gte('created_at', startOfMonth.toISOString());
 
     const totalRevenue =
-      orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+      orders?.reduce((sum, order) => sum + (order.total_amount ?? 0), 0) ?? 0;
 
     // Get costs from operational_costs and ingredient_purchases
     const { data: opCosts } = await supabase
@@ -225,7 +225,7 @@ export class BusinessContextService {
       .gte('purchase_date', startOfMonth.toISOString());
 
     const totalCosts =
-      (opCosts?.reduce((sum, cost) => sum + cost.amount, 0) || 0) +
+      (opCosts?.reduce((sum, cost) => sum + cost.amount, 0) ?? 0) +
       (purchases?.reduce((sum, purchase) => sum + purchase.total_price, 0) ||
         0);
 

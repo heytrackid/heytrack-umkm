@@ -45,7 +45,7 @@ const OrderItemsStep = ({
     ) : (
       <div className="space-y-4">
         {orderItems.map((item, index) => {
-          const itemKey = item.id || `${item.recipe_id}-${index}`
+          const itemKey = item.id ?? `${item.recipe_id}-${index}`
 
           return (
             <div key={itemKey} className="border rounded-lg p-4">
@@ -120,7 +120,7 @@ const OrderItemsStep = ({
               <div className="mt-3">
                 <Label className="text-xs">Permintaan Khusus</Label>
                 <Input
-                  value={item.special_requests || ''}
+                  value={item.special_requests ?? ''}
                   onChange={(e) => onUpdateItem(index, 'special_requests', e.target.value)}
                   className="mt-1"
                 />

@@ -36,11 +36,11 @@ export async function createServerClient() {
 
   // In server-side environments, use dynamic import with a trick to avoid bundler detection
   // Using a dynamic import function to make it harder for static analysis tools
-  const serverModule = await (async () => {
+  const serverModule = await ((() => {
     // Import path as a variable to avoid static analysis
     const serverPath = './server'
     return import(serverPath)
-  })()
+  })())
   
   return serverModule.createClient()
 }

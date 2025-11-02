@@ -150,7 +150,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         : []
 
       ingredientCost = recipeIngredients.reduce((sum: number, ri) => {
-        const quantity = ri.quantity || 0
+        const quantity = ri.quantity ?? 0
         // Use WAC if available, otherwise use current price
         const unitPrice =
           ri.ingredients?.weighted_average_cost ||
@@ -169,14 +169,14 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         ...data,
         ingredients: recipeIngredients.map((ri): RecipeIngredientWithPrice => ({
           id: ri.ingredient_id,
-          name: ri.ingredients?.name || 'Unknown',
-          quantity: ri.quantity || 0,
-          unit: ri.unit || 'unit',
+          name: ri.ingredients?.name ?? 'Unknown',
+          quantity: ri.quantity ?? 0,
+          unit: ri.unit ?? 'unit',
           unit_price:
             ri.ingredients?.weighted_average_cost ||
             ri.ingredients?.price_per_unit ||
             0,
-          category: ri.ingredients?.category || undefined
+          category: ri.ingredients?.category ?? undefined
         })),
         operational_costs: operationalCost,
         total_cost: ingredientCost + operationalCost
@@ -221,9 +221,9 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
     },
     onSuccess: (_data, recipeId) => {
       // Granular cache invalidation - only invalidate affected recipe
-      queryClient.invalidateQueries({ queryKey: ['recipe-detail', recipeId] })
-      queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
-      queryClient.invalidateQueries({ queryKey: ['hpp-comparison'] })
+      void queryClient.invalidateQueries({ queryKey: ['recipe-detail', recipeId] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp-comparison'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -257,10 +257,10 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
     },
     onSuccess: (_data, { recipeId }) => {
       // Granular cache invalidation - only invalidate affected recipe
-      queryClient.invalidateQueries({ queryKey: ['recipe-detail', recipeId] })
-      queryClient.invalidateQueries({ queryKey: ['recipes-list'] })
-      queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
-      queryClient.invalidateQueries({ queryKey: ['hpp-comparison'] })
+      void queryClient.invalidateQueries({ queryKey: ['recipe-detail', recipeId] })
+      void queryClient.invalidateQueries({ queryKey: ['recipes-list'] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
+      void queryClient.invalidateQueries({ queryKey: ['hpp-comparison'] })
       
       toast({
         title: 'Tersimpan ✓',
@@ -279,10 +279,10 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
 
 
   return {
-    recipes: recipesData || [],
+    recipes: recipesData ?? [],
     overview: overviewData,
-    recipe: (recipeData || null),
-    comparison: comparisonData || [],
+    recipe: (recipeData ?? null),
+    comparison: comparisonData ?? [],
     isLoading: recipesLoading || overviewLoading,
     recipeLoading,
     selectedRecipeId,

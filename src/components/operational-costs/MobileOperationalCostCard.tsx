@@ -77,7 +77,7 @@ export const MobileOperationalCostCard = ({
                     <div>
                         <p className="text-xl font-bold text-primary">{formatCurrency(cost.amount || 0)}</p>
                         <p className="text-sm text-muted-foreground">
-                            {getFrequencyLabel(cost.frequency || 'monthly')} • {formatCurrency(monthlyCost)}/bulan
+                            {getFrequencyLabel(cost.frequency ?? 'monthly')} • {formatCurrency(monthlyCost)}/bulan
                         </p>
                     </div>
 

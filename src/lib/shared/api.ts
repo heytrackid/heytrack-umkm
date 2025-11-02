@@ -26,7 +26,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 }
 
 export interface ApiErrorInterface {
-  readonly code: string
+  readonly _code: string
   readonly message: string
   readonly details?: Record<string, unknown>
   readonly statusCode: number
@@ -66,7 +66,7 @@ export const API_ERROR_CODES = {
 export class ApiErrorClass extends Error implements ApiErrorInterface {
   constructor(
     message: string,
-    public readonly code: string = API_ERROR_CODES.UNKNOWN_ERROR,
+    public readonly _code: string = API_ERROR_CODES.UNKNOWN_ERROR,
     public readonly statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
     public readonly details?: Record<string, unknown>
   ) {
@@ -92,7 +92,7 @@ export const createApiResponse = {
   error: <T = unknown>(
     message: string,
     statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    code: string = API_ERROR_CODES.UNKNOWN_ERROR,
+    _code: string = API_ERROR_CODES.UNKNOWN_ERROR,
     details?: Record<string, unknown>
   ): ApiResponse<T> => ({
     success: false,
@@ -242,7 +242,7 @@ export const apiRequest = async <T>(
 
   // Check cache first
   if (finalConfig.cache) {
-    const cacheKey = `${options.method || 'GET'}-${url}`
+    const cacheKey = `${options.method ?? 'GET'}-${url}`
     const cached = apiCache.get<T>(cacheKey)
     if (cached) {
       apiLogger.debug({ url }, 'Cache hit')
@@ -276,11 +276,11 @@ export const apiRequest = async <T>(
       clearTimeout(timeoutId)
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({})) as { message?: string; code?: string; details?: Record<string, unknown> }
+        const errorData = await response.json().catch(() => ({})) as { message?: string; _code?: string; details?: Record<string, unknown> }
 
         throw new ApiErrorClass(
-          errorData.message || `HTTP ${response.status}: ${response.statusText}`,
-          errorData.code || API_ERROR_CODES.UNKNOWN_ERROR,
+          errorData.message ?? `HTTP ${response.status}: ${response.statusText}`,
+          errorData._code ?? API_ERROR_CODES.UNKNOWN_ERROR,
           response.status,
           errorData.details
         )
@@ -293,7 +293,7 @@ export const apiRequest = async <T>(
 
       // Cache response if enabled
       if (finalConfig.cache) {
-        const cacheKey = `${options.method || 'GET'}-${url}`
+        const cacheKey = `${options.method ?? 'GET'}-${url}`
         apiCache.set(cacheKey, data, finalConfig.cacheTimeout)
       }
 
@@ -452,7 +452,7 @@ export const apiAnalytics = {
 
   trackRequest: (url: string, duration: number, error = false) => {
     const key = url.split('?')[0] // Remove query params for grouping
-    const existing = apiAnalytics.requests.get(key) || { count: 0, totalTime: 0, errors: 0 }
+    const existing = apiAnalytics.requests.get(key) ?? { count: 0, totalTime: 0, errors: 0 }
 
     apiAnalytics.requests.set(key, {
       count: existing.count + 1,

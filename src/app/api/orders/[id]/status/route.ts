@@ -69,7 +69,7 @@ export async function PUT(
           type: 'INCOME',
           category: 'Revenue',
           amount: currentOrder.total_amount || 0,
-          date: (currentOrder.delivery_date || currentOrder.order_date || new Date().toISOString().split('T')[0]),
+          date: (currentOrder.delivery_date ?? currentOrder.order_date ?? new Date().toISOString().split('T')[0]),
           reference: `Order #${currentOrder.order_no || ''}${currentOrder.customer_name ? ` - ${  currentOrder.customer_name}` : ''}`,
           description: `Income from order ${currentOrder.order_no || ''}`,
           user_id: currentOrder.user_id
@@ -126,7 +126,7 @@ export async function PUT(
         apiLogger.info('🚀 Triggering order completion automation...')
         await triggerWorkflow('order.completed', orderId, {
           order: updatedOrder,
-          previousStatus: previousStatus || '',
+          previousStatus: previousStatus ?? '',
           newStatus: status
         })
       }
@@ -136,16 +136,16 @@ export async function PUT(
         apiLogger.info('🚀 Triggering order cancellation automation...')
         await triggerWorkflow('order.cancelled', orderId, {
           order: updatedOrder,
-          previousStatus: previousStatus || '',
+          previousStatus: previousStatus ?? '',
           newStatus: status,
-          reason: notes || 'Order cancelled'
+          reason: notes ?? 'Order cancelled'
         })
       }
 
       // General status change trigger
       await triggerWorkflow('order.status_changed', orderId, {
         order: updatedOrder,
-        previousStatus: previousStatus || '',
+        previousStatus: previousStatus ?? '',
         newStatus: status,
         notes
       })
@@ -160,18 +160,18 @@ export async function PUT(
       success: true,
       order: updatedOrder,
       status_change: {
-        from: previousStatus || '',
+        from: previousStatus ?? '',
         to: status,
         timestamp: new Date().toISOString()
       },
       automation: {
         triggered: status === 'DELIVERED' || status === 'CANCELLED',
-        workflows: getTriggeredWorkflows(status, previousStatus || '')
+        workflows: getTriggeredWorkflows(status, previousStatus ?? '')
       },
       financial: {
         income_recorded: !!incomeRecordId,
         income_record_id: incomeRecordId,
-        amount: incomeRecordId ? (currentOrder.total_amount || 0) : null
+        amount: incomeRecordId ? (currentOrder.total_amount ?? 0) : null
       },
       message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing and income tracking' : ''}`
     })

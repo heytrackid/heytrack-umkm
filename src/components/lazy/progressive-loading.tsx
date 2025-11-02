@@ -69,7 +69,7 @@ export const ProgressiveLoader = ({
   }
 
   if (isLoading) {
-    return fallback || (
+    return fallback ?? (
       <Card className="w-full">
         <CardContent className="p-6">
           <div className="flex items-center justify-center mb-4">
@@ -230,7 +230,7 @@ const VirtualizedTableLoader = <T extends { length?: number }>({ data }: { data?
 // Simulate heavy data processing
 (
   <div className="p-4 border rounded-lg bg-muted/50">
-    <p className="text-sm">Optimized view ready for {data?.length || 0} items</p>
+    <p className="text-sm">Optimized view ready for {data?.length ?? 0} items</p>
     <Button className="mt-2" variant="outline" size="sm">
       Load Virtual Table
     </Button>

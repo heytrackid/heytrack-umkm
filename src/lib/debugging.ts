@@ -1,4 +1,4 @@
-import { apiLogger, dbLogger, uiLogger, serializeError } from './logger';
+import {serializeError } from './logger';
 import type pino from 'pino';
 
 
@@ -80,7 +80,7 @@ class DebugLogger {
       logData.error = serializeError(additionalData.error);
     }
 
-    switch (options.level || 'debug') {
+    switch (options.level ?? 'debug') {
       case 'error':
         this.logger.error(logData, message);
         break;
@@ -99,7 +99,7 @@ class DebugLogger {
 
   public time<T>(message: string, fn: () => T, options: DetailedDebugOptions = {}): T {
     const start = process.hrtime.bigint();
-    const startMemory = options.includeMemory && typeof process !== 'undefined' ? process.memoryUsage() : undefined;
+    const _startMemory = options.includeMemory && typeof process !== 'undefined' ? process.memoryUsage() : undefined;
     
     try {
       const result = fn();
@@ -109,10 +109,10 @@ class DebugLogger {
       const logData = {
         ...this.context,
         duration,
-        ...(options.includeMemory && startMemory ? { 
-          memoryBefore: startMemory,
+        ...(options.includeMemory && _startMemory ? { 
+          memoryBefore: _startMemory,
           memoryAfter: process.memoryUsage(),
-          memoryDiff: this.calculateMemoryDiff(startMemory, process.memoryUsage())
+          memoryDiff: this.calculateMemoryDiff(_startMemory, process.memoryUsage())
         } : {})
       };
 
@@ -126,10 +126,10 @@ class DebugLogger {
         ...this.context,
         duration,
         error: serializeError(error),
-        ...(options.includeMemory && startMemory ? { 
-          memoryBefore: startMemory,
+        ...(options.includeMemory && _startMemory ? { 
+          memoryBefore: _startMemory,
           memoryAfter: process.memoryUsage(),
-          memoryDiff: this.calculateMemoryDiff(startMemory, process.memoryUsage())
+          memoryDiff: this.calculateMemoryDiff(_startMemory, process.memoryUsage())
         } : {})
       };
 
@@ -140,7 +140,7 @@ class DebugLogger {
 
   public async timeAsync<T>(message: string, fn: () => Promise<T>, options: DetailedDebugOptions = {}): Promise<T> {
     const start = process.hrtime.bigint();
-    const startMemory = options.includeMemory && typeof process !== 'undefined' ? process.memoryUsage() : undefined;
+    const _startMemory = options.includeMemory && typeof process !== 'undefined' ? process.memoryUsage() : undefined;
     
     try {
       const result = await fn();
@@ -150,10 +150,10 @@ class DebugLogger {
       const logData = {
         ...this.context,
         duration,
-        ...(options.includeMemory && startMemory ? { 
-          memoryBefore: startMemory,
+        ...(options.includeMemory && _startMemory ? { 
+          memoryBefore: _startMemory,
           memoryAfter: process.memoryUsage(),
-          memoryDiff: this.calculateMemoryDiff(startMemory, process.memoryUsage())
+          memoryDiff: this.calculateMemoryDiff(_startMemory, process.memoryUsage())
         } : {})
       };
 
@@ -167,10 +167,10 @@ class DebugLogger {
         ...this.context,
         duration,
         error: serializeError(error),
-        ...(options.includeMemory && startMemory ? { 
-          memoryBefore: startMemory,
+        ...(options.includeMemory && _startMemory ? { 
+          memoryBefore: _startMemory,
           memoryAfter: process.memoryUsage(),
-          memoryDiff: this.calculateMemoryDiff(startMemory, process.memoryUsage())
+          memoryDiff: this.calculateMemoryDiff(_startMemory, process.memoryUsage())
         } : {})
       };
 
@@ -183,7 +183,7 @@ class DebugLogger {
     fn: T,
     options: DetailedDebugOptions & { name?: string } = {}
   ): T {
-    const name = options.name || fn.name || 'anonymous';
+    const name = options.name ?? fn.name ?? 'anonymous';
     
     return ((...args: unknown[]) => {
       if (options.logParams) {
@@ -196,7 +196,7 @@ class DebugLogger {
       }
 
       const start = process.hrtime.bigint();
-      const startMemory = options.includeMemory && typeof process !== 'undefined' ? process.memoryUsage() : undefined;
+      const _startMemory = options.includeMemory && typeof process !== 'undefined' ? process.memoryUsage() : undefined;
       
       try {
         const result = fn.apply(this, args);
@@ -379,7 +379,7 @@ export function withDetailedDebug<T extends (...args: unknown[]) => unknown>(
   const debugLog = new DebugLogger('ApiRoute');
   const wrappedHandler = debugLog.traceFunction(handler, {
     ...options,
-    name: options.name || 'ApiRouteHandler',
+    name: options.name ?? 'ApiRouteHandler',
     performanceTracking: true,
     includeMemory: true
   });

@@ -1,6 +1,6 @@
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { WorkflowEventData, WorkflowResult, WorkflowContext } from '@/types/features/automation'
+import type {WorkflowResult, WorkflowContext } from '@/types/features/automation'
 
 /**
  * Financial Workflow Handlers
@@ -38,7 +38,7 @@ export class FinancialWorkflowHandlers {
       oldPrice,
       newPrice,
       priceChange: priceChange.toFixed(2),
-      affectedRecipesCount: affectedRecipes?.length || 0
+      affectedRecipesCount: affectedRecipes?.length ?? 0
     })
 
     try {
@@ -165,7 +165,7 @@ export class FinancialWorkflowHandlers {
         category: 'financial',
         priority: Math.abs(priceChange) > 20 ? 'critical' : 'high',
         title: `Harga Bahan Baku ${priceChange > 0 ? 'NAIK' : 'TURUN'} Signifikan`,
-        message: `Perubahan ${Math.abs(priceChange).toFixed(1)}% mempengaruhi ${affectedRecipes?.length || 0} resep.`,
+        message: `Perubahan ${Math.abs(priceChange).toFixed(1)}% mempengaruhi ${affectedRecipes?.length ?? 0} resep.`,
         actionUrl: '/ingredients',
         actionLabel: 'Review Bahan Baku'
       }

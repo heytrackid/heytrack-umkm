@@ -41,7 +41,7 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
       const validatedData = validateBusinessInfoSettings(newSettings)
       void setErrors({})
       // If validation passes, update parent
-      onSettingChange('general', field, validatedData[field as keyof typeof validatedData] || value)
+      onSettingChange('general', field, validatedData[field as keyof typeof validatedData] ?? value)
     } catch (err) {      // Don't update parent if validation fails, but allow user to continue typing
       if (err instanceof Error) {
         // Extract field-specific errors if possible

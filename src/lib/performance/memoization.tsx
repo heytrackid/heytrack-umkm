@@ -1,6 +1,7 @@
+'use client'
+
 import { memo, useMemo, useCallback, type ComponentType, type DependencyList } from 'react'
 
-'use client'
 
 
 /**

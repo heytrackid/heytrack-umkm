@@ -55,7 +55,7 @@ const GeneratedRecipeDisplay = ({
             <div className="text-center p-3 bg-muted rounded-lg">
               <DollarSign className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
               <p className="text-sm font-medium">
-                {formatCurrency(recipe.hpp?.hppPerUnit || 0)}
+                {formatCurrency(recipe.hpp?.hppPerUnit ?? 0)}
               </p>
               <p className="text-xs text-muted-foreground">HPP/unit</p>
             </div>

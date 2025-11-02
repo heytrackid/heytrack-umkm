@@ -234,10 +234,10 @@ export const InfiniteScroll = ({
       {children}
 
       {/* Loading indicator */}
-      {loading && (loadingComponent || defaultLoadingComponent)}
+      {loading && (loadingComponent ?? defaultLoadingComponent)}
 
       {/* End message */}
-      {!hasMore && !loading && (endMessage || defaultEndMessage)}
+      {!hasMore && !loading && (endMessage ?? defaultEndMessage)}
     </div>
   )
 }

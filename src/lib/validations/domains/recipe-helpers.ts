@@ -120,8 +120,8 @@ export class RecipeValidationHelpers {
     profit_margin: number
   } {
     const total_ingredients = recipe.ingredients.length
-    const cost_per_serving = recipe.cost_per_serving || 0
-    const selling_price = recipe.selling_price || 0
+    const cost_per_serving = recipe.cost_per_serving ?? 0
+    const selling_price = recipe.selling_price ?? 0
 
     const estimated_profit = selling_price - cost_per_serving
     const profit_margin = cost_per_serving > 0 ? (estimated_profit / cost_per_serving) * 100 : 0
@@ -144,8 +144,8 @@ export class RecipeValidationHelpers {
     cooking_time?: number
   }): 'simple' | 'moderate' | 'complex' {
     const ingredientCount = recipe.ingredients.length
-    const instructionCount = recipe.instructions?.length || 0
-    const totalTime = (recipe.preparation_time || 0) + (recipe.cooking_time || 0)
+    const instructionCount = recipe.instructions?.length ?? 0
+    const totalTime = (recipe.preparation_time ?? 0) + (recipe.cooking_time ?? 0)
 
     if (ingredientCount <= 5 && instructionCount <= 5 && totalTime <= 30) {
       return 'simple'
@@ -212,7 +212,7 @@ export class RecipeValidationHelpers {
         invalid.push({
           index,
           data: recipe,
-          errors: result.errors || []
+          errors: result.errors ?? []
         })
       }
     })

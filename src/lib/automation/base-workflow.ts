@@ -38,7 +38,7 @@ export abstract class BaseWorkflowAutomation {
     const event: WorkflowEventData = {
       event: eventData.event!,
       entityId: eventData.entityId!,
-      data: eventData.data || {},
+      data: eventData.data ?? {},
       timestamp: new Date().toISOString()
     }
 
@@ -93,7 +93,7 @@ export abstract class BaseWorkflowAutomation {
         automationLogger.error({
           event: event.event,
           entityId: event.entityId,
-          error: result.error || result.message
+          error: result.error ?? result.message
         }, 'Workflow event processing failed')
       }
 

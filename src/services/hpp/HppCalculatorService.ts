@@ -134,7 +134,7 @@ export class HppCalculatorService {
 
       // Calculate total HPP
       const total_hpp = total_material_cost + labor_cost + overhead_cost + wac_adjustment
-      const servings = recipeData.servings || 1
+      const servings = recipeData.servings ?? 1
       const cost_per_unit = servings > 0 ? total_hpp / servings : total_hpp
 
       const result: HppCalculationResult = {
@@ -195,7 +195,7 @@ export class HppCalculatorService {
         0
       )
       const totalQuantity = productions.reduce(
-        (sum, p) => sum + Number(p.actual_quantity || 0),
+        (sum, p) => sum + Number(p.actual_quantity ?? 0),
         0
       )
 
@@ -250,8 +250,8 @@ export class HppCalculatorService {
         .eq('status', 'COMPLETED')
         .gte('actual_end_time', thirtyDaysAgo.toISOString())
 
-      const recipeVolume = (recipeProductions || []).reduce(
-        (sum, p) => sum + Number(p.actual_quantity || 0),
+      const recipeVolume = (recipeProductions ?? []).reduce(
+        (sum, p) => sum + Number(p.actual_quantity ?? 0),
         0
       )
 
@@ -263,8 +263,8 @@ export class HppCalculatorService {
         .eq('status', 'COMPLETED')
         .gte('actual_end_time', thirtyDaysAgo.toISOString())
 
-      const totalVolume = (allProductions || []).reduce(
-        (sum, p) => sum + Number(p.actual_quantity || 0),
+      const totalVolume = (allProductions ?? []).reduce(
+        (sum, p) => sum + Number(p.actual_quantity ?? 0),
         0
       )
 
@@ -350,7 +350,7 @@ export class HppCalculatorService {
           0
         )
         const totalValue = ingredientTransactions.reduce(
-          (sum, t) => sum + Number(t.total_price || 0),
+          (sum, t) => sum + Number(t.total_price ?? 0),
           0
         )
 
@@ -451,7 +451,7 @@ export class HppCalculatorService {
         throw new Error(`Failed to fetch latest HPP: ${error.message}`)
       }
 
-      return data || null
+      return data ?? null
 
     } catch (error: unknown) {
       this.logger.error({ error, recipeId }, 'Failed to get latest HPP')

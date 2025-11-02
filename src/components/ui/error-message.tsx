@@ -134,11 +134,11 @@ export const ErrorMessage = ({
     const [showDetails, setShowDetails] = useState(false)
 
     const errorInfo = error ? getUserFriendlyError(error) : null
-    const ErrorIcon = errorInfo?.icon || AlertCircle
+    const ErrorIcon = errorInfo?.icon ?? AlertCircle
 
-    const finalTitle = title || errorInfo?.title || 'Terjadi Kesalahan'
-    const finalMessage = message || errorInfo?.message || 'Silakan coba lagi.'
-    const suggestions = errorInfo?.suggestions || []
+    const finalTitle = title ?? errorInfo?.title ?? 'Terjadi Kesalahan'
+    const finalMessage = message ?? errorInfo?.message ?? 'Silakan coba lagi.'
+    const suggestions = errorInfo?.suggestions ?? []
 
     // Inline variant (for forms, small sections)
     if (variant === 'inline') {
@@ -213,7 +213,7 @@ export const ErrorMessage = ({
 
                                 {showDetails && (
                                     <pre className="mt-2 p-3 bg-muted rounded text-xs text-left overflow-auto max-h-32">
-                                        {String(error instanceof Error ? (error.stack || error.message) : error)}
+                                        {String(error instanceof Error ? (error.stack ?? error.message) : error)}
                                     </pre>
                                 )}
                             </div>
@@ -287,7 +287,7 @@ export const ErrorMessage = ({
 
                         {showDetails && (
                             <pre className="mt-3 p-4 bg-muted rounded text-xs text-left overflow-auto max-h-48">
-                                {String(error instanceof Error ? (error.stack || error.message) : error)}
+                                {String(error instanceof Error ? (error.stack ?? error.message) : error)}
                             </pre>
                         )}
                     </div>

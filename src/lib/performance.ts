@@ -164,12 +164,14 @@ export function isSlowConnection(): boolean {
     readonly saveData: boolean
   }
   
-  const connection = (navigator as Navigator & { 
-    connection?: NetworkInformation, 
-    mozConnection?: NetworkInformation, 
+  type NavigatorWithConnection = Navigator & { 
+    connection?: NetworkInformation
+    mozConnection?: NetworkInformation
     webkitConnection?: NetworkInformation 
-  }).connection || (navigator as any).mozConnection || 
-  (navigator as any).webkitConnection
+  }
+  
+  const nav = navigator as NavigatorWithConnection
+  const connection = nav.connection ?? nav.mozConnection ?? nav.webkitConnection
   
   if (!connection) {return false}
   

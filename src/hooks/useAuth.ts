@@ -59,8 +59,8 @@ export function useAuth() {
         }
 
         setAuthState({
-          user: user || null,
-          session: session || null,
+          user: user ?? null,
+          session: session ?? null,
           isLoading: false,
           isAuthenticated: !!user,
         })
@@ -84,8 +84,8 @@ export function useAuth() {
         apiLogger.info({ event }, 'Auth state changed')
 
         setAuthState({
-          user: session?.user || null,
-          session: session || null,
+          user: session?.user ?? null,
+          session: session ?? null,
           isLoading: false,
           isAuthenticated: !!session?.user,
         })

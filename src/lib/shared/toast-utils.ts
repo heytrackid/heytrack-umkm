@@ -110,8 +110,8 @@ export function showSuccessToast(
   description?: string
 ) {
   toast({
-    title: title || TOAST_PRESETS.SUCCESS.title,
-    description: description || TOAST_PRESETS.SUCCESS.description,
+    title: title ?? TOAST_PRESETS.SUCCESS.title,
+    description: description ?? TOAST_PRESETS.SUCCESS.description,
     variant: TOAST_PRESETS.SUCCESS.variant
   })
 }
@@ -122,8 +122,8 @@ export function showErrorToast(
   description?: string
 ) {
   toast({
-    title: title || TOAST_PRESETS.ERROR.title,
-    description: description || TOAST_PRESETS.ERROR.description,
+    title: title ?? TOAST_PRESETS.ERROR.title,
+    description: description ?? TOAST_PRESETS.ERROR.description,
     variant: TOAST_PRESETS.ERROR.variant
   })
 }
@@ -134,8 +134,8 @@ export function showWarningToast(
   description?: string
 ) {
   toast({
-    title: title || TOAST_PRESETS.WARNING.title,
-    description: description || TOAST_PRESETS.WARNING.description,
+    title: title ?? TOAST_PRESETS.WARNING.title,
+    description: description ?? TOAST_PRESETS.WARNING.description,
     variant: TOAST_PRESETS.WARNING.variant
   })
 }
@@ -185,7 +185,7 @@ export function showFormSuccessToast(
 ) {
   toast({
     title: FORM_TOASTS.SUBMIT_SUCCESS.title,
-    description: message || FORM_TOASTS.SUBMIT_SUCCESS.description
+    description: message ?? FORM_TOASTS.SUBMIT_SUCCESS.description
   })
 }
 
@@ -195,7 +195,7 @@ export function showFormErrorToast(
 ) {
   toast({
     title: FORM_TOASTS.SUBMIT_ERROR.title,
-    description: message || FORM_TOASTS.SUBMIT_ERROR.description,
+    description: message ?? FORM_TOASTS.SUBMIT_ERROR.description,
     variant: FORM_TOASTS.SUBMIT_ERROR.variant
   })
 }
@@ -207,7 +207,7 @@ export function showLoadingToast(
 ) {
   return toast({
     title: API_TOASTS.LOADING.title,
-    description: message || API_TOASTS.LOADING.description,
+    description: message ?? API_TOASTS.LOADING.description,
     duration: Infinity // Keep showing until manually dismissed
   })
 }

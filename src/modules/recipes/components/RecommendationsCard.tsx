@@ -1,9 +1,10 @@
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Lightbulb, Info } from 'lucide-react'
 import type { HPPCalculationResult } from '@/modules/recipes/types'
 
-'use client'
 
 
 

@@ -52,7 +52,7 @@ export const HppCostTrendsChart = ({
   currency
 }: HppCostTrendsChartProps) => {
   const { currency: defaultCurrency } = useCurrency()
-  const resolvedCurrency = currency || defaultCurrency
+  const resolvedCurrency = currency ?? defaultCurrency
 
   const chartData = useMemo(() => {
     if (data && data.length > 0) { return data }

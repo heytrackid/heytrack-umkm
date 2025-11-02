@@ -30,7 +30,7 @@ interface StatsCardsProps {
  * Standardized stats cards grid component
  */
 export const StatsCards = ({ stats, className, gridClassName = "grid gap-4 md:grid-cols-2 lg:grid-cols-4" }: StatsCardsProps) => (
-  <div className={`${gridClassName} ${className || ''}`}>
+  <div className={`${gridClassName} ${className ?? ''}`}>
     {stats.map((stat, index) => (
       <StatCard key={index} {...stat} />
     ))}

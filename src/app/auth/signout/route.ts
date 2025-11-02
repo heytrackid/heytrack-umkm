@@ -19,10 +19,10 @@ async function handleSignOut(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
 }
 
-export async function POST(request: NextRequest) {
+export function POST(request: NextRequest) {
     return handleSignOut(request)
 }
 
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
     return handleSignOut(request)
 }

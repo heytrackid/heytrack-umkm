@@ -112,9 +112,9 @@ export function useTableData<T>(
 ) {
   const [data, setData] = useState(initialData)
   const [sorting, setSorting] = useState(config?.initialSort)
-  const [filters, setFilters] = useState<Record<string, unknown>>(config?.initialFilters || {})
-  const [currentPage, setCurrentPage] = useState(config?.initialPage || 1)
-  const [pageSize] = useState(config?.pageSize || 10)
+  const [filters, setFilters] = useState<Record<string, unknown>>(config?.initialFilters ?? {})
+  const [currentPage, setCurrentPage] = useState(config?.initialPage ?? 1)
+  const [pageSize] = useState(config?.pageSize ?? 10)
 
   // Apply operations in correct order: filter -> sort -> paginate
   const processedData = useMemo(() => {
@@ -232,7 +232,7 @@ export const commonColumns = {
     width: 100,
     render: (value: unknown) => {
       const stringValue = String(value)
-      const displayValue = statusMap?.[stringValue] || stringValue
+      const displayValue = statusMap?.[stringValue] ?? stringValue
       const getStatusClasses = (status: string) => {
         switch (status) {
           case 'active':
@@ -257,7 +257,7 @@ export const commonColumns = {
   currency: <T>(key: string, header: string, width?: number): TableColumn<T> => ({
     key,
     header,
-    width: width || 120,
+    width: width ?? 120,
     align: 'right' as const,
     format: (value: unknown) => tableFormatters.currency(Number(value))
   }),
@@ -265,7 +265,7 @@ export const commonColumns = {
   date: <T>(key: string, header: string, width?: number): TableColumn<T> => ({
     key,
     header,
-    width: width || 100,
+    width: width ?? 100,
     format: (value: unknown) => tableFormatters.date(value as string | Date)
   })
 }

@@ -199,8 +199,8 @@ async function PUT(
       updatedOrder.total_amount > 0
     ) {
       const incomeDate = normalizeDateValue(updatedOrder.delivery_date)
-        || normalizeDateValue(updatedOrder.order_date)
-        || new Date().toISOString().split('T')[0]
+ ?? normalizeDateValue(updatedOrder.order_date)
+ ?? new Date().toISOString().split('T')[0]
 
       const incomeData = {
         user_id: user.id,

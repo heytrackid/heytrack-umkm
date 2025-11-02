@@ -72,9 +72,9 @@ export async function proxy(request: NextRequest) {
     let response: NextResponse
     
     try {
-      const result = await updateSession(request)
-      user = result.user
-      response = result.response
+      const { user: authUser, response: authResponse } = await updateSession(request)
+      user = authUser
+      response = authResponse
     } catch (error) {
       // If auth fails, continue without user (they'll be redirected to login if needed)
       middlewareLogger.debug({ error }, 'Middleware auth error')

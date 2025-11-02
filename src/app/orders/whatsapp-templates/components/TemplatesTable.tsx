@@ -27,7 +27,7 @@ const TemplatesTable = ({
     onPreview,
     onDuplicate
 }: TemplatesTableProps) => {
-    const getCategoryLabel = (category: string) => TEMPLATE_CATEGORIES.find((cat) => cat.value === category)?.label || category
+    const getCategoryLabel = (category: string) => TEMPLATE_CATEGORIES.find((cat) => cat.value === category)?.label ?? category
 
     const renderTableRows = () => {
         if (loading) {
@@ -84,7 +84,7 @@ const TemplatesTable = ({
                             // Handle both array and object formats
                             const vars = Array.isArray(template.variables)
                                 ? template.variables
-                                : Object.keys(template.variables || {})
+                                : Object.keys(template.variables ?? {})
 
                             if (vars.length === 0) {
                                 return (

@@ -127,8 +127,8 @@ export class OrderValidationHelpers {
   } {
     const subtotal = items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0)
     const tax_amount = options.taxRate ? subtotal * (options.taxRate / 100) : 0
-    const discount_amount = options.discountAmount || 0
-    const delivery_fee = options.deliveryFee || 0
+    const discount_amount = options.discountAmount ?? 0
+    const delivery_fee = options.deliveryFee ?? 0
 
     const total_amount = subtotal + tax_amount - discount_amount + delivery_fee
 
@@ -208,7 +208,7 @@ export class OrderValidationHelpers {
         invalid.push({
           index,
           data: order,
-          errors: result.errors || []
+          errors: result.errors ?? []
         })
       }
     })

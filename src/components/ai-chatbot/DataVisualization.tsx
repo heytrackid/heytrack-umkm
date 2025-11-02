@@ -1,59 +1,55 @@
 'use client'
 
 import type { CustomersTable, RecipesTable } from '@/types/database'
-import dynamic from 'next/dynamic';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign } from 'lucide-react';
-import { useCurrency } from '@/hooks/useCurrency';
-import { useMemo } from 'react';
-
+import dynamic from 'next/dynamic'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DollarSign } from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
+import { useMemo } from 'react'
 
 type Customer = CustomersTable
 type Recipe = RecipesTable
 
 // Dynamically import Recharts components to reduce bundle size
 const BarChart = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.BarChart),
+  () => import('recharts').then(mod => mod.BarChart),
   { ssr: false }
 )
 const Bar = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Bar),
+  () => import('recharts').then(mod => mod.Bar),
   { ssr: false }
 )
 const XAxis = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.XAxis),
+  () => import('recharts').then(mod => mod.XAxis),
   { ssr: false }
 )
 const YAxis = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.YAxis),
+  () => import('recharts').then(mod => mod.YAxis),
   { ssr: false }
 )
 const CartesianGrid = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.CartesianGrid),
+  () => import('recharts').then(mod => mod.CartesianGrid),
   { ssr: false }
 )
 const Tooltip = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Tooltip),
+  () => import('recharts').then(mod => mod.Tooltip),
   { ssr: false }
 )
 const ResponsiveContainer = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.ResponsiveContainer),
+  () => import('recharts').then(mod => mod.ResponsiveContainer),
   { ssr: false }
 )
 const Cell = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Cell),
+  () => import('recharts').then(mod => mod.Cell),
   { ssr: false }
 )
 
-
-// Type definitions for data structures
 interface ChartEntry {
   name: string
   value: number
   color: string
 }
 
-// Extended types for visualization
 interface CustomerForViz extends Omit<Customer, 'total_spent' | 'total_orders'> {
   total_spent?: number
   total_orders?: number
@@ -102,35 +98,22 @@ interface AnalysisData {
 }
 
 interface DataVisualizationProps {
-  type: 'financial' | 'inventory' | 'customers' | 'products' | 'analysis';
-  data: unknown;
-  compact?: boolean;
+  type: 'financial' | 'inventory' | 'customers' | 'products' | 'analysis'
+  data: unknown
+  compact?: boolean
 }
 
-// Standalone components extracted from the main component
-const FinancialChart = ({ data, compact = false, formatCurrency, COLORS }: {
-  data: FinancialData;
-  compact?: boolean;
-  formatCurrency: (value: number) => string;
-  COLORS: string[];
+const FinancialChart = ({ data, compact = false, formatCurrency, colors }: {
+  data: FinancialData
+  compact?: boolean
+  formatCurrency: (value: number) => string
+  colors: string[]
 }) => {
   const chartData: ChartEntry[] = useMemo(() => [
-    {
-      name: 'Revenue',
-      value: data.revenue,
-      color: '#10B981'
-    },
-    {
-      name: 'Costs',
-      value: data.costs,
-      color: '#EF4444'
-    },
-    {
-      name: 'Profit',
-      value: data.revenue - data.costs,
-      color: '#3B82F6'
-    }
-  ], [data.revenue, data.costs]);
+    { name: 'Revenue', value: data.revenue, color: colors[0] ?? '#10B981' },
+    { name: 'Costs', value: data.costs, color: colors[1] ?? '#EF4444' },
+    { name: 'Profit', value: data.revenue - data.costs, color: colors[2] ?? '#3B82F6' }
+  ], [colors, data.costs, data.revenue])
 
   return (
     <Card className="w-full">
@@ -142,7 +125,6 @@ const FinancialChart = ({ data, compact = false, formatCurrency, COLORS }: {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {/* Key metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
               <div className="text-xl font-bold">{formatCurrency(data.revenue)}</div>
@@ -166,14 +148,13 @@ const FinancialChart = ({ data, compact = false, formatCurrency, COLORS }: {
             </div>
           </div>
 
-          {/* Profit chart */}
           {!compact && (
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(value) => `Rp${(value / 1000000).toFixed(1)}M`} />
+                  <YAxis tickFormatter={(value) => `Rp${(value / 1_000_000).toFixed(1)}M`} />
                   <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                   <Bar dataKey="value">
                     {chartData.map((entry, index) => (
@@ -185,7 +166,6 @@ const FinancialChart = ({ data, compact = false, formatCurrency, COLORS }: {
             </div>
           )}
 
-          {/* Insights */}
           {!compact && (
             <div className="space-y-2">
               <h4 className="font-medium">Key Insights</h4>
@@ -199,86 +179,82 @@ const FinancialChart = ({ data, compact = false, formatCurrency, COLORS }: {
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-// Placeholder components for other chart types
-const InventoryChart = ({ data, compact, formatCurrency, COLORS }: { data: InventoryData; compact?: boolean; formatCurrency: (value: number) => string; COLORS: string[] }) => (
+const InventoryChart = ({ data: _data, compact: _compact }: { data: InventoryData; compact?: boolean }): JSX.Element => (
   <Card><CardContent className="p-4"><div className="text-sm text-gray-500">Inventory visualization</div></CardContent></Card>
-);
+)
 
-const CustomerChart = ({ data, compact, formatCurrency, COLORS }: { data: CustomerData; compact?: boolean; formatCurrency: (value: number) => string; COLORS: string[] }) => (
+const CustomerChart = ({ data: _data, compact: _compact }: { data: CustomerData; compact?: boolean }): JSX.Element => (
   <Card><CardContent className="p-4"><div className="text-sm text-gray-500">Customer visualization</div></CardContent></Card>
-);
+)
 
-const ProductChart = ({ data, compact, formatCurrency, COLORS }: { data: ProductData; compact?: boolean; formatCurrency: (value: number) => string; COLORS: string[] }) => (
+const ProductChart = ({ data: _data, compact: _compact }: { data: ProductData; compact?: boolean }): JSX.Element => (
   <Card><CardContent className="p-4"><div className="text-sm text-gray-500">Product visualization</div></CardContent></Card>
-);
+)
 
-const AnalysisChart = ({ data, compact, formatCurrency, COLORS }: { data: AnalysisData; compact?: boolean; formatCurrency: (value: number) => string; COLORS: string[] }) => (
+const AnalysisChart = ({ data: _data, compact: _compact }: { data: AnalysisData; compact?: boolean }): JSX.Element => (
   <Card><CardContent className="p-4"><div className="text-sm text-gray-500">Analysis visualization</div></CardContent></Card>
-);
+)
 
 const DataVisualization = ({ type, data, compact = false }: DataVisualizationProps) => {
-  const { formatCurrency } = useCurrency();
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+  const { formatCurrency } = useCurrency()
+  const colors = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']
 
-  // Product Analysis Visualization
+  const isFinancialData = (value: unknown): value is FinancialData => {
+    if (!value || typeof value !== 'object') { return false }
+    return 'revenue' in value && 'costs' in value && 'profitMargin' in value
+  }
 
-  const isFinancialData = (data: unknown): data is FinancialData => {
-    if (!data || typeof data !== 'object') { return false; }
-    return 'revenue' in data || 'profit' in data || 'expenses' in data;
-  };
+  const isInventoryData = (value: unknown): value is InventoryData => {
+    if (!value || typeof value !== 'object') { return false }
+    return 'criticalItems' in value && 'alerts' in value && Array.isArray((value as InventoryData).criticalItems)
+  }
 
-  const isInventoryData = (data: unknown): data is InventoryData => {
-    if (!data || typeof data !== 'object') { return false; }
-    return 'criticalItems' in data && 'alerts' in data && Array.isArray((data as InventoryData).criticalItems);
-  };
+  const isCustomerData = (value: unknown): value is CustomerData => {
+    if (!value || typeof value !== 'object') { return false }
+    return 'topCustomers' in value && 'summary' in value && Array.isArray((value as CustomerData).topCustomers)
+  }
 
-  const isCustomerData = (data: unknown): data is CustomerData => {
-    if (!data || typeof data !== 'object') { return false; }
-    return 'topCustomers' in data && 'summary' in data && Array.isArray((data as CustomerData).topCustomers);
-  };
+  const isProductData = (value: unknown): value is ProductData => {
+    if (!value || typeof value !== 'object') { return false }
+    return 'topRecipes' in value && 'recommendations' in value && Array.isArray((value as ProductData).topRecipes)
+  }
 
-  const isProductData = (data: unknown): data is ProductData => {
-    if (!data || typeof data !== 'object') { return false; }
-    return 'topRecipes' in data && 'recommendations' in data && Array.isArray((data as ProductData).topRecipes);
-  };
+  const isAnalysisData = (value: unknown): value is AnalysisData => {
+    if (!value || typeof value !== 'object') { return false }
+    return 'analysis' in value && typeof (value as AnalysisData).analysis === 'object'
+  }
 
-  const isAnalysisData = (data: unknown): data is AnalysisData => {
-    if (!data || typeof data !== 'object') { return false; }
-    return 'analysis' in data && typeof (data as AnalysisData).analysis === 'object';
-  };
-
-  // Render appropriate chart based on type
   switch (type) {
     case 'financial':
       if (isFinancialData(data)) {
-        return <FinancialChart data={data} compact={compact} formatCurrency={formatCurrency} COLORS={COLORS} />;
+        return <FinancialChart data={data} compact={compact} formatCurrency={formatCurrency} colors={colors} />
       }
-      break;
+      break
     case 'inventory':
       if (isInventoryData(data)) {
-        return <InventoryChart data={data} compact={compact} formatCurrency={formatCurrency} COLORS={COLORS} />;
+        return <InventoryChart data={data} compact={compact} />
       }
-      break;
+      break
     case 'customers':
       if (isCustomerData(data)) {
-        return <CustomerChart data={data} compact={compact} formatCurrency={formatCurrency} COLORS={COLORS} />;
+        return <CustomerChart data={data} compact={compact} />
       }
-      break;
+      break
     case 'products':
       if (isProductData(data)) {
-        return <ProductChart data={data} compact={compact} formatCurrency={formatCurrency} COLORS={COLORS} />;
+        return <ProductChart data={data} compact={compact} />
       }
-      break;
+      break
     case 'analysis':
       if (isAnalysisData(data)) {
-        return <AnalysisChart data={data} compact={compact} formatCurrency={formatCurrency} COLORS={COLORS} />;
+        return <AnalysisChart data={data} compact={compact} />
       }
-      break;
+      break
     default:
-      break;
+      break
   }
 
   return (
@@ -289,7 +265,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default DataVisualization;
+export default DataVisualization

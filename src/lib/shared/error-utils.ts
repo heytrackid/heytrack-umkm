@@ -54,7 +54,7 @@ export function useErrorHandler() {
     const message = getErrorMessage(error)
     const title = context ? `${context} Error` : 'Error'
 
-    logger.error({ error }, `${context || 'App'} Error`)
+    logger.error({ error }, `${context ?? 'App'} Error`)
 
     toast({
       title,
@@ -92,7 +92,7 @@ export function handleAPIResponse<T>(
     const message = getErrorMessage(response.error)
 
     toast({
-      title: errorContext || 'API Error',
+      title: errorContext ?? 'API Error',
       description: message,
       variant: 'destructive'
     })
@@ -113,7 +113,7 @@ export function handleAPIResponse<T>(
 // Form error handling
 export function formatFormErrors(errors: Record<string, unknown>): string[] {
   return Object.entries(errors).map(([field, error]) => {
-    const message = typeof error === 'string' ? error : (error as { message?: string })?.message || 'Invalid value'
+    const message = typeof error === 'string' ? error : (error as { message?: string })?.message ?? 'Invalid value'
     return `${field}: ${message}`
   })
 }

@@ -99,7 +99,7 @@ const chartConfig = {
 }
 
 const FinancialTrendsChart = () => (
-  <ChartContainer config={chartConfig}>
+  <ChartContainer _config={chartConfig}>
     <LineChart
       accessibilityLayer
       data={financialData}

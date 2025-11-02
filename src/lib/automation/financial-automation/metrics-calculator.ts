@@ -22,7 +22,7 @@ export class MetricsCalculator {
     const netProfit = grossProfit - totalExpenses
 
     // Inventory value calculation
-    const inventoryValue = inventory.reduce((sum, i) => sum + (i.current_stock || 0) * (i.price_per_unit || 0), 0)
+    const inventoryValue = inventory.reduce((sum, i) => sum + (i.current_stock ?? 0) * (i.price_per_unit ?? 0), 0)
 
     return {
       revenue: totalRevenue,
@@ -49,7 +49,7 @@ export class MetricsCalculator {
    * Calculate inventory value
    */
   static calculateInventoryValue(inventory: Ingredient[]): number {
-    return inventory.reduce((sum, i) => sum + (i.current_stock || 0) * (i.price_per_unit || 0), 0)
+    return inventory.reduce((sum, i) => sum + (i.current_stock ?? 0) * (i.price_per_unit ?? 0), 0)
   }
 
   /**

@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useRef } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -8,7 +10,6 @@ import { getErrorMessage } from '@/lib/type-guards'
 import { uiLogger } from '@/lib/logger'
 import { Upload, FileText, CheckCircle, AlertTriangle, Download, X, ArrowRight } from 'lucide-react'
 
-'use client'
 
 
 
@@ -35,7 +36,7 @@ export const BulkImportWizard = ({ onImport, onCancel }: BulkImportWizardProps) 
     const [currentStep, setCurrentStep] = useState<Step>('upload')
     const [_file, setFile] = useState<File | null>(null)
     const [parsedData, setParsedData] = useState<ImportRow[]>([])
-    const [isImporting, setIsImporting] = useState(false)
+    const [_isImporting, setIsImporting] = useState(false)
     const [importProgress, setImportProgress] = useState(0)
     const [importResults, setImportResults] = useState<{ success: number; failed: number }>({ success: 0, failed: 0 })
     const fileInputRef = useRef<HTMLInputElement>(null)

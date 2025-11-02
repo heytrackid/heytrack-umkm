@@ -15,9 +15,9 @@ import {
 // Core Sidebar Components
 // Main sidebar structure and layout components
 
-const SIDEBAR_WIDTH = "16rem"
+const _SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
-const SIDEBAR_WIDTH_ICON = "3rem"
+const _SIDEBAR_WIDTH_ICON = "3rem"
 
 interface SidebarProps extends ComponentProps<'div'> {
   side?: "left" | "right"

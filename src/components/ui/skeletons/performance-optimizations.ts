@@ -31,7 +31,7 @@ export function useSkeletonDebounce(delay: number = MIN_LOADING_DURATION.FAST) {
 export function useSkeletonArray(length: number, dependency?: unknown[]) {
   return useMemo(
     () => Array.from({ length }, (_, i) => i),
-    [length, ...(dependency || [])]
+    [length, ...(dependency ?? [])]
   )
 }
 

@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Add sorting
-    const sortField = sort_by || 'name'
+    const sortField = sort_by ?? 'name'
     const sortDirection = sort_order === 'asc'
     query = query.order(sortField, { ascending: sortDirection })
 
@@ -75,8 +75,8 @@ export async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit)
+        total: count ?? 0,
+        totalPages: Math.ceil((count ?? 0) / limit)
       }
     })
   } catch (error: unknown) {

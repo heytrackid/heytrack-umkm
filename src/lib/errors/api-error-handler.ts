@@ -82,9 +82,9 @@ export function handleAPIError(error: unknown, context?: string): NextResponse {
       details?: string;
     };
     const errorResponse: ErrorResponse = {
-      error: supabaseError.message || 'Database error occurred',
+      error: supabaseError.message ?? 'Database error occurred',
       code: 'DATABASE_ERROR',
-      status: supabaseError.status || 500,
+      status: supabaseError.status ?? 500,
       details: {
         code: supabaseError.code,
         hint: supabaseError.hint,
@@ -94,7 +94,7 @@ export function handleAPIError(error: unknown, context?: string): NextResponse {
     };
 
     // Map specific Supabase error codes to appropriate HTTP status codes
-    let status = supabaseError.status || 500;
+    let status = supabaseError.status ?? 500;
     if (supabaseError.code === '23505') {status = 409;} // Unique violation
     if (supabaseError.code === '23503') {status = 400;} // Foreign key violation
     if (supabaseError.code === '23502') {status = 400;} // Not null violation
@@ -133,7 +133,7 @@ function isZodError(error: unknown): error is { issues: Array<{ path: string[]; 
     typeof error === 'object' &&
     error !== null &&
     'issues' in error &&
-    Array.isArray((error as any).issues)
+    Array.isArray((error as { issues: unknown[] }).issues)
   );
 }
 
@@ -240,7 +240,7 @@ export function createRateLimitError(
 /**
  * Wrap an API route handler with centralized error handling
  */
-export function withAPIErrorHandler<T extends Record<string, any>>(
+export function withAPIErrorHandler<T extends Record<string, unknown>>(
   handler: (req: Request, ctx: T) => Promise<NextResponse>,
   context?: string
 ) {
@@ -248,7 +248,7 @@ export function withAPIErrorHandler<T extends Record<string, any>>(
     try {
       return handler(req, ctx);
     } catch (error) {
-      return handleAPIError(error, context || `API Route: ${req.url}`);
+      return handleAPIError(error, context ?? `API Route: ${req.url}`);
     }
   };
 }

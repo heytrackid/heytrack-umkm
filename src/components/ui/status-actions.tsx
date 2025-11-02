@@ -68,7 +68,7 @@ export const StatusBadges = {
 
   // Generic boolean status
   boolean: (value: boolean, labels?: { true: string; false: string }) => {
-    const { true: trueLabel = 'Aktif', false: falseLabel = 'Tidak Aktif' } = labels || {}
+    const { true: trueLabel = 'Aktif', false: falseLabel = 'Tidak Aktif' } = labels ?? {}
 
     return (
       <Badge variant={value ? 'default' : 'secondary'}>

@@ -314,13 +314,13 @@ export const themeAware = {
 // Color manipulation utilities
 export const colorUtils = {
   // Lighten color by percentage
-  lighten: (color: string, percent: number): string => 
+  lighten: (color: string, _percent: number): string => 
     // Simple implementation - in real app, use a proper color library
      color
   ,
 
   // Darken color by percentage
-  darken: (color: string, percent: number): string => 
+  darken: (color: string, _percent: number): string => 
     // Simple implementation - in real app, use a proper color library
      color
   ,

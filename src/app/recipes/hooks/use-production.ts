@@ -54,16 +54,16 @@ export function useProductionBatches(filters?: ProductionFilters) {
       planned_quantity: batch.quantity,
       batch_size: batch.quantity,
       scheduled_start: batch.planned_date,
-      scheduled_completion: batch.completed_at || batch.planned_date,
-      actual_start: batch.started_at || undefined,
-      actual_completion: batch.completed_at || undefined,
+      scheduled_completion: batch.completed_at ?? batch.planned_date,
+      actual_start: batch.started_at ?? undefined,
+      actual_completion: batch.completed_at ?? undefined,
       estimated_duration_minutes: 0,
       actual_duration_minutes: 0,
       assigned_staff_ids: [],
       assigned_equipment_ids: [],
       supervisor_id: undefined,
-      planned_cost: batch.actual_cost || 0,
-      actual_cost: batch.actual_cost || undefined,
+      planned_cost: batch.actual_cost ?? 0,
+      actual_cost: batch.actual_cost ?? undefined,
       labor_cost: undefined,
       utility_cost: undefined,
       overhead_cost: undefined,
@@ -77,11 +77,11 @@ export function useProductionBatches(filters?: ProductionFilters) {
       order_ids: [],
       ingredient_allocations: [],
       stock_transactions: [],
-      notes: batch.notes || undefined,
+      notes: batch.notes ?? undefined,
       internal_notes: undefined,
       tags: [],
-      created_at: batch.created_at || new Date().toISOString(),
-      updated_at: batch.updated_at || new Date().toISOString(),
+      created_at: batch.created_at ?? new Date().toISOString(),
+      updated_at: batch.updated_at ?? new Date().toISOString(),
       recipe: undefined,
       quality_inspector: undefined,
       production_logs: []
@@ -161,7 +161,7 @@ export function useProductionBatches(filters?: ProductionFilters) {
 
   return {
     batches: filteredBatches,
-    allBatches: filteredBatches || [],
+    allBatches: filteredBatches ?? [],
     loading,
     error,
     createBatch: createBatchRecord,
@@ -204,7 +204,7 @@ export function useQualityChecks(batchId: string) {
     recipe_name: 'N/A', // Placeholder
     quality_score: 100, // Placeholder
     temperature: null // Placeholder
-  })) || []
+  })) ?? []
 
   return {
     checks,
@@ -257,7 +257,7 @@ export function useProductionEquipment(filters?: { type?: string; status?: strin
     efficiency: 95, // Placeholder
     location: 'main facility', // Placeholder
     operator: setting.user_id // Placeholder
-  })) || []
+  })) ?? []
 
   return {
     equipment,
@@ -307,7 +307,7 @@ export function useProductionStaff(filters?: { role?: string; active?: boolean }
     last_shift: setting.updated_at, // Placeholder
     shift_schedule: 'day', // Placeholder
     certifications: ['food safety'] // Placeholder
-  })) || []
+  })) ?? []
 
   return {
     staff,
@@ -351,7 +351,7 @@ export function useIngredientAllocations(batchId: string) {
     notes: transaction.notes,
     status: 'allocated' as const, // Literal type
     unit: 'kg' // Placeholder
-  })) || []
+  })) ?? []
 
   return {
     allocations,
@@ -369,11 +369,11 @@ export function useBatchScheduling(config = PRODUCTION_CONFIG) {
   const { batches } = useProductionBatches({ status: ['PLANNED', 'IN_PROGRESS', 'COMPLETED'] }) // Using valid database enum values only
 
   const generateSchedule = (newBatchData: CreateBatchData): BatchSchedule => {
-    const currentQueue = batches?.length || 0
+    const currentQueue = batches?.length ?? 0
 
     const timeline = calculateProductionTimeline(
       newBatchData.recipe_id,
-      newBatchData.batch_size || config.DEFAULT_BATCH_SIZE,
+      newBatchData.batch_size ?? config.DEFAULT_BATCH_SIZE,
       config,
       {
         priority: newBatchData.priority,
@@ -385,18 +385,18 @@ export function useBatchScheduling(config = PRODUCTION_CONFIG) {
       batch_id: '', // Will be assigned after creation
       recipe_name: '', // Would come from recipe lookup
       planned_quantity: newBatchData.planned_quantity,
-      priority: newBatchData.priority || 'normal',
+      priority: newBatchData.priority ?? 'normal',
       scheduled_start: timeline.estimated_start,
       scheduled_completion: timeline.estimated_completion,
       estimated_duration: timeline.total_time_minutes,
-      assigned_equipment: newBatchData.assigned_equipment_ids || [],
-      assigned_staff: newBatchData.assigned_staff_ids || []
+      assigned_equipment: newBatchData.assigned_equipment_ids ?? [],
+      assigned_staff: newBatchData.assigned_staff_ids ?? []
     }
   }
 
   return {
     generateSchedule,
-    currentQueue: batches?.length || 0
+    currentQueue: batches?.length ?? 0
   }
 }
 
@@ -521,7 +521,7 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
     )
     const average_batch_efficiency: number = efficiencyBatches.length > 0 
       ? efficiencyBatches.reduce((sum: number, b: ProductionBatch) => 
-          sum + ((b.estimated_duration_minutes / (b.actual_duration_minutes || 1)) * 100), 0
+          sum + ((b.estimated_duration_minutes / (b.actual_duration_minutes ?? 1)) * 100), 0
         ) / efficiencyBatches.length
       : 0
 
@@ -539,13 +539,13 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
 
     // Cost analysis
     const costBatches = completedBatches.filter((b: ProductionBatch) => b.actual_cost)
-    const total_production_cost: number = costBatches.reduce((sum: number, b: ProductionBatch) => sum + (b.actual_cost || 0), 0)
-    const total_units: number = costBatches.reduce((sum: number, b: ProductionBatch) => sum + (b.actual_quantity || b.planned_quantity), 0)
+    const total_production_cost: number = costBatches.reduce((sum: number, b: ProductionBatch) => sum + (b.actual_cost ?? 0), 0)
+    const total_units: number = costBatches.reduce((sum: number, b: ProductionBatch) => sum + (b.actual_quantity ?? b.planned_quantity), 0)
     const cost_per_unit = total_units > 0 ? total_production_cost / total_units : 0
 
     // Quality metrics
     const overall_quality_score = qualityBatches.length > 0
-      ? qualityBatches.reduce((sum: number, b: ProductionBatch) => sum + (b.quality_score || 0), 0) / qualityBatches.length
+      ? qualityBatches.reduce((sum: number, b: ProductionBatch) => sum + (b.quality_score ?? 0), 0) / qualityBatches.length
       : 0
 
     const failed_batches = batchArray.filter((b: ProductionBatch) => b.status === 'CANCELLED').length
@@ -553,7 +553,7 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
 
     // Production volume
     const total_units_produced = completedBatches.reduce((sum: number, b: ProductionBatch) => 
-      sum + (b.actual_quantity || b.planned_quantity), 0
+      sum + (b.actual_quantity ?? b.planned_quantity), 0
     )
 
     const production_by_recipe: Record<string, { batches: number, units: number, revenue: number }> = {}
@@ -564,7 +564,7 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
       const recipeData = production_by_recipe[batch.recipe_id]
       if (recipeData) {
         recipeData.batches++
-        recipeData.units += (batch.actual_quantity || batch.planned_quantity)
+        recipeData.units += (batch.actual_quantity ?? batch.planned_quantity)
       }
       // Revenue would need to be calculated based on selling price
     })
@@ -645,7 +645,7 @@ export function useProductionNotifications() {
   const unreadCount = (notificationsData as NotificationsTable[] | undefined)?.filter((n) => {
     const notif = n
     return !notif.is_read
-  }).length || 0
+  }).length ?? 0
 
   // Transform to expected format
   const notifications = (notificationsData as NotificationsTable[] | undefined)?.map(notification => ({
@@ -653,13 +653,13 @@ export function useProductionNotifications() {
     title: notification.title,
     message: notification.message,
     type: notification.type,
-    priority: notification.priority || 'medium',
+    priority: notification.priority ?? 'medium',
     batch_id: undefined, // Would need to be stored in the metadata
     recipe_id: undefined, // Would need to be stored in the metadata
     created_at: notification.created_at,
     read: notification.is_read,
     user_id: notification.user_id
-  })) || []
+  })) ?? []
 
   return {
     notifications,
@@ -701,7 +701,7 @@ export function useTemperatureMonitoring(batchId: string) {
     id: setting.id,
     batch_id: batchId, // Use the passed batchId
     stage: setting.settings_data && typeof setting.settings_data === 'object' && 'stage' in setting.settings_data 
-      ? (setting.settings_data as { stage?: string }).stage || 'general'
+      ? (setting.settings_data as { stage?: string }).stage ?? 'general'
       : 'general',
     temperature: setting.settings_data && typeof setting.settings_data === 'object' && 'temperature' in setting.settings_data 
       ? (setting.settings_data as { temperature?: number }).temperature 
@@ -710,7 +710,7 @@ export function useTemperatureMonitoring(batchId: string) {
     recorded_at: setting.updated_at,
     notes: '',
     operator: setting.user_id
-  })) || []
+  })) ?? []
 
   return {
     temperatureLogs,
@@ -724,8 +724,8 @@ export function useTemperatureMonitoring(batchId: string) {
 // Currency formatting for production costs
 export function useProductionCurrency(currency?: string | Currency) {
   const resolvedCurrency: Currency = typeof currency === 'string'
-    ? currencies.find(curr => curr.code === currency) || DEFAULT_CURRENCY
-    : currency || DEFAULT_CURRENCY
+    ? currencies.find(curr => curr.code === currency) ?? DEFAULT_CURRENCY
+    : currency ?? DEFAULT_CURRENCY
 
   const formatCost = (amount: number, _options?: {
     showSymbol?: boolean
@@ -757,7 +757,7 @@ function calculateProductionTimeline(
   context: ProductionTimelineContext = {}
 ): ProductionTimelineResult {
   const now = new Date()
-  const queueDelay = (context.current_queue_length || 0) * config.DEFAULT_COOK_TIME
+  const queueDelay = (context.current_queue_length ?? 0) * config.DEFAULT_COOK_TIME
   const priorityMultiplier = context.priority === 'urgent' || context.rush_order ? 0.75 : 1
 
   const prepTime = config.DEFAULT_PREP_TIME

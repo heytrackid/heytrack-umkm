@@ -114,8 +114,8 @@ const ModalRenderer = () => {
             if (!open) { closeModal(modal.id) }
           }}
         >
-          <DialogContent className={sizeClasses[modal.size || 'md']}>
-            {(modal.title || modal.description) && (
+          <DialogContent className={sizeClasses[modal.size ?? 'md']}>
+            {(modal.title ?? modal.description) && (
               <DialogHeader>
                 {modal.title && <DialogTitle>{modal.title}</DialogTitle>}
                 {modal.description && <DialogDescription>{modal.description}</DialogDescription>}

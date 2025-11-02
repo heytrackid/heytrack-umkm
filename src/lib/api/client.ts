@@ -167,7 +167,7 @@ export class ApiClient {
       
       return {
         success: false,
-        error: error.error || error.message || 'Request failed'
+        error: error.error ?? error.message ?? 'Request failed'
       }
     }
 

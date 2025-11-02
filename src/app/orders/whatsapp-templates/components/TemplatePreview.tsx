@@ -21,11 +21,11 @@ const TemplatePreview = ({
 }: TemplatePreviewProps) => {
     const [showExampleData, setShowExampleData] = useState(true)
 
-    const getCategoryLabel = (category: string) => TEMPLATE_CATEGORIES.find((cat) => cat.value === category)?.label || category
+    const getCategoryLabel = (category: string) => TEMPLATE_CATEGORIES.find((cat) => cat.value === category)?.label ?? category
 
     const getExampleValue = (variableName: string): string => {
         const variable = AVAILABLE_VARIABLES.find((v) => v.name === variableName)
-        return variable?.example || `{${variableName}}`
+        return variable?.example ?? `{${variableName}}`
     }
 
     const renderPreview = (content: string): string => {
@@ -53,7 +53,7 @@ const TemplatePreview = ({
                         Preview Template
                     </DialogTitle>
                     <DialogDescription>
-                        {template?.name} - {getCategoryLabel(template?.category || '')}
+                        {template?.name} - {getCategoryLabel(template?.category ?? '')}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -139,7 +139,7 @@ const TemplatePreview = ({
                                     // Handle both array and object formats
                                     const vars = Array.isArray(template.variables)
                                         ? template.variables
-                                        : Object.keys(template.variables || {})
+                                        : Object.keys(template.variables ?? {})
 
                                     return vars.map((variable) => {
                                         const varInfo = AVAILABLE_VARIABLES.find(v => v.name === variable)

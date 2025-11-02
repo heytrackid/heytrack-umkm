@@ -1,3 +1,5 @@
+'use client'
+
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -5,7 +7,6 @@ import { useCurrency } from '@/hooks/useCurrency'
 import type { IngredientsTable } from '@/types/database'
 import { Package, AlertTriangle, CheckCircle, TrendingDown, TrendingUp, DollarSign } from 'lucide-react'
 
-'use client'
 
 
 type Ingredient = IngredientsTable
@@ -56,7 +57,7 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
 
     // Group by status
     const byStatus = ingredients.reduce((acc, ing) => {
-        const status = getStockStatus(ing.current_stock || 0, ing.min_stock || 0)
+        const status = getStockStatus(ing.current_stock ?? 0, ing.min_stock ?? 0)
         if (!acc[status]) { acc[status] = [] }
         acc[status].push(ing)
         return acc
@@ -71,9 +72,9 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
     const safeTotalCount = totalCount === 0 ? 1 : totalCount
 
     const criticalValue = byStatus.critical?.reduce((sum, i) =>
-        sum + ((i.current_stock || 0) * i.price_per_unit), 0) || 0
+        sum + ((i.current_stock ?? 0) * i.price_per_unit), 0) ?? 0
     const totalValue = ingredients.reduce((sum, i) =>
-        sum + ((i.current_stock || 0) * i.price_per_unit), 0)
+        sum + ((i.current_stock ?? 0) * i.price_per_unit), 0)
 
     return (
         <div className="space-y-4">
@@ -234,8 +235,8 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
                         <CardContent>
                             <div className="space-y-3">
                                 {items.map(ing => {
-                                    const currentStock = ing.current_stock || 0
-                                    const minStock = ing.min_stock || 0
+                                    const currentStock = ing.current_stock ?? 0
+                                    const minStock = ing.min_stock ?? 0
                                     const maxStockBaseline = Math.max(minStock * 2, 1)
                                     const stockPercent = (currentStock / maxStockBaseline) * 100
                                     const value = currentStock * (ing.price_per_unit || 0)

@@ -40,8 +40,8 @@ const RootLayout = async ({
     <html lang="id" suppressHydrationWarning className="h-full">
       <head>
         {/* Performance resource hints */}
-        <link rel="preconnect" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] || ''} crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] || ''} />
+        <link rel="preconnect" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} />
         <link rel="preconnect" href="https://api.openrouter.ai" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.openrouter.ai" />
 

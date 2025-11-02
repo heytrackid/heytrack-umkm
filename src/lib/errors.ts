@@ -42,7 +42,7 @@ export function captureError(
       name: errorObj.name,
     },
     context,
-    level: context?.level || 'error'
+    level: context?.level ?? 'error'
   }, 'Console error replaced with logger')
 }
 

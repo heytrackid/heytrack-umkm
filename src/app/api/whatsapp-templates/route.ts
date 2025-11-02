@@ -88,12 +88,12 @@ export async function POST(request: NextRequest) {
     // 4. Insert template
     const templateData: WhatsAppTemplateInsert = {
       name: body.name,
-      description: body.description || '',
+      description: body.description ?? '',
       category: body.category,
       template_content: body.template_content,
-      variables: body.variables || [],
-      is_active: body.is_active || true,
-      is_default: body.is_default || false,
+      variables: body.variables ?? [],
+      is_active: body.is_active ?? true,
+      is_default: body.is_default ?? false,
       user_id: user.id
     }
 

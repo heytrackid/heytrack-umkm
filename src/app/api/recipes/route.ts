@@ -52,7 +52,7 @@ async function GET(request: NextRequest) {
     const status = searchParams.get('status')
 
     // Create cache key based on query parameters
-    const cacheKey = `${cacheKeys.recipes.all}:${user.id}:${page}:${limit}:${search || ''}:${sort_by || ''}:${sort_order || ''}:${category || ''}:${status || ''}`
+    const cacheKey = `${cacheKeys.recipes.all}:${user.id}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${category ?? ''}:${status ?? ''}`
 
     // Wrap database query with caching
     // ✅ OPTIMIZED: Use specific fields instead of SELECT *
@@ -101,7 +101,7 @@ async function GET(request: NextRequest) {
       }
 
       // Add sorting
-      const sortField = sort_by || 'name'
+      const sortField = sort_by ?? 'name'
       const sortDirection = sort_order === 'asc'
       query = query.order(sortField, { ascending: sortDirection })
 
@@ -117,7 +117,7 @@ async function GET(request: NextRequest) {
 
       return {
         data: recipes || [],
-        meta: createPaginationMeta(page, limit, count || 0)
+        meta: createPaginationMeta(page, limit, count ?? 0)
       }
     }, cacheKey, 10 * 60 * 1000) // Cache for 10 minutes
 
@@ -126,7 +126,7 @@ async function GET(request: NextRequest) {
       cached: true,
       page,
       limit,
-      search: search || '',
+      search: search ?? '',
       resultCount: result.data.length,
       total: result.meta.total
     }, 'Recipes fetched (cached)')
@@ -177,7 +177,7 @@ async function POST(request: NextRequest) {
       .insert([{
         ...recipeData,
         created_by: user.id,
-        name: recipeData.name || recipeData.nama
+        name: recipeData.name ?? recipeData.nama
       }])
       .select('id, name, created_at')
       .single()
@@ -203,9 +203,9 @@ async function POST(request: NextRequest) {
 
       const recipeIngredientsToInsert: RecipeIngredientsInsert[] = recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
         recipe_id: createdRecipe.id,
-        ingredient_id: ingredient.ingredient_id || ingredient.bahan_id || '',
-        quantity: ingredient.quantity || ingredient.qty_per_batch || 0,
-        unit: ingredient.unit || 'g',
+        ingredient_id: ingredient.ingredient_id ?? ingredient.bahan_id ?? '',
+        quantity: ingredient.quantity ?? ingredient.qty_per_batch ?? 0,
+        unit: ingredient.unit ?? 'g',
         user_id: user.id
       }))
 

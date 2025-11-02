@@ -54,7 +54,7 @@ interface UseEnhancedCashFlowReturn {
 function calculateDateRange(period: PeriodType, startDate?: string, endDate?: string) {
   const today = new Date()
   let calculatedStartDate = startDate
-  const calculatedEndDate = endDate || today.toISOString().split('T')[0]
+  const calculatedEndDate = endDate ?? today.toISOString().split('T')[0]
 
   if (!startDate) {
     if (period === 'week') {
@@ -221,7 +221,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Gagal menyimpan transaksi')
+        throw new Error(errorData.error ?? 'Gagal menyimpan transaksi')
       }
 
       setIsAddDialogOpen(false)
@@ -240,7 +240,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
       setLoading(true)
 
       // Use transaction.id as the reference_id
-      const recordId = transaction.reference_id || transaction.id
+      const recordId = transaction.reference_id ?? transaction.id
       
       const response = await fetch(`/api/financial/records/${recordId}`, {
         method: 'DELETE'
@@ -248,7 +248,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Gagal menghapus transaksi')
+        throw new Error(errorData.error ?? 'Gagal menghapus transaksi')
       }
 
       await fetchCashFlowData()
@@ -268,8 +268,8 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
   }, [fetchCashFlowData])
 
   // Computed values
-  const transactions = useMemo(() => cashFlowData?.transactions || [], [cashFlowData])
-  const summary = useMemo(() => cashFlowData?.summary || null, [cashFlowData])
+  const transactions = useMemo(() => cashFlowData?.transactions ?? [], [cashFlowData])
+  const summary = useMemo(() => cashFlowData?.summary ?? null, [cashFlowData])
   const chartData = useMemo(() => prepareChartData(transactions), [transactions])
 
   // Load data on mount and when filters change

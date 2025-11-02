@@ -12,10 +12,10 @@ export class TimeCalculator {
    */
   static calculateProductionTime(recipe: Recipe, quantity: number): number {
     // Base time + time per batch + prep time
-    const batchSize = recipe.servings || 1
+    const batchSize = recipe.servings ?? 1
     const batches = Math.ceil(quantity / batchSize)
-    const prepTime = recipe.prep_time || 30 // minutes
-    const cookTime = recipe.cook_time || 45 // minutes
+    const prepTime = recipe.prep_time ?? 30 // minutes
+    const cookTime = recipe.cook_time ?? 45 // minutes
 
     // Sequential batches with some parallelization efficiency
     const baseTime = prepTime + cookTime

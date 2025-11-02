@@ -76,9 +76,9 @@ const OrderDetailView = ({
         }
     }
 
-    const statusInfo = getStatusInfo(order.status || 'PENDING')
-    const paymentInfo = getPaymentInfo((order.payment_status || 'UNPAID') as PaymentStatus)
-    const priorityInfo = getPriorityInfo((order.priority || 'normal') as Priority)
+    const statusInfo = getStatusInfo(order.status ?? 'PENDING')
+    const paymentInfo = getPaymentInfo((order.payment_status ?? 'UNPAID') as PaymentStatus)
+    const priorityInfo = getPriorityInfo((order.priority ?? 'normal') as Priority)
 
     return (
         <div className="space-y-6">
@@ -98,7 +98,7 @@ const OrderDetailView = ({
                             {order.order_no}
                         </h2>
                         <p className="text-sm text-muted-foreground">
-                            Dibuat {new Date(order.created_at || '').toLocaleDateString('id-ID', {
+                            Dibuat {new Date(order.created_at ?? '').toLocaleDateString('id-ID', {
                                 day: 'numeric',
                                 month: 'long',
                                 year: 'numeric'
@@ -188,7 +188,7 @@ const OrderDetailView = ({
 
             {/* Status Timeline */}
             <OrderStatusTimeline
-                currentStatus={order.status || 'PENDING'}
+                currentStatus={order.status ?? 'PENDING'}
                 onStatusChange={onUpdateStatus}
             />
 
@@ -337,13 +337,13 @@ const OrderDetailView = ({
                             <div className="flex justify-between text-lg">
                                 <span className="font-medium">Subtotal</span>
                                 <span className="font-medium">
-                                    {formatCurrency(order.total_amount || 0)}
+                                    {formatCurrency(order.total_amount ?? 0)}
                                 </span>
                             </div>
                             <div className="flex justify-between text-2xl font-bold">
                                 <span>Total</span>
                                 <span className="text-primary">
-                                    {formatCurrency(order.total_amount || 0)}
+                                    {formatCurrency(order.total_amount ?? 0)}
                                 </span>
                             </div>
                         </div>

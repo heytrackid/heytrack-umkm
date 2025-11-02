@@ -13,9 +13,9 @@ export interface SmartPricingAssistantPropsWithIndex extends SmartPricingAssista
 const LazySmartPricingAssistantComponent = lazy(() => import('./SmartPricingAssistant'))
 
 // Wrapper component that provides proper typing and suspense boundary
-const LazySmartPricingAssistant = (props: SmartPricingAssistantPropsWithIndex) => (
+const LazySmartPricingAssistant = (_props: SmartPricingAssistantPropsWithIndex) => (
   <Suspense fallback={<CardSkeleton />}>
-    <LazySmartPricingAssistantComponent {...props} />
+    <LazySmartPricingAssistantComponent {..._props} />
   </Suspense>
 )
 
@@ -67,7 +67,7 @@ export const SmartRecipeLoader = ({
   userRole,
   recipeId,
   recipeName,
-  ...props
+  ..._props
 }: {
   userRole: 'admin' | 'manager' | 'staff'
   recipeId: string

@@ -109,7 +109,7 @@ export class RecipeAvailabilityService {
 
         const requiredPerUnit = ri.quantity
         const totalRequired = requiredPerUnit * requestedQuantity
-        const currentStock = ingredient.current_stock || 0
+        const currentStock = ingredient.current_stock ?? 0
 
         // Calculate max possible quantity based on this ingredient
         const maxFromThisIngredient = Math.floor(currentStock / requiredPerUnit)
@@ -129,7 +129,7 @@ export class RecipeAvailabilityService {
         }
 
         // Check if approaching reorder point
-        if (currentStock <= (ingredient.reorder_point || 0)) {
+        if (currentStock <= (ingredient.reorder_point ?? 0)) {
           warnings.push(
             `${ingredient.name} is at or below reorder point (${currentStock} ${ingredient.unit} available)`
           )
@@ -226,7 +226,7 @@ export class RecipeAvailabilityService {
           const {ingredient} = ri
           if (!ingredient) {continue}
 
-          const currentStock = safeGet(ingredient, 'current_stock') || 0
+          const currentStock = safeGet(ingredient, 'current_stock') ?? 0
           const maxFromThisIngredient = Math.floor(currentStock / ri.quantity)
           maxQuantity = Math.min(maxQuantity, maxFromThisIngredient)
         }
@@ -236,7 +236,7 @@ export class RecipeAvailabilityService {
             recipe_id: recipe.id,
             recipe_name: recipe.name,
             max_quantity: maxQuantity,
-            cost_per_unit: recipe.cost_per_unit || 0,
+            cost_per_unit: recipe.cost_per_unit ?? 0,
             selling_price: recipe.selling_price
           })
         }

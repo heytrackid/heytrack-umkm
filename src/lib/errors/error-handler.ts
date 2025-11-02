@@ -7,8 +7,6 @@ import {
   AuthorizationError,
   NotFoundError,
   DatabaseError,
-  ExternalServiceError,
-  RateLimitError,
 } from './app-error'; 
 
 
@@ -64,14 +62,14 @@ export function createErrorResponse(
       {
         error: supabaseError.message || 'Database error occurred',
         code: 'DATABASE_ERROR',
-        status: supabaseError.status || 500,
+        status: supabaseError.status ?? 500,
         details: {
           hint: supabaseError.hint,
           details: supabaseError.details,
         },
         timestamp: new Date().toISOString(),
       },
-      { status: supabaseError.status || 500 }
+      { status: supabaseError.status ?? 500 }
     );
   }
 
@@ -109,7 +107,7 @@ function isZodError(error: unknown): error is { issues: Array<{ path: string[]; 
     typeof error === 'object' &&
     error !== null &&
     'issues' in error &&
-    Array.isArray((error as any).issues)
+    Array.isArray((error as { issues: unknown[] }).issues)
   );
 }
 

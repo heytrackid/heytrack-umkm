@@ -1,3 +1,6 @@
+'use client'
+
+
 import { useState, useEffect, type ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -5,8 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-'use client'
-
 import { useCurrency } from '@/hooks/useCurrency'
 import { CheckCircle2, AlertTriangle, XCircle, TrendingUp, TrendingDown, DollarSign, Activity, Clock, Zap, Info, RefreshCw, Eye, ArrowRight } from 'lucide-react'
 
@@ -97,7 +98,7 @@ const AutoSyncFinancialDashboard = () => {
         void setData(result.data)
         void setError(null)
       } else {
-        void setError(result.error || 'Failed to fetch auto-sync data')
+        void setError(result.error ?? 'Failed to fetch auto-sync data')
       }
     } catch (err: unknown) {
       const error = err as Error
@@ -162,7 +163,7 @@ const AutoSyncFinancialDashboard = () => {
       <Alert variant="destructive">
         <XCircle className="h-4 w-4" />
         <AlertDescription>
-          {error || 'Failed to load auto-sync data'}
+          {error ?? 'Failed to load auto-sync data'}
           <Button
             variant="outline"
             size="sm"

@@ -62,7 +62,7 @@ const PricingAssistantPage = () => {
         const response = await fetch('/api/recipes?limit=1000')
         if (response.ok) {
           const data = await response.json()
-          void setRecipes(data.recipes || [])
+          void setRecipes(data.recipes ?? [])
         }
       } catch (err: unknown) {
         dbLogger.error({ err }, 'Failed to load recipes')

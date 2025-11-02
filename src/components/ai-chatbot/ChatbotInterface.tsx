@@ -75,7 +75,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
 
   // Handle sending messages via API
   const handleSendMessage = async (message?: string) => {
-    const messageToSend = message || inputValue.trim();
+    const messageToSend = message ?? inputValue.trim();
     if (!messageToSend || isLoading) { return; }
 
     setIsLoading(true);
@@ -142,7 +142,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
           });
         }
       } else {
-        throw new Error(result.error || 'Unknown API error');
+        throw new Error(result.error ?? 'Unknown API error');
       }
 
     } catch (err: unknown) {
@@ -188,7 +188,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
         const { result } = apiResult;
 
         // Create system message with enhanced content
-        let content = result.message || `Aksi"${action.label}" berhasil dijalankan.`;
+        let content = result.message ?? `Aksi"${action.label}" berhasil dijalankan.`;
 
         // Add AI recommendations if available
         if (result.aiRecommendations) {
@@ -203,17 +203,17 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
           data: {
             ...result,
             actionType: action.type,
-            aiEnhanced: !!(result.aiRecommendations || result.businessInsights),
+            aiEnhanced: !!(result.aiRecommendations ?? result.businessInsights),
             metadata: {
               actionType: action.type,
-              aiEnhanced: !!(result.aiRecommendations || result.businessInsights)
+              aiEnhanced: !!(result.aiRecommendations ?? result.businessInsights)
             }
           }
         };
 
         setMessages(prev => [...prev, systemMessage]);
       } else {
-        throw new Error(apiResult.error || 'Unknown action error');
+        throw new Error(apiResult.error ?? 'Unknown action error');
       }
 
     } catch (err: unknown) {
@@ -476,7 +476,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  handleSendMessage();
+                  void handleSendMessage();
                 }
               }}
               disabled={isLoading}

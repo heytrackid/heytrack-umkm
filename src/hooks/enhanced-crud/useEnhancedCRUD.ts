@@ -5,9 +5,8 @@ import { successToast } from '@/hooks/use-toast'
 import { createClient as createSupabaseClient } from '@/utils/supabase/client'
 import type { EnhancedCRUDOptions } from './types'
 import { handleCRUDError, validateCRUDInputs, validateBulkInputs } from './utils'
-import { getErrorMessage } from '@/types/type-utilities'
+import { getErrorMessage, typed } from '@/types/type-utilities'
 import type { TableName, Row, Insert, Update } from '@/types/database'
-import { typed } from '@/types/type-utilities'
 
 /**
  * Enhanced CRUD hook with toast notifications and error handling
@@ -42,7 +41,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
         delete: 'Data berhasil dihapus'
       }
 
-      const message = successMessages[operation] || defaultMessages[operation]
+      const message = successMessages[operation] ?? defaultMessages[operation]
       successToast(message)
     }
   }, [showSuccessToast, successMessages])

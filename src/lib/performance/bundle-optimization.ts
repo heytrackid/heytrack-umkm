@@ -77,8 +77,16 @@ export function shouldLoadFeature(feature: string): boolean {
   if (typeof window === 'undefined') {return false}
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  
+  type NavigatorWithConnection = Navigator & {
+    connection?: {
+      effectiveType: string
+    }
+  }
+  
+  const nav = navigator as NavigatorWithConnection
   const isSlowConnection = 'connection' in navigator && 
-    (navigator as any).connection?.effectiveType === '2g'
+    nav.connection?.effectiveType === '2g'
 
   // Don't load heavy features on mobile with slow connection
   const heavyFeatures = ['charts', 'export', 'ai-chatbot']
@@ -96,7 +104,14 @@ export function shouldLoadFeature(feature: string): boolean {
 export function getOptimalImageQuality(): number {
   if (typeof window === 'undefined') {return 75}
 
-  const {connection} = (navigator as any)
+  type NavigatorWithConnection = Navigator & {
+    connection?: {
+      effectiveType: string
+    }
+  }
+  
+  const nav = navigator as NavigatorWithConnection
+  const connection = nav.connection
   
   if (!connection) {return 75}
 

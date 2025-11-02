@@ -48,7 +48,7 @@ const FilterPeriod = ({
       const end = new Date(endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
       return `${start} – ${end}`
     }
-    return presetPeriods.find(p => p.value === selectedPeriod)?.label || ''
+    return presetPeriods.find(p => p.value === selectedPeriod)?.label ?? ''
   }
 
   return (

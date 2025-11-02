@@ -116,13 +116,13 @@ export async function POST(request: NextRequest) {
     const customerData = typedInsert<'customers'>({
       user_id: user.id,
       name: validatedData.name,
-      email: validatedData.email || null,
-      phone: validatedData.phone || null,
-      address: validatedData.address || null,
-      customer_type: validatedData.customer_type || 'regular',
-      discount_percentage: validatedData.discount_percentage || null,
-      notes: validatedData.notes || null,
-      is_active: validatedData.is_active || true,
+      email: validatedData.email ?? null,
+      phone: validatedData.phone ?? null,
+      address: validatedData.address ?? null,
+      customer_type: validatedData.customer_type ?? 'regular',
+      discount_percentage: validatedData.discount_percentage ?? null,
+      notes: validatedData.notes ?? null,
+      is_active: validatedData.is_active ?? true,
     })
     
     // Insert with proper typing

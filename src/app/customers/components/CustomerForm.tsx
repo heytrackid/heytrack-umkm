@@ -74,14 +74,14 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
     const form = useForm<CustomerFormData>({
         resolver: zodResolver(CustomerFormSchema),
         defaultValues: {
-            name: customer?.name || '',
-            phone: customer?.phone || '',
-            email: customer?.email || '',
-            address: customer?.address || '',
+            name: customer?.name ?? '',
+            phone: customer?.phone ?? '',
+            email: customer?.email ?? '',
+            address: customer?.address ?? '',
             customer_type: (customer?.customer_type as 'retail' | 'wholesale' | 'vip' | 'regular') || 'regular',
-            discount_percentage: customer?.discount_percentage?.toString() || '',
-            notes: customer?.notes || '',
-            is_active: customer?.is_active || true,
+            discount_percentage: customer?.discount_percentage?.toString() ?? '',
+            notes: customer?.notes ?? '',
+            is_active: customer?.is_active ?? true,
         },
     })
 
@@ -96,12 +96,12 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
             // Prepare payload
             const payload = {
                 name: data.name,
-                phone: data.phone || null,
-                email: data.email || null,
-                address: data.address || null,
-                customer_type: data.customer_type || 'regular',
+                phone: data.phone ?? null,
+                email: data.email ?? null,
+                address: data.address ?? null,
+                customer_type: data.customer_type ?? 'regular',
                 discount_percentage: data.discount_percentage ? parseFloat(data.discount_percentage) : null,
-                notes: data.notes || null,
+                notes: data.notes ?? null,
                 is_active: data.is_active,
             }
 
@@ -116,7 +116,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
 
             if (!response.ok) {
                 const errorData = await response.json()
-                throw new Error(errorData.error || 'Gagal menyimpan data pelanggan')
+                throw new Error(errorData.error ?? 'Gagal menyimpan data pelanggan')
             }
 
             toast({

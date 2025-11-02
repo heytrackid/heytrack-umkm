@@ -1,4 +1,4 @@
-import type { Database, IngredientsTable } from '@/types/database'
+import type {IngredientsTable } from '@/types/database'
 
 /**
  * Notification System Module Types
@@ -15,7 +15,7 @@ export interface SmartNotification {
   action?: string
   priority: 'low' | 'medium' | 'high'
   timestamp?: Date
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 }
 
 export interface AutomationConfig {

@@ -65,7 +65,7 @@ Focus on Indonesian food business terminology.`
       try {
         const analysis = JSON.parse(response) as NLPAnalysis
         return analysis
-      } catch (error) {
+      } catch (_error) {
         return this.fallbackAnalysis(safeQuery)
       }
     } catch (err) {
@@ -139,10 +139,10 @@ Focus on Indonesian food business terminology.`
   } {
     const lowerQuery = query.toLowerCase()
     
-    const numbers = (query.match(/\d+/g) || []).map(n => parseInt(n))
-    const currencies = query.match(/rp\.?\s*\d+[\d.,]*/gi) || []
-    const percentages = (query.match(/\d+%/g) || []).map(p => parseInt(p))
-    const dates = query.match(/\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|hari ini|kemarin|besok|minggu ini|bulan ini/gi) || []
+    const numbers = (query.match(/\d+/g) ?? []).map(n => parseInt(n))
+    const currencies = query.match(/rp\.?\s*\d+[\d.,]*/gi) ?? []
+    const percentages = (query.match(/\d+%/g) ?? []).map(p => parseInt(p))
+    const dates = query.match(/\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|hari ini|kemarin|besok|minggu ini|bulan ini/gi) ?? []
     
     const timeframes = []
     if (/hari ini|today/i.test(query)) {timeframes.push('today')}
@@ -214,8 +214,8 @@ Focus on Indonesian food business terminology.`
    */
   private static fallbackAnalysis(query: string): NLPAnalysis {
     const lowerQuery = query.toLowerCase()
-    const numbers = query.match(/\d+/g)?.map(n => parseInt(n)) || []
-    const currencies = query.match(/rp\.?\s*\d+[\d.,]*/gi) || []
+    const numbers = query.match(/\d+/g)?.map(n => parseInt(n)) ?? []
+    const currencies = query.match(/rp\.?\s*\d+[\d.,]*/gi) ?? []
     
     const questionWords = {
       'apa': 'what',

@@ -21,7 +21,7 @@ const FinancialReport = ({ dateRange }: FinancialReportProps) => {
   const { data: financialRecords } = useSupabaseCRUD<'financial_records'>('financial_records')
 
   // Calculate financial report
-  const financialData = (financialRecords || []).filter((record): record is FinancialRecord & { date: string } => {
+  const financialData = (financialRecords ?? []).filter((record): record is FinancialRecord & { date: string } => {
     if (!record.date) { return false }
     const recordDate = new Date(record.date).toISOString().split('T')[0]
     return recordDate >= dateRange.start && recordDate <= dateRange.end

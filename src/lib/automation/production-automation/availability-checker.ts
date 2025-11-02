@@ -18,7 +18,7 @@ export class AvailabilityChecker {
     const requirements: IngredientRequirement[] = recipe.recipe_ingredients.map((ri: RecipeIngredient & { ingredient: Ingredient }) => {
       const needed = ri.quantity * quantity
       const inventoryItem = inventory.find(inv => inv.id === ri.ingredient_id)
-      const available = inventoryItem?.current_stock || 0
+      const available = inventoryItem?.current_stock ?? 0
 
       return {
         ingredient: ri.ingredient,

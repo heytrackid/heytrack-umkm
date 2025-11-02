@@ -104,7 +104,7 @@ const OrderFilters = ({
             <div>
               <Input
                 type="date"
-                value={filters.dateFrom || ''}
+                value={filters.dateFrom ?? ''}
                 onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
                 placeholder=""
               />
@@ -114,7 +114,7 @@ const OrderFilters = ({
             <div>
               <Input
                 type="date"
-                value={filters.dateTo || ''}
+                value={filters.dateTo ?? ''}
                 onChange={(e) => handleFilterChange('dateTo', e.target.value)}
                 placeholder=""
               />

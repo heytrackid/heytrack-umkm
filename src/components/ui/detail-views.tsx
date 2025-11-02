@@ -85,7 +85,7 @@ interface DetailFieldProps {
 }
 
 export const DetailField = ({ label, value, className, copyable: _copyable }: DetailFieldProps) => (
-  <div className={`flex justify-between items-start py-2 ${className || ''}`}>
+  <div className={`flex justify-between items-start py-2 ${className ?? ''}`}>
     <span className="text-sm font-medium text-gray-600 min-w-0 flex-1">
       {label}
     </span>
@@ -273,7 +273,7 @@ export const DetailTimeline = ({ items, title = "Riwayat Aktivitas" }: DetailTim
           </p>
         ) : (
           items.map((item, index) => {
-            const Icon = item.icon || getIcon(item.type)
+            const Icon = item.icon ?? getIcon(item.type)
             const isLast = index === items.length - 1
 
             return (

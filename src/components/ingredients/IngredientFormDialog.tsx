@@ -38,9 +38,9 @@ export const IngredientFormDialog = ({
             name: ingredient.name,
             unit: ingredient.unit as "g" | "l" | "kg" | "ml" | "pcs" | "dozen",
             price_per_unit: ingredient.price_per_unit,
-            current_stock: ingredient.current_stock || 0,
-            min_stock: ingredient.min_stock || 0,
-            description: ingredient.description || '',
+            current_stock: ingredient.current_stock ?? 0,
+            min_stock: ingredient.min_stock ?? 0,
+            description: ingredient.description ?? '',
         } : {
             name: '',
             unit: 'kg',
@@ -65,7 +65,7 @@ export const IngredientFormDialog = ({
 
             if (!response.ok) {
                 const error = await response.json()
-                throw new Error(error.error || 'Gagal menyimpan bahan baku')
+                throw new Error(error.error ?? 'Gagal menyimpan bahan baku')
             }
 
             toast({
@@ -104,9 +104,9 @@ export const IngredientFormDialog = ({
                             name: ingredient.name || '',
                             unit: ingredient.unit || 'kg',
                             price_per_unit: ingredient.price_per_unit || 0,
-                            current_stock: ingredient.current_stock || 0,
-                            min_stock: ingredient.min_stock || 0,
-                            description: ingredient.description || '',
+                            current_stock: ingredient.current_stock ?? 0,
+                            min_stock: ingredient.min_stock ?? 0,
+                            description: ingredient.description ?? '',
                         } : undefined}
                     />
 

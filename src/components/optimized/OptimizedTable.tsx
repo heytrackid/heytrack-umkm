@@ -8,10 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Edit2, Trash2, Eye } from 'lucide-react'
 
-
-
-// Define types
-interface ColumnDefinition<T> {
+interface ColumnDefinition<T extends { id: string | number }> {
   key: keyof T | string
   label: string
   render?: (value: unknown, item: T) => ReactNode
@@ -28,7 +25,6 @@ interface OptimizedTableRowProps<T extends { id: string | number }> {
   formatValue?: (key: string, value: unknown, item: T) => ReactNode
 }
 
-// Memoized row component to prevent unnecessary re-renders
 const OptimizedTableRowComponent = <T extends { id: string | number }>({
   item,
   columns,
@@ -58,21 +54,19 @@ const OptimizedTableRowComponent = <T extends { id: string | number }>({
   return (
     <TableRow className="hover:bg-gray-50">
       <TableCell>
-        <Checkbox
-          checked={isSelected}
-          onCheckedChange={handleSelect}
-        />
+        <Checkbox checked={isSelected} onCheckedChange={handleSelect} />
       </TableCell>
       {columns.map((column) => {
-        const value = item[column.key as keyof T]
+        const {key} = column
+        const value = key in item ? item[key as keyof T] : undefined
         const displayValue = column.render
           ? column.render(value, item)
           : formatValue
-            ? formatValue(column.key as string, value, item)
-            : String(value || '')
+            ? formatValue(String(key), value, item)
+            : String(value ?? '')
 
         return (
-          <TableCell key={column.key as string}>
+          <TableCell key={String(key)}>
             {displayValue}
           </TableCell>
         )
@@ -80,11 +74,7 @@ const OptimizedTableRowComponent = <T extends { id: string | number }>({
       <TableCell>
         <div className="flex items-center gap-2">
           {onView && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleView}
-            >
+            <Button variant="outline" size="sm" onClick={handleView}>
               <Eye className="h-4 w-4" />
             </Button>
           )}
@@ -102,10 +92,7 @@ const OptimizedTableRowComponent = <T extends { id: string | number }>({
                 </DropdownMenuItem>
               )}
               {onDelete && (
-                <DropdownMenuItem
-                  className="text-red-600"
-                  onClick={handleDelete}
-                >
+                <DropdownMenuItem className="text-red-600" onClick={handleDelete}>
                   <Trash2 className="h-4 w-4 mr-2" />
                   Hapus
                 </DropdownMenuItem>
@@ -120,8 +107,7 @@ const OptimizedTableRowComponent = <T extends { id: string | number }>({
 
 export const OptimizedTableRow = memo(OptimizedTableRowComponent) as typeof OptimizedTableRowComponent
 
-// Bulk Actions Bar Component
-interface BulkActionsBarProps<T> {
+interface BulkActionsBarProps {
   selectedCount: number
   selectedItems: string[]
   onClearSelection: () => void
@@ -130,14 +116,14 @@ interface BulkActionsBarProps<T> {
   getPreviewNames: (items: string[]) => string
 }
 
-const BulkActionsBar = memo(<_T,>({
+const BulkActionsBar = memo(({
   selectedCount,
   selectedItems,
   onClearSelection,
   onBulkEdit,
   onBulkDelete,
   getPreviewNames
-}: BulkActionsBarProps<_T>) => {
+}: BulkActionsBarProps) => {
   if (selectedCount === 0) { return null }
 
   return (
@@ -159,11 +145,7 @@ const BulkActionsBar = memo(<_T,>({
         </Button>
       </div>
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onBulkEdit}
-        >
+        <Button variant="outline" size="sm" onClick={onBulkEdit}>
           <Edit2 className="h-4 w-4 mr-2" />
           Edit Semua
         </Button>
@@ -183,7 +165,6 @@ const BulkActionsBar = memo(<_T,>({
 
 BulkActionsBar.displayName = 'BulkActionsBar'
 
-// Main optimized table component
 interface OptimizedTableProps<T extends { id: string | number }> {
   data: T[]
   columns: Array<ColumnDefinition<T>>
@@ -202,7 +183,7 @@ interface OptimizedTableProps<T extends { id: string | number }> {
   description?: string
 }
 
-export const OptimizedTable = memo(<T extends { id: string | number }>({
+const OptimizedTableComponent = <T extends { id: string | number }>({
   data,
   columns,
   selectedItems,
@@ -221,21 +202,19 @@ export const OptimizedTable = memo(<T extends { id: string | number }>({
 }: OptimizedTableProps<T>) => {
   const isAllSelected = useMemo(() =>
     selectedItems.length === data.length && data.length > 0,
-    [selectedItems.length, data.length]
-  )
+  [selectedItems.length, data.length])
 
   const getPreviewNames = useCallback((items: string[]) => {
     const selectedData = data.filter(item => items.includes(item.id.toString()))
     const names = selectedData.map(item => {
-      // Use type assertion to access common properties like name, title, etc.
-      const itemTyped = item as Record<string, unknown>
-      return (itemTyped.name as string) || (itemTyped.title as string) || String(item.id)
+      const itemRecord = item as Record<string, unknown>
+      return (itemRecord.name as string) || (itemRecord.title as string) || String(item.id)
     }).slice(0, 2)
     return names.join(', ') + (items.length > 2 ? ` +${items.length - 2} lainnya` : '')
   }, [data])
 
   if (data.length === 0) {
-    return emptyStateComponent || <div>Tidak ada data</div>
+    return emptyStateComponent ?? <div>Tidak ada data</div>
   }
 
   return (
@@ -254,13 +233,10 @@ export const OptimizedTable = memo(<T extends { id: string | number }>({
           <TableHeader>
             <TableRow>
               <TableHead className="w-12">
-                <Checkbox
-                  checked={isAllSelected}
-                  onCheckedChange={onSelectAll}
-                />
+                <Checkbox checked={isAllSelected} onCheckedChange={onSelectAll} />
               </TableHead>
               {columns.map((column) => (
-                <TableHead key={column.key as string}>{column.label}</TableHead>
+                <TableHead key={String(column.key)}>{column.label}</TableHead>
               ))}
               <TableHead className="w-32">Aksi</TableHead>
             </TableRow>
@@ -284,6 +260,10 @@ export const OptimizedTable = memo(<T extends { id: string | number }>({
       </div>
     </div>
   )
-})
+}
 
-OptimizedTable.displayName = 'OptimizedTable'
+OptimizedTableComponent.displayName = 'OptimizedTable'
+
+export const OptimizedTable = memo(OptimizedTableComponent) as <T extends { id: string | number }>(
+  props: OptimizedTableProps<T>
+) => JSX.Element

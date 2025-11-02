@@ -70,7 +70,7 @@ export class APICache {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl: ttl || this.config.defaultTTL,
+      ttl: ttl ?? this.config.defaultTTL,
     })
   }
 

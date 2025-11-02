@@ -91,12 +91,12 @@ export async function POST(request: NextRequest) {
 
         // Type the ingredients properly
         type IngredientSubset = Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>
-        const typedIngredients: IngredientSubset[] = (ingredients || []).map(ing => ({
+        const typedIngredients: IngredientSubset[] = (ingredients ?? []).map(ing => ({
             id: ing.id,
             name: ing.name,
             unit: ing.unit || 'gram', // Default to common unit if null
             price_per_unit: ing.price_per_unit || 0, // Default to 0 if null
-            current_stock: ing.current_stock || 0  // Default to 0 if null
+            current_stock: ing.current_stock ?? 0  // Default to 0 if null
         }))
 
         // Build the AI prompt
@@ -222,8 +222,8 @@ function buildRecipePrompt(params: {
     // Sanitize all user inputs
     const safeName = sanitizeInput(productName)
     const safeType = sanitizeInput(productType)
-    const safeDietary = dietaryRestrictions?.map(d => sanitizeInput(d)) || []
-    const safeUserIngredients = userProvidedIngredients?.map(i => sanitizeInput(i)) || []
+    const safeDietary = dietaryRestrictions?.map(d => sanitizeInput(d)) ?? []
+    const safeUserIngredients = userProvidedIngredients?.map(i => sanitizeInput(i)) ?? []
     
     // Validate no injection attempts
     if (!validateNoInjection(safeName) || !validateNoInjection(safeType)) {
@@ -385,7 +385,7 @@ async function callAIServiceWithRetry(prompt: string, maxRetries = 3): Promise<s
     }
     
     throw new Error(
-        `AI service failed after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`
+        `AI service failed after ${maxRetries} attempts: ${lastError?.message ?? 'Unknown error'}`
     )
 }
 
@@ -405,7 +405,7 @@ async function callAIService(prompt: string): Promise<string> {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
-                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
+                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
                 'X-Title': 'HeyTrack AI Recipe Generator'
             },
             body: JSON.stringify({
@@ -456,7 +456,7 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`,
-                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
+                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
                     'X-Title': 'HeyTrack AI Recipe Generator'
                 },
                 body: JSON.stringify({
@@ -581,7 +581,7 @@ function findBestIngredientMatch(
         return searchWords.some(sw => nameWords.some(nw => nw.includes(sw) || sw.includes(nw)))
     })
     
-    return match || null
+    return match ?? null
 }
 
 /**
@@ -655,7 +655,7 @@ async function calculateRecipeHPP(
         .gte('expense_date', today)
         .lte('expense_date', today)
     
-    const dailyOpCost = opCosts?.reduce((sum, cost) => sum + cost.amount, 0) || 0
+    const dailyOpCost = opCosts?.reduce((sum, cost) => sum + cost.amount, 0) ?? 0
     
     // Estimate operational cost per unit
     // Assume daily production of 50 units (can be configured)

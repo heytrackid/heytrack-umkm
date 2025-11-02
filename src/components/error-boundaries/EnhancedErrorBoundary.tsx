@@ -60,7 +60,7 @@ class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBou
       if (FallbackComponent) {
         return (
           <FallbackComponent
-            error={this.state.error || null}
+            error={this.state.error ?? null}
             errorId={this.state.errorId}
             resetError={this.resetError}
           />

@@ -237,7 +237,7 @@ export function groupBy<T, K extends string | number | symbol>(
 
 export function sortBy<T>(
   array: T[],
-  keyFn: (item: T) => any,
+  keyFn: (item: T) => string | number | boolean | Date,
   direction: 'asc' | 'desc' = 'asc'
 ): T[] {
   return [...array].sort((a, b) => {

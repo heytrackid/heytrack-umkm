@@ -13,7 +13,7 @@ import { type BaseMobileChartProps, CHART_COLORS } from './types'
 
 interface MobilePieChartProps extends BaseMobileChartProps {
   valueKey: string
-  nameKey: string
+  _nameKey: string
   colors?: string[]
   showLabels?: boolean
   innerRadius?: number
@@ -26,7 +26,7 @@ interface MobilePieChartProps extends BaseMobileChartProps {
 export const MobilePieChart = memo(({
   data,
   valueKey,
-  nameKey,
+  _nameKey,
   colors = CHART_COLORS.rainbow,
   showLabels = true,
   innerRadius = 0,

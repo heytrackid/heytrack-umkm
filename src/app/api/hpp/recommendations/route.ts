@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     const isImplemented = searchParams.get('is_implemented')
 
     // Create cache key based on query parameters
-    const cacheKey = `${cacheKeys.hpp.recommendations}:${user.id}:${page}:${limit}:${search || ''}:${sort_by || ''}:${sort_order || ''}:${recipeId || ''}:${priority || ''}:${isImplemented || ''}`
+    const cacheKey = `${cacheKeys.hpp.recommendations}:${user.id}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${priority ?? ''}:${isImplemented ?? ''}`
 
     // Wrap database query with caching
     const getRecommendations = async () => {
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Apply sorting
-      const sortColumn = sort_by || 'created_at'
+      const sortColumn = sort_by ?? 'created_at'
       const sortDirection = sort_order || 'desc'
       query = query.order(sortColumn, { ascending: sortDirection === 'asc' })
 
@@ -99,10 +99,10 @@ export async function GET(request: NextRequest) {
 
       return {
         recommendations: data || [],
-        total: count || 0,
+        total: count ?? 0,
         page,
         limit,
-        totalPages: Math.ceil((count || 0) / limit)
+        totalPages: Math.ceil((count ?? 0) / limit)
       }
     }
 
@@ -160,8 +160,8 @@ export async function POST(request: NextRequest) {
         recommendation_type: recommendationType,
         title,
         description,
-        potential_savings: potentialSavings || 0,
-        priority: priority || 'MEDIUM',
+        potential_savings: potentialSavings ?? 0,
+        priority: priority ?? 'MEDIUM',
         is_implemented: false,
         user_id: user.id
       })

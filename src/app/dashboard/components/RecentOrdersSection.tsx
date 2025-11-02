@@ -30,7 +30,7 @@ const RecentOrdersSection = ({ orders = [] }: RecentOrdersSectionProps) => {
       CANCELLED: { label: 'Dibatalkan', variant: 'destructive' }
     }
 
-    const statusInfo = statusMap[status || 'PENDING'] || statusMap.PENDING
+    const statusInfo = statusMap[status ?? 'PENDING'] ?? statusMap.PENDING
     return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
   }
 
@@ -81,7 +81,7 @@ const RecentOrdersSection = ({ orders = [] }: RecentOrdersSectionProps) => {
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-wrap-mobile">{order.customer}</div>
                   <div className="text-sm text-muted-foreground">
-                    {formatCurrency(order.amount || 0)}
+                    {formatCurrency(order.amount ?? 0)}
                   </div>
                 </div>
                 <div className="flex-shrink-0">

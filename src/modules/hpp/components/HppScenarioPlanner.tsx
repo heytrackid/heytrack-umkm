@@ -46,7 +46,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
     const [changePercent, setChangePercent] = useState(10)
 
     const currentCost = recipe.total_cost
-    const sellingPrice = recipe.selling_price || 0
+    const sellingPrice = recipe.selling_price ?? 0
     const currentMargin = sellingPrice > 0 ? ((sellingPrice - currentCost) / sellingPrice) * 100 : 0
 
     const calculateScenario = (

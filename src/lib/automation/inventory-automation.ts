@@ -20,7 +20,7 @@ export class InventoryAutomation {
     return ingredients.map(ingredient => {
       const monthlyUsage = usageData[ingredient.id] || 0
       const dailyUsage = monthlyUsage / 30
-      const daysRemaining = dailyUsage > 0 ? (ingredient.current_stock || 0) / dailyUsage : Infinity
+      const daysRemaining = dailyUsage > 0 ? (ingredient.current_stock ?? 0) / dailyUsage : Infinity
 
       // Smart reorder calculation
       const reorderPoint = dailyUsage * this.config.autoReorderDays
@@ -28,10 +28,10 @@ export class InventoryAutomation {
 
       return {
         ingredient,
-        status: this.getInventoryStatus(daysRemaining, ingredient.current_stock || 0, ingredient.min_stock || 0),
+        status: this.getInventoryStatus(daysRemaining, ingredient.current_stock ?? 0, ingredient.min_stock ?? 0),
         daysRemaining: Math.floor(daysRemaining),
         reorderRecommendation: {
-          shouldReorder: ingredient.current_stock || reorderPoint >= 0,
+          shouldReorder: ingredient.current_stock ?? reorderPoint >= 0,
           quantity: optimalOrderQuantity,
           urgency: this.getReorderUrgency(daysRemaining),
           estimatedCost: optimalOrderQuantity * ingredient.price_per_unit
@@ -51,10 +51,10 @@ export class InventoryAutomation {
     const holdingCostRate = 0.2 // 20% of item value per year
     const holdingCost = ingredient.price_per_unit * holdingCostRate
 
-    if (holdingCost <= 0) {return ingredient.min_stock || 0}
+    if (holdingCost <= 0) {return ingredient.min_stock ?? 0}
 
     const eoq = Math.sqrt(2 * annualDemand * orderingCost / holdingCost)
-    return Math.max(eoq, ingredient.min_stock || 0) // At least minimum stock
+    return Math.max(eoq, ingredient.min_stock ?? 0) // At least minimum stock
   }
 
   /**
@@ -99,7 +99,7 @@ export class InventoryAutomation {
       insights.push(`📊 Pemakaian bulanan: ${monthlyUsage.toFixed(1)} ${ingredient.unit}`)
       
       // Velocity insights
-      if (dailyUsage > (ingredient.min_stock || 0) / 30) {
+      if (dailyUsage > (ingredient.min_stock ?? 0) / 30) {
         insights.push(`🚀 Bahan fast-moving, pertimbangkan stok buffer lebih besar`)
       }
     } else {
@@ -113,7 +113,7 @@ export class InventoryAutomation {
     }
 
     // Storage insights
-    if ((ingredient.current_stock || 0) > (ingredient.min_stock || 0) * 5) {
+    if ((ingredient.current_stock ?? 0) > (ingredient.min_stock ?? 0) * 5) {
       insights.push(`📦 Possible overstocking, review purchasing patterns`)
     }
 
@@ -156,7 +156,7 @@ export class InventoryAutomation {
 
       const projectedDailyUsage = avgDailyUsage * (1 + trend)
       const projectedTotalUsage = projectedDailyUsage * forecastDays
-      const currentDaysSupply = ingredient.current_stock || 0 / projectedDailyUsage
+      const currentDaysSupply = ingredient.current_stock ?? 0 / projectedDailyUsage
 
       return {
         ingredient,
@@ -248,7 +248,7 @@ export class InventoryAutomation {
     return {
       name: 'Default Supplier',
       deliveryDays: 2,
-      minOrder: ingredient.min_stock || 0,
+      minOrder: ingredient.min_stock ?? 0,
       reliability: 95
     }
   }
@@ -260,7 +260,7 @@ export class InventoryAutomation {
     const holdingCostRate = 0.25 // 25% per year
     
     return ingredients.map(ingredient => {
-      const inventoryValue = (ingredient.current_stock || 0) * (ingredient.price_per_unit || 0)
+      const inventoryValue = (ingredient.current_stock ?? 0) * (ingredient.price_per_unit ?? 0)
       const annualCarryingCost = inventoryValue * holdingCostRate
       const monthlyCarryingCost = annualCarryingCost / 12
 
@@ -280,7 +280,7 @@ export class InventoryAutomation {
    */
   private calculateTurnoverRate(ingredient: Ingredient): number {
     // Simplified calculation - would use actual historical data
-    const avgStock = ((ingredient.current_stock || 0) + (ingredient.min_stock || 0)) / 2
+    const avgStock = ((ingredient.current_stock ?? 0) + (ingredient.min_stock ?? 0)) / 2
     const estimatedMonthlyCOGS = avgStock * ingredient.price_per_unit * 0.1 // Assume 10% monthly usage
     
     if (avgStock === 0) {return 0}
@@ -291,8 +291,8 @@ export class InventoryAutomation {
    * Calculate storage efficiency score
    */
   private calculateStorageEfficiency(ingredient: Ingredient): number {
-    const optimalStock = (ingredient.min_stock || 0) * 2 // Optimal is 2x minimum
-    const currentRatio = (ingredient.current_stock || 0) / optimalStock
+    const optimalStock = (ingredient.min_stock ?? 0) * 2 // Optimal is 2x minimum
+    const currentRatio = (ingredient.current_stock ?? 0) / optimalStock
     
     // Efficiency score: 100% when at optimal, decreases with over/understocking
     if (currentRatio <= 1) {return currentRatio * 100}

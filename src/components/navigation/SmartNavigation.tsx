@@ -1,12 +1,13 @@
+'use client'
+
 import { Fragment, type ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-'use client'
 
 import { cn } from '@/lib/utils'
 import { useLinkPreloading, useButtonPreloading } from '@/hooks/useSimplePreloading'
-import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search } from 'lucide-react'
+import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search, Truck } from 'lucide-react'
 
 // Smart Link component with preloading
 interface SmartLinkProps {
@@ -134,6 +135,12 @@ const navigationItems = [
     href: '/ingredients',
     icon: Utensils,
     preloadTargets: ['/inventory', '/recipes']
+  },
+  {
+    title: 'Suppliers',
+    href: '/suppliers',
+    icon: Truck,
+    preloadTargets: ['/ingredients', '/inventory']
   },
   {
     title: 'Recipes',

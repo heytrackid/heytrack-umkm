@@ -16,14 +16,14 @@ export const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps>(
   ({ loading, loadingText, children, disabled, className, ...props }, ref) => (
     <Button
       ref={ref}
-      disabled={disabled || loading}
+      disabled={disabled ?? loading}
       className={cn(className)}
       {...props}
     >
       {loading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          {loadingText || 'Memuat...'}
+          {loadingText ?? 'Memuat...'}
         </>
       ) : (
         children

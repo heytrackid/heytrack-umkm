@@ -58,7 +58,7 @@ export class PricingAssistantService {
       const recipe = data as RecipesTable
 
       // Get HPP calculation - simplified for now
-      const hppValue = (recipe.selling_price || 0) * 0.7 // Estimate 70% cost
+      const hppValue = (recipe.selling_price ?? 0) * 0.7 // Estimate 70% cost
 
       // Analyze market factors
       const marketFactors = await this.analyzeMarketFactors(recipe)
@@ -69,7 +69,7 @@ export class PricingAssistantService {
       // Calculate price recommendations
       const recommendations = this.calculatePriceRecommendations(
         hppValue,
-        recipe.selling_price || 0,
+        recipe.selling_price ?? 0,
         strategy,
         marketFactors
       )
@@ -79,7 +79,7 @@ export class PricingAssistantService {
 
       const result: PricingRecommendation = {
         recipeId,
-        currentPrice: recipe.selling_price || 0,
+        currentPrice: recipe.selling_price ?? 0,
         recommendedPrice: recommendations.recommendedPrice,
         hppValue,
         minPrice: recommendations.minPrice,
@@ -111,18 +111,18 @@ export class PricingAssistantService {
       const { data: similarRecipes } = await supabase
         .from('recipes')
         .select('selling_price')
-        .eq('category', recipe.category || '')
+        .eq('category', recipe.category ?? '')
         .eq('user_id', recipe.user_id)
         .neq('id', recipe.id)
         .not('selling_price', 'is', null)
         .limit(10)
 
       const competitorPrices = (similarRecipes as Array<{ selling_price: number | null }> || [])
-        .map(r => r.selling_price || 0)
+        .map(r => r.selling_price ?? 0)
         .filter(price => price > 0)
 
       // Determine demand level based on recipe usage
-      const demandLevel = this.calculateDemandLevel(recipe.times_made || 0)
+      const demandLevel = this.calculateDemandLevel(recipe.times_made ?? 0)
 
       // Determine seasonality based on category and current month
       const seasonality = this.calculateSeasonality(recipe.category)
@@ -131,7 +131,7 @@ export class PricingAssistantService {
         competitorPrices,
         demandLevel,
         seasonality,
-        category: recipe.category || 'General'
+        category: recipe.category ?? 'General'
       }
 
     } catch (err: unknown) {
@@ -140,7 +140,7 @@ export class PricingAssistantService {
         competitorPrices: [],
         demandLevel: 'medium',
         seasonality: 'normal',
-        category: recipe.category || 'General'
+        category: recipe.category ?? 'General'
       }
     }
   }
@@ -152,7 +152,7 @@ export class PricingAssistantService {
     recipe: Recipe,
     marketFactors: PricingRecommendation['marketFactors']
   ): PricingStrategy {
-    const hppMargin = recipe.margin_percentage || 30
+    const hppMargin = recipe.margin_percentage ?? 30
 
     // High demand + high seasonality = market-based pricing
     if (marketFactors.demandLevel === 'high' && marketFactors.seasonality === 'peak') {

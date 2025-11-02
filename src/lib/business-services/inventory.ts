@@ -1,5 +1,5 @@
 import type { ReorderSummary } from './types'
-import type { Database, IngredientsTable } from '@/types/database'
+import type {IngredientsTable } from '@/types/database'
 import { inventoryLogger } from '@/lib/logger'
 
 
@@ -44,16 +44,16 @@ export class InventoryServices {
 
       const reorderItems = (ingredients as Ingredient[])
         .filter(ingredient => {
-          const currentStock = ingredient.current_stock || 0
-          const minStock = ingredient.min_stock || 0
-          const reorderPoint = ingredient.reorder_point || minStock
+          const currentStock = ingredient.current_stock ?? 0
+          const minStock = ingredient.min_stock ?? 0
+          const reorderPoint = ingredient.reorder_point ?? minStock
 
           return currentStock <= reorderPoint && reorderPoint > 0
         })
         .map(ingredient => {
-          const currentStock = ingredient.current_stock || 0
-          const minStock = ingredient.min_stock || 0
-          const reorderPoint = ingredient.reorder_point || minStock
+          const currentStock = ingredient.current_stock ?? 0
+          const minStock = ingredient.min_stock ?? 0
+          const reorderPoint = ingredient.reorder_point ?? minStock
 
           // Calculate reorder quantity (suggest 150% of min stock or reorder point)
           const suggestedReorder = Math.max(minStock * 1.5, reorderPoint * 1.5, 10)
@@ -113,14 +113,14 @@ export class InventoryServices {
       
       // Filter for low stock items (current_stock <= min_stock) in code
       const ingredients = (allIngredients as Ingredient[]).filter(ingredient => {
-        const currentStock = ingredient.current_stock || 0
-        const minStock = ingredient.min_stock || 0
+        const currentStock = ingredient.current_stock ?? 0
+        const minStock = ingredient.min_stock ?? 0
         return currentStock <= minStock
       })
       
       // Sort by current stock (ascending - lowest first)
       ingredients.sort((a, b) => 
-        (a.current_stock || 0) - (b.current_stock || 0)
+        (a.current_stock ?? 0) - (b.current_stock ?? 0)
       )
 
       if (error) {
@@ -195,8 +195,8 @@ export class InventoryServices {
       }> = []
 
       for (const ingredient of ingredients as Ingredient[]) {
-        const currentStock = ingredient.current_stock || 0
-        const minStock = ingredient.min_stock || 0
+        const currentStock = ingredient.current_stock ?? 0
+        const minStock = ingredient.min_stock ?? 0
 
         if (currentStock <= 0) {
           alerts.push({

@@ -16,9 +16,7 @@ import {
   MoreHorizontal,
   Search,
   SortAsc,
-  SortDesc,
-  Trash2
-} from 'lucide-react'
+  SortDesc} from 'lucide-react'
 
 // Types for mobile table
 export interface MobileTableColumn<T extends Record<string, unknown> = Record<string, unknown>> {
@@ -135,7 +133,7 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
       <Card>
         <CardContent className="p-8 text-center">
           <div className="text-muted-foreground">
-            {emptyMessage || 'Tidak ada data'}
+            {emptyMessage ?? 'Tidak ada data'}
           </div>
         </CardContent>
       </Card>
@@ -151,7 +149,7 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder={searchPlaceholder || 'Cari...'}
+            placeholder={searchPlaceholder ?? 'Cari...'}
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             className="pl-10"

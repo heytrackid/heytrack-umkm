@@ -88,4 +88,15 @@ export const BreadcrumbPatterns = {
     { label: 'Dashboard', href: '/' },
     { label: 'HPP & Pricing', href: '/hpp' }
   ],
+
+  suppliers: [
+    { label: 'Dashboard', href: '/' },
+    { label: 'Supplier', href: '/suppliers' }
+  ],
+
+  supplierNew: [
+    { label: 'Dashboard', href: '/' },
+    { label: 'Supplier', href: '/suppliers' },
+    { label: 'Tambah Supplier' }
+  ],
 }

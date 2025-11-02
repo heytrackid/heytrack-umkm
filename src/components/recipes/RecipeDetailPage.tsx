@@ -202,7 +202,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                     </Button>
                     <div>
                         <h1 className="text-3xl font-bold flex items-center gap-2">
-                            <span className="text-3xl">{getCategoryIcon(recipe.category || 'other')}</span>
+                            <span className="text-3xl">{getCategoryIcon(recipe.category ?? 'other')}</span>
                             {recipe.name}
                         </h1>
                         {recipe.description && (
@@ -245,7 +245,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Persiapan</p>
-                                <p className="text-2xl font-bold">{recipe.prep_time || 0} menit</p>
+                                <p className="text-2xl font-bold">{recipe.prep_time ?? 0} menit</p>
                             </div>
                             <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
                         </div>
@@ -257,7 +257,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Memasak</p>
-                                <p className="text-2xl font-bold">{recipe.cook_time || 0} menit</p>
+                                <p className="text-2xl font-bold">{recipe.cook_time ?? 0} menit</p>
                             </div>
                             <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
                         </div>
@@ -269,8 +269,8 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Kesulitan</p>
-                                <Badge className={getDifficultyColor(recipe.difficulty || 'medium')}>
-                                    {getDifficultyLabel(recipe.difficulty || 'medium')}
+                                <Badge className={getDifficultyColor(recipe.difficulty ?? 'medium')}>
+                                    {getDifficultyLabel(recipe.difficulty ?? 'medium')}
                                 </Badge>
                             </div>
                             <ChefHat className="h-8 w-8 text-gray-600 dark:text-gray-400" />
@@ -293,7 +293,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                                     className="flex items-center justify-between p-3 border rounded-lg"
                                 >
                                     <div className="flex-1">
-                                        <p className="font-medium">{ri.ingredient?.name || 'Unknown'}</p>
+                                        <p className="font-medium">{ri.ingredient?.name ?? 'Unknown'}</p>
                                         <p className="text-sm text-muted-foreground">
                                             {ri.quantity} {ri.unit}
                                         </p>

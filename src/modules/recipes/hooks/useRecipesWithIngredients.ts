@@ -1,7 +1,7 @@
+'use client'
+
 import { useSupabaseQuery } from '@/hooks/supabase'
 import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
-
-'use client'
 
 
 

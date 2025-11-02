@@ -118,12 +118,12 @@ export class RecipeRecommendationService {
           name: data.recipe.name,
           category: data.recipe.category,
           servings: 1, // Default
-          selling_price: data.recipe.selling_price || 0,
-          cost_per_unit: data.recipe.cost_per_unit || null,
-          margin_percentage: data.recipe.margin_percentage || null,
+          selling_price: data.recipe.selling_price ?? 0,
+          cost_per_unit: data.recipe.cost_per_unit ?? null,
+          margin_percentage: data.recipe.margin_percentage ?? null,
           is_available: true, // Would need to check
-          prep_time: data.recipe.prep_time || null,
-          cook_time: data.recipe.cook_time || null
+          prep_time: data.recipe.prep_time ?? null,
+          cook_time: data.recipe.cook_time ?? null
         } as RecipeOption))
 
       return recommendations

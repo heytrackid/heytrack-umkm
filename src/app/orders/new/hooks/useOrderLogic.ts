@@ -150,7 +150,7 @@ export const useOrderLogic = () => {
     }
     
     const firstRecipe = availableRecipes[0]
-    const fallbackPrice = firstRecipe.selling_price || 0
+    const fallbackPrice = firstRecipe.selling_price ?? 0
     const newItem: OrderItem = {
       recipe_id: firstRecipe.id,
       product_name: firstRecipe.name,
@@ -177,7 +177,7 @@ export const useOrderLogic = () => {
             ...currentItem,
             recipe_id: value as string,
             product_name: selectedRecipe.name,
-            unit_price: selectedRecipe.selling_price || currentItem.unit_price
+            unit_price: selectedRecipe.selling_price ?? currentItem.unit_price
           }
         }
       } else if (field === 'quantity') {
@@ -212,9 +212,9 @@ export const useOrderLogic = () => {
     setFormData(prev => ({
       ...prev,
       customer_name: customer.name,
-      customer_phone: customer.phone || '',
-      customer_email: customer.email || '',
-      customer_address: customer.address || ''
+      customer_phone: customer.phone ?? '',
+      customer_email: customer.email ?? '',
+      customer_address: customer.address ?? ''
     }))
   }
 

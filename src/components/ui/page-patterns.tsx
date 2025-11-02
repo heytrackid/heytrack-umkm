@@ -1,5 +1,4 @@
 import type { ComponentType, ReactNode } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -125,7 +124,7 @@ export const AlertBanner = ({
     )
   }
 
-  const DefaultIcon = Icon || defaultIcons[type]
+  const DefaultIcon = Icon ?? defaultIcons[type]
 
   return (
     <div className={`p-4 border rounded-lg ${styles[type]}`}>
@@ -158,7 +157,7 @@ export const LoadingState = ({
   message = "Memuat...",
   className
 }: LoadingStateProps) => (
-  <div className={`flex items-center justify-center p-8 ${className || ''}`}>
+  <div className={`flex items-center justify-center p-8 ${className ?? ''}`}>
     <div className="flex items-center gap-3">
       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
       <span className="text-gray-600">{message}</span>
@@ -184,7 +183,7 @@ export const EmptyState = ({
   action,
   className
 }: EmptyStateProps) => (
-  <div className={`text-center p-8 ${className || ''}`}>
+  <div className={`text-center p-8 ${className ?? ''}`}>
     {Icon && (
       <Icon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
     )}

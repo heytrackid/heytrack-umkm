@@ -34,7 +34,7 @@ const WacEnginePage = () => {
         const response = await fetch('/api/ingredients?limit=1000')
         if (response.ok) {
           const data = await response.json()
-          void setIngredients(data.ingredients || [])
+          void setIngredients(data.ingredients ?? [])
         }
       } catch (err: unknown) {
         dbLogger.error({ err }, 'Failed to load ingredients')
@@ -52,7 +52,7 @@ const WacEnginePage = () => {
   }, [toast])
 
   // Calculate WAC for selected ingredient
-  const calculateWac = async () => {
+  const calculateWac = () => {
     if (!selectedIngredient) {
       toast({
         title: 'Error',
@@ -83,7 +83,7 @@ const WacEnginePage = () => {
   }
 
   // Recalculate all WAC values
-  const recalculateAll = async () => {
+  const recalculateAll = () => {
     try {
       void setRecalculating(true)
       toast({
@@ -258,7 +258,7 @@ const WacEnginePage = () => {
                 {formatCurrency(
                   ingredients.reduce((sum, i) => {
                     const wac = (i.weighted_average_cost || i.price_per_unit) || 0
-                    const stock = i.current_stock || 0
+                    const stock = i.current_stock ?? 0
                     return sum + (wac * stock)
                   }, 0)
                 )}
@@ -282,7 +282,7 @@ const WacEnginePage = () => {
                   <div>
                     <div className="font-medium">{ingredient.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      Current stock: {ingredient.current_stock || 0} {ingredient.unit}
+                      Current stock: {ingredient.current_stock ?? 0} {ingredient.unit}
                     </div>
                   </div>
                   <div className="text-right">

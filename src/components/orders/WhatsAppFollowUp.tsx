@@ -69,10 +69,10 @@ const WhatsAppFollowUp = ({
     delivery_date: order.delivery_date,
     status: order.status,
     items: order.order_items?.map((item: OrderItemData) => ({
-      name: (item.recipe_name || item.name) || 'Product',
+      name: (item.recipe_name ?? item.name) ?? 'Product',
       quantity: item.quantity || 1,
       price: item.price_per_unit || 0
-    })) || [],
+    })) ?? [],
     notes: order.notes
   });
 
@@ -103,10 +103,10 @@ const WhatsAppFollowUp = ({
         customer_name: orderData.customer_name,
         order_id: orderData.id,
         total_amount: formatCurrency(orderData.total_amount),
-        delivery_date: orderData.delivery_date || 'Sesuai kesepakatan',
+        delivery_date: orderData.delivery_date ?? 'Sesuai kesepakatan',
         business_name: businessName,
         order_items: orderItems,
-        notes: orderData.notes || '',
+        notes: orderData.notes ?? '',
         payment_deadline: new Date().toLocaleDateString('id-ID'),
         payment_account: paymentDetails,
         delivery_status: 'Dalam perjalanan',

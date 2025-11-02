@@ -41,7 +41,7 @@ export function useRegistration() {
     return errors
   }
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = (formData: FormData) => {
     void setError('')
     void setErrorAction(null)
     void setFieldErrors({})

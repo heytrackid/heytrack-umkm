@@ -13,7 +13,14 @@ import { preloadChartBundle } from '@/components/lazy/index'
 export const useNetworkAwarePreloading = () => {
   useEffect(() => {
     // Only aggressive preloading on fast connections
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
+    type NavigatorWithConnection = Navigator & {
+      connection?: { effectiveType: string; downlink: number }
+      mozConnection?: { effectiveType: string; downlink: number }
+      webkitConnection?: { effectiveType: string; downlink: number }
+    }
+    
+    const nav = navigator as NavigatorWithConnection
+    const connection = nav.connection ?? nav.mozConnection ?? nav.webkitConnection
 
     if (connection) {
       const isSlowConnection = connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g'

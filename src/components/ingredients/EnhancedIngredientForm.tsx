@@ -27,7 +27,7 @@ export const EnhancedIngredientForm = ({
     initialData
 }: EnhancedIngredientFormProps) => {
     const { formatCurrency } = useSettings()
-    const { register, watch, formState: { errors }, setValue } = form
+    const { watch, formState: { errors }, setValue } = form
 
     const currentStock = watch('current_stock')
     const minStock = watch('min_stock')
@@ -39,14 +39,14 @@ export const EnhancedIngredientForm = ({
     useEffect(() => {
         if (mode === 'edit' && initialData) {
             const changed = (currentStock || 0) !== initialData.current_stock ||
-                (minStock || 0) !== initialData.min_stock ||
+                (minStock ?? 0) !== initialData.min_stock ||
                 pricePerUnit !== initialData.price_per_unit
             setHasChanges(changed)
         }
     }, [currentStock, minStock, pricePerUnit, initialData, mode])
 
     // Validation warnings (with handling for potentially undefined values)
-    const showMinStockWarning = (minStock || 0) > 0 && (currentStock || 0) > 0 && (currentStock || 0) <= (minStock || 0)
+    const showMinStockWarning = (minStock ?? 0) > 0 && (currentStock ?? 0) > 0 && (currentStock ?? 0) <= (minStock ?? 0)
     const showOutOfStockWarning = (currentStock || 0) <= 0
     const totalValue = (pricePerUnit || 0) * (currentStock || 0)
 
@@ -191,7 +191,7 @@ export const EnhancedIngredientForm = ({
                         step={0.01}
                         placeholder="0"
                         hint="Anda akan mendapat notifikasi jika stok mencapai batas ini"
-                        value={watch('min_stock') || 0}
+                        value={watch('min_stock') ?? 0}
                         onChange={(_, value) => setValue('min_stock', value as number)}
                     />
 
@@ -216,7 +216,7 @@ export const EnhancedIngredientForm = ({
                         name="description"
                         type="text"
                         placeholder="Catatan atau deskripsi tambahan"
-                        value={watch('description') || ''}
+                        value={watch('description') ?? ''}
                         onChange={(_, value) => setValue('description', value as string)}
                     />
                 </div>

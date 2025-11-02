@@ -69,7 +69,7 @@ async function GET(request: NextRequest) {
     }
 
     // Create pagination metadata
-    const pagination = createPaginationMeta(count || 0, page, limit)
+    const pagination = createPaginationMeta(count ?? 0, page, limit)
 
     return createSuccessResponse({
       ingredients: data,

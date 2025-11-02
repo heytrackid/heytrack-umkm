@@ -38,7 +38,7 @@ export class AIClient {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
-          'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
+          'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
           'X-Title': 'HeyTrack AI Assistant'
         },
         body: JSON.stringify({
@@ -74,7 +74,7 @@ export class AIClient {
           hasApiKey: !!apiKey 
         }, 'OpenRouter API Error')
         
-        throw new Error(`OpenRouter API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
+        throw new Error(`OpenRouter API error: ${response.status} - ${errorData.error?.message ?? 'Unknown error'}`)
       }
 
       const data = await response.json()
@@ -131,11 +131,11 @@ export class AIClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
+      throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message ?? 'Unknown error'}`)
     }
 
     const data = await response.json()
-    return data.choices[0]?.message?.content || 'No response generated'
+    return data.choices[0]?.message?.content ?? 'No response generated'
   }
 
   /**

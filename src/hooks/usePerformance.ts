@@ -18,8 +18,11 @@ export function usePerformanceMonitor(componentName: string) {
       // Performance monitoring in development is handled by Next.js compiler
 
       // Send to analytics in production
-      if (typeof window !== 'undefined' && 'gtag' in window && typeof (window as any).gtag === 'function') {
-        ;(window as any).gtag('event', 'component_load_time', {
+      type WindowWithGtag = Window & { gtag?: (...args: unknown[]) => void }
+      const win = window as WindowWithGtag
+      
+      if (typeof window !== 'undefined' && 'gtag' in window && typeof win.gtag === 'function') {
+        win.gtag('event', 'component_load_time', {
           component_name: componentName,
           load_time: loadTime,
           page_path: window.location.pathname
@@ -119,13 +122,16 @@ export function usePerformanceLogger(eventName: string, delay = 1000) {
 
       // Debounced analytics call
       const timeoutId = setTimeout(() => {
-        if (typeof window !== 'undefined' && 'gtag' in window && typeof (window as any).gtag === 'function') {
+        type WindowWithGtag = Window & { gtag?: (...args: unknown[]) => void }
+        const win = window as WindowWithGtag
+        
+        if (typeof window !== 'undefined' && 'gtag' in window && typeof win.gtag === 'function') {
           const payload =
             typeof data === 'object' && data !== null
               ? data as Record<string, unknown>
               : { value: data }
 
-          ;(window as any).gtag('event', eventName, {
+          win.gtag('event', eventName, {
             ...payload,
             timestamp,
             page_path: window.location.pathname
@@ -156,7 +162,16 @@ export function useMemoryMonitor() {
     if (typeof window !== 'undefined' && 'performance' in window) {
       const updateMemoryInfo = () => {
         if ('memory' in performance) {
-          const {memory} = (performance as any)
+          type PerformanceWithMemory = Performance & {
+            memory: {
+              usedJSHeapSize: number
+              totalJSHeapSize: number
+              jsHeapSizeLimit: number
+            }
+          }
+          
+          const perfWithMemory = performance as PerformanceWithMemory
+          const {memory} = perfWithMemory
           setMemoryInfo({
             usedJSHeapSize: Math.round(memory.usedJSHeapSize / 1024 / 1024), // MB
             totalJSHeapSize: Math.round(memory.totalJSHeapSize / 1024 / 1024), // MB

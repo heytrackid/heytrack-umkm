@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     // Get query params
     const { searchParams } = new URL(request.url)
-    const currentPage = searchParams.get('page') || undefined
+    const currentPage = searchParams.get('page') ?? undefined
 
     // Load business context
     const context = await BusinessContextService.loadContext(user.id, currentPage)

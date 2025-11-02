@@ -14,7 +14,7 @@ export function withRateLimit(options: { windowMs: number; maxRequests: number }
   const requests = new Map<string, { count: number; resetTime: number }>()
 
   return (request: NextRequest): NextResponse | null => {
-    const ip = request.headers.get('x-forwarded-for') || 'anonymous'
+    const ip = request.headers.get('x-forwarded-for') ?? 'anonymous'
     const now = Date.now()
     const windowData = requests.get(ip)
 

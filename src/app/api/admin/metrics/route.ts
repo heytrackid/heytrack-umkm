@@ -56,9 +56,9 @@ export async function GET(_request: NextRequest) {
 
     // Calculate total revenue
     const totalRevenue = revenueSum.data?.reduce(
-      (sum, order) => sum + (order.total_amount || 0),
+      (sum, order) => sum + (order.total_amount ?? 0),
       0
-    ) || 0
+    ) ?? 0
 
     // Get active users today (simplified - would need activity tracking)
     const today = new Date().toISOString().split('T')[0]
@@ -84,9 +84,9 @@ export async function GET(_request: NextRequest) {
     const metrics = {
       database: {
         total_tables: 35, // Approximate count of public tables
-        total_rows: totalRows || 0,
-        database_size: dbSize || 'N/A',
-        active_connections: activeConns || 0
+        total_rows: totalRows ?? 0,
+        database_size: dbSize ?? 'N/A',
+        active_connections: activeConns ?? 0
       },
       performance: {
         avg_query_time: 45, // Would calculate from logs
@@ -95,15 +95,15 @@ export async function GET(_request: NextRequest) {
         api_response_time: 120 // Would calculate from logs
       },
       users: {
-        total_users: usersCount.count || 0,
-        active_today: activeToday || 0,
-        new_this_week: newThisWeek || 0
+        total_users: usersCount.count ?? 0,
+        active_today: activeToday ?? 0,
+        new_this_week: newThisWeek ?? 0
       },
       business: {
-        total_recipes: recipesCount.count || 0,
-        total_orders: ordersCount.count || 0,
+        total_recipes: recipesCount.count ?? 0,
+        total_orders: ordersCount.count ?? 0,
         total_revenue: totalRevenue,
-        total_ingredients: ingredientsCount.count || 0
+        total_ingredients: ingredientsCount.count ?? 0
       }
     }
 

@@ -44,7 +44,7 @@ export const AUTH_ERROR_MESSAGES = {
 export function getAuthErrorMessage(error: string | Error | { message?: string }): string {
   const errorMessage = typeof error === 'string'
     ? error
-    : error?.message || 'Terjadi kesalahan autentikasi'
+    : error?.message ?? 'Terjadi kesalahan autentikasi'
 
   // Check for exact matches in our error messages
   if (AUTH_ERROR_MESSAGES[errorMessage as keyof typeof AUTH_ERROR_MESSAGES]) {

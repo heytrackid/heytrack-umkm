@@ -114,7 +114,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
       orders.filter(o => o.payment_status === 'UNPAID'),
       'total_amount'
     ),
-    paid_revenue: orders.reduce((sum, o) => sum + (o.paid_amount || 0), 0),
+    paid_revenue: orders.reduce((sum, o) => sum + (o.paid_amount ?? 0), 0),
     average_order_value: arrayCalculations.average(orders, 'total_amount'),
     total_customers: new Set(orders.filter(o => o.customer_id).map(o => o.customer_id)).size,
     repeat_customers: 0,
@@ -384,11 +384,11 @@ const OrdersPage = (_props: OrdersPageProps) => {
                       <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex-1">
                           <div className="font-medium">{order.order_no}</div>
-                          <div className="text-sm text-muted-foreground">{order.customer_name || 'N/A'}</div>
+                          <div className="text-sm text-muted-foreground">{order.customer_name ?? 'N/A'}</div>
                           <div className="text-xs text-muted-foreground">{order.order_date ? formatDate(order.order_date) : 'N/A'}</div>
                         </div>
                         <div className="text-right">
-                          <div className="font-medium">{formatCurrency(order.total_amount || 0)}</div>
+                          <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
                           <Badge className={`text-xs ${getStatusColor(order.status)}`}>
                             {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'N/A'}
                           </Badge>
@@ -446,7 +446,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
                         placeholder="Cari nama pelanggan atau nomor pesanan..."
-                        value={filters.customer_search || ''}
+                        value={filters.customer_search ?? ''}
                         onChange={(e) => setFilters(prev => ({ ...prev, customer_search: e.target.value }))}
                         className="pl-8"
                       />
@@ -548,14 +548,14 @@ const OrdersPage = (_props: OrdersPageProps) => {
                         <div className="space-y-1">
                           <div className="font-semibold text-lg">{order.order_no}</div>
                           <div className="text-sm text-muted-foreground">
-                            {order.customer_name || 'N/A'} • {order.order_date ? formatDate(order.order_date) : 'N/A'}
+                            {order.customer_name ?? 'N/A'} • {order.order_date ? formatDate(order.order_date) : 'N/A'}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge className={getStatusColor(order.status)}>
                             {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'N/A'}
                           </Badge>
-                          <Badge className={getPaymentStatusColor(order.payment_status || null)}>
+                          <Badge className={getPaymentStatusColor(order.payment_status ?? null)}>
                             {order.payment_status && order.payment_status in PAYMENT_STATUS_LABELS ? PAYMENT_STATUS_LABELS[order.payment_status as keyof typeof PAYMENT_STATUS_LABELS] : 'N/A'}
                           </Badge>
                         </div>
@@ -570,7 +570,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                         </div>
                         <div>
                           <div className="text-sm text-muted-foreground">Total Tagihan</div>
-                          <div className="font-medium text-lg">{formatCurrency(order.total_amount || 0)}</div>
+                          <div className="font-medium text-lg">{formatCurrency(order.total_amount ?? 0)}</div>
                         </div>
                         <div>
                           <div className="text-sm text-muted-foreground">Tanggal Kirim</div>
@@ -596,7 +596,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value={order.status || 'PENDING'} disabled>
+                              <SelectItem value={order.status ?? 'PENDING'} disabled>
                                 {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'Status Tidak Diketahui'}
                               </SelectItem>
                               {ORDER_STATUS_CONFIG[order.status as keyof typeof ORDER_STATUS_CONFIG]?.nextStatuses?.map((status) => (

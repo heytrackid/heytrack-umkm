@@ -121,10 +121,10 @@ export class IngredientValidationHelpers {
       : 30 // Default assumption
 
     // Calculate reorder point considering lead time
-    const effectiveReorderPoint = min_stock + (usage_rate_daily || 0) * reorder_lead_time
+    const effectiveReorderPoint = min_stock + (usage_rate_daily ?? 0) * reorder_lead_time
 
     const shouldReorder = current_stock <= effectiveReorderPoint
-    let recommendedQuantity = (max_stock || min_stock * 2) - current_stock
+    let recommendedQuantity = (max_stock ?? min_stock * 2) - current_stock
     let priority: 'low' | 'medium' | 'high' | 'critical' = 'low'
     let reason = 'Stock at reorder level'
 
@@ -136,13 +136,13 @@ export class IngredientValidationHelpers {
     if (daysUntilEmpty <= reorder_lead_time) {
       priority = 'critical'
       reason = `Stock will run out in ${daysUntilEmpty} days (lead time: ${reorder_lead_time} days)`
-      recommendedQuantity = Math.max(recommendedQuantity, (usage_rate_daily || 1) * reorder_lead_time * 2)
+      recommendedQuantity = Math.max(recommendedQuantity, (usage_rate_daily ?? 1) * reorder_lead_time * 2)
     }
 
     if (current_stock <= 0) {
       priority = 'critical'
       reason = 'Out of stock'
-      recommendedQuantity = Math.max(min_stock * 2, (usage_rate_daily || 1) * reorder_lead_time * 3)
+      recommendedQuantity = Math.max(min_stock * 2, (usage_rate_daily ?? 1) * reorder_lead_time * 3)
     }
 
     return {
@@ -171,7 +171,7 @@ export class IngredientValidationHelpers {
         invalid.push({
           index,
           data: ingredient,
-          errors: result.errors || []
+          errors: result.errors ?? []
         })
       }
     })

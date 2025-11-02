@@ -88,7 +88,7 @@ export class RateLimiter {
     const windowStart = now - windowMs
 
     // Get existing requests for this identifier
-    const requests = this.requests.get(identifier) || []
+    const requests = this.requests.get(identifier) ?? []
 
     // Remove old requests outside the window
     const validRequests = requests.filter(time => time > windowStart)
@@ -106,7 +106,7 @@ export class RateLimiter {
   }
 
   static getRemainingRequests(identifier: string, maxRequests = 100): number {
-    const requests = this.requests.get(identifier) || []
+    const requests = this.requests.get(identifier) ?? []
     return Math.max(0, maxRequests - requests.length)
   }
 

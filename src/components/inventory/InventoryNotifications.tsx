@@ -245,7 +245,7 @@ export const InventoryNotifications = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => window.location.href = notification.action_url || ''}
+                              onClick={() => window.location.href = notification.action_url ?? ''}
                             >
                               View Details
                             </Button>

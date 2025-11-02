@@ -26,7 +26,7 @@ interface FormInputProps extends FormFieldProps, InputHTMLAttributes<HTMLInputEl
  */
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ label, error, required, helperText, className, ...props }, ref) => {
-    const id = props.id || props.name
+    const id = props.id ?? props.name
     return (
       <div className={cn('space-y-2', className)}>
         {label && (
@@ -68,7 +68,7 @@ interface FormTextareaProps extends FormFieldProps, TextareaHTMLAttributes<HTMLT
  */
 export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
   ({ label, error, required, helperText, className, ...props }, ref) => {
-    const id = props.id || props.name
+    const id = props.id ?? props.name
     return (
       <div className={cn('space-y-2', className)}>
         {label && (

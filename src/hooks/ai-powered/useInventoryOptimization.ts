@@ -31,14 +31,14 @@ export function useInventoryOptimization() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to optimize inventory')
+        throw new Error(result.error ?? 'Failed to optimize inventory')
       }
 
       setState({
         data: result,
         loading: false,
         error: null,
-        confidence: result.metadata?.confidence || 0.8,
+        confidence: result.metadata?.confidence ?? 0.8,
         lastUpdated: new Date().toISOString()
       })
 

@@ -75,12 +75,12 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 }
 
                 return {
-                    id: record.ingredient_id || Math.random().toString(36).slice(2),
-                    name: record.ingredient?.name || 'Unknown',
-                    quantity: record.quantity || 0,
-                    unit: record.unit || 'unit',
-                    unit_price: record.ingredient?.weighted_average_cost || record.ingredient?.price_per_unit || 0,
-                    category: record.ingredient?.category || undefined
+                    id: record.ingredient_id ?? Math.random().toString(36).slice(2),
+                    name: record.ingredient?.name ?? 'Unknown',
+                    quantity: record.quantity ?? 0,
+                    unit: record.unit ?? 'unit',
+                    unit_price: record.ingredient?.weighted_average_cost ?? record.ingredient?.price_per_unit ?? 0,
+                    category: record.ingredient?.category ?? undefined
                 }
             })
         }
@@ -91,7 +91,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
     // Calculate costs
     const ingredientCost = ingredients.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
 
-    const opCosts = operationalCosts || {
+    const opCosts = operationalCosts ?? {
         labor: ingredientCost * 0.10,
         utilities: ingredientCost * 0.03,
         packaging: ingredientCost * 0.05,
@@ -100,7 +100,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
 
     const totalOperational = Object.values(opCosts).reduce((a, b) => a + b, 0)
     const totalCost = ingredientCost + totalOperational
-    const sellingPrice = recipe.selling_price || 0
+    const sellingPrice = recipe.selling_price ?? 0
     const profit = sellingPrice - totalCost
     const marginPercent = sellingPrice > 0 ? (profit / sellingPrice) * 100 : 0
     const ingredientSharePercent = totalCost > 0 ? (ingredientCost / totalCost) * 100 : 0
@@ -108,7 +108,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
 
     // Group ingredients by category
     const ingredientsByCategory = ingredients.reduce((acc, item) => {
-        const category = item.category || 'Lainnya'
+        const category = item.category ?? 'Lainnya'
         if (!acc[category]) { acc[category] = [] }
         acc[category].push(item)
         return acc

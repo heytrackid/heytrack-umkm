@@ -45,9 +45,9 @@ export const MobileIngredientCard = ({
     const { formatCurrency } = useSettings()
     const [isExpanded, setIsExpanded] = useState(false)
 
-    const isLowStock = (ingredient.current_stock || 0) <= (ingredient.min_stock || 0)
-    const isOutOfStock = (ingredient.current_stock || 0) <= 0
-    const totalValue = (ingredient.price_per_unit || 0) * (ingredient.current_stock || 0)
+    const isLowStock = (ingredient.current_stock ?? 0) <= (ingredient.min_stock ?? 0)
+    const isOutOfStock = (ingredient.current_stock ?? 0) <= 0
+    const totalValue = (ingredient.price_per_unit ?? 0) * (ingredient.current_stock ?? 0)
 
     return (
         <Card className={cn(
@@ -85,13 +85,13 @@ export const MobileIngredientCard = ({
                     {/* Stock Indicator */}
                     <div className="flex items-center justify-between">
                         <CompactStockIndicator
-                            currentStock={ingredient.current_stock || 0}
-                            minStock={ingredient.min_stock || 0}
+                            currentStock={ingredient.current_stock ?? 0}
+                            minStock={ingredient.min_stock ?? 0}
                             unit={ingredient.unit || ''}
                         />
                         <StockBadge
-                            currentStock={ingredient.current_stock || 0}
-                            minStock={ingredient.min_stock || 0}
+                            currentStock={ingredient.current_stock ?? 0}
+                            minStock={ingredient.min_stock ?? 0}
                             unit={ingredient.unit || ''}
                             compact
                             showIcon={false}
@@ -106,7 +106,7 @@ export const MobileIngredientCard = ({
                                 <div>
                                     <p className="text-muted-foreground mb-1">Stok Minimum</p>
                                     <p className="font-medium">
-                                        {ingredient.min_stock || 0} {ingredient.unit || ''}
+                                        {ingredient.min_stock ?? 0} {ingredient.unit ?? ''}
                                     </p>
                                 </div>
                                 <div>

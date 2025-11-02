@@ -1,5 +1,4 @@
 import { automationLogger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/type-guards'
 import { BaseWorkflowAutomation } from '@/lib/automation/base-workflow'
 import { OrderWorkflowHandlers } from './order-workflows'
 import { InventoryWorkflowHandlers } from './inventory-workflows'

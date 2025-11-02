@@ -49,14 +49,14 @@ const IngredientsPage = () => {
   }, [error, router, toast]);
 
   // Calculate stats
-  const totalIngredients = ingredients?.length || 0;
+  const totalIngredients = ingredients?.length ?? 0;
   const lowStockCount = ingredients?.filter((i: IngredientsTable) =>
-    (i.current_stock || 0) <= (i.min_stock || 0) && (i.current_stock || 0) > 0
-  ).length || 0;
+    (i.current_stock ?? 0) <= (i.min_stock ?? 0) && (i.current_stock ?? 0) > 0
+  ).length ?? 0;
   const totalValue = ingredients?.reduce((sum: number, i: IngredientsTable) =>
-    sum + ((i.current_stock || 0) * (i.price_per_unit || 0)), 0
-  ) || 0;
-  const outOfStockCount = ingredients?.filter((i: IngredientsTable) => (i.current_stock || 0) <= 0).length || 0;
+    sum + ((i.current_stock ?? 0) * (i.price_per_unit ?? 0)), 0
+  ) ?? 0;
+  const outOfStockCount = ingredients?.filter((i: IngredientsTable) => (i.current_stock ?? 0) <= 0).length ?? 0;
 
   // ✅ FIX: Combine loading states
   const isLoading = isAuthLoading || loading
@@ -207,7 +207,7 @@ const IngredientsPage = () => {
               if (!response.ok) {
                 return {
                   success: false,
-                  error: result.error || 'Import gagal',
+                  error: result.error ?? 'Import gagal',
                   details: result.details
                 }
               }

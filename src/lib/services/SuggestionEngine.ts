@@ -163,7 +163,7 @@ export class SuggestionEngine {
 
     // Low stock alert
     const lowStockCount =
-      context.ingredients?.filter((i) => i.low_stock).length || 0;
+      context.ingredients?.filter((i) => i.low_stock).length ?? 0;
     if (lowStockCount > 0) {
       suggestions.push({
         id: 'state-low-stock',
@@ -204,7 +204,7 @@ export class SuggestionEngine {
     }
 
     // Recent orders
-    const recentOrdersCount = context.orders?.length || 0;
+    const recentOrdersCount = context.orders?.length ?? 0;
     if (recentOrdersCount > 5) {
       suggestions.push({
         id: 'state-busy-orders',

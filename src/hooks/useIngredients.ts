@@ -36,11 +36,13 @@ export function useIngredients(options?: UseIngredientsOptions) {
       if (!response.ok) {
         throw new Error('Failed to fetch ingredients')
       }
-      return response.json()
+      const result = await response.json() as { data?: { ingredients?: Ingredient[]; pagination?: unknown } }
+      return result.data ?? { ingredients: [], pagination: null }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
+    select: (result) => result.ingredients ?? [],
   })
 }
 
@@ -82,7 +84,7 @@ export function useCreateIngredient() {
       
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to create ingredient')
+        throw new Error(error.message ?? 'Failed to create ingredient')
       }
       
       return response.json()
@@ -125,7 +127,7 @@ export function useUpdateIngredient() {
       
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to update ingredient')
+        throw new Error(error.message ?? 'Failed to update ingredient')
       }
       
       return response.json()
@@ -167,7 +169,7 @@ export function useDeleteIngredient() {
       
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to delete ingredient')
+        throw new Error(error.message ?? 'Failed to delete ingredient')
       }
       
       return response.json()

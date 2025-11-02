@@ -86,6 +86,6 @@ export class ContextManager {
    * Get conversation history
    */
   getHistory() {
-    return this.context.conversationHistory || []
+    return this.context.conversationHistory ?? []
   }
 }

@@ -155,7 +155,7 @@ export async function PUT(request: NextRequest) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Cookie': request.headers.get('cookie') || ''
+            'Cookie': request.headers.get('cookie') ?? ''
           },
           body: JSON.stringify({ recipeId: recipe.id })
         })

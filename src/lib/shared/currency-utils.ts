@@ -13,7 +13,7 @@ export function formatPrice(amount: number): string {
 }
 
 export function formatPriceWithCurrency(amount: number, currency?: Currency): string {
-  const currencyToUse = currency || getCurrentCurrency()
+  const currencyToUse = currency ?? getCurrentCurrency()
   return formatCurrency(amount, currencyToUse)
 }
 

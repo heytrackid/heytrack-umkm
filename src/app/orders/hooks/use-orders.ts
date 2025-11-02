@@ -75,7 +75,7 @@ export function useOrders(filters?: OrderFilters) {
   const loading = [queryLoading, crudLoading].some(Boolean)
 
   // Combine errors
-  const error = queryError || crudError
+  const error = queryError ?? crudError
 
   // Memoized orders data
   const orders = useMemo(() => {
@@ -131,7 +131,7 @@ export function useOrders(filters?: OrderFilters) {
       if (typeof search === 'string' && search.trim().length > 0) {
         const searchLower = search.toLowerCase()
         filteredOrders = filteredOrders.filter(order => {
-          const name = order.customer_name?.toLowerCase() || ''
+          const name = order.customer_name?.toLowerCase() ?? ''
           const orderNo = order.order_no?.toLowerCase() || ''
           return name.includes(searchLower) || orderNo.includes(searchLower)
         })
@@ -345,17 +345,17 @@ export function useOrderCurrency(currency?: string) {
     showSymbol?: boolean
     showCode?: boolean
   }) => {
-    const activeCurrency = currency || defaultCurrency
+    const activeCurrency = currency ?? defaultCurrency
     return formatCurrency(amount, { code: activeCurrency, symbol: '$', name: 'USD', decimals: 2 })
   }
 
   const parseAmount = (currencyString: string) => {
-    const activeCurrency = currency || defaultCurrency
+    const activeCurrency = currency ?? defaultCurrency
     return parseCurrencyString(currencyString, { code: activeCurrency, symbol: '$', name: 'USD', decimals: 2 })
   }
 
   return {
-    currency: currency || defaultCurrency,
+    currency: currency ?? defaultCurrency,
     formatAmount,
     parseAmount
   }
@@ -365,10 +365,10 @@ export function useOrderCurrency(currency?: string) {
 export function useInvoiceGeneration() {
   const generateInvoice = (order: Order, companyInfo?: InvoiceData['company_info']): InvoiceData => {
     // Calculate subtotal from total_amount and discount
-    const discountAmount = order.discount || 0
-    const totalAmount = order.total_amount || 0
-    const taxAmount = order.tax_amount || 0
-    const shippingAmount = order.delivery_fee || 0
+    const discountAmount = order.discount ?? 0
+    const totalAmount = order.total_amount ?? 0
+    const taxAmount = order.tax_amount ?? 0
+    const shippingAmount = order.delivery_fee ?? 0
     const itemsSubtotal = totalAmount - taxAmount - shippingAmount + discountAmount
     
     const totalsBreakdown: OrderTotalsBreakdown = {
@@ -386,7 +386,7 @@ export function useInvoiceGeneration() {
     // Default payment terms (30 days) since field doesn't exist in DB
     const paymentTermsDays = DEFAULT_ORDERS_CONFIG.payment.default_terms_days
     const paymentTerms = `Payment due within ${paymentTermsDays} days`
-    const dueDate = new Date(order.order_date || new Date())
+    const dueDate = new Date(order.order_date ?? new Date())
     dueDate.setDate(dueDate.getDate() + paymentTermsDays)
 
     return {
@@ -396,7 +396,7 @@ export function useInvoiceGeneration() {
       payment_terms: paymentTerms,
       due_date: dueDate.toISOString().split('T')[0],
       invoice_number: order.order_no || `INV-${order.id.slice(-8)}`,
-      notes: order.notes || undefined
+      notes: order.notes ?? undefined
     }
   }
 

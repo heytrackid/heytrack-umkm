@@ -135,12 +135,12 @@ export class AlertGenerator {
       // Assume items older than 90 days are potentially dead stock
       const lastUpdated = item.updated_at ? new Date(item.updated_at) : new Date()
       const daysSinceUpdate = (Date.now() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24)
-      return daysSinceUpdate > 90 && (item.current_stock || 0) > 0
+      return daysSinceUpdate > 90 && (item.current_stock ?? 0) > 0
     })
 
     if (oldInventory.length > 0) {
       const totalValue = oldInventory.reduce((sum, item) =>
-        sum + (item.current_stock || 0) * (item.price_per_unit || 0), 0
+        sum + (item.current_stock ?? 0) * (item.price_per_unit ?? 0), 0
       )
 
       alerts.push({

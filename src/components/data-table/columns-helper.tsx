@@ -62,7 +62,7 @@ export function createCurrencyColumn<T extends Record<string, unknown>>(
 ): ColumnDef<T> {
   const formatter = new Intl.NumberFormat('id-ID', {
     style: 'currency',
-    currency: options?.currency || 'IDR',
+    currency: options?.currency ?? 'IDR',
     minimumFractionDigits: 0,
   })
 
@@ -147,8 +147,8 @@ export function createActionColumn<T extends Record<string, unknown>>(
         {actions.map((action, idx) => (
           <Button
             key={idx}
-            variant={action.variant || 'outline'}
-            size={action.size || 'sm'}
+            variant={action.variant ?? 'outline'}
+            size={action.size ?? 'sm'}
             onClick={() => action.onClick(row.original)}
           >
             {action.label}

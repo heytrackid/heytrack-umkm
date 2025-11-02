@@ -41,7 +41,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log the error
-    const errorId = this.state.errorId || `error_${Date.now()}`
+    const errorId = this.state.errorId ?? `error_${Date.now()}`
 
     apiLogger.error({
       error: error.message,
@@ -134,7 +134,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
               </div>
 
               <div className="text-center text-xs text-gray-500 dark:text-gray-400">
-                Error ID: {this.state.errorId || 'Unknown'}
+                Error ID: {this.state.errorId ?? 'Unknown'}
               </div>
             </CardContent>
           </Card>

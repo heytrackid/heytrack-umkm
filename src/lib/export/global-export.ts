@@ -1,8 +1,7 @@
 import 'server-only'
 import ExcelJS from 'exceljs'
 import { createClient } from '@/utils/supabase/server'
-import type { Database, RecipesTable, OrdersTable, IngredientsTable, CustomersTable, StockTransactionsTable } from '@/types/database'
-import { formatCurrency } from '@/lib/currency'
+import type { RecipesTable, OrdersTable, IngredientsTable, CustomersTable, StockTransactionsTable } from '@/types/database'
 import { format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
 
@@ -117,14 +116,14 @@ export class GlobalExportService {
 
     // Add data
     recipes.forEach((recipe: Recipe) => {
-      const margin = (recipe.selling_price || 0) - (recipe.cost_per_unit || 0)
+      const margin = (recipe.selling_price ?? 0) - (recipe.cost_per_unit ?? 0)
       const marginPct = recipe.selling_price ? (margin / recipe.selling_price) * 100 : 0
 
       sheet.addRow({
         name: recipe.name,
         servings: recipe.servings,
-        selling_price: recipe.selling_price || 0,
-        production_cost: recipe.cost_per_unit || 0,
+        selling_price: recipe.selling_price ?? 0,
+        production_cost: recipe.cost_per_unit ?? 0,
         margin,
         margin_pct: marginPct,
         status: recipe.is_active ? 'Aktif' : 'Nonaktif',
@@ -179,7 +178,7 @@ export class GlobalExportService {
       sheet.addRow({
         order_no: order.order_no,
         customer_name: order.customer_name,
-        total_amount: order.total_amount || 0,
+        total_amount: order.total_amount ?? 0,
         status: this.translateStatus(order.status),
         order_date: order.order_date ? format(new Date(order.order_date), 'dd/MM/yyyy', { locale: localeId }) : '',
         created_at: order.created_at ? format(new Date(order.created_at), 'dd/MM/yyyy', { locale: localeId }) : '',
@@ -208,15 +207,15 @@ export class GlobalExportService {
     this.styleHeader(sheet)
 
     ingredients.forEach((ingredient: Ingredient) => {
-      const stockStatus = (ingredient.current_stock || 0) <= (ingredient.min_stock || 0) 
+      const stockStatus = (ingredient.current_stock ?? 0) <= (ingredient.min_stock ?? 0) 
         ? 'Perlu Restock' 
         : 'Aman'
 
       sheet.addRow({
         name: ingredient.name,
         unit: ingredient.unit,
-        current_stock: ingredient.current_stock || 0,
-        min_stock: ingredient.min_stock || 0,
+        current_stock: ingredient.current_stock ?? 0,
+        min_stock: ingredient.min_stock ?? 0,
         wac: ingredient.weighted_average_cost || 0,
         price_per_unit: ingredient.price_per_unit || 0,
         stock_status: stockStatus,
@@ -259,9 +258,9 @@ export class GlobalExportService {
     customers.forEach((customer: Customer) => {
       sheet.addRow({
         name: customer.name,
-        phone: customer.phone || '-',
-        email: customer.email || '-',
-        address: customer.address || '-',
+        phone: customer.phone ?? '-',
+        email: customer.email ?? '-',
+        address: customer.address ?? '-',
         created_at: customer.created_at ? format(new Date(customer.created_at), 'dd/MM/yyyy', { locale: localeId }) : '',
       })
     })
@@ -283,12 +282,12 @@ export class GlobalExportService {
     this.styleHeader(sheet)
 
     transactions.forEach((tx: StockTransaction) => {
-      const total = (tx.quantity || 0) * (tx.unit_price || 0)
+      const total = (tx.quantity ?? 0) * (tx.unit_price ?? 0)
       sheet.addRow({
         created_at: tx.created_at ? format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm', { locale: localeId }) : '',
         type: this.translateTransactionType(tx.type),
         quantity: tx.quantity || 0,
-        unit_price: tx.unit_price || 0,
+        unit_price: tx.unit_price ?? 0,
         total,
       })
     })
@@ -320,11 +319,11 @@ export class GlobalExportService {
     const completedOrders = data.orders.filter(o => o.status === 'DELIVERED').length
     const totalRevenue = data.orders
       .filter(o => o.status === 'DELIVERED')
-      .reduce((sum, o) => sum + (o.total_amount || 0), 0)
+      .reduce((sum, o) => sum + (o.total_amount ?? 0), 0)
     const avgOrderValue = completedOrders > 0 ? totalRevenue / completedOrders : 0
     const totalIngredients = data.ingredients.length
     const lowStockIngredients = data.ingredients.filter(
-      i => (i.current_stock || 0) <= (i.min_stock || 0)
+      i => (i.current_stock ?? 0) <= (i.min_stock ?? 0)
     ).length
     const totalCustomers = data.customers.length
 

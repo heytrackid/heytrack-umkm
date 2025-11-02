@@ -87,9 +87,9 @@ const CustomersLayout = () => {
 
   const filteredCustomers = useMemo(() =>
     customers.filter((customer: Customer) =>
-      customer.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      customer.email?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      customer.phone?.includes(debouncedSearchTerm)
+      (customer.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ?? false) ||
+      (customer.email?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ?? false) ||
+      (customer.phone?.includes(debouncedSearchTerm) ?? false)
     ), [customers, debouncedSearchTerm]
   )
 

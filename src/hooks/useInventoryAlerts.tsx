@@ -71,10 +71,10 @@ export function useInventoryAlerts() {
     let totalValue = 0
 
     ingredients.forEach((ingredient: Ingredient) => {
-      const currentStock = ingredient.current_stock || 0
-      const minStock = ingredient.min_stock || 0
+      const currentStock = ingredient.current_stock ?? 0
+      const minStock = ingredient.min_stock ?? 0
       const maxStock = ingredient.max_stock
-      const reorderPoint = ingredient.reorder_point || minStock
+      const reorderPoint = ingredient.reorder_point ?? minStock
       const pricePerUnit = ingredient.price_per_unit || 0
 
       // Calculate total value
@@ -100,7 +100,7 @@ export function useInventoryAlerts() {
           current_stock: currentStock,
           reorder_point: reorderPoint,
           min_stock: minStock,
-          max_stock: maxStock || undefined,
+          max_stock: maxStock ?? undefined,
           unit: ingredient.unit
         })
       } else if (currentStock <= reorderPoint) {
@@ -122,7 +122,7 @@ export function useInventoryAlerts() {
           current_stock: currentStock,
           reorder_point: reorderPoint,
           min_stock: minStock,
-          max_stock: maxStock || undefined,
+          max_stock: maxStock ?? undefined,
           unit: ingredient.unit
         })
       } else if (maxStock && currentStock > maxStock) {
@@ -191,10 +191,10 @@ export function useIngredientStockStatus(ingredientId: string) {
     const ingredient = ingredients.find((ing: Ingredient) => ing.id === ingredientId)
     if (!ingredient) { return null }
 
-    const currentStock = ingredient.current_stock || 0
-    const minStock = ingredient.min_stock || 0
+    const currentStock = ingredient.current_stock ?? 0
+    const minStock = ingredient.min_stock ?? 0
     const maxStock = ingredient.max_stock
-    const reorderPoint = ingredient.reorder_point || minStock
+    const reorderPoint = ingredient.reorder_point ?? minStock
 
     let status: 'out_of_stock' | 'low_stock' | 'reorder_needed' | 'healthy' | 'over_stock' = 'healthy'
     let statusColor: 'destructive' | 'orange' | 'yellow' | 'green' | 'blue' = 'green'
@@ -257,14 +257,14 @@ export const InventoryAlertsList = ({ alerts, maxItems = 5 }: { alerts: Inventor
                 alert.severity === 'medium' ? 'secondary' : 'outline'}
             className="shrink-0"
           >
-            {alert.severity?.toUpperCase() || 'INFO'}
+            {alert.severity?.toUpperCase() ?? 'INFO'}
           </Badge>
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm">{alert.ingredient_name || 'Unknown Ingredient'}</p>
+            <p className="font-medium text-sm">{alert.ingredient_name ?? 'Unknown Ingredient'}</p>
             <p className="text-sm text-muted-foreground">{alert.message}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Stok: {alert.current_stock || 0} {alert.unit || ''}
-              {alert.reorder_point && alert.reorder_point > 0 && ` • Reorder: ${alert.reorder_point} ${alert.unit || ''}`}
+              Stok: {alert.current_stock ?? 0} {alert.unit ?? ''}
+              {alert.reorder_point && alert.reorder_point > 0 && ` • Reorder: ${alert.reorder_point} ${alert.unit ?? ''}`}
             </p>
           </div>
         </div>

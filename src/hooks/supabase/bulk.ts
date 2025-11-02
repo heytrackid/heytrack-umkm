@@ -1,7 +1,7 @@
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
-import type { TableName, Row, Insert, Update } from '@/types/database'
+import type { TableName, Row, Insert} from '@/types/database'
 import { typed } from '@/types/type-utilities'
 import type { BulkUpdateItem } from './types'
 

@@ -95,13 +95,13 @@ export async function GET(request: NextRequest) {
       userId: user.id,
       batchCount: batches?.length || 0,
       pendingCount: pendingOrders?.length || 0,
-      lowStockCount: lowStock?.length || 0
+      lowStockCount: lowStock?.length ?? 0
     }, 'Dashboard data fetched')
 
     return NextResponse.json({
       production_schedule: batches || [],
       pending_orders: pendingOrders || [],
-      low_stock_alerts: lowStock || [],
+      low_stock_alerts: lowStock ?? [],
       summary: {
         total_batches_today: batches?.length || 0,
         planned_batches: (batches?.filter(b => b.status === 'PLANNED') || []).length,
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
         completed_batches: (batches?.filter(b => b.status === 'COMPLETED') || []).length,
         pending_orders_count: pendingOrders?.length || 0,
         urgent_orders: (pendingOrders?.filter(o => o.priority === 'URGENT') || []).length,
-        critical_stock_items: (lowStock?.filter(s => s.stock_status === 'OUT_OF_STOCK') || []).length
+        critical_stock_items: (lowStock?.filter(s => s.stock_status === 'OUT_OF_STOCK') ?? []).length
       }
     })
   } catch (error) {

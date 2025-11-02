@@ -114,7 +114,7 @@ async function GET(request: NextRequest) {
     }
 
     // Add sorting
-    const sortField = sort_by || 'created_at'
+    const sortField = sort_by ?? 'created_at'
     const sortDirection = sort_order === 'asc'
     query = query.order(sortField, { ascending: sortDirection })
 
@@ -158,20 +158,20 @@ async function GET(request: NextRequest) {
     
     const mappedData = data?.map((order) => ({
       ...order,
-      items: (order as OrderWithItems).order_items || []
+      items: (order as OrderWithItems).order_items ?? []
     }))
 
     apiLogger.info({ 
       userId: user.id,
       count: mappedData?.length || 0,
-      totalCount: count || 0,
+      totalCount: count ?? 0,
       page,
       limit
     }, 'GET /api/orders - Success')
 
     return NextResponse.json({
       data: mappedData,
-      meta: createPaginationMeta(page, limit, count || 0)
+      meta: createPaginationMeta(page, limit, count ?? 0)
     })
   } catch (error: unknown) {
     logError(apiLogger, error, 'GET /api/orders - Unexpected error', {
@@ -227,7 +227,7 @@ async function POST(request: NextRequest) {
     apiLogger.info({ 
       userId: user.id,
       orderNo: validation.data.order_no,
-      itemsCount: validation.data.items?.length || 0
+      itemsCount: validation.data.items?.length ?? 0
     }, 'POST /api/orders - Validation passed')
 
     const validatedData = validation.data
@@ -237,8 +237,8 @@ async function POST(request: NextRequest) {
     // If order is DELIVERED, create income record first
     if (orderStatus === 'DELIVERED' && validatedData.total_amount && validatedData.total_amount > 0) {
       const incomeDate = normalizeDateValue(validatedData.delivery_date)
-        || normalizeDateValue(validatedData.order_date)
-        || new Date().toISOString().split('T')[0]
+ ?? normalizeDateValue(validatedData.order_date)
+ ?? new Date().toISOString().split('T')[0]
 
       const incomeData: FinancialRecordInsert = {
         user_id: user.id,
@@ -278,7 +278,7 @@ async function POST(request: NextRequest) {
         customer_name: validatedData.customer_name,
         customer_phone: validatedData.customer_phone,
         status: orderStatus,
-        order_date: validatedData.order_date || new Date().toISOString().split('T')[0],
+        order_date: validatedData.order_date ?? new Date().toISOString().split('T')[0],
         delivery_date: validatedData.delivery_date,
         delivery_time: validatedData.delivery_time,
         total_amount: validatedData.total_amount,
@@ -333,11 +333,11 @@ async function POST(request: NextRequest) {
     if (validatedData.items && validatedData.items.length > 0) {
       const orderItems = validatedData.items.map((item) => ({
         recipe_id: item.recipe_id,
-        product_name: item.product_name || null,
+        product_name: item.product_name ?? null,
         quantity: item.quantity,
         unit_price: item.unit_price,
         total_price: item.total_price || (item.quantity * item.unit_price),
-        special_requests: item.special_requests || null,
+        special_requests: item.special_requests ?? null,
         order_id: createdOrder.id,
         user_id: user.id
       }))

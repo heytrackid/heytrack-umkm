@@ -1,3 +1,5 @@
+'use client'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -11,9 +13,8 @@ import { getErrorMessage } from '@/lib/type-guards'
 import type { IngredientsTable, RecipeIngredientsTable, RecipesTable } from '@/types/database'
 import type { SmartPricingAnalysis } from '@/types/features/analytics'
 import { AlertTriangle, Calculator, CheckCircle, Lightbulb, Target, Zap } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState, type FC } from 'react'
+import { useCallback, useEffect, useState, type FC } from 'react'
 
-'use client'
 
 
 type Recipe = RecipesTable
@@ -65,13 +66,13 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
 
       if (recipe?.recipe_ingredients?.length) {
         const totalCost = recipe.recipe_ingredients.reduce((sum, ri) => {
-          const ingredientPrice = ri.ingredient?.price_per_unit || 0
+          const ingredientPrice = ri.ingredient?.price_per_unit ?? 0
           return sum + (ingredientPrice * ri.quantity)
         }, 0)
         const ingredientCost = totalCost
         const overheadCost = ingredientCost * 0.15
         const totalCalculatedCost = ingredientCost + overheadCost
-        const servings = recipe.servings || 1
+        const servings = recipe.servings ?? 1
 
         const fallbackAnalysis: SmartPricingAnalysis = {
           breakdown: {

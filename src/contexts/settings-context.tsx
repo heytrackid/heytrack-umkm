@@ -51,11 +51,11 @@ export const languages: Language[] = [
   { code: 'en', name: 'English', flag: '🇺🇸' }
 ]
 
-const DEFAULT_CURRENCY_CODE = process.env['NEXT_PUBLIC_DEFAULT_CURRENCY'] || 'IDR'
-const DEFAULT_LANGUAGE_CODE = process.env['NEXT_PUBLIC_DEFAULT_LANGUAGE'] || 'id'
+const DEFAULT_CURRENCY_CODE = process.env['NEXT_PUBLIC_DEFAULT_CURRENCY'] ?? 'IDR'
+const DEFAULT_LANGUAGE_CODE = process.env['NEXT_PUBLIC_DEFAULT_LANGUAGE'] ?? 'id'
 
-const defaultCurrency = currencies.find(c => c.code === DEFAULT_CURRENCY_CODE) || currencies[0]
-const defaultLanguage = languages.find(l => l.code === DEFAULT_LANGUAGE_CODE) || languages[0]
+const defaultCurrency = currencies.find(c => c.code === DEFAULT_CURRENCY_CODE) ?? currencies[0]
+const defaultLanguage = languages.find(l => l.code === DEFAULT_LANGUAGE_CODE) ?? languages[0]
 
 const defaultSettings: Settings = {
   currency: defaultCurrency,
@@ -66,7 +66,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
-  const [isHydrated, setIsHydrated] = useState(false)
+  const [_isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
     // Mark as hydrated to prevent hydration mismatch
@@ -78,8 +78,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       if (savedSettings) {
         try {
           const parsed = JSON.parse(savedSettings)
-          const parsedCurrency = currencies.find(c => c.code === parsed?.currency?.code) || defaultCurrency
-          const parsedLanguage = languages.find(l => l.code === parsed?.language?.code) || defaultLanguage
+          const parsedCurrency = currencies.find(c => c.code === parsed?.currency?.code) ?? defaultCurrency
+          const parsedLanguage = languages.find(l => l.code === parsed?.language?.code) ?? defaultLanguage
           const newSettings: Settings = {
             currency: parsedCurrency,
             language: parsedLanguage
@@ -112,7 +112,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
   const formatCurrency = (amount: number | null | undefined): string => {
     const { symbol, decimals } = settings.currency
-    const validAmount = amount || 0
+    const validAmount = amount ?? 0
     const formattedAmount = validAmount.toLocaleString('en-US', {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals

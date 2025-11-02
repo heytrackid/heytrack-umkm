@@ -170,7 +170,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
 
                 if (!response.ok) {
                     const error = await response.json()
-                    throw new Error(error.error || 'Gagal membuat resep')
+                    throw new Error(error.error ?? 'Gagal membuat resep')
                 }
 
                 const newRecipe = await response.json()
@@ -199,7 +199,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
 
                 if (!response.ok) {
                     const error = await response.json()
-                    throw new Error(error.error || 'Gagal memperbarui resep')
+                    throw new Error(error.error ?? 'Gagal memperbarui resep')
                 }
 
                 toast({
@@ -285,7 +285,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                                 <Label htmlFor="name">Nama Resep *</Label>
                                 <Input
                                     id="name"
-                                    value={formData.name || ''}
+                                    value={formData.name ?? ''}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     placeholder="Contoh: Roti Tawar Premium"
                                     required
@@ -295,7 +295,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                             <div className="space-y-2">
                                 <Label htmlFor="category">Kategori</Label>
                                 <Select
-                                    value={formData.category || 'other'}
+                                    value={formData.category ?? 'other'}
                                     onValueChange={(value) => setFormData({ ...formData, category: value })}
                                 >
                                     <SelectTrigger id="category">
@@ -316,7 +316,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                             <Label htmlFor="description">Deskripsi</Label>
                             <Textarea
                                 id="description"
-                                value={formData.description || ''}
+                                value={formData.description ?? ''}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 placeholder="Deskripsi singkat tentang resep ini..."
                                 rows={3}
@@ -330,7 +330,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                                     id="servings"
                                     type="number"
                                     min="1"
-                                    value={formData.servings || 1}
+                                    value={formData.servings ?? 1}
                                     onChange={(e) =>
                                         setFormData({ ...formData, servings: parseInt(e.target.value) || 1 })
                                     }
@@ -343,7 +343,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                                     id="prep_time"
                                     type="number"
                                     min="0"
-                                    value={formData.prep_time || 0}
+                                    value={formData.prep_time ?? 0}
                                     onChange={(e) =>
                                         setFormData({ ...formData, prep_time: parseInt(e.target.value) || 0 })
                                     }
@@ -356,7 +356,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                                     id="cook_time"
                                     type="number"
                                     min="0"
-                                    value={formData.cook_time || 0}
+                                    value={formData.cook_time ?? 0}
                                     onChange={(e) =>
                                         setFormData({ ...formData, cook_time: parseInt(e.target.value) || 0 })
                                     }
@@ -366,7 +366,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                             <div className="space-y-2">
                                 <Label htmlFor="difficulty">Tingkat Kesulitan</Label>
                                 <Select
-                                    value={formData.difficulty || 'medium'}
+                                    value={formData.difficulty ?? 'medium'}
                                     onValueChange={(value) => setFormData({ ...formData, difficulty: value })}
                                 >
                                     <SelectTrigger id="difficulty">
@@ -448,7 +448,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
 
                                         <Input
                                             placeholder="Catatan (opsional)"
-                                            value={ri.notes || ''}
+                                            value={ri.notes ?? ''}
                                             onChange={(e) => updateIngredient(index, 'notes', e.target.value)}
                                         />
                                     </div>

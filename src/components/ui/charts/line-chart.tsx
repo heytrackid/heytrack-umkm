@@ -82,9 +82,9 @@ export const MobileLineChart = memo(({
               key={line.key}
               type={curved ? "monotone" : "linear"}
               dataKey={line.key}
-              stroke={line.color || CHART_COLORS.primary[_index % CHART_COLORS.primary.length]}
-              strokeWidth={line.strokeWidth || (isMobile ? 2 : 3)}
-              dot={{ fill: line.color || CHART_COLORS.primary[_index], strokeWidth: 0, r: isMobile ? 3 : 4 }}
+              stroke={line.color ?? CHART_COLORS.primary[_index % CHART_COLORS.primary.length]}
+              strokeWidth={line.strokeWidth ?? (isMobile ? 2 : 3)}
+              dot={{ fill: line.color ?? CHART_COLORS.primary[_index], strokeWidth: 0, r: isMobile ? 3 : 4 }}
               activeDot={{ r: isMobile ? 5 : 6, strokeWidth: 0 }}
               name={line.name}
             />

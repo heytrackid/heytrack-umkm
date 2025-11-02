@@ -198,7 +198,7 @@ export const OrdersTableView = () => {
       <Dialog open={showOrderDetail} onOpenChange={setShowOrderDetail}>
         <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl">Detail Pesanan {selectedOrder?.order_no || selectedOrder?.id}</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">Detail Pesanan {selectedOrder?.order_no ?? selectedOrder?.id}</DialogTitle>
           </DialogHeader>
           {selectedOrder && <OrderDetailView order={selectedOrder} />}
         </DialogContent>

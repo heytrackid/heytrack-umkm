@@ -122,7 +122,7 @@ export async function PUT(
 
     // Calculate stock adjustment
     const oldQuantity = existingPurchase.quantity
-    const newQuantity = body.quantity || oldQuantity
+    const newQuantity = body.quantity ?? oldQuantity
     const quantityDiff = newQuantity - oldQuantity
 
     // Update purchase
@@ -130,7 +130,7 @@ export async function PUT(
       supplier: body.supplier,
       quantity: newQuantity,
       unit_price: body.unit_price,
-      total_price: newQuantity * (body.unit_price || 0),
+      total_price: newQuantity * (body.unit_price ?? 0),
       purchase_date: body.purchase_date,
       notes: body.notes,
       updated_at: new Date().toISOString()
@@ -168,15 +168,15 @@ export async function PUT(
         .eq('id', existingPurchase.ingredient_id)
         .single()
 
-      const currentStock = ingredient?.current_stock || 0
+      const currentStock = ingredient?.current_stock ?? 0
 
       // Create adjustment transaction - trigger will handle stock update
       const adjustmentTransaction: StockTransactionsInsert = {
         ingredient_id: existingPurchase.ingredient_id,
         type: 'ADJUSTMENT',
         quantity: quantityDiff,
-        unit_price: body.unit_price || 0,
-        total_price: quantityDiff * (body.unit_price || 0),
+        unit_price: body.unit_price ?? 0,
+        total_price: quantityDiff * (body.unit_price ?? 0),
         reference: `PURCHASE-UPDATE-${id}`,
         notes: `Purchase quantity adjusted from ${oldQuantity} to ${newQuantity}`,
         user_id: user.id
@@ -257,7 +257,7 @@ export async function DELETE(
       .eq('id', purchase.ingredient_id)
       .single()
 
-    const currentStock = ingredient?.current_stock || 0
+    const currentStock = ingredient?.current_stock ?? 0
 
     // ✅ FIX: Let database trigger handle stock reversal
     // Create reversal transaction - trigger will auto-update current_stock

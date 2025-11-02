@@ -164,7 +164,7 @@ export const NotificationList = ({
                             const TypeIcon = typeIcons[notification.type as keyof typeof typeIcons] || Info
                             const CategoryIcon = categoryIcons[notification.category as keyof typeof categoryIcons] || Settings
                             const typeColor = typeColors[notification.type as keyof typeof typeColors] || 'text-muted-foreground'
-                            const priorityColor = priorityColors[(notification.priority || 'normal') as keyof typeof priorityColors] || 'border-l-blue-400'
+                            const priorityColor = priorityColors[(notification.priority ?? 'normal') as keyof typeof priorityColors] ?? 'border-l-blue-400'
 
                             return (
                                 <div
@@ -207,7 +207,7 @@ export const NotificationList = ({
 
                                             <div className="flex items-center justify-between">
                                                 <span className="text-xs text-muted-foreground">
-                                                    {formatDistanceToNow(new Date(notification.created_at || new Date()), {
+                                                    {formatDistanceToNow(new Date(notification.created_at ?? new Date()), {
                                                         addSuffix: true,
                                                         locale: idLocale,
                                                     })}

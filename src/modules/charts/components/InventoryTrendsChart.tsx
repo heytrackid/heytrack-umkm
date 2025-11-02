@@ -135,7 +135,7 @@ export default function InventoryTrendsChart({
   className
 }: InventoryTrendsChartProps) {
   return (
-    <ChartContainer config={config} className={className}>
+    <ChartContainer _config={config} className={className}>
       <ResponsiveContainer width="100%" height={height}>
         <LineChart
           accessibilityLayer

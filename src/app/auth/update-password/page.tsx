@@ -46,7 +46,7 @@ const UpdatePasswordPage = () => {
     { label: 'Mengandung angka', met: /\d/.test(password) },
   ]
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     void setError('')
     void setFieldErrors({})

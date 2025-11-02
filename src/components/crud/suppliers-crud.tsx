@@ -63,20 +63,20 @@ export const SuppliersCRUD = () => {
       key: 'contact_person',
       header: 'Contact Person',
       accessor: (supplier) => supplier.contact_person,
-      render: (value) => (value as string | null) || '-',
+      render: (value) => (value as string | null) ?? '-',
     },
     {
       key: 'phone',
       header: 'Phone',
       accessor: (supplier) => supplier.phone,
-      render: (value) => (value as string | null) || '-',
+      render: (value) => (value as string | null) ?? '-',
       hideOnMobile: true,
     },
     {
       key: 'email',
       header: 'Email',
       accessor: (supplier) => supplier.email,
-      render: (value) => (value as string | null) || '-',
+      render: (value) => (value as string | null) ?? '-',
       hideOnMobile: true,
     },
   ];
@@ -97,11 +97,11 @@ export const SuppliersCRUD = () => {
     void setSelectedSupplier(supplier)
     editForm.reset({
       name: supplier.name,
-      contact_person: supplier.contact_person || '',
-      phone: supplier.phone || '',
-      email: supplier.email || '',
-      address: supplier.address || '',
-      notes: supplier.notes || '',
+      contact_person: supplier.contact_person ?? '',
+      phone: supplier.phone ?? '',
+      email: supplier.email ?? '',
+      address: supplier.address ?? '',
+      notes: supplier.notes ?? '',
     })
     void setIsEditModalOpen(true)
   }
@@ -219,7 +219,7 @@ export const SuppliersCRUD = () => {
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
         entityName="Supplier"
-        itemName={selectedSupplier?.name || ''}
+        itemName={selectedSupplier?.name ?? ''}
         isLoading={loading}
       />
     </div>

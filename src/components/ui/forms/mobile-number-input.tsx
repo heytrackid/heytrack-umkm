@@ -50,7 +50,7 @@ export const MobileNumberInput = ({
   const [isFocused, setIsFocused] = useState(false)
   const { isMobile } = useResponsive()
 
-  const currentValue = value || defaultValue || 0
+  const currentValue = value ?? defaultValue ?? 0
 
   const handleIncrement = () => {
     const newValue = currentValue + step
@@ -107,7 +107,7 @@ export const MobileNumberInput = ({
           type="button"
           variant="outline"
           size="sm"
-          disabled={disabled || (min !== undefined && currentValue <= min)}
+          disabled={disabled ?? (min !== undefined && currentValue <= min)}
           onClick={handleDecrement}
           className={cn(
             "h-10 w-10 rounded-r-none border-r-0 p-0 shrink-0",
@@ -147,7 +147,7 @@ export const MobileNumberInput = ({
           type="button"
           variant="outline"
           size="sm"
-          disabled={disabled || (max !== undefined && currentValue >= max)}
+          disabled={disabled ?? (max !== undefined && currentValue >= max)}
           onClick={handleIncrement}
           className={cn(
             "h-10 w-10 rounded-l-none border-l-0 p-0 shrink-0",
@@ -166,12 +166,12 @@ export const MobileNumberInput = ({
       )}
 
       {/* Hint or Error message */}
-      {(hint || error) && (
+      {(hint ?? error) && (
         <p className={cn(
           "text-sm",
           error ? "text-destructive" : "text-muted-foreground"
         )}>
-          {error || hint}
+          {error ?? hint}
         </p>
       )}
     </div>

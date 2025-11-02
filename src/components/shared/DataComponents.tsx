@@ -461,7 +461,7 @@ export const QuickActions = ({
 }: QuickActionsProps) => (
   <Select>
     <SelectTrigger className={cn("w-48", className)}>
-      {trigger || (
+      {trigger ?? (
         <div className="flex items-center gap-2">
           <Settings className="h-4 w-4" />
           Quick Actions

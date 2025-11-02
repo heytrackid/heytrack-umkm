@@ -79,7 +79,7 @@ export const EnhancedProductionPage = () => {
     const filteredProductions = productions.filter(prod => {
         // Safe search with null checks
         const batchNumber = prod.batch_number || ''
-        const recipeName = prod.recipe?.name || ''
+        const recipeName = prod.recipe?.name ?? ''
 
         const matchesSearch =
             batchNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -125,7 +125,7 @@ export const EnhancedProductionPage = () => {
         cancelled: productions.filter(p => p.status === 'CANCELLED').length,
         totalCost: productions
             .filter(p => p.actual_cost)
-            .reduce((sum, p) => sum + (p.actual_cost || 0), 0),
+            .reduce((sum, p) => sum + (p.actual_cost ?? 0), 0),
         totalQuantity: productions
             .filter(p => p.status === 'COMPLETED')
             .reduce((sum, p) => sum + (p.quantity || 0), 0)
@@ -562,7 +562,7 @@ const ProductionCard = ({
                 <div>
                     <CardTitle className="text-lg">{production.batch_number}</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
-                        {production.recipe?.name || 'Unknown Recipe'}
+                        {production.recipe?.name ?? 'Unknown Recipe'}
                     </p>
                 </div>
                 {getStatusBadge(production.status)}

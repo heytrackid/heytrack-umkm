@@ -50,7 +50,7 @@ export class ProductionPlanner {
           canProduce: availabilityCheck.canProduce,
           startTime,
           estimatedDuration: productionTime,
-          batchCount: Math.ceil(order.quantity / (recipe.servings || 1)),
+          batchCount: Math.ceil(order.quantity / (recipe.servings ?? 1)),
         },
         ingredients: availabilityCheck,
         recommendations: ProductionRecommendations.generateProductionRecommendations(availabilityCheck, productionTime)

@@ -108,7 +108,7 @@ export const EnhancedOperationalCostsPage = () => {
                     !searchTerm ||
                     cost.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     cost.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (cost.notes?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+                    (cost.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
 
                 // Category filter
                 const matchesCategory = categoryFilter === 'all' || cost.category === categoryFilter
@@ -116,8 +116,8 @@ export const EnhancedOperationalCostsPage = () => {
                 return matchesSearch && matchesCategory
             })
             .sort((a: OperationalCost, b: OperationalCost) => {
-                const dateA = new Date(a.created_at || 0).getTime()
-                const dateB = new Date(b.created_at || 0).getTime()
+                const dateA = new Date(a.created_at ?? 0).getTime()
+                const dateB = new Date(b.created_at ?? 0).getTime()
                 return dateB - dateA
             })
     }, [costs, searchTerm, categoryFilter])
@@ -215,7 +215,7 @@ export const EnhancedOperationalCostsPage = () => {
     const hasActiveFilters = searchTerm || categoryFilter !== 'all'
 
     // Helper functions
-    const getCategoryInfo = (categoryId: string) => COST_CATEGORIES.find((c) => c.id === categoryId) || COST_CATEGORIES[7]
+    const getCategoryInfo = (categoryId: string) => COST_CATEGORIES.find((c) => c.id === categoryId) ?? COST_CATEGORIES[7]
 
     const calculateMonthlyCost = (cost: OperationalCost) => {
         const amount = cost.amount || 0
@@ -470,7 +470,7 @@ export const EnhancedOperationalCostsPage = () => {
                                         <div>
                                             <p className="text-2xl font-bold text-primary">{formatCurrency(cost.amount || 0)}</p>
                                             <p className="text-sm text-muted-foreground">
-                                                {getFrequencyLabel(cost.frequency || 'monthly')} • {formatCurrency(monthlyCost)}/bulan
+                                                {getFrequencyLabel(cost.frequency ?? 'monthly')} • {formatCurrency(monthlyCost)}/bulan
                                             </p>
                                         </div>
 
@@ -526,7 +526,7 @@ export const EnhancedOperationalCostsPage = () => {
                 }}
                 onConfirm={handleConfirmDelete}
                 entityName="Biaya Operasional"
-                itemName={selectedCost?.description || ''}
+                itemName={selectedCost?.description ?? ''}
             />
 
             {/* Form Dialog */}

@@ -41,7 +41,7 @@ export interface ActiveBatchesListProps {
   executionStates: Map<string, BatchExecutionState>
   selectedBatch: string | null
   onBatchSelect: (batchId: string) => void
-  onBatchUpdate?: (batchId: string, status: ProductionBatch['status'], notes?: string) => void
+  onBatchUpdate?: (batchId: string, updates: Partial<ProductionBatch>) => void
   onStartBatch: (batch: ProductionBatch) => void
   onPauseBatch: (batchId: string) => void
   onCompleteBatch: (batchId: string) => void

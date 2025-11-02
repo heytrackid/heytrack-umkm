@@ -1,5 +1,3 @@
-import type { FinancialMetrics, FinancialTrend, FinancialAlert } from '@/lib/automation/types'
-
 /**
  * Financial Automation Module Types
  * Additional type definitions specific to financial automation

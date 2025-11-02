@@ -59,7 +59,7 @@ const IngredientPurchasesLayout = () => {
       const response = await fetch('/api/ingredients')
       if (response.ok) {
         const data = await response.json()
-        void setIngredients(data.ingredients || [])
+        void setIngredients(data.ingredients ?? [])
       }
     } catch (err: unknown) {
       apiLogger.error({ err }, 'Error fetching ingredients:')

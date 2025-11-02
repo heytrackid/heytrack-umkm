@@ -141,7 +141,7 @@ const OrdersTable = ({
   }
 
   const getStatusBadge = (status: string | null) => {
-    const config = statusConfig[(status || 'PENDING') as keyof typeof statusConfig] || statusConfig.PENDING
+    const config = statusConfig[(status ?? 'PENDING') as keyof typeof statusConfig] ?? statusConfig.PENDING
     return (
       <Badge className={config.color}>
         {config.label}
@@ -150,7 +150,7 @@ const OrdersTable = ({
   }
 
   const getPaymentBadge = (status: string | null) => {
-    const config = paymentStatusConfig[(status || 'UNPAID') as keyof typeof paymentStatusConfig] || paymentStatusConfig.UNPAID
+    const config = paymentStatusConfig[(status ?? 'UNPAID') as keyof typeof paymentStatusConfig] ?? paymentStatusConfig.UNPAID
     return (
       <Badge variant="outline" className={config.color}>
         {config.label}
@@ -159,7 +159,7 @@ const OrdersTable = ({
   }
 
   const getPriorityBadge = (priority: string | null) => {
-    const config = priorityConfig[(priority || 'normal') as keyof typeof priorityConfig] || priorityConfig.normal
+    const config = priorityConfig[(priority ?? 'normal') as keyof typeof priorityConfig] ?? priorityConfig.normal
     return (
       <Badge variant="secondary" className={config.color}>
         {config.label}
@@ -335,7 +335,7 @@ const OrdersTable = ({
                     <div className="space-y-1">
                       <div className="font-medium">{order.order_no}</div>
                       <div className="text-sm text-muted-foreground">
-                        {order.order_items?.length || 0} item • {order.order_items?.reduce((sum, item) => sum + item.quantity, 0) || 0} produk
+                        {order.order_items?.length ?? 0} item • {order.order_items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0} produk
                       </div>
                     </div>
                   </TableCell>
@@ -369,11 +369,11 @@ const OrdersTable = ({
 
                   <TableCell>
                     <div className="space-y-2">
-                      <div className="font-medium">{formatCurrency(order.total_amount || 0)}</div>
+                      <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
                       {getPaymentBadge(order.payment_status)}
-                      {(order.paid_amount || 0) > 0 && order.payment_status !== 'PAID' && (
+                      {(order.paid_amount ?? 0) > 0 && order.payment_status !== 'PAID' && (
                         <div className="text-xs text-muted-foreground">
-                          Dibayar: {formatCurrency(order.paid_amount || 0)}
+                          Dibayar: {formatCurrency(order.paid_amount ?? 0)}
                         </div>
                       )}
                     </div>

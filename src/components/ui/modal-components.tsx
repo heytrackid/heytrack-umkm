@@ -142,7 +142,7 @@ export const DeleteModal = ({
       open={isOpen}
       onOpenChange={(open) => !open && onClose()}
       title = {`Hapus ${entityName}`}
-      description={`Apakah Anda yakin ingin menghapus "${itemName || entityName}"? Tindakan ini tidak dapat dibatalkan.`}
+      description={`Apakah Anda yakin ingin menghapus "${itemName ?? entityName}"? Tindakan ini tidak dapat dibatalkan.`}
       onConfirm={handleConfirm}
       confirmText="Ya, Hapus"
       variant="destructive"

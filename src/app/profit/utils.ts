@@ -7,7 +7,7 @@ import type { ProfitData, ProfitPeriodType, ChartDataPoint } from './constants'
 export function calculateProfitDateRange(period: ProfitPeriodType, startDate?: string, endDate?: string) {
   const today = new Date()
   let calculatedStartDate = startDate
-  const calculatedEndDate = endDate || today.toISOString().split('T')[0]
+  const calculatedEndDate = endDate ?? today.toISOString().split('T')[0]
 
   if (!startDate) {
     if (period === 'week') {
@@ -75,7 +75,7 @@ export function calculateProfitMetrics(summary: ProfitData['summary']) {
  * Validate profit data
  */
 export function validateProfitData(data: ProfitData): boolean {
-  return !!(data && data.summary && data.products && data.ingredients && data.operating_expenses)
+  return !!(data?.summary && data?.products && data?.ingredients && data?.operating_expenses)
 }
 
 /**

@@ -44,12 +44,12 @@ export async function GET(_request: NextRequest) {
     const exportData = {
       exported_at: new Date().toISOString(),
       exported_by: user.id,
-      performance_logs: perfLogs || [],
-      error_logs: errLogs || [],
+      performance_logs: perfLogs ?? [],
+      error_logs: errLogs ?? [],
       system_metrics: {
         timestamp: new Date().toISOString(),
-        total_performance_logs: perfLogs?.length || 0,
-        total_error_logs: errLogs?.length || 0
+        total_performance_logs: perfLogs?.length ?? 0,
+        total_error_logs: errLogs?.length ?? 0
       }
     }
 

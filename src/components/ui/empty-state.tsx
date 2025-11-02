@@ -86,7 +86,7 @@ export const EmptyState = ({
             const button = (
               <Button
                 key={index}
-                variant={action.variant || (index === 0 ? 'default' : 'outline')}
+                variant={action.variant ?? (index === 0 ? 'default' : 'outline')}
                 onClick={action.onClick}
                 size={compact ? 'sm' : 'default'}
               >

@@ -40,7 +40,7 @@ async function POST(request: NextRequest) {
       stack: body.stack ? body.stack.substring(0, 5000) : null, // Limit stack trace
       url: body.url ? body.url.substring(0, 500) : null,
       userAgent: body.userAgent ? body.userAgent.substring(0, 500) : null,
-      timestamp: body.timestamp || new Date().toISOString(),
+      timestamp: body.timestamp ?? new Date().toISOString(),
       componentStack: body.componentStack ? body.componentStack.substring(0, 2000) : null,
       // Add any additional fields you want to log
     }

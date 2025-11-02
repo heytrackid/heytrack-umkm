@@ -96,7 +96,7 @@ const OrderQuickActions = ({ order }: OrderQuickActionsProps) => {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => copyToClipboard(order.customer_phone || '', 'phone')}
+                                onClick={() => copyToClipboard(order.customer_phone ?? '', 'phone')}
                                 className="flex items-center gap-2"
                             >
                                 {copiedField === 'phone' ? (

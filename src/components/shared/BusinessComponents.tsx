@@ -96,8 +96,8 @@ export const InventoryAlerts = ({
           : Info
 
         // Determine item details - prefer the item object if available, otherwise extract from alert
-        const itemName = alert.item?.name || alert.ingredient_name || 'Unknown Item';
-        const itemId = alert.item?.id || alert.ingredient_id || '';
+        const itemName = alert.item?.name ?? alert.ingredient_name ?? 'Unknown Item';
+        const itemId = alert.item?.id ?? alert.ingredient_id ?? '';
 
         return (
           <Alert key={alert.id} className={`border-l-4 ${alert.severity === 'critical' ? 'border-red-500' :
@@ -110,7 +110,7 @@ export const InventoryAlerts = ({
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge className={severityColors[(alert.severity as keyof typeof severityColors) || 'low']}>
-                      {(alert.severity || 'low').toUpperCase()}
+                      {(alert.severity ?? 'low').toUpperCase()}
                     </Badge>
                     <span className="font-medium">{itemName}</span>
                   </div>
@@ -291,8 +291,8 @@ export const ProfitabilityCalculator = ({
     const grossProfit = data.revenue - data.costOfGoodsSold
     const grossMargin = data.revenue > 0 ? (grossProfit / data.revenue) * 100 : 0
 
-    const totalExpenses = data.operatingExpenses + (data.otherExpenses || 0)
-    const netIncome = grossProfit - totalExpenses + (data.otherIncome || 0)
+    const totalExpenses = data.operatingExpenses + (data.otherExpenses ?? 0)
+    const netIncome = grossProfit - totalExpenses + (data.otherIncome ?? 0)
     const netMargin = data.revenue > 0 ? (netIncome / data.revenue) * 100 : 0
 
     return {
@@ -406,7 +406,7 @@ export const SalesPerformanceChart = ({
 }: SalesPerformanceChartProps) => {
   const maxSales = Math.max(...data.map(d => d.sales))
   const maxTarget = showTargets && data.some(d => d.target)
-    ? Math.max(...data.map(d => d.target || 0))
+    ? Math.max(...data.map(d => d.target ?? 0))
     : maxSales
 
   const chartHeight = 200

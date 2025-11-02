@@ -45,7 +45,7 @@ export interface WebVitalsMetric {
 
 // Performance monitoring hooks
 export function usePerformanceMonitor() {
-  const [metrics, setMetrics] = useState<PerformanceMetric[]>([])
+  const [metrics, _setMetrics] = useState<PerformanceMetric[]>([])
   const observerRef = useRef<PerformanceObserver | null>(null)
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export function usePerformanceMonitor() {
             }
           ]
 
-          void setMetrics(prev => [...prev, ...navMetrics])
+          void _setMetrics(prev => [...prev, ...navMetrics])
         }
       } catch {
         // Navigation timing not available
@@ -92,7 +92,7 @@ export function usePerformanceMonitor() {
             timestamp: Date.now(),
             type: 'paint'
           }
-          void setMetrics(prev => [...prev, paintMetric])
+          void _setMetrics(prev => [...prev, paintMetric])
         })
       } catch {
         // Paint timing not available
@@ -110,7 +110,7 @@ export function usePerformanceMonitor() {
               type: entry.entryType
             }))
 
-            void setMetrics(prev => [...prev, ...newMetrics])
+            void _setMetrics(prev => [...prev, ...newMetrics])
           })
 
           // Observe different performance entry types
@@ -147,7 +147,7 @@ export function usePerformanceMonitor() {
             type: entry.entryType
           }
 
-          void setMetrics(prev => [...prev, metric])
+          void _setMetrics(prev => [...prev, metric])
           return metric
         }
       } catch {
@@ -167,7 +167,7 @@ export function usePerformanceMonitor() {
           timestamp: Date.now(),
           type: 'mark'
         }
-        void setMetrics(prev => [...prev, metric])
+        void _setMetrics(prev => [...prev, metric])
         return metric
       } catch {
         // Performance mark failed
@@ -251,7 +251,7 @@ export function usePerformanceMonitor() {
 
 // Web Vitals monitoring hook - simplified to avoid import issues
 export function useWebVitals() {
-  const [metrics, setMetrics] = useState<WebVitalsMetric[]>([])
+  const [metrics, _setMetrics] = useState<WebVitalsMetric[]>([])
 
   useEffect(() => {
     // Web Vitals monitoring disabled to avoid import issues
@@ -314,7 +314,28 @@ export function useNetworkMonitor() {
 
   useEffect(() => {
     const updateNetworkInfo = () => {
-      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
+      type NavigatorWithConnection = Navigator & {
+        connection?: {
+          effectiveType: string
+          downlink: number
+          rtt: number
+          addEventListener: (event: string, handler: () => void) => void
+          removeEventListener: (event: string, handler: () => void) => void
+        }
+        mozConnection?: {
+          effectiveType: string
+          downlink: number
+          rtt: number
+        }
+        webkitConnection?: {
+          effectiveType: string
+          downlink: number
+          rtt: number
+        }
+      }
+      
+      const nav = navigator as NavigatorWithConnection
+      const connection = nav.connection ?? nav.mozConnection ?? nav.webkitConnection
 
       setNetworkInfo({
         isOnline: navigator.onLine,
@@ -334,18 +355,24 @@ export function useNetworkMonitor() {
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
-    if ((navigator as any).connection) {
-      const {connection} = (navigator as any)
-      connection.addEventListener('change', updateNetworkInfo)
+    type NavigatorWithConnection = Navigator & {
+      connection?: {
+        addEventListener: (event: string, handler: () => void) => void
+        removeEventListener: (event: string, handler: () => void) => void
+      }
+    }
+    
+    const nav = navigator as NavigatorWithConnection
+    if (nav.connection) {
+      nav.connection.addEventListener('change', updateNetworkInfo)
     }
 
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
 
-      if ((navigator as any).connection) {
-        const {connection} = (navigator as any)
-        connection.removeEventListener('change', updateNetworkInfo)
+      if (nav.connection) {
+        nav.connection.removeEventListener('change', updateNetworkInfo)
       }
     }
   }, [])

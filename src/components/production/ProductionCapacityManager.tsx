@@ -13,11 +13,9 @@ import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { Users, Clock, Settings, Save, RotateCcw, Plus, Minus, AlertCircle, TrendingUp, Zap } from 'lucide-react'
-import type {
-  ProductionConstraints
-} from '@/services/production/BatchSchedulingService'
 import {
-  batchSchedulingService
+  batchSchedulingService,
+  type ProductionConstraints
 } from '@/services/production/BatchSchedulingService'
 
 /**
@@ -224,7 +222,7 @@ const ProductionCapacityManager = ({
 
           <div className="flex items-center gap-2">
             {hasChanges && (
-              <Button variant = "outline" size="sm" onClick={handleReset}>
+              <Button variant="outline" size="sm" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4 mr-1" />
                 Reset
               </Button>
@@ -443,9 +441,9 @@ const ProductionCapacityManager = ({
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Labor Utilization</span>
-                    <span>{efficiencyMetrics?.current_utilization || 0}%</span>
+                    <span>{efficiencyMetrics?.current_utilization ?? 0}%</span>
                   </div>
-                  <Progress value={efficiencyMetrics?.current_utilization || 0} className="h-2" />
+                  <Progress value={efficiencyMetrics?.current_utilization ?? 0} className="h-2" />
                 </div>
               </CardContent>
             </Card>

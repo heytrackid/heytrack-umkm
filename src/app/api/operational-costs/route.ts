@@ -83,18 +83,18 @@ export async function GET(request: NextRequest) {
       id: expense.id,
       name: expense.description,
       category: expense.category,
-      subcategory: expense.subcategory || null,
+      subcategory: expense.subcategory ?? null,
       amount: Number(expense.amount),
-      frequency: expense.recurring_frequency || 'monthly',
+      frequency: expense.recurring_frequency ?? 'monthly',
       description: expense.description,
-      isFixed: expense.is_recurring || false,
-      expense_date: expense.expense_date || null,
-      supplier: expense.supplier || null,
-      payment_method: expense.payment_method || null,
-      status: expense.status || null,
-      receipt_number: expense.receipt_number || null,
-      created_at: expense.created_at || null,
-      updated_at: expense.updated_at || null
+      isFixed: expense.is_recurring ?? false,
+      expense_date: expense.expense_date ?? null,
+      supplier: expense.supplier ?? null,
+      payment_method: expense.payment_method ?? null,
+      status: expense.status ?? null,
+      receipt_number: expense.receipt_number ?? null,
+      created_at: expense.created_at ?? null,
+      updated_at: expense.updated_at ?? null
     })) || []
 
     return NextResponse.json({
@@ -161,14 +161,14 @@ export async function POST(request: NextRequest) {
       category: validatedData.category,
       subcategory: validatedData.subcategory,
       amount: validatedData.amount,
-      description: validatedData.description || '',
+      description: validatedData.description ?? '',
       expense_date: validatedData.date,
-      supplier: validatedData.vendor_name || undefined,
+      supplier: validatedData.vendor_name ?? undefined,
       payment_method: 'CASH',
       status: validatedData.is_paid ? 'paid' : 'pending',
       receipt_number: validatedData.invoice_number,
       is_recurring: validatedData.is_recurring,
-      recurring_frequency: validatedData.recurring_frequency || undefined,
+      recurring_frequency: validatedData.recurring_frequency ?? undefined,
       tags: []
     }
 

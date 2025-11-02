@@ -52,10 +52,10 @@ export const RegistrationForm = ({
     }
   }, [success, onSuccess])
 
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    await handleSubmit(formData)
+    handleSubmit(formData)
   }
 
   return (

@@ -418,7 +418,7 @@ export type TypedSupabaseClient = SupabaseClient<Database>
 /**
  * Helper untuk cast Supabase client dengan type safety
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export function typed(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   client: SupabaseClient<Database, any, any>

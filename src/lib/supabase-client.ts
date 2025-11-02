@@ -141,7 +141,7 @@ export async function typedSelect<T extends TableName>(
     single?: boolean
   }
 ) {
-  let queryBuilder = supabase.from(table).select(query?.select || '*')
+  let queryBuilder = supabase.from(table).select(query?.select ?? '*')
 
   // Apply filters
   if (query?.filter) {
@@ -159,7 +159,7 @@ export async function typedSelect<T extends TableName>(
   // Apply ordering
   if (query?.orderBy) {
     queryBuilder = queryBuilder.order(query.orderBy.column, {
-      ascending: query.orderBy.ascending || true
+      ascending: query.orderBy.ascending ?? true
     })
   }
 
@@ -216,7 +216,7 @@ export async function isAuthenticated() {
     const supabase = getSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
     return !!user
-  } catch (error) {
+  } catch (_error) {
     return false
   }
 }
@@ -230,7 +230,7 @@ export async function getCurrentUser() {
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) {throw error}
     return user
-  } catch (err) {
+  } catch (_err) {
     return null
   }
 }

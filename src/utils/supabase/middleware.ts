@@ -10,9 +10,16 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
+  const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL']
+  const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+  
   const supabase = createServerClient<Database>(
-    process.env['NEXT_PUBLIC_SUPABASE_URL']!,
-    process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -42,7 +49,8 @@ export async function updateSession(request: NextRequest) {
     
     // Only set user if we have valid data and no error
     if (data?.user && !error) {
-      user = data.user
+      const { user: authUser } = data
+      user = authUser
     }
   } catch (_error) {
     // AuthSessionMissingError is expected for unauthenticated users

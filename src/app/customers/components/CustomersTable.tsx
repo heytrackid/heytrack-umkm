@@ -135,12 +135,12 @@ const CustomersTable = ({
                   </TableCell>
                   <TableCell>
                     <span className="font-medium text-green-600">
-                      {formatCurrency(customer.total_spent || 0)}
+                      {formatCurrency(customer.total_spent ?? 0)}
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="font-medium">
-                      {customer.total_orders || 0}
+                      {customer.total_orders ?? 0}
                     </span>
                   </TableCell>
                   <TableCell>

@@ -40,7 +40,7 @@ export class EnhancedErrorLogger {
     const log: ErrorLog = {
       message: this.getErrorMessage(error),
       stack: this.getErrorStack(error),
-      context: context || {},
+      context: context ?? {},
       timestamp: new Date().toISOString(),
       level: 'error',
       type: this.getErrorType(error),
@@ -61,7 +61,7 @@ export class EnhancedErrorLogger {
     const log: ErrorLog = {
       message: this.getErrorMessage(error),
       stack: this.getErrorStack(error),
-      context: context || {},
+      context: context ?? {},
       timestamp: new Date().toISOString(),
       level: 'error',
       type: this.getErrorType(error),
@@ -82,7 +82,7 @@ export class EnhancedErrorLogger {
     const log: ErrorLog = {
       message: this.getErrorMessage(error),
       stack: this.getErrorStack(error),
-      context: context || {},
+      context: context ?? {},
       timestamp: new Date().toISOString(),
       level: 'error',
       type: this.getErrorType(error),
@@ -135,9 +135,9 @@ export class EnhancedErrorLogger {
     const url = new URL(request.url);
     return {
       url: url.toString(),
-      userAgent: request.headers.get('user-agent') || undefined,
-      ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                 request.headers.get('x-real-ip') ||
+      userAgent: request.headers.get('user-agent') ?? undefined,
+      ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0] ?? 
+                 request.headers.get('x-real-ip') ?? 
                  undefined,
     };
   }
@@ -150,7 +150,7 @@ export class EnhancedErrorLogger {
     context: ErrorContext,
     logger: typeof apiLogger | typeof dbLogger | typeof uiLogger = apiLogger
   ): string {
-    const errorId = `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const errorId = `err_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
     const log = {
       errorId,
       message: this.getErrorMessage(error),
@@ -175,7 +175,7 @@ export class EnhancedErrorLogger {
   ): void {
     const log: ErrorLog = {
       message,
-      context: context || {},
+      context: context ?? {},
       timestamp: new Date().toISOString(),
       level: 'warn',
       type: 'Warning',
@@ -195,7 +195,7 @@ export class EnhancedErrorLogger {
   ): void {
     const log: ErrorLog = {
       message,
-      context: context || {},
+      context: context ?? {},
       timestamp: new Date().toISOString(),
       level: 'info',
       type: 'Info',

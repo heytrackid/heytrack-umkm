@@ -102,7 +102,7 @@ export const validationFunctions = {
     try {
       new URL(value)
       return validationPatterns.url.test(value)
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }
@@ -279,15 +279,15 @@ export const validationHelpers = {
   },
 
   // Get validation errors as string array
-  getValidationErrors: (errors: z.ZodError): string[] => errors.issues.map(error => {
-      const path = error.path.join('.')
-      return path ? `${path}: ${error.message}` : error.message
+  getValidationErrors: (errors: z.ZodError): string[] => errors.issues.map(_error => {
+      const path = _error.path.join('.')
+      return path ? `${path}: ${_error.message}` : _error.message
     }),
 
   // Get validation errors as object
-  getValidationErrorsObject: (errors: z.ZodError): Record<string, string> => errors.issues.reduce((acc, error) => {
-      const path = error.path.join('.')
-      acc[path] = error.message
+  getValidationErrorsObject: (errors: z.ZodError): Record<string, string> => errors.issues.reduce((acc, _error) => {
+      const path = _error.path.join('.')
+      acc[path] = _error.message
       return acc
     }, {} as Record<string, string>),
 
@@ -313,7 +313,7 @@ export const validationHelpers = {
     try {
       schema.parse(data)
       return true
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }

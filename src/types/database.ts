@@ -167,3 +167,200 @@ export type UserRole = SupabaseEnums<'user_role'>
 // Note: payment_status is stored as string in the database, not an enum
 // This is just for type consistency in our code
 export type PaymentStatus = string
+
+// ============================================
+// EXTENDED TYPES WITH RELATIONS
+// ============================================
+
+// Order with relations
+export type OrderWithItems = OrdersTable & {
+  order_items: OrderItemsTable[]
+  customer: CustomersTable | null
+}
+
+export type OrderWithFullDetails = OrdersTable & {
+  order_items: Array<OrderItemsTable & {
+    recipe: RecipesTable | null
+  }>
+  customer: CustomersTable | null
+  payments: PaymentsTable[]
+}
+
+// Recipe with relations
+export type RecipeWithIngredients = RecipesTable & {
+  recipe_ingredients: Array<RecipeIngredientsTable & {
+    ingredient: IngredientsTable | null
+  }>
+}
+
+// Ingredient with relations
+export type IngredientWithSuppliers = IngredientsTable & {
+  supplier_ingredients: Array<SupplierIngredientsTable & {
+    supplier: SuppliersTable | null
+  }>
+}
+
+// Production with relations
+export type ProductionWithRecipe = ProductionsTable & {
+  recipe: RecipesTable | null
+}
+
+// Supplier with relations
+export type SupplierWithIngredients = SuppliersTable & {
+  supplier_ingredients: Array<SupplierIngredientsTable & {
+    ingredient: IngredientsTable | null
+  }>
+}
+
+// ============================================
+// UTILITY TYPES
+// ============================================
+
+// Extract specific fields from table
+export type PickFields<T extends TableName, K extends keyof Row<T>> = Pick<Row<T>, K>
+
+// Make specific fields optional
+export type PartialFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
+// Make specific fields required
+export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>
+
+// Pagination result type
+export interface PaginatedResult<T> {
+  data: T[]
+  count: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+// API Response types
+export interface ApiSuccessResponse<T = unknown> {
+  success: true
+  data: T
+  message?: string
+}
+
+export interface ApiErrorResponse {
+  success: false
+  error: string
+  details?: unknown
+}
+
+export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse
+
+// ============================================
+// DOMAIN-SPECIFIC TYPES
+// ============================================
+
+// Stock Reservation Status
+export type StockReservationStatus = 'ACTIVE' | 'CONSUMED' | 'RELEASED' | 'EXPIRED'
+
+// Stock Reservation with relations
+export interface StockReservation {
+  id: string
+  ingredient_id: string
+  order_id: string
+  reserved_quantity: number
+  status: StockReservationStatus
+  reserved_at: string | null
+  consumed_at: string | null
+  released_at: string | null
+  notes: string | null
+  user_id: string
+  created_at: string | null
+  updated_at: string | null
+}
+
+export type StockReservationInsert = Omit<StockReservation, 'id' | 'created_at' | 'updated_at'>
+export type StockReservationUpdate = Partial<StockReservationInsert>
+
+// Order Item with calculated fields
+export type OrderItemWithProfit = OrderItemsTable & {
+  hpp_at_order: number
+  profit_amount: number
+  profit_margin: number
+}
+
+// Financial Summary
+export interface FinancialSummary {
+  totalRevenue: number
+  totalCogs: number
+  totalProfit: number
+  profitMargin: number
+  period: {
+    start: string
+    end: string
+  }
+}
+
+// Inventory Status
+export interface InventoryStatus {
+  ingredient_id: string
+  ingredient_name: string
+  current_stock: number
+  reserved_stock: number
+  available_stock: number
+  min_stock: number
+  reorder_point: number
+  status: 'OK' | 'LOW' | 'OUT_OF_STOCK' | 'REORDER_NEEDED'
+}
+
+// Production Batch Status
+export type BatchStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+
+// ============================================
+// FORM TYPES
+// ============================================
+
+// Form data types (for client-side forms)
+export type IngredientFormData = Omit<IngredientsInsert, 'id' | 'created_at' | 'updated_at' | 'user_id'>
+export type RecipeFormData = Omit<RecipesInsert, 'id' | 'created_at' | 'updated_at' | 'user_id'>
+export type OrderFormData = Omit<OrdersInsert, 'id' | 'created_at' | 'updated_at' | 'user_id'>
+export type CustomerFormData = Omit<CustomersInsert, 'id' | 'created_at' | 'updated_at' | 'user_id'>
+export type SupplierFormData = Omit<SuppliersInsert, 'id' | 'created_at' | 'updated_at' | 'user_id'>
+
+// ============================================
+// QUERY FILTER TYPES
+// ============================================
+
+export interface DateRangeFilter {
+  start: string
+  end: string
+}
+
+export interface PaginationParams {
+  page: number
+  pageSize: number
+}
+
+export interface SortParams {
+  field: string
+  direction: 'asc' | 'desc'
+}
+
+export interface SearchParams {
+  query: string
+  fields?: string[]
+}
+
+// ============================================
+// CONSTANTS
+// ============================================
+
+// Table names as const for type safety
+export const TABLE_NAMES = {
+  INGREDIENTS: 'ingredients',
+  RECIPES: 'recipes',
+  ORDERS: 'orders',
+  ORDER_ITEMS: 'order_items',
+  CUSTOMERS: 'customers',
+  SUPPLIERS: 'suppliers',
+  PRODUCTIONS: 'productions',
+  FINANCIAL_RECORDS: 'financial_records',
+  EXPENSES: 'expenses',
+  STOCK_TRANSACTIONS: 'stock_transactions',
+  NOTIFICATIONS: 'notifications',
+} as const
+
+export type TableNameConstant = typeof TABLE_NAMES[keyof typeof TABLE_NAMES]

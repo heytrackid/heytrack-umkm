@@ -1,11 +1,11 @@
+'use client'
+
 import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-'use client'
-
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { format, addHours, startOfDay, endOfDay, differenceInMinutes } from 'date-fns'
 import { Calendar, Clock, ChefHat, Flame, Package, AlertTriangle, CheckCircle, Play, Pause, BarChart3, Settings } from 'lucide-react'
@@ -43,7 +43,7 @@ interface TimelineGridConfig {
   totalWidth: number
 }
 
-const RESOURCE_COLORS: Record<ResourceType, string> = {
+const _RESOURCE_COLORS: Record<ResourceType, string> = {
   oven: 'bg-orange-500',
   mixer: 'bg-gray-100 dark:bg-gray-800',
   decorator: 'bg-gray-100 dark:bg-gray-800',

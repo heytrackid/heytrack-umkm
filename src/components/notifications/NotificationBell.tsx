@@ -50,7 +50,7 @@ export const NotificationBell = () => {
             const response = await fetch('/api/notifications?limit=20')
             if (response.ok) {
                 const data = await response.json()
-                const newNotifications = data.notifications || []
+                const newNotifications = data.notifications ?? []
 
                 // Check for new notification and play sound
                 if (newNotifications.length > 0 && preferences) {
@@ -76,7 +76,7 @@ export const NotificationBell = () => {
                 }
 
                 setNotifications(newNotifications)
-                setUnreadCount(data.unread_count || 0)
+                setUnreadCount(data.unread_count ?? 0)
             }
         } catch (error: unknown) {
             // Silent fail - will retry on next fetch

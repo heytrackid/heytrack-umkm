@@ -25,7 +25,7 @@ export const customerUniquenessValidation = z.object({
   email: z.string().email().optional(),
 }).refine((data) => 
   // At least one contact method is required
-   !!(data.phone || data.email)
+   !!(data.phone ?? data.email)
 , {
   message: 'Either phone or email is required for customer identification',
   path: ['phone']
@@ -98,8 +98,8 @@ export class CustomerValidationHelpers {
    * Check if customer qualifies for VIP status
    */
   static qualifiesForVIP(customer: { loyalty_points?: number; discount_percentage?: number }): boolean {
-    const points = customer.loyalty_points || 0
-    const discount = customer.discount_percentage || 0
+    const points = customer.loyalty_points ?? 0
+    const discount = customer.discount_percentage ?? 0
 
     return points >= 1000 || discount >= 10
   }
@@ -132,7 +132,7 @@ export class CustomerValidationHelpers {
         invalid.push({
           index,
           data: customer,
-          errors: result.errors || []
+          errors: result.errors ?? []
         })
       }
     })

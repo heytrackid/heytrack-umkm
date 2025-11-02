@@ -34,17 +34,17 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
   const form = useForm({
     resolver: zodResolver(RecipeFormSchema),
     defaultValues: {
-      name: initialData?.name || '',
-      description: initialData?.description || '',
-      servings: initialData?.servings || 1,
-      preparation_time: initialData?.preparation_time || initialData?.prep_time || 30,
-      cooking_time: initialData?.cooking_time || initialData?.cook_time || 0,
-      instructions: typeof initialData?.instructions === 'string' ? [] : initialData?.instructions || [],
+      name: initialData?.name ?? '',
+      description: initialData?.description ?? '',
+      servings: initialData?.servings ?? 1,
+      preparation_time: initialData?.preparation_time ?? initialData?.prep_time ?? 30,
+      cooking_time: initialData?.cooking_time ?? initialData?.cook_time ?? 0,
+      instructions: typeof initialData?.instructions === 'string' ? [] : initialData?.instructions ?? [],
       difficulty: (initialData?.difficulty as 'EASY' | 'MEDIUM' | 'HARD') || 'MEDIUM',
-      category: initialData?.category || '',
-      is_active: initialData?.is_active || true,
-      is_available: initialData?.is_available || true,
-      selling_price: initialData?.selling_price || 0,
+      category: initialData?.category ?? '',
+      is_active: initialData?.is_active ?? true,
+      is_available: initialData?.is_available ?? true,
+      selling_price: initialData?.selling_price ?? 0,
       ingredients: []
     }
   })
@@ -198,7 +198,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
 
           <Button
             type="submit"
-            disabled={isLoading || !form.formState.isValid}
+            disabled={isLoading ?? !form.formState.isValid}
             className="w-full"
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

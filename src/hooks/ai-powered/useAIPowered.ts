@@ -55,7 +55,7 @@ export function useAIPowered() {
     try {
       const response = await fetch('/api/ai/health')
       return response.ok
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       return false
     }
   }, [])
@@ -78,7 +78,7 @@ export function useAIPowered() {
 
     // Computed
     isAnyLoading: pricingAnalysis.loading || inventoryAnalysis.loading || customerAnalysis.loading || financialAnalysis.loading,
-    hasAnyData: !!(pricingAnalysis.data || inventoryAnalysis.data || customerAnalysis.data || financialAnalysis.data),
+    hasAnyData: !!(pricingAnalysis.data ?? inventoryAnalysis.data ?? customerAnalysis.data ?? financialAnalysis.data),
 
     // Helper functions
     getConfidenceLevel: (confidence: number) => {

@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { AlertCircle } from 'lucide-react'
@@ -10,7 +12,6 @@ import { warningToast } from '@/hooks/use-toast'
 import type { RecipesTable, CustomersTable } from '@/types/database'
 import dynamic from 'next/dynamic'
 
-'use client'
 
 
 /**
@@ -61,25 +62,25 @@ interface FormState {
 
 export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, error }: OrderFormProps) => {
     const [formData, setFormData] = useState<FormState>({
-        customer_name: order?.customer_name || '',
-        customer_phone: order?.customer_phone || '',
-        customer_address: order?.customer_address || '',
-        order_date: order?.order_date || new Date().toISOString().split('T')[0],
-        delivery_date: order?.delivery_date || '',
+        customer_name: order?.customer_name ?? '',
+        customer_phone: order?.customer_phone ?? '',
+        customer_address: order?.customer_address ?? '',
+        order_date: order?.order_date ?? new Date().toISOString().split('T')[0],
+        delivery_date: order?.delivery_date ?? '',
         delivery_time: order?.delivery_date?.includes('T')
             ? order.delivery_date.split('T')[1]?.slice(0, 5) || ''
             : '',
-        delivery_fee: order?.delivery_fee || ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
-        discount: order?.discount || 0,
-        tax_amount: order?.tax_amount || ORDER_CONFIG.DEFAULT_TAX_RATE,
+        delivery_fee: order?.delivery_fee ?? ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
+        discount: order?.discount ?? 0,
+        tax_amount: order?.tax_amount ?? ORDER_CONFIG.DEFAULT_TAX_RATE,
         payment_method: 'CASH',
-        paid_amount: order?.paid_amount || 0,
-        priority: order?.priority || ORDER_CONFIG.DEFAULT_PRIORITY,
-        notes: order?.notes || '',
-        special_instructions: order?.special_instructions || ''
+        paid_amount: order?.paid_amount ?? 0,
+        priority: order?.priority ?? ORDER_CONFIG.DEFAULT_PRIORITY,
+        notes: order?.notes ?? '',
+        special_instructions: order?.special_instructions ?? ''
     })
 
-    const [orderItems, setOrderItems] = useState<OrderItemWithRecipe[]>(order?.items || [])
+    const [orderItems, setOrderItems] = useState<OrderItemWithRecipe[]>(order?.items ?? [])
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
     const { subtotal, taxAmount, totalAmount } = calculateOrderTotals(
@@ -139,18 +140,21 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             recipe_id: firstRecipe.id,
             product_name: firstRecipe.name,
             quantity: 1,
-            unit_price: firstRecipe.selling_price || 0,
-            total_price: firstRecipe.selling_price || 0,
+            unit_price: firstRecipe.selling_price ?? 0,
+            total_price: firstRecipe.selling_price ?? 0,
             special_requests: null,
+            hpp_at_order: firstRecipe.cost_per_unit ?? 0,
+            profit_amount: (firstRecipe.selling_price ?? 0) - (firstRecipe.cost_per_unit ?? 0),
+            profit_margin: firstRecipe.selling_price ? (((firstRecipe.selling_price - (firstRecipe.cost_per_unit ?? 0)) / firstRecipe.selling_price) * 100) : 0,
             updated_at: null,
             user_id: '',
             recipe: {
                 id: firstRecipe.id,
                 name: firstRecipe.name,
-                price: firstRecipe.selling_price || 0,
-                category: firstRecipe.category || 'Uncategorized',
-                servings: firstRecipe.servings || 0,
-                description: firstRecipe.description || undefined
+                price: firstRecipe.selling_price ?? 0,
+                category: firstRecipe.category ?? 'Uncategorized',
+                servings: firstRecipe.servings ?? 0,
+                description: firstRecipe.description ?? undefined
             }
         }
         setOrderItems(prev => [...prev, newItem])
@@ -176,13 +180,13 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                         recipe: {
                             id: selectedRecipe.id,
                             name: selectedRecipe.name,
-                            price: selectedRecipe.selling_price || currentItem.unit_price,
-                            category: selectedRecipe.category || 'Uncategorized',
-                            servings: selectedRecipe.servings || 0,
-                            description: selectedRecipe.description || undefined
+                            price: selectedRecipe.selling_price ?? currentItem.unit_price,
+                            category: selectedRecipe.category ?? 'Uncategorized',
+                            servings: selectedRecipe.servings ?? 0,
+                            description: selectedRecipe.description ?? undefined
                         },
-                        unit_price: selectedRecipe.selling_price || currentItem.unit_price,
-                        total_price: (selectedRecipe.selling_price || currentItem.unit_price) * currentItem.quantity
+                        unit_price: selectedRecipe.selling_price ?? currentItem.unit_price,
+                        total_price: (selectedRecipe.selling_price ?? currentItem.unit_price) * currentItem.quantity
                     }
                 }
             } else if (field === 'quantity') {
@@ -238,11 +242,11 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         setFieldErrors({})
 
         const orderData = {
-            order_no: order?.order_no || generateOrderNo(),
+            order_no: order?.order_no ?? generateOrderNo(),
             customer_name: formData.customer_name,
             customer_phone: formData.customer_phone,
             customer_address: formData.customer_address,
-            status: order?.status || 'PENDING',
+            status: order?.status ?? 'PENDING',
             order_date: formData.order_date,
             delivery_date: formData.delivery_date,
             delivery_time: formData.delivery_time,
@@ -253,7 +257,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             total_amount: totalAmount,
             paid_amount: formData.paid_amount,
             payment_method: formData.payment_method,
-            priority: formData.priority || 'NORMAL',
+            priority: formData.priority ?? 'NORMAL',
             notes: formData.notes,
             special_instructions: formData.special_instructions,
             items: orderItems.map(item => ({

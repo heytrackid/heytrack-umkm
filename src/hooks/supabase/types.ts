@@ -1,4 +1,4 @@
-import type { Database, Tables, TablesUpdate } from '@/types/database'
+import type { Database, TablesUpdate } from '@/types/database'
 
 
 type TablesMap = Database['public']['Tables']

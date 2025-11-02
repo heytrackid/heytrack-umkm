@@ -30,7 +30,7 @@ export function groupNotifications(
   const now = new Date().getTime()
 
   for (const notification of notifications) {
-    const createdAt = new Date(notification.created_at || new Date()).getTime()
+    const createdAt = new Date(notification.created_at ?? new Date()).getTime()
     const ageSeconds = (now - createdAt) / 1000
 
     // Don't group if too old
@@ -45,14 +45,14 @@ export function groupNotifications(
         message: notification.message,
         count: 1,
         notifications: [notification],
-        latest_created_at: notification.created_at || new Date().toISOString(),
-        priority: notification.priority || 'normal',
+        latest_created_at: notification.created_at ?? new Date().toISOString(),
+        priority: notification.priority ?? 'normal',
       })
       continue
     }
 
     // Create grouping key
-    const groupKey = `${notification.category}_${notification.entity_type || 'general'}`
+    const groupKey = `${notification.category}_${notification.entity_type ?? 'general'}`
 
     if (groups.has(groupKey)) {
       // Add to existing group
@@ -61,8 +61,8 @@ export function groupNotifications(
       group.notifications.push(notification)
       
       // Update to latest timestamp
-      if (new Date(notification.created_at || new Date()) > new Date(group.latest_created_at)) {
-        group.latest_created_at = notification.created_at || new Date().toISOString()
+      if (new Date(notification.created_at ?? new Date()) > new Date(group.latest_created_at)) {
+        group.latest_created_at = notification.created_at ?? new Date().toISOString()
         group.title = notification.title
         group.message = notification.message
       }
@@ -70,9 +70,9 @@ export function groupNotifications(
       // Upgrade priority if higher
       const priorities = ['low', 'normal', 'high', 'urgent']
       const currentPriorityIndex = priorities.indexOf(group.priority)
-      const newPriorityIndex = priorities.indexOf(notification.priority || 'normal')
+      const newPriorityIndex = priorities.indexOf(notification.priority ?? 'normal')
       if (newPriorityIndex > currentPriorityIndex) {
-        group.priority = notification.priority || 'normal'
+        group.priority = notification.priority ?? 'normal'
       }
     } else {
       // Create new group
@@ -84,8 +84,8 @@ export function groupNotifications(
         message: notification.message,
         count: 1,
         notifications: [notification],
-        latest_created_at: notification.created_at || new Date().toISOString(),
-        priority: notification.priority || 'normal',
+        latest_created_at: notification.created_at ?? new Date().toISOString(),
+        priority: notification.priority ?? 'normal',
       })
     }
   }
@@ -160,8 +160,8 @@ export function shouldGroup(
   if (notif1.entity_type !== notif2.entity_type) {return false}
 
   // Within time window
-  const time1 = new Date(notif1.created_at || new Date()).getTime()
-  const time2 = new Date(notif2.created_at || new Date()).getTime()
+  const time1 = new Date(notif1.created_at ?? new Date()).getTime()
+  const time2 = new Date(notif2.created_at ?? new Date()).getTime()
   const diffSeconds = Math.abs(time1 - time2) / 1000
 
   return diffSeconds <= timeWindowSeconds

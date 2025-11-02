@@ -20,7 +20,7 @@ const ResetPasswordPage = () => {
   const [email, setEmail] = useState('')
   const [isPending, startTransition] = useTransition()
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     void setError('')
     void setErrorAction(null)

@@ -3,10 +3,7 @@ import { getErrorMessage } from '@/lib/type-guards'
 import type { Database, NotificationsInsert } from '@/types/database'
 import type { Json } from '@/types/supabase-generated'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type {
-
-  WorkflowEventData,
-  WorkflowResult,
+import type {WorkflowResult,
   WorkflowContext
 } from '@/types/features/automation'
 
@@ -160,7 +157,7 @@ export class InventoryWorkflowHandlers {
     priority: 'low' | 'medium' | 'high' | 'critical'
     reason: string
   } {
-    const minStock = ingredient.min_stock || 0
+    const minStock = ingredient.min_stock ?? 0
     const reorderPoint = minStock * 0.8 // Reorder at 80% of minimum stock
 
     const shouldReorder = currentStock <= reorderPoint

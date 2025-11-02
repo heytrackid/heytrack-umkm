@@ -9,6 +9,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+import {
+  openWhatsApp,
+  generateOrderConfirmationMessage,
+  generateDeliveryReminderMessage,
+  generatePaymentReminderMessage,
+  generateFollowUpMessage
+} from '@/lib/communications/whatsapp-helpers'
 
 import { apiLogger } from '@/lib/logger'
 import {
@@ -74,7 +81,7 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>([])
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [customMessage, setCustomMessage] = useState('')
-  const [phoneNumber, setPhoneNumber] = useState(order.customer_phone || '')
+  const [phoneNumber, setPhoneNumber] = useState(order.customer_phone ?? '')
   const [whatsappType, setWhatsappType] = useState<'whatsapp' | 'business'>('whatsapp')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -113,12 +120,12 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
 
     // Replace common variables
     const replacements = {
-      'customer_name': orderData.customer_name || '',
+      'customer_name': orderData.customer_name ?? '',
       'order_no': orderData.order_no || '',
-      'order_date': new Date(orderData.order_date || new Date()).toLocaleDateString('id-ID'),
+      'order_date': new Date(orderData.order_date ?? new Date()).toLocaleDateString('id-ID'),
       'due_date': orderData.due_date ? new Date(orderData.due_date).toLocaleDateString('id-ID') : '',
-      'total_amount': (orderData.total_amount || 0).toLocaleString('id-ID'),
-      'remaining_amount': (orderData.remaining_amount || 0).toLocaleString('id-ID'),
+      'total_amount': (orderData.total_amount ?? 0).toLocaleString('id-ID'),
+      'remaining_amount': (orderData.remaining_amount ?? 0).toLocaleString('id-ID'),
       'estimated_arrival': orderData.due_date ? new Date(orderData.due_date).toLocaleDateString('id-ID') : ''
     }
 
@@ -131,7 +138,7 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
     // Handle order_items array
     const itemsRegex = /\{\{#each order_items\}\}([\s\S]*?)\{\{\/each\}\}/g
     processed = processed.replace(itemsRegex, (match, itemTemplate) => orderData.items.map(item => itemTemplate
-      .replace(/\{\{product_name\}\}/g, item.recipe?.name || item.product_name || 'Unknown Product')
+      .replace(/\{\{product_name\}\}/g, item.recipe?.name ?? item.product_name ?? 'Unknown Product')
       .replace(/\{\{quantity\}\}/g, item.quantity.toString())).join(''))
 
     // Handle conditional blocks
@@ -259,13 +266,13 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                  <Badge className={getStatusBadgeColor(order.status || '')}>
-                    {(order.status || '').replace('_', ' ').toUpperCase()}
+                  <Badge className={getStatusBadgeColor(order.status ?? '')}>
+                    {(order.status ?? '').replace('_', ' ').toUpperCase()}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Total:</span>
-                  <span className="font-medium">Rp {(order.total_amount || 0).toLocaleString('id-ID')}</span>
+                  <span className="font-medium">Rp {(order.total_amount ?? 0).toLocaleString('id-ID')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Items:</span>

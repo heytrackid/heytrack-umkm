@@ -45,7 +45,7 @@ export function useCreateProductionBatch() {
       
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to create production batch')
+        throw new Error(error.message ?? 'Failed to create production batch')
       }
       
       return response.json()
@@ -88,7 +88,7 @@ export function useUpdateProductionBatch() {
       
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to update production batch')
+        throw new Error(error.message ?? 'Failed to update production batch')
       }
       
       return response.json()

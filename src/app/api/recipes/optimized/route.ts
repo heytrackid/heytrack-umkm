@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
     return createCachedResponse(
       {
         recipes: recipes || [],
-        total: count || 0,
+        total: count ?? 0,
         limit
       },
       cacheConfig

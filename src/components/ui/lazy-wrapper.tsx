@@ -39,8 +39,8 @@ export const LazyWrapper = ({
   )
 
   return (
-    <ErrorBoundary fallback={errorFallback || defaultErrorFallback}>
-      <Suspense fallback={fallback || defaultFallback}>
+    <ErrorBoundary fallback={errorFallback ?? defaultErrorFallback}>
+      <Suspense fallback={fallback ?? defaultFallback}>
         {children}
       </Suspense>
     </ErrorBoundary>

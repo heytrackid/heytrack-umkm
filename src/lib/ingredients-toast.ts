@@ -93,7 +93,7 @@ export const outOfStockErrorToast = (name: string): ToastOptions => ({
  */
 export const genericErrorToast = (operation: string, error?: string): ToastOptions => ({
   title: '❌ Terjadi Kesalahan',
-  description: error || `Gagal ${operation}. Silakan coba lagi atau hubungi support jika masalah berlanjut.`,
+  description: error ?? `Gagal ${operation}. Silakan coba lagi atau hubungi support jika masalah berlanjut.`,
   variant: 'destructive'
 })
 

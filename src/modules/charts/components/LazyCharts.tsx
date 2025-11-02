@@ -1,9 +1,10 @@
+'use client'
+
 import dynamic from 'next/dynamic'
 import type { ComponentType, ReactNode } from 'react'
 import { serializeError, uiLogger } from '@/lib/logger'
 import type { MiniChartProps } from './MiniChart'
 
-'use client'
 
 
 
@@ -129,7 +130,7 @@ type SmartChartLoaderProps =
 
 // Smart loader component
 export const SmartChartLoader = (props: SmartChartLoaderProps) => {
-  const fallback = props.fallback || defaultChartFallback
+  const fallback = props.fallback ?? defaultChartFallback
 
   switch (props.chartType) {
     case 'financial-trends':

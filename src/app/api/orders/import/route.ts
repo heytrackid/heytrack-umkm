@@ -211,7 +211,7 @@ async function POST(request: NextRequest) {
         .from('orders')
         .insert({
           ...orderData.order,
-          customer_id: customerId || null
+          customer_id: customerId ?? null
         })
         .select()
         .single()

@@ -92,13 +92,13 @@ export class AIFallbackService {
    */
   private static getRuleBasedResponse(
     query: string,
-    context: BusinessContext
+    _context: BusinessContext
   ): string | null {
     const normalized = query.toLowerCase();
 
     // HPP-related queries
     if (normalized.includes('hpp') && normalized.includes('naik')) {
-      return this.getHppIncreaseResponse(context);
+      return this.getHppIncreaseResponse(_context);
     }
 
     if (normalized.includes('hpp') && normalized.includes('turun')) {
@@ -110,12 +110,12 @@ export class AIFallbackService {
       normalized.includes('stok') || normalized.includes('stock') ||
       normalized.includes('restock')
     ) {
-      return this.getStockResponse(context);
+      return this.getStockResponse(_context);
     }
 
     // Profit-related queries
     if (normalized.includes('profit') || normalized.includes('untung')) {
-      return this.getProfitResponse(context);
+      return this.getProfitResponse(_context);
     }
 
     // Recipe-related queries
@@ -123,7 +123,7 @@ export class AIFallbackService {
       normalized.includes('resep') &&
       (normalized.includes('menguntungkan') || normalized.includes('profit'))
     ) {
-      return this.getMostProfitableRecipeResponse(context);
+      return this.getMostProfitableRecipeResponse(_context);
     }
 
     return null;
@@ -134,7 +134,7 @@ export class AIFallbackService {
    */
   private static getHelpfulError(
     query: string,
-    context: BusinessContext
+    _context: BusinessContext
   ): string {
     const parts = [
       'Maaf, saya sedang mengalami kendala teknis. Namun, saya bisa membantu Anda dengan cara lain:',
@@ -186,7 +186,7 @@ export class AIFallbackService {
   /**
    * Rule-based response for HPP increase
    */
-  private static getHppIncreaseResponse(context: BusinessContext): string {
+  private static getHppIncreaseResponse(_context: BusinessContext): string {
     const parts = [
       '📈 **HPP Naik - Analisis & Rekomendasi**',
       '',
@@ -206,9 +206,9 @@ export class AIFallbackService {
       '',
     ];
 
-    if (context.hpp && context.hpp.alerts_count > 0) {
+    if (_context.hpp && _context.hpp.alerts_count > 0) {
       parts.push(
-        `⚠️ Anda memiliki ${context.hpp.alerts_count} alert HPP yang perlu ditinjau.`,
+        `⚠️ Anda memiliki ${_context.hpp.alerts_count} alert HPP yang perlu ditinjau.`,
         ''
       );
     }
@@ -255,8 +255,8 @@ export class AIFallbackService {
   /**
    * Rule-based response for stock queries
    */
-  private static getStockResponse(context: BusinessContext): string {
-    const lowStock = context.ingredients?.filter((i) => i.low_stock) || [];
+  private static getStockResponse(_context: BusinessContext): string {
+    const lowStock = _context.ingredients?.filter((i) => i.low_stock) ?? [];
 
     if (lowStock.length === 0) {
       return '✅ **Stok Aman**\n\nSemua bahan memiliki stok yang cukup. Tidak ada yang perlu direstock saat ini.';
@@ -293,12 +293,12 @@ export class AIFallbackService {
   /**
    * Rule-based response for profit queries
    */
-  private static getProfitResponse(context: BusinessContext): string {
-    if (!context.financial) {
+  private static getProfitResponse(_context: BusinessContext): string {
+    if (!_context.financial) {
       return 'Untuk melihat analisis profit, silakan kunjungi [Halaman Laporan](/reports)';
     }
 
-    const { total_revenue, total_costs, profit, period } = context.financial;
+    const { total_revenue, total_costs, profit, period } = _context.financial;
     const profitMargin =
       total_revenue > 0 ? (profit / total_revenue) * 100 : 0;
 
@@ -342,14 +342,14 @@ export class AIFallbackService {
    * Rule-based response for most profitable recipe
    */
   private static getMostProfitableRecipeResponse(
-    context: BusinessContext
+    _context: BusinessContext
   ): string {
-    if (!context.recipes || context.recipes.length === 0) {
+    if (!_context.recipes || _context.recipes.length === 0) {
       return 'Belum ada data resep. Silakan tambahkan resep di [Halaman Resep](/recipes)';
     }
 
     // Sort by lowest HPP (assuming selling price is similar)
-    const sortedRecipes = [...context.recipes].sort((a, b) => a.hpp - b.hpp);
+    const sortedRecipes = [..._context.recipes].sort((a, b) => a.hpp - b.hpp);
     const topRecipes = sortedRecipes.slice(0, 5);
 
     const parts = [

@@ -22,7 +22,7 @@ export class ChatbotPromptBuilder {
       '',
       ...this.buildBusinessDataContext(context.businessData as BusinessData),
       '',
-      ...this.buildConversationHistory(context.conversationHistory || []),
+      ...this.buildConversationHistory(context.conversationHistory ?? []),
       '',
       ...this.buildResponseGuidelines(),
     ]
@@ -59,7 +59,7 @@ export class ChatbotPromptBuilder {
     return [
       '=== USER CONTEXT (READ-ONLY) ===',
       `User ID: ${context.userId}`,
-      `Session ID: ${context.sessionId || 'new'}`,
+      `Session ID: ${context.sessionId ?? 'new'}`,
       '⚠️ Data ini HANYA untuk user ini. JANGAN berikan akses ke data user lain.',
     ]
   }

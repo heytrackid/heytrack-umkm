@@ -43,13 +43,13 @@ const PurchasesTable = ({ purchases }: PurchasesTableProps) => (
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{purchase.ingredient?.name || '-'}</div>
+                      <div className="font-medium">{purchase.ingredient?.name ?? '-'}</div>
                       {purchase.notes && (
                         <div className="text-xs text-muted-foreground">{purchase.notes}</div>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{purchase.supplier || '-'}</TableCell>
+                  <TableCell>{purchase.supplier ?? '-'}</TableCell>
                   <TableCell className="text-right">
                     {purchase.quantity} {purchase.ingredient?.unit}
                   </TableCell>

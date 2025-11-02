@@ -90,7 +90,7 @@ const HppReportsPage = () => {
     void loadAnalytics()
   }, [])
 
-  const loadAnalytics = async () => {
+  const loadAnalytics = () => {
     try {
       void setLoading(true)
 
@@ -161,7 +161,7 @@ const HppReportsPage = () => {
     }
   }
 
-  const exportData = async (format: ExportFormat) => {
+  const exportData = (format: ExportFormat) => {
     try {
       void setGenerating(true)
       toast({

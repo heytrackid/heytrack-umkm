@@ -51,7 +51,7 @@ export function useApi<T = unknown >(
         })
         onSuccess?.(response.data)
       } else {
-        const error = response.error || 'Failed to fetch data'
+        const error = response.error ?? 'Failed to fetch data'
         setState({
           data: null,
           error,
@@ -90,7 +90,7 @@ export function useApi<T = unknown >(
         }))
         onSuccess?.(response.data)
       } else {
-        const error = response.error || 'Failed to refetch data'
+        const error = response.error ?? 'Failed to refetch data'
         setState((prev) => ({
           ...prev,
           error,
@@ -179,7 +179,7 @@ export function useMutationApi<T = unknown , R = unknown >(
           })
           onSuccess?.(response.data)
         } else {
-          const error = response.error || 'Operation failed'
+          const error = response.error ?? 'Operation failed'
           setState({
             data: null,
             error,

@@ -89,13 +89,13 @@ export async function GET(request: NextRequest) {
       // Calculate profitability and efficiency
       const profitability = getProfitabilityLevel(marginPercentage)
 
-      const timesMade = recipe.times_made || 0
+      const timesMade = recipe.times_made ?? 0
       const efficiency = getEfficiencyLevel(timesMade)
 
       return {
         id: recipe.id,
         name: recipe.name,
-        category: recipe.category || 'General',
+        category: recipe.category ?? 'General',
         hppValue,
         sellingPrice,
         margin,
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
     apiLogger.info({
       userId: user.id,
       totalRecipes,
-      category: category || 'all'
+      category: category ?? 'all'
     }, 'Recipe comparison data retrieved successfully')
 
     return NextResponse.json({

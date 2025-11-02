@@ -147,14 +147,14 @@ const OrdersList = memo(({
                     <p className="text-sm text-muted-foreground">{order.customer_name}</p>
                   </div>
                   <OrderStatusBadge
-                    status={order.status || 'PENDING'}
+                    status={order.status ?? 'PENDING'}
                     compact
                   />
                 </div>
 
                 {/* Progress indicator */}
                 <div className="mb-3">
-                  <OrderProgress currentStatus={order.status || 'PENDING'} />
+                  <OrderProgress currentStatus={order.status ?? 'PENDING'} />
                 </div>
 
                 <div className="space-y-2 text-sm">
@@ -173,7 +173,7 @@ const OrdersList = memo(({
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">
-                      {formatCurrency(order.total_amount || 0)}
+                      {formatCurrency(order.total_amount ?? 0)}
                     </span>
                   </div>
                 </div>
@@ -262,15 +262,15 @@ const OrdersList = memo(({
                       </td>
                       <td className="py-3">
                         <div className="font-medium">
-                          {formatCurrency(order.total_amount || 0)}
+                          {formatCurrency(order.total_amount ?? 0)}
                         </div>
-                        <Badge className={getPaymentInfo((order.payment_status || 'UNPAID') as PaymentStatus).color} variant="outline">
-                          {getPaymentInfo((order.payment_status || 'UNPAID') as PaymentStatus).label}
+                        <Badge className={getPaymentInfo((order.payment_status ?? 'UNPAID') as PaymentStatus).color} variant="outline">
+                          {getPaymentInfo((order.payment_status ?? 'UNPAID') as PaymentStatus).label}
                         </Badge>
                       </td>
                       <td className="py-3">
                         <select
-                          value={order.status || 'PENDING'}
+                          value={order.status ?? 'PENDING'}
                           onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
                           className="bg-transparent border border-input rounded px-2 py-1 text-sm"
                         >
@@ -283,8 +283,8 @@ const OrdersList = memo(({
                         </select>
                       </td>
                       <td className="py-3">
-                        <Badge className={getPriorityInfo((order.priority || 'normal') as Priority).color}>
-                          {getPriorityInfo((order.priority || 'normal') as Priority).label}
+                        <Badge className={getPriorityInfo((order.priority ?? 'normal') as Priority).color}>
+                          {getPriorityInfo((order.priority ?? 'normal') as Priority).label}
                         </Badge>
                       </td>
                       <td className="py-3">

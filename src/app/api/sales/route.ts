@@ -37,7 +37,7 @@ async function GET(request: NextRequest) {
     start_date: searchParams.get('start_date'),
     end_date: searchParams.get('end_date'),
     recipe_id: searchParams.get('recipe_id'),
-    period: searchParams.get('period') || 'monthly',
+    period: searchParams.get('period') ?? 'monthly',
     include_trends: searchParams.get('include_trends') === 'true',
   })
 
@@ -90,7 +90,7 @@ async function GET(request: NextRequest) {
     }
 
     // Add sorting
-    const sortField = sort_by || 'date'
+    const sortField = sort_by ?? 'date'
     const sortDirection = sort_order === 'asc'
     query = query.order(sortField, { ascending: sortDirection })
 
@@ -122,8 +122,8 @@ async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit)
+        total: count ?? 0,
+        totalPages: Math.ceil((count ?? 0) / limit)
       }
     })
   } catch (error: unknown) {

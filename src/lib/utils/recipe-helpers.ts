@@ -1,4 +1,3 @@
-import type { RecipeTemplate } from '@/lib/constants/recipe-templates'
 import { uiLogger } from '@/lib/logger'
 
 
@@ -20,7 +19,7 @@ export interface IngredientSuggestion {
  */
 export const getSmartIngredientSuggestions = (
   productType: string,
-  category?: string
+  _category?: string
 ): IngredientSuggestion[] => {
   const suggestions: Record<string, IngredientSuggestion[]> = {
     // Bakery
@@ -171,7 +170,7 @@ export const formatTime = (minutes: number): string => {
 /**
  * Get category icon
  */
-export const getCategoryIcon = (category: string): string => {
+export const getCategoryIcon = (_category: string): string => {
   const icons: Record<string, string> = {
     'Bakery': '🥐',
     'Snacks': '🍿',
@@ -180,7 +179,7 @@ export const getCategoryIcon = (category: string): string => {
     'Traditional': '🏮',
     'Frozen': '🧊'
   }
-  return icons[category] || '🍴'
+  return icons[_category] || '🍴'
 }
 
 /**

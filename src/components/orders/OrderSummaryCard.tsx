@@ -32,9 +32,9 @@ const OrderSummaryCard = memo(({
     showActions: _showActions = false
 }: OrderSummaryCardProps) => {
     const { formatCurrency } = useCurrency()
-    const statusInfo = getStatusInfo(order.status || 'PENDING')
-    const paymentInfo = getPaymentInfo((order.payment_status || 'UNPAID') as PaymentStatus)
-    const priorityInfo = getPriorityInfo((order.priority || 'normal') as Priority)
+    const statusInfo = getStatusInfo(order.status ?? 'PENDING')
+    const paymentInfo = getPaymentInfo((order.payment_status ?? 'UNPAID') as PaymentStatus)
+    const priorityInfo = getPriorityInfo((order.priority ?? 'normal') as Priority)
 
     return (
         <Card
@@ -46,7 +46,7 @@ const OrderSummaryCard = memo(({
                     <div>
                         <CardTitle className="text-lg">{order.order_no}</CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
-                            {new Date(order.created_at || '').toLocaleDateString('id-ID', {
+                            {new Date(order.created_at ?? '').toLocaleDateString('id-ID', {
                                 day: 'numeric',
                                 month: 'short',
                                 year: 'numeric'
@@ -114,7 +114,7 @@ const OrderSummaryCard = memo(({
                         </div>
                         <div className="text-right">
                             <div className="font-bold text-lg">
-                                {formatCurrency(order.total_amount || 0)}
+                                {formatCurrency(order.total_amount ?? 0)}
                             </div>
                             <Badge className={`${paymentInfo.color} text-xs`} variant="outline">
                                 {paymentInfo.label}

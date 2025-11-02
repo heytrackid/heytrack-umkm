@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 import {
   Search,
-  Filter,
   Plus,
   Eye,
   Edit,
@@ -114,7 +113,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
 
     const matchesSearch = !searchTerm || columns.some(col => {
       const value = getColumnValue(item, col)
-      return value != null && String(value).toLowerCase().includes(searchLower)
+      return value !== null && String(value).toLowerCase().includes(searchLower)
     })
 
     const matchesFilters = Object.entries(filters).every(([key, filterValue]) => {
@@ -140,8 +139,8 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
     const bVal = toSortableValue(rawB)
 
     if (aVal === bVal) { return 0 }
-    if (aVal == null) { return sortOrder === 'asc' ? -1 : 1 }
-    if (bVal == null) { return sortOrder === 'asc' ? 1 : -1 }
+    if (aVal === null || aVal === undefined) { return sortOrder === 'asc' ? -1 : 1 }
+    if (bVal === null || bVal === undefined) { return sortOrder === 'asc' ? 1 : -1 }
 
     if (aVal < bVal) { return sortOrder === 'asc' ? -1 : 1 }
     if (aVal > bVal) { return sortOrder === 'asc' ? 1 : -1 }
@@ -158,20 +157,20 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
     ? sortedData.slice(pageStart - 1, pageEnd)
     : sortedData
 
-function getColumnValue(item: T, column: SimpleColumn<T, TValue>): TValue {
-  if (column.accessor) {
-    return column.accessor(item)
+  function getColumnValue(item: T, column: SimpleColumn<T, TValue>): TValue {
+    if (column.accessor) {
+      return column.accessor(item)
+    }
+    return item[column.key] as TValue
   }
-  return item[column.key] as TValue
-}
 
-function toSortableValue(value: unknown): SortableValue {
-  if (value instanceof Date) { return value.getTime() }
-  if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean' || value == null) {
-    return value as SortableValue
+  function toSortableValue(value: unknown): SortableValue {
+    if (value instanceof Date) { return value.getTime() }
+    if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean' || value === null) {
+      return value as SortableValue
+    }
+    return String(value)
   }
-  return String(value)
-}
 
   useEffect(() => {
     if (!enablePagination) { return }
@@ -251,7 +250,7 @@ function toSortableValue(value: unknown): SortableValue {
   return (
     <Card>
       {/* Header */}
-      {(title || onAdd) && (
+      {(title ?? onAdd) && (
         <CardHeader className={isMobile ? 'p-4' : ''}>
           <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-col sm:flex-row sm:items-center sm:justify-between gap-4'}`}>
             <div>
@@ -268,7 +267,7 @@ function toSortableValue(value: unknown): SortableValue {
               {onAdd && (
                 <Button onClick={onAdd} size={isMobile ? "sm" : "default"} className={isMobile ? 'flex-1' : ''}>
                   <Plus className="h-4 w-4 mr-2" />
-                  {addButtonText || "Tambah Data"}
+                  {addButtonText ?? "Tambah Data"}
                 </Button>
               )}
             </div>
@@ -283,7 +282,7 @@ function toSortableValue(value: unknown): SortableValue {
           <div className={`relative ${isMobile ? 'w-full' : 'flex-1'}`}>
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={searchPlaceholder || "Cari..."}
+              placeholder={searchPlaceholder ?? "Cari..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -303,7 +302,7 @@ function toSortableValue(value: unknown): SortableValue {
                     onValueChange={(value) => handleFilterChange(String(col.key), value)}
                   >
                     <SelectTrigger className={isMobile ? 'w-full' : 'w-[150px]'}>
-                      <SelectValue placeholder={`Filter ${col.header}`} />
+                      <SelectValue placeholder={`_Filter ${col.header}`} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Informasi {col.header}</SelectItem>
@@ -322,7 +321,7 @@ function toSortableValue(value: unknown): SortableValue {
         {/* Table / Mobile Cards */}
         {sortedData.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">{emptyMessage || "Tidak ada data"}</p>
+            <p className="text-muted-foreground">{emptyMessage ?? "Tidak ada data"}</p>
           </div>
         ) : isMobile ? (
           /* Mobile Card Layout */
@@ -345,14 +344,14 @@ function toSortableValue(value: unknown): SortableValue {
                                 if (col.render) {
                                   return col.render(value, item)
                                 }
-                                return value == null ? '-' : String(value)
+                                return value === null ? '-' : String(value)
                               })()}
                             </div>
                           </div>
                         ))
                       }
 
-                      {(onView || onEdit || onDelete) && (
+                      {(onView ?? onEdit ?? onDelete) && (
                         <div className="flex gap-2 pt-3 border-t">
                           {onView && (
                             <Button variant="outline" size="sm" onClick={() => onView(item)} className="flex-1">
@@ -430,7 +429,7 @@ function toSortableValue(value: unknown): SortableValue {
                         )}
                       </th>
                     ))}
-                    {(onView || onEdit || onDelete) && (
+                    {(onView ?? onEdit ?? onDelete) && (
                       <th className="text-right p-2 font-medium text-muted-foreground">
                         Informasi
                       </th>
@@ -457,11 +456,11 @@ function toSortableValue(value: unknown): SortableValue {
                                 </Badge>
                               )
                             }
-                            return value == null ? '-' : String(value)
+                            return value === null ? '-' : String(value)
                           })()}
                         </td>
                       ))}
-                      {(onView || onEdit || onDelete) && (
+                      {(onView ?? onEdit ?? onDelete) && (
                         <td className="text-right p-2">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>

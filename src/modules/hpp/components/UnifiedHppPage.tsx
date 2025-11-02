@@ -13,7 +13,7 @@ import { ProductComparisonCard } from './ProductComparisonCard'
 import { HppBreakdownVisual } from './HppBreakdownVisual'
 import { HppScenarioPlanner } from './HppScenarioPlanner'
 import { Card, CardContent } from '@/components/ui/card'
-import { CheckCircle, ArrowRight, Calculator, TrendingUp, BarChart3 } from 'lucide-react'
+import {Calculator, TrendingUp, BarChart3 } from 'lucide-react'
 
 
 
@@ -78,7 +78,7 @@ export const UnifiedHppPage = memo(() => {
   // Calculate progress steps
   const step1Complete = !!selectedRecipeId && selectedRecipeId !== 'new'
   const step2Complete = step1Complete && recipe && recipe.total_cost > 0
-  const step3Complete = step2Complete && recipe.selling_price && recipe.selling_price > 0
+  const _step3Complete = step2Complete && recipe.selling_price && recipe.selling_price > 0
 
   return (
     <TooltipProvider>

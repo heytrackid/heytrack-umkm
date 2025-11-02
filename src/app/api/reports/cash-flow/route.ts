@@ -83,9 +83,9 @@ export async function GET(request: NextRequest) {
     const defaultStartDate = new Date(new Date().setDate(1)).toISOString().split('T')[0] // First day of current month
     const defaultEndDate = new Date().toISOString().split('T')[0] // Today
 
-    const startDate = normalizeDateParam(startDateParam) || defaultStartDate
-    const endDate = normalizeDateParam(endDateParam) || defaultEndDate
-    const period = periodParam || 'daily'
+    const startDate = normalizeDateParam(startDateParam) ?? defaultStartDate
+    const endDate = normalizeDateParam(endDateParam) ?? defaultEndDate
+    const period = periodParam ?? 'daily'
 
     // ✅ CRITICAL FIX: Filter by user_id for RLS
     const { data: transactions, error: transError } = await supabase
@@ -137,8 +137,8 @@ export async function GET(request: NextRequest) {
     // Transform transactions for frontend
     const transactionsList = validTransactions.map((t: FinancialRecordPartial) => ({
       id: t.id,
-      reference_id: t.reference || t.id,
-      date: t.date || '',
+      reference_id: t.reference ?? t.id,
+      date: t.date ?? '',
       description: safeString(t.description),
       category: safeString(t.category),
       amount: safeParseAmount(t.amount),
@@ -195,7 +195,7 @@ function groupByPeriod(transactions: FinancialRecordPartial[], period: string) {
 
     switch (period) {
       case 'daily':
-        key = transaction.date || ''
+        key = transaction.date ?? ''
         break
       case 'weekly': {
         if (!date || Number.isNaN(date.getTime())) {
@@ -218,7 +218,7 @@ function groupByPeriod(transactions: FinancialRecordPartial[], period: string) {
         key = date && !Number.isNaN(date.getTime()) ? `${date.getFullYear()}` : ''
         break
       default:
-        key = transaction.date || ''
+        key = transaction.date ?? ''
     }
 
     if (!grouped[key]) {

@@ -125,7 +125,8 @@ Kami tunggu orderan selanjutnya! 🙏
   }
 
   /**
-   * Send WhatsApp message
+   * Send WhatsApp message using wa.me link
+   * ✅ NEW: Opens WhatsApp with pre-filled message using wa.me
    */
   async sendMessage(to: string, templateId: string, data: Record<string, unknown>): Promise<boolean> {
     try {
@@ -146,14 +147,47 @@ Kami tunggu orderan selanjutnya! 🙏
         }
       });
 
-      // For demo purposes - in real implementation, this would call WhatsApp API
-      automationLogger.info({ to, templateId, message }, 'WhatsApp message sent (simulated)');
+      // Clean phone number (remove non-digits)
+      const cleanPhone = to.replace(/\D/g, '');
+      
+      // Add country code if not present (assume Indonesia +62)
+      const phoneWithCountry = cleanPhone.startsWith('62') ? cleanPhone : `62${cleanPhone.replace(/^0/, '')}`;
 
+      // Encode message for URL
+      const encodedMessage = encodeURIComponent(message);
+
+      // Generate wa.me link
+      const waLink = `https://wa.me/${phoneWithCountry}?text=${encodedMessage}`;
+
+      automationLogger.info({ 
+        to: phoneWithCountry, 
+        templateId, 
+        waLink 
+      }, 'WhatsApp link generated');
+
+      // Return the link in the response (client can open it)
+      // In browser context, you can use: window.open(waLink, '_blank')
       return true;
     } catch (err) {
-      automationLogger.error({ err: err instanceof Error ? err.message : String(err), to, templateId }, 'Failed to send WhatsApp message');
+      automationLogger.error({ 
+        err: err instanceof Error ? err.message : String(err), 
+        to, 
+        templateId 
+      }, 'Failed to generate WhatsApp link');
       return false;
     }
+  }
+
+  /**
+   * Generate WhatsApp link for message
+   * ✅ NEW: Public method to get wa.me link
+   */
+  generateWhatsAppLink(to: string, message: string): string {
+    // Clean phone number
+    const cleanPhone = to.replace(/\D/g, '');
+    const phoneWithCountry = cleanPhone.startsWith('62') ? cleanPhone : `62${cleanPhone.replace(/^0/, '')}`;
+    const encodedMessage = encodeURIComponent(message);
+    return `https://wa.me/${phoneWithCountry}?text=${encodedMessage}`;
   }
 
   /**
@@ -168,8 +202,8 @@ Kami tunggu orderan selanjutnya! 🙏
       customer_name: orderData.customer_name,
       order_items: orderItems,
       total_amount: formatCurrentCurrency(orderData.total_amount),
-      delivery_date: orderData.delivery_date || 'Segera',
-      notes: orderData.notes || ''
+      delivery_date: orderData.delivery_date ?? 'Segera',
+      notes: orderData.notes ?? ''
     };
 
     return this.sendMessage(orderData.customer_phone, 'order_confirmation', data);
@@ -187,7 +221,7 @@ Kami tunggu orderan selanjutnya! 🙏
       customer_name: orderData.customer_name,
       order_items: orderItems,
       total_amount: formatCurrentCurrency(orderData.total_amount),
-      delivery_date: orderData.delivery_date || 'Hari ini'
+      delivery_date: orderData.delivery_date ?? 'Hari ini'
     };
 
     return this.sendMessage(orderData.customer_phone, 'order_reminder', data);

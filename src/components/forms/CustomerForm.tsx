@@ -48,14 +48,14 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
     resolver: zodResolver(CustomerFormSchema),
     mode: 'onChange',
     defaultValues: {
-      name: initialData?.name || '',
-      email: initialData?.email || null,
-      phone: initialData?.phone || null,
-      address: initialData?.address || null,
+      name: initialData?.name ?? '',
+      email: initialData?.email ?? null,
+      phone: initialData?.phone ?? null,
+      address: initialData?.address ?? null,
       customer_type: (initialData?.customer_type as 'retail' | 'wholesale' | 'vip' | 'regular') || 'regular',
-      notes: initialData?.notes || null,
+      notes: initialData?.notes ?? null,
       is_active: initialData?.is_active !== undefined ? initialData.is_active : true,
-      user_id: initialData?.user_id || '',
+      user_id: initialData?.user_id ?? '',
     }
   })
 
@@ -146,7 +146,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              checked={form.watch('is_active') || true}
+              checked={form.watch('is_active') ?? true}
               onCheckedChange={(checked) => form.setValue('is_active', checked === true)}
             />
             <Label>Aktif</Label>
@@ -154,7 +154,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
 
           <Button
             type="submit"
-            disabled={isLoading || !form.formState.isValid}
+            disabled={isLoading ?? !form.formState.isValid}
             className="w-full"
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

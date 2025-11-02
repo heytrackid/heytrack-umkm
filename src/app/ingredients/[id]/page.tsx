@@ -67,9 +67,9 @@ const EditIngredientPage = () => {
                         name: data.name,
                         unit: data.unit as 'kg' | 'g' | 'l' | 'ml' | 'pcs' | 'dozen',
                         price_per_unit: data.price_per_unit,
-                        current_stock: data.current_stock || 0,
-                        min_stock: data.min_stock || 0,
-                        description: data.description || ''
+                        current_stock: data.current_stock ?? 0,
+                        min_stock: data.min_stock ?? 0,
+                        description: data.description ?? ''
                     })
                 }
             } catch (err: unknown) {
@@ -99,8 +99,8 @@ const EditIngredientPage = () => {
                 unit: data.unit,
                 price_per_unit: data.price_per_unit,
                 current_stock: data.current_stock,
-                min_stock: data.min_stock || 0,
-                description: data.description || null,
+                min_stock: data.min_stock ?? 0,
+                description: data.description ?? null,
             }
 
             await updateIngredient(id, payload)
@@ -126,7 +126,7 @@ const EditIngredientPage = () => {
     const breadcrumbItems = [
         { label: 'Dashboard', href: '/' },
         { label: 'Bahan Baku', href: '/ingredients' },
-        { label: ingredient?.name || 'Edit Bahan Baku' }
+        { label: ingredient?.name ?? 'Edit Bahan Baku' }
     ]
 
     if (fetching) {
@@ -184,9 +184,9 @@ const EditIngredientPage = () => {
                                         name: ingredient.name,
                                         unit: ingredient.unit as 'kg' | 'g' | 'l' | 'ml' | 'pcs' | 'dozen',
                                         price_per_unit: ingredient.price_per_unit,
-                                        current_stock: ingredient.current_stock || 0,
-                                        min_stock: ingredient.min_stock || 0,
-                                        description: ingredient.description || ''
+                                        current_stock: ingredient.current_stock ?? 0,
+                                        min_stock: ingredient.min_stock ?? 0,
+                                        description: ingredient.description ?? ''
                                     }}
                                 />
 

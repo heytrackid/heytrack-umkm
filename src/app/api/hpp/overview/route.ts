@@ -43,8 +43,8 @@ export async function GET(_request: NextRequest) {
           .gt('cost_per_unit', 0)
       ])
 
-      const totalRecipes = recipesResult.count || 0
-      const recipesWithCost = calculationsResult.data || []
+      const totalRecipes = recipesResult.count ?? 0
+      const recipesWithCost = calculationsResult.data ?? []
 
       // Calculate average HPP
       const averageHpp = recipesWithCost.length > 0

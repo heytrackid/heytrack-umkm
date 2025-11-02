@@ -40,7 +40,7 @@ export function useRecipesData(options: UseRecipesDataOptions = {}) {
     const searchLower = options.searchTerm.toLowerCase()
     return (
       recipe.name.toLowerCase().includes(searchLower) ||
-      (recipe.description || '').toLowerCase().includes(searchLower)
+      (recipe.description ?? '').toLowerCase().includes(searchLower)
     )
   })
 

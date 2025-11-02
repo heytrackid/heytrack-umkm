@@ -30,7 +30,7 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
     const difficultyMap = { EASY: 1, MEDIUM: 2, HARD: 3 }
     const avgDifficultyNum =
         recipes.length > 0
-            ? recipes.reduce((sum, r) => sum + (difficultyMap[(r.difficulty || 'MEDIUM') as keyof typeof difficultyMap] || 2), 0) /
+            ? recipes.reduce((sum, r) => sum + (difficultyMap[(r.difficulty ?? 'MEDIUM') as keyof typeof difficultyMap] ?? 2), 0) /
             recipes.length
             : 0
 
@@ -40,7 +40,7 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
     // Find most common category
     const categoryCount = recipes.reduce(
         (acc, r) => {
-            const category = r.category || 'other';
+            const category = r.category ?? 'other';
             acc[category] = (acc[category] || 0) + 1
             return acc
         },

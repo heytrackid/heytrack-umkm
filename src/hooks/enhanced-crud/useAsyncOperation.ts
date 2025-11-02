@@ -47,7 +47,7 @@ export function useAsyncOperation() {
       if (showToasts) {
         errorToast(
           'Terjadi Kesalahan',
-          errorMessage || errorMsg
+          errorMessage ?? errorMsg
         )
       }
 

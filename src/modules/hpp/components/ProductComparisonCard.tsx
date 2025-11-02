@@ -27,7 +27,6 @@ interface ProductComparisonCardProps {
 export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps) => {
   const { formatCurrency } = useCurrency()
   const router = useRouter()
-  const { toast } = useToast()
 
 
 

@@ -12,7 +12,7 @@ export function useSupabaseQuery<T extends TableName>(
   tableName: T,
   options: UseSupabaseQueryOptions<T> = {}
 ) {
-  const [data, setData] = useState<Array<Row<T>>>(options.initial || [])
+  const [data, setData] = useState<Array<Row<T>>>(options.initial ?? [])
   const [loading, setLoading] = useState(!options.initial)
   const [error, setError] = useState<string | null>(null)
   
@@ -28,7 +28,7 @@ export function useSupabaseQuery<T extends TableName>(
 
       const supabase = createClient()
       const currentOptions = optionsRef.current;
-      let query = supabase.from(tableName).select(currentOptions.select || '*')
+      let query = supabase.from(tableName).select(currentOptions.select ?? '*')
 
       // Apply filters
       if (currentOptions.filter) {
@@ -46,7 +46,7 @@ export function useSupabaseQuery<T extends TableName>(
       // Apply ordering
       if (currentOptions.orderBy) {
         query = query.order(currentOptions.orderBy.column, {
-          ascending: currentOptions.orderBy.ascending || true,
+          ascending: currentOptions.orderBy.ascending ?? true,
         })
       }
 

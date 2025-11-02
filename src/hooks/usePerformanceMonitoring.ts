@@ -105,7 +105,7 @@ export function usePerformanceMonitoring() {
       })
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
       observersRef.current.push(lcpObserver)
-    } catch (e) {
+    } catch (_e) {
       // LCP observation not supported
     }
 
@@ -123,7 +123,7 @@ export function usePerformanceMonitoring() {
       })
       fidObserver.observe({ entryTypes: ['first-input'] })
       observersRef.current.push(fidObserver)
-    } catch (e) {
+    } catch (_e) {
       // FID observation not supported
     }
 
@@ -145,7 +145,7 @@ export function usePerformanceMonitoring() {
       })
       clsObserver.observe({ entryTypes: ['layout-shift'] })
       observersRef.current.push(clsObserver)
-    } catch (e) {
+    } catch (_e) {
       // CLS observation not supported
     }
 
@@ -162,7 +162,7 @@ export function usePerformanceMonitoring() {
       })
       fcpObserver.observe({ entryTypes: ['paint'] })
       observersRef.current.push(fcpObserver)
-    } catch (e) {
+    } catch (_e) {
       // FCP observation not supported
     }
   }
@@ -211,13 +211,22 @@ export function usePerformanceMonitoring() {
 
   const updateMemoryUsage = () => {
     if ('memory' in performance) {
-      const {memory} = (performance as any)
+      type PerformanceWithMemory = Performance & {
+        memory: {
+          usedJSHeapSize?: number
+          totalJSHeapSize?: number
+          jsHeapSizeLimit?: number
+        }
+      }
+      
+      const perfWithMemory = performance as PerformanceWithMemory
+      const {memory} = perfWithMemory
       setMetrics(prev => ({
         ...prev,
         memoryUsage: {
-          used: memory.usedJSHeapSize || null,
-          total: memory.totalJSHeapSize || null,
-          limit: memory.jsHeapSizeLimit || null
+          used: memory.usedJSHeapSize ?? null,
+          total: memory.totalJSHeapSize ?? null,
+          limit: memory.jsHeapSizeLimit ?? null
         }
       }))
     }
