@@ -132,7 +132,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                     {/* Recipe Selection */}
                     <div className="space-y-2">
                         <Label htmlFor="recipe">
-                            Resep <span className="text-red-500">*</span>
+                            Resep <span className="text-gray-500">*</span>
                         </Label>
                         {loadingRecipes ? (
                             <div className="flex items-center justify-center py-4">
@@ -166,7 +166,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                     {/* Quantity */}
                     <div className="space-y-2">
                         <Label htmlFor="quantity">
-                            Jumlah Produksi <span className="text-red-500">*</span>
+                            Jumlah Produksi <span className="text-gray-500">*</span>
                         </Label>
                         <Input
                             id="quantity"
@@ -182,7 +182,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                     {/* Planned Date */}
                     <div className="space-y-2">
                         <Label>
-                            Tanggal Rencana Produksi <span className="text-red-500">*</span>
+                            Tanggal Rencana Produksi <span className="text-gray-500">*</span>
                         </Label>
                         <Popover>
                             <PopoverTrigger asChild>

@@ -159,7 +159,7 @@ export const retryWithBackoff = async <T>(
   baseDelay = 1000,
   maxDelay = 10000
 ): Promise<T> => {
-  let lastError: Error
+  let lastError: Error | undefined
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -181,7 +181,8 @@ export const retryWithBackoff = async <T>(
     }
   }
 
-  throw lastError!
+  // This should never happen due to the loop logic, but TypeScript needs the check
+  throw lastError ?? new Error('Retry failed with unknown error')
 }
 
 /**
@@ -416,7 +417,14 @@ export const responseTransformers = {
       )
     }
 
-    return createApiResponse.success(response.data!)
+    if (!response.data) {
+      return createApiResponse.error(
+        'No data returned from database',
+        HTTP_STATUS.INTERNAL_SERVER_ERROR
+      )
+    }
+
+    return createApiResponse.success(response.data)
   },
 
   // Transform array response to paginated response

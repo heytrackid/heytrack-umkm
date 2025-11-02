@@ -67,9 +67,9 @@ export const NotificationBell = () => {
 
                         if (shouldPlaySound) {
                             if (latestNotif.priority === 'urgent') {
-                                playUrgentNotificationSound(preferences.sound_volume !== null ? preferences.sound_volume : undefined)
+                                playUrgentNotificationSound(preferences.sound_volume ?? undefined)
                             } else {
-                                playNotificationSound(preferences.sound_volume !== null ? preferences.sound_volume : undefined)
+                                playNotificationSound(preferences.sound_volume ?? undefined)
                             }
                         }
                     }
@@ -89,13 +89,13 @@ export const NotificationBell = () => {
     }, [preferences])
 
     useEffect(() => {
-        fetchPreferences()
+        void fetchPreferences()
     }, [fetchPreferences])
 
     useEffect(() => {
         if (!preferences) { return }
 
-        fetchNotifications()
+        void fetchNotifications()
 
         // Set up real-time subscription
         const supabase = createClient()
@@ -110,13 +110,13 @@ export const NotificationBell = () => {
                     table: 'notifications',
                 },
                 () => {
-                    fetchNotifications()
+                    void fetchNotifications()
                 }
             )
             .subscribe()
 
         return () => {
-            supabase.removeChannel(channel)
+            void supabase.removeChannel(channel)
         }
     }, [preferences, fetchNotifications])
 

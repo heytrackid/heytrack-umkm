@@ -84,7 +84,7 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                                         <span className="text-muted-foreground">
                                             {ingredient.name} ({ingredient.quantity} {ingredient.unit})
                                             {ingredient.unit_price === 0 && (
-                                                <span className="ml-2 text-xs text-red-600">⚠️ Belum ada harga</span>
+                                                <span className="ml-2 text-xs text-gray-600">⚠️ Belum ada harga</span>
                                             )}
                                         </span>
                                         <span className="font-medium">
@@ -131,7 +131,7 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                             )}
                         </div>
                         <div className="text-right">
-                            <div className="text-2xl font-bold text-blue-600">
+                            <div className="text-2xl font-bold text-gray-600">
                                 {formatCurrency(recipe.total_cost)}
                             </div>
                             {hasSignificantChange && (

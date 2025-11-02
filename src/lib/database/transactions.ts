@@ -1,6 +1,4 @@
 import { dbLogger } from '@/lib/logger'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/database'
 
 
 /**
@@ -234,10 +232,8 @@ export async function executeParallel<T>(
 
     if (executing.length >= maxConcurrency) {
       await Promise.race(executing)
-      executing.splice(
-        executing.findIndex(p => p === promise),
-        1
-      )
+      const index = executing.findIndex(p => p === promise)
+      void executing.splice(index, 1)
     }
   }
 

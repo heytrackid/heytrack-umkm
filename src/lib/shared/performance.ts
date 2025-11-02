@@ -452,7 +452,10 @@ export const perfUtils = {
       const key = getKey ? getKey(...args) : JSON.stringify(args)
 
       if (cache.has(key)) {
-        return cache.get(key)!
+        const cached = cache.get(key)
+        if (cached !== undefined) {
+          return cached
+        }
       }
 
       const result = func(...args)
@@ -464,7 +467,10 @@ export const perfUtils = {
   // Request idle callback
   requestIdleCallback: (callback: () => void, timeout = 5000) => {
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      const ric = (window as any).requestIdleCallback as (cb: IdleRequestCallback, opts?: IdleRequestOptions) => number
+      interface WindowWithIdleCallback extends Window {
+        requestIdleCallback: (cb: IdleRequestCallback, opts?: IdleRequestOptions) => number
+      }
+      const ric = (window as WindowWithIdleCallback).requestIdleCallback
       ric(callback, { timeout })
     } else {
       void setTimeout(callback, 0)

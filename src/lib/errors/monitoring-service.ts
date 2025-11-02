@@ -123,7 +123,7 @@ class ErrorMonitoringService {
         }, 'Captured error (development mode)')
       } else {
         // Send to external error monitoring service
-        this.sendError(processedEvent)
+        void this.sendError(processedEvent)
       }
     }
   }
@@ -314,5 +314,6 @@ export { ErrorMonitoringService }
 
 // Add error monitoring to global scope
 if (typeof window !== 'undefined') {
-  (window as any).monitoringService = monitoringService
+  type WindowWithMonitoring = Window & { monitoringService?: typeof monitoringService }
+  ;(window as WindowWithMonitoring).monitoringService = monitoringService
 }

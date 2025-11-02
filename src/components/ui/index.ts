@@ -83,7 +83,8 @@ export {
   SwipeableTabs,
   SwipeableTabsList,
   SwipeableTabsTrigger,
-  SwipeableTabsContent
+  SwipeableTabsContent,
+  SwipeableTabsContentContainer
 } from './swipeable-tabs'
 
 export {

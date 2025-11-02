@@ -77,26 +77,26 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {/* Produk Dihitung */}
-                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <div className="text-2xl font-bold text-blue-600 mb-1">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+                        <div className="text-2xl font-bold text-gray-600 mb-1">
                             {overview.recipesWithHpp}/{overview.totalRecipes}
                         </div>
                         <div className="text-xs text-muted-foreground mb-2">Produk Dihitung</div>
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                             <div
-                                className="bg-blue-600 h-1.5 rounded-full transition-all"
+                                className="bg-gray-600 h-1.5 rounded-full transition-all"
                                 style={{ width: `${completionPercentage}%` }}
                             />
                         </div>
                     </div>
 
                     {/* Biaya Rata-rata */}
-                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                        <div className="text-2xl font-bold text-green-600 mb-1">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+                        <div className="text-2xl font-bold text-gray-600 mb-1">
                             {formatCurrency(overview.averageHpp)}
                         </div>
                         <div className="text-xs text-muted-foreground">Biaya Rata-rata</div>
-                        <div className="flex items-center gap-1 mt-1 text-xs text-green-600">
+                        <div className="flex items-center gap-1 mt-1 text-xs text-gray-600">
                             <TrendingUp className="h-3 w-3" />
                             <span>Per produk</span>
                         </div>
@@ -107,33 +107,32 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
                         ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
                         : 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
                         }`}>
-                        <div className={`text-2xl font-bold mb-1 ${overview.unreadAlerts > 0 ? 'text-orange-600' : 'text-gray-400'
-                            }`}>
+                        <div className="text-2xl font-bold mb-1 text-gray-600">
                             {overview.unreadAlerts}
                         </div>
                         <div className="text-xs text-muted-foreground">Peringatan Baru</div>
                         <div className="flex items-center gap-1 mt-1 text-xs">
                             {overview.unreadAlerts > 0 ? (
                                 <>
-                                    <Bell className="h-3 w-3 text-orange-600" />
-                                    <span className="text-orange-600">Perlu tindakan</span>
+                                    <Bell className="h-3 w-3 text-gray-600" />
+                                    <span className="text-gray-600">Perlu tindakan</span>
                                 </>
                             ) : (
                                 <>
-                                    <CheckCircle className="h-3 w-3 text-green-600" />
-                                    <span className="text-green-600">Semua aman</span>
+                                    <CheckCircle className="h-3 w-3 text-gray-600" />
+                                    <span className="text-gray-600">Semua aman</span>
                                 </>
                             )}
                         </div>
                     </div>
 
                     {/* Progress */}
-                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                        <div className="text-2xl font-bold text-purple-600 mb-1">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+                        <div className="text-2xl font-bold text-gray-600 mb-1">
                             {completionPercentage}%
                         </div>
                         <div className="text-xs text-muted-foreground">Progress</div>
-                        <div className="flex items-center gap-1 mt-1 text-xs text-purple-600">
+                        <div className="flex items-center gap-1 mt-1 text-xs text-gray-600">
                             <Calculator className="h-3 w-3" />
                             <span>Kelengkapan data</span>
                         </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import AppLayout from '@/components/layout/app-layout'
-import { PageBreadcrumb, BreadcrumbPatterns, PageHeader, StatsCards, StatCardPatterns } from '@/components/ui'
+import { PageBreadcrumb, BreadcrumbPatterns, PageHeader, StatsCards } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import { Plus, Upload, TrendingUp, Users, DollarSign, Package } from 'lucide-react'
 import { SuppliersCRUD } from '@/components/crud/suppliers-crud'
@@ -10,8 +10,8 @@ import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
 import type { SuppliersTable } from '@/types/database'
 
 const SuppliersPage = () => {
-    const { data: suppliers, loading } = useSupabaseCRUD('suppliers')
-    const [showAddDialog, setShowAddDialog] = useState(false)
+    const { data: suppliers } = useSupabaseCRUD('suppliers')
+    const [_showAddDialog, _setShowAddDialog] = useState(false)
 
     // Calculate stats
     const totalSuppliers = suppliers?.length ?? 0
@@ -45,7 +45,7 @@ const SuppliersPage = () => {
                                 Import
                             </Button>
                             <Button
-                                onClick={() => setShowAddDialog(true)}
+                                onClick={() => _setShowAddDialog(true)}
                                 className="flex-1 sm:flex-none"
                             >
                                 <Plus className="h-4 w-4 mr-2" />

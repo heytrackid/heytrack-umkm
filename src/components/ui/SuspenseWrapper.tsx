@@ -22,6 +22,13 @@ import {
 } from '@/components/ui/skeletons'
 import { globalLazyLoadingUtils } from '../lazy'
 
+// Type for window with lazy loading metrics
+interface WindowWithMetrics extends Window {
+  LazyLoadingMetrics?: {
+    trackComponentLoad: (componentName: string, startTime: number) => void
+  }
+}
+
 /**
  * Suspense Wrapper for Lazy Components
  * Provides consistent loading states and error boundaries
@@ -145,8 +152,9 @@ export const RouteSuspenseWrapper = ({
   // Preload critical components for this route
   useEffect(() => {
     // Import the lazy loading utils and preload for route
-    globalLazyLoadingUtils.preloadForRoute(routeName as any).catch(() => {
-      // Ignore preload errors
+    // Type assertion is safe here as we're catching errors from invalid routes
+    void globalLazyLoadingUtils.preloadForRoute(routeName as never).catch(() => {
+      // Ignore preload errors for invalid routes
     })
   }, [routeName])
 
@@ -156,7 +164,7 @@ export const RouteSuspenseWrapper = ({
 /**
  * Lazy component with automatic performance tracking
  */
-export function createTrackedLazyComponent<T extends ComponentType<Record<string, unknown>>>(
+export function createTrackedLazyComponent(
   componentName: string,
   options: {
     loadingType?: keyof typeof loadingComponents
@@ -168,8 +176,8 @@ export function createTrackedLazyComponent<T extends ComponentType<Record<string
       // Track component load time
       const startTime = performance.now()
       setTimeout(() => {
-        if (typeof window !== 'undefined' && (window as any).LazyLoadingMetrics) {
-          (window as any).LazyLoadingMetrics.trackComponentLoad(componentName, startTime)
+        if (typeof window !== 'undefined' && (window as WindowWithMetrics).LazyLoadingMetrics) {
+          (window as WindowWithMetrics).LazyLoadingMetrics?.trackComponentLoad(componentName, startTime)
         }
       }, 0)
       return module

@@ -79,7 +79,11 @@ export function getCachedSkeleton(
   if (!skeletonCache.has(key)) {
     skeletonCache.set(key, factory())
   }
-  return skeletonCache.get(key)!
+  const cached = skeletonCache.get(key)
+  if (!cached) {
+    throw new Error(`Skeleton cache failed for key: ${key}`)
+  }
+  return cached
 }
 
 // Animation timing untuk smooth transitions

@@ -10,7 +10,7 @@ import type { RecipesTable, RecipesInsert, RecipesUpdate } from '@/types/databas
  */
 
 
-type Recipe = RecipesTable
+type _Recipe = RecipesTable
 type RecipeInsert = RecipesInsert
 type RecipeUpdate = RecipesUpdate
 
@@ -89,7 +89,7 @@ export function useCreateRecipe() {
     },
     onSuccess: () => {
       // Invalidate and refetch recipes list
-      queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      void queryClient.invalidateQueries({ queryKey: ['recipes'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -133,8 +133,8 @@ export function useUpdateRecipe() {
     },
     onSuccess: (_, variables) => {
       // Invalidate specific recipe and list
-      queryClient.invalidateQueries({ queryKey: ['recipe', variables.id] })
-      queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      void queryClient.invalidateQueries({ queryKey: ['recipe', variables.id] })
+      void queryClient.invalidateQueries({ queryKey: ['recipes'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -176,7 +176,7 @@ export function useDeleteRecipe() {
     },
     onSuccess: () => {
       // Invalidate recipes list
-      queryClient.invalidateQueries({ queryKey: ['recipes'] })
+      void queryClient.invalidateQueries({ queryKey: ['recipes'] })
       
       toast({
         title: 'Berhasil ✓',

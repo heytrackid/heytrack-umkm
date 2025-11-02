@@ -91,7 +91,7 @@ export function useProfitReport(): UseProfitReportReturn {
 
     try {
       const filename = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
-      await exportProfitReport(profitData, format, filename)
+      exportProfitReport(profitData, format, filename)
     } catch (err: unknown) {
       const error = err as Error
       apiLogger.error({ error: error.message }, 'Error exporting report:')

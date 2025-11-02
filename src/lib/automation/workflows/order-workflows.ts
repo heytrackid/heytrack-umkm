@@ -37,7 +37,7 @@ type RecipeIngredientRow = RecipeIngredientsTable
 type IngredientRow = IngredientsTable
 type StockTransactionInsert = StockTransactionsInsert
 type FinancialRecordInsert = FinancialRecordsInsert
-type IngredientUpdate = IngredientsUpdate
+type _IngredientUpdate = IngredientsUpdate
 type CustomerUpdate = CustomersUpdate
 
 type RecipeIngredientWithIngredient = RecipeIngredientRow & {
@@ -308,7 +308,12 @@ export class OrderWorkflowHandlers {
 
       // Note: stock_reservations table exists in database but not in generated types yet
       // This will work at runtime
-      const { error: reservationError } = await (supabase as any)
+      type SupabaseWithReservations = typeof supabase & {
+        from(table: 'stock_reservations'): {
+          insert: (data: typeof reservation) => Promise<{ error: unknown }>
+        }
+      }
+      const { error: reservationError } = await (supabase as SupabaseWithReservations)
         .from('stock_reservations')
         .insert(reservation)
 
@@ -571,9 +576,10 @@ export class OrderWorkflowHandlers {
 
     // 2. Calculate total COGS from order items
     let totalCogs = 0
-    for (const item of order.order_items ?? []) {
+    type OrderItemWithHpp = OrderItemWithRecipe & { hpp_at_order?: number }
+    for (const item of (order.order_items ?? []) as OrderItemWithHpp[]) {
       // hpp_at_order exists in database but not in generated types yet
-      const hppAtOrder = Number((item as any).hpp_at_order ?? 0)
+      const hppAtOrder = Number(item.hpp_at_order ?? 0)
       const quantity = Number(item.quantity ?? 0)
       totalCogs += hppAtOrder * quantity
     }

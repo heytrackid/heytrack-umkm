@@ -108,7 +108,7 @@ export class InventoryWorkflowHandlers {
   /**
    * Handle out of stock event
    */
-  static async handleOutOfStock(context: WorkflowContext): Promise<WorkflowResult> {
+  static handleOutOfStock(context: WorkflowContext): WorkflowResult {
     const { event, logger } = context
 
     logger.error({

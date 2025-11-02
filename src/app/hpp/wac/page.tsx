@@ -212,7 +212,7 @@ const WacEnginePage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-3xl font-bold text-gray-600">
                 {ingredients.filter(i => i.weighted_average_cost && i.weighted_average_cost > 0).length}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -229,7 +229,7 @@ const WacEnginePage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">
+              <div className="text-3xl font-bold text-gray-600">
                 {ingredients.length > 0
                   ? formatCurrency(
                     ingredients
@@ -254,7 +254,7 @@ const WacEnginePage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-600">
+              <div className="text-3xl font-bold text-gray-600">
                 {formatCurrency(
                   ingredients.reduce((sum, i) => {
                     const wac = (i.weighted_average_cost || i.price_per_unit) || 0

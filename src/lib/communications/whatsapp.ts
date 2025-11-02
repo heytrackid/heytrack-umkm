@@ -128,9 +128,9 @@ Kami tunggu orderan selanjutnya! 🙏
    * Send WhatsApp message using wa.me link
    * ✅ NEW: Opens WhatsApp with pre-filled message using wa.me
    */
-  async sendMessage(to: string, templateId: string, data: Record<string, unknown>): Promise<boolean> {
+  sendMessage(to: string, templateId: string, data: Record<string, unknown>): boolean {
     try {
-      const template = this.config.defaultTemplates.find(t => t.id === templateId) ||
+      const template = this.config.defaultTemplates.find(t => t.id === templateId) ??
                       WhatsAppService.getDefaultTemplates().find(t => t.id === templateId);
 
       if (!template) {
@@ -193,7 +193,7 @@ Kami tunggu orderan selanjutnya! 🙏
   /**
    * Send order confirmation
    */
-  async sendOrderConfirmation(orderData: OrderData): Promise<boolean> {
+  sendOrderConfirmation(orderData: OrderData): boolean {
     const orderItems = orderData.items.map(item =>
       `• ${item.name} (${item.quantity}x) - ${formatCurrentCurrency(item.price * item.quantity)}`
     ).join('\n');
@@ -212,7 +212,7 @@ Kami tunggu orderan selanjutnya! 🙏
   /**
    * Send delivery reminder
    */
-  async sendDeliveryReminder(orderData: OrderData): Promise<boolean> {
+  sendDeliveryReminder(orderData: OrderData): boolean {
     const orderItems = orderData.items.map(item =>
       `• ${item.name} (${item.quantity}x)`
     ).join('\n');
@@ -230,7 +230,7 @@ Kami tunggu orderan selanjutnya! 🙏
   /**
    * Send payment reminder
    */
-  async sendPaymentReminder(orderData: OrderData, deadline: string, paymentAccount: string): Promise<boolean> {
+  sendPaymentReminder(orderData: OrderData, deadline: string, paymentAccount: string): boolean {
     const orderItems = orderData.items.map(item =>
       `• ${item.name} (${item.quantity}x)`
     ).join('\n');
@@ -249,7 +249,7 @@ Kami tunggu orderan selanjutnya! 🙏
   /**
    * Send follow-up message
    */
-  async sendFollowUp(orderData: OrderData): Promise<boolean> {
+  sendFollowUp(orderData: OrderData): boolean {
     const orderItems = orderData.items.map(item =>
       `• ${item.name} (${item.quantity}x)`
     ).join('\n');

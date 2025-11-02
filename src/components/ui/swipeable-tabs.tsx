@@ -5,11 +5,11 @@ import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { cn } from '@/lib/utils'
 import { Button } from './button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-
-
+import { useSwipeableTabs } from '@/hooks/useSwipeableTabs'
 
 interface SwipeableTabsProps extends ComponentProps<typeof TabsPrimitive.Root> {
   children: React.ReactNode
+  enableTouchSwipe?: boolean
 }
 
 interface SwipeableTabsListProps extends ComponentProps<typeof TabsPrimitive.List> {
@@ -30,12 +30,23 @@ interface SwipeableTabsContentProps extends ComponentProps<typeof TabsPrimitive.
   className?: string
 }
 
+interface SwipeableTabsContentContainerProps {
+  children: React.ReactNode
+  tabValues: string[]
+  currentValue: string
+  onValueChange: (value: string) => void
+  className?: string
+  enableSwipe?: boolean
+}
+
 const SwipeableTabs = ({
   className,
+  enableTouchSwipe = true,
   ...props
 }: SwipeableTabsProps) => (
   <TabsPrimitive.Root
     data-slot="tabs"
+    data-enable-touch-swipe={enableTouchSwipe}
     className={cn('flex flex-col gap-2', className)}
     {...props}
   />
@@ -152,4 +163,57 @@ const SwipeableTabsContent = ({
   />
 )
 
-export { SwipeableTabs, SwipeableTabsList, SwipeableTabsTrigger, SwipeableTabsContent }
+/**
+ * Container for tab content with swipe gesture support
+ * Usage: Wrap all TabsContent components with this
+ */
+const SwipeableTabsContentContainer = ({
+  children,
+  tabValues,
+  currentValue,
+  onValueChange,
+  className,
+  enableSwipe = true
+}: SwipeableTabsContentContainerProps) => {
+  const currentIndex = tabValues.indexOf(currentValue)
+
+  const { containerRef, translateX, isDragging } = useSwipeableTabs(
+    currentIndex,
+    tabValues.length,
+    (newIndex) => {
+      onValueChange(tabValues[newIndex])
+    },
+    {
+      threshold: 50,
+      resistance: 0.3,
+      animationDuration: 200,
+      enabled: enableSwipe
+    }
+  )
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn(
+        'relative overflow-hidden touch-pan-y',
+        isDragging && 'cursor-grabbing',
+        !isDragging && 'cursor-grab',
+        className
+      )}
+      style={{
+        transform: `translateX(${translateX}px)`,
+        transition: isDragging ? 'none' : 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)'
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+export { 
+  SwipeableTabs, 
+  SwipeableTabsList, 
+  SwipeableTabsTrigger, 
+  SwipeableTabsContent,
+  SwipeableTabsContentContainer 
+}

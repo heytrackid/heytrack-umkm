@@ -107,7 +107,7 @@ export const RegistrationForm = ({
               />
             </div>
             {fieldErrors.email && (
-              <p id="email-error" className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
+              <p id="email-error" className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in" role="alert">
                 {fieldErrors.email}
               </p>
             )}
@@ -153,7 +153,7 @@ export const RegistrationForm = ({
               </Button>
             </div>
             {fieldErrors.password && (
-              <p id="password-error" className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
+              <p id="password-error" className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in" role="alert">
                 {fieldErrors.password}
               </p>
             )}
@@ -204,7 +204,7 @@ export const RegistrationForm = ({
             {fieldErrors.confirmPassword && (
               <p
                 id="confirm-password-error"
-                className="text-sm text-red-600 dark:text-red-400 animate-fade-in"
+                className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in"
                 role="alert"
               >
                 {fieldErrors.confirmPassword}

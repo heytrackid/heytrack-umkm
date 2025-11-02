@@ -106,7 +106,7 @@ export class FinancialWorkflowHandlers {
       const costChange = ((newAmount - oldAmount) / oldAmount) * 100
 
       // Send notifications
-      await this.sendCostChangeNotification(data, costChange)
+      void this.sendCostChangeNotification(data, costChange)
 
       // Trigger pricing reviews for significant changes
       if (Math.abs(costChange) > 10) {
@@ -149,13 +149,13 @@ export class FinancialWorkflowHandlers {
   /**
    * Send price change notification
    */
-  private static async sendPriceChangeNotification(data: {
+  private static sendPriceChangeNotification(data: {
     ingredientId: string
     oldPrice: number
     newPrice: number
     priceChange: number
     affectedRecipes?: string[]
-  }): Promise<void> {
+  }): void {
     const { priceChange, affectedRecipes } = data
 
     try {
@@ -179,10 +179,10 @@ export class FinancialWorkflowHandlers {
   /**
    * Send cost change notification
    */
-  private static async sendCostChangeNotification(
+  private static sendCostChangeNotification(
     data: { costId: string; costName: string; oldAmount: number; newAmount: number },
     costChange: number
-  ): Promise<void> {
+  ): void {
     const { costName, oldAmount, newAmount } = data
 
     try {

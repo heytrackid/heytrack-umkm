@@ -4,9 +4,7 @@ import { type ReactNode, lazy, Suspense } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { uiLogger } from '@/lib/logger'
-import(/* webpackChunkName: "recharts" */ 'recharts')
-
-
+void import(/* webpackChunkName: "recharts" */ 'recharts')
 
 // Chart Loading Skeleton Component
 const ChartLoadingSkeleton = ({ title, height = 'h-64' }: { title?: string, height?: string }) => (

@@ -251,8 +251,8 @@ async function POST(request: NextRequest) {
     )
 
     // Invalidate cache after bulk import
-    await cacheInvalidation.orders()
-    await cacheInvalidation.customers()
+    cacheInvalidation.orders()
+    cacheInvalidation.customers()
 
     return NextResponse.json({
       success: true,

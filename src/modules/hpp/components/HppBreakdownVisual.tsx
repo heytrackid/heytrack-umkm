@@ -130,7 +130,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
-                            <TrendingUp className="h-5 w-5 text-blue-600" />
+                            <TrendingUp className="h-5 w-5 text-gray-600" />
                             Ringkasan HPP - {recipe.name}
                         </CardTitle>
                         <Button variant="outline" size="sm" onClick={exportToPDF}>
@@ -142,27 +142,27 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-2xl font-bold text-blue-600">
+                            <div className="text-2xl font-bold text-gray-600">
                                 {formatCurrency(ingredientCost)}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">Bahan Baku</div>
-                            <div className="text-xs font-medium text-blue-600 mt-1">
+                            <div className="text-xs font-medium text-gray-600 mt-1">
                                 {ingredientSharePercent.toFixed(0)}% dari total
                             </div>
                         </div>
 
                         <div className="text-center p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-2xl font-bold text-orange-600">
+                            <div className="text-2xl font-bold text-gray-600">
                                 {formatCurrency(totalOperational)}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">Operasional</div>
-                            <div className="text-xs font-medium text-orange-600 mt-1">
+                            <div className="text-xs font-medium text-gray-600 mt-1">
                                 {operationalSharePercent.toFixed(0)}% dari total
                             </div>
                         </div>
 
                         <div className="text-center p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-2xl font-bold text-red-600">
+                            <div className="text-2xl font-bold text-gray-600">
                                 {formatCurrency(totalCost)}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">Total HPP</div>
@@ -172,7 +172,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                         </div>
 
                         <div className="text-center p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-2xl font-bold text-green-600">
+                            <div className="text-2xl font-bold text-gray-600">
                                 {marginPercent.toFixed(0)}%
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">Margin</div>
@@ -224,7 +224,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 >
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
-                            <Package className="h-5 w-5 text-blue-600" />
+                            <Package className="h-5 w-5 text-gray-600" />
                             Detail Bahan Baku
                             <Badge variant="secondary">{formatCurrency(ingredientCost)}</Badge>
                         </CardTitle>
@@ -299,7 +299,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 >
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
-                            <Zap className="h-5 w-5 text-orange-600" />
+                            <Zap className="h-5 w-5 text-gray-600" />
                             Biaya Operasional
                             <Badge variant="secondary">{formatCurrency(totalOperational)}</Badge>
                         </CardTitle>
@@ -313,10 +313,10 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 {expandedSections.has('operational') && (
                     <CardContent className="space-y-3">
                         {[
-                            { label: 'Tenaga Kerja', value: opCosts.labor, icon: Users, color: 'text-purple-600' },
-                            { label: 'Utilitas (Listrik, Air, Gas)', value: opCosts.utilities, icon: Zap, color: 'text-yellow-600' },
-                            { label: 'Packaging & Kemasan', value: opCosts.packaging, icon: Package, color: 'text-green-600' },
-                            { label: 'Overhead Lainnya', value: opCosts.overhead, icon: TrendingUp, color: 'text-blue-600' },
+                            { label: 'Tenaga Kerja', value: opCosts.labor, icon: Users, color: 'text-gray-600' },
+                            { label: 'Utilitas (Listrik, Air, Gas)', value: opCosts.utilities, icon: Zap, color: 'text-gray-600' },
+                            { label: 'Packaging & Kemasan', value: opCosts.packaging, icon: Package, color: 'text-gray-600' },
+                            { label: 'Overhead Lainnya', value: opCosts.overhead, icon: TrendingUp, color: 'text-gray-600' },
                         ].map((item) => {
                             const percent = (item.value / totalOperational) * 100
                             const Icon = item.icon
@@ -338,8 +338,8 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                             )
                         })}
 
-                        <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
-                            <p className="text-xs text-orange-800 dark:text-orange-200">
+                        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+                            <p className="text-xs text-gray-800 dark:text-gray-200">
                                 💡 <strong>Tips:</strong> Biaya operasional dihitung sebagai persentase dari biaya bahan baku.
                                 Anda bisa customize nilai ini di halaman Settings untuk hasil yang lebih akurat.
                             </p>
@@ -353,26 +353,26 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 <Card className="border-2 border-green-200 dark:border-green-800">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <TrendingUp className="h-5 w-5 text-green-600" />
+                            <TrendingUp className="h-5 w-5 text-gray-600" />
                             Analisis Profit
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-3 gap-4">
                             <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                                <div className="text-xl font-bold text-green-600">
+                                <div className="text-xl font-bold text-gray-600">
                                     {formatCurrency(sellingPrice)}
                                 </div>
                                 <div className="text-xs text-muted-foreground mt-1">Harga Jual</div>
                             </div>
                             <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                                <div className="text-xl font-bold text-red-600">
+                                <div className="text-xl font-bold text-gray-600">
                                     {formatCurrency(totalCost)}
                                 </div>
                                 <div className="text-xs text-muted-foreground mt-1">Total HPP</div>
                             </div>
                             <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                <div className="text-xl font-bold text-blue-600">
+                                <div className="text-xl font-bold text-gray-600">
                                     {formatCurrency(profit)}
                                 </div>
                                 <div className="text-xs text-muted-foreground mt-1">Profit Bersih</div>
@@ -382,7 +382,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                         <div className="space-y-2">
                             <div className="flex justify-between text-sm">
                                 <span>Margin Profit</span>
-                                <span className="font-bold text-green-600">{marginPercent.toFixed(1)}%</span>
+                                <span className="font-bold text-gray-600">{marginPercent.toFixed(1)}%</span>
                             </div>
                             <Progress value={marginPercent} className="h-3" />
                         </div>

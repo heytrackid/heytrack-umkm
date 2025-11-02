@@ -147,7 +147,7 @@ export default [
       "react/jsx-boolean-value": ["error", "never"],
       "react/jsx-no-useless-fragment": ["error", { allowExpressions: true }],
       "react/jsx-pascal-case": "error",
-      "react/no-array-index-key": "error",
+      "react/no-array-index-key": "warn", // Warn instead of error for static/skeleton content
       "react/no-danger": "error",
       "react/no-unstable-nested-components": "error",
       "react/function-component-definition": [

@@ -119,7 +119,7 @@ const FinancialChart = ({ data, compact = false, formatCurrency, colors }: {
     <Card className="w-full">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center space-x-2">
-          <DollarSign className="h-5 w-5 text-green-600" />
+          <DollarSign className="h-5 w-5 text-gray-600" />
           <span>Financial Performance</span>
         </CardTitle>
       </CardHeader>
@@ -135,13 +135,13 @@ const FinancialChart = ({ data, compact = false, formatCurrency, colors }: {
               <div className="text-sm text-gray-500">Costs</div>
             </div>
             <div>
-              <div className="text-xl font-bold text-green-600">
+              <div className="text-xl font-bold text-gray-600">
                 {formatCurrency(data.revenue - data.costs)}
               </div>
               <div className="text-sm text-gray-500">Profit</div>
             </div>
             <div>
-              <div className={`text-xl font-bold ${data.profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <div className="text-xl font-bold text-gray-600">
                 {data.profitMargin.toFixed(1)}%
               </div>
               <div className="text-sm text-gray-500">Margin</div>

@@ -4,9 +4,7 @@ import { lazy, Suspense, useState, useCallback, type ComponentType } from 'react
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-import(/* webpackChunkName: "modal-customer-form" */ '@/components/forms/CustomerForm').then(m => ({ default: m.CustomerForm }))
-
-
+void import(/* webpackChunkName: "modal-customer-form" */ '@/components/forms/CustomerForm').then(m => ({ default: m.CustomerForm }))
 
 // Modal Loading Skeleton
 const ModalLoadingSkeleton = ({ title }: { title?: string }) => (

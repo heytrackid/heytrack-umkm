@@ -39,7 +39,7 @@ export class BusinessContextService {
       const context = await this.loadFreshContext(userId, currentPage)
 
       // Cache the result
-      await this.cacheContext(userId, context);
+      void this.cacheContext(userId, context);
 
       const duration = Date.now() - startTime;
       logger.info({ userId, duration }, 'Business context loaded');
@@ -226,7 +226,7 @@ export class BusinessContextService {
 
     const totalCosts =
       (opCosts?.reduce((sum, cost) => sum + cost.amount, 0) ?? 0) +
-      (purchases?.reduce((sum, purchase) => sum + purchase.total_price, 0) ||
+      (purchases?.reduce((sum, purchase) => sum + purchase.total_price, 0) ??
         0);
 
     return {
@@ -377,18 +377,18 @@ export class BusinessContextService {
     return parts.join('\n')
   }
 
-  private static async loadInsights(
+  private static loadInsights(
     _supabase: Awaited<ReturnType<typeof createClient>>,
     _userId: string
-  ): Promise<BusinessInsight[]> {
+  ): BusinessInsight[] {
     // Return empty array for now - business_insights table may not exist yet
     return []
   }
 
-  private static async loadQuickStats(
+  private static loadQuickStats(
     _supabase: Awaited<ReturnType<typeof createClient>>,
     _userId: string
-  ): Promise<QuickStat[]> {
+  ): QuickStat[] {
     // Return empty array for now - business_quick_stats table may not exist yet
     return []
   }

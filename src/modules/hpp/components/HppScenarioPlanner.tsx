@@ -176,11 +176,11 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
                             <div className="text-xs text-muted-foreground">Harga Jual</div>
                         </div>
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-green-600">{currentMargin.toFixed(1)}%</div>
+                            <div className="text-lg font-bold text-gray-600">{currentMargin.toFixed(1)}%</div>
                             <div className="text-xs text-muted-foreground">Margin Saat Ini</div>
                         </div>
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-blue-600">{scenarios.length}</div>
+                            <div className="text-lg font-bold text-gray-600">{scenarios.length}</div>
                             <div className="text-xs text-muted-foreground">Skenario Aktif</div>
                         </div>
                     </div>
@@ -191,7 +191,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-yellow-600" />
+                        <Sparkles className="h-5 w-5 text-gray-600" />
                         Skenario Cepat
                     </CardTitle>
                 </CardHeader>
@@ -327,7 +327,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
                                         </div>
 
                                         <div className="text-center p-2 bg-white dark:bg-gray-900 rounded">
-                                            <div className={`text-sm font-bold ${isNegative ? 'text-red-600' : 'text-green-600'}`}>
+                                            <div className="text-sm font-bold text-gray-600">
                                                 {scenario.impact.costDiff > 0 ? '+' : ''}
                                                 {formatCurrency(scenario.impact.costDiff)}
                                             </div>
@@ -342,7 +342,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
                                         </div>
 
                                         <div className="text-center p-2 bg-white dark:bg-gray-900 rounded">
-                                            <div className={`text-sm font-bold ${marginImpact < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            <div className="text-sm font-bold text-gray-600">
                                                 {marginImpact > 0 ? '+' : ''}
                                                 {marginImpact.toFixed(1)}%
                                             </div>
@@ -351,9 +351,9 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
                                     </div>
 
                                     {scenario.impact.newMargin < 30 && (
-                                        <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800 flex items-start gap-2">
-                                            <AlertTriangle className="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" />
-                                            <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                                        <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-900/20 rounded border border-gray-200 dark:border-gray-800 flex items-start gap-2">
+                                            <AlertTriangle className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                                            <p className="text-xs text-gray-800 dark:text-gray-200">
                                                 <strong>Peringatan:</strong> Margin di bawah 30% berisiko untuk sustainability bisnis.
                                                 Pertimbangkan untuk menaikkan harga jual atau cari supplier alternatif.
                                             </p>

@@ -101,8 +101,8 @@ const UpdatePasswordPage = () => {
         <Card className="w-full max-w-md shadow-xl border-slate-200 dark:border-slate-800 animate-fade-in-scale">
           <CardContent className="pt-6 pb-6 sm:pt-8 sm:pb-8 px-4 sm:px-6">
             <div className="text-center space-y-4">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto animate-success-pulse">
-                <CheckCircle className="h-7 w-7 sm:h-8 sm:w-8 text-green-600 dark:text-green-400" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 dark:bg-gray-900/30 rounded-full flex items-center justify-center mx-auto animate-success-pulse">
+                <CheckCircle className="h-7 w-7 sm:h-8 sm:w-8 text-gray-600 dark:text-gray-400" />
               </div>
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -197,7 +197,7 @@ const UpdatePasswordPage = () => {
                   </Button>
                 </div>
                 {fieldErrors.password && (
-                  <p id="password-error" className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
+                  <p id="password-error" className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in" role="alert">
                     {fieldErrors.password}
                   </p>
                 )}
@@ -229,11 +229,11 @@ const UpdatePasswordPage = () => {
                     {passwordRequirements.map((req) => (
                       <div key={req.label} className="flex items-center gap-2 text-xs transition-all duration-200">
                         {req.met ? (
-                          <Check className="h-3 w-3 text-green-600 dark:text-green-400 transition-all duration-200" />
+                          <Check className="h-3 w-3 text-gray-600 dark:text-gray-400 transition-all duration-200" />
                         ) : (
                           <X className="h-3 w-3 text-slate-400 transition-all duration-200" />
                         )}
-                        <span className={`transition-colors duration-200 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-slate-500'}`}>
+                        <span className={`transition-colors duration-200 ${req.met ? 'text-gray-600 dark:text-gray-400' : 'text-slate-500'}`}>
                           {req.label}
                         </span>
                       </div>

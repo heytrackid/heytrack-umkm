@@ -66,7 +66,10 @@ export function useEnhancedCRUD<TTable extends TableName>(
       }
 
       void handleSuccess('create')
-      return result!
+      if (!result) {
+        throw new Error('Create operation returned no data')
+      }
+      return result
     } catch (error: unknown) {
       void handleCRUDError(error as Error, 'create', showErrorToast, customErrorHandler)
       throw error
@@ -173,7 +176,10 @@ export function useEnhancedCRUD<TTable extends TableName>(
         )
       }
 
-      return result!
+      if (!result) {
+        throw new Error('Bulk create operation returned no data')
+      }
+      return result
     } catch (error: unknown) {
       void handleCRUDError(new Error(getErrorMessage(error)), 'create', showErrorToast, customErrorHandler)
       throw error
@@ -206,7 +212,11 @@ export function useEnhancedCRUD<TTable extends TableName>(
           throw new Error(`Gagal update record ${update.id}: ${error.message}`)
         }
 
-        results.push(result!)
+        if (!result) {
+          throw new Error(`Update returned no data for ${update.id}`)
+        }
+
+        results.push(result)
       }
 
       if (showSuccessToast) {

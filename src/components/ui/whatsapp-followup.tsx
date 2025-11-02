@@ -1,21 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { OrdersTable, OrderItemsTable, OrderStatus, RecipesTable } from '@/types/database'
+import type { OrdersTable, OrderItemsTable, RecipesTable } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import {
-  openWhatsApp,
-  generateOrderConfirmationMessage,
-  generateDeliveryReminderMessage,
-  generatePaymentReminderMessage,
-  generateFollowUpMessage
-} from '@/lib/communications/whatsapp-helpers'
 
 import { apiLogger } from '@/lib/logger'
 import {
@@ -27,7 +19,6 @@ import {
   Smartphone,
   User,
   Clock,
-  Calendar,
   Package,
   CheckCircle2,
   AlertCircle
@@ -36,7 +27,7 @@ import {
 type Order = OrdersTable
 type OrderItem = OrderItemsTable
 // payment_status is a string field, not an enum
-type PaymentStatus = string
+type _PaymentStatus = string
 type Recipe = RecipesTable
 
 // Extended type for WhatsApp follow-up
@@ -210,17 +201,17 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
 
   const handleCopyMessage = () => {
     const message = getCurrentMessage()
-    navigator.clipboard.writeText(message)
+    void navigator.clipboard.writeText(message)
   }
 
   const getStatusBadgeColor = (status: string) => {
     const colors = {
       'pending': 'bg-gray-100 text-gray-800',
-      'confirmed': 'bg-blue-100 text-blue-800',
-      'in_production': 'bg-orange-100 text-orange-800',
-      'ready': 'bg-green-100 text-green-800',
+      'confirmed': 'bg-gray-100 text-gray-800',
+      'in_production': 'bg-gray-100 text-gray-800',
+      'ready': 'bg-gray-100 text-gray-800',
       'delivered': 'bg-gray-100 text-gray-800',
-      'cancelled': 'bg-red-100 text-red-800'
+      'cancelled': 'bg-gray-100 text-gray-800'
     }
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800'
   }
@@ -334,21 +325,21 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
                           key={template.id}
                           onClick={() => setSelectedTemplateId(template.id)}
                           className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${selectedTemplateId === template.id
-                            ? 'border-blue-500 bg-blue-50 text-blue-900 '
-                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:'
+                            ? 'border-gray-500 bg-gray-50 text-gray-900 '
+                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:'
                             }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${selectedTemplateId === template.id ? 'bg-blue-100' : 'bg-gray-100'
-                              }`}>
+                             <div className={`p-2 rounded-full ${selectedTemplateId === template.id ? 'bg-gray-100' : 'bg-gray-100'
+                               }`}>
                               {getTemplateIcon(template.category)}
                             </div>
                             <div>
                               <div className="font-medium text-sm flex items-center gap-2">
                                 {template.name}
-                                {template.is_default && (
-                                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Default</span>
-                                )}
+                                 {template.is_default && (
+                                   <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">Default</span>
+                                 )}
                               </div>
                               <div className="text-xs text-muted-foreground mt-1">
                                 {template.description || `Template untuk ${template.category.replace('_', ' ')}`}
@@ -362,12 +353,12 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
                       <button
                         onClick={() => setSelectedTemplateId('custom')}
                         className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${selectedTemplateId === 'custom'
-                          ? 'border-blue-500 bg-blue-50 text-blue-900 '
-                          : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:'
+                          ? 'border-gray-500 bg-gray-50 text-gray-900 '
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:'
                           }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-full ${selectedTemplateId === 'custom' ? 'bg-blue-100' : 'bg-gray-100'
+                          <div className={`p-2 rounded-full ${selectedTemplateId === 'custom' ? 'bg-gray-100' : 'bg-gray-100'
                             }`}>
                             <MessageCircle className="h-4 w-4" />
                           </div>
@@ -411,12 +402,12 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
                     </p>
                   </div>
                 ) : (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-h-80 overflow-y-auto">
-                    <div className="flex items-center gap-2 mb-3 pb-2 border-b border-green-200">
-                      <Smartphone className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-medium text-green-800">Preview WhatsApp</span>
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-80 overflow-y-auto">
+                    <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
+                      <Smartphone className="h-4 w-4 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-800">Preview WhatsApp</span>
                     </div>
-                    <pre className="whitespace-pre-wrap text-sm font-mono text-green-800 leading-relaxed">
+                    <pre className="whitespace-pre-wrap text-sm font-mono text-gray-800 leading-relaxed">
                       {getCurrentMessage()}
                     </pre>
                   </div>
@@ -437,12 +428,12 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
                   </SwipeableTabsList>
 
                   <SwipeableTabsContent value="whatsapp" className="mt-4 space-y-4">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <Smartphone className="h-5 w-5 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-800">WhatsApp Regular</span>
+                        <Smartphone className="h-5 w-5 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-800">WhatsApp Regular</span>
                       </div>
-                      <p className="text-xs text-blue-700">
+                      <p className="text-xs text-gray-700">
                         Akan mencoba membuka aplikasi WhatsApp di perangkat, jika tidak tersedia akan buka di browser.
                       </p>
                     </div>
@@ -468,12 +459,12 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
                   </SwipeableTabsContent>
 
                   <SwipeableTabsContent value="business" className="mt-4 space-y-4">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <User className="h-5 w-5 text-green-600" />
-                        <span className="text-sm font-medium text-green-800">WhatsApp Business</span>
+                        <User className="h-5 w-5 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-800">WhatsApp Business</span>
                       </div>
-                      <p className="text-xs text-green-700">
+                      <p className="text-xs text-gray-700">
                         Menggunakan WhatsApp Business API untuk komunikasi profesional dengan pelanggan.
                       </p>
                     </div>

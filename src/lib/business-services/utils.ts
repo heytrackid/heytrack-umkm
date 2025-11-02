@@ -12,7 +12,7 @@ import type { ProductionBatch, ReorderSummary } from './types'
 /**
  * Check inventory reorder needs (convenience function)
  */
-export async function checkInventoryReorder(): Promise<ReorderSummary> {
+export function checkInventoryReorder(): Promise<ReorderSummary> {
   const service = InventoryServices.getInstance()
   return service.checkReorderNeeds()
 }
@@ -20,7 +20,7 @@ export async function checkInventoryReorder(): Promise<ReorderSummary> {
 /**
  * Schedule production batch (convenience function)
  */
-export async function scheduleProductionBatch(batch: Omit<ProductionBatch, 'id' | 'status'>): Promise<ProductionBatch> {
+export function scheduleProductionBatch(batch: Omit<ProductionBatch, 'id' | 'status'>): Promise<ProductionBatch> {
   const service = ProductionServices.getInstance()
   return service.scheduleProductionBatch(batch)
 }
@@ -32,28 +32,28 @@ export const productionServices = ProductionServices.getInstance()
 /**
  * Check if production is feasible for a recipe
  */
-export async function checkProductionFeasibility(recipeId: string, quantity: number) {
+export function checkProductionFeasibility(recipeId: string, quantity: number) {
   return productionServices.checkProductionFeasibility(recipeId, quantity)
 }
 
 /**
  * Get stock alerts for all ingredients
  */
-export async function getStockAlerts() {
+export function getStockAlerts() {
   return inventoryServices.getStockAlerts()
 }
 
 /**
  * Get production capacity for a recipe
  */
-export async function getProductionCapacity(recipeId: string) {
+export function getProductionCapacity(recipeId: string) {
   return productionServices.getProductionCapacity(recipeId)
 }
 
 /**
  * Quick production batch scheduling with validation
  */
-export async function quickScheduleProduction(recipeId: string, quantity: number, scheduledDate?: string) {
+export function quickScheduleProduction(recipeId: string, quantity: number, scheduledDate?: string) {
   const batchData: Omit<ProductionBatch, 'id' | 'status'> = {
     recipe_id: recipeId,
     quantity,

@@ -110,30 +110,30 @@ export function formatRelativeTime(
 export function getStatusColor(status: string): string {
   const statusColors: Record<string, string> = {
     // Order statuses
-    PENDING: 'bg-yellow-100 text-yellow-800',
-    CONFIRMED: 'bg-blue-100 text-blue-800',
-    IN_PROGRESS: 'bg-orange-100 text-orange-800',
-    READY: 'bg-green-100 text-green-800',
-    DELIVERED: 'bg-emerald-100 text-emerald-800',
-    CANCELLED: 'bg-red-100 text-red-800',
+    PENDING: 'bg-gray-100 text-gray-800',
+    CONFIRMED: 'bg-gray-100 text-gray-800',
+    IN_PROGRESS: 'bg-gray-100 text-gray-800',
+    READY: 'bg-gray-100 text-gray-800',
+    DELIVERED: 'bg-gray-100 text-gray-800',
+    CANCELLED: 'bg-gray-100 text-gray-800',
 
     // Payment statuses
-    UNPAID: 'bg-red-100 text-red-800',
-    PAID: 'bg-green-100 text-green-800',
-    PARTIAL: 'bg-yellow-100 text-yellow-800',
+    UNPAID: 'bg-gray-100 text-gray-800',
+    PAID: 'bg-gray-100 text-gray-800',
+    PARTIAL: 'bg-gray-100 text-gray-800',
     REFUNDED: 'bg-gray-100 text-gray-800',
 
     // Inventory statuses
-    IN_STOCK: 'bg-green-100 text-green-800',
-    LOW_STOCK: 'bg-yellow-100 text-yellow-800',
-    OUT_OF_STOCK: 'bg-red-100 text-red-800',
-    OVER_STOCK: 'bg-blue-100 text-blue-800',
+    IN_STOCK: 'bg-gray-100 text-gray-800',
+    LOW_STOCK: 'bg-gray-100 text-gray-800',
+    OUT_OF_STOCK: 'bg-gray-100 text-gray-800',
+    OVER_STOCK: 'bg-gray-100 text-gray-800',
 
     // Generic statuses
-    ACTIVE: 'bg-green-100 text-green-800',
+    ACTIVE: 'bg-gray-100 text-gray-800',
     INACTIVE: 'bg-gray-100 text-gray-800',
     DRAFT: 'bg-gray-100 text-gray-800',
-    PUBLISHED: 'bg-green-100 text-green-800',
+    PUBLISHED: 'bg-gray-100 text-gray-800',
   }
 
   return statusColors[status] || 'bg-gray-100 text-gray-800'

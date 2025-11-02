@@ -153,8 +153,8 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         const quantity = ri.quantity ?? 0
         // Use WAC if available, otherwise use current price
         const unitPrice =
-          ri.ingredients?.weighted_average_cost ||
-          ri.ingredients?.price_per_unit ||
+          ri.ingredients?.weighted_average_cost ??
+          ri.ingredients?.price_per_unit ??
           0
         return sum + quantity * unitPrice
       }, 0)
@@ -173,8 +173,8 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
           quantity: ri.quantity ?? 0,
           unit: ri.unit ?? 'unit',
           unit_price:
-            ri.ingredients?.weighted_average_cost ||
-            ri.ingredients?.price_per_unit ||
+            ri.ingredients?.weighted_average_cost ??
+            ri.ingredients?.price_per_unit ??
             0,
           category: ri.ingredients?.category ?? undefined
         })),

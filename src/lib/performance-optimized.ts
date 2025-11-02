@@ -59,13 +59,14 @@ export function useExpensiveCalculation<T, R>(
 /**
  * Batch multiple calculations together
  */
-export function useBatchedCalculations<T extends Record<string, any>>(
+export function useBatchedCalculations<T extends Record<string, () => unknown>>(
   calculations: T
-): T {
+): { [K in keyof T]: T[K] extends () => infer R ? R : never } {
   return useMemo(() => {
-    const results = {} as T
+    const results = {} as { [K in keyof T]: T[K] extends () => infer R ? R : never }
     Object.keys(calculations).forEach((key) => {
-      results[key as keyof T] = calculations[key]()
+      const k = key as keyof T
+      results[k] = calculations[k]() as { [K in keyof T]: T[K] extends () => infer R ? R : never }[typeof k]
     })
     return results
   }, [calculations])
@@ -175,13 +176,13 @@ export const arrayCalculations = {
 /**
  * Memoized filter with multiple conditions
  */
-export function useFilteredData<T>(
+export function useFilteredData<T extends Record<string, unknown>>(
   data: T[],
-  filters: Record<string, any>
+  filters: Record<string, unknown>
 ): T[] {
   return useMemo(() => data.filter((item) => Object.entries(filters).every(([key, value]) => {
         if (value === null || value === undefined || value === '') {return true}
-        return (item as any)[key] === value
+        return item[key as keyof T] === value
       })), [data, filters])
 }
 
@@ -318,7 +319,10 @@ export function createMemoizedFunction<T extends (...args: Parameters<T>) => Ret
     const key = JSON.stringify(args)
 
     if (cache.has(key)) {
-      return cache.get(key)!
+      const cached = cache.get(key)
+      if (cached !== undefined) {
+        return cached
+      }
     }
 
     const result = fn(...args)

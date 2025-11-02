@@ -117,7 +117,7 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
                 </SelectContent>
               </Select>
               {form.formState.errors.ingredient_id && (
-                <p className="text-sm text-red-600">{form.formState.errors.ingredient_id.message}</p>
+                <p className="text-sm text-gray-600">{form.formState.errors.ingredient_id.message}</p>
               )}
             </div>
 
@@ -131,7 +131,7 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
                   {...form.register('quantity', { valueAsNumber: true })}
                 />
                 {form.formState.errors.quantity && (
-                  <p className="text-sm text-red-600">{form.formState.errors.quantity.message}</p>
+                  <p className="text-sm text-gray-600">{form.formState.errors.quantity.message}</p>
                 )}
               </div>
 
@@ -144,7 +144,7 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
                   {...form.register('unit_price', { valueAsNumber: true })}
                 />
                 {form.formState.errors.unit_price && (
-                  <p className="text-sm text-red-600">{form.formState.errors.unit_price.message}</p>
+                  <p className="text-sm text-gray-600">{form.formState.errors.unit_price.message}</p>
                 )}
               </div>
             </div>
@@ -156,7 +156,7 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
                 {...form.register('supplier', { value: '' })}
               />
               {form.formState.errors.supplier && (
-                <p className="text-sm text-red-600">{form.formState.errors.supplier.message}</p>
+                <p className="text-sm text-gray-600">{form.formState.errors.supplier.message}</p>
               )}
             </div>
 
@@ -168,7 +168,7 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
                 {...form.register('purchase_date')}
               />
               {form.formState.errors.purchase_date && (
-                <p className="text-sm text-red-600">{form.formState.errors.purchase_date.message}</p>
+                <p className="text-sm text-gray-600">{form.formState.errors.purchase_date.message}</p>
               )}
             </div>
 
@@ -179,7 +179,7 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
                 {...form.register('notes')}
               />
               {form.formState.errors.notes && (
-                <p className="text-sm text-red-600">{form.formState.errors.notes.message}</p>
+                <p className="text-sm text-gray-600">{form.formState.errors.notes.message}</p>
               )}
             </div>
 

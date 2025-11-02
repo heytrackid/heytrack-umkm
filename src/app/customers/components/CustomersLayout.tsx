@@ -353,13 +353,13 @@ const CustomersLayout = () => {
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <div className="bg-blue-100 dark:bg-blue-800/50 p-2 rounded-lg">
-                <Users className="h-5 w-5 text-blue-600" />
+                <Users className="h-5 w-5 text-gray-600" />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">
                   💡 Tips: Manfaatkan Data Pelanggan
                 </h3>
-                <div className={`text-sm text-blue-800 dark:text-blue-200 ${isMobile ? 'space-y-1' : 'flex items-center gap-4'}`}>
+                <div className={`text-sm text-gray-800 dark:text-gray-200 ${isMobile ? 'space-y-1' : 'flex items-center gap-4'}`}>
                   <span>• Lacak riwayat pembelian</span>
                   <span>• Analisa pelanggan terbaik</span>
                   <span>• Personalisasi penawaran</span>

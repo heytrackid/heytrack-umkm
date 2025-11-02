@@ -202,8 +202,8 @@ export class OrderValidationHelpers {
 
     orders.forEach((order, index) => {
       const result = this.validateInsert(order)
-      if (result.success) {
-        valid.push(result.data!)
+      if (result.success && result.data) {
+        valid.push(result.data)
       } else {
         invalid.push({
           index,

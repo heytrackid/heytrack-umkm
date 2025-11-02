@@ -69,7 +69,7 @@ const ProductionCapacityManager = ({
 
   // Load current constraints on mount
   useEffect(() => {
-    loadCurrentConstraints()
+    void loadCurrentConstraints()
   }, [])
 
   // Track changes
@@ -576,12 +576,12 @@ const ProductionCapacityManager = ({
                         <div className="text-xs text-gray-600 dark:text-gray-400">85% efficiency target</div>
                       </div>
 
-                      <div className="p-3 bg-orange-50 rounded">
-                        <div className="text-sm font-medium text-orange-800">Current Performance</div>
-                        <div className="text-lg font-bold text-orange-600">
+                      <div className="p-3 bg-gray-50 rounded">
+                        <div className="text-sm font-medium text-gray-800">Current Performance</div>
+                        <div className="text-lg font-bold text-gray-600">
                           {efficiencyMetrics.optimization_score}/100
                         </div>
-                        <div className="text-xs text-orange-600">Efficiency Score</div>
+                        <div className="text-xs text-gray-600">Efficiency Score</div>
                       </div>
                     </div>
                   </>

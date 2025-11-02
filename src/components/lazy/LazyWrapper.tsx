@@ -4,10 +4,6 @@ import { lazy, Suspense, type ComponentProps, type ComponentType } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 
-type LazyImport<T extends ComponentType<Record<string, unknown>>> = () => Promise<{ default: T }>
-
-
-
 // Loading skeletons for different components
 export const TableSkeleton = () => (
   <div className="space-y-3">

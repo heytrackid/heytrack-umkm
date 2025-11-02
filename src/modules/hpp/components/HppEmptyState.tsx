@@ -28,8 +28,8 @@ export const HppEmptyState = () => {
                     <div className="grid md:grid-cols-2 gap-4 mb-8">
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border text-left">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                                    <Calculator className="h-5 w-5 text-green-600" />
+                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center flex-shrink-0">
+                                    <Calculator className="h-5 w-5 text-gray-600" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold mb-1">Hitung Modal Otomatis</h4>
@@ -42,8 +42,8 @@ export const HppEmptyState = () => {
 
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border text-left">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                                    <TrendingUp className="h-5 w-5 text-purple-600" />
+                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center flex-shrink-0">
+                                    <TrendingUp className="h-5 w-5 text-gray-600" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold mb-1">Saran Harga Jual</h4>
@@ -56,8 +56,8 @@ export const HppEmptyState = () => {
 
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border text-left">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                                    <BarChart3 className="h-5 w-5 text-blue-600" />
+                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center flex-shrink-0">
+                                    <BarChart3 className="h-5 w-5 text-gray-600" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold mb-1">Bandingkan Produk</h4>
@@ -70,8 +70,8 @@ export const HppEmptyState = () => {
 
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border text-left">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-                                    <Bell className="h-5 w-5 text-orange-600" />
+                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center flex-shrink-0">
+                                    <Bell className="h-5 w-5 text-gray-600" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold mb-1">Peringatan Otomatis</h4>
@@ -105,14 +105,14 @@ export const HppEmptyState = () => {
                     </div>
 
                     {/* Quick Tip */}
-                    <div className="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 text-left">
+                    <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800 text-left">
                         <div className="flex items-start gap-2">
-                            <Lightbulb className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                            <Lightbulb className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
                             <div className="text-sm">
-                                <p className="font-semibold text-yellow-900 dark:text-yellow-100 mb-1">
+                                <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                                     💡 Tips: Pastikan Harga Bahan Sudah Diisi
                                 </p>
-                                <p className="text-yellow-800 dark:text-yellow-200">
+                                <p className="text-gray-800 dark:text-gray-200">
                                     Sebelum menghitung HPP, pastikan semua bahan sudah memiliki harga.
                                     Kunjungi halaman <button onClick={() => router.push('/ingredients')} className="underline font-medium">Bahan Baku</button> untuk update harga.
                                 </p>

@@ -51,7 +51,7 @@ export function useCreateProductionBatch() {
       return response.json()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['production-batches'] })
+      void queryClient.invalidateQueries({ queryKey: ['production-batches'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -94,7 +94,7 @@ export function useUpdateProductionBatch() {
       return response.json()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['production-batches'] })
+      void queryClient.invalidateQueries({ queryKey: ['production-batches'] })
       
       toast({
         title: 'Berhasil ✓',

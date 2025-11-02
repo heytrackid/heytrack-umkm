@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { CustomerInsertSchema, type CustomerInsertInput, type CustomerUpdateInput } from './customer'
+import { CustomerInsertSchema } from './customer'
 import type { CustomersInsert, CustomersUpdate } from '@/types/database'
 
 

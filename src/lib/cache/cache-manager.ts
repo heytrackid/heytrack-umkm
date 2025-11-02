@@ -112,7 +112,7 @@ export class CacheInvalidator {
   /**
    * Execute cache invalidation (implement based on your cache backend)
    */
-  async execute(): Promise<void> {
+  execute(): void {
     const keys = this.getInvalidatedKeys()
     
     if (keys.length === 0) {

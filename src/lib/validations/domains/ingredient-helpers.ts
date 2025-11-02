@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { IngredientInsertSchema, type IngredientInsert, type IngredientUpdate } from './ingredient'
+import { IngredientInsertSchema, type IngredientInsert } from './ingredient'
 
 
 /**
@@ -85,7 +85,7 @@ export class IngredientValidationHelpers {
   /**
    * Validate ingredient update data
    */
-  static validateUpdate(data: unknown): { success: boolean; data?: IngredientUpdate; errors?: string[] } {
+  static validateUpdate(data: unknown): { success: boolean; data?: EnhancedIngredientUpdate; errors?: string[] } {
     try {
       const validatedData = EnhancedIngredientUpdateSchema.parse(data)
       return { success: true, data: validatedData }
@@ -165,8 +165,8 @@ export class IngredientValidationHelpers {
 
     ingredients.forEach((ingredient, index) => {
       const result = this.validateInsert(ingredient)
-      if (result.success) {
-        valid.push(result.data!)
+      if (result.success && result.data) {
+        valid.push(result.data)
       } else {
         invalid.push({
           index,

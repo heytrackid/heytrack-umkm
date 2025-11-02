@@ -8,12 +8,11 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { format, addHours, startOfDay, endOfDay, differenceInMinutes } from 'date-fns'
-import { Calendar, Clock, ChefHat, Flame, Package, AlertTriangle, CheckCircle, Play, Pause, BarChart3, Settings } from 'lucide-react'
+import { Calendar, Clock, ChefHat, Flame, Package, AlertTriangle, CheckCircle, Play, BarChart3 } from 'lucide-react'
 import {
   type ProductionBatchWithDetails,
   type TimelineSlot,
-  type SchedulingResult,
-  batchSchedulingService
+  type SchedulingResult
 } from '@/services/production/BatchSchedulingService'
 
 /**
@@ -430,7 +429,7 @@ const ProductionTimeline = ({
                 <Separator orientation="vertical" className="h-4" />
 
                 <div className="flex items-center gap-2">
-                  <Flame className="h-4 w-4 text-orange-500" />
+                  <Flame className="h-4 w-4 text-gray-500" />
                   <span>Flame</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -450,7 +449,7 @@ const ProductionTimeline = ({
                     <AlertTriangle className="h-4 w-4" />
                     Peringatan Penjadwalan
                   </div>
-                  <ul className="text-sm text-yellow-700 space-y-1">
+                  <ul className="text-sm text-gray-700 space-y-1">
                     {schedulingResult.warnings.map((warning, index: number) => (
                       <li key={index}>• {warning}</li>
                     ))}

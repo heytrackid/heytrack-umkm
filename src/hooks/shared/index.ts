@@ -12,7 +12,7 @@ import type { Database } from '@/types/database'
  */
 type TablesMap = Database['public']['Tables']
 
-type TableRow<TTable extends keyof TablesMap> = TablesMap[TTable]['Row']
+type _TableRow<TTable extends keyof TablesMap> = TablesMap[TTable]['Row']
 type TableInsert<TTable extends keyof TablesMap> = TablesMap[TTable]['Insert']
 type TableUpdate<TTable extends keyof TablesMap> = TablesMap[TTable]['Update']
 

@@ -1,6 +1,5 @@
 import type { ComponentProps, CSSProperties } from 'react'
 import { PanelLeftIcon } from "lucide-react"
-import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "./sidebar-context"

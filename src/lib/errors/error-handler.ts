@@ -251,7 +251,7 @@ export async function handleAPIRouteError(
   context?: string
 ): Promise<NextResponse> {
   try {
-    return fn();
+    return await fn();
   } catch (error) {
     return createErrorResponse(error, context);
   }

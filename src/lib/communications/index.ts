@@ -23,7 +23,7 @@ export { CommunicationsManager } from './manager'
 /**
  * Send WhatsApp message (convenience function)
  */
-export async function sendWhatsAppMessage(to: string, templateId: string, data: Record<string, unknown>): Promise<boolean> {
+export function sendWhatsAppMessage(to: string, templateId: string, data: Record<string, unknown>): boolean {
   // This would need proper configuration in a real app
   const config = {
     businessNumber: '',

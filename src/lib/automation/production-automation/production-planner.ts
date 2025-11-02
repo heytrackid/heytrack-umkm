@@ -9,7 +9,6 @@ import type {
   ProductionPlan,
   ProductionPlanItem,
   ProductionPlanSummary,
-  AvailabilityCheck,
   AutomationConfig
 } from '@/lib/automation/types'
 
@@ -29,7 +28,7 @@ export class ProductionPlanner {
     config: AutomationConfig
   ): ProductionPlan {
     const productionPlan = orders.map(order => {
-      const recipe = recipes.find(r => r.id === order.recipe_id)!
+      const recipe = recipes.find(r => r.id === order.recipe_id)
       if (!recipe) {
         throw new Error(`Recipe not found for order: ${order.recipe_id}`)
       }

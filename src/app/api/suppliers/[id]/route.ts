@@ -96,7 +96,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Failed to update supplier' }, { status: 500 })
     }
 
-    await cacheInvalidation.suppliers()
+    cacheInvalidation.suppliers()
     return NextResponse.json(data)
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/suppliers/[id]')
@@ -150,7 +150,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Failed to delete supplier' }, { status: 500 })
     }
 
-    await cacheInvalidation.suppliers()
+    cacheInvalidation.suppliers()
     return NextResponse.json({ message: 'Supplier deleted successfully' })
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/suppliers/[id]')

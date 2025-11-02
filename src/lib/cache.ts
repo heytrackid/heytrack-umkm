@@ -113,12 +113,12 @@ export async function withCache<T>(
 
 // Granular cache invalidation
 export const cacheInvalidation = {
-  hpp: async () => {
+  hpp: () => {
     memoryCache.deletePattern('^hpp:')
     apiLogger.info('HPP cache invalidated')
   },
   
-  recipes: async (recipeId?: string) => {
+  recipes: (recipeId?: string) => {
     if (recipeId) {
       memoryCache.delete(cacheKeys.recipes.detail(recipeId))
     }
@@ -126,7 +126,7 @@ export const cacheInvalidation = {
     apiLogger.info({ recipeId }, 'Recipes cache invalidated')
   },
   
-  ingredients: async (ingredientId?: string) => {
+  ingredients: (ingredientId?: string) => {
     if (ingredientId) {
       memoryCache.delete(cacheKeys.ingredients.detail(ingredientId))
     }
@@ -134,7 +134,7 @@ export const cacheInvalidation = {
     apiLogger.info({ ingredientId }, 'Ingredients cache invalidated')
   },
   
-  orders: async (orderId?: string) => {
+  orders: (orderId?: string) => {
     if (orderId) {
       memoryCache.delete(cacheKeys.orders.detail(orderId))
     }
@@ -142,7 +142,7 @@ export const cacheInvalidation = {
     apiLogger.info({ orderId }, 'Orders cache invalidated')
   },
   
-  customers: async (customerId?: string) => {
+  customers: (customerId?: string) => {
     if (customerId) {
       memoryCache.deletePattern(`^customers:.*${customerId}`)
     }
@@ -150,7 +150,7 @@ export const cacheInvalidation = {
     apiLogger.info({ customerId }, 'Customers cache invalidated')
   },
   
-  suppliers: async (supplierId?: string) => {
+  suppliers: (supplierId?: string) => {
     if (supplierId) {
       memoryCache.deletePattern(`^suppliers:.*${supplierId}`)
     }
@@ -158,7 +158,7 @@ export const cacheInvalidation = {
     apiLogger.info({ supplierId }, 'Suppliers cache invalidated')
   },
   
-  all: async () => {
+  all: () => {
     memoryCache.clear()
     apiLogger.info('All cache cleared')
   }

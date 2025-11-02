@@ -14,7 +14,9 @@ let soundVolume = 0.5
 // Initialize audio context (lazy loading)
 function getAudioContext(): AudioContext {
   if (!audioContext) {
-    const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    type WindowWithWebkit = Window & { webkitAudioContext?: typeof AudioContext }
+    const win = window as WindowWithWebkit
+    const AudioContextClass = window.AudioContext ?? win.webkitAudioContext ?? AudioContext
     audioContext = new AudioContextClass()
   }
   return audioContext

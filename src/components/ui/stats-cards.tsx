@@ -46,7 +46,7 @@ export const StatCard = ({
   description,
   icon: Icon,
   trend,
-  variant = 'default'
+  variant: _variant = 'default'
 }: StatCardData) => (
   <Card>
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

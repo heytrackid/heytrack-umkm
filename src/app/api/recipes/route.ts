@@ -243,7 +243,7 @@ async function POST(request: NextRequest) {
     }
 
     // Invalidate cache after successful creation
-    await cacheInvalidation.recipes()
+    cacheInvalidation.recipes()
 
     return NextResponse.json(completeRecipe, { status: 201 })
   } catch (error: unknown) {

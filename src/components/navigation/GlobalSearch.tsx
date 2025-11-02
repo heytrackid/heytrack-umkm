@@ -64,8 +64,8 @@ export const GlobalSearch = memo(() => {
   ).slice(0, 5) ?? []
 
   const filteredCustomers = (customers as CustomerItem[] | undefined)?.filter((item: CustomerItem) =>
-    item.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-    item.email?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+    item.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ??
+    item.email?.toLowerCase().includes(debouncedSearch.toLowerCase()) ??
     item.phone?.includes(debouncedSearch)
   ).slice(0, 5) ?? []
 

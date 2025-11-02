@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, Trash2, CheckCircle, type LucideIcon } from "lucide-react"
-import type  from "react"
 import {
   AlertDialog,
   AlertDialogAction,

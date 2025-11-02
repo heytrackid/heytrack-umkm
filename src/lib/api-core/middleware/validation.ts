@@ -22,7 +22,11 @@ export function withValidation<T>(schema: z.ZodSchema<T>) {
         return createErrorResponse('Validation failed', 400, result.errors)
       }
 
-      return result.data!
+      if (!result.data) {
+        return createErrorResponse('Validation failed: no data', 400)
+      }
+
+      return result.data
     } catch (_err) {
       return createErrorResponse('Invalid request body', 400)
     }
@@ -42,6 +46,10 @@ export function withQueryValidation<T>(schema: z.ZodSchema<T>) {
       return createErrorResponse('Query validation failed', 400, result.errors)
     }
 
-    return result.data!
+    if (!result.data) {
+      return createErrorResponse('Query validation failed: no data', 400)
+    }
+
+    return result.data
   }
 }

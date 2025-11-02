@@ -15,7 +15,7 @@ export class EmailService {
     this.config = config;
   }
 
-  async sendEmail(to: string, subject: string, _html: string): Promise<boolean> {
+  sendEmail(to: string, subject: string, _html: string): boolean {
     // Placeholder for email implementation
     automationLogger.info({ to, subject }, 'Email sent (placeholder)');
     return true;

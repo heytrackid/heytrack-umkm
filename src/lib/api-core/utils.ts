@@ -18,8 +18,8 @@ export function parseSearchParams(request: NextRequest): Record<string, string> 
  * Get client IP address from request
  */
 export function getClientIP(request: NextRequest): string {
-  return request.headers.get('x-forwarded-for') ||
-         request.headers.get('x-real-ip') ||
+  return request.headers.get('x-forwarded-for') ??
+         request.headers.get('x-real-ip') ??
          'unknown'
 }
 

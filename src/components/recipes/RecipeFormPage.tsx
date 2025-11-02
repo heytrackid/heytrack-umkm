@@ -54,9 +54,9 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
     const [recipeIngredients, setRecipeIngredients] = useState<RecipeIngredientForm[]>([])
 
     useEffect(() => {
-        loadIngredients()
+        void loadIngredients()
         if (mode === 'edit' && recipeId) {
-            loadRecipe()
+            void loadRecipe()
         }
     }, [mode, recipeId])
 
@@ -459,7 +459,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                                         size="sm"
                                         onClick={() => removeIngredient(index)}
                                     >
-                                        <Trash2 className="h-4 w-4 text-red-600" />
+                                        <Trash2 className="h-4 w-4 text-gray-600" />
                                     </Button>
                                 </div>
                             ))

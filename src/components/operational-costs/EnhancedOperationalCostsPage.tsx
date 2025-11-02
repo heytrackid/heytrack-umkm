@@ -196,7 +196,7 @@ export const EnhancedOperationalCostsPage = () => {
             })
 
             // Refresh data
-            refetch?.()
+            void refetch?.()
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Gagal menambahkan template'
             toast({
@@ -293,17 +293,17 @@ export const EnhancedOperationalCostsPage = () => {
             <OperationalCostStats costs={costs || []} formatCurrency={formatCurrency} calculateMonthlyCost={calculateMonthlyCost} />
 
             {/* Info Card */}
-            <Card className="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
+            <Card className="bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800">
                 <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                        <div className="bg-orange-100 dark:bg-orange-800/50 p-2 rounded-lg flex-shrink-0">
-                            <Receipt className="h-5 w-5 text-orange-600" />
+                        <div className="bg-gray-100 dark:bg-gray-800/50 p-2 rounded-lg flex-shrink-0">
+                            <Receipt className="h-5 w-5 text-gray-600" />
                         </div>
                         <div className="flex-1">
-                            <h3 className="font-medium text-orange-900 dark:text-orange-100 mb-1">
+                            <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">
                                 💡 Mengapa Biaya Operasional Penting?
                             </h3>
-                            <p className="text-sm text-orange-800 dark:text-orange-200">
+                            <p className="text-sm text-gray-800 dark:text-gray-200">
                                 Biaya operasional digunakan untuk menghitung HPP dan harga jual yang akurat. Semakin lengkap data
                                 biaya, semakin tepat perhitungan harga jual produk Anda.
                             </p>
@@ -458,7 +458,7 @@ export const EnhancedOperationalCostsPage = () => {
                                                         Edit
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
-                                                    <DropdownMenuItem onClick={() => handleDelete(cost)} className="text-red-600">
+                                                    <DropdownMenuItem onClick={() => handleDelete(cost)} className="text-gray-600">
                                                         <Trash2 className="h-4 w-4 mr-2" />
                                                         Hapus
                                                     </DropdownMenuItem>
@@ -477,7 +477,7 @@ export const EnhancedOperationalCostsPage = () => {
                                         {/* Badges */}
                                         <div className="flex flex-wrap gap-2">
                                             {cost.recurring && (
-                                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                                <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
                                                     Tetap
                                                 </Badge>
                                             )}

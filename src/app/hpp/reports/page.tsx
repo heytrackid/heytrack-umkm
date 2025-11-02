@@ -252,7 +252,7 @@ const HppReportsPage = () => {
           <SwipeableTabsContent value="analytics" className="space-y-6">
             {loading ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600" />
               </div>
             ) : analytics ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -264,13 +264,13 @@ const HppReportsPage = () => {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center">
-                        <div className="text-3xl font-bold text-blue-600">
+                        <div className="text-3xl font-bold text-gray-600">
                           {analytics.totalRecipes}
                         </div>
                         <div className="text-sm text-muted-foreground">Total Recipes</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-3xl font-bold text-green-600">
+                        <div className="text-3xl font-bold text-gray-600">
                           {analytics.totalCalculations}
                         </div>
                         <div className="text-sm text-muted-foreground">Calculations</div>
@@ -502,9 +502,9 @@ const HppReportsPage = () => {
                   <CardTitle>Cost Optimization Opportunities</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="h-5 w-5 text-green-600" />
+                      <TrendingUp className="h-5 w-5 text-gray-600" />
                       <span className="font-semibold">Supplier Negotiation</span>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -512,9 +512,9 @@ const HppReportsPage = () => {
                     </p>
                   </div>
 
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="h-5 w-5 text-blue-600" />
+                      <TrendingUp className="h-5 w-5 text-gray-600" />
                       <span className="font-semibold">Recipe Optimization</span>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -522,9 +522,9 @@ const HppReportsPage = () => {
                     </p>
                   </div>
 
-                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="h-5 w-5 text-purple-600" />
+                      <TrendingUp className="h-5 w-5 text-gray-600" />
                       <span className="font-semibold">Seasonal Pricing</span>
                     </div>
                     <p className="text-sm text-muted-foreground">

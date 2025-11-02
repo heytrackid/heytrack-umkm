@@ -125,9 +125,7 @@ export class ChatSessionService {
       const session = sessionMap.get(msg.session_id);
       if (session) {
         session.message_count++;
-        if (!session.last_message) {
-          session.last_message = msg.content.substring(0, 100);
-        }
+        session.last_message ??= msg.content.substring(0, 100);
       }
     });
 

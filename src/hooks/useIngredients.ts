@@ -90,7 +90,7 @@ export function useCreateIngredient() {
       return response.json()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -133,8 +133,8 @@ export function useUpdateIngredient() {
       return response.json()
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['ingredient', variables.id] })
-      queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredient', variables.id] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       
       toast({
         title: 'Berhasil ✓',
@@ -175,7 +175,7 @@ export function useDeleteIngredient() {
       return response.json()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       
       toast({
         title: 'Berhasil ✓',

@@ -79,9 +79,7 @@ export class WorkflowAutomation extends BaseWorkflowAutomation {
 let workflowAutomationInstance: WorkflowAutomation | null = null
 
 export function getWorkflowAutomation(config?: Partial<AutomationConfig>): WorkflowAutomation {
-  if (!workflowAutomationInstance) {
-    workflowAutomationInstance = new WorkflowAutomation(config)
-  }
+  workflowAutomationInstance ??= new WorkflowAutomation(config)
   return workflowAutomationInstance
 }
 

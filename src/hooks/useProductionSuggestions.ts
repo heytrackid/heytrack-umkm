@@ -63,9 +63,9 @@ export function useCreateProductionBatch() {
     onSuccess: (data) => {
       apiLogger.info({ batchId: data.batch_id }, 'Production batch created:')
       // Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['production-suggestions'] })
-      queryClient.invalidateQueries({ queryKey: ['productions'] })
-      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey: ['production-suggestions'] })
+      void queryClient.invalidateQueries({ queryKey: ['productions'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
     },
     onError: (error) => {
       apiLogger.error({ error }, 'Failed to create production batch:')

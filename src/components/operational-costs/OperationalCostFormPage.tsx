@@ -21,7 +21,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 
-type OperationalCost = OperationalCostsTable
+type _OperationalCost = OperationalCostsTable
 type OperationalCostInsert = OperationalCostsInsert
 
 interface OperationalCostFormPageProps {
@@ -59,7 +59,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
 
     useEffect(() => {
         if (mode === 'edit' && costId) {
-            loadCost()
+            void loadCost()
         }
     }, [mode, costId])
 

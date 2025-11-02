@@ -114,7 +114,7 @@ export function useApi<T = unknown >(
    */
   useEffect(() => {
     if (autoLoad) {
-      fetch()
+      void fetch()
     }
   }, [autoLoad, fetch])
 

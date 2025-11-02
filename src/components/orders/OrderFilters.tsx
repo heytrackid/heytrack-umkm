@@ -31,9 +31,9 @@ const OrderFilters = ({
     filters.status !== 'all' ||
     filters.paymentStatus !== 'all' ||
     filters.priority !== 'all' ||
-    filters.dateFrom ||
-    filters.dateTo ||
-    filters.searchTerm
+    Boolean(filters.dateFrom) ||
+    Boolean(filters.dateTo) ||
+    Boolean(filters.searchTerm)
 
   return (
     <Card>
@@ -170,7 +170,7 @@ const OrderFilters = ({
                 variant="ghost"
                 size="sm"
                 onClick={onReset}
-                className="text-red-600 hover:text-red-700"
+                className="text-gray-600 hover:text-gray-700"
               >
                 <X className="h-4 w-4 mr-2" />
                 Reset Filter

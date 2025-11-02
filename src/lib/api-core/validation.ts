@@ -43,7 +43,11 @@ export async function validateRequestOrRespond<T>(
       return createErrorResponse('Validation failed', 400, result.errors)
     }
 
-    return result.data!
+    if (!result.data) {
+      return createErrorResponse('Validation failed: no data', 400)
+    }
+
+    return result.data
   } catch (err) {
     apiLogger.error({ err }, 'Request validation error')
     return createErrorResponse('Invalid request body', 400)

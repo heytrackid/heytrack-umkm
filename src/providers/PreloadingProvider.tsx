@@ -90,7 +90,7 @@ export const PreloadingProvider = ({
   }, [enableNetworkAware, networkAwarePreloading])
 
   // Track preloaded routes
-  const preloadRoute = async (route: string) => {
+  const preloadRoute = async (route: string): Promise<void> => {
     if (preloadedRoutes.has(route)) {
       if (debug) { apiLogger.info(`🔄 Route ${route} already preloaded`) }
       return
@@ -100,7 +100,7 @@ export const PreloadingProvider = ({
     const startTime = performance.now()
 
     try {
-      await hookPreloadRoute(route)
+      hookPreloadRoute(route)
       setPreloadedRoutes(prev => new Set([...prev, route]))
 
       const endTime = performance.now()

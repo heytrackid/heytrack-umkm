@@ -269,7 +269,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
           <div className={`px-4 py-3 rounded-2xl w-full break-words overflow-hidden shadow-sm ${isUser
             ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
             : isSystem
-              ? 'bg-gradient-to-br from-green-50 to-green-100 text-green-900 border border-green-200'
+              ? 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
               : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
             }`}>
             <div className="whitespace-pre-wrap text-sm leading-relaxed break-words overflow-wrap-anywhere word-break-break-word prose prose-sm max-w-none">

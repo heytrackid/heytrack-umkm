@@ -111,7 +111,7 @@ export function getOptimalImageQuality(): number {
   }
   
   const nav = navigator as NavigatorWithConnection
-  const connection = nav.connection
+  const {connection} = nav
   
   if (!connection) {return 75}
 

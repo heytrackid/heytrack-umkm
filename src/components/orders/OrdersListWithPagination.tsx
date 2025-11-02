@@ -95,7 +95,7 @@ export const OrdersListWithPagination = () => {
 
     // Fetch on mount and when pagination/filters change
     useEffect(() => {
-        fetchOrders()
+        void fetchOrders()
     }, [pagination.page, pagination.pageSize, searchTerm, statusFilter])
 
     // Handlers
@@ -110,13 +110,13 @@ export const OrdersListWithPagination = () => {
     }
 
     const getStatusBadge = (status: OrderStatus) => {
-        const statusConfig: Record<OrderStatus, { label: string; icon: React.ComponentType<any>; className: string }> = {
-            PENDING: { label: 'Pending', icon: Clock, className: 'bg-yellow-100 text-yellow-700' },
-            CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle, className: 'bg-blue-100 text-blue-700' },
-            IN_PROGRESS: { label: 'Sedang Diproses', icon: Package, className: 'bg-purple-100 text-purple-700' },
-            READY: { label: 'Siap', icon: CheckCircle, className: 'bg-green-100 text-green-700' },
-            DELIVERED: { label: 'Terkirim', icon: CheckCircle, className: 'bg-green-100 text-green-700' },
-            CANCELLED: { label: 'Dibatalkan', icon: XCircle, className: 'bg-red-100 text-red-700' },
+        const statusConfig: Record<OrderStatus, { label: string; icon: React.ComponentType<{ className?: string }>; className: string }> = {
+            PENDING: { label: 'Pending', icon: Clock, className: 'bg-gray-100 text-gray-700' },
+            CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle, className: 'bg-gray-100 text-gray-700' },
+            IN_PROGRESS: { label: 'Sedang Diproses', icon: Package, className: 'bg-gray-100 text-gray-700' },
+            READY: { label: 'Siap', icon: CheckCircle, className: 'bg-gray-100 text-gray-700' },
+            DELIVERED: { label: 'Terkirim', icon: CheckCircle, className: 'bg-gray-100 text-gray-700' },
+            CANCELLED: { label: 'Dibatalkan', icon: XCircle, className: 'bg-gray-100 text-gray-700' },
         }
 
         const config = statusConfig[status] || statusConfig.PENDING

@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     }
 
     // Invalidate cache
-    await cacheInvalidation.all()
+    cacheInvalidation.all()
 
     return NextResponse.json(mappedBatch, { status: 201 })
   } catch (error: unknown) {

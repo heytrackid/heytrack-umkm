@@ -33,7 +33,7 @@ const ActiveBatchesList = ({
   executionStates,
   selectedBatch,
   onBatchSelect,
-  onBatchUpdate,
+  onBatchUpdate: _onBatchUpdate,
   onStartBatch,
   onPauseBatch,
   onCompleteBatch

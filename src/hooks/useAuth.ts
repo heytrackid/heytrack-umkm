@@ -10,7 +10,7 @@ import { getErrorMessage } from '@/lib/type-guards'
 
 
 
-type UserProfile = UserProfilesTable
+type _UserProfile = UserProfilesTable
 interface AuthState {
   user: User | null
   session: Session | null

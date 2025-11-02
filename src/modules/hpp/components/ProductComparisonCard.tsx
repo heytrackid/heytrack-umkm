@@ -7,7 +7,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Info, BarChart3, TrendingUp, CheckCircle, AlertTriangle, Lightbulb, ArrowRight, TrendingDown } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useRouter } from 'next/navigation'
-import { useToast } from '@/hooks/use-toast'
 
 
 
@@ -84,9 +83,9 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
                       }`}
                   >
                     {/* Rank Badge */}
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${index === 0 ? 'bg-yellow-400 text-yellow-900' :
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${index === 0 ? 'bg-gray-400 text-gray-900' :
                       index === 1 ? 'bg-gray-300 text-gray-700' :
-                        index === 2 ? 'bg-orange-400 text-orange-900' :
+                        index === 2 ? 'bg-gray-400 text-gray-900' :
                           'bg-gray-200 text-gray-600'
                       }`}>
                       {index + 1}
@@ -99,7 +98,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
                         <span>Modal: {formatCurrency(item.hppValue)}</span>
                         <span>→</span>
                         <span>Jual: {formatCurrency(item.sellingPrice)}</span>
-                        <span className="text-green-600 font-medium">
+                        <span className="text-gray-600 font-medium">
                           Untung: {formatCurrency(profit)}
                         </span>
                       </div>
@@ -107,8 +106,8 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
 
                     {/* Status Badge */}
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                      <Badge className={`${isGood ? 'bg-green-600' :
-                        isWarning ? 'bg-yellow-600' :
+                      <Badge className={`${isGood ? 'bg-gray-600' :
+                        isWarning ? 'bg-gray-600' :
                           'bg-red-600'
                         } gap-1`}>
                         {isGood ? (
@@ -169,7 +168,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
         {comparison.length > 0 && (
           <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-5 rounded-lg border-2 border-purple-200 dark:border-purple-800">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
                 <Lightbulb className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1">
@@ -177,7 +176,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
                 <ul className="space-y-2.5 text-sm">
                   {comparison[0] && comparison[0].marginPercentage >= 50 && (
                     <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
                       <span>
                         <strong>{comparison[0].name}</strong>: Produk terbaik! Pertahankan kualitas dan pertimbangkan tingkatkan produksi.
                       </span>
@@ -185,7 +184,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
                   )}
                   {comparison.find((c) => c.marginPercentage < 30) && (
                     <li className="flex items-start gap-2">
-                      <AlertTriangle className="h-4 w-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                      <AlertTriangle className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
                       <span>
                         <strong>{comparison.find((c) => c.marginPercentage < 30)?.name}</strong>: Margin rendah. Pertimbangkan naikkan harga atau cari supplier bahan lebih murah.
                       </span>
@@ -193,7 +192,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
                   )}
                   {comparison.length >= 3 && (
                     <li className="flex items-start gap-2">
-                      <TrendingUp className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <TrendingUp className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
                       <span>
                         Fokuskan produksi pada 3 produk teratas untuk maksimalkan keuntungan.
                       </span>
@@ -201,7 +200,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
                   )}
                   {comparison.length < 3 && (
                     <li className="flex items-start gap-2">
-                      <Info className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <Info className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
                       <span>
                         Tambahkan lebih banyak produk untuk mendapat analisis perbandingan yang lebih lengkap.
                       </span>

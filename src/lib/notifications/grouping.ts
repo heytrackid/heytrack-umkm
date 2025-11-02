@@ -56,7 +56,8 @@ export function groupNotifications(
 
     if (groups.has(groupKey)) {
       // Add to existing group
-      const group = groups.get(groupKey)!
+      const group = groups.get(groupKey)
+      if (!group) {continue}
       group.count++
       group.notifications.push(notification)
       

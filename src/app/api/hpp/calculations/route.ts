@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
     const calculationResult = await hppService.calculateRecipeHpp(supabase, recipeId, user.id)
 
     // Invalidate cache
-    await cacheInvalidation.hpp()
+    cacheInvalidation.hpp()
 
     apiLogger.info({
       userId: user.id,

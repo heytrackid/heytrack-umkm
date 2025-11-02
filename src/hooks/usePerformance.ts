@@ -240,7 +240,18 @@ export function useNetworkStatus() {
 
     // Monitor connection quality if available
     if ('connection' in navigator) {
-      const {connection} = (navigator as any)
+      type NetworkConnection = EventTarget & {
+        effectiveType: string
+        downlink: number
+        rtt: number
+        addEventListener(type: 'change', listener: () => void): void
+        removeEventListener(type: 'change', listener: () => void): void
+      }
+      type NavigatorWithConnection = Navigator & {
+        connection?: NetworkConnection
+      }
+      const nav = navigator as NavigatorWithConnection
+      const {connection} = nav
       if (connection) {
         setConnection({
           effectiveType: connection.effectiveType,

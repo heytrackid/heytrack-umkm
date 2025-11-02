@@ -56,13 +56,13 @@ export class CommunicationsManager {
     if (this.whatsapp) {
       switch (type) {
         case 'confirmation':
-          await this.whatsapp.sendOrderConfirmation(orderData);
+          this.whatsapp.sendOrderConfirmation(orderData);
           break;
         case 'reminder':
-          await this.whatsapp.sendDeliveryReminder(orderData);
+          this.whatsapp.sendDeliveryReminder(orderData);
           break;
         case 'followup':
-          await this.whatsapp.sendFollowUp(orderData);
+          this.whatsapp.sendFollowUp(orderData);
           break;
       }
     }

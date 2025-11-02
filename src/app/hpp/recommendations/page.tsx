@@ -105,13 +105,13 @@ const HppRecommendationsPage = () => {
   const getRecommendationTypeIcon = (type: string) => {
     switch (type) {
       case 'COST_OPTIMIZATION':
-        return <TrendingUp className="h-4 w-4 text-green-500" />
+        return <TrendingUp className="h-4 w-4 text-gray-500" />
       case 'SUPPLIER_CHANGE':
-        return <Lightbulb className="h-4 w-4 text-blue-500" />
+        return <Lightbulb className="h-4 w-4 text-gray-500" />
       case 'RECIPE_ADJUSTMENT':
-        return <Sparkles className="h-4 w-4 text-purple-500" />
+        return <Sparkles className="h-4 w-4 text-gray-500" />
       default:
-        return <AlertTriangle className="h-4 w-4 text-orange-500" />
+        return <AlertTriangle className="h-4 w-4 text-gray-500" />
     }
   }
 
@@ -138,7 +138,7 @@ const HppRecommendationsPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-3xl font-bold text-gray-600">
                 {recommendations.length}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -155,7 +155,7 @@ const HppRecommendationsPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-orange-600">
+              <div className="text-3xl font-bold text-gray-600">
                 {recommendations.filter(r => !r.is_implemented).length}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -172,7 +172,7 @@ const HppRecommendationsPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">
+              <div className="text-3xl font-bold text-gray-600">
                 {recommendations.filter(r => r.is_implemented).length}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -235,7 +235,7 @@ const HppRecommendationsPage = () => {
             <Card>
               <CardContent className="py-8">
                 <div className="text-center text-muted-foreground">
-                  <Lightbulb className="h-12 w-12 mx-auto mb-4 text-yellow-500" />
+                  <Lightbulb className="h-12 w-12 mx-auto mb-4 text-gray-500" />
                   <h3 className="text-lg font-semibold mb-2">No Recommendations</h3>
                   <p>No cost optimization recommendations available at this time.</p>
                   <p className="text-sm mt-2">Recommendations will be generated based on your HPP analysis.</p>
@@ -259,7 +259,7 @@ const HppRecommendationsPage = () => {
                             {rec.priority}
                           </Badge>
                           {rec.is_implemented && (
-                            <Badge variant="outline" className="text-green-600">
+                            <Badge variant="outline" className="text-gray-600">
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Implemented
                             </Badge>
@@ -278,7 +278,7 @@ const HppRecommendationsPage = () => {
                         {rec.potential_savings > 0 && (
                           <div className="flex items-center gap-2 text-sm">
                             <span className="font-medium">Potential Savings:</span>
-                            <Badge variant="secondary" className="text-green-600">
+                            <Badge variant="secondary" className="text-gray-600">
                               {formatCurrency(rec.potential_savings)}
                             </Badge>
                           </div>

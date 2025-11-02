@@ -192,7 +192,7 @@ export const PricingCalculatorCard = ({
                                 Minimal: {formatCurrency(totalCost)} (biaya produksi)
                             </p>
                             {manualPrice < totalCost && (
-                                <p className="text-xs text-red-600">
+                                <p className="text-xs text-gray-600">
                                     ⚠️ Harga jual tidak boleh lebih rendah dari biaya produksi
                                 </p>
                             )}
@@ -207,7 +207,7 @@ export const PricingCalculatorCard = ({
                             <div className="text-sm text-muted-foreground mb-1">
                                 Harga Jual {mode === 'manual' ? 'yang Anda Masukkan' : 'yang Disarankan'}
                             </div>
-                            <div className="text-4xl font-bold text-purple-600">
+                            <div className="text-4xl font-bold text-gray-600">
                                 {formatCurrency(displayPrice)}
                             </div>
                         </div>
@@ -223,20 +223,20 @@ export const PricingCalculatorCard = ({
                             <span className="text-muted-foreground">Biaya Produksi</span>
                             <span className="font-medium">{formatCurrency(totalCost)}</span>
                         </div>
-                        <div className="flex justify-between text-green-600">
+                        <div className="flex justify-between text-gray-600">
                             <span>Keuntungan ({displayMargin.toFixed(0)}%)</span>
                             <span className="font-semibold">+ {formatCurrency(profit)}</span>
                         </div>
                         <div className="flex justify-between pt-2 border-t font-semibold">
                             <span>Harga Jual</span>
-                            <span className="text-purple-600">{formatCurrency(displayPrice)}</span>
+                            <span className="text-gray-600">{formatCurrency(displayPrice)}</span>
                         </div>
                     </div>
 
                     {/* Profit per item */}
                     <div className="mt-3 text-center">
                         <span className="text-sm text-muted-foreground">Keuntungan per produk: </span>
-                        <span className="text-lg font-bold text-green-600">
+                        <span className="text-lg font-bold text-gray-600">
                             {formatCurrency(profit)}
                         </span>
                     </div>
@@ -257,10 +257,11 @@ export const PricingCalculatorCard = ({
                 </Alert>
 
                 {/* Actions */}
+                { }
                 <Button
                     onClick={() => onSavePrice(displayPrice, displayMargin)}
                     className="w-full"
-                    disabled={isSaving || displayPrice === currentPrice || (mode === 'manual' && manualPrice < totalCost)}
+                    disabled={Boolean(isSaving || displayPrice === currentPrice || (mode === 'manual' && manualPrice < totalCost))}
                 >
                     {actionContent}
                 </Button>

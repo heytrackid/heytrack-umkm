@@ -32,12 +32,12 @@ export class GlobalExportService {
     ])
 
     // Create sheets
-    await this.createRecipesSheet(workbook, recipes)
-    await this.createOrdersSheet(workbook, orders)
-    await this.createIngredientsSheet(workbook, ingredients)
-    await this.createCustomersSheet(workbook, customers)
-    await this.createStockTransactionsSheet(workbook, stockTransactions)
-    await this.createSummarySheet(workbook, { recipes, orders, ingredients, customers })
+    void this.createRecipesSheet(workbook, recipes)
+    void this.createOrdersSheet(workbook, orders)
+    void this.createIngredientsSheet(workbook, ingredients)
+    void this.createCustomersSheet(workbook, customers)
+    void this.createStockTransactionsSheet(workbook, stockTransactions)
+    void this.createSummarySheet(workbook, { recipes, orders, ingredients, customers })
 
     // Generate buffer
     const buffer = await workbook.xlsx.writeBuffer()
@@ -95,7 +95,7 @@ export class GlobalExportService {
     return (data || []) as StockTransaction[]
   }
 
-  private static async createRecipesSheet(workbook: ExcelJS.Workbook, recipes: Recipe[]) {
+  private static createRecipesSheet(workbook: ExcelJS.Workbook, recipes: Recipe[]) {
     const sheet = workbook.addWorksheet('Resep', {
       views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }]
     })
@@ -158,7 +158,7 @@ export class GlobalExportService {
     })
   }
 
-  private static async createOrdersSheet(workbook: ExcelJS.Workbook, orders: Order[]) {
+  private static createOrdersSheet(workbook: ExcelJS.Workbook, orders: Order[]) {
     const sheet = workbook.addWorksheet('Pesanan', {
       views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }]
     })
@@ -188,7 +188,7 @@ export class GlobalExportService {
     sheet.getColumn('total_amount').numFmt = '#,##0'
   }
 
-  private static async createIngredientsSheet(workbook: ExcelJS.Workbook, ingredients: Ingredient[]) {
+  private static createIngredientsSheet(workbook: ExcelJS.Workbook, ingredients: Ingredient[]) {
     const sheet = workbook.addWorksheet('Bahan', {
       views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }]
     })
@@ -240,7 +240,7 @@ export class GlobalExportService {
     })
   }
 
-  private static async createCustomersSheet(workbook: ExcelJS.Workbook, customers: Customer[]) {
+  private static createCustomersSheet(workbook: ExcelJS.Workbook, customers: Customer[]) {
     const sheet = workbook.addWorksheet('Pelanggan', {
       views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }]
     })
@@ -266,7 +266,7 @@ export class GlobalExportService {
     })
   }
 
-  private static async createStockTransactionsSheet(workbook: ExcelJS.Workbook, transactions: StockTransaction[]) {
+  private static createStockTransactionsSheet(workbook: ExcelJS.Workbook, transactions: StockTransaction[]) {
     const sheet = workbook.addWorksheet('Transaksi Stok', {
       views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }]
     })
@@ -297,7 +297,7 @@ export class GlobalExportService {
     sheet.getColumn('total').numFmt = '#,##0'
   }
 
-  private static async createSummarySheet(
+  private static createSummarySheet(
     workbook: ExcelJS.Workbook,
     data: { recipes: Recipe[]; orders: Order[]; ingredients: Ingredient[]; customers: Customer[] }
   ) {

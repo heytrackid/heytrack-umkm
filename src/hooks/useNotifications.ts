@@ -110,7 +110,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
 
   // Initial fetch
   useEffect(() => {
-    fetchNotifications()
+    void fetchNotifications()
   }, [fetchNotifications])
 
   // Auto refresh
@@ -118,7 +118,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     if (!autoRefresh) {return}
 
     const interval = setInterval(() => {
-      fetchNotifications()
+      void fetchNotifications()
     }, refreshInterval)
 
     return () => clearInterval(interval)
@@ -138,13 +138,13 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
           table: 'notifications',
         },
         () => {
-          fetchNotifications()
+          void fetchNotifications()
         }
       )
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      void supabase.removeChannel(channel)
     }
   }, [fetchNotifications])
 

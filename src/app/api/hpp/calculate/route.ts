@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     // Snapshot feature removed - no longer creating snapshots
 
     // Invalidate cache
-    await cacheInvalidation.hpp()
+    cacheInvalidation.hpp()
 
     apiLogger.info({
       userId: user.id,

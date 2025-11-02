@@ -7,7 +7,6 @@ import { useSidebar } from "./sidebar-context"
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 

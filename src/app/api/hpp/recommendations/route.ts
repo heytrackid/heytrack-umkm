@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Invalidate cache
-    await cacheInvalidation.hpp()
+    cacheInvalidation.hpp()
 
     apiLogger.info({
       userId: user.id,

@@ -1,5 +1,5 @@
 import { automationLogger } from '@/lib/logger'
-import type { WorkflowEvent, WorkflowEventData, WorkflowContext, WorkflowResult, AutomationConfig } from '@/types/features/automation'
+import type { WorkflowEventData, WorkflowContext, WorkflowResult, AutomationConfig } from '@/types/features/automation'
 
 /**
  * Base Workflow Automation
@@ -35,9 +35,13 @@ export abstract class BaseWorkflowAutomation {
    * Trigger workflow automation event
    */
   async triggerEvent(eventData: Partial<WorkflowEventData>) {
+    if (!eventData.event || !eventData.entityId) {
+      throw new Error('Event and entityId are required')
+    }
+    
     const event: WorkflowEventData = {
-      event: eventData.event!,
-      entityId: eventData.entityId!,
+      event: eventData.event,
+      entityId: eventData.entityId,
       data: eventData.data ?? {},
       timestamp: new Date().toISOString()
     }

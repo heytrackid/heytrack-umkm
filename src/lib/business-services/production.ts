@@ -12,8 +12,8 @@ import { isIngredient } from '@/lib/type-guards'
 
 
 
-type Recipe = RecipesTable
-type Ingredient = IngredientsTable
+type _Recipe = RecipesTable
+type _Ingredient = IngredientsTable
 
 export class ProductionServices {
   private static instance: ProductionServices
@@ -229,7 +229,7 @@ export class ProductionServices {
     }
   }
 
-  async getProductionQueue(): Promise<ProductionBatch[]> {
+  getProductionQueue(): ProductionBatch[] {
     try {
       // TODO: Implement when production_batches table is created
       // For now, return empty array
@@ -240,7 +240,7 @@ export class ProductionServices {
     }
   }
 
-  async updateBatchStatus(batchId: string, status: ProductionBatch['status']): Promise<void> {
+  updateBatchStatus(batchId: string, status: ProductionBatch['status']): void {
     try {
       // TODO: Implement when production_batches table is created
       productionLogger.info({ batchId, status }, 'Updating production batch status')
@@ -250,7 +250,7 @@ export class ProductionServices {
     }
   }
 
-  async getActiveBatches(): Promise<ProductionBatch[]> {
+  getActiveBatches(): ProductionBatch[] {
     try {
       // TODO: Implement when production_batches table is created
       return []
@@ -263,9 +263,9 @@ export class ProductionServices {
   async cancelProductionBatch(batchId: string): Promise<void> {
     try {
       const { createServerClient } = await import('@/utils/supabase/client-safe')
-      const supabase = await createServerClient()
+      const _supabase = await createServerClient()
 
-      // TODO: Implement batch cancellation logic
+      // TODO: Implement batch cancellation logic using _supabase
       // This would involve:
       // 1. Finding the batch
       // 2. Returning reserved ingredients to stock
