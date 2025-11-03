@@ -131,7 +131,7 @@ const HppReportsPage = () => {
     } finally {
       void setLoading(false)
     }
-  }, [])
+  }, [toast])
 
   useEffect(() => {
     void loadAnalytics()
@@ -447,14 +447,20 @@ const HppReportsPage = () => {
                           checked={config.metrics.includes(metric.value)}
                           onChange={(e) => {
                             const { checked } = e.target
-                            setConfig(prev => ({
-                              ...prev,
-                              metrics: checked
-                                ? prev.metrics.includes(metric.value)
-                                  ? prev.metrics
-                                  : [...prev.metrics, metric.value]
-                                : prev.metrics.filter(m => m !== metric.value)
-                            }))
+                            setConfig(prev => {
+                              if (checked) {
+                                return {
+                                  ...prev,
+                                  metrics: prev.metrics.includes(metric.value)
+                                    ? prev.metrics
+                                    : [...prev.metrics, metric.value]
+                                }
+                              }
+                              return {
+                                ...prev,
+                                metrics: prev.metrics.filter(m => m !== metric.value)
+                              }
+                            })
                           }}
                           className="rounded"
                         />

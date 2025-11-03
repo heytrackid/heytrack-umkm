@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { apiLogger } from '@/lib/logger'
 import { useToast } from '@/hooks/use-toast'
 import type {
@@ -49,7 +49,7 @@ export function useProfitReport(): UseProfitReportReturn {
   const [endDate, setEndDate] = useState('')
 
   // Fetch profit data
-  const fetchProfitData = async () => {
+  const fetchProfitData = useCallback(async () => {
     void setLoading(true)
     void setError(null)
 
@@ -83,7 +83,7 @@ export function useProfitReport(): UseProfitReportReturn {
     } finally {
       void setLoading(false)
     }
-  }
+  }, [selectedPeriod, startDate, endDate])
 
   // Handle export report
   const exportReport = async (format: 'csv' | 'pdf' | 'xlsx') => {
@@ -91,7 +91,7 @@ export function useProfitReport(): UseProfitReportReturn {
 
     try {
       const filename = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
-      await exportProfitReport(profitData, format, filename)
+      exportProfitReport(profitData, format, filename)
     } catch (err: unknown) {
       const error = err as Error
       apiLogger.error({ error: error.message }, 'Error exporting report:')

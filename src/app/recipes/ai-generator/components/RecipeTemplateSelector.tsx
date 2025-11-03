@@ -78,8 +78,7 @@ export const RecipeTemplateSelector = ({ onSelectTemplate, selectedTemplateId }:
                                                 variant="secondary"
                                                 className={`text-xs ${getDifficultyColor(template.difficulty)}`}
                                             >
-                                                {template.difficulty === 'easy' ? 'Mudah' :
-                                                    template.difficulty === 'medium' ? 'Sedang' : 'Sulit'}
+                                                {template.difficulty === 'easy' ? 'Mudah' : (template.difficulty === 'medium' ? 'Sedang' : 'Sulit')}
                                             </Badge>
                                         </div>
 
