@@ -1,9 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { MessageBubble } from './MessageBubble'
 import { TypingIndicator } from './TypingIndicator'
 import type { Message } from '@/app/ai-chatbot/types'
-import type { RefObject } from 'react'
 
 interface MessageListProps {
   messages: Message[]

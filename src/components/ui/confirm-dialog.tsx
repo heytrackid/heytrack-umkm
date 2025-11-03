@@ -137,7 +137,7 @@ export function useConfirm() {
     setState({
       ...options,
       open: true,
-      onConfirm: async () => {
+      onConfirm: () => {
         resolve(true)
       }
     })

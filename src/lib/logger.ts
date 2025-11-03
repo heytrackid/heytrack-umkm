@@ -14,8 +14,14 @@ const isDevelopment = process.env.NODE_ENV === 'development'
 const isTest = process.env.NODE_ENV === 'test'
 
 // Configure Pino logger
+const getLogLevel = () => {
+  if (isTest) return 'silent'
+  if (isDevelopment) return 'debug'
+  return 'info'
+}
+
 const logger = pino({
-  level: isTest ? 'silent' : isDevelopment ? 'debug' : 'info',
+  level: getLogLevel(),
   ...(isDevelopment && {
     transport: {
       target: 'pino-pretty',

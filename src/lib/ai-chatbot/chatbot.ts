@@ -20,7 +20,7 @@ export class ContextAwareAI {
   /**
    * Initialize chatbot session
    */
-  async initializeSession(): Promise<void> {
+  initializeSession(): Promise<void> {
     return this.contextManager.initializeSession()
   }
 

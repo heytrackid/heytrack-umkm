@@ -1,5 +1,5 @@
 import { apiLogger } from '@/lib/logger'
-import { processChatbotQuery, generateAIInsights } from '@/lib/ai'
+import { generateAIInsights } from '@/lib/ai'
 import { createClient } from '@/utils/supabase/client'
 
 const supabase = createClient()
@@ -161,7 +161,7 @@ export function useAIService() {
         query,
         businessContext: businessContext ?? undefined
       }
-      const insights = await generateAIInsights(aiQueryParams as Record<string, unknown>)
+      const insights = generateAIInsights(aiQueryParams as Record<string, unknown>)
 
       // Generate contextual suggestions based on query type
       const lowerQuery = query.toLowerCase()

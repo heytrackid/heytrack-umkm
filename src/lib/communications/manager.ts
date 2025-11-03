@@ -51,7 +51,7 @@ export class CommunicationsManager {
   /**
    * Send order notification via appropriate channel
    */
-  async sendOrderNotification(orderData: OrderData, type: 'confirmation' | 'reminder' | 'payment' | 'followup'): Promise<void> {
+  sendOrderNotification(orderData: OrderData, type: 'confirmation' | 'reminder' | 'payment' | 'followup'): void {
     // Send WhatsApp message
     if (this.whatsapp) {
       switch (type) {

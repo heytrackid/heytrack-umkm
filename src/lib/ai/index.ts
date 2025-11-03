@@ -30,19 +30,19 @@ export type {
 
 // Convenience functions
 
-export async function processChatbotQuery(query: string) {
+export function processChatbotQuery(query: string) {
   return NLPProcessor.processChatbotQuery(query)
 }
 
-export async function trainNLPModel(data: Record<string, unknown>): Promise<boolean> {
+export function trainNLPModel(data: Record<string, unknown>): boolean {
   apiLogger.info({ data }, 'NLP Model training requested (placeholder)')
   return true
 }
 
-export async function parseNaturalLanguage(text: string) {
+export function parseNaturalLanguage(text: string) {
   return NLPProcessor.parseNaturalLanguage(text)
 }
 
-export async function generateAIInsights(data: Record<string, unknown>): Promise<string> {
+export function generateAIInsights(data: Record<string, unknown>): string {
   return BusinessAI.getBusinessInsights(data)
 }

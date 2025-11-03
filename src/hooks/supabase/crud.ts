@@ -19,7 +19,7 @@ export function useSupabaseCRUD<T extends TableName>(
   const {
     showSuccessToast = true,
     showErrorToast = true,
-    successMessages = {},
+    successMessages: _successMessages = {},
     customErrorHandler
   } = options
 

@@ -177,11 +177,14 @@ const EnhancedSummaryCards = ({
             <Card className="bg-gradient-to-r from-background to-muted/20">
                 <CardContent className="pt-6">
                     <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-full ${health.status === 'excellent' ? 'bg-green-100 dark:bg-green-900' :
-                            health.status === 'good' ? 'bg-blue-100 dark:bg-blue-900' :
-                                health.status === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900' :
-                                    'bg-red-100 dark:bg-red-900'
-                            }`}>
+                        <div className={`p-3 rounded-full ${
+                            (() => {
+                                if (health.status === 'excellent') {return 'bg-green-100 dark:bg-green-900'}
+                                if (health.status === 'good') {return 'bg-blue-100 dark:bg-blue-900'}
+                                if (health.status === 'warning') {return 'bg-yellow-100 dark:bg-yellow-900'}
+                                return 'bg-red-100 dark:bg-red-900'
+                            })()
+                        }`}>
                             {health.status === 'danger' || health.status === 'warning' ? (
                                 <AlertCircle className={`h-6 w-6 ${health.color}`} />
                             ) : (

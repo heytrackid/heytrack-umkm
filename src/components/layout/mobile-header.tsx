@@ -90,7 +90,7 @@ const MobileHeader = ({
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event: string, session: { user: SupabaseUser | null } | null) => {
+      (_event: string, session: { user: SupabaseUser | null } | null) => {
         void setUser(session?.user ?? null)
         void setLoading(false)
       }

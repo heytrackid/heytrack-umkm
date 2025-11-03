@@ -301,8 +301,11 @@ const PricingAssistantPage = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Demand Level</span>
                     <Badge variant={
-                      recommendation.marketFactors.demandLevel === 'high' ? 'default' :
-                        recommendation.marketFactors.demandLevel === 'medium' ? 'secondary' : 'outline'
+                      (() => {
+                        if (recommendation.marketFactors.demandLevel === 'high') {return 'default'}
+                        if (recommendation.marketFactors.demandLevel === 'medium') {return 'secondary'}
+                        return 'outline'
+                      })()
                     }>
                       {recommendation.marketFactors.demandLevel}
                     </Badge>
@@ -311,8 +314,11 @@ const PricingAssistantPage = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Seasonality</span>
                     <Badge variant={
-                      recommendation.marketFactors.seasonality === 'peak' ? 'default' :
-                        recommendation.marketFactors.seasonality === 'normal' ? 'secondary' : 'outline'
+                      (() => {
+                        if (recommendation.marketFactors.seasonality === 'peak') {return 'default'}
+                        if (recommendation.marketFactors.seasonality === 'normal') {return 'secondary'}
+                        return 'outline'
+                      })()
                     }>
                       {recommendation.marketFactors.seasonality}
                     </Badge>

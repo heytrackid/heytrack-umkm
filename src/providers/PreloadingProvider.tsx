@@ -90,7 +90,7 @@ export const PreloadingProvider = ({
   }, [enableNetworkAware, networkAwarePreloading])
 
   // Track preloaded routes
-  const preloadRoute = async (route: string): Promise<void> => {
+  const preloadRoute = (route: string): void => {
     if (preloadedRoutes.has(route)) {
       if (debug) { apiLogger.info(`🔄 Route ${route} already preloaded`) }
       return

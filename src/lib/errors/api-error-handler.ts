@@ -244,7 +244,7 @@ export function withAPIErrorHandler<T extends Record<string, unknown>>(
   handler: (req: Request, ctx: T) => Promise<NextResponse>,
   context?: string
 ) {
-  return async (req: Request, ctx: T): Promise<NextResponse> => {
+  return (req: Request, ctx: T): Promise<NextResponse> => {
     try {
       return handler(req, ctx);
     } catch (error) {

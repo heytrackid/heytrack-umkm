@@ -178,7 +178,7 @@ export const LazyLoadingMetrics = {
 // Global lazy loading utilities
 export const globalLazyLoadingUtils = {
   // Preload critical components for the current route
-  preloadForRoute: async (routeName: keyof typeof RouteLazyLoadingConfig) => {
+  preloadForRoute: (routeName: keyof typeof RouteLazyLoadingConfig) => {
     const config = RouteLazyLoadingConfig[routeName]
     const preloadPromises: Array<Promise<unknown>> = []
 

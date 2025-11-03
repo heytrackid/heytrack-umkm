@@ -134,13 +134,13 @@ export const useErrorHandler = () => {
     showNotification = true
   ): ApiResponse => ApiErrorHandler.handle(error, context, showNotification);
 
-  const handleFetchError = async (
+  const handleFetchError = (
     response: Response,
     context?: string,
     showNotification = true
   ): Promise<ApiResponse> => ApiErrorHandler.handleFetchError(response, context, showNotification);
 
-  const safeExecute = async <T,>(
+  const safeExecute = <T,>(
     apiCall: () => Promise<T>,
     context?: string,
     showNotification = true

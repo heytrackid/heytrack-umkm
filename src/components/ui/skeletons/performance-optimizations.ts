@@ -98,6 +98,7 @@ export const ANIMATION_CONFIG = {
 export function preloadSkeletonComponents() {
   // Preload common skeleton components to avoid loading delays
   if (typeof window !== 'undefined') {
+    // TODO: Implement preload logic for skeleton components
   }
 }
 

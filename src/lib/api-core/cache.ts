@@ -77,7 +77,7 @@ export class APICache {
   /**
    * Execute with caching and deduplication
    */
-  async executeWithCache<T>(
+  executeWithCache<T>(
     operationName: string,
     queryFn: () => Promise<T>,
     cacheKey: string,

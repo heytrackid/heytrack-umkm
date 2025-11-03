@@ -66,7 +66,7 @@ export class BusinessAI {
   /**
    * Generate pricing recommendations
    */
-  static async generatePricingStrategy(data: PricingData): Promise<string> {
+  static generatePricingStrategy(data: PricingData): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(data, 'dynamic pricing strategy and market positioning')
     const systemPrompt = 'You are a pricing strategist specializing in Indonesian food businesses and competitive analysis.'
     return AIService.callOpenRouter(prompt, systemPrompt)
@@ -75,7 +75,7 @@ export class BusinessAI {
   /**
    * Analyze inventory patterns and suggest optimizations
    */
-  static async analyzeInventory(data: InventoryData): Promise<string> {
+  static analyzeInventory(data: InventoryData): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(data, 'inventory management and supply chain optimization')
     const systemPrompt = 'You are an inventory optimization expert for food service businesses.'
     return AIService.callOpenRouter(prompt, systemPrompt)
@@ -84,7 +84,7 @@ export class BusinessAI {
   /**
    * Optimize production schedules
    */
-  static async optimizeProduction(data: ProductionData): Promise<string> {
+  static optimizeProduction(data: ProductionData): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(data, 'production planning and resource optimization')
     const systemPrompt = 'You are a production planning expert for food manufacturing businesses.'
     return AIService.callOpenRouter(prompt, systemPrompt)

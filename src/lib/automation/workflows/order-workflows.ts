@@ -25,7 +25,7 @@ import type { WorkflowContext, WorkflowResult } from '@/types/features/automatio
 // import { triggerWorkflow } from '@/lib/automation/workflows' TODO: benerin ini
 
 // Temporary stub for triggerWorkflow
-const triggerWorkflow = async (_workflow: string, _context: unknown) => {
+const triggerWorkflow = (_workflow: string, _context: unknown) => {
   automationLogger.warn('triggerWorkflow stub called')
 }
 
@@ -463,7 +463,7 @@ export class OrderWorkflowHandlers {
         // Check for low stock alerts
         const minStock = Number(ingredient.min_stock ?? 0)
         if (newStock <= minStock && newStock > 0) {
-          await triggerWorkflow('inventory.low_stock', {
+          triggerWorkflow('inventory.low_stock', {
             ingredient: {
               id: ingredient.id,
               name: ingredient.name,
@@ -476,7 +476,7 @@ export class OrderWorkflowHandlers {
         }
 
         if (newStock <= 0) {
-          await triggerWorkflow('inventory.out_of_stock', {
+          triggerWorkflow('inventory.out_of_stock', {
             ingredient: {
               id: ingredient.id,
               name: ingredient.name,

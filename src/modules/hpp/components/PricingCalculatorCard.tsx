@@ -261,6 +261,7 @@ export const PricingCalculatorCard = ({
                 <Button
                     onClick={() => onSavePrice(displayPrice, displayMargin)}
                     className="w-full"
+                    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- Using logical OR for boolean conditions is correct here
                     disabled={Boolean(isSaving || displayPrice === currentPrice || (mode === 'manual' && manualPrice < totalCost))}
                 >
                     {actionContent}

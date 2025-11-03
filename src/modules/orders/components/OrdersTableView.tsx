@@ -1,3 +1,4 @@
+ 
 'use client'
 
 import OrdersTableComponent from '@/components/orders/orders-table'

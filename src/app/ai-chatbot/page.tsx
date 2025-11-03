@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/shared'
 import { ChatHeader, ChatInput, MessageList } from './components'
@@ -16,12 +16,7 @@ const AIChatbotPage = () => {
   const { messages, isLoading, scrollAreaRef, addMessage, setLoading } = useChatMessages()
   const { processAIQuery } = useAIService()
   const [input, setInput] = useState('')
-  const [isMounted, setIsMounted] = useState(false)
-
-  // Prevent hydration mismatch
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
+  
 
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = (messageText ?? input).trim()

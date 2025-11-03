@@ -235,7 +235,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
 }
 
 // Fetch top products data
-const fetchTopProducts = async (): Promise<TopProductsData[]> => {
+const fetchTopProducts = (): TopProductsData[] => {
   try {
     // This would need to be implemented based on your order_items and recipes schema
     // For now, return empty array since we're removing mock data

@@ -10,7 +10,7 @@ export class AIClient {
   /**
    * Call OpenRouter API (primary method)
    */
-  static async callAI(
+  static callAI(
     prompt: string,
     systemPrompt: string,
     model = 'meta-llama/llama-3.1-8b-instruct:free'
@@ -141,7 +141,7 @@ export class AIClient {
   /**
    * Call external AI service (generic method)
    */
-  static async callExternalAI(prompt: string, options: {
+  static callExternalAI(prompt: string, options: {
     model?: string
     temperature?: number
     maxTokens?: number

@@ -179,7 +179,7 @@ class DebugLogger {
     }
   }
 
-  public traceFunction<T extends Function>(
+  public traceFunction<T extends (...args: unknown[]) => unknown>(
     fn: T,
     options: DetailedDebugOptions & { name?: string } = {}
   ): T {
@@ -399,7 +399,7 @@ export function measurePerformance<T>(
   });
 }
 
-export async function measurePerformanceAsync<T>(
+export function measurePerformanceAsync<T>(
   name: string,
   fn: () => Promise<T>
 ): Promise<T> {

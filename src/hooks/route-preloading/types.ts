@@ -13,12 +13,14 @@ export interface RouteConfig {
 }
 
 // Preloading priority levels
-export enum PreloadPriority {
-  IMMEDIATE = 'immediate',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low'
-}
+export const PreloadPriority = {
+  IMMEDIATE: 'immediate',
+  HIGH: 'high',
+  MEDIUM: 'medium',
+  LOW: 'low'
+} as const
+
+export type PreloadPriority = typeof PreloadPriority[keyof typeof PreloadPriority]
 
 // Route preloading patterns
 export type RoutePreloadingPatterns = Record<string, RouteConfig>

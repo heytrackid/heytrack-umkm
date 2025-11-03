@@ -86,7 +86,7 @@ export function useProfitReport(): UseProfitReportReturn {
   }
 
   // Handle export report
-  const exportReport = async (format: 'csv' | 'pdf' | 'xlsx') => {
+  const exportReport = (format: 'csv' | 'pdf' | 'xlsx') => {
     if (!profitData) {return}
 
     try {

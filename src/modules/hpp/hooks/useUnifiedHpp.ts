@@ -93,11 +93,13 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
       const response = await fetch('/api/recipes?limit=100')
       if (!response.ok) {throw new Error('Failed to fetch recipes')}
       const payload = await response.json() as RecipesListResponse | Recipe[] | null
-      const recipeCount = Array.isArray(payload)
-        ? payload.length
-        : isRecipesListResponse(payload)
-          ? payload.recipes.length
-          : 0
+      
+      let recipeCount = 0
+      if (Array.isArray(payload)) {
+        recipeCount = payload.length
+      } else if (isRecipesListResponse(payload)) {
+        recipeCount = payload.recipes.length
+      }
 
       apiLogger.info({
         hasPayload: payload !== null,

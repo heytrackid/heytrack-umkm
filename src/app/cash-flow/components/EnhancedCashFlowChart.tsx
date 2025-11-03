@@ -94,8 +94,17 @@ const EnhancedCashFlowChart = ({
         const change = recent.net - previous.net
         const percentage = previous.net !== 0 ? (change / Math.abs(previous.net)) * 100 : 0
 
+        let direction: 'up' | 'down' | 'stable'
+        if (change > 0) {
+            direction = 'up'
+        } else if (change < 0) {
+            direction = 'down'
+        } else {
+            direction = 'stable'
+        }
+
         return {
-            direction: change > 0 ? 'up' : change < 0 ? 'down' : 'stable',
+            direction,
             percentage: Math.abs(percentage)
         }
     }

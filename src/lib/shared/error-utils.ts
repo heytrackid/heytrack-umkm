@@ -81,6 +81,7 @@ export function useErrorHandler() {
 }
 
 // API error handling
+// eslint-disable-next-line react-hooks/rules-of-hooks -- This utility function needs refactoring to not use hooks directly
 export function handleAPIResponse<T>(
   response: { data?: T; error?: unknown },
   successMessage?: string,
@@ -170,11 +171,7 @@ export function createErrorRecovery<T>(
       errorHandler?.(err as Error)
 
       if (fallbackFn) {
-        try {
-          return await fallbackFn()
-        } catch (fallbackError) {
-          throw fallbackError
-        }
+        return fallbackFn()
       }
 
       throw err

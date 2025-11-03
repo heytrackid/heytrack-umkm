@@ -18,7 +18,7 @@ export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps
     }
     
     const dataObj = data as Record<string, unknown>
-    const businessContext = dataObj.businessContext
+    const {businessContext} = dataObj
     
     if (!businessContext || typeof businessContext !== 'object') { 
       return null 

@@ -380,16 +380,16 @@ export class BusinessContextService {
   private static loadInsights(
     _supabase: Awaited<ReturnType<typeof createClient>>,
     _userId: string
-  ): BusinessInsight[] {
+  ): Promise<BusinessInsight[]> {
     // Return empty array for now - business_insights table may not exist yet
-    return []
+    return Promise.resolve([])
   }
 
   private static loadQuickStats(
     _supabase: Awaited<ReturnType<typeof createClient>>,
     _userId: string
-  ): QuickStat[] {
+  ): Promise<QuickStat[]> {
     // Return empty array for now - business_quick_stats table may not exist yet
-    return []
+    return Promise.resolve([])
   }
 }

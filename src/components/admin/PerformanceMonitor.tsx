@@ -11,8 +11,7 @@ import {
   Clock, 
   AlertTriangle, 
   CheckCircle,
-  TrendingUp,
-  TrendingDown
+  TrendingUp
 } from 'lucide-react'
 import { usePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring'
 
@@ -72,11 +71,11 @@ export const PerformanceMonitor = () => {
   }
 
   const handleExport = () => {
-    const data = exportMetrics()
-    console.log('Performance Metrics:', data)
+    const _data = exportMetrics()
+    // console.log('Performance Metrics:', _data)
     
     // Could send to analytics service here
-    // analytics.track('performance_metrics', data)
+    // analytics.track('performance_metrics', _data)
   }
 
   return (
@@ -109,7 +108,7 @@ export const PerformanceMonitor = () => {
               </span>
             </div>
             <Progress 
-              value={performanceScore || 0} 
+              value={performanceScore ?? 0} 
               className="h-2"
             />
           </div>
@@ -186,7 +185,7 @@ export const PerformanceMonitor = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Total:</span>
                   <span className="font-medium">
-                    {(metrics.memoryUsage.total! / 1024 / 1024).toFixed(1)} MB
+                    {metrics.memoryUsage.total ? (metrics.memoryUsage.total / 1024 / 1024).toFixed(1) : '—'} MB
                   </span>
                 </div>
               </div>

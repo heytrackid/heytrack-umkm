@@ -2,7 +2,8 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { usePathname, useRouter } from 'next/navigation'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
+import { logger } from '@/lib/logger'
 
 /**
  * Hook untuk navigasi instant tanpa loading skeleton
@@ -21,7 +22,7 @@ export function useInstantNavigation() {
   const queryClient = useQueryClient()
 
   // Konfigurasi route dengan data yang perlu di-prefetch
-  const routeConfigs: RouteConfig[] = [
+  const routeConfigs: RouteConfig[] = useMemo(() => [
     {
       path: '/dashboard',
       queryKeys: [['dashboard', 'all-data']],
@@ -78,7 +79,7 @@ export function useInstantNavigation() {
         return response.json()
       }
     }
-  ]
+  ], [])
 
   // Prefetch route data
   const prefetchRoute = useCallback(async (path: string) => {
@@ -104,7 +105,7 @@ export function useInstantNavigation() {
       }
     } catch (error) {
       // Silent fail - data will be fetched on navigation
-      console.warn('Prefetch failed for', path, error)
+      logger.warn('Prefetch failed for', { path, error })
     }
   }, [queryClient, routeConfigs])
 

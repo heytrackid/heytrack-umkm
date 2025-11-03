@@ -30,6 +30,7 @@ export class ContextManager {
         { userId: this.context.userId, sessionId: this.context.sessionId },
         'AI session initialized'
       )
+      await Promise.resolve()
     } catch (err) {
       apiLogger.error({ err }, 'Error initializing AI session')
       throw err

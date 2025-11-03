@@ -240,17 +240,24 @@ const ComparisonAnalyticsPage = () => {
             <CardTitle>Recipe Comparison Table</CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-              </div>
-            ) : sortedRecipes.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No recipe data available for comparison
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
+            {(() => {
+              if (loading) {
+                return (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                  </div>
+                )
+              }
+              if (sortedRecipes.length === 0) {
+                return (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No recipe data available for comparison
+                  </div>
+                )
+              }
+              return (
+                <div className="overflow-x-auto">
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Recipe</TableHead>
@@ -299,10 +306,11 @@ const ComparisonAnalyticsPage = () => {
                         </TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )
+            })()}
           </CardContent>
         </Card>
 

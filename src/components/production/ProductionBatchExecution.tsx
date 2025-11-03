@@ -143,7 +143,7 @@ const ProductionBatchExecution = ({
     })
   }
 
-  const handleCompleteBatch = async (batchId: string) => {
+  const handleCompleteBatch = (batchId: string) => {
     const state = executionStates.get(batchId)
     if (!state) { return }
 

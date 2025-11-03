@@ -50,11 +50,11 @@ export function useChatMessages() {
           .limit(50)
       ])
 
-      type OrderRow = { id: string; status: string; total_amount: number; created_at: string }
-      type InventoryRow = { id: string; current_stock: number; minimum_stock: number }
+      interface OrderRow { id: string; status: string; total_amount: number; created_at: string }
+      interface InventoryRow { id: string; current_stock: number; minimum_stock: number }
       
-      const orders = (ordersResult.data || []) as OrderRow[]
-      const inventory = (inventoryResult.data || []) as InventoryRow[]
+      const orders = (ordersResult.data ?? []) as OrderRow[]
+      const inventory = (inventoryResult.data ?? []) as InventoryRow[]
       
       const totalOrders = orders.length
       const pendingOrders = orders.filter(o => o.status === 'PENDING').length
@@ -83,22 +83,30 @@ export function useChatMessages() {
         healthStatus = 'Good'
       }
 
+      // Determine alert message
+      let alertMessage = '\n✅ **All Good!** Bisnis berjalan lancar. Ada yang ingin ditanyakan?'
+      if (criticalItems > 0) {
+        alertMessage = '\n🚨 **Alert:** Ada bahan yang stoknya kritis! Klik suggestion di bawah untuk detail.'
+      } else if (pendingOrders > 0) {
+        alertMessage = '\n⏰ **Reminder:** Ada pesanan pending yang perlu diproses!'
+      }
+
+      // Determine suggestions
+      let suggestions: string[]
+      if (criticalItems > 0) {
+        suggestions = ['Berapa stok bahan baku yang tersedia?', 'Status pesanan terbaru', 'Analisis profit bulan ini']
+      } else if (pendingOrders > 0) {
+        suggestions = ['Status pesanan terbaru', 'Berapa stok bahan baku?', 'Gimana kondisi bisnis aku?']
+      } else {
+        suggestions = ['Gimana kondisi bisnis aku?', 'Analisis profit bulan ini', 'Rekomendasi resep hari ini']
+      }
+
       const welcomeMessage: Message = {
-        id: `welcome-${  Date.now()}`,
+        id: `welcome-${Date.now()}`,
         role: 'assistant',
-        content: `👋 **Selamat datang kembali!**\n\nSaya Asisten AI HeyTrack yang siap membantu bisnis UMKM kuliner Anda.\n\n📊 **Quick Business Overview:**\n• Status: ${healthEmoji} ${healthStatus}\n• Total Pesanan: ${totalOrders} pesanan\n• Pending Orders: ${pendingOrders}\n• Total Revenue: ${revenueFormatted}\n${criticalItems > 0 ? `• ⚠️ Stok Kritis: ${criticalItems} bahan\n` : ''}
-${criticalItems > 0 
-  ? '\n🚨 **Alert:** Ada bahan yang stoknya kritis! Klik suggestion di bawah untuk detail.' 
-  : pendingOrders > 0 
-    ? '\n⏰ **Reminder:** Ada pesanan pending yang perlu diproses!' 
-    : '\n✅ **All Good!** Bisnis berjalan lancar. Ada yang ingin ditanyakan?'
-}`,
+        content: `👋 **Selamat datang kembali!**\n\nSaya Asisten AI HeyTrack yang siap membantu bisnis UMKM kuliner Anda.\n\n📊 **Quick Business Overview:**\n• Status: ${healthEmoji} ${healthStatus}\n• Total Pesanan: ${totalOrders} pesanan\n• Pending Orders: ${pendingOrders}\n• Total Revenue: ${revenueFormatted}\n${criticalItems > 0 ? `• ⚠️ Stok Kritis: ${criticalItems} bahan\n` : ''}${alertMessage}`,
         timestamp: new Date(),
-        suggestions: criticalItems > 0 
-          ? ['Berapa stok bahan baku yang tersedia?', 'Status pesanan terbaru', 'Analisis profit bulan ini']
-          : pendingOrders > 0
-            ? ['Status pesanan terbaru', 'Berapa stok bahan baku?', 'Gimana kondisi bisnis aku?']
-            : ['Gimana kondisi bisnis aku?', 'Analisis profit bulan ini', 'Rekomendasi resep hari ini']
+        suggestions
       }
 
       setMessages([welcomeMessage])

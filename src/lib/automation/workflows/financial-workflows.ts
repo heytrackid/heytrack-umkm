@@ -12,7 +12,7 @@ export class FinancialWorkflowHandlers {
   /**
    * Handle ingredient price change event
    */
-  static async handleIngredientPriceChanged(context: WorkflowContext): Promise<WorkflowResult> {
+  static handleIngredientPriceChanged(context: WorkflowContext): WorkflowResult {
     const { event, logger } = context
 
     if (!event.data || typeof event.data !== 'object') {
@@ -44,7 +44,7 @@ export class FinancialWorkflowHandlers {
     try {
       // Generate smart notifications for significant changes
       if (Math.abs(priceChange) > 10) {
-        await this.sendPriceChangeNotification(data)
+        this.sendPriceChangeNotification(data)
       }
 
       return {
@@ -74,7 +74,7 @@ export class FinancialWorkflowHandlers {
   /**
    * Handle operational cost change event
    */
-  static async handleOperationalCostChanged(context: WorkflowContext): Promise<WorkflowResult> {
+  static handleOperationalCostChanged(context: WorkflowContext): WorkflowResult {
     const { event, logger } = context
 
     if (!event.data || typeof event.data !== 'object') {
@@ -115,7 +115,7 @@ export class FinancialWorkflowHandlers {
         })
 
         // TODO: Trigger pricing review workflow
-        setTimeout(async () => {
+        setTimeout(() => {
           logger.info('Pricing review triggered for cost change', { costId })
         }, 3000)
       }

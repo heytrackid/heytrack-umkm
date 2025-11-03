@@ -13,7 +13,7 @@ export class AIService {
   /**
    * Enhanced call to OpenRouter with security and prompt building
    */
-  static async callOpenRouter(prompt: string, systemPrompt: string): Promise<string> {
+  static callOpenRouter(prompt: string, systemPrompt: string): Promise<string> {
     const safePrompt = AISecurity.sanitizeInput(prompt)
     const safeSystemPrompt = AISecurity.sanitizeInput(systemPrompt)
 
@@ -29,7 +29,7 @@ export class AIService {
   /**
    * Generate AI insights for business data
    */
-  static async getPredictions(data: Record<string, unknown>): Promise<string> {
+  static getPredictions(data: Record<string, unknown>): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(data, 'sales forecasting and trend analysis')
     const systemPrompt = 'You are a business intelligence analyst specializing in Indonesian food businesses.'
     return this.callOpenRouter(prompt, systemPrompt)
@@ -38,7 +38,7 @@ export class AIService {
   /**
    * Optimize inventory using AI
    */
-  static async optimizeInventory(inventoryData: Record<string, unknown>): Promise<string> {
+  static optimizeInventory(inventoryData: Record<string, unknown>): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(inventoryData, 'inventory optimization and demand forecasting')
     const systemPrompt = 'You are an inventory management expert for food businesses.'
     return this.callOpenRouter(prompt, systemPrompt)

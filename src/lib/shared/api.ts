@@ -233,7 +233,7 @@ export const apiCache = {
 /**
  * API request wrapper with error handling and retries
  */
-export const apiRequest = async <T>(
+export const apiRequest = <T>(
   url: string,
   options: RequestInit = {},
   config: Partial<ApiRequestConfig> = {}

@@ -187,7 +187,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
     }
   }, []);
 
-  const createNewSession = useCallback(async () => {
+  const createNewSession = useCallback(() => {
     setSessionId(null);
     setMessages([]);
     setError(null);
