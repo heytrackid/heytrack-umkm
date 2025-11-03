@@ -115,12 +115,25 @@ export function MyComponent() {
 }
 ```
 
+## Additional Fixes (Dashboard Components)
+
+After initial fix, found additional components in dashboard causing the same error:
+
+- ✅ `src/app/dashboard/components/HppDashboardWidget.tsx` - Was using `dbLogger`
+- ✅ `src/modules/orders/components/OrdersTableView.tsx` - Was using `uiLogger`
+- ✅ `src/modules/orders/components/OrdersPage.tsx` - Was using `uiLogger`
+
+These were fixed in commit `37d04b2`.
+
 ## Related Files
 
 - `src/lib/client-logger.ts` - Client-side logger implementation
 - `src/lib/logger.ts` - Server-side logger (Pino)
 - `src/app/api/errors/route.ts` - Error reporting API endpoint
 - `src/providers/AuthProvider.tsx` - Fixed auth provider
+- `src/app/dashboard/components/HppDashboardWidget.tsx` - Fixed dashboard widget
+- `src/modules/orders/components/OrdersTableView.tsx` - Fixed orders table
+- `src/modules/orders/components/OrdersPage.tsx` - Fixed orders page
 
 ## Notes
 
