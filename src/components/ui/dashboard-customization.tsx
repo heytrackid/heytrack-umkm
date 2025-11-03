@@ -5,13 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import {
-    BarChart3,
-    Eye,
-    EyeOff,
-    Grid3X3,
-    GripVertical,
-    Plus,
-    Settings
+  BarChart3,
+  Eye,
+  EyeOff,
+  Grid3X3,
+  GripVertical,
+  Plus,
+  Settings
 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
@@ -147,7 +147,7 @@ export const DashboardCustomization = ({
   }
 
   // Add new widget (example - in real implementation you might have a different mechanism)
-  const addWidget = (widgetType: string) => {
+  const addWidget = (_widgetType: string) => {
     const newWidgetId = `widget-${Date.now()}`
     setLayout(prev => ({
       ...prev,

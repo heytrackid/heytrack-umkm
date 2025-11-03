@@ -3,9 +3,9 @@
 import { Button } from '@/components/ui/button'
 import { DateRangePicker } from '@/components/ui/date-range-picker'
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger
+  Popover,
+  PopoverContent,
+  PopoverTrigger
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Calendar, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react'
@@ -14,7 +14,7 @@ import type { DateRange } from 'react-day-picker'
 
 interface ChartData {
   labels: string[]
-  datasets: {
+  datasets: Array<{
     label: string
     data: number[]
     borderColor?: string
@@ -22,20 +22,18 @@ interface ChartData {
     borderWidth?: number
     fill?: boolean
     tension?: number
-  }[]
+  }>
 }
 
 interface InteractiveChartProps {
   type: 'bar' | 'line' | 'pie'
   data: ChartData
-  options?: any
   className?: string
   title?: string
   onDateRangeChange?: (range: DateRange) => void
   showDateRange?: boolean
   initialDateRange?: DateRange
   zoomEnabled?: boolean
-  panEnabled?: boolean
 }
 
 export const InteractiveChart = ({
@@ -158,18 +156,16 @@ export const InteractiveChart = ({
 // Export helper functions
 export const createChartData = (
   labels: string[],
-  datasets: { label: string; data: number[]; color?: string }[]
-): ChartData => {
-  return {
-    labels,
-    datasets: datasets.map((ds, index) => ({
-      label: ds.label,
-      data: ds.data,
-      borderColor: ds.color || `hsl(${index * 137.5}, 50%, 50%)`,
-      backgroundColor: ds.color ? `${ds.color}80` : `hsla(${index * 137.5}, 50%, 50%, 0.6)`,
-      borderWidth: 2,
-      fill: false,
-      tension: 0.4
-    }))
-  }
-}
+  datasets: Array<{ label: string; data: number[]; color?: string }>
+): ChartData => ({
+  labels,
+  datasets: datasets.map((ds, index) => ({
+    label: ds.label,
+    data: ds.data,
+    borderColor: ds.color ?? `hsl(${index * 137.5}, 50%, 50%)`,
+    backgroundColor: ds.color ? `${ds.color}80` : `hsla(${index * 137.5}, 50%, 50%, 0.6)`,
+    borderWidth: 2,
+    fill: false,
+    tension: 0.4
+  }))
+})

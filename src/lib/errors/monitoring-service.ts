@@ -189,7 +189,7 @@ class ErrorMonitoringService {
   /**
    * Send error to external monitoring service (placeholder implementation)
    */
-  private async sendError(errorEvent: ErrorEvent): Promise<void> {
+  private sendError(errorEvent: ErrorEvent): void {
     try {
       // If a DSN is provided, we could send to external service
       if (this.config.dsn) {

@@ -44,7 +44,7 @@ export async function getCurrentSession(): Promise<SessionInfo> {
         }, 'Could not fetch user profile')
       } else {
         role = profile?.role ?? undefined
-        permissions = profile?.permissions || []
+        permissions = profile?.permissions ?? []
       }
     }
 
@@ -128,7 +128,7 @@ export async function getUserPermissions(userId: string): Promise<string[]> {
       return []
     }
     
-    return profile?.permissions || []
+    return profile?.permissions ?? []
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     apiLogger.error({ error: message, userId }, 'Exception getting user permissions')
@@ -147,7 +147,7 @@ export async function checkUserPermission(userId: string, permission: string): P
 /**
  * Create a custom session cookie
  */
-export async function createCustomSession(userId: string, expiresInHours: number = 24) {
+export async function createCustomSession(userId: string, expiresInHours = 24) {
   try {
     const supabase = await createClient()
     
@@ -181,7 +181,7 @@ export async function validateSession(): Promise<{ valid: boolean; user?: User; 
     const { data, error } = await supabase.auth.getUser()
     
     if (error || !data.user) {
-      return { valid: false, error: error?.message || 'No user session' }
+      return { valid: false, error: error?.message ?? 'No user session' }
     }
     
     return { valid: true, user: data.user }

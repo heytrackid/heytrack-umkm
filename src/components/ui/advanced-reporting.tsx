@@ -21,10 +21,10 @@ interface ReportData {
   totalSales: number
   totalOrders: number
   totalProfit: number
-  salesData: { date: string; amount: number }[]
-  orderData: { date: string; count: number }[]
-  topProducts: { name: string; sales: number }[]
-  profitData: { date: string; amount: number }[]
+  salesData: Array<{ date: string; amount: number }>
+  orderData: Array<{ date: string; count: number }>
+  topProducts: Array<{ name: string; sales: number }>
+  profitData: Array<{ date: string; amount: number }>
 }
 
 interface AdvancedReportingProps {
@@ -44,10 +44,10 @@ export const AdvancedReporting = ({
 
   // Sample data if not provided
   const sampleData: ReportData = {
-    totalSales: reportData?.totalSales || 45000000,
-    totalOrders: reportData?.totalOrders || 142,
-    totalProfit: reportData?.totalProfit || 12000000,
-    salesData: reportData?.salesData || [
+    totalSales: reportData?.totalSales ?? 45000000,
+    totalOrders: reportData?.totalOrders ?? 142,
+    totalProfit: reportData?.totalProfit ?? 12000000,
+    salesData: reportData?.salesData ?? [
       { date: '2023-01', amount: 3500000 },
       { date: '2023-02', amount: 4200000 },
       { date: '2023-03', amount: 3800000 },
@@ -56,7 +56,7 @@ export const AdvancedReporting = ({
       { date: '2023-06', amount: 5500000 },
       { date: '2023-07', amount: 6200000 },
     ],
-    orderData: reportData?.orderData || [
+    orderData: reportData?.orderData ?? [
       { date: '2023-01', count: 24 },
       { date: '2023-02', count: 28 },
       { date: '2023-03', count: 22 },
@@ -65,14 +65,14 @@ export const AdvancedReporting = ({
       { date: '2023-06', count: 38 },
       { date: '2023-07', count: 42 },
     ],
-    topProducts: reportData?.topProducts || [
+    topProducts: reportData?.topProducts ?? [
       { name: 'Bakso Sapi', sales: 1250000 },
       { name: 'Sate Ayam', sales: 980000 },
       { name: 'Rendang', sales: 870000 },
       { name: 'Soto Ayam', sales: 760000 },
       { name: 'Nasi Goreng', sales: 650000 },
     ],
-    profitData: reportData?.profitData || [
+    profitData: reportData?.profitData ?? [
       { date: '2023-01', amount: 1000000 },
       { date: '2023-02', amount: 1200000 },
       { date: '2023-03', amount: 1100000 },
@@ -95,49 +95,20 @@ export const AdvancedReporting = ({
     // Simulate export process
     setTimeout(() => {
       setIsExporting(false)
-      alert(`Export ${format.toUpperCase()} completed!`)
+      // Export completed - in production, this would trigger actual export
+      void format
     }, 1500)
   }
 
-  // Prepare chart data based on active report
-  const getChartData = () => {
-    switch (activeReport) {
-      case 'sales':
-        return {
-          labels: sampleData.salesData.map(d => d.date),
-          datasets: [{
-            label: 'Penjualan',
-            data: sampleData.salesData.map(d => d.amount),
-            borderColor: '#3b82f6',
-            backgroundColor: '#3b82f680'
-          }]
-        }
-      case 'orders':
-        return {
-          labels: sampleData.orderData.map(d => d.date),
-          datasets: [{
-            label: 'Jumlah Pesanan',
-            data: sampleData.orderData.map(d => d.count),
-            borderColor: '#10b981',
-            backgroundColor: '#10b98180'
-          }]
-        }
-      case 'profit':
-        return {
-          labels: sampleData.profitData.map(d => d.date),
-          datasets: [{
-            label: 'Keuntungan',
-            data: sampleData.profitData.map(d => d.amount),
-            borderColor: '#f59e0b',
-            backgroundColor: '#f59e0b80'
-          }]
-        }
-      default:
-        return {
-          labels: [],
-          datasets: [{ label: '', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f680' }]
-        }
+  // Get chart title based on active report
+  const getChartTitle = () => {
+    if (activeReport === 'sales') {
+      return 'Grafik Penjualan'
     }
+    if (activeReport === 'orders') {
+      return 'Grafik Pesanan'
+    }
+    return 'Grafik Keuntungan'
   }
 
   return (
@@ -248,7 +219,7 @@ export const AdvancedReporting = ({
       {/* Chart */}
       <div className="bg-background rounded-xl border p-4">
         <h3 className="text-lg font-semibold mb-4">
-          {`Grafik ${activeReport === 'sales' ? 'Penjualan' : activeReport === 'orders' ? 'Pesanan' : 'Keuntungan'}`}
+          {getChartTitle()}
         </h3>
         <div className="h-80 flex items-center justify-center text-muted-foreground">
           Chart visualization placeholder

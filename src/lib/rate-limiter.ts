@@ -1,5 +1,5 @@
-import { NextRequest } from 'next/server'
-import { dbLogger } from './logger'
+import type { NextRequest } from 'next/server';
+import { dbLogger } from './logger';
 
 // Simple in-memory rate limiter (for development)
 // In production, use Redis or similar
@@ -61,7 +61,7 @@ class InMemoryRateLimiter {
 
 // Production rate limiter using a more robust approach
 class ProductionRateLimiter {
-  async checkLimit(identifier: string, maxRequests: number, windowMs: number, request?: NextRequest): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
+  checkLimit(identifier: string, maxRequests: number, windowMs: number, _request?: NextRequest): { allowed: boolean; remaining: number; resetTime: number } {
     // In production, this would connect to Redis or similar
     // For now, we'll simulate with a simple approach
     const now = Date.now()
@@ -86,29 +86,28 @@ export interface RateLimitOptions {
 
 const defaultKeyGenerator = (request: NextRequest): string => {
   // Generate a key based on IP and path
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
-             request.headers.get('x-real-ip') ||
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 
+             request.headers.get('x-real-ip') ??
              'unknown'
   const path = request.nextUrl.pathname
   return `${ip}:${path}`
 }
 
-export async function checkRateLimit(
+export function checkRateLimit(
   request: NextRequest, 
   options: RateLimitOptions
 ): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
   
-  const key = options.keyGenerator?.(request) || defaultKeyGenerator(request)
+  const key = options.keyGenerator?.(request) ?? defaultKeyGenerator(request)
   
   if (process.env.NODE_ENV === 'production') {
-    return await rateLimiter.checkLimit(key, options.maxRequests, options.windowMs, request)
-  } else {
-    return rateLimiter.checkLimit(key, options.maxRequests, options.windowMs)
+    return Promise.resolve(rateLimiter.checkLimit(key, options.maxRequests, options.windowMs, request))
   }
+  return Promise.resolve(rateLimiter.checkLimit(key, options.maxRequests, options.windowMs))
 }
 
 // Middleware wrapper for rate limiting
-export async function withRateLimit(
+export function withRateLimit(
   handler: (request: NextRequest) => Promise<Response>,
   options: RateLimitOptions
 ) {

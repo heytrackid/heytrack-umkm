@@ -1,10 +1,10 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
+import { checkAdminPrivileges } from '@/lib/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-import { checkAdminPrivileges } from '@/lib/admin-check'
 import type { ErrorLogsInsert } from '@/types/database'
+import { SecurityPresets, withSecurity } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -81,12 +81,12 @@ async function POST(request: NextRequest) {
       }
     }
 
-    // In development, log to console as well
+    // In development, log as well
     if (process.env.NODE_ENV === 'development') {
-      console.log('Client-side error reported:', {
+      apiLogger.info({
         ...sanitizedErrorData,
         userId
-      })
+      }, 'Client-side error reported')
     }
 
     return NextResponse.json({ success: true })
