@@ -15,19 +15,19 @@ interface QuickStockAdjustmentProps {
   disabled?: boolean
 }
 
-export function QuickStockAdjustment({
+export const QuickStockAdjustment = ({
   currentStock,
   unit,
   onAdjust,
   quickAmounts = [10, 50, 100],
   className,
   disabled = false
-}: QuickStockAdjustmentProps) {
+}: QuickStockAdjustmentProps) => {
   const [customAmount, setCustomAmount] = useState('')
   const [isAdjusting, setIsAdjusting] = useState(false)
 
   const handleQuickAdjust = async (amount: number) => {
-    if (disabled || isAdjusting) return
+    if (disabled || isAdjusting) {return}
     
     setIsAdjusting(true)
     try {
@@ -40,7 +40,7 @@ export function QuickStockAdjustment({
 
   const handleCustomAdjust = async () => {
     const amount = parseFloat(customAmount)
-    if (isNaN(amount) || amount === 0) return
+    if (isNaN(amount) || amount === 0) {return}
 
     await handleQuickAdjust(amount)
     setCustomAmount('')
@@ -138,17 +138,17 @@ export function QuickStockAdjustment({
 }
 
 // Compact version for inline use
-export function CompactStockAdjustment({
+export const CompactStockAdjustment = ({
   currentStock,
   unit,
   onAdjust,
   quickAmounts = [10, 50, 100],
   disabled = false
-}: QuickStockAdjustmentProps) {
+}: QuickStockAdjustmentProps) => {
   const [isAdjusting, setIsAdjusting] = useState(false)
 
   const handleQuickAdjust = async (amount: number) => {
-    if (disabled || isAdjusting) return
+    if (disabled || isAdjusting) {return}
     
     setIsAdjusting(true)
     try {

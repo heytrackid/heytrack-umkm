@@ -205,8 +205,7 @@ export const EnhancedMobileIngredientList = ({
     onStockAdjust,
     enableSwipe = true,
     showQuickAdjust = false
-}: EnhancedMobileIngredientListProps) => {
-    return (
+}: EnhancedMobileIngredientListProps) => (
         <div className="space-y-3">
             {ingredients.map((ingredient, index) => (
                 <div
@@ -227,4 +226,3 @@ export const EnhancedMobileIngredientList = ({
             ))}
         </div>
     )
-}

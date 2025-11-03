@@ -16,7 +16,7 @@ interface BottomSheetProps {
   className?: string
 }
 
-export function BottomSheet({
+export const BottomSheet = ({
   open,
   onOpenChange,
   children,
@@ -25,7 +25,7 @@ export function BottomSheet({
   snapPoints = [0.5, 0.9],
   defaultSnap = 0,
   className
-}: BottomSheetProps) {
+}: BottomSheetProps) => {
   const [snapIndex, setSnapIndex] = useState(defaultSnap)
   const currentSnap = snapPoints[snapIndex] || snapPoints[0]
 
@@ -50,7 +50,7 @@ export function BottomSheet({
     e.stopPropagation()
   }
 
-  if (!open) return null
+  if (!open) {return null}
 
   return (
     <div className="fixed inset-0 z-50 flex items-end">
@@ -118,14 +118,13 @@ interface FilterBottomSheetProps {
   children: ReactNode
 }
 
-export function FilterBottomSheet({
+export const FilterBottomSheet = ({
   open,
   onOpenChange,
   onApply,
   onReset,
   children
-}: FilterBottomSheetProps) {
-  return (
+}: FilterBottomSheetProps) => (
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
@@ -158,4 +157,3 @@ export function FilterBottomSheet({
       </div>
     </BottomSheet>
   )
-}

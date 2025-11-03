@@ -27,13 +27,13 @@ const ACTION_COLORS = {
   yellow: 'bg-yellow-500 text-white'
 }
 
-export function SwipeableCard({
+export const SwipeableCard = ({
   children,
   actions = [],
   threshold = 100,
   className,
   disabled = false
-}: SwipeableCardProps) {
+}: SwipeableCardProps) => {
   const [swipeDistance, setSwipeDistance] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const startX = useRef(0)
@@ -44,13 +44,13 @@ export function SwipeableCard({
   const rightActions = actions.filter(a => a.side === 'right')
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (disabled) return
+    if (disabled) {return}
     startX.current = e.touches[0].clientX
     currentX.current = e.touches[0].clientX
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (disabled) return
+    if (disabled) {return}
     currentX.current = e.touches[0].clientX
     const diff = currentX.current - startX.current
     
@@ -62,7 +62,7 @@ export function SwipeableCard({
   }
 
   const handleTouchEnd = () => {
-    if (disabled) return
+    if (disabled) {return}
 
     // Check if threshold reached
     if (Math.abs(swipeDistance) >= threshold) {

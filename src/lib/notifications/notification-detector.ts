@@ -43,7 +43,7 @@ export function detectStockNotifications(ingredients: IngredientsTable[]): Notif
   ingredients.forEach((ingredient) => {
     const currentStock = ingredient.current_stock ?? 0
     const minStock = ingredient.min_stock ?? 0
-    const name = ingredient.name
+    const {name} = ingredient
 
     // Critical: Out of stock
     if (currentStock <= 0) {

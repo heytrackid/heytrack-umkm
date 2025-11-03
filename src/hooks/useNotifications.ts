@@ -74,7 +74,7 @@ export function useNotifications() {
 
   // Check for new notifications periodically
   useEffect(() => {
-    if (!preferences.enabled) return
+    if (!preferences.enabled) {return}
 
     const checkNotifications = () => {
       const newNotifications = detectAllNotifications({
@@ -85,7 +85,7 @@ export function useNotifications() {
       // Filter by preferences
       const filtered = newNotifications.filter(n => {
         // Check if type is enabled
-        if (!preferences.types[n.type]) return false
+        if (!preferences.types[n.type]) {return false}
         
         // Check priority
         const priorityOrder = { low: 0, medium: 1, high: 2, critical: 3 }

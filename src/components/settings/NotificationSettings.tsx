@@ -15,8 +15,8 @@ interface NotificationSettingsProps {
   onUpdate: (updates: Partial<NotificationPreferences>) => void
 }
 
-export function NotificationSettings({ preferences, onUpdate }: NotificationSettingsProps) {
-  const notificationTypes: { type: NotificationType; label: string; description: string }[] = [
+export const NotificationSettings = ({ preferences, onUpdate }: NotificationSettingsProps) => {
+  const notificationTypes: Array<{ type: NotificationType; label: string; description: string }> = [
     { type: 'stock_low', label: 'Stok Menipis', description: 'Bahan baku mencapai batas minimum' },
     { type: 'stock_out', label: 'Stok Habis', description: 'Bahan baku habis' },
     { type: 'stock_critical', label: 'Stok Kritis', description: 'Bahan baku sangat menipis' },
@@ -173,7 +173,7 @@ export function NotificationSettings({ preferences, onUpdate }: NotificationSett
               id="desktop"
               checked={preferences.desktopNotifications}
               onCheckedChange={(checked) => onUpdate({ desktopNotifications: checked })}
-              disabled={true}
+              disabled
             />
           </div>
 
@@ -195,7 +195,7 @@ export function NotificationSettings({ preferences, onUpdate }: NotificationSett
               id="email"
               checked={preferences.emailNotifications}
               onCheckedChange={(checked) => onUpdate({ emailNotifications: checked })}
-              disabled={true}
+              disabled
             />
           </div>
         </CardContent>

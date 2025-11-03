@@ -23,21 +23,21 @@ interface NotificationCenterProps {
   className?: string
 }
 
-export function NotificationCenter({
+export const NotificationCenter = ({
   notifications,
   onMarkAsRead,
   onMarkAllAsRead,
   onClearAll,
   onNotificationClick,
   className
-}: NotificationCenterProps) {
+}: NotificationCenterProps) => {
   const [filterPriority, setFilterPriority] = useState<NotificationPriority | 'all'>('all')
   const [open, setOpen] = useState(false)
 
   const unreadCount = notifications.filter(n => !n.read).length
   
   const filteredNotifications = notifications.filter(n => {
-    if (filterPriority === 'all') return true
+    if (filterPriority === 'all') {return true}
     return n.priority === filterPriority
   })
 
@@ -152,7 +152,7 @@ interface NotificationItemProps {
   index: number
 }
 
-function NotificationItem({ notification, onClick, onMarkAsRead, index }: NotificationItemProps) {
+const NotificationItem = ({ notification, onClick, onMarkAsRead, index }: NotificationItemProps) => {
   const priorityColors = {
     critical: 'border-l-red-500 bg-red-50 dark:bg-red-950/20',
     high: 'border-l-orange-500 bg-orange-50 dark:bg-orange-950/20',
@@ -235,17 +235,17 @@ function NotificationItem({ notification, onClick, onMarkAsRead, index }: Notifi
 function getTimeAgo(date: Date): string {
   const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
   
-  if (seconds < 60) return 'Baru saja'
-  if (seconds < 3600) return `${Math.floor(seconds / 60)} menit lalu`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)} jam lalu`
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)} hari lalu`
+  if (seconds < 60) {return 'Baru saja'}
+  if (seconds < 3600) {return `${Math.floor(seconds / 60)} menit lalu`}
+  if (seconds < 86400) {return `${Math.floor(seconds / 3600)} jam lalu`}
+  if (seconds < 604800) {return `${Math.floor(seconds / 86400)} hari lalu`}
   
   return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
 }
 
 // Simple notification badge (for nav)
-export function NotificationBadge({ count, className }: { count: number; className?: string }) {
-  if (count === 0) return null
+export const NotificationBadge = ({ count, className }: { count: number; className?: string }) => {
+  if (count === 0) {return null}
 
   return (
     <Badge 

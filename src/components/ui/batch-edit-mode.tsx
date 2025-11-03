@@ -61,7 +61,7 @@ export function BatchEditMode<T>({
   }
 
   const handleAction = async (action: BatchAction) => {
-    if (selectedCount === 0) return
+    if (selectedCount === 0) {return}
 
     const selectedIds = Array.from(selectedItems)
     

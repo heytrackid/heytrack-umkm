@@ -12,13 +12,13 @@ interface PullToRefreshProps {
   className?: string
 }
 
-export function PullToRefresh({
+export const PullToRefresh = ({
   children,
   onRefresh,
   disabled = false,
   threshold = 80,
   className
-}: PullToRefreshProps) {
+}: PullToRefreshProps) => {
   const [pullDistance, setPullDistance] = useState(0)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [shouldRefresh, setShouldRefresh] = useState(false)
@@ -26,22 +26,22 @@ export function PullToRefresh({
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (disabled || isRefreshing) return
+    if (disabled || isRefreshing) {return}
     
     // Only start pull if at top of scroll
-    if (containerRef.current && containerRef.current.scrollTop === 0) {
+    if (containerRef.current?.scrollTop === 0) {
       startY.current = e.touches[0].clientY
     }
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (disabled || isRefreshing || startY.current === 0) return
+    if (disabled || isRefreshing || startY.current === 0) {return}
 
     const currentY = e.touches[0].clientY
     const diff = currentY - startY.current
 
     // Only allow pull down
-    if (diff > 0 && containerRef.current && containerRef.current.scrollTop === 0) {
+    if (diff > 0 && containerRef.current?.scrollTop === 0) {
       // Add resistance (diminishing returns)
       const distance = Math.min(diff * 0.5, threshold * 1.5)
       setPullDistance(distance)
@@ -50,7 +50,7 @@ export function PullToRefresh({
   }
 
   const handleTouchEnd = async () => {
-    if (disabled || isRefreshing) return
+    if (disabled || isRefreshing) {return}
 
     if (shouldRefresh && pullDistance >= threshold) {
       setIsRefreshing(true)

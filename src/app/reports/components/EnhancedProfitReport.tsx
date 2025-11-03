@@ -91,10 +91,6 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
     const [profitData, setProfitData] = useState<ProfitData | null>(null)
     const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly')
 
-    useEffect(() => {
-        void fetchProfitData()
-    }, [dateRange, period, fetchProfitData])
-
     const fetchProfitData = useCallback(async () => {
         try {
             setLoading(true)
@@ -118,6 +114,11 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
             setLoading(false)
         }
     }, [dateRange, period])
+
+    // Load data on mount and when dependencies change
+    useEffect(() => {
+        void fetchProfitData()
+    }, [fetchProfitData])
 
     if (loading) {
         return (
