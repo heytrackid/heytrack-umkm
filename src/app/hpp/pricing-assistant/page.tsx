@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable no-nested-ternary */
 
 import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'

@@ -93,7 +93,7 @@ export const PreloadingProvider = ({
   const preloadRoute = (route: string): Promise<void> => {
     if (preloadedRoutes.has(route)) {
       if (debug) { apiLogger.info(`🔄 Route ${route} already preloaded`) }
-      return
+      return Promise.resolve()
     }
 
     setIsPreloading(true)
@@ -115,6 +115,7 @@ export const PreloadingProvider = ({
     } finally {
       void setIsPreloading(false)
     }
+    return Promise.resolve()
   }
 
   // Debug logging
