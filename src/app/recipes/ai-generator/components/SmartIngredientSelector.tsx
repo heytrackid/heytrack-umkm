@@ -63,6 +63,7 @@ export const SmartIngredientSelector = ({
                 onSelectionChange(suggestedIds)
             }
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [productType]) // Only run when product type changes
 
     // Filter ingredients based on search

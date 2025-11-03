@@ -18,7 +18,7 @@ interface FilterBadgesProps {
   className?: string
 }
 
-export function FilterBadges({ filters, onClearAll, className }: FilterBadgesProps) {
+export const FilterBadges = ({ filters, onClearAll, className }: FilterBadgesProps) => {
   if (filters.length === 0) {
     return null
   }
@@ -68,7 +68,7 @@ export function createFilterBadges<T extends Record<string, unknown>>(
   const badges: FilterBadge[] = []
 
   Object.entries(filters).forEach(([key, value]) => {
-    if (!value) return
+    if (!value) {return}
 
     // Handle array filters
     if (Array.isArray(value) && value.length > 0) {

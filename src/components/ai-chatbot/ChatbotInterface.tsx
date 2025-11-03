@@ -71,6 +71,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
       };
       setMessages([greetingMessage]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle sending messages via API
@@ -253,23 +254,21 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
     return (
       <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         {/* Avatar */}
-        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isUser ? 'bg-blue-500' : isSystem ? 'bg-green-500' : 'bg-gray-500'
+        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+          isUser ? 'bg-blue-500' : (isSystem ? 'bg-green-500' : 'bg-gray-500')
           }`}>
-          {isUser ? (
-            <User className="h-4 w-4 text-white" />
-          ) : isSystem ? (
-            <MessageCircle className="h-4 w-4 text-white" />
-          ) : (
-            <Bot className="h-4 w-4 text-white" />
-          )}
+          {(() => {
+            if (isUser) {return <User className="h-4 w-4 text-white" />}
+            if (isSystem) {return <MessageCircle className="h-4 w-4 text-white" />}
+            return <Bot className="h-4 w-4 text-white" />
+          })()}
         </div>
 
         {/* Message content */}
         <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} flex-1 min-w-0 overflow-hidden`}>
-          <div className={`px-4 py-3 rounded-2xl w-full break-words overflow-hidden shadow-sm ${isUser
-            ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
-            : isSystem
-              ? 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
+          <div className={`px-4 py-3 rounded-2xl w-full break-words overflow-hidden shadow-sm ${
+            isUser
+              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
               : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
             }`}>
             <div className="whitespace-pre-wrap text-sm leading-relaxed break-words overflow-wrap-anywhere word-break-break-word prose prose-sm max-w-none">

@@ -1,161 +1,194 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/utils/supabase/client'
-import type { Notification } from '@/types/domain/notifications'
+import type { Notification, NotificationPreferences } from '@/lib/notifications/notification-types'
+import { DEFAULT_NOTIFICATION_PREFERENCES } from '@/lib/notifications/notification-types'
+import { detectAllNotifications } from '@/lib/notifications/notification-detector'
+import { useIngredients } from './useIngredients'
+import type { OrdersTable } from '@/types/database'
 
+const STORAGE_KEY = 'heytrack_notifications'
+const PREFERENCES_KEY = 'heytrack_notification_preferences'
 
-
-interface UseNotificationsOptions {
-  unreadOnly?: boolean
-  category?: string
-  limit?: number
-  autoRefresh?: boolean
-  refreshInterval?: number
-}
-
-export function useNotifications(options: UseNotificationsOptions = {}) {
-  const {
-    unreadOnly = false,
-    category,
-    limit = 50,
-    autoRefresh = true,
-    refreshInterval = 30000, // 30 seconds
-  } = options
-
+export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFERENCES)
+  const { data: ingredients } = useIngredients()
+  const [orders, setOrders] = useState<OrdersTable[]>([])
 
-  const fetchNotifications = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-
-      const params = new URLSearchParams()
-      if (unreadOnly) {params.append('unread_only', 'true')}
-      if (category) {params.append('category', category)}
-      params.append('limit', limit.toString())
-
-      const response = await fetch(`/api/notifications?${params.toString()}`)
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch notifications')
-      }
-
-      const data = await response.json()
-      setNotifications(data.notifications ?? [])
-      setUnreadCount(data.unread_count ?? 0)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [unreadOnly, category, limit])
-
-  const markAsRead = useCallback(async (notificationId: string) => {
-    try {
-      const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_read: true }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to mark notification as read')
-      }
-
-      await fetchNotifications()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-    }
-  }, [fetchNotifications])
-
-  const markAllAsRead = useCallback(async (filterCategory?: string) => {
-    try {
-      const response = await fetch('/api/notifications/mark-all-read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: filterCategory }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to mark all as read')
-      }
-
-      await fetchNotifications()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-    }
-  }, [fetchNotifications])
-
-  const dismissNotification = useCallback(async (notificationId: string) => {
-    try {
-      const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_dismissed: true }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to dismiss notification')
-      }
-
-      await fetchNotifications()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-    }
-  }, [fetchNotifications])
-
-  // Initial fetch
+  // Load saved notifications from localStorage
   useEffect(() => {
-    void fetchNotifications()
-  }, [fetchNotifications])
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        setNotifications(parsed.map((n: Notification) => ({
+          ...n,
+          timestamp: new Date(n.timestamp)
+        })))
+      } catch (e) {
+        // Invalid data, ignore
+      }
+    }
 
-  // Auto refresh
+    const savedPrefs = localStorage.getItem(PREFERENCES_KEY)
+    if (savedPrefs) {
+      try {
+        setPreferences(JSON.parse(savedPrefs))
+      } catch (e) {
+        // Invalid data, use defaults
+      }
+    }
+  }, [])
+
+  // Save notifications to localStorage
   useEffect(() => {
-    if (!autoRefresh) {return}
+    if (notifications.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications))
+    }
+  }, [notifications])
 
-    const interval = setInterval(() => {
-      void fetchNotifications()
-    }, refreshInterval)
+  // Save preferences to localStorage
+  useEffect(() => {
+    localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences))
+  }, [preferences])
+
+  // Load orders (in real app, use useOrders hook)
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch('/api/orders')
+        if (response.ok) {
+          const data = await response.json()
+          setOrders(Array.isArray(data) ? data : [])
+        }
+      } catch (e) {
+        // Silently fail
+      }
+    }
+
+    if (preferences.enabled) {
+      void fetchOrders()
+    }
+  }, [preferences.enabled])
+
+  // Check for new notifications periodically
+  useEffect(() => {
+    if (!preferences.enabled) {return}
+
+    const checkNotifications = () => {
+      const newNotifications = detectAllNotifications({
+        ingredients: ingredients || [],
+        orders: orders || []
+      })
+
+      // Filter by preferences
+      const filtered = newNotifications.filter(n => {
+        // Check if type is enabled
+        if (!preferences.types[n.type]) {return false}
+        
+        // Check priority
+        const priorityOrder = { low: 0, medium: 1, high: 2, critical: 3 }
+        const minPriorityLevel = priorityOrder[preferences.minPriority]
+        const notifPriorityLevel = priorityOrder[n.priority]
+        
+        return notifPriorityLevel >= minPriorityLevel
+      })
+
+      // Merge with existing, avoid duplicates
+      setNotifications(prev => {
+        const existing = new Set(prev.map(n => `${n.type}-${n.metadata?.itemId}`))
+        const toAdd = filtered.filter(n => !existing.has(`${n.type}-${n.metadata?.itemId}`))
+        
+        // Keep only last 50 notifications
+        return [...toAdd, ...prev].slice(0, 50)
+      })
+
+      // Play sound if enabled and has new critical/high priority
+      if (preferences.soundEnabled && filtered.some(n => n.priority === 'critical' || n.priority === 'high')) {
+        playNotificationSound()
+      }
+    }
+
+    // Initial check
+    checkNotifications()
+
+    // Periodic check
+    const interval = setInterval(checkNotifications, preferences.checkInterval * 60 * 1000)
 
     return () => clearInterval(interval)
-  }, [autoRefresh, refreshInterval, fetchNotifications])
+  }, [ingredients, orders, preferences])
 
-  // Real-time subscription
-  useEffect(() => {
-    const supabase = createClient()
+  // Mark notification as read
+  const markAsRead = useCallback((id: string) => {
+    setNotifications(prev => 
+      prev.map(n => n.id === id ? { ...n, read: true } : n)
+    )
+  }, [])
 
-    const channel = supabase
-      .channel('notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-        },
-        () => {
-          void fetchNotifications()
-        }
-      )
-      .subscribe()
+  // Mark all as read
+  const markAllAsRead = useCallback(() => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+  }, [])
 
-    return () => {
-      void supabase.removeChannel(channel)
+  // Clear all notifications
+  const clearAll = useCallback(() => {
+    setNotifications([])
+    localStorage.removeItem(STORAGE_KEY)
+  }, [])
+
+  // Update preferences
+  const updatePreferences = useCallback((updates: Partial<NotificationPreferences>) => {
+    setPreferences(prev => ({ ...prev, ...updates }))
+  }, [])
+
+  // Add custom notification
+  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: `custom-${Date.now()}`,
+      timestamp: new Date(),
+      read: false
     }
-  }, [fetchNotifications])
+    setNotifications(prev => [newNotification, ...prev])
+  }, [])
+
+  const unreadCount = notifications.filter(n => !n.read).length
+  const criticalCount = notifications.filter(n => !n.read && n.priority === 'critical').length
 
   return {
     notifications,
     unreadCount,
-    isLoading,
-    error,
-    refresh: fetchNotifications,
+    criticalCount,
+    preferences,
     markAsRead,
     markAllAsRead,
-    dismissNotification,
+    clearAll,
+    updatePreferences,
+    addNotification
+  }
+}
+
+// Play notification sound (simple beep)
+function playNotificationSound() {
+  try {
+    // Create simple beep sound using Web Audio API
+    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+    const oscillator = audioContext.createOscillator()
+    const gainNode = audioContext.createGain()
+
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext.destination)
+
+    oscillator.frequency.value = 800
+    oscillator.type = 'sine'
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
+
+    oscillator.start(audioContext.currentTime)
+    oscillator.stop(audioContext.currentTime + 0.3)
+  } catch (e) {
+    // Browser doesn't support Web Audio API
   }
 }

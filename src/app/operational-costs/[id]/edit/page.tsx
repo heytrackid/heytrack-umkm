@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable no-nested-ternary */
 
 import { Suspense } from 'react'
 import { OperationalCostFormPage } from '@/components/operational-costs/OperationalCostFormPage'

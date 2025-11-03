@@ -77,7 +77,7 @@ interface OnboardingWizardProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) {
+export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) => {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<string[]>([])

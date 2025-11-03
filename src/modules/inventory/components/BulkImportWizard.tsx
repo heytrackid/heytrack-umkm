@@ -328,10 +328,11 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
                                 {parsedData.map((row) => (
                                     <div
                                         key={row.row}
-                                        className={`p-3 rounded-lg border ${row.errors.length > 0 ? 'bg-red-50 border-red-200' :
-                                            row.warnings.length > 0 ? 'bg-orange-50 border-orange-200' :
-                                                'bg-green-50 border-green-200'
-                                            }`}
+                                        className={`p-3 rounded-lg border ${
+                                          row.errors.length > 0 
+                                            ? 'bg-red-50 border-red-200' 
+                                            : (row.warnings.length > 0 ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200')
+                                          }`}
                                     >
                                         <div className="flex items-start justify-between mb-2">
                                             <div className="flex-1">

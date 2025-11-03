@@ -15,8 +15,8 @@ const isTest = process.env.NODE_ENV === 'test'
 
 // Configure Pino logger
 const getLogLevel = () => {
-  if (isTest) return 'silent'
-  if (isDevelopment) return 'debug'
+  if (isTest) {return 'silent'}
+  if (isDevelopment) {return 'debug'}
   return 'info'
 }
 

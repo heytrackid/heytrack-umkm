@@ -81,7 +81,7 @@ export function useErrorHandler() {
 }
 
 // API error handling
-// eslint-disable-next-line react-hooks/rules-of-hooks -- This utility function needs refactoring to not use hooks directly
+ 
 export function handleAPIResponse<T>(
   response: { data?: T; error?: unknown },
   successMessage?: string,

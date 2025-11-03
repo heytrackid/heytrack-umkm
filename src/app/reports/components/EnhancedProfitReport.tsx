@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -91,11 +91,7 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
     const [profitData, setProfitData] = useState<ProfitData | null>(null)
     const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly')
 
-    useEffect(() => {
-        void fetchProfitData()
-    }, [dateRange, period])
-
-    const fetchProfitData = async () => {
+    const fetchProfitData = useCallback(async () => {
         try {
             setLoading(true)
             const params = new URLSearchParams({
@@ -117,7 +113,12 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
         } finally {
             setLoading(false)
         }
-    }
+    }, [dateRange, period])
+
+    // Load data on mount and when dependencies change
+    useEffect(() => {
+        void fetchProfitData()
+    }, [fetchProfitData])
 
     if (loading) {
         return (

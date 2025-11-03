@@ -85,7 +85,7 @@ const AIRecipeGeneratorPage = () => {
         )
       })
     }
-  }, [])
+  }, [toast])
 
   // Sprint 1: Auto-save draft
   useEffect(() => {
