@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable no-nested-ternary */
 
 
 import { useState, useEffect, type ReactNode } from 'react'
