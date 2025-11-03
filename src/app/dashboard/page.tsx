@@ -2,26 +2,26 @@
  
 
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
-import { usePagePreloading } from '@/providers/PreloadingProvider'
-import { BarChart3, ChefHat, Package, ShoppingCart, Target, Calculator, Sparkles } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { Suspense, useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { queryLogger } from '@/lib/client-logger'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
+import { usePagePreloading } from '@/providers/PreloadingProvider'
+import { useQuery } from '@tanstack/react-query'
+import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Target } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 
 // Import lightweight components normally - no need for lazy loading
-import StatsCardsSection from './components/StatsCardsSection'
-import RecentOrdersSection from './components/RecentOrdersSection'
-import StockAlertsSection from './components/StockAlertsSection'
 import HppDashboardWidget from './components/HppDashboardWidget'
+import RecentOrdersSection from './components/RecentOrdersSection'
+import StatsCardsSection from './components/StatsCardsSection'
+import StockAlertsSection from './components/StockAlertsSection'
 
 // Dashboard data structure
 interface DashboardData {
@@ -153,7 +153,8 @@ const Dashboard = () => {
       })
       void router.push('/auth/login')
     }
-  }, [isAuthLoading, isAuthenticated, router, toast])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthLoading, isAuthenticated])
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -200,10 +201,13 @@ const Dashboard = () => {
     )
   }
 
-  // Check if user has no data yet (empty state)
-  const hasNoData = dashboardData?.stats.totalOrders === 0 &&
-    dashboardData.stats.totalIngredients === 0 &&
-    dashboardData.stats.totalCustomers === 0
+  // Check if user has no data yet (empty state) - memoized to prevent unnecessary re-renders
+  const hasNoData = useMemo(() => {
+    if (!dashboardData) return false
+    return dashboardData.stats.totalOrders === 0 &&
+      dashboardData.stats.totalIngredients === 0 &&
+      dashboardData.stats.totalCustomers === 0
+  }, [dashboardData])
 
   // Show onboarding for new users
   useEffect(() => {
