@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -86,11 +86,7 @@ const HppReportsPage = () => {
   const [generating, setGenerating] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    void loadAnalytics()
-  }, [])
-
-  const loadAnalytics = () => {
+  const loadAnalytics = useCallback(() => {
     try {
       void setLoading(true)
 
@@ -135,7 +131,11 @@ const HppReportsPage = () => {
     } finally {
       void setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    void loadAnalytics()
+  }, [loadAnalytics])
 
   const generateReport = async () => {
     try {
@@ -250,11 +250,20 @@ const HppReportsPage = () => {
 
           {/* Analytics Tab */}
           <SwipeableTabsContent value="analytics" className="space-y-6">
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600" />
-              </div>
-            ) : analytics ? (
+            {(() => {
+              if (loading) {
+                return (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600" />
+                  </div>
+                )
+              }
+              
+              if (!analytics) {
+                return null
+              }
+              
+              return (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Key Metrics */}
                 <Card>
@@ -360,7 +369,8 @@ const HppReportsPage = () => {
                   </CardContent>
                 </Card>
               </div>
-            ) : null}
+              )
+            })()}
           </SwipeableTabsContent>
 
           {/* Reports Tab */}

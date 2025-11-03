@@ -4,7 +4,9 @@ import { useState, useEffect, memo, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { NotificationCenter } from '@/components/ui/notification-center'
 import { useMobile } from '@/hooks/useResponsive'
+import { useNotifications } from '@/hooks/useNotifications'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { Search, User } from 'lucide-react'
@@ -38,6 +40,9 @@ const AppLayout = memo(({
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
+  
+  // Notifications
+  const notifications = useNotifications()
 
   // Check auth state on mount
   useEffect(() => {
@@ -166,6 +171,14 @@ const AppLayout = memo(({
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Notifications */}
+              <NotificationCenter
+                notifications={notifications.notifications}
+                onMarkAsRead={notifications.markAsRead}
+                onMarkAllAsRead={notifications.markAllAsRead}
+                onClearAll={notifications.clearAll}
+              />
+              
               <ThemeToggle />
               {/* User Authentication */}
               {loading ? (

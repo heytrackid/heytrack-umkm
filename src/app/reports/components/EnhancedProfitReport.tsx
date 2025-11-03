@@ -93,7 +93,7 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
 
     useEffect(() => {
         void fetchProfitData()
-    }, [dateRange, period])
+    }, [dateRange, period, fetchProfitData])
 
     const fetchProfitData = async () => {
         try {

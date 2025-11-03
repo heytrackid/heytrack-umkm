@@ -91,7 +91,7 @@ export function useProfitReport(): UseProfitReportReturn {
 
     try {
       const filename = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
-      exportProfitReport(profitData, format, filename)
+      await exportProfitReport(profitData, format, filename)
     } catch (err: unknown) {
       const error = err as Error
       apiLogger.error({ error: error.message }, 'Error exporting report:')
@@ -104,17 +104,17 @@ export function useProfitReport(): UseProfitReportReturn {
   }
 
   // Computed values
-  const products = profitData?.products ?? []
-  const ingredients = profitData?.ingredients ?? []
-  const operatingExpenses = profitData?.operating_expenses ?? []
-  const summary = profitData?.summary ?? null
-  const trends = profitData?.trends ?? null
+  const products = useMemo(() => profitData?.products ?? [], [profitData])
+  const ingredients = useMemo(() => profitData?.ingredients ?? [], [profitData])
+  const operatingExpenses = useMemo(() => profitData?.operating_expenses ?? [], [profitData])
+  const summary = useMemo(() => profitData?.summary ?? null, [profitData])
+  const trends = useMemo(() => profitData?.trends ?? null, [profitData])
   const productChartData = useMemo(() => prepareProductChartData(products), [products])
 
   // Load data on mount and when filters change
   useEffect(() => {
     void fetchProfitData()
-  }, [selectedPeriod, startDate, endDate])
+  }, [selectedPeriod, startDate, endDate, fetchProfitData])
 
   return {
     // State

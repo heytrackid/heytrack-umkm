@@ -71,6 +71,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
       };
       setMessages([greetingMessage]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle sending messages via API

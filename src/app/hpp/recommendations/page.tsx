@@ -228,22 +228,31 @@ const HppRecommendationsPage = () => {
 
         {/* Recommendations List */}
         <div className="space-y-4">
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-            </div>
-          ) : recommendations.length === 0 ? (
-            <Card>
-              <CardContent className="py-8">
-                <div className="text-center text-muted-foreground">
-                  <Lightbulb className="h-12 w-12 mx-auto mb-4 text-gray-500" />
-                  <h3 className="text-lg font-semibold mb-2">No Recommendations</h3>
-                  <p>No cost optimization recommendations available at this time.</p>
-                  <p className="text-sm mt-2">Recommendations will be generated based on your HPP analysis.</p>
+          {(() => {
+            if (loading) {
+              return (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
                 </div>
-              </CardContent>
-            </Card>
-          ) : (
+              )
+            }
+            
+            if (recommendations.length === 0) {
+              return (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">
+                      <Lightbulb className="h-12 w-12 mx-auto mb-4 text-gray-500" />
+                      <h3 className="text-lg font-semibold mb-2">No Recommendations</h3>
+                      <p>No cost optimization recommendations available at this time.</p>
+                      <p className="text-sm mt-2">Recommendations will be generated based on your HPP analysis.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            }
+            
+            return (
             recommendations.map((rec) => (
               <Card key={rec.id} className={`transition-all ${rec.is_implemented ? 'opacity-75' : ''}`}>
                 <CardContent className="pt-6">
@@ -306,7 +315,8 @@ const HppRecommendationsPage = () => {
                 </CardContent>
               </Card>
             ))
-          )}
+            )
+          })()}
         </div>
 
         {/* Sample Recommendations */}
