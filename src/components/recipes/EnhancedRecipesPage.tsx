@@ -51,6 +51,9 @@ import {
     Users,
     X
 } from 'lucide-react'
+import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
+import { SimpleFAB } from '@/components/ui/floating-action-button'
+import { undoableToast } from '@/components/ui/enhanced-toast'
 
 // UI Components
 
@@ -124,6 +127,37 @@ export const EnhancedRecipesPage = () => {
         pagination.setPageSize(newSize)
     }
 
+    // Create filter badges
+    const activeFilters = createFilterBadges(
+        { 
+            search: searchTerm,
+            category: categoryFilter,
+            difficulty: difficultyFilter
+        },
+        {
+            search: 'Search',
+            category: 'Category',
+            difficulty: 'Difficulty'
+        },
+        (newFilters) => {
+            if (newFilters.search !== undefined) {
+                setSearchTerm(newFilters.search)
+            }
+            if (newFilters.category !== undefined) {
+                setCategoryFilter(newFilters.category)
+            }
+            if (newFilters.difficulty !== undefined) {
+                setDifficultyFilter(newFilters.difficulty)
+            }
+        }
+    )
+
+    const handleClearAllFilters = () => {
+        setSearchTerm('')
+        setCategoryFilter('all')
+        setDifficultyFilter('all')
+    }
+
     // Handlers
     const handleView = (recipe: Recipe) => {
         router.push(`/recipes/${recipe.id}`)
@@ -146,11 +180,23 @@ export const EnhancedRecipesPage = () => {
         if (!selectedRecipe) { return }
 
         try {
+            const deletedRecipe = selectedRecipe
             await deleteRecipe(selectedRecipe.id)
-            toast({
-                title: 'Resep dihapus',
-                description: `${selectedRecipe.name} berhasil dihapus`,
+            
+            // Enhanced toast with undo
+            undoableToast({
+                title: `${deletedRecipe.name} dihapus`,
+                description: 'Resep telah dihapus dari sistem',
+                onUndo: () => {
+                    // Note: Would need an undelete API endpoint
+                    toast({
+                        title: 'Fitur undo sedang dikembangkan',
+                        description: 'Anda bisa membuat ulang resep ini',
+                    })
+                },
+                duration: 6000
             })
+            
             setIsDeleteDialogOpen(false)
             setSelectedRecipe(null)
         } catch (err: unknown) {
@@ -297,12 +343,18 @@ export const EnhancedRecipesPage = () => {
                             </Select>
 
                             {hasActiveFilters && (
-                                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                                <Button variant="ghost" size="sm" onClick={handleClearAllFilters}>
                                     <X className="h-4 w-4 mr-2" />
                                     Clear
                                 </Button>
                             )}
                         </div>
+
+                        {/* Active Filter Badges */}
+                        <FilterBadges 
+                            filters={activeFilters}
+                            onClearAll={handleClearAllFilters}
+                        />
                     </div>
                 </CardContent>
             </Card>
@@ -311,6 +363,7 @@ export const EnhancedRecipesPage = () => {
             <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
                     Ditemukan {filteredData.length} resep
+                    {activeFilters.length > 0 && ` (${activeFilters.length} filter aktif)`}
                 </p>
             </div>
 
@@ -510,6 +563,14 @@ export const EnhancedRecipesPage = () => {
                 entityName="Resep"
                 itemName={selectedRecipe?.name ?? ''}
             />
+
+            {/* Floating Action Button for Mobile */}
+            {isMobile && (
+                <SimpleFAB
+                    onClick={() => router.push('/recipes/new')}
+                    icon={<Plus className="h-6 w-6" />}
+                />
+            )}
         </div >
     )
 }

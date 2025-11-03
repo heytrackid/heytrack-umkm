@@ -105,7 +105,7 @@ export function useInstantNavigation() {
       }
     } catch (error) {
       // Silent fail - data will be fetched on navigation
-      logger.warn('Prefetch failed for', { path, error })
+      logger.warn({ path, error }, 'Prefetch failed for route')
     }
   }, [queryClient, routeConfigs])
 

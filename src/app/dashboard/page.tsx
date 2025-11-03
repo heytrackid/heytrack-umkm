@@ -8,12 +8,13 @@ import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
-import { BarChart3, ChefHat, Package, ShoppingCart, Target, Calculator } from 'lucide-react'
+import { BarChart3, ChefHat, Package, ShoppingCart, Target, Calculator, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { queryLogger } from '@/lib/client-logger'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 
 // Import lightweight components normally - no need for lazy loading
 import StatsCardsSection from './components/StatsCardsSection'
@@ -121,6 +122,7 @@ const Dashboard = () => {
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   // ✅ OPTIMIZED: Single API call with better caching
   const {
@@ -202,9 +204,26 @@ const Dashboard = () => {
     dashboardData.stats.totalIngredients === 0 &&
     dashboardData.stats.totalCustomers === 0
 
+  // Show onboarding for new users
+  useEffect(() => {
+    if (hasNoData && !isLoading) {
+      const hasSkipped = localStorage.getItem('heytrack_onboarding_skipped')
+      const hasCompleted = localStorage.getItem('heytrack_onboarding_completed')
+      if (!hasSkipped && !hasCompleted) {
+        setShowOnboarding(true)
+      }
+    }
+  }, [hasNoData, isLoading])
+
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Onboarding Wizard */}
+        <OnboardingWizard 
+          open={showOnboarding} 
+          onOpenChange={setShowOnboarding}
+        />
+
         {/* Header - Always visible */}
         <PageHeader
           title="Beranda"
@@ -216,42 +235,106 @@ const Dashboard = () => {
           })}${user ? `, Selamat datang kembali, ${user.email?.split('@')[0]}! 👋` : ''}`}
         />
 
-        {/* Empty State - Show when user has no data */}
+        {/* Enhanced Empty State - Show when user has no data */}
         {hasNoData && (
-          <Card className="border-dashed">
-            <CardContent className="pt-6">
-              <div className="text-center space-y-4">
-                <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Target className="h-6 w-6 text-primary" />
+          <Card className="border-dashed border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardContent className="pt-8 pb-8">
+              <div className="text-center space-y-6">
+                <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center animate-pulse">
+                  <Sparkles className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    Mulai Kelola Bisnis Kuliner Anda
+                  <h3 className="text-2xl font-bold mb-3">
+                    Selamat Datang di HeyTrack! 🎉
                   </h3>
-                  <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                    Belum ada data di sistem. Mulai dengan menambahkan bahan baku,
-                    membuat resep, atau mencatat pesanan pertama Anda.
+                  <p className="text-muted-foreground text-base max-w-xl mx-auto mb-4">
+                    Sistem manajemen kuliner yang membantu Anda menghitung HPP, 
+                    kelola stok, dan maksimalkan keuntungan dengan mudah.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Mari mulai dengan setup sederhana dalam 4 langkah 👇
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-3 justify-center pt-2">
-                  <Button asChild>
+
+                {/* Primary CTA */}
+                <div className="flex flex-col items-center gap-3 pt-2">
+                  <Button 
+                    size="lg"
+                    onClick={() => setShowOnboarding(true)}
+                    className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+                  >
+                    <Sparkles className="h-5 w-5" />
+                    Mulai Setup (5 menit)
+                  </Button>
+                  
+                  <p className="text-xs text-muted-foreground">
+                    Atau langsung ke:
+                  </p>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
+                  <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/ingredients">
-                      <Package className="h-4 w-4 mr-2" />
-                      Tambah Bahan Baku
+                      <Package className="h-6 w-6 text-blue-600" />
+                      <span className="text-sm font-medium">Bahan Baku</span>
                     </a>
                   </Button>
-                  <Button variant="outline" asChild>
+                  <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/recipes">
-                      <ChefHat className="h-4 w-4 mr-2" />
-                      Buat Resep
+                      <ChefHat className="h-6 w-6 text-purple-600" />
+                      <span className="text-sm font-medium">Resep</span>
                     </a>
                   </Button>
-                  <Button variant="outline" asChild>
+                  <Button variant="outline" asChild className="h-24 flex-col gap-2">
+                    <a href="/hpp">
+                      <Calculator className="h-6 w-6 text-green-600" />
+                      <span className="text-sm font-medium">Hitung HPP</span>
+                    </a>
+                  </Button>
+                  <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/orders">
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Catat Pesanan
+                      <ShoppingCart className="h-6 w-6 text-orange-600" />
+                      <span className="text-sm font-medium">Pesanan</span>
                     </a>
                   </Button>
+                </div>
+
+                {/* Feature Highlights */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto pt-6 text-left">
+                  <div className="flex gap-3 items-start">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
+                      <Calculator className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-sm mb-1">HPP Otomatis</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Hitung biaya produksi real-time
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center flex-shrink-0">
+                      <BarChart3 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-sm mb-1">Analisis Profit</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Lacak keuntungan per produk
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
+                      <Package className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-sm mb-1">Kelola Stok</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Alert otomatis stok menipis
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>

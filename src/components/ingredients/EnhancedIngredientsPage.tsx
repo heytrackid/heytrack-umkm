@@ -22,6 +22,9 @@ import { Badge } from '@/components/ui/badge'
 
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X, Plus } from 'lucide-react'
+import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
+import { SimpleFAB } from '@/components/ui/floating-action-button'
+import { undoableToast } from '@/components/ui/enhanced-toast'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -38,7 +41,6 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import {
-    ingredientDeletedToast,
     genericErrorToast,
 } from '@/lib/ingredients-toast'
 
@@ -114,6 +116,37 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
         pagination.setPageSize(newSize)
     }
 
+    // Create filter badges
+    const activeFilters = createFilterBadges(
+        { 
+            search: searchTerm,
+            stock: stockFilter,
+            category: categoryFilter
+        },
+        {
+            search: 'Search',
+            stock: 'Stock',
+            category: 'Category'
+        },
+        (newFilters) => {
+            if (newFilters.search !== undefined) {
+                setSearchTerm(newFilters.search)
+            }
+            if (newFilters.stock !== undefined) {
+                setStockFilter(newFilters.stock)
+            }
+            if (newFilters.category !== undefined) {
+                setCategoryFilter(newFilters.category)
+            }
+        }
+    )
+
+    const handleClearAllFilters = () => {
+        setSearchTerm('')
+        setStockFilter('all')
+        setCategoryFilter('all')
+    }
+
     // Handlers
     const handleEdit = (ingredient: Ingredient) => {
         setEditingIngredient(ingredient)
@@ -142,8 +175,23 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
         if (!selectedIngredient) { return }
 
         try {
+            const deletedItem = selectedIngredient
             await deleteIngredient(selectedIngredient.id)
-            toast(ingredientDeletedToast(selectedIngredient.name))
+            
+            // Enhanced toast with undo functionality
+            undoableToast({
+                title: `${deletedItem.name} dihapus`,
+                description: 'Bahan baku telah dihapus dari sistem',
+                onUndo: () => {
+                    // Note: Would need an undelete API endpoint for real undo
+                    toast({
+                        title: 'Fitur undo sedang dikembangkan',
+                        description: 'Anda bisa menambahkan kembali bahan baku ini',
+                    })
+                },
+                duration: 6000
+            })
+            
             setIsDeleteDialogOpen(false)
             setSelectedIngredient(null)
         } catch (err: unknown) {
@@ -245,6 +293,13 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
                         </div>
                     </div>
 
+                    {/* Active Filter Badges */}
+                    <FilterBadges 
+                        filters={activeFilters}
+                        onClearAll={handleClearAllFilters}
+                        className="mt-3"
+                    />
+
                     {/* Results Count */}
                     <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
                         <span>
@@ -252,7 +307,7 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
                         </span>
                         {hasActiveFilters && (
                             <Badge variant="secondary" className="text-xs">
-                                Filter aktif
+                                {activeFilters.length} filter aktif
                             </Badge>
                         )}
                     </div>
@@ -445,6 +500,14 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
                 ingredient={editingIngredient}
                 onSuccess={() => refetch?.()}
             />
+
+            {/* Floating Action Button for Mobile */}
+            {isMobile && (
+                <SimpleFAB
+                    onClick={handleAdd}
+                    icon={<Plus className="h-6 w-6" />}
+                />
+            )}
         </div>
     )
 }

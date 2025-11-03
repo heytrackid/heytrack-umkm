@@ -247,7 +247,7 @@ export const apiRequest = <T>(
     const cached = apiCache.get<T>(cacheKey)
     if (cached) {
       apiLogger.debug({ url }, 'Cache hit')
-      return cached
+      return Promise.resolve(cached)
     }
   }
 

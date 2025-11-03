@@ -88,7 +88,7 @@ export class APICache {
     if (useCache) {
       const cached = this.get<T>(cacheKey)
       if (cached !== null) {
-        return cached
+        return Promise.resolve(cached)
       }
     }
 
