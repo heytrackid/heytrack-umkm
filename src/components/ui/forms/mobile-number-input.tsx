@@ -1,9 +1,3 @@
-/**
- * Mobile Number Input Component
- * Optimized number input with +/- buttons for mobile
- */
-
-import * as React from 'react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -11,6 +5,12 @@ import { Input } from '../input'
 import { Label } from '../label'
 import { Button } from '../button'
 import { Minus, Plus } from 'lucide-react'
+
+/**
+ * Mobile Number Input Component
+ * Optimized number input with +/- buttons for mobile
+ */
+
 
 interface MobileNumberInputProps {
   label?: string
@@ -30,7 +30,7 @@ interface MobileNumberInputProps {
   className?: string
 }
 
-export function MobileNumberInput({
+export const MobileNumberInput = ({
   label,
   placeholder,
   value,
@@ -46,7 +46,7 @@ export function MobileNumberInput({
   hint,
   formatCurrency = false,
   className
-}: MobileNumberInputProps) {
+}: MobileNumberInputProps) => {
   const [isFocused, setIsFocused] = useState(false)
   const { isMobile } = useResponsive()
 
@@ -91,9 +91,9 @@ export function MobileNumberInput({
       {label && (
         <Label
           className={cn(
-           "text-sm font-medium",
-            isMobile &&"text-base",
-            error &&"text-destructive"
+            "text-sm font-medium",
+            isMobile && "text-base",
+            error && "text-destructive"
           )}
         >
           {label}
@@ -107,11 +107,11 @@ export function MobileNumberInput({
           type="button"
           variant="outline"
           size="sm"
-          disabled={disabled || (min !== undefined && currentValue <= min)}
+          disabled={disabled ?? (min !== undefined && currentValue <= min)}
           onClick={handleDecrement}
           className={cn(
-           "h-10 w-10 rounded-r-none border-r-0 p-0 shrink-0",
-            isMobile &&"h-12 w-12"
+            "h-10 w-10 rounded-r-none border-r-0 p-0 shrink-0",
+            isMobile && "h-12 w-12"
           )}
         >
           <Minus className="h-4 w-4" />
@@ -125,7 +125,7 @@ export function MobileNumberInput({
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
-            setIsFocused(false)
+            void setIsFocused(false)
             onBlur?.()
           }}
           disabled={disabled}
@@ -135,10 +135,10 @@ export function MobileNumberInput({
           step={step}
           inputMode="decimal"
           className={cn(
-           "flex-1 rounded-none text-center transition-all duration-200",
-            isMobile &&"h-12 text-base",
-            error &&"border-destructive focus-visible:ring-destructive",
-            isFocused &&"ring-2 ring-ring ring-offset-2"
+            "flex-1 rounded-none text-center transition-all duration-200",
+            isMobile && "h-12 text-base",
+            error && "border-destructive focus-visible:ring-destructive",
+            isFocused && "ring-2 ring-ring ring-offset-2"
           )}
         />
 
@@ -147,11 +147,11 @@ export function MobileNumberInput({
           type="button"
           variant="outline"
           size="sm"
-          disabled={disabled || (max !== undefined && currentValue >= max)}
+          disabled={disabled ?? (max !== undefined && currentValue >= max)}
           onClick={handleIncrement}
           className={cn(
-           "h-10 w-10 rounded-l-none border-l-0 p-0 shrink-0",
-            isMobile &&"h-12 w-12"
+            "h-10 w-10 rounded-l-none border-l-0 p-0 shrink-0",
+            isMobile && "h-12 w-12"
           )}
         >
           <Plus className="h-4 w-4" />
@@ -166,12 +166,12 @@ export function MobileNumberInput({
       )}
 
       {/* Hint or Error message */}
-      {(hint || error) && (
+      {(hint ?? error) && (
         <p className={cn(
-         "text-sm",
-          error ?"text-destructive" :"text-muted-foreground"
+          "text-sm",
+          error ? "text-destructive" : "text-muted-foreground"
         )}>
-          {error || hint}
+          {error ?? hint}
         </p>
       )}
     </div>

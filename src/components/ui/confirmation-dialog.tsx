@@ -1,5 +1,7 @@
 'use client'
 
+import { Button } from "@/components/ui/button"
+import { AlertTriangle, Trash2, CheckCircle, type LucideIcon } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,10 +11,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from"@/components/ui/alert-dialog"
-import { Button } from"@/components/ui/button"
-import { AlertTriangle, Trash2, CheckCircle, XCircle } from"lucide-react"
-import type { ReactNode } from"react"
+} from "@/components/ui/alert-dialog"
 
 interface ConfirmationDialogProps {
   open: boolean
@@ -24,46 +23,46 @@ interface ConfirmationDialogProps {
   variant?: 'default' | 'destructive' | 'success' | 'warning'
   onConfirm: () => void | Promise<void>
   loading?: boolean
-  icon?: ReactNode
+  icon?: LucideIcon
 }
 
 const variantConfig = {
   default: {
     icon: CheckCircle,
-    confirmButtonClass:"bg-primary hover:bg-primary/90",
-    iconColor:"text-blue-500"
+    confirmButtonClass: "bg-primary hover:bg-primary/90",
+    iconColor: "text-blue-500"
   },
   destructive: {
     icon: Trash2,
-    confirmButtonClass:"bg-red-500 hover:bg-red-600 text-white",
-    iconColor:"text-red-500"
+    confirmButtonClass: "bg-red-500 hover:bg-red-600 text-white",
+    iconColor: "text-red-500"
   },
   success: {
     icon: CheckCircle,
-    confirmButtonClass:"bg-green-500 hover:bg-green-600 text-white",
-    iconColor:"text-green-500"
+    confirmButtonClass: "bg-green-500 hover:bg-green-600 text-white",
+    iconColor: "text-green-500"
   },
   warning: {
     icon: AlertTriangle,
-    confirmButtonClass:"bg-orange-500 hover:bg-orange-600 text-white",
-    iconColor:"text-orange-500"
+    confirmButtonClass: "bg-orange-500 hover:bg-orange-600 text-white",
+    iconColor: "text-orange-500"
   }
 }
 
-export function ConfirmationDialog({
+export const ConfirmationDialog = ({
   open,
   onOpenChange,
   title,
   description,
   confirmText,
-  cancelText, 
-  variant ="default",
+  cancelText,
+  variant = "default",
   onConfirm,
   loading = false,
   icon
-}: ConfirmationDialogProps) {
+}: ConfirmationDialogProps) => {
   const config = variantConfig[variant]
-  const IconComponent = icon || config.icon
+  const IconComponent = icon ?? config.icon
 
   const handleConfirm = async () => {
     await onConfirm()
@@ -75,12 +74,11 @@ export function ConfirmationDialog({
       <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
-            <div className={`rounded-full p-2 ${
-              variant === 'destructive' ? 'bg-red-100' :
+            <div className={`rounded-full p-2 ${variant === 'destructive' ? 'bg-red-100' :
               variant === 'success' ? 'bg-green-100' :
-              variant === 'warning' ? 'bg-orange-100' :
-              'bg-blue-100'
-            }`}>
+                variant === 'warning' ? 'bg-orange-100' :
+                  'bg-blue-100'
+              }`}>
               <IconComponent className={`h-5 w-5 ${config.iconColor}`} />
             </div>
             <AlertDialogTitle className="text-left">{title}</AlertDialogTitle>
@@ -92,7 +90,7 @@ export function ConfirmationDialog({
         <AlertDialogFooter className="flex flex-row gap-2 justify-end">
           <AlertDialogCancel asChild>
             <Button variant="outline" disabled={loading}>
-              {cancelText || "Batal"}
+              {cancelText ?? "Batal"}
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
@@ -103,11 +101,11 @@ export function ConfirmationDialog({
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                   Informasi
                 </>
               ) : (
-                confirmText || "Konfirmasi"
+                confirmText ?? "Konfirmasi"
               )}
             </Button>
           </AlertDialogAction>
@@ -119,14 +117,13 @@ export function ConfirmationDialog({
 
 // Hook for easy usage
 export function useConfirmationDialog() {
-  const confirm = (options: Omit<ConfirmationDialogProps, 'open' | 'onOpenChange'>) => {
-    return new Promise<boolean>((resolve) => {
-      // Implementation akan menggunakan state management untuk dialog
-      // Untuk sekarang, kita akan return Promise yang resolve dengan hasil
-      const result = window.confirm(`${options.title}\n\n${options.description}`)
-      resolve(result)
-    })
-  }
+  const confirm = (options: Omit<ConfirmationDialogProps, 'open' | 'onOpenChange'>) => new Promise<boolean>((resolve) => {
+    // Implementation akan menggunakan state management untuk dialog
+    // Untuk sekarang, kita akan return Promise yang resolve dengan hasil
+    // eslint-disable-next-line no-alert -- Using native confirm as fallback until proper dialog is implemented
+    const result = window.confirm(`${options.title}\n\n${options.description}`)
+    resolve(result)
+  })
 
   return { confirm }
 }

@@ -1,7 +1,10 @@
+import type { ProductionBatchWithDetails } from '@/services/production/BatchSchedulingService'
+
 // Production Components Types
 // Type definitions for production batch execution components
 
-import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
+
+export type ProductionBatch = ProductionBatchWithDetails
 
 export interface BatchExecutionState {
   batch: ProductionBatch
@@ -38,7 +41,7 @@ export interface ActiveBatchesListProps {
   executionStates: Map<string, BatchExecutionState>
   selectedBatch: string | null
   onBatchSelect: (batchId: string) => void
-  onBatchUpdate?: (batchId: string, status: ProductionBatch['status'], notes?: string) => void
+  onBatchUpdate?: (batchId: string, updates: Partial<ProductionBatch>) => void
   onStartBatch: (batch: ProductionBatch) => void
   onPauseBatch: (batchId: string) => void
   onCompleteBatch: (batchId: string) => void

@@ -1,3 +1,4 @@
+
 /**
  * Barrel export for all hooks
  * Provides convenient single-import access to all custom hooks
@@ -41,10 +42,15 @@ export { useCurrency } from './useCurrency'
 export { useRoutePreloading } from './useRoutePreloading'
 
 // API Hooks
-export { useHPPAlerts } from './api/useHPPAlerts'
-export { useHPPComparison } from './api/useHPPComparison'
-export { useHPPExport } from './api/useHPPExport'
-export { useHPPSnapshots } from './api/useHPPSnapshots'
+export { useDashboardStats, useWeeklySales, useTopProducts } from './api/useDashboard'
+// export { useHPPAlerts } from './api/useHPPAlerts' // TODO: Implement
+// export { useHPPComparison } from './api/useHPPComparison' // TODO: Implement
+// export { useHPPExport } from './api/useHPPExport' // TODO: Implement
+// export { useHPPSnapshots } from './api/useHPPSnapshots' // TODO: Implement
+
+// HPP Hooks
+export { useHppOverview } from '@/modules/hpp/hooks/useHppOverview'
+export { useHppWorker } from '@/modules/hpp/hooks/useHppWorker'
 
 // Inventory Hooks
 export { useInventoryAlerts, useIngredientStockStatus } from './useInventoryAlerts'
@@ -54,5 +60,4 @@ export { useReorderManagement, usePurchaseOrderGenerator } from './useReorderMan
 // export { useHPPAutomation, useRecipeHPPAnalysis } from './useHPPAutomation'
 
 // Performance Hooks
-export { useServiceWorker } from './useServiceWorker'
 export { usePerformanceMonitoring } from './usePerformanceMonitoring'

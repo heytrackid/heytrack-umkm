@@ -1,21 +1,27 @@
+
+
 // Security Utilities
 // Input sanitization, validation, and security helpers
 
-// Note: DOMPurify import commented out - install 'isomorphic-dompurify' if needed
-// import DOMPurify from 'isomorphic-dompurify'
-
-// Input Sanitization
+// Input Sanitization (Basic client-safe version)
 export class InputSanitizer {
-  // Sanitize HTML input to prevent XSS
+  // Sanitize HTML input to prevent XSS (basic strip tags version)
   static sanitizeHtml(input: string): string {
-    // Basic sanitization without DOMPurify - strips all HTML tags
-    return input.replace(/<[^>]*>/g, '')
+    // Basic HTML sanitization without DOMPurify (client-safe)
+    // For server-side with full DOMPurify, use @/utils/security/server
+    return input
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
+      .replace(/<embed[^>]*>/gi, '')
+      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+      .trim()
   }
 
   // Sanitize for rich text (limited HTML)
   static sanitizeRichText(input: string): string {
-    // Basic sanitization - in production, install and use DOMPurify
-    return input.replace(/<(?!\/?(?:p|br|strong|em|u|ul|ol|li)\b)[^>]*>/gi, '')
+    // Basic rich text sanitization (client-safe)
+    return InputSanitizer.sanitizeHtml(input)
   }
 
   // Sanitize SQL-like inputs (remove dangerous characters)
@@ -24,6 +30,8 @@ export class InputSanitizer {
       .replace(/['"`;\\]/g, '') // Remove quotes and semicolons
       .replace(/--/g, '') // Remove SQL comments
       .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
+      .replace(/\b(OR|AND)\s+.*(?:=|>|<|LIKE)\s*['"][^'"]*['"]/gi, '') // Remove potential SQL injection patterns
+      .replace(/DROP\s+|DELETE\s+|INSERT\s+|UPDATE\s+/gi, '') // Remove potential SQL commands
       .trim()
   }
 
@@ -75,12 +83,12 @@ export class InputSanitizer {
 export class RateLimiter {
   private static requests = new Map<string, number[]>()
 
-  static checkLimit(identifier: string, maxRequests: number = 100, windowMs: number = 60000): boolean {
+  static checkLimit(identifier: string, maxRequests = 100, windowMs = 60000): boolean {
     const now = Date.now()
     const windowStart = now - windowMs
 
     // Get existing requests for this identifier
-    const requests = this.requests.get(identifier) || []
+    const requests = this.requests.get(identifier) ?? []
 
     // Remove old requests outside the window
     const validRequests = requests.filter(time => time > windowStart)
@@ -97,13 +105,13 @@ export class RateLimiter {
     return true
   }
 
-  static getRemainingRequests(identifier: string, maxRequests: number = 100): number {
-    const requests = this.requests.get(identifier) || []
+  static getRemainingRequests(identifier: string, maxRequests = 100): number {
+    const requests = this.requests.get(identifier) ?? []
     return Math.max(0, maxRequests - requests.length)
   }
 
   // Clean up old entries (call this periodically)
-  static cleanup(maxAge: number = 3600000): void { // 1 hour default
+  static cleanup(maxAge = 3600000): void { // 1 hour default
     const cutoff = Date.now() - maxAge
     for (const [key, requests] of this.requests.entries()) {
       const validRequests = requests.filter(time => time > cutoff)
@@ -131,20 +139,35 @@ export class SecurityHeaders {
     }
   }
 
-  static getCSPHeader(): string {
+  // Deprecated: Use getStrictCSP from @/lib/csp instead
+  // Kept for backward compatibility
+  static getCSPHeader(isDev = false): string {
+    // Deprecation warning shown in development only (console allowed for deprecation notices)
+     
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.warn('SecurityHeaders.getCSPHeader is deprecated. Use getStrictCSP from @/lib/csp instead.')
+    }
     const policies = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https: blob:",
-      "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai",
+      isDev 
+        ? "script-src 'self' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com"
+        : "script-src 'self' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com",
+      "style-src 'self' https://fonts.googleapis.com",
+      "img-src 'self' data: https: blob: https://*.supabase.co",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai https://vitals.vercel-insights.com",
+      "worker-src 'self' blob:",
+      "media-src 'self' https://*.supabase.co",
       "frame-src 'none'",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
-      "upgrade-insecure-requests"
+      "manifest-src 'self'",
+      "prefetch-src 'self' https://*.supabase.co",
+      "upgrade-insecure-requests",
+      "block-all-mixed-content"
     ]
 
     return policies.join('; ')
@@ -196,9 +219,12 @@ export class APISecurity {
     return !!(apiKey && apiKey.length > 20 && /^[a-zA-Z0-9_-]+$/.test(apiKey))
   }
 
-  static sanitizeAPIInput(input: any): unknown {
+  static sanitizeAPIInput(input: unknown): unknown {
     if (typeof input === 'string') {
-      return InputSanitizer.sanitizeHtml(input)
+      // Apply multiple sanitization layers
+      let sanitized = InputSanitizer.sanitizeHtml(input)
+      sanitized = InputSanitizer.sanitizeSQLInput(sanitized)
+      return sanitized
     }
 
     if (Array.isArray(input)) {
@@ -208,13 +234,35 @@ export class APISecurity {
     if (typeof input === 'object' && input !== null) {
       const sanitized: Record<string, unknown> = {}
       for (const [key, value] of Object.entries(input)) {
-        if (typeof key === 'string') {
-          sanitized[key] = this.sanitizeAPIInput(value)
-        }
+        // Sanitize both keys and values
+        const sanitizedKey = typeof key === 'string' ? InputSanitizer.sanitizeSQLInput(key) : key
+        sanitized[sanitizedKey] = this.sanitizeAPIInput(value)
       }
       return sanitized
     }
 
     return input
   }
+  
+  // Additional sanitization that can be applied to entire request bodies
+  static sanitizeRequestBody<T>(body: T): T {
+    return this.sanitizeAPIInput(body) as T
+  }
+  
+  // Sanitize query parameters
+  static sanitizeQueryParams(params: Record<string, string | string[]>): Record<string, string | string[]> {
+    const sanitized: Record<string, string | string[]> = {}
+    for (const [key, value] of Object.entries(params)) {
+      const sanitizedKey = InputSanitizer.sanitizeSQLInput(key)
+      if (Array.isArray(value)) {
+        sanitized[sanitizedKey] = value.map(v => InputSanitizer.sanitizeHtml(v))
+      } else {
+        sanitized[sanitizedKey] = InputSanitizer.sanitizeHtml(value)
+      }
+    }
+    return sanitized
+  }
 }
+
+// Export the middleware functions
+export { withSecurity, SecurityPresets } from './api-middleware'

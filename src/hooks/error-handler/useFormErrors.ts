@@ -2,6 +2,8 @@
 
 import { useCallback, useState } from 'react'
 
+
+
 /**
  * Hook untuk handle form validation errors per field
  * Ideal untuk forms dengan multiple fields dan individual error messages
@@ -46,7 +48,7 @@ export function useFormErrors() {
   }, [])
 
   const clearAllErrors = useCallback(() => {
-    setFieldErrors({})
+    void setFieldErrors({})
   }, [])
 
   const hasErrors = Object.keys(fieldErrors).length > 0

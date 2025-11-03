@@ -1,32 +1,18 @@
-// Purchase Form Component - Lazy Loaded
-// Form dialog for adding new ingredient purchases
+'use client'
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
+import { useToast } from '@/hooks/use-toast'
 import { Plus } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IngredientPurchaseInsertSchema, type IngredientPurchaseInsert } from '@/lib/validations/database-validations'
 import type { AvailableIngredient } from './types'
 import { uiLogger } from '@/lib/logger'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface PurchaseFormProps {
   ingredients: AvailableIngredient[]
@@ -41,8 +27,9 @@ interface PurchaseFormProps {
   onSuccess: () => void
 }
 
-export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) {
+const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const { toast } = useToast()
 
   const form = useForm<IngredientPurchaseInsert>({
     resolver: zodResolver(IngredientPurchaseInsertSchema),
@@ -51,14 +38,21 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
       supplier: '',
       quantity: 0,
       unit_price: 0,
-      tanggal_beli: new Date().toISOString().split('T')[0],
-      catatan: ''
+      purchase_date: new Date().toISOString().split('T')[0],
+      notes: ''
     }
   })
 
-  const handleSubmit = async (data: IngredientPurchaseInsert) => {
+  const handleSubmit = (data: IngredientPurchaseInsert) => {
     try {
-      await onSubmit(data)
+      onSubmit({
+        ingredient_id: data.ingredient_id,
+        quantity: data.quantity,
+        unit_price: data.unit_price,
+        supplier: data.supplier ?? undefined,
+        purchase_date: data.purchase_date,
+        notes: data.notes ?? undefined
+      })
 
       // Reset form
       form.reset({
@@ -66,15 +60,20 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
         supplier: '',
         quantity: 0,
         unit_price: 0,
-        tanggal_beli: new Date().toISOString().split('T')[0],
-        catatan: ''
+        purchase_date: new Date().toISOString().split('T')[0],
+        notes: ''
       })
 
-      setIsDialogOpen(false)
+      void setIsDialogOpen(false)
       onSuccess()
-    } catch (error) {
+    } catch (err: unknown) {
+      const error = err as Error
       uiLogger.error({ error }, 'Error creating purchase')
-      alert('Gagal menambahkan pembelian')
+      toast({
+        title: 'Gagal',
+        description: 'Gagal menambahkan pembelian',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -90,10 +89,10 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
           Tambah Pembelian
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           <DialogHeader>
-            <DialogTitle>Tambah Pembelian Bahan Baku</DialogTitle>
+            <DialogTitle className="text-wrap-mobile">Tambah Pembelian Bahan Baku</DialogTitle>
             <DialogDescription>
               Input detail pembelian bahan baku baru
             </DialogDescription>
@@ -118,7 +117,7 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
                 </SelectContent>
               </Select>
               {form.formState.errors.ingredient_id && (
-                <p className="text-sm text-red-600">{form.formState.errors.ingredient_id.message}</p>
+                <p className="text-sm text-gray-600">{form.formState.errors.ingredient_id.message}</p>
               )}
             </div>
 
@@ -132,7 +131,7 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
                   {...form.register('quantity', { valueAsNumber: true })}
                 />
                 {form.formState.errors.quantity && (
-                  <p className="text-sm text-red-600">{form.formState.errors.quantity.message}</p>
+                  <p className="text-sm text-gray-600">{form.formState.errors.quantity.message}</p>
                 )}
               </div>
 
@@ -145,7 +144,7 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
                   {...form.register('unit_price', { valueAsNumber: true })}
                 />
                 {form.formState.errors.unit_price && (
-                  <p className="text-sm text-red-600">{form.formState.errors.unit_price.message}</p>
+                  <p className="text-sm text-gray-600">{form.formState.errors.unit_price.message}</p>
                 )}
               </div>
             </div>
@@ -154,10 +153,10 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
               <Label htmlFor="supplier">Supplier</Label>
               <Input
                 id="supplier"
-                {...form.register('supplier')}
+                {...form.register('supplier', { value: '' })}
               />
               {form.formState.errors.supplier && (
-                <p className="text-sm text-red-600">{form.formState.errors.supplier.message}</p>
+                <p className="text-sm text-gray-600">{form.formState.errors.supplier.message}</p>
               )}
             </div>
 
@@ -169,7 +168,7 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
                 {...form.register('purchase_date')}
               />
               {form.formState.errors.purchase_date && (
-                <p className="text-sm text-red-600">{form.formState.errors.purchase_date.message}</p>
+                <p className="text-sm text-gray-600">{form.formState.errors.purchase_date.message}</p>
               )}
             </div>
 
@@ -180,7 +179,7 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
                 {...form.register('notes')}
               />
               {form.formState.errors.notes && (
-                <p className="text-sm text-red-600">{form.formState.errors.notes.message}</p>
+                <p className="text-sm text-gray-600">{form.formState.errors.notes.message}</p>
               )}
             </div>
 
@@ -209,3 +208,5 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
     </Dialog>
   )
 }
+
+export default PurchaseForm

@@ -1,10 +1,16 @@
 'use client'
 
-import type * as React from 'react'
-import { useState, useEffect } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-
+import type { RecipesTable, CustomersTable } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isArrayOf, isRecipe, isCustomer } from '@/lib/type-guards'
+
+
+
+type Recipe = RecipesTable
+type Customer = CustomersTable
+
 export interface OrderItem {
   id?: string
   recipe_id: string
@@ -49,7 +55,7 @@ export const useOrderLogic = () => {
     customer_phone: '',
     customer_email: '',
     customer_address: '',
-    order_date: new Date().toISOString().split('T')[0],
+    order_date: new Date().toISOString().substring(0, 10),
     delivery_date: '',
     delivery_time: '',
     delivery_method: 'pickup',
@@ -64,13 +70,13 @@ export const useOrderLogic = () => {
   })
 
   const [orderItems, setOrderItems] = useState<OrderItem[]>([])
-  const [availableRecipes, setAvailableRecipes] = useState<any[]>([])
-  const [customers, setCustomers] = useState<any[]>([])
+  const [availableRecipes, setAvailableRecipes] = useState<Recipe[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
 
   // Load initial data
   useEffect(() => {
-    fetchRecipes()
-    fetchCustomers()
+    void fetchRecipes()
+    void fetchCustomers()
   }, [])
 
   const fetchRecipes = async () => {
@@ -78,14 +84,24 @@ export const useOrderLogic = () => {
       const response = await fetch('/api/recipes')
       if (response.ok) {
         const data = await response.json()
-        const recipes = Array.isArray(data) ? data : (data?.recipes ?? [])
-        setAvailableRecipes(recipes)
+        // Validate with type guards
+        if (isArrayOf(data, isRecipe)) {
+          void setAvailableRecipes(data)
+        } else if (data && typeof data === 'object' && Array.isArray(data?.recipes) && isArrayOf(data.recipes, isRecipe)) {
+          void setAvailableRecipes(data.recipes)
+        } else {
+          apiLogger.warn({ data }, 'API returned unexpected format for recipes')
+          void setAvailableRecipes([])
+        }
       } else {
-        setAvailableRecipes([])
+        const errorText = await response.text()
+        apiLogger.error({ error: errorText }, 'Failed to fetch recipes')
+        void setAvailableRecipes([])
       }
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Failed to fetch recipes:')
-      setAvailableRecipes([])
+    } catch (err: unknown) {
+      const message = getErrorMessage(err)
+      apiLogger.error({ error: message }, 'Failed to fetch recipes:')
+      void setAvailableRecipes([])
     } finally {
       setLoading(false) // Set loading to false after fetch
     }
@@ -96,14 +112,24 @@ export const useOrderLogic = () => {
       const response = await fetch('/api/customers')
       if (response.ok) {
         const data = await response.json()
-        const customersArr = Array.isArray(data) ? data : (data?.customers ?? [])
-        setCustomers(customersArr)
+        // Validate with type guards
+        if (isArrayOf(data, isCustomer)) {
+          void setCustomers(data)
+        } else if (data && typeof data === 'object' && Array.isArray(data?.customers) && isArrayOf(data.customers, isCustomer)) {
+          void setCustomers(data.customers)
+        } else {
+          apiLogger.warn({ data }, 'API returned unexpected format for customers')
+          void setCustomers([])
+        }
       } else {
-        setCustomers([])
+        const errorText = await response.text()
+        apiLogger.error({ error: errorText }, 'Failed to fetch customers')
+        void setCustomers([])
       }
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Failed to fetch customers:')
-      setCustomers([])
+    } catch (err: unknown) {
+      const message = getErrorMessage(err)
+      apiLogger.error({ error: message }, 'Failed to fetch customers:')
+      void setCustomers([])
     }
   }
 
@@ -113,60 +139,67 @@ export const useOrderLogic = () => {
   const totalAmount = subtotal - formData.discount_amount + taxAmount + formData.delivery_fee
 
   // Form handlers
-  const handleInputChange = (field: keyof OrderFormData, value: any) => {
+  const handleInputChange = (field: keyof OrderFormData, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const addOrderItem = () => {
     if (availableRecipes.length === 0) {
-      setError('Belum ada resep tersedia')
+      void setError('Belum ada resep tersedia')
       return
     }
     
     const firstRecipe = availableRecipes[0]
+    const fallbackPrice = firstRecipe.selling_price ?? 0
     const newItem: OrderItem = {
       recipe_id: firstRecipe.id,
       product_name: firstRecipe.name,
       quantity: 1,
-      unit_price: firstRecipe.selling_price || 0,
-      total_price: firstRecipe.selling_price || 0,
+      unit_price: fallbackPrice,
+      total_price: fallbackPrice,
       special_requests: ''
     }
     
-    setOrderItems(prev => [...prev, newItem])
+    void setOrderItems(prev => [...prev, newItem])
   }
 
-  const updateOrderItem = (index: number, field: keyof OrderItem, value: any) => {
+  const updateOrderItem = (index: number, field: keyof OrderItem, value: unknown) => {
     setOrderItems(prev => {
       const updated = [...prev]
+      if (index < 0 || index >= updated.length || !updated[index]) {return updated}
+
+      const currentItem = updated[index]
+
       if (field === 'recipe_id') {
         const selectedRecipe = availableRecipes.find(recipe => recipe.id === value)
         if (selectedRecipe) {
           updated[index] = {
-            ...updated[index],
-            recipe_id: value,
+            ...currentItem,
+            recipe_id: value as string,
             product_name: selectedRecipe.name,
-            unit_price: selectedRecipe.selling_price || updated[index].unit_price
+            unit_price: selectedRecipe.selling_price ?? currentItem.unit_price
           }
         }
       } else if (field === 'quantity') {
-        const qty = parseInt(String(value)) || 0
+        const qty = Number.parseInt(String(value), 10)
+        const safeQuantity = Number.isNaN(qty) ? 0 : qty
         updated[index] = {
-          ...updated[index],
-          quantity: qty,
-          total_price: qty * updated[index].unit_price
+          ...currentItem,
+          quantity: safeQuantity,
+          total_price: safeQuantity * currentItem.unit_price
         }
       } else if (field === 'unit_price') {
-        const price = parseFloat(String(value)) || 0
+        const price = Number.parseFloat(String(value))
+        const safePrice = Number.isNaN(price) ? 0 : price
         updated[index] = {
-          ...updated[index],
-          unit_price: price,
-          total_price: updated[index].quantity * price
+          ...currentItem,
+          unit_price: safePrice,
+          total_price: currentItem.quantity * safePrice
         }
       } else {
-        updated[index] = { ...updated[index], [field]: value }
+        updated[index] = { ...currentItem, [field]: value }
       }
-      
+
       return updated
     })
   }
@@ -175,39 +208,39 @@ export const useOrderLogic = () => {
     setOrderItems(prev => prev.filter((_, i) => i !== index))
   }
 
-  const selectCustomer = (customer: any) => {
+  const selectCustomer = (customer: Customer) => {
     setFormData(prev => ({
       ...prev,
       customer_name: customer.name,
-      customer_phone: customer.phone || '',
-      customer_email: customer.email || '',
-      customer_address: customer.address || ''
+      customer_phone: customer.phone ?? '',
+      customer_email: customer.email ?? '',
+      customer_address: customer.address ?? ''
     }))
   }
 
-  const generateOrderNumber = () => {
+  const generateOrderNo = () => {
     const today = new Date()
-    const dateStr = today.toISOString().split('T')[0].replace(/-/g, '')
-    const timeStr = Math.floor(Date.now() / 1000).toString().slice(-4)
+    const dateStr = today.toISOString().substring(0, 10).replace(/-/g, '')
+    const timeStr = String(Math.floor(Date.now() / 1000)).slice(-4)
     return `ORD-${dateStr}-${timeStr}`
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     
     if (!formData.customer_name || orderItems.length === 0) {
-      setError('Nama pelanggan dan minimal 1 item pesanan harus diisi')
+      void setError('Nama pelanggan dan minimal 1 item pesanan harus diisi')
       return
     }
     
-    setIsSubmitting(true)
-    setError('')
+    void setIsSubmitting(true)
+    void setError('')
     
     try {
-      const orderNumber = generateOrderNumber()
+      const orderNo = generateOrderNo()
       
       const orderData = {
-        order_no: orderNumber,
+        order_no: orderNo,
         customer_name: formData.customer_name,
         customer_phone: formData.customer_phone,
         customer_email: formData.customer_email,
@@ -246,17 +279,39 @@ export const useOrderLogic = () => {
       })
       
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Gagal menyimpan pesanan')
+        const responseClone = response.clone()
+        let errorMessage = 'Gagal menyimpan pesanan'
+
+        try {
+          const errorData = await response.json()
+          const apiMessage = typeof errorData?.error === 'string' ? errorData.error.trim() : ''
+          if (apiMessage.length > 0) {
+            errorMessage = apiMessage
+          } else {
+            const fallbackText = (await responseClone.text()).trim()
+            if (fallbackText.length > 0) {
+              errorMessage = fallbackText
+            }
+          }
+        } catch {
+          const fallbackText = (await responseClone.text()).trim()
+          if (fallbackText.length > 0) {
+            errorMessage = fallbackText
+          }
+        }
+
+        throw new Error(errorMessage)
       }
       
       // Redirect to orders page with success message
-      router.push('/orders?success=true')
+      void router.push('/orders?success=true')
       
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan')
+    } catch (err: unknown) {
+      const error = err as Error
+      const message = getErrorMessage(error)
+      void setError(message)
     } finally {
-      setIsSubmitting(false)
+      void setIsSubmitting(false)
     }
   }
 

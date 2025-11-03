@@ -1,19 +1,19 @@
+import { memo } from 'react'
+import { useResponsive } from '@/hooks/useResponsive'
+import { Pie, PieChart, Cell, Tooltip, Legend, ResponsiveContainer, type PieLabelRenderProps } from 'recharts'
+import { BaseMobileChart } from './base-chart'
+import { MobileTooltip } from './mobile-tooltip'
+import { type BaseMobileChartProps, CHART_COLORS } from './types'
+
 /**
  * Mobile Pie Chart Component
  * Optimized pie chart for mobile devices
  */
 
-import * as React from 'react'
-import { memo } from 'react'
-import { useResponsive } from '@/hooks/useResponsive'
-import { Pie, PieChart, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { BaseMobileChart } from './base-chart'
-import { MobileTooltip } from './mobile-tooltip'
-import { CHART_COLORS, BaseMobileChartProps, PieLabelProps } from './types'
 
 interface MobilePieChartProps extends BaseMobileChartProps {
   valueKey: string
-  nameKey: string
+  _nameKey: string
   colors?: string[]
   showLabels?: boolean
   innerRadius?: number
@@ -23,37 +23,43 @@ interface MobilePieChartProps extends BaseMobileChartProps {
  * MobilePieChart - Optimized with React.memo
  * Prevents unnecessary re-renders when data hasn't changed
  */
-export const MobilePieChart = memo(function MobilePieChart({
+export const MobilePieChart = memo(({
   data,
   valueKey,
-  nameKey,
+  _nameKey,
   colors = CHART_COLORS.rainbow,
   showLabels = true,
   innerRadius = 0,
   ...baseProps
-}: MobilePieChartProps) {
+}: MobilePieChartProps) => {
   const { isMobile } = useResponsive()
 
-  const renderLabel = (props: any) => {
-    const { cx, cy, midAngle, innerRadius, outerRadius, percent } = props
-    if (!showLabels || !percent || percent < 0.05) {return null} // Don't show labels for slices < 5%
+  const renderLabel = (props: PieLabelRenderProps) => {
+    const { cx, cy, midAngle, innerRadius: propsInnerRadius, outerRadius: propsOuterRadius, percent } = props
+    const percentValue = typeof percent === 'number' ? percent : 0
+    if (!showLabels || percentValue < 0.05) { return null } // Don't show labels for slices < 5%
 
     const RADIAN = Math.PI / 180
-    const radius = (innerRadius || 0) + ((outerRadius || 0) - (innerRadius || 0)) * 0.5
-    const x = Number(cx || 0) + radius * Math.cos(-Number(midAngle || 0) * RADIAN)
-    const y = Number(cy || 0) + radius * Math.sin(-Number(midAngle || 0) * RADIAN)
+    const innerR = typeof propsInnerRadius === 'number' ? propsInnerRadius : 0
+    const outerR = typeof propsOuterRadius === 'number' ? propsOuterRadius : 0
+    const radius = innerR + (outerR - innerR) * 0.5
+    const cxValue = typeof cx === 'number' ? cx : 0
+    const cyValue = typeof cy === 'number' ? cy : 0
+    const midAngleValue = typeof midAngle === 'number' ? midAngle : 0
+    const x = cxValue + radius * Math.cos(-midAngleValue * RADIAN)
+    const y = cyValue + radius * Math.sin(-midAngleValue * RADIAN)
 
     return (
       <text
         x={x}
         y={y}
         fill="white"
-        textAnchor={x > Number(cx || 0) ? 'start' : 'end'}
+        textAnchor={x > cxValue ? 'start' : 'end'}
         dominantBaseline="central"
         fontSize={isMobile ? 10 : 12}
         fontWeight="medium"
       >
-        {`${(percent * 100).toFixed(0)}%`}
+        {`${(percentValue * 100).toFixed(0)}%`}
       </text>
     )
   }
@@ -73,7 +79,7 @@ export const MobilePieChart = memo(function MobilePieChart({
             fill="#8884d8"
             dataKey={valueKey}
           >
-            {data.map((entry, _index) => (
+            {data.map((_entry, _index) => (
               <Cell
                 key={`cell-${_index}`}
                 fill={colors[_index % colors.length]}
@@ -88,6 +94,4 @@ export const MobilePieChart = memo(function MobilePieChart({
       </ResponsiveContainer>
     </BaseMobileChart>
   )
-}, (prevProps: MobilePieChartProps, nextProps: MobilePieChartProps) => {
-  return prevProps.data === nextProps.data && prevProps.valueKey === nextProps.valueKey
-})
+}, (prevProps: MobilePieChartProps, nextProps: MobilePieChartProps) => prevProps.data === nextProps.data && prevProps.valueKey === nextProps.valueKey)

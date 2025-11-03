@@ -1,10 +1,11 @@
+import { useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+
 /**
  * Simple Preloading Hooks
  * Lightweight preloading utilities for links and buttons
  */
 
-import { useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 
 /**
  * Hook for preloading links on hover
@@ -14,7 +15,7 @@ export function useLinkPreloading() {
 
   const handleMouseEnter = useCallback((href: string) => {
     // Prefetch the route
-    router.prefetch(href)
+    void router.prefetch(href)
   }, [router])
 
   return { handleMouseEnter }
@@ -27,7 +28,7 @@ export function useButtonPreloading() {
   const router = useRouter()
 
   const preload = useCallback((href: string) => {
-    router.prefetch(href)
+    void router.prefetch(href)
   }, [router])
 
   return { preload }
@@ -40,7 +41,7 @@ export function usePreload() {
   const router = useRouter()
 
   const preloadRoute = useCallback((href: string) => {
-    router.prefetch(href)
+    void router.prefetch(href)
   }, [router])
 
   return { preloadRoute }

@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,43 +11,73 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { 
-  CustomerFormSchema,
-  type CustomerForm
-} from '@/lib/validations/domains/customer'
+import { z } from 'zod'
 import { FormField } from './shared/FormField'
-import { useFormWithValidation, createFormSubmitHandler, CUSTOMER_TYPES } from '@/lib/shared'
+import type { CustomersTable } from '@/types/database'
+import { getErrorMessage } from '@/lib/type-guards'
 
-interface CustomerFormProps {
-  initialData?: Partial<CustomerForm>
-  onSubmit: (data: CustomerForm) => Promise<void>
+
+
+type Customer = CustomersTable
+
+// Form schema without user_id (will be added on submit)
+const CustomerFormSchema = z.object({
+  name: z.string().min(1, 'Nama wajib diisi'),
+  email: z.string().email('Email tidak valid').nullable().optional(),
+  phone: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  customer_type: z.enum(['retail', 'wholesale', 'vip', 'regular']).nullable().optional(),
+  discount_percentage: z.number().min(0).max(100).nullable().optional(),
+  notes: z.string().nullable().optional(),
+  is_active: z.boolean().nullable().optional(),
+  user_id: z.string().uuid(),
+})
+
+type CustomerFormData = z.infer<typeof CustomerFormSchema>
+
+interface CustomerFormComponentProps {
+  initialData?: Partial<Customer>
+  onSubmit: (data: CustomerFormData) => Promise<void>
   isLoading?: boolean
 }
 
-export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormProps) {
-  const form = useFormWithValidation(CustomerFormSchema, {
+export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormComponentProps) => {
+  const { toast } = useToast()
+
+  const form = useForm<CustomerFormData>({
+    resolver: zodResolver(CustomerFormSchema),
+    mode: 'onChange',
     defaultValues: {
-      name: initialData?.name || '',
-      email: initialData?.email || '',
-      phone: initialData?.phone || '',
-      address: initialData?.address || '',
-      customer_type: initialData?.customer_type || 'REGULAR',
-      loyalty_points: initialData?.loyalty_points || 0,
-      notes: initialData?.notes || '',
-      is_active: initialData?.is_active ?? true,
-      ...initialData
+      name: initialData?.name ?? '',
+      email: initialData?.email ?? null,
+      phone: initialData?.phone ?? null,
+      address: initialData?.address ?? null,
+      customer_type: (initialData?.customer_type as 'retail' | 'wholesale' | 'vip' | 'regular') || 'regular',
+      notes: initialData?.notes ?? null,
+      is_active: initialData?.is_active !== undefined ? initialData.is_active : true,
+      user_id: initialData?.user_id ?? '',
     }
   })
 
-  const handleSubmit = createFormSubmitHandler(
-    form,
-    onSubmit,
-    'Data customer berhasil disimpan',
-    'Gagal menyimpan data customer',
-    !initialData,
-    'Berhasil',
-    'Error'
-  )
+  const handleSubmit = async (data: CustomerFormData) => {
+    try {
+      await onSubmit(data)
+      toast({
+        title: 'Berhasil',
+        description: 'Data customer berhasil disimpan'
+      })
+      if (!initialData) {
+        form.reset()
+      }
+    } catch (error: unknown) {
+      const message = getErrorMessage(error)
+      toast({
+        title: 'Error',
+        description: message || 'Gagal menyimpan data customer',
+        variant: 'destructive'
+      })
+    }
+  }
 
   return (
     <Card>
@@ -58,103 +87,74 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
       <CardContent>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField 
-              label="Nama Customer" 
-              required 
-              error={form.formState.errors.name?.message}
+            <FormField
+              label="Nama Customer"
+              required
+              error={form.formState.errors['name']?.message as string}
             >
-              <Input 
-                {...form.register('name')}
-
-              />
+              <Input {...form.register('name')} />
             </FormField>
 
-            <FormField 
-              label="Email" 
-              error={form.formState.errors.email?.message}
+            <FormField
+              label="Email"
+              error={form.formState.errors['email']?.message as string}
             >
-              <Input 
-                type="email"
-                {...form.register('email')}
-
-              />
+              <Input type="email" {...form.register('email')} />
             </FormField>
 
-            <FormField 
-              label="Nomor Telepon" 
-              error={form.formState.errors.phone?.message}
+            <FormField
+              label="Nomor Telepon"
+              error={form.formState.errors['phone']?.message as string}
             >
-              <Input 
-                {...form.register('phone')}
-
-              />
+              <Input {...form.register('phone')} />
             </FormField>
 
-            <FormField 
-              label="Tipe Customer" 
-              error={form.formState.errors.customer_type?.message}
+            <FormField
+              label="Tipe Customer"
+              error={form.formState.errors['customer_type']?.message as string}
             >
-              <Select 
-                value={form.watch('customer_type')} 
-                onValueChange={(value) => form.setValue('customer_type', value as any)}
+              <Select
+                value={form.watch('customer_type') as string}
+                onValueChange={(value) => form.setValue('customer_type', value as 'retail' | 'wholesale' | 'vip' | 'regular')}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="REGULAR">Regular</SelectItem>
-                  <SelectItem value="VIP">VIP</SelectItem>
-                  <SelectItem value="WHOLESALE">Wholesale</SelectItem>
+                  <SelectItem value="regular">Regular</SelectItem>
+                  <SelectItem value="vip">VIP</SelectItem>
+                  <SelectItem value="wholesale">Wholesale</SelectItem>
+                  <SelectItem value="retail">Retail</SelectItem>
                 </SelectContent>
               </Select>
             </FormField>
-
-            <FormField 
-              label="Poin Loyalitas" 
-              error={form.formState.errors.loyalty_points?.message}
-            >
-              <Input 
-                type="number"
-                min="0"
-                {...form.register('loyalty_points', { valueAsNumber: true })}
-
-              />
-            </FormField>
           </div>
 
-          <FormField 
-            label="Alamat" 
-            error={form.formState.errors.address?.message}
+          <FormField
+            label="Alamat"
+            error={form.formState.errors['address']?.message as string}
           >
-            <Textarea 
-              {...form.register('address')}
-
-              rows={3}
-            />
+            <Textarea {...form.register('address')} rows={3} />
           </FormField>
 
-          <FormField 
-            label="Catatan" 
-            error={form.formState.errors.notes?.message}
+          <FormField
+            label="Catatan"
+            error={form.formState.errors['notes']?.message as string}
           >
-            <Textarea 
-              {...form.register('notes')}
-
-              rows={2}
-            />
+            <Textarea {...form.register('notes')} rows={2} />
           </FormField>
 
           <div className="flex items-center space-x-2">
-            <Checkbox 
-              checked={form.watch('is_active')}
-              onCheckedChange={(checked) => form.setValue('is_active', !!checked)}
+            <Checkbox
+              checked={form.watch('is_active') ?? true}
+              onCheckedChange={(checked) => form.setValue('is_active', checked === true)}
             />
             <Label>Aktif</Label>
           </div>
 
-          <Button 
-            type="submit" 
-            disabled={isLoading || !form.formState.isValid}
+          <Button
+            type="submit"
+            disabled={isLoading ?? !form.formState.isValid}
             className="w-full"
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

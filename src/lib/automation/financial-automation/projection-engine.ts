@@ -1,10 +1,11 @@
+import type { HistoricalData, ProjectionResult, FinancialProjection } from './types'
+import { TrendAnalyzer } from './trend-analyzer'
+
 /**
  * Projection Engine Module
  * Handles financial projection and forecasting
  */
 
-import type { HistoricalData, ProjectionResult, FinancialProjection } from './types'
-import { TrendAnalyzer } from './trend-analyzer'
 
 export class ProjectionEngine {
   /**
@@ -12,7 +13,7 @@ export class ProjectionEngine {
    */
   static projectFinancialPerformance(
     historicalData: HistoricalData[],
-    projectionMonths: number = 12
+    projectionMonths = 12
   ): ProjectionResult | { error: string } {
     if (historicalData.length < 3) {
       return {
@@ -59,25 +60,36 @@ export class ProjectionEngine {
    */
   static projectWithSeasonalAdjustments(
     historicalData: HistoricalData[],
-    projectionMonths: number = 12
-  ): ProjectionResult & {
-    seasonalFactors: Record<number, number> // month -> seasonal factor
-  } {
+    projectionMonths = 12
+  ):
+    | (ProjectionResult & {
+      seasonalFactors: Record<number, number>
+    })
+    | { error: string } {
     const baseProjection = this.projectFinancialPerformance(historicalData, projectionMonths)
+    
+    if ('error' in baseProjection) {
+      return baseProjection
+    }
 
     // Calculate seasonal factors based on historical data
     const seasonalFactors = this.calculateSeasonalFactors(historicalData)
 
     // Apply seasonal adjustments to projections
-    const adjustedProjections = baseProjection.projections.map(proj => ({
-      ...proj,
-      revenue: Math.round(proj.revenue * (seasonalFactors[proj.month % 12] || 1)),
-      expenses: Math.round(proj.expenses * (seasonalFactors[proj.month % 12] || 1)),
-    })).map(proj => ({
-      ...proj,
-      profit: proj.revenue - proj.expenses,
-      profitMargin: proj.revenue > 0 ? (proj.profit / proj.revenue) * 100 : 0
-    }))
+    const adjustedProjections: FinancialProjection[] = baseProjection.projections
+      .map((projection) => {
+        const seasonalFactor = seasonalFactors[projection.month % 12] ?? 1
+        return {
+          ...projection,
+          revenue: Math.round(projection.revenue * seasonalFactor),
+          expenses: Math.round(projection.expenses * seasonalFactor),
+        }
+      })
+      .map((projection) => ({
+        ...projection,
+        profit: projection.revenue - projection.expenses,
+        profitMargin: projection.revenue > 0 ? (projection.profit / projection.revenue) * 100 : 0
+      }))
 
     return {
       ...baseProjection,
@@ -93,10 +105,13 @@ export class ProjectionEngine {
     const monthlyData: Record<number, number[]> = {}
 
     // Group data by month
-    historicalData.forEach(data => {
-      const month = new Date(data.date).getMonth()
-      if (!monthlyData[month]) monthlyData[month] = []
-      monthlyData[month].push(data.revenue)
+    historicalData.forEach((data: HistoricalData) => {
+      const monthInput = data.month ?? ''
+      const parsedMonth = new Date(`${monthInput}-01`)
+      if (Number.isNaN(parsedMonth.getTime())) {return}
+      const monthIndex = parsedMonth.getMonth()
+      if (!monthlyData[monthIndex]) {monthlyData[monthIndex] = []}
+      monthlyData[monthIndex].push(data.revenue)
     })
 
     // Calculate average for each month
@@ -127,14 +142,14 @@ export class ProjectionEngine {
       revenueMultiplier: number
       expenseMultiplier: number
     }>,
-    projectionMonths: number = 12
+    projectionMonths = 12
   ): Array<{
     scenarioName: string
-    projection: ProjectionResult
+    projection: ProjectionResult | { error: string }
   }> {
     return scenarios.map(scenario => {
       // Adjust historical data for scenario
-      const adjustedData = baseHistoricalData.map(data => ({
+      const adjustedData = baseHistoricalData.map((data: HistoricalData) => ({
         ...data,
         revenue: data.revenue * scenario.revenueMultiplier,
         expenses: data.expenses * scenario.expenseMultiplier
@@ -174,7 +189,7 @@ export class ProjectionEngine {
       insights.push(`✅ ${profitabilityRate.toFixed(0)}% of projected months show profitability`)
     }
 
-    const confidence = projection.confidence
+    const {confidence} = projection
     if (confidence === 'Low') {
       insights.push(`🎲 Projection confidence is low - consider gathering more historical data`)
     } else if (confidence === 'High') {

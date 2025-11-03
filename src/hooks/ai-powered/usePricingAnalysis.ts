@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { apiLogger } from '@/lib/logger'
 import type { AIAnalysisState, PricingAnalysisRequest } from './types'
+
+
 
 /**
  * AI-Powered Pricing Analysis Hook
@@ -30,7 +31,7 @@ export function usePricingAnalysis() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to analyze pricing')
+        throw new Error(result.error ?? 'Failed to analyze pricing')
       }
 
       setState({

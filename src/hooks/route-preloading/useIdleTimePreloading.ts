@@ -1,8 +1,10 @@
 'use client'
-import { useEffect } from 'react'
 
-import { apiLogger } from '@/lib/logger'
+import { useEffect } from 'react'
 import { preloadChartBundle } from '@/components/lazy/index'
+
+
+// Removed unused import: apiLogger
 
 /**
  * Time-based preloading hook
@@ -16,10 +18,8 @@ export const useIdleTimePreloading = () => {
       clearTimeout(idleTimer)
       idleTimer = setTimeout(() => {
         // User is idle, preload heavy components
-        console.log('🕒 User idle - preloading heavy components')
-
         preloadChartBundle().then(() => {
-          console.log('✅ Idle preloading completed')
+          // Idle preloading completed
         }).catch(() => {})
       }, 5000) // 5 seconds of inactivity
     }

@@ -1,9 +1,10 @@
+import type { CacheEntry, CacheConfig } from './types'
+
 /**
  * Cache Module
  * API response caching and deduplication system
  */
 
-import type { CacheEntry, CacheConfig } from './types'
 
 export class APICache {
   private cache = new Map<string, CacheEntry<unknown>>()
@@ -44,14 +45,14 @@ export class APICache {
    */
   get<T>(key: string): T | null {
     const entry = this.cache.get(key)
-    if (!entry) return null
+    if (!entry) {return null}
 
     if (this.isCacheValid(entry)) {
       return entry.data as T
-    } else {
+    } 
       this.cache.delete(key)
       return null
-    }
+    
   }
 
   /**
@@ -69,19 +70,19 @@ export class APICache {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl: ttl || this.config.defaultTTL,
+      ttl: ttl ?? this.config.defaultTTL,
     })
   }
 
   /**
    * Execute with caching and deduplication
    */
-  async executeWithCache<T>(
+  executeWithCache<T>(
     operationName: string,
     queryFn: () => Promise<T>,
     cacheKey: string,
     ttl?: number,
-    useCache: boolean = true
+    useCache = true
   ): Promise<T> {
     // Check cache first
     if (useCache) {

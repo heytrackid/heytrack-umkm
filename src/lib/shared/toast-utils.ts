@@ -1,9 +1,11 @@
+import type { useToast } from '@/hooks/use-toast'
+
+
 /**
  * Shared Toast Utilities
  * Consistent toast notification patterns across the application
  */
 
-import { useToast } from '@/hooks/use-toast'
 
 // Toast presets for common actions
 export const TOAST_PRESETS = {
@@ -108,8 +110,8 @@ export function showSuccessToast(
   description?: string
 ) {
   toast({
-    title: title || TOAST_PRESETS.SUCCESS.title,
-    description: description || TOAST_PRESETS.SUCCESS.description,
+    title: title ?? TOAST_PRESETS.SUCCESS.title,
+    description: description ?? TOAST_PRESETS.SUCCESS.description,
     variant: TOAST_PRESETS.SUCCESS.variant
   })
 }
@@ -120,8 +122,8 @@ export function showErrorToast(
   description?: string
 ) {
   toast({
-    title: title || TOAST_PRESETS.ERROR.title,
-    description: description || TOAST_PRESETS.ERROR.description,
+    title: title ?? TOAST_PRESETS.ERROR.title,
+    description: description ?? TOAST_PRESETS.ERROR.description,
     variant: TOAST_PRESETS.ERROR.variant
   })
 }
@@ -132,8 +134,8 @@ export function showWarningToast(
   description?: string
 ) {
   toast({
-    title: title || TOAST_PRESETS.WARNING.title,
-    description: description || TOAST_PRESETS.WARNING.description,
+    title: title ?? TOAST_PRESETS.WARNING.title,
+    description: description ?? TOAST_PRESETS.WARNING.description,
     variant: TOAST_PRESETS.WARNING.variant
   })
 }
@@ -183,7 +185,7 @@ export function showFormSuccessToast(
 ) {
   toast({
     title: FORM_TOASTS.SUBMIT_SUCCESS.title,
-    description: message || FORM_TOASTS.SUBMIT_SUCCESS.description
+    description: message ?? FORM_TOASTS.SUBMIT_SUCCESS.description
   })
 }
 
@@ -193,7 +195,7 @@ export function showFormErrorToast(
 ) {
   toast({
     title: FORM_TOASTS.SUBMIT_ERROR.title,
-    description: message || FORM_TOASTS.SUBMIT_ERROR.description,
+    description: message ?? FORM_TOASTS.SUBMIT_ERROR.description,
     variant: FORM_TOASTS.SUBMIT_ERROR.variant
   })
 }
@@ -205,7 +207,7 @@ export function showLoadingToast(
 ) {
   return toast({
     title: API_TOASTS.LOADING.title,
-    description: message || API_TOASTS.LOADING.description,
+    description: message ?? API_TOASTS.LOADING.description,
     duration: Infinity // Keep showing until manually dismissed
   })
 }
@@ -244,15 +246,15 @@ export async function withToastFeedback<T>(
 
     onSuccess?.(result)
     return result
-  } catch (error) {
+  } catch (err) {
     // Dismiss loading toast
     loadingToast.dismiss()
 
     // Show error toast
-    const errorMsg = error instanceof Error ? error.message : errorMessage
+    const errorMsg = err instanceof Error ? err.message : errorMessage
     showErrorToast(toast, 'Error', errorMsg)
 
-    onError?.(error as Error)
+    onError?.(err as Error)
     return null
   }
 }

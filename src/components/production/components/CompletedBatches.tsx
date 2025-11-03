@@ -1,18 +1,19 @@
-// Completed Batches Component - Lazy Loaded
-// Displays recently completed production batches
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle } from 'lucide-react'
 import { format } from 'date-fns'
-import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
+import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
+
+// Completed Batches Component - Lazy Loaded
+// Displays recently completed production batches
+
 
 interface CompletedBatchesProps {
   batches: ProductionBatch[]
 }
 
-export default function CompletedBatches({ batches }: CompletedBatchesProps) {
-  const completedBatches = batches.filter(b => b.status === 'completed').slice(0, 5)
+const CompletedBatches = ({ batches }: CompletedBatchesProps) => {
+  const completedBatches = batches.filter(b => b.status === 'COMPLETED').slice(0, 5)
 
   if (completedBatches.length === 0) {
     return null
@@ -37,9 +38,9 @@ export default function CompletedBatches({ batches }: CompletedBatchesProps) {
               <p className="text-sm text-muted-foreground">
                 Quantity: {batch.quantity}
               </p>
-              {batch.actual_end && (
+              {batch.completed_at && (
                 <p className="text-xs text-muted-foreground">
-                  Completed: {format(new Date(batch.actual_end), 'MMM dd, HH:mm')}
+                  Completed: {format(new Date(batch.completed_at), 'MMM dd, HH:mm')}
                 </p>
               )}
             </div>
@@ -49,3 +50,5 @@ export default function CompletedBatches({ batches }: CompletedBatchesProps) {
     </Card>
   )
 }
+
+export default CompletedBatches

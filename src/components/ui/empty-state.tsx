@@ -1,145 +1,218 @@
-/**
- * Empty State Component
- * Beautiful empty states for better first-time user experience
- */
+'use client'
 
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { ReactNode } from 'react'
-import { Button } from './button'
+import type { LucideIcon } from 'lucide-react'
+import Link from 'next/link'
+
+
+
+interface EmptyStateAction {
+  label: string
+  onClick?: () => void
+  href?: string
+  variant?: 'default' | 'outline' | 'ghost'
+  icon?: LucideIcon
+}
+
+interface EmptyStateTip {
+  icon: string
+  text: string
+}
 
 interface EmptyStateProps {
-  icon: ReactNode
+  icon?: LucideIcon
+  emoji?: string
   title: string
   description: string
-  action?: ReactNode
+  actions?: EmptyStateAction[]
+  tips?: EmptyStateTip[]
   className?: string
+  compact?: boolean
 }
 
-export function EmptyState({
-  icon,
+export const EmptyState = ({
+  icon: Icon,
+  emoji,
   title,
   description,
-  action,
-  className
-}: EmptyStateProps) {
-  return (
-    <div className={cn(
-      "flex flex-col items-center justify-center py-12 px-4 text-center",
-      className
+  actions = [],
+  tips = [],
+  className,
+  compact = false
+}: EmptyStateProps) => (
+  <Card className={cn('border-dashed', className)}>
+    <CardContent className={cn(
+      'flex flex-col items-center justify-center text-center',
+      compact ? 'py-8' : 'py-12'
     )}>
-      <div className="rounded-full bg-muted/50 p-6 mb-4 ring-8 ring-muted/20">
-        <div className="text-muted-foreground">
-          {icon}
-        </div>
+      {/* Icon/Emoji */}
+      <div className={cn(
+        'rounded-full bg-muted flex items-center justify-center mb-4',
+        compact ? 'w-16 h-16' : 'w-20 h-20'
+      )}>
+        {Icon ? (
+          <Icon className={cn(
+            'text-muted-foreground',
+            compact ? 'w-8 h-8' : 'w-10 h-10'
+          )} />
+        ) : emoji ? (
+          <span className={compact ? 'text-3xl' : 'text-4xl'}>{emoji}</span>
+        ) : null}
       </div>
-      <h3 className="text-lg font-semibold mb-2">
+
+      {/* Title */}
+      <h3 className={cn(
+        'font-semibold text-foreground mb-2',
+        compact ? 'text-lg' : 'text-xl'
+      )}>
         {title}
       </h3>
-      <p className="text-muted-foreground text-sm mb-6 max-w-md">
+
+      {/* Description */}
+      <p className={cn(
+        'text-muted-foreground mb-6 max-w-md',
+        compact ? 'text-sm' : 'text-base'
+      )}>
         {description}
       </p>
-      {action}
-    </div>
-  )
-}
+
+      {/* Actions */}
+      {actions.length > 0 && (
+        <div className="flex flex-wrap gap-2 justify-center mb-6">
+          {actions.map((action, index) => {
+            const ActionIcon = action.icon
+            const button = (
+              <Button
+                key={index}
+                variant={action.variant ?? (index === 0 ? 'default' : 'outline')}
+                onClick={action.onClick}
+                size={compact ? 'sm' : 'default'}
+              >
+                {ActionIcon && <ActionIcon className="w-4 h-4 mr-2" />}
+                {action.label}
+              </Button>
+            )
+
+            return action.href ? (
+              <Link key={index} href={action.href}>
+                {button}
+              </Link>
+            ) : button
+          })}
+        </div>
+      )}
+
+      {/* Tips */}
+      {tips.length > 0 && !compact && (
+        <div className="w-full max-w-md space-y-2 mt-4 pt-4 border-t">
+          {tips.map((tip, index) => (
+            <div
+              key={index}
+              className="flex items-start gap-2 text-left text-sm text-muted-foreground"
+            >
+              <span className="text-base flex-shrink-0">{tip.icon}</span>
+              <span>{tip.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </CardContent>
+  </Card>
+)
 
 // Preset empty states for common scenarios
-export function EmptyIngredients({ onAdd }: { onAdd?: () => void }) {
-  return (
-    <EmptyState
-      icon={<svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-      </svg>}
-      title="Belum ada bahan baku"
-      description="Mulai dengan menambahkan bahan baku pertama Anda untuk memulai tracking inventory"
-      action={onAdd && (
-        <Button onClick={onAdd}>
-          <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Tambah Bahan Baku
-        </Button>
-      )}
-    />
-  )
-}
-
-export function EmptyOrders({ onAdd }: { onAdd?: () => void }) {
-  return (
-    <EmptyState
-      icon={<svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-      </svg>}
-      title="Belum ada pesanan"
-      description="Pesanan dari pelanggan akan muncul di sini. Buat pesanan pertama Anda sekarang!"
-      action={onAdd && (
-        <Button onClick={onAdd}>
-          <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Buat Pesanan
-        </Button>
-      )}
-    />
-  )
-}
-
-export function EmptyCustomers({ onAdd }: { onAdd?: () => void }) {
-  return (
-    <EmptyState
-      icon={<svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>}
-      title="Belum ada pelanggan"
-      description="Tambahkan pelanggan untuk melacak pesanan dan riwayat pembelian mereka"
-      action={onAdd && (
-        <Button onClick={onAdd}>
-          <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Tambah Pelanggan
-        </Button>
-      )}
-    />
-  )
-}
-
-export function EmptyRecipes({ onAdd }: { onAdd?: () => void }) {
-  return (
-    <EmptyState
-      icon={<svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>}
-      title="Belum ada resep"
-      description="Buat resep pertama Anda dengan menambahkan bahan-bahan dan langkah pembuatan"
-      action={onAdd && (
-        <Button onClick={onAdd}>
-          <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Buat Resep
-        </Button>
-      )}
-    />
-  )
-}
-
-export function EmptyData({ 
-  title = "Tidak ada data",
-  description = "Data akan muncul di sini setelah Anda menambahkannya",
-  icon
-}: { 
-  title?: string
-  description?: string
-  icon?: ReactNode
-}) {
-  return (
-    <EmptyState
-      icon={icon || <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-      </svg>}
-      title={title}
-      description={description}
-    />
-  )
+export const EmptyStatePresets = {
+  orders: {
+    emoji: '📦',
+    title: 'Belum Ada Order',
+    description: 'Mulai dengan membuat order pertama Anda. Order akan otomatis mengurangi stok bahan.',
+    tips: [
+      { icon: '💡', text: 'Order akan otomatis mengurangi stok bahan setelah dikonfirmasi' },
+      { icon: '📊', text: 'Lihat laporan penjualan untuk analisis bisnis' },
+      { icon: '🔔', text: 'Aktifkan notifikasi untuk update order real-time' }
+    ]
+  },
+  recipes: {
+    emoji: '👨‍🍳',
+    title: 'Belum Ada Resep',
+    description: 'Buat resep produk Anda untuk mulai menghitung HPP dan mengelola produksi.',
+    tips: [
+      { icon: '💡', text: 'Resep akan digunakan untuk menghitung HPP otomatis' },
+      { icon: '🤖', text: 'Gunakan AI Generator untuk membuat resep lebih cepat' },
+      { icon: '📋', text: 'Tambahkan biaya operasional untuk HPP yang akurat' }
+    ]
+  },
+  ingredients: {
+    emoji: '🥬',
+    title: 'Belum Ada Bahan Baku',
+    description: 'Tambahkan bahan baku untuk mulai mengelola inventory dan menghitung HPP produk Anda.',
+    tips: [
+      { icon: '💡', text: 'Stok akan otomatis berkurang saat order dikonfirmasi' },
+      { icon: '🔔', text: 'Atur minimum stok untuk notifikasi reorder otomatis' },
+      { icon: '💰', text: 'Harga bahan menggunakan WAC (Weighted Average Cost)' },
+      { icon: '📥', text: 'Import CSV untuk menambahkan banyak bahan sekaligus' }
+    ]
+  },
+  customers: {
+    emoji: '👥',
+    title: 'Belum Ada Customer',
+    description: 'Tambahkan data customer untuk tracking order dan analisis penjualan.',
+    tips: [
+      { icon: '💡', text: 'Customer data membantu analisis repeat order' },
+      { icon: '📱', text: 'Simpan nomor WhatsApp untuk notifikasi otomatis' },
+      { icon: '📊', text: 'Lihat history pembelian per customer' }
+    ]
+  },
+  production: {
+    emoji: '⚙️',
+    title: 'Belum Ada Produksi',
+    description: 'Mulai batch produksi untuk tracking proses dan efisiensi produksi.',
+    tips: [
+      { icon: '💡', text: 'Batch produksi membantu tracking waste dan efisiensi' },
+      { icon: '📊', text: 'Analisis waktu produksi untuk optimasi' },
+      { icon: '🔔', text: 'Notifikasi otomatis saat produksi selesai' }
+    ]
+  },
+  reports: {
+    emoji: '📊',
+    title: 'Belum Ada Data',
+    description: 'Data laporan akan muncul setelah Anda memiliki transaksi.',
+    tips: [
+      { icon: '💡', text: 'Buat order untuk mulai melihat laporan' },
+      { icon: '📈', text: 'Laporan diupdate real-time setiap ada transaksi' },
+      { icon: '📅', text: 'Filter berdasarkan tanggal untuk analisis periode' }
+    ]
+  },
+  hpp: {
+    emoji: '🧮',
+    title: 'Belum Ada Perhitungan HPP',
+    description: 'Buat resep dan tambahkan bahan untuk mulai menghitung HPP produk Anda.',
+    tips: [
+      { icon: '💡', text: 'HPP dihitung otomatis dari harga bahan + biaya operasional' },
+      { icon: '📊', text: 'Gunakan HPP untuk menentukan harga jual yang profitable' },
+      { icon: '🔔', text: 'Notifikasi otomatis jika HPP naik signifikan' }
+    ]
+  },
+  operationalCosts: {
+    emoji: '💰',
+    title: 'Belum Ada Biaya Operasional',
+    description: 'Tambahkan biaya operasional untuk perhitungan HPP yang lebih akurat.',
+    tips: [
+      { icon: '💡', text: 'Setup Cepat menambahkan 8 template biaya umum' },
+      { icon: '📊', text: 'Biaya operasional digunakan untuk menghitung HPP' },
+      { icon: '🔔', text: 'Atur biaya berulang untuk tracking otomatis' }
+    ]
+  },
+  search: {
+    emoji: '🔍',
+    title: 'Tidak Ada Hasil',
+    description: 'Coba gunakan kata kunci yang berbeda atau filter lain.',
+    tips: [
+      { icon: '💡', text: 'Gunakan kata kunci yang lebih umum' },
+      { icon: '🔤', text: 'Periksa ejaan kata kunci' },
+      { icon: '🔧', text: 'Hapus beberapa filter untuk hasil lebih luas' }
+    ]
+  }
 }

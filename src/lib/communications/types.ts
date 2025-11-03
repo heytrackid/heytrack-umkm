@@ -1,3 +1,5 @@
+
+
 /**
  * Communications Module Types
  * Centralized type definitions for all communication services
@@ -64,7 +66,7 @@ export interface SmartNotification extends Omit<BaseMessage, 'type'> {
   category: 'inventory' | 'orders' | 'financial' | 'production' | 'customer' | 'system'
   title: string
   message: string
-  data?: any
+  data?: Record<string, unknown>
   actionUrl?: string
   actionLabel?: string
   isRead: boolean
@@ -76,12 +78,12 @@ export interface NotificationRule {
   name: string
   category: SmartNotification['category']
   enabled: boolean
-  conditions: {
+  conditions: Array<{
     metric: string
     operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'contains'
     value: unknown
     timeWindow?: number // minutes
-  }[]
+  }>
   notification: {
     priority: SmartNotification['priority']
     title: string

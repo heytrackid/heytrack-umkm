@@ -1,9 +1,8 @@
 'use client'
 
 import { useSupabaseQuery } from './core'
-import type { Database } from '@/types'
 
-type Tables = Database['public']['Tables']
+
 
 /**
  * Entity-specific hooks for common database operations
@@ -53,7 +52,15 @@ export function useSuppliers(options?: { realtime?: boolean }) {
 // Expenses
 export function useExpenses(options?: { realtime?: boolean }) {
   return useSupabaseQuery('expenses', {
-    orderBy: { column: 'date', ascending: false },
+    orderBy: { column: 'expense_date', ascending: false },
+    realtime: options?.realtime,
+  })
+}
+
+// Operational Costs
+export function useOperationalCosts(options?: { realtime?: boolean }) {
+  return useSupabaseQuery('operational_costs', {
+    orderBy: { column: 'created_at', ascending: false },
     realtime: options?.realtime,
   })
 }
@@ -66,11 +73,11 @@ export function useFinancialRecords(options?: {
   realtime?: boolean
 }) {
   const filter: Record<string, unknown> = {}
-  if (options?.type) filter.type = options.type
+  if (options?.type) {filter.type = options.type}
 
   return useSupabaseQuery('financial_records', {
     filter,
-    orderBy: { column: 'date', ascending: false },
+    orderBy: { column: 'created_at', ascending: false },
     realtime: options?.realtime,
   })
 }

@@ -1,5 +1,6 @@
 import type { RoutePreloadingPatterns } from './types'
 
+
 /**
  * Route preloading patterns based on user behavior
  * Defines which routes and components should be preloaded for each page
@@ -52,7 +53,7 @@ export const ROUTE_PRELOADING_PATTERNS: RoutePreloadingPatterns = {
   },
 
   // Recipes -> likely next routes
-  '/resep': {
+  '/recipes': {
     immediate: ['/ingredients', '/hpp'],
     onHover: ['/orders', '/production'],
     components: ['recipe-table', 'cost-calculator'],
@@ -62,8 +63,8 @@ export const ROUTE_PRELOADING_PATTERNS: RoutePreloadingPatterns = {
   // Settings -> likely next routes
   '/settings': {
     immediate: ['/dashboard'],
-    onHover: ['/settings/whatsapp-templates'],
+    onHover: [],
     components: ['settings-tabs'],
-    modals: ['whatsapp-templates']
+    modals: []
   }
 }

@@ -1,3 +1,4 @@
+
 /**
  * Components Module
  * Barrel export for all application components
@@ -25,6 +26,7 @@ export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 
 // Table Components
 export { DataTable } from './data-table/data-table'
+export { useReactTable } from '@tanstack/react-table'
 
 // Layout Components
 export { default as AppLayout } from './layout/app-layout'
@@ -32,7 +34,7 @@ export { default as AppLayout } from './layout/app-layout'
 
 
 // Error Components
-export { ErrorFallback as ErrorMessage } from './error-fallback'
+// export { ErrorFallback as ErrorMessage } from './error-fallback' // Removed - file doesn't exist
 
 // Export types if they exist
 export type { ColumnDef } from '@tanstack/react-table'

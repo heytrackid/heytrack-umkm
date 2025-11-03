@@ -1,11 +1,12 @@
+import { useCallback, useState } from 'react'
+import { apiLogger } from '@/lib/logger'
+
 /**
  * useConfirm Hook
  * Easy way to add confirmation dialogs
  */
 
-import { useCallback, useState } from 'react'
 
-import { apiLogger } from '@/lib/logger'
 interface UseConfirmOptions {
   onConfirm: () => void | Promise<void>
   title?: string
@@ -18,27 +19,27 @@ export function useConfirm() {
   const [config, setConfig] = useState<UseConfirmOptions | null>(null)
 
   const confirm = useCallback((options: UseConfirmOptions) => {
-    setConfig(options)
-    setIsOpen(true)
+    void setConfig(options)
+    void setIsOpen(true)
   }, [])
 
   const handleConfirm = useCallback(async () => {
     if (!config) {return}
 
     try {
-      setLoading(true)
+      void setLoading(true)
       await config.onConfirm()
-      setIsOpen(false)
-    } catch (error) {
-      apiLogger.error({ error: error }, 'Confirmation action failed:')
+      void setIsOpen(false)
+    } catch (err) {
+      apiLogger.error({ err }, 'Confirmation action failed:')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [config])
 
   const handleCancel = useCallback(() => {
-    setIsOpen(false)
-    setLoading(false)
+    void setIsOpen(false)
+    void setLoading(false)
   }, [])
 
   return {

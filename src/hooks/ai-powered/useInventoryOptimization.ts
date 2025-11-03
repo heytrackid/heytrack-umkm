@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { apiLogger } from '@/lib/logger'
 import type { AIAnalysisState, InventoryOptimizationRequest } from './types'
+
+
 
 /**
  * AI-Powered Inventory Optimization Hook
@@ -30,27 +31,27 @@ export function useInventoryOptimization() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to optimize inventory')
+        throw new Error(result.error ?? 'Failed to optimize inventory')
       }
 
       setState({
         data: result,
         loading: false,
         error: null,
-        confidence: result.metadata?.confidence || 0.8,
+        confidence: result.metadata?.confidence ?? 0.8,
         lastUpdated: new Date().toISOString()
       })
 
       return result
 
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setState(prev => ({
         ...prev,
         loading: false,
         error: errorMessage
       }))
-      throw error
+      throw err
     }
   }, [])
 

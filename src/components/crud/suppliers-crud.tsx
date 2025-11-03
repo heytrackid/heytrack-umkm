@@ -1,35 +1,27 @@
-'use client';
-import * as React from 'react'
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+'use client'
 
-import { useState } from 'react';
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useSuppliers } from '@/hooks';
 import { useSupabaseCRUD } from '@/hooks/supabase';
-import { SimpleDataTable } from '@/components/ui/simple-data-table';
+import { SimpleDataTable, type SimpleColumn } from '@/components/ui/simple-data-table';
 import { SupplierFormSchema, type SupplierForm } from '@/lib/validations/form-validations';
-
-// Shared components
 import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields';
 import { CreateModal, EditModal, DeleteModal } from '@/components/ui';
-
 import { apiLogger } from '@/lib/logger'
+import type { SuppliersTable, SuppliersInsert, SuppliersUpdate } from '@/types/database'
 
-// Using generic types since suppliers might not be in the database schema yet
-type Supplier = {
-  id: string;
-  name: string;
-  contact_person?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  address?: string | null;
-  created_at: string;
-  updated_at: string;
-};
-type SupplierInsert = Omit<Supplier, 'id' | 'created_at' | 'updated_at'>;
-type SupplierUpdate = Partial<SupplierInsert>;
 
-export function SuppliersCRUD() {
+
+
+// Shared components
+
+
+type Supplier = SuppliersTable
+
+
+export const SuppliersCRUD = () => {
   const { data: suppliersData, loading, error } = useSuppliers();
   const { create: createSupplier, update: updateSupplier, delete: deleteSupplier } = useSupabaseCRUD('suppliers');
   const suppliers = suppliersData || [];
@@ -62,98 +54,113 @@ export function SuppliersCRUD() {
     }
   });
 
-  const columns = [
+  const columns: Array<SimpleColumn<Supplier>> = [
     {
       key: 'name',
       header: 'Name',
-      priority: 'high' as const,
     },
     {
       key: 'contact_person',
       header: 'Contact Person',
-      render: (value: string) => value || '-',
-      priority: 'high' as const,
+      accessor: (supplier) => supplier.contact_person,
+      render: (value) => (value as string | null) ?? '-',
     },
     {
       key: 'phone',
       header: 'Phone',
-      render: (value: string) => value || '-',
+      accessor: (supplier) => supplier.phone,
+      render: (value) => (value as string | null) ?? '-',
       hideOnMobile: true,
     },
     {
       key: 'email',
       header: 'Email',
-      render: (value: string) => value || '-',
+      accessor: (supplier) => supplier.email,
+      render: (value) => (value as string | null) ?? '-',
       hideOnMobile: true,
     },
   ];
 
   const handleCreate = () => {
-    createForm.reset()
-    setIsCreateModalOpen(true)
+    createForm.reset({
+      name: '',
+      contact_person: '',
+      phone: '',
+      email: '',
+      address: '',
+      notes: '',
+    })
+    void setIsCreateModalOpen(true)
   }
 
   const handleEdit = (supplier: Supplier) => {
-    setSelectedSupplier(supplier)
+    void setSelectedSupplier(supplier)
     editForm.reset({
       name: supplier.name,
-      contact_person: supplier.contact_person || '',
-      phone: supplier.phone || '',
-      email: supplier.email || '',
-      address: supplier.address || '',
-      notes: '' // Notes field not in supplier type
+      contact_person: supplier.contact_person ?? '',
+      phone: supplier.phone ?? '',
+      email: supplier.email ?? '',
+      address: supplier.address ?? '',
+      notes: supplier.notes ?? '',
     })
-    setIsEditModalOpen(true)
+    void setIsEditModalOpen(true)
   }
 
   const handleDelete = (supplier: Supplier) => {
-    setSelectedSupplier(supplier)
-    setIsDeleteDialogOpen(true)
+    void setSelectedSupplier(supplier)
+    void setIsDeleteDialogOpen(true)
   }
 
-  const handleSubmitCreate = async (data: SupplierForm) => {
+  const handleSubmitCreate = async (data: Record<string, unknown>) => {
     try {
-      await createSupplier(data)
-      setIsCreateModalOpen(false)
-      createForm.reset()
-    } catch (error: unknown) {
-      apiLogger.error({ error }, 'Failed to create supplier:')
+      await createSupplier(data as SuppliersInsert)
+      void setIsCreateModalOpen(false)
+      createForm.reset({
+        name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: '',
+      })
+    } catch (err: unknown) {
+      apiLogger.error({ err }, 'Failed to create supplier:')
     }
   }
 
-  const handleSubmitEdit = async (data: SupplierForm) => {
-    if (!selectedSupplier) {return}
+  const handleSubmitEdit = async (data: Record<string, unknown>) => {
+    if (!selectedSupplier) { return }
 
     try {
-      await updateSupplier(selectedSupplier.id, data)
-      setIsEditModalOpen(false)
-      setSelectedSupplier(null)
-      editForm.reset()
-    } catch (error: unknown) {
-      apiLogger.error({ error }, 'Failed to update supplier:')
+      await updateSupplier(selectedSupplier.id, data as SuppliersUpdate)
+      void setIsEditModalOpen(false)
+      void setSelectedSupplier(null)
+      editForm.reset({
+        name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: '',
+      })
+    } catch (err: unknown) {
+      apiLogger.error({ err }, 'Failed to update supplier:')
     }
   }
 
   const handleConfirmDelete = async () => {
-    if (!selectedSupplier) {return}
+    if (!selectedSupplier) { return }
 
     try {
       await deleteSupplier(selectedSupplier.id)
       setIsDeleteDialogOpen(false);
       setSelectedSupplier(null);
-    } catch (error: unknown) {
-      apiLogger.error({ error }, 'Failed to delete supplier:');
+    } catch (err: unknown) {
+      apiLogger.error({ err }, 'Failed to delete supplier:');
     }
   }
 
-  const closeModals = () => {
-    setIsCreateModalOpen(false)
-    setIsEditModalOpen(false)
-    setIsDeleteDialogOpen(false)
-    setSelectedSupplier(null)
-    createForm.reset()
-    editForm.reset()
-  }
+
 
   if (error) {
     return (
@@ -212,7 +219,7 @@ export function SuppliersCRUD() {
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
         entityName="Supplier"
-        itemName={selectedSupplier?.name}
+        itemName={selectedSupplier?.name ?? ''}
         isLoading={loading}
       />
     </div>

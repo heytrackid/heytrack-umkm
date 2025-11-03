@@ -1,10 +1,13 @@
 'use client'
-import * as React from 'react'
 
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 
-interface MiniChartProps {
+
+
+
+
+export interface MiniChartProps {
   data: unknown[]
   type?: 'line' | 'bar'
   dataKey: string
@@ -15,7 +18,7 @@ interface MiniChartProps {
 
 // Dynamically import Recharts to reduce initial bundle size
 const DynamicChart = dynamic(
-  () => import('./MiniChartCore'),
+  () => import(/* webpackChunkName: "mini-chart-core" */ './MiniChartCore'),
   {
     loading: () => (
       <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded animate-pulse">
@@ -26,16 +29,16 @@ const DynamicChart = dynamic(
   }
 )
 
-export default function MiniChart(props: MiniChartProps) {
+const MiniChart = (props: MiniChartProps) => {
   const { data, height = 60, className = '' } = props
 
   if (!data || data.length === 0) {
     return (
-      <div 
+      <div
         className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded ${className}`}
         style={{ height }}
       >
-        <span className="text-xs text-gray-400">No data</span>
+        <span className="text-xs text-gray-400">Tidak ada data</span>
       </div>
     )
   }
@@ -52,3 +55,5 @@ export default function MiniChart(props: MiniChartProps) {
     </div>
   )
 }
+
+export default MiniChart

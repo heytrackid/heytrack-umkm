@@ -2,54 +2,32 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import {
-  ChevronLeft,
-  ChevronRight,
-  Edit2,
-  Eye,
-  Mail,
-  MoreHorizontal,
-  Phone,
-  Plus,
-  Trash2,
-  Users
-} from 'lucide-react'
-import type { CustomersTable } from '@/types/customers'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { ChevronLeft, ChevronRight, Edit2, Eye, Mail, MoreHorizontal, Phone, Plus, Trash2, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import type { CustomersTable } from '@/types/database'
 
 interface CustomersTableProps {
-  customers: CustomersTable['Row'][]
+  customers: CustomersTable[]
   selectedItems: string[]
   onSelectItem: (itemId: string) => void
   onSelectAll: () => void
-  onView: (customer: CustomersTable['Row']) => void
-  onEdit: (customer: CustomersTable['Row']) => void
-  onDelete: (customer: CustomersTable['Row']) => void
+  onView: (customer: CustomersTable) => void
+  onEdit: (customer: CustomersTable) => void
+  onDelete: (customer: CustomersTable) => void
   onAddNew: () => void
   formatCurrency: (amount: number) => string
-  isMobile?: boolean
+  isMobile: boolean
 }
 
 /**
  * Customers Table Component with Pagination
  * Extracted from customers/page.tsx for code splitting
  */
-export default function CustomersTable({
+const CustomersTable = ({
   customers,
   selectedItems,
   onSelectItem,
@@ -58,9 +36,8 @@ export default function CustomersTable({
   onEdit,
   onDelete,
   onAddNew,
-  formatCurrency,
-  isMobile = false
-}: CustomersTableProps) {
+  formatCurrency
+}: CustomersTableProps) => {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -79,26 +56,22 @@ export default function CustomersTable({
 
   // Reset to page 1 when customers change
   useMemo(() => {
-    setCurrentPage(1)
-  }, [customers.length])
+    void setCurrentPage(1)
+     
+  }, [])
 
   if (customers.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-            Belum Ada Pelanggan
-          </h3>
-          <p className="text-muted-foreground mb-4">
-            Mulai tambahkan pelanggan pertama Anda
-          </p>
-          <Button onClick={onAddNew}>
-            <Plus className="h-4 w-4 mr-2" />
-            Tambah Pelanggan
-          </Button>
-        </CardContent>
-      </Card>
+      <EmptyState
+        {...EmptyStatePresets.customers}
+        actions={[
+          {
+            label: 'Tambah Customer Pertama',
+            onClick: onAddNew,
+            icon: Plus
+          }
+        ]}
+      />
     )
   }
 
@@ -152,23 +125,23 @@ export default function CustomersTable({
                   <TableCell>
                     <div className="space-y-1">
                       <div className="flex items-center gap-1 text-sm">
-                        <Mail className="h-3 w-3 text-gray-400" />
-                        <span className="truncate max-w-32">{customer.email}</span>
+                        <Mail className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                        <span className="truncate-desktop-only">{customer.email}</span>
                       </div>
                       <div className="flex items-center gap-1 text-sm">
-                        <Phone className="h-3 w-3 text-gray-400" />
-                        <span>{customer.phone}</span>
+                        <Phone className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                        <span className="text-wrap-mobile">{customer.phone}</span>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <span className="font-medium text-green-600">
-                      {formatCurrency(customer.total_spent)}
+                      {formatCurrency(customer.total_spent ?? 0)}
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="font-medium">
-                      {customer.total_orders}
+                      {customer.total_orders ?? 0}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -227,7 +200,7 @@ export default function CustomersTable({
                   <span className="text-sm text-muted-foreground">Show</span>
                   <Select value={pageSize.toString()} onValueChange={(value: string) => {
                     setPageSize(Number(value))
-                    setCurrentPage(1)
+                    void setCurrentPage(1)
                   }}>
                     <SelectTrigger className="w-20 h-8">
                       <SelectValue />
@@ -273,3 +246,5 @@ export default function CustomersTable({
     </Card>
   )
 }
+
+export default CustomersTable

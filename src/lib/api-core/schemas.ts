@@ -1,9 +1,10 @@
+import { z } from 'zod'
+
 /**
  * Common Schemas Module
  * Reusable Zod validation schemas for API endpoints
  */
 
-import { z } from 'zod'
 
 // ============================================================================
 // COMMON SCHEMAS

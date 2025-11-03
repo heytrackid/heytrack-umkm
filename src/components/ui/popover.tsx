@@ -1,29 +1,26 @@
-"use client"
+'use client';
 
-import * as React from"react"
+import type { ComponentProps } from 'react'
 import * as PopoverPrimitive from"@radix-ui/react-popover"
-
 import { cn } from"@/lib/utils"
 
-function Popover({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Root>) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />
-}
 
-function PopoverTrigger({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
-}
 
-function PopoverContent({
+
+const Popover = ({
+  ...props
+}: ComponentProps<typeof PopoverPrimitive.Root>) => <PopoverPrimitive.Root data-slot="popover" {...props} />
+
+const PopoverTrigger = ({
+  ...props
+}: ComponentProps<typeof PopoverPrimitive.Trigger>) => <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+
+const PopoverContent = ({
   className,
   align ="center",
   sideOffset = 4,
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
-  return (
+}: ComponentProps<typeof PopoverPrimitive.Content>) => (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
         data-slot="popover-content"
@@ -37,12 +34,9 @@ function PopoverContent({
       />
     </PopoverPrimitive.Portal>
   )
-}
 
-function PopoverAnchor({
+const PopoverAnchor = ({
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {
-  return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />
-}
+}: ComponentProps<typeof PopoverPrimitive.Anchor>) => <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />
 
 export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor }

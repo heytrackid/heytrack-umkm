@@ -1,9 +1,10 @@
+import type { SmartNotification, OrderForNotification } from './types'
+
 /**
  * Order Notifications Module
  * Handles order-related notification generation
  */
 
-import type { SmartNotification, OrderForNotification } from './types'
 
 export class OrderNotifications {
   /**

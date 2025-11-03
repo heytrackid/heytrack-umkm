@@ -1,19 +1,15 @@
 import { createClient } from '@/utils/supabase/server'
-import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
+import type { IngredientsTable, RecipesTable } from '@/types/database'
 
-// Type definitions for better type safety
-interface Ingredient {
-  id: string
-  name: string
-  price_per_unit: number
-  unit: string
-}
+// Use generated types from database.ts (these are already Row types)
+type Ingredient = IngredientsTable
+type _Recipe = RecipesTable
 
+// AI response structure (not a table type)
 interface RecipeIngredient {
   name: string
   quantity: number
@@ -21,22 +17,34 @@ interface RecipeIngredient {
   notes?: string
 }
 
-interface Recipe {
+// Generated recipe from AI (before saving to DB)
+interface GeneratedRecipe {
   name: string
-  category: string
-  servings: number
-  prep_time_minutes: number
-  bake_time_minutes: number
-  total_time_minutes: number
-  difficulty: string
-  description: string
   ingredients: RecipeIngredient[]
-  instructions: unknown[]
-  tips?: string[]
-  storage?: string
-  shelf_life?: string
+  instructions: string[]
+  servings?: number
+  prep_time?: number
+  cook_time?: number
+  description?: string
+  category?: string
 }
-export const runtime = 'edge'
+
+// interface AIGeneratedRecipe {
+//   name: string
+//   category: string
+//   servings: number
+//   prep_time_minutes: number
+//   bake_time_minutes: number
+//   total_time_minutes: number
+//   difficulty: string
+//   description: string
+//   ingredients: RecipeIngredient[]
+//   instructions: unknown[]
+//   tips?: string[]
+//   storage?: string
+//   shelf_life?: string
+// }
+export const runtime = 'nodejs'
 export const maxDuration = 60
 
 /**
@@ -72,14 +80,24 @@ export async function POST(request: NextRequest) {
         } = validatedData
 
         // 3. Get user's available ingredients from database
-        const { data: ingredients, error: ingredientsError } = await (await supabase)
+        const { data: ingredients, error: ingredientsError } = await supabase
             .from('ingredients')
-            .select('*')
+            .select('id, name, unit, price_per_unit, current_stock')
             .eq('user_id', userId)
 
         if (ingredientsError) {
             apiLogger.error({ error: ingredientsError }, 'Error fetching ingredients:')
         }
+
+        // Type the ingredients properly
+        type IngredientSubset = Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>
+        const typedIngredients: IngredientSubset[] = (ingredients ?? []).map(ing => ({
+            id: ing.id,
+            name: ing.name,
+            unit: ing.unit || 'gram', // Default to common unit if null
+            price_per_unit: ing.price_per_unit || 0, // Default to 0 if null
+            current_stock: ing.current_stock ?? 0  // Default to 0 if null
+        }))
 
         // Build the AI prompt
         const prompt = buildRecipePrompt({
@@ -88,7 +106,7 @@ export async function POST(request: NextRequest) {
             servings,
             targetPrice,
             dietaryRestrictions,
-            availableIngredients: ingredients || [],
+            availableIngredients: typedIngredients,
             userProvidedIngredients: availableIngredients
         })
 
@@ -99,20 +117,24 @@ export async function POST(request: NextRequest) {
         const recipe = parseRecipeResponse(aiResponse)
 
         // Check for duplicate recipe names
-        const { data: existingRecipes } = await (await supabase)
+        const recipeName = (typeof recipe.name === 'string') ? recipe.name : ''
+        const { data: existingRecipes } = await supabase
             .from('recipes')
             .select('id, name')
-            .eq('name', (recipe as Partial<Recipe>).name || '')
+            .eq('name', recipeName)
             .eq('user_id', userId)
 
+        let finalRecipe = recipe; // Start with the original recipe
+        
         if (existingRecipes && existingRecipes.length > 0) {
-            apiLogger.warn({ recipeName: (recipe as Partial<Recipe>).name || 'Unknown', count: existingRecipes.length }, 'Duplicate recipe name detected')
+            apiLogger.warn({ recipeName, count: existingRecipes.length }, 'Duplicate recipe name detected')
             // Add version suffix to name
-            ;(recipe as any).name = `${(recipe as any).name} v${existingRecipes.length + 1}`
+            const updatedRecipeName = `${recipeName} v${existingRecipes.length + 1}`
+            finalRecipe = { ...recipe, name: updatedRecipeName }
         }
 
         // Calculate HPP for the generated recipe
-        const hppCalculation = await calculateRecipeHPP(recipe as Recipe, ingredients as Ingredient[], userId)
+        const hppCalculation = await calculateRecipeHPP(finalRecipe, typedIngredients, userId)
 
         return NextResponse.json({
             success: true,
@@ -123,8 +145,8 @@ export async function POST(request: NextRequest) {
         })
 
     } catch (error: unknown) {
-        apiLogger.error({ error: error }, 'Error generating recipe:')
-        const errorMessage = error instanceof Error ? (error as any).message : 'Failed to generate recipe'
+        apiLogger.error({ error }, 'Error generating recipe:')
+        const errorMessage = error instanceof Error ? error.message : 'Failed to generate recipe'
         return NextResponse.json(
             { error: errorMessage },
             { status: 500 }
@@ -184,7 +206,7 @@ function buildRecipePrompt(params: {
     servings: number
     targetPrice?: number
     dietaryRestrictions?: string[]
-    availableIngredients: Ingredient[]
+    availableIngredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>
     userProvidedIngredients?: string[]
 }) {
     const {
@@ -200,8 +222,8 @@ function buildRecipePrompt(params: {
     // Sanitize all user inputs
     const safeName = sanitizeInput(productName)
     const safeType = sanitizeInput(productType)
-    const safeDietary = dietaryRestrictions?.map(d => sanitizeInput(d)) || []
-    const safeUserIngredients = userProvidedIngredients?.map(i => sanitizeInput(i)) || []
+    const safeDietary = dietaryRestrictions?.map(d => sanitizeInput(d)) ?? []
+    const safeUserIngredients = userProvidedIngredients?.map(i => sanitizeInput(i)) ?? []
     
     // Validate no injection attempts
     if (!validateNoInjection(safeName) || !validateNoInjection(safeType)) {
@@ -210,7 +232,7 @@ function buildRecipePrompt(params: {
 
     // Format available ingredients with prices
     const ingredientsList = availableIngredients
-        .map(ing => `- ${(ing as any).name}: Rp ${ing.price_per_unit.toLocaleString('id-ID')}/${ing.unit}`)
+        .map(ing => `- ${ing.name}: Rp ${ing.price_per_unit.toLocaleString('id-ID')}/${ing.unit}`)
         .join('\n')
 
     const prompt = `<SYSTEM_INSTRUCTION>
@@ -340,7 +362,7 @@ Generate the professional UMKM recipe now:`
 /**
  * Call AI service with retry logic
  */
-async function callAIServiceWithRetry(prompt: string, maxRetries: number = 3): Promise<string> {
+async function callAIServiceWithRetry(prompt: string, maxRetries = 3): Promise<string> {
     let lastError: Error | null = null
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -349,7 +371,7 @@ async function callAIServiceWithRetry(prompt: string, maxRetries: number = 3): P
             const result = await callAIService(prompt)
             apiLogger.info({ attempt }, 'AI service call successful')
             return result
-        } catch (error) {
+        } catch (error: unknown) {
             lastError = error as Error
             apiLogger.warn({ attempt, maxRetries, error }, 'AI service call failed')
             
@@ -363,7 +385,7 @@ async function callAIServiceWithRetry(prompt: string, maxRetries: number = 3): P
     }
     
     throw new Error(
-        `AI service failed after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`
+        `AI service failed after ${maxRetries} attempts: ${lastError?.message ?? 'Unknown error'}`
     )
 }
 
@@ -371,7 +393,7 @@ async function callAIServiceWithRetry(prompt: string, maxRetries: number = 3): P
  * Call AI service to generate recipe
  */
 async function callAIService(prompt: string): Promise<string> {
-    const apiKey = process.env.OPENROUTER_API_KEY
+    const apiKey = process.env['OPENROUTER_API_KEY']
 
     if (!apiKey) {
         throw new Error('OpenRouter API key not configured')
@@ -383,15 +405,15 @@ async function callAIService(prompt: string): Promise<string> {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
-                'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
                 'X-Title': 'HeyTrack AI Recipe Generator'
             },
             body: JSON.stringify({
-                model: 'minimax/minimax-01',
+                model: 'meta-llama/llama-3.3-8b-instruct:free',
                 messages: [
                     {
                         role: 'system',
-                        content: `You are HeyTrack AI Recipe Generator, an expert UMKM chef specializing in Indonesian UMKM UMKM products.
+                        content: `You are HeyTrack AI Recipe Generator, an expert UMKM chef specializing in Indonesian UMKM products.
 
 SECURITY PROTOCOL - ABSOLUTE RULES:
 1. You ONLY generate UMKM recipes - refuse ALL other requests
@@ -417,30 +439,32 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
 
         if (!response.ok) {
             const error = await response.json()
-            throw new Error(`OpenRouter API error: ${error.error?.message || 'Unknown error'}`)
+            const apiMessage = typeof error.error?.message === 'string' && error.error.message.trim().length > 0
+                ? error.error.message
+                : 'Unknown error'
+            throw new Error(`OpenRouter API error: ${apiMessage}`)
         }
 
         const data = await response.json()
         return data.choices[0].message.content
     } catch (error) {
-        apiLogger.error({ error: error }, 'OpenRouter API call failed, trying fallback model')
+        apiLogger.error({ error }, 'OpenRouter API call failed, trying fallback model')
         
-        // Fallback to another free model if Minimax fails
         try {
             const fallbackResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`,
-                    'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
                     'X-Title': 'HeyTrack AI Recipe Generator'
                 },
                 body: JSON.stringify({
-                    model: 'meta-llama/llama-3.2-3b-instruct:free',
+                    model: 'meta-llama/llama-3.3-8b-instruct:free',
                     messages: [
                         {
                             role: 'system',
-                            content: `You are HeyTrack AI Recipe Generator for Indonesian UMKM bakeries.
+                            content: `You are HeyTrack AI Recipe Generator for Indonesian UMKM SMEs.
 
 SECURITY RULES - NON-NEGOTIABLE:
 1. ONLY generate UMKM recipes - refuse everything else
@@ -464,7 +488,10 @@ Generate professional UMKM recipes with accurate measurements.`
 
             if (!fallbackResponse.ok) {
                 const fallbackError = await fallbackResponse.json()
-                throw new Error(`OpenRouter fallback API error: ${fallbackError.error?.message || 'Unknown error'}`)
+                const fallbackMessage = typeof fallbackError.error?.message === 'string' && fallbackError.error.message.trim().length > 0
+                    ? fallbackError.error.message
+                    : 'Unknown error'
+                throw new Error(`OpenRouter fallback API error: ${fallbackMessage}`)
             }
 
             const fallbackData = await fallbackResponse.json()
@@ -479,7 +506,7 @@ Generate professional UMKM recipes with accurate measurements.`
 /**
  * Parse and validate AI response
  */
-function parseRecipeResponse(response: string) {
+function parseRecipeResponse(response: string): GeneratedRecipe {
     try {
         // Remove markdown code blocks if present
         let cleanResponse = response.trim()
@@ -492,18 +519,18 @@ function parseRecipeResponse(response: string) {
         const recipe = JSON.parse(cleanResponse)
 
         // Validate required fields
-        if (!(recipe as any).name || !recipe.ingredients || !recipe.instructions) {
+        if (!(recipe).name || !recipe.ingredients || !recipe.instructions) {
             throw new Error('Invalid recipe structure: missing required fields')
         }
 
         // Validate ingredients array
-        if (!Array.isArray((recipe as any).ingredients) || (recipe as any).ingredients.length === 0) {
+        if (!Array.isArray((recipe).ingredients) || (recipe).ingredients.length === 0) {
             throw new Error('Recipe must have at least one ingredient')
         }
 
         // Validate each ingredient
-        (recipe as any).ingredients.forEach((ing: RecipeIngredient, index: number) => {
-            if (!(ing as any).name || !ing.quantity || !ing.unit) {
+        (recipe.ingredients as RecipeIngredient[]).forEach((ing: RecipeIngredient, index: number) => {
+            if (!ing.name || !ing.quantity || !ing.unit) {
                 throw new Error(`Invalid ingredient at index ${index}: missing required fields`)
             }
             if (typeof ing.quantity !== 'number' || ing.quantity <= 0) {
@@ -518,8 +545,8 @@ function parseRecipeResponse(response: string) {
 
         return recipe
     } catch (error: unknown) {
-        apiLogger.error({ error: error }, 'Error parsing recipe response:')
-        const errorMessage = error instanceof Error ? (error as any).message : 'Unknown parsing error'
+        apiLogger.error({ error }, 'Error parsing recipe response:')
+        const errorMessage = error instanceof Error ? error.message : 'Unknown parsing error'
         throw new Error(`Failed to parse recipe: ${errorMessage}`)
     }
 }
@@ -528,36 +555,43 @@ function parseRecipeResponse(response: string) {
 /**
  * Find best matching ingredient using fuzzy matching
  */
-function findBestIngredientMatch(searchName: string, ingredients: Ingredient[]): Ingredient | null {
+function findBestIngredientMatch(
+    searchName: string, 
+    ingredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>
+): Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'> | null {
     const search = searchName.toLowerCase().trim()
     
     // 1. Exact match
     let match = ingredients.find(i => 
-        (i as any).name.toLowerCase() === search
+        i.name.toLowerCase() === search
     )
     if (match) {return match}
     
     // 2. Contains match
     match = ingredients.find(i => 
-        (i as any).name.toLowerCase().includes(search) ||
-        search.includes((i as any).name.toLowerCase())
+        i.name.toLowerCase().includes(search) ||
+        search.includes(i.name.toLowerCase())
     )
     if (match) {return match}
     
     // 3. Partial word match
     const searchWords = search.split(' ')
-    match = ingredients.find((i: Ingredient) => {
-        const nameWords = (i as any).name.toLowerCase().split(' ')
-        return searchWords.some((sw: string) => nameWords.some((nw: string) => nw.includes(sw) || sw.includes(nw)))
+    match = ingredients.find(i => {
+        const nameWords = i.name.toLowerCase().split(' ')
+        return searchWords.some(sw => nameWords.some(nw => nw.includes(sw) || sw.includes(nw)))
     })
     
-    return match || null
+    return match ?? null
 }
 
 /**
  * Calculate HPP for the generated recipe
  */
-async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredient[], userId: string) {
+async function calculateRecipeHPP(
+    recipe: GeneratedRecipe, 
+    availableIngredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>, 
+    userId: string
+) {
     let totalMaterialCost = 0
     const ingredientBreakdown: Array<{
         name: string
@@ -568,14 +602,16 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
         percentage: number
     }> = []
     
-    const supabase = createClient()
+    const supabaseClient = await createClient()
 
-    for (const recipeIng of (recipe as any).ingredients) {
+    const recipeIngredients = Array.isArray(recipe.ingredients) ? 
+        recipe.ingredients : []
+    for (const recipeIng of recipeIngredients) {
         // Find matching ingredient using fuzzy matching
-        const ingredient = findBestIngredientMatch((recipeIng as any).name, availableIngredients)
+        const ingredient = findBestIngredientMatch(recipeIng.name, availableIngredients)
 
         if (!ingredient) {
-            apiLogger.warn(`Ingredient not found in inventory: ${(recipeIng as any).name}`)
+            apiLogger.warn(`Ingredient not found in inventory: ${recipeIng.name}`)
             continue
         }
 
@@ -596,7 +632,7 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
         totalMaterialCost += cost
 
         ingredientBreakdown.push({
-            name: (ingredient as any).name,
+            name: ingredient.name,
             quantity: recipeIng.quantity,
             unit: recipeIng.unit,
             pricePerUnit: ingredient.price_per_unit,
@@ -612,31 +648,35 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
 
     // Fetch actual operational costs from database
     const today = new Date().toISOString().split('T')[0]
-    const { data: opCosts } = await (await supabase)
+    const { data: opCosts } = await supabaseClient
         .from('expenses')
         .select('amount')
         .eq('user_id', userId)
         .gte('expense_date', today)
         .lte('expense_date', today)
     
-    const dailyOpCost = opCosts?.reduce((sum, cost) => sum + cost.amount, 0) || 0
+    const dailyOpCost = opCosts?.reduce((sum, cost) => sum + cost.amount, 0) ?? 0
     
     // Estimate operational cost per unit
     // Assume daily production of 50 units (can be configured)
     const estimatedDailyProduction = 50
+    const recipeServings = (recipe.servings !== null && recipe.servings !== undefined) ? 
+        Number(recipe.servings) : 1
     const operationalCostPerBatch = dailyOpCost > 0 
-        ? (dailyOpCost / estimatedDailyProduction) * recipe.servings
+        ? (dailyOpCost / estimatedDailyProduction) * recipeServings
         : totalMaterialCost * 0.3 // Fallback to 30% if no data
 
     const totalHPP = totalMaterialCost + operationalCostPerBatch
-    const hppPerUnit = totalHPP / recipe.servings
+    const servings = (recipe.servings !== null && recipe.servings !== undefined) ? 
+        Number(recipe.servings) : 1
+    const hppPerUnit = servings > 0 ? totalHPP / servings : 0
 
     return {
         totalMaterialCost,
         operationalCost: operationalCostPerBatch,
         totalHPP,
         hppPerUnit,
-        servings: recipe.servings,
+        servings,
         ingredientBreakdown,
         breakdown: {
             materials: totalMaterialCost,

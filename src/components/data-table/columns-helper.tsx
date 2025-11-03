@@ -1,10 +1,11 @@
+import type { ColumnDef } from '@tanstack/react-table'
+import { Button } from '@/components/ui/button'
+
 /**
  * Data Table Column Helper
  * Common column definitions for reuse
  */
 
-import type { ColumnDef } from '@tanstack/react-table'
-import { Button } from '@/components/ui/button'
 
 /**
  * Create a text column with sorting enabled
@@ -14,15 +15,15 @@ export function createTextColumn<T extends Record<string, unknown>>(
   header: string,
   options?: {
     sortable?: boolean
-    width?: string
+    width?: number
   }
 ): ColumnDef<T> {
   return {
     accessorKey: key,
-    header: ({ column }) => header,
+    header,
     cell: ({ getValue }) => getValue(),
     enableSorting: options?.sortable !== false,
-    size: options?.width as any,
+    size: options?.width,
   }
 }
 
@@ -39,7 +40,7 @@ export function createNumberColumn<T extends Record<string, unknown>>(
 ): ColumnDef<T> {
   return {
     accessorKey: key,
-    header: header,
+    header,
     cell: ({ getValue }) => {
       const value = getValue() as number
       return options?.format ? options.format(value) : value.toString()
@@ -61,13 +62,13 @@ export function createCurrencyColumn<T extends Record<string, unknown>>(
 ): ColumnDef<T> {
   const formatter = new Intl.NumberFormat('id-ID', {
     style: 'currency',
-    currency: options?.currency || 'IDR',
+    currency: options?.currency ?? 'IDR',
     minimumFractionDigits: 0,
   })
 
   return {
     accessorKey: key,
-    header: header,
+    header,
     cell: ({ getValue }) => {
       const value = getValue() as number
       return formatter.format(value)
@@ -91,10 +92,10 @@ export function createDateColumn<T extends Record<string, unknown>>(
 
   return {
     accessorKey: key,
-    header: header,
+    header,
     cell: ({ getValue }) => {
       const value = getValue()
-      if (!value) {return '-'}
+      if (!value) { return '-' }
       const date = new Date(value as string)
       return options?.format ? options.format(date) : defaultFormat(date)
     },
@@ -112,11 +113,11 @@ export function createStatusColumn<T extends Record<string, unknown>>(
 ): ColumnDef<T> {
   return {
     accessorKey: key,
-    header: header,
+    header,
     cell: ({ getValue }) => {
       const value = getValue() as string
       const config = statusConfig[value]
-      if (!config) {return value}
+      if (!config) { return value }
 
       return (
         <div className={`inline-block px-2 py-1 rounded text-sm font-medium ${config.className}`}>
@@ -146,8 +147,8 @@ export function createActionColumn<T extends Record<string, unknown>>(
         {actions.map((action, idx) => (
           <Button
             key={idx}
-            variant={action.variant || 'outline'}
-            size={action.size || 'sm'}
+            variant={action.variant ?? 'outline'}
+            size={action.size ?? 'sm'}
             onClick={() => action.onClick(row.original)}
           >
             {action.label}

@@ -1,17 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useLoading } from '@/hooks/loading/useLoading'
 import { apiLogger } from '@/lib/logger'
+import { useToast } from '@/hooks/use-toast'
 import type {
   ProfitData,
   ProfitPeriodType,
   ChartDataPoint
 } from '../constants'
-import {
-  calculateProfitDateRange,
-  prepareProductChartData,
-  validateProfitData,
-  exportProfitReport
-} from '../utils'
+import { calculateProfitDateRange, prepareProductChartData, validateProfitData, exportProfitReport } from '../utils' 
 
 interface UseProfitReportReturn {
   // State
@@ -43,6 +38,7 @@ interface UseProfitReportReturn {
 }
 
 export function useProfitReport(): UseProfitReportReturn {
+  const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [profitData, setProfitData] = useState<ProfitData | null>(null)
@@ -54,8 +50,8 @@ export function useProfitReport(): UseProfitReportReturn {
 
   // Fetch profit data
   const fetchProfitData = async () => {
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const { startDate: calculatedStartDate, endDate: calculatedEndDate } = calculateProfitDateRange(
@@ -80,39 +76,44 @@ export function useProfitReport(): UseProfitReportReturn {
         throw new Error('Data laporan laba tidak valid')
       }
 
-      setProfitData(data)
+      void setProfitData(data)
     } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Error fetching profit data:')
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
+      void setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
   // Handle export report
-  const exportReport = async (format: 'csv' | 'pdf' | 'xlsx') => {
+  const exportReport = (format: 'csv' | 'pdf' | 'xlsx') => {
     if (!profitData) {return}
 
     try {
       const filename = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
       exportProfitReport(profitData, format, filename)
-    } catch (err) {
-      apiLogger.error({ error: err }, 'Error exporting report:')
-      alert('Gagal mengekspor laporan')
+    } catch (err: unknown) {
+      const error = err as Error
+      apiLogger.error({ error: error.message }, 'Error exporting report:')
+      toast({
+        title: 'Gagal',
+        description: 'Gagal mengekspor laporan',
+        variant: 'destructive',
+      })
     }
   }
 
   // Computed values
-  const products = profitData?.products || []
-  const ingredients = profitData?.ingredients || []
-  const operatingExpenses = profitData?.operating_expenses || []
-  const summary = profitData?.summary || null
-  const trends = profitData?.trends || null
+  const products = profitData?.products ?? []
+  const ingredients = profitData?.ingredients ?? []
+  const operatingExpenses = profitData?.operating_expenses ?? []
+  const summary = profitData?.summary ?? null
+  const trends = profitData?.trends ?? null
   const productChartData = useMemo(() => prepareProductChartData(products), [products])
 
   // Load data on mount and when filters change
   useEffect(() => {
-    fetchProfitData()
+    void fetchProfitData()
   }, [selectedPeriod, startDate, endDate])
 
   return {

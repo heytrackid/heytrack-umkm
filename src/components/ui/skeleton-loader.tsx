@@ -3,13 +3,14 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
+
+
 /**
  * Card Skeleton - Loading placeholder for card components
  * @example
  * <CardSkeleton rows={3} />
  */
-export function CardSkeleton({ rows = 3, className }: { rows?: number; className?: string }) {
-  return (
+export const CardSkeleton = ({ rows = 3, className }: { rows?: number; className?: string }) => (
     <div className={cn('p-4 space-y-4', className)}>
       <Skeleton className="h-8 w-1/3" />
       <div className="space-y-2">
@@ -19,15 +20,13 @@ export function CardSkeleton({ rows = 3, className }: { rows?: number; className
       </div>
     </div>
   )
-}
 
 /**
  * Table Skeleton - Loading placeholder for table data
  * @example
  * <TableSkeleton rows={5} columns={4} />
  */
-export function TableSkeleton({ rows = 5, columns = 4 }: { rows?: number; columns?: number }) {
-  return (
+export const TableSkeleton = ({ rows = 5, columns = 4 }: { rows?: number; columns?: number }) => (
     <div className="space-y-2">
       <div className="flex gap-4">
         {Array.from({ length: columns }).map((_, i) => (
@@ -43,15 +42,13 @@ export function TableSkeleton({ rows = 5, columns = 4 }: { rows?: number; column
       ))}
     </div>
   )
-}
 
 /**
  * List Skeleton - Loading placeholder for list items
  * @example
  * <ListSkeleton items={5} />
  */
-export function ListSkeleton({ items = 5, className }: { items?: number; className?: string }) {
-  return (
+export const ListSkeleton = ({ items = 5, className }: { items?: number; className?: string }) => (
     <div className={cn('space-y-3', className)}>
       {Array.from({ length: items }).map((_, i) => (
         <div key={i} className="flex gap-3">
@@ -64,15 +61,13 @@ export function ListSkeleton({ items = 5, className }: { items?: number; classNa
       ))}
     </div>
   )
-}
 
 /**
  * Grid Skeleton - Loading placeholder for grid layouts
  * @example
  * <GridSkeleton columns={3} items={6} />
  */
-export function GridSkeleton({ columns = 3, items = 6 }: { columns?: number; items?: number }) {
-  return (
+export const GridSkeleton = ({ columns = 3, items = 6 }: { columns?: number; items?: number }) => (
     <div className={`grid grid-cols-${columns} gap-4`}>
       {Array.from({ length: items }).map((_, i) => (
         <div key={i} className="space-y-3">
@@ -83,15 +78,13 @@ export function GridSkeleton({ columns = 3, items = 6 }: { columns?: number; ite
       ))}
     </div>
   )
-}
 
 /**
  * Form Skeleton - Loading placeholder for forms
  * @example
  * <FormSkeleton fields={3} />
  */
-export function FormSkeleton({ fields = 3, hasSubmit = true }: { fields?: number; hasSubmit?: boolean }) {
-  return (
+export const FormSkeleton = ({ fields = 3, hasSubmit = true }: { fields?: number; hasSubmit?: boolean }) => (
     <form className="space-y-4">
       {Array.from({ length: fields }).map((_, i) => (
         <div key={i} className="space-y-2">
@@ -102,15 +95,13 @@ export function FormSkeleton({ fields = 3, hasSubmit = true }: { fields?: number
       {hasSubmit && <Skeleton className="h-10 w-full" />}
     </form>
   )
-}
 
 /**
  * Hero Skeleton - Loading placeholder for hero sections
  * @example
  * <HeroSkeleton />
  */
-export function HeroSkeleton() {
-  return (
+export const HeroSkeleton = () => (
     <div className="space-y-4">
       <Skeleton className="h-12 w-2/3" />
       <Skeleton className="h-4 w-full" />
@@ -121,15 +112,13 @@ export function HeroSkeleton() {
       </div>
     </div>
   )
-}
 
 /**
  * Profile Skeleton - Loading placeholder for profile cards
  * @example
  * <ProfileSkeleton />
  */
-export function ProfileSkeleton() {
-  return (
+export const ProfileSkeleton = () => (
     <div className="flex flex-col items-center gap-4">
       <Skeleton className="h-24 w-24 rounded-full" />
       <Skeleton className="h-6 w-1/2" />
@@ -140,15 +129,13 @@ export function ProfileSkeleton() {
       </div>
     </div>
   )
-}
 
 /**
  * Stats Skeleton - Loading placeholder for stat cards
  * @example
  * <StatsSkeleton count={4} />
  */
-export function StatsSkeleton({ count = 4 }: { count?: number }) {
-  return (
+export const StatsSkeleton = ({ count = 4 }: { count?: number }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="p-4 space-y-2">
@@ -159,15 +146,13 @@ export function StatsSkeleton({ count = 4 }: { count?: number }) {
       ))}
     </div>
   )
-}
 
 /**
  * Comment Skeleton - Loading placeholder for comments
  * @example
  * <CommentSkeleton count={3} />
  */
-export function CommentSkeleton({ count = 3 }: { count?: number }) {
-  return (
+export const CommentSkeleton = ({ count = 3 }: { count?: number }) => (
     <div className="space-y-4">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="flex gap-3">
@@ -181,15 +166,13 @@ export function CommentSkeleton({ count = 3 }: { count?: number }) {
       ))}
     </div>
   )
-}
 
 /**
  * Product Card Skeleton - Loading placeholder for product cards
  * @example
  * <ProductCardSkeleton count={3} />
  */
-export function ProductCardSkeleton({ count = 3 }: { count?: number }) {
-  return (
+export const ProductCardSkeleton = ({ count = 3 }: { count?: number }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="space-y-3">
@@ -204,15 +187,13 @@ export function ProductCardSkeleton({ count = 3 }: { count?: number }) {
       ))}
     </div>
   )
-}
 
 /**
  * Breadcrumb Skeleton - Loading placeholder for breadcrumbs
  * @example
  * <BreadcrumbSkeleton />
  */
-export function BreadcrumbSkeleton() {
-  return (
+export const BreadcrumbSkeleton = () => (
     <div className="flex gap-2">
       <Skeleton className="h-4 w-16" />
       <Skeleton className="h-4 w-4" />
@@ -221,4 +202,3 @@ export function BreadcrumbSkeleton() {
       <Skeleton className="h-4 w-24" />
     </div>
   )
-}

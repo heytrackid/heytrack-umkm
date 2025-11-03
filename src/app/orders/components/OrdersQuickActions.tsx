@@ -1,24 +1,24 @@
 'use client'
 
-import * as React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, Package } from 'lucide-react'
-
 import { apiLogger } from '@/lib/logger'
+
+
+
 interface OrdersQuickActionsProps {
-  t: unknown
+  _t?: unknown
 }
 
-export default function OrdersQuickActions({ t }: OrdersQuickActionsProps) {
-  return (
+const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => (
     <Card>
       <CardContent className="p-4">
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.location.href = '/settings/whatsapp-templates'}
+            onClick={() => window.location.href = '/orders/whatsapp-templates'}
             className="flex items-center gap-2"
           >
             <MessageCircle className="h-4 w-4" />
@@ -37,4 +37,5 @@ export default function OrdersQuickActions({ t }: OrdersQuickActionsProps) {
       </CardContent>
     </Card>
   )
-}
+
+export default OrdersQuickActions

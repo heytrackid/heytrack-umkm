@@ -1,6 +1,3 @@
-// Batch Details Component - Lazy Loaded
-// Displays detailed view of selected batch with quality control and notes
-
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,8 +5,12 @@ import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { CheckSquare, Eye, MessageSquare, X } from 'lucide-react'
-import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
+import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
 import type { BatchExecutionState } from './types'
+
+// Batch Details Component - Lazy Loaded
+// Displays detailed view of selected batch with quality control and notes
+
 
 interface BatchDetailsProps {
   selectedBatch: string | null
@@ -21,7 +22,7 @@ interface BatchDetailsProps {
   onQualityCheck: (batchId: string, checkId: string, passed: boolean, notes?: string) => void
 }
 
-export default function BatchDetails({
+const BatchDetails = ({
   selectedBatch,
   batches,
   executionStates,
@@ -29,7 +30,7 @@ export default function BatchDetails({
   onNotesChange,
   onAddNote,
   onQualityCheck
-}: BatchDetailsProps) {
+}: BatchDetailsProps) => {
   if (!selectedBatch) {
     return (
       <Card>
@@ -101,7 +102,7 @@ export default function BatchDetails({
                   <div className="flex gap-1">
                     {check.completed ? (
                       <Badge variant={check.passed ? "default" : "destructive"} className="text-xs">
-                        {check.passed ? 'PASSED' : 'FAILED'}
+                        {check.passed ? 'LULUS' : 'GAGAL'}
                       </Badge>
                     ) : (
                       <>
@@ -167,3 +168,5 @@ export default function BatchDetails({
     </Card>
   )
 }
+
+export default BatchDetails

@@ -1,10 +1,15 @@
+import { z } from 'zod'
+import { RecipeInsertSchema, type RecipeInsert, type RecipeUpdate } from './recipe'
+
+
 /**
  * Recipe Validation Helpers
  * Domain-specific validation helpers for recipe-related business rules
  */
 
-import { z } from 'zod'
-import { RecipeInsertSchema, RecipeUpdateSchema, type RecipeInsert, type RecipeUpdate } from './recipe'
+
+// Re-export for convenience
+export { RecipeUpdateSchema } from './recipe'
 
 // Enhanced recipe validation with business rules
 export const EnhancedRecipeInsertSchema = RecipeInsertSchema
@@ -74,10 +79,10 @@ export class RecipeValidationHelpers {
   static validateInsert(data: unknown): { success: boolean; data?: RecipeInsert; errors?: string[] } {
     try {
       const validatedData = EnhancedRecipeInsertSchema.parse(data)
-      return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+      return { success: true, data: validatedData as RecipeInsert }
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -91,9 +96,9 @@ export class RecipeValidationHelpers {
     try {
       const validatedData = EnhancedRecipeUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -115,8 +120,8 @@ export class RecipeValidationHelpers {
     profit_margin: number
   } {
     const total_ingredients = recipe.ingredients.length
-    const cost_per_serving = recipe.cost_per_serving || 0
-    const selling_price = recipe.selling_price || 0
+    const cost_per_serving = recipe.cost_per_serving ?? 0
+    const selling_price = recipe.selling_price ?? 0
 
     const estimated_profit = selling_price - cost_per_serving
     const profit_margin = cost_per_serving > 0 ? (estimated_profit / cost_per_serving) * 100 : 0
@@ -133,14 +138,14 @@ export class RecipeValidationHelpers {
    * Check recipe complexity
    */
   static getRecipeComplexity(recipe: {
-    ingredients: any[]
-    instructions?: any[]
+    ingredients: Array<Record<string, unknown>>
+    instructions?: Array<Record<string, unknown>>
     preparation_time?: number
     cooking_time?: number
   }): 'simple' | 'moderate' | 'complex' {
     const ingredientCount = recipe.ingredients.length
-    const instructionCount = recipe.instructions?.length || 0
-    const totalTime = (recipe.preparation_time || 0) + (recipe.cooking_time || 0)
+    const instructionCount = recipe.instructions?.length ?? 0
+    const totalTime = (recipe.preparation_time ?? 0) + (recipe.cooking_time ?? 0)
 
     if (ingredientCount <= 5 && instructionCount <= 5 && totalTime <= 30) {
       return 'simple'
@@ -193,21 +198,21 @@ export class RecipeValidationHelpers {
    * Validate bulk recipe import
    */
   static validateBulkImport(recipes: unknown[]): {
-    valid: any[]
-    invalid: Array<{ index: number; data: any; errors: string[] }>
+    valid: Array<Record<string, unknown>>
+    invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: any[] = []
-    const invalid: Array<{ index: number; data: any; errors: string[] }> = []
+    const valid: Array<Record<string, unknown>> = []
+    const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     recipes.forEach((recipe, index) => {
       const result = this.validateInsert(recipe)
-      if (result.success) {
-        valid.push(result.data)
+      if (result.success && result.data) {
+        valid.push(result.data as Record<string, unknown>)
       } else {
         invalid.push({
           index,
           data: recipe,
-          errors: result.errors || []
+          errors: result.errors ?? []
         })
       }
     })

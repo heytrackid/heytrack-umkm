@@ -2,7 +2,9 @@
 
 import { useCallback, useState } from 'react'
 import { useErrorHandler } from './useErrorHandler'
-import type { RetryOptions } from './types'
+
+
+// Removed unused import: RetryOptions
 
 /**
  * Hook untuk implement retry logic dengan exponential backoff
@@ -23,7 +25,7 @@ import type { RetryOptions } from './types'
  * const handleFetch = async () => {
  *   const result = await retry(
  *     async () => await fetchUnreliableAPI(),
- *     (attempt, error) => console.log(`Retry ${attempt}: ${error.message}`)
+ *     (attempt, error) => logger.info(`Retry ${attempt}: ${error.message}`)
  *   )
  * }
  *
@@ -48,10 +50,10 @@ export function useRetry(maxRetries = 3, initialDelay = 1000) {
 
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
-          setIsRetrying(attempt > 0)
+          void setIsRetrying(attempt > 0)
           const result = await asyncFn()
-          setRetryCount(0)
-          setIsRetrying(false)
+          void setRetryCount(0)
+          void setIsRetrying(false)
           return result
         } catch (error) {
           lastError = error as Error
@@ -61,25 +63,25 @@ export function useRetry(maxRetries = 3, initialDelay = 1000) {
             onRetry?.(attempt + 1, lastError)
 
             await new Promise((resolve) => setTimeout(resolve, delay))
-            setRetryCount(attempt + 1)
+            void setRetryCount(attempt + 1)
           }
         }
       }
 
       // All retries failed
       if (lastError) {
-        handleError(lastError, `useRetry: Failed after ${maxRetries} retries`)
+        void handleError(lastError, `useRetry: Failed after ${maxRetries} retries`)
       }
 
-      setIsRetrying(false)
+      void setIsRetrying(false)
       return null
     },
     [maxRetries, initialDelay, handleError]
   )
 
   const reset = useCallback(() => {
-    setRetryCount(0)
-    setIsRetrying(false)
+    void setRetryCount(0)
+    void setIsRetrying(false)
   }, [])
 
   return {

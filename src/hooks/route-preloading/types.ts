@@ -1,10 +1,11 @@
+
 /**
  * Route Preloading Types
  * Type definitions for route preloading configurations and strategies
  */
 
 // Route preloading patterns based on user behavior
-export type RouteConfig = {
+export interface RouteConfig {
   immediate: string[]
   onHover: string[]
   components: string[]
@@ -12,12 +13,14 @@ export type RouteConfig = {
 }
 
 // Preloading priority levels
-export enum PreloadPriority {
-  IMMEDIATE = 'immediate',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low'
-}
+export const PreloadPriority = {
+  IMMEDIATE: 'immediate',
+  HIGH: 'high',
+  MEDIUM: 'medium',
+  LOW: 'low'
+} as const
+
+export type PreloadPriority = typeof PreloadPriority[keyof typeof PreloadPriority]
 
 // Route preloading patterns
 export type RoutePreloadingPatterns = Record<string, RouteConfig>

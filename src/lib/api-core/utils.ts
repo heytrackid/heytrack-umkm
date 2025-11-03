@@ -1,9 +1,10 @@
+import { type NextRequest, NextResponse } from 'next/server'
+
 /**
  * Utilities Module
  * General utility functions for API operations
  */
 
-import { NextRequest, NextResponse } from 'next/server'
 
 /**
  * Parse search parameters from request URL
@@ -17,15 +18,15 @@ export function parseSearchParams(request: NextRequest): Record<string, string> 
  * Get client IP address from request
  */
 export function getClientIP(request: NextRequest): string {
-  return request.headers.get('x-forwarded-for') ||
-         request.headers.get('x-real-ip') ||
+  return request.headers.get('x-forwarded-for') ??
+         request.headers.get('x-real-ip') ??
          'unknown'
 }
 
 /**
  * Create ETag for response caching
  */
-export function createETag(data: any): string {
+export function createETag(data: unknown): string {
   const hash = JSON.stringify(data).split('').reduce((a, b) => {
     a = ((a << 5) - a) + b.charCodeAt(0)
     return a & a

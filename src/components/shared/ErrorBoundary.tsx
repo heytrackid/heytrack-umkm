@@ -1,11 +1,12 @@
 'use client'
 
-import type { ReactNode, ErrorInfo } from 'react'
-import React, { Component } from 'react'
+import { Component, type ReactNode, type ErrorInfo, type ComponentType } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import { apiLogger } from '@/lib/logger'
+
+
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -51,7 +52,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error with appropriate logger
     apiLogger.error({
       error: error.toString(),
@@ -76,7 +77,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     if (this.resetTimeoutId) {
       clearTimeout(this.resetTimeoutId)
     }
@@ -100,7 +101,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     window.location.href = '/'
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       // Use custom fallback if provided
       if (this.props.fallback) {
@@ -126,7 +127,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   We're sorry, but something unexpected happened. Our team has been notified and is working on a fix.
                 </p>
 
-                {this.props.showErrorDetails && process.env.NODE_ENV === 'development' && this.state.error && (
+                {this.props.showErrorDetails && this.state.error && (
                   <details className="mt-4 p-4 bg-muted rounded-lg">
                     <summary className="cursor-pointer font-medium text-sm mb-2">
                       Error Details (Development Only)
@@ -175,16 +176,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
  * Higher-Order Component for wrapping components with error boundary
  */
 export function withErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
+  Component: ComponentType<P>,
   errorBoundaryProps?: Omit<ErrorBoundaryProps, 'children'>
 ) {
-  return function WithErrorBoundaryComponent(props: P) {
-    return (
-      <ErrorBoundary {...errorBoundaryProps}>
-        <Component {...props} />
-      </ErrorBoundary>
-    )
-  }
+  return (props: P) => (
+    <ErrorBoundary {...errorBoundaryProps}>
+      <Component {...props} />
+    </ErrorBoundary>
+  )
 }
 
 /**

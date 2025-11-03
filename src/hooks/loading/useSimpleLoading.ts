@@ -2,6 +2,8 @@
 
 import { useCallback, useState } from 'react'
 
+
+
 /**
  * Hook sederhana untuk single loading state
  *
@@ -13,10 +15,10 @@ export function useSimpleLoading(initialValue = false) {
 
   const withLoading = useCallback(async <T>(fn: () => Promise<T>): Promise<T> => {
     try {
-      setIsLoading(true)
+      void setIsLoading(true)
       return await fn()
     } finally {
-      setIsLoading(false)
+      void setIsLoading(false)
     }
   }, [])
 

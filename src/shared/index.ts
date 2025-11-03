@@ -1,10 +1,11 @@
+import { cn } from '@/lib/utils'
+
+
 /**
  * Consolidated Shared Module
  * Single source for all shared utilities, components, hooks, and common functionality
  */
 
-import { cn } from '@/lib/utils'
-import { formatCurrentCurrency } from '@/lib/currency'
 
 // ============================================================================
 // SHARED UTILITIES
@@ -28,19 +29,15 @@ export {
 export type { Currency } from '@/lib/currency'
 
 // Date utilities
-export const formatDate = (date: Date | string): string => {
-  return new Intl.DateTimeFormat('id-ID').format(new Date(date))
-}
+export const formatDate = (date: Date | string): string => new Intl.DateTimeFormat('id-ID').format(new Date(date))
 
-export const formatDateTime = (date: Date | string): string => {
-  return new Intl.DateTimeFormat('id-ID', {
+export const formatDateTime = (date: Date | string): string => new Intl.DateTimeFormat('id-ID', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   }).format(new Date(date))
-}
 
 export const formatRelativeTime = (date: Date | string): string => {
   const now = new Date()
@@ -48,11 +45,11 @@ export const formatRelativeTime = (date: Date | string): string => {
   const diffMs = now.getTime() - past.getTime()
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-  if (diffDays === 0) return 'Hari ini'
-  if (diffDays === 1) return 'Kemarin'
-  if (diffDays < 7) return `${diffDays} hari yang lalu`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} minggu yang lalu`
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} bulan yang lalu`
+  if (diffDays === 0) {return 'Hari ini'}
+  if (diffDays === 1) {return 'Kemarin'}
+  if (diffDays < 7) {return `${diffDays} hari yang lalu`}
+  if (diffDays < 30) {return `${Math.floor(diffDays / 7)} minggu yang lalu`}
+  if (diffDays < 365) {return `${Math.floor(diffDays / 30)} bulan yang lalu`}
   return `${Math.floor(diffDays / 365)} tahun yang lalu`
 }
 
@@ -64,43 +61,43 @@ export { debounce } from '@/lib/debounce'
 // ============================================================================
 
 // Primitive type guards
-export function isString(value: any): value is string {
+export function isString(value: unknown): value is string {
   return typeof value === 'string'
 }
 
-export function isNumber(value: any): value is number {
+export function isNumber(value: unknown): value is number {
   return typeof value === 'number' && !isNaN(value)
 }
 
-export function isBoolean(value: any): value is boolean {
+export function isBoolean(value: unknown): value is boolean {
   return typeof value === 'boolean'
 }
 
-export function isNull(value: any): value is null {
+export function isNull(value: unknown): value is null {
   return value === null
 }
 
-export function isUndefined(value: any): value is undefined {
+export function isUndefined(value: unknown): value is undefined {
   return value === undefined
 }
 
-export function isNullish(value: any): value is null | undefined {
-  return value === null || value === undefined
+export function isNullish(value: unknown): value is null | undefined {
+  return value === null
 }
 
-export function isArray(value: any): value is any[] {
+export function isArray<T = unknown>(value: unknown): value is T[] {
   return Array.isArray(value)
 }
 
-export function isObject(value: any): value is Record<string, any> {
+export function isObject<T extends Record<string, unknown>>(value: unknown): value is T {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-export function isFunction(value: any): value is Function {
+export function isFunction<T extends (...args: unknown[]) => unknown>(value: unknown): value is T {
   return typeof value === 'function'
 }
 
-export function isDate(value: any): value is Date {
+export function isDate(value: unknown): value is Date {
   return value instanceof Date && !isNaN(value.getTime())
 }
 
@@ -124,16 +121,16 @@ export function isValidPercentage(value: number): boolean {
 }
 
 // Error type guards
-export function isError(value: any): value is Error {
+export function isError(value: unknown): value is Error {
   return value instanceof Error
 }
 
-export function isApiError(value: any): boolean {
-  return isObject(value) && 'success' in value && value.success === false
+export function isApiError(value: unknown): boolean {
+  return isObject(value) && 'success' in value && value['success'] === false
 }
 
-export function isValidationError(value: any): boolean {
-  return isObject(value) && 'errors' in value && Array.isArray(value.errors)
+export function isValidationError(value: unknown): boolean {
+  return isObject(value) && 'errors' in value && Array.isArray(value['errors'])
 }
 
 // Get error message safely
@@ -144,8 +141,8 @@ export function getErrorMessage(error: unknown): string {
   if (isString(error)) {
     return error
   }
-  if (isObject(error) && 'message' in error && isString(error.message)) {
-    return error.message
+  if (isObject(error) && 'message' in error && isString(error['message'])) {
+    return error['message']
   }
   return 'An unexpected error occurred'
 }
@@ -154,8 +151,7 @@ export function getErrorMessage(error: unknown): string {
 export const groupBy = <T, K extends keyof T>(
   array: T[],
   key: K
-): Record<string, T[]> => {
-  return array.reduce((groups, item) => {
+): Record<string, T[]> => array.reduce((groups, item) => {
     const groupKey = String(item[key])
     if (!groups[groupKey]) {
       groups[groupKey] = []
@@ -163,54 +159,41 @@ export const groupBy = <T, K extends keyof T>(
     groups[groupKey].push(item)
     return groups
   }, {} as Record<string, T[]>)
-}
 
-export const sortBy = <T>(array: T[], key: keyof T, direction: 'asc' | 'desc' = 'asc'): T[] => {
-  return [...array].sort((a, b) => {
+export const sortBy = <T>(array: T[], key: keyof T, direction: 'asc' | 'desc' = 'asc'): T[] => [...array].sort((a, b) => {
     const aVal = a[key]
     const bVal = b[key]
 
-    if (aVal < bVal) return direction === 'asc' ? -1 : 1
-    if (aVal > bVal) return direction === 'asc' ? 1 : -1
+    if (aVal < bVal) {return direction === 'asc' ? -1 : 1}
+    if (aVal > bVal) {return direction === 'asc' ? 1 : -1}
     return 0
   })
-}
 
-export const unique = <T>(array: T[]): T[] => {
-  return [...new Set(array)]
-}
+export const unique = <T>(array: T[]): T[] => [...new Set(array)]
 
 export const uniqueBy = <T>(array: T[], key: keyof T): T[] => {
   const seen = new Set()
   return array.filter(item => {
     const value = item[key]
-    if (seen.has(value)) return false
+    if (seen.has(value)) {return false}
     seen.add(value)
     return true
   })
 }
 
 // String utilities
-export const capitalize = (str: string): string => {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
-}
+export const capitalize = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 
-export const slugify = (str: string): string => {
-  return str
+export const slugify = (str: string): string => str
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '')
-}
 
-export const truncate = (str: string, length: number, suffix: string = '...'): string => {
-  return str.length <= length ? str : str.slice(0, length - suffix.length) + suffix
-}
+export const truncate = (str: string, length: number, suffix = '...'): string => str.length <= length ? str : str.slice(0, length - suffix.length) + suffix
 
-export const formatNumber = (num: number, locale: string = 'id-ID'): string => {
-  return new Intl.NumberFormat(locale).format(num)
-}
+export const formatNumber = (num: number, locale = 'id-ID'): string => new Intl.NumberFormat(locale).format(num)
 
 // Validation utilities
 export const isEmail = (email: string): boolean => {
@@ -267,12 +250,10 @@ export const getStatusColor = (status: string): string => {
   return colorMap[status] || 'bg-gray-100 text-gray-800'
 }
 
-export const calculatePercentage = (value: number, total: number): number => {
-  return total === 0 ? 0 : Math.round((value / total) * 100)
-}
+export const calculatePercentage = (value: number, total: number): number => total === 0 ? 0 : Math.round((value / total) * 100)
 
 export const calculateTrend = (current: number, previous: number): { value: number; isPositive: boolean } => {
-  if (previous === 0) return { value: 0, isPositive: true }
+  if (previous === 0) {return { value: 0, isPositive: true }}
   const change = ((current - previous) / previous) * 100
   return { value: Math.abs(change), isPositive: change >= 0 }
 }

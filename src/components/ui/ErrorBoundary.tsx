@@ -1,14 +1,16 @@
+'use client'
+
+import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { apiLogger } from '@/lib/logger'
+
 /**
  * Error Boundary Component
  * Catches JavaScript errors anywhere in the child component tree
  */
 
-'use client'
 
-import React, { Component, ErrorInfo, ReactNode } from 'react'
-import { AlertTriangle, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { apiLogger } from '@/lib/logger'
 
 interface Props {
   children: ReactNode
@@ -31,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error }
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({
       error,
       errorInfo
@@ -49,7 +51,7 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: undefined, errorInfo: undefined })
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback
@@ -68,7 +70,7 @@ export class ErrorBoundary extends Component<Props, State> {
               An unexpected error occurred. Please try refreshing the page.
             </p>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {this.state.error && (
               <details className="mb-4 text-left bg-gray-100 p-3 rounded text-sm">
                 <summary className="cursor-pointer font-medium">Error Details</summary>
                 <pre className="mt-2 whitespace-pre-wrap text-red-600">

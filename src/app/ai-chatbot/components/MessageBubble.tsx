@@ -1,25 +1,68 @@
+import React from 'react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Bot, User } from 'lucide-react'
-import type { Message } from '../types'
+import type { Message } from '@/app/ai-chatbot/types'
+import { DataCard } from './DataCard'
 
 interface MessageBubbleProps {
   message: Message
   onSuggestionClick?: (suggestion: string) => void
 }
 
-export function MessageBubble({ message, onSuggestionClick }: MessageBubbleProps) {
-  const renderMessageData = (data: unknown) => {
-    if (!data) return null
+export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps) => {
+  const renderMessageData = (data: unknown): React.ReactElement | null => {
+    if (!data || typeof data !== 'object') { 
+      return null 
+    }
+    
+    const dataObj = data as Record<string, unknown>
+    const {businessContext} = dataObj
+    
+    if (!businessContext || typeof businessContext !== 'object') { 
+      return null 
+    }
+
+    const contextObj = businessContext as Record<string, unknown>
+    const hasOrdersData = contextObj.orders && typeof contextObj.orders === 'object'
+    const hasInventoryData = contextObj.inventory && typeof contextObj.inventory === 'object'
+
+    if (!hasOrdersData && !hasInventoryData) {
+      return null
+    }
+
+    const cards: React.ReactElement[] = []
+
+    if (hasOrdersData) {
+      cards.push(
+        <DataCard
+          key="orders-card"
+          title="📊 Status Pesanan"
+          data={contextObj.orders as Record<string, unknown>}
+          type="orders"
+        />
+      )
+    }
+
+    if (hasInventoryData) {
+      cards.push(
+        <DataCard
+          key="inventory-card"
+          title="⚠️ Stok Kritis"
+          data={contextObj.inventory as Record<string, unknown>}
+          type="inventory"
+        />
+      )
+    }
+
+    if (cards.length === 0) {
+      return null
+    }
+
     return (
-      <div className="mt-3 p-3 bg-background/50 rounded border">
-        <pre className="text-xs overflow-x-auto">
-          {typeof data === 'string'
-            ? data
-            : JSON.stringify(data, null, 2) || 'No data'
-          }
-        </pre>
+      <div className="mt-3 space-y-2">
+        {cards}
       </div>
     )
   }
@@ -53,9 +96,9 @@ export function MessageBubble({ message, onSuggestionClick }: MessageBubbleProps
           <div className="mt-3 space-y-2">
             <p className="text-xs text-muted-foreground font-medium">Coba tanyakan:</p>
             <div className="flex flex-wrap gap-2">
-              {message.suggestions.map((suggestion, index) => (
+              {message.suggestions.map((suggestion) => (
                 <Button
-                  key={index}
+                  key={`${message.id}-${suggestion}`}
                   variant="outline"
                   size="sm"
                   className="text-xs h-7"

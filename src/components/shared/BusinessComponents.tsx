@@ -1,12 +1,14 @@
-// Shared business logic components and utilities
+'use client'
 
-import * as React from 'react'
-import { useState, useMemo } from 'react'
+import { type ReactNode, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { cn } from '@/lib/utils'
+import { formatCurrency, formatNumber } from '@/lib/shared/utilities'
+import type { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
 import {
   TrendingUp,
   TrendingDown,
@@ -14,21 +16,30 @@ import {
   CheckCircle,
   Info,
   DollarSign,
-  Package,
   ShoppingCart,
   Users,
   BarChart3,
-  PieChart,
-  LineChart,
-  Activity
+  LineChart
 } from 'lucide-react'
-import { formatCurrency, formatNumber, getStatusColor, calculatePercentage } from '@/lib/shared/utilities'
+
+// Shared business logic components and utilities
 
 // Inventory Status Components
-interface InventoryAlert {
-  id: string
-  type: 'low_stock' | 'out_of_stock' | 'over_stock' | 'expiring'
-  item: {
+
+// Define a UI-specific type that extends the database type with UI-specific fields
+interface BaseInventoryAlert extends DatabaseInventoryAlert {
+  // Additional UI fields that are not in the database schema
+  ingredient_name?: string
+  current_stock?: number
+  reorder_point?: number
+  min_stock?: number
+  max_stock?: number
+  unit?: string
+}
+
+interface InventoryAlert extends BaseInventoryAlert {
+  // Additional UI fields that are not in the database schema
+  item?: {
     id: string
     name: string
     currentStock: number
@@ -36,9 +47,9 @@ interface InventoryAlert {
     maxStock?: number
     unit: string
   }
-  severity: 'low' | 'medium' | 'high' | 'critical'
-  message: string
   suggestedAction?: string
+  // Map the database alert_type to the UI type field
+  type?: 'low_stock' | 'out_of_stock' | 'over_stock' | 'expiring'
 }
 
 interface InventoryAlertsProps {
@@ -48,24 +59,17 @@ interface InventoryAlertsProps {
   className?: string
 }
 
-export function InventoryAlerts({
+export const InventoryAlerts = ({
   alerts,
   onResolve,
   onViewItem,
   className = ""
-}: InventoryAlertsProps) {
+}: InventoryAlertsProps) => {
   const severityColors = {
     low: 'bg-yellow-100 text-yellow-800',
     medium: 'bg-orange-100 text-orange-800',
     high: 'bg-red-100 text-red-800',
     critical: 'bg-red-200 text-red-900'
-  }
-
-  const typeIcons = {
-    low_stock: AlertTriangle,
-    out_of_stock: AlertTriangle,
-    over_stock: Info,
-    expiring: AlertTriangle
   }
 
   if (alerts.length === 0) {
@@ -85,22 +89,30 @@ export function InventoryAlerts({
   return (
     <div className={cn("space-y-3", className)}>
       {alerts.map((alert) => {
-        const Icon = typeIcons[alert.type]
+        // Map alert_type from database to UI type
+        const alertType = alert.alert_type as 'low_stock' | 'out_of_stock' | 'over_stock' | 'expiring' | undefined;
+        const Icon = alertType === 'low_stock' || alertType === 'out_of_stock' || alertType === 'expiring'
+          ? AlertTriangle
+          : Info
+
+        // Determine item details - prefer the item object if available, otherwise extract from alert
+        const itemName = alert.item?.name ?? alert.ingredient_name ?? 'Unknown Item';
+        const itemId = alert.item?.id ?? alert.ingredient_id ?? '';
+
         return (
-          <Alert key={alert.id} className={`border-l-4 ${
-            alert.severity === 'critical' ? 'border-red-500' :
+          <Alert key={alert.id} className={`border-l-4 ${alert.severity === 'critical' ? 'border-red-500' :
             alert.severity === 'high' ? 'border-orange-500' :
-            'border-yellow-500'
-          }`}>
+              'border-yellow-500'
+            }`}>
             <Icon className="h-4 w-4" />
             <AlertDescription>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <Badge className={severityColors[alert.severity]}>
-                      {alert.severity.toUpperCase()}
+                    <Badge className={severityColors[(alert.severity as keyof typeof severityColors) || 'low']}>
+                      {(alert.severity ?? 'low').toUpperCase()}
                     </Badge>
-                    <span className="font-medium">{alert.item.name}</span>
+                    <span className="font-medium">{itemName}</span>
                   </div>
                   <p className="text-sm">{alert.message}</p>
                   {alert.suggestedAction && (
@@ -114,7 +126,7 @@ export function InventoryAlerts({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onViewItem(alert.item.id)}
+                      onClick={() => onViewItem(itemId)}
                     >
                       View
                     </Button>
@@ -147,28 +159,28 @@ interface StockLevelIndicatorProps {
   className?: string
 }
 
-export function StockLevelIndicator({
+export const StockLevelIndicator = ({
   currentStock,
   minStock,
   maxStock,
   unit,
   showProgress = true,
   className = ""
-}: StockLevelIndicatorProps) {
+}: StockLevelIndicatorProps) => {
   const percentage = maxStock ? (currentStock / maxStock) * 100 : (currentStock / (minStock * 2)) * 100
   const clampedPercentage = Math.min(Math.max(percentage, 0), 100)
 
   const getStatusColor = () => {
-    if (currentStock <= 0) return 'bg-red-500'
-    if (currentStock <= minStock) return 'bg-orange-500'
-    if (maxStock && currentStock >= maxStock) return 'bg-blue-500'
+    if (currentStock <= 0) { return 'bg-red-500' }
+    if (currentStock <= minStock) { return 'bg-orange-500' }
+    if (maxStock && currentStock >= maxStock) { return 'bg-blue-500' }
     return 'bg-green-500'
   }
 
   const getStatusText = () => {
-    if (currentStock <= 0) return 'Out of Stock'
-    if (currentStock <= minStock) return 'Low Stock'
-    if (maxStock && currentStock >= maxStock) return 'Over Stock'
+    if (currentStock <= 0) { return 'Out of Stock' }
+    if (currentStock <= minStock) { return 'Low Stock' }
+    if (maxStock && currentStock >= maxStock) { return 'Over Stock' }
     return 'In Stock'
   }
 
@@ -211,52 +223,49 @@ interface MetricCardProps {
     label: string
     trend: 'up' | 'down' | 'neutral'
   }
-  icon?: React.ReactNode
+  icon?: ReactNode
   className?: string
 }
 
-export function MetricCard({
+export const MetricCard = ({
   title,
   value,
   change,
   icon,
   className = ""
-}: MetricCardProps) {
-  return (
-    <Card className={className}>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">
-              {title}
-            </p>
-            <p className="text-2xl font-bold">
-              {value}
-            </p>
-            {change && (
-              <div className="flex items-center mt-2 text-sm">
-                {change.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-500 mr-1" />}
-                {change.trend === 'down' && <TrendingDown className="h-4 w-4 text-red-500 mr-1" />}
-                <span className={`${
-                  change.trend === 'up' ? 'text-green-600' :
-                  change.trend === 'down' ? 'text-red-600' :
+}: MetricCardProps) => (
+  <Card className={className}>
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground mb-1">
+            {title}
+          </p>
+          <p className="text-2xl font-bold">
+            {value}
+          </p>
+          {change && (
+            <div className="flex items-center mt-2 text-sm">
+              {change.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-500 mr-1" />}
+              {change.trend === 'down' && <TrendingDown className="h-4 w-4 text-red-500 mr-1" />}
+              <span className={`${change.trend === 'up' ? 'text-green-600' :
+                change.trend === 'down' ? 'text-red-600' :
                   'text-muted-foreground'
                 }`}>
-                  {change.value > 0 && '+'}{change.value}% {change.label}
-                </span>
-              </div>
-            )}
-          </div>
-          {icon && (
-            <div className="h-8 w-8 text-muted-foreground">
-              {icon}
+                {change.value > 0 && '+'}{change.value}% {change.label}
+              </span>
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
-  )
-}
+        {icon && (
+          <div className="h-8 w-8 text-muted-foreground">
+            {icon}
+          </div>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+)
 
 // Profitability Calculator Component
 interface ProfitabilityData {
@@ -273,17 +282,17 @@ interface ProfitabilityCalculatorProps {
   className?: string
 }
 
-export function ProfitabilityCalculator({
+export const ProfitabilityCalculator = ({
   data,
   showBreakdown = true,
   className = ""
-}: ProfitabilityCalculatorProps) {
+}: ProfitabilityCalculatorProps) => {
   const calculations = useMemo(() => {
     const grossProfit = data.revenue - data.costOfGoodsSold
     const grossMargin = data.revenue > 0 ? (grossProfit / data.revenue) * 100 : 0
 
-    const totalExpenses = data.operatingExpenses + (data.otherExpenses || 0)
-    const netIncome = grossProfit - totalExpenses + (data.otherIncome || 0)
+    const totalExpenses = data.operatingExpenses + (data.otherExpenses ?? 0)
+    const netIncome = grossProfit - totalExpenses + (data.otherIncome ?? 0)
     const netMargin = data.revenue > 0 ? (netIncome / data.revenue) * 100 : 0
 
     return {
@@ -389,15 +398,15 @@ interface SalesPerformanceChartProps {
   className?: string
 }
 
-export function SalesPerformanceChart({
+export const SalesPerformanceChart = ({
   data,
   period,
   showTargets = false,
   className = ""
-}: SalesPerformanceChartProps) {
+}: SalesPerformanceChartProps) => {
   const maxSales = Math.max(...data.map(d => d.sales))
   const maxTarget = showTargets && data.some(d => d.target)
-    ? Math.max(...data.map(d => d.target || 0))
+    ? Math.max(...data.map(d => d.target ?? 0))
     : maxSales
 
   const chartHeight = 200
@@ -503,11 +512,11 @@ interface CustomerInsightsProps {
   className?: string
 }
 
-export function CustomerInsights({
+export const CustomerInsights = ({
   insights,
   onViewCustomer,
   className = ""
-}: CustomerInsightsProps) {
+}: CustomerInsightsProps) => {
   const typeConfig = {
     high_value: { icon: DollarSign, color: 'text-green-600', bgColor: 'bg-green-100' },
     frequent: { icon: ShoppingCart, color: 'text-blue-600', bgColor: 'bg-blue-100' },

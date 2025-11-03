@@ -3,15 +3,9 @@
 import { useState } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { useSettingsManager } from './hooks'
-import {
-  SettingsHeader,
-  SettingsTabs,
-  SettingsLoadingSkeleton,
-  SettingsQuickLinks,
-  UnsavedChangesPrompt
-} from './components'
+import { SettingsHeader, SettingsTabs, SettingsLoadingSkeleton, SettingsQuickLinks, UnsavedChangesPrompt } from './components'
 
-export default function SettingsPage() {
+const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('general')
 
   const {
@@ -59,3 +53,5 @@ export default function SettingsPage() {
     </AppLayout>
   )
 }
+
+export default SettingsPage

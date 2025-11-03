@@ -1,3 +1,4 @@
+
 /**
  * Route Optimization Configuration
  * Defines which routes should use dynamic loading
@@ -10,12 +11,13 @@ export const HEAVY_ROUTES = [
   // Complex data pages
   '/cash-flow',
   '/hpp',
-  '/hpp-enhanced',
   '/reports',
   
   // Settings pages
   '/settings',
-  '/settings/whatsapp-templates',
+  
+  // Orders pages
+  '/orders/whatsapp-templates',
   
   // Feature-rich pages
   '/categories',

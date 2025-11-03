@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+
+
 /**
  * Detect device orientation
  */
@@ -9,7 +11,7 @@ export function useOrientation(): 'portrait' | 'landscape' | undefined {
   const [orientation, setOrientation] = useState<'portrait' | 'landscape' | undefined>(undefined)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') {return}
 
     const updateOrientation = () => {
       setOrientation(
@@ -17,7 +19,7 @@ export function useOrientation(): 'portrait' | 'landscape' | undefined {
       )
     }
 
-    updateOrientation()
+    void updateOrientation()
     window.addEventListener('resize', updateOrientation)
     window.addEventListener('orientationchange', updateOrientation)
 

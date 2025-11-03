@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import { 
+
   Skeleton, 
   SkeletonText, 
   SkeletonButton,
@@ -12,8 +13,7 @@ interface SkeletonProps {
 }
 
 // Skeleton untuk Orders Table
-export function OrdersTableSkeleton({ className, rows = 5 }: SkeletonProps & { rows?: number }) {
-  return (
+export const OrdersTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
       <div className="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
         {/* Table Header */}
@@ -52,11 +52,9 @@ export function OrdersTableSkeleton({ className, rows = 5 }: SkeletonProps & { r
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Customers Table
-export function CustomersTableSkeleton({ className, rows = 5 }: SkeletonProps & { rows?: number }) {
-  return (
+export const CustomersTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
       <div className="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
         {/* Table Header */}
@@ -90,11 +88,9 @@ export function CustomersTableSkeleton({ className, rows = 5 }: SkeletonProps & 
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Inventory Table
-export function InventoryTableSkeleton({ className, rows = 5 }: SkeletonProps & { rows?: number }) {
-  return (
+export const InventoryTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
       <div className="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
         {/* Table Header */}
@@ -133,11 +129,9 @@ export function InventoryTableSkeleton({ className, rows = 5 }: SkeletonProps & 
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Recipes Table
-export function RecipesTableSkeleton({ className, rows = 5 }: SkeletonProps & { rows?: number }) {
-  return (
+export const RecipesTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
       <div className="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
         {/* Table Header */}
@@ -172,11 +166,9 @@ export function RecipesTableSkeleton({ className, rows = 5 }: SkeletonProps & { 
       </div>
     </div>
   )
-}
 
 // Skeleton untuk List View (mobile friendly)
-export function ListViewSkeleton({ className, rows = 5 }: SkeletonProps & { rows?: number }) {
-  return (
+export const ListViewSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("space-y-4", className)}>
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="rounded-lg border border-gray-200 dark:border-gray-800 p-4">
@@ -198,11 +190,9 @@ export function ListViewSkeleton({ className, rows = 5 }: SkeletonProps & { rows
       ))}
     </div>
   )
-}
 
 // Skeleton untuk Search Form
-export function SearchFormSkeleton({ className }: SkeletonProps) {
-  return (
+export const SearchFormSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("space-y-4", className)}>
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
@@ -215,11 +205,9 @@ export function SearchFormSkeleton({ className }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Recipe Table khusus
-export function RecipeTableSkeleton({ className, rows = 5 }: SkeletonProps & { rows?: number }) {
-  return (
+export const RecipeTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
       <div className="rounded-md border">
         {/* Table Header */}
@@ -265,11 +253,9 @@ export function RecipeTableSkeleton({ className, rows = 5 }: SkeletonProps & { r
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Data Grid dengan Pagination
-export function DataGridSkeleton({ className, rows = 10 }: SkeletonProps & { rows?: number }) {
-  return (
+export const DataGridSkeleton = ({ className, rows = 10 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("space-y-4", className)}>
       {/* Search and Filter Bar */}
       <div className="flex items-center justify-between">
@@ -298,12 +284,10 @@ export function DataGridSkeleton({ className, rows = 10 }: SkeletonProps & { row
       </div>
     </div>
   )
-}
 
 
 // Skeleton untuk Categories Table
-export function CategoriesTableSkeleton({ className, rows = 8 }: SkeletonProps & { rows?: number }) {
-  return (
+export const CategoriesTableSkeleton = ({ className, rows = 8 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
       <div className="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
         {/* Table Header */}
@@ -349,4 +333,3 @@ export function CategoriesTableSkeleton({ className, rows = 8 }: SkeletonProps &
       </div>
     </div>
   )
-}

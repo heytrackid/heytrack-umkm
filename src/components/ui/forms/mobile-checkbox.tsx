@@ -1,13 +1,13 @@
+import { cn } from '@/lib/utils'
+import { useResponsive } from '@/hooks/useResponsive'
+import { Label } from '../label'
+import { Checkbox } from '../checkbox'
+
 /**
  * Mobile Checkbox Component
  * Optimized checkbox for mobile devices with larger touch targets
  */
 
-import * as React from 'react'
-import { cn } from '@/lib/utils'
-import { useResponsive } from '@/hooks/useResponsive'
-import { Label } from '../label'
-import { Checkbox } from '../checkbox'
 
 interface MobileCheckboxProps {
   label?: string
@@ -21,7 +21,7 @@ interface MobileCheckboxProps {
   className?: string
 }
 
-export function MobileCheckbox({
+export const MobileCheckbox = ({
   label,
   checked,
   defaultChecked,
@@ -31,7 +31,7 @@ export function MobileCheckbox({
   error,
   hint,
   className
-}: MobileCheckboxProps) {
+}: MobileCheckboxProps) => {
   const { isMobile } = useResponsive()
 
   return (
@@ -44,18 +44,18 @@ export function MobileCheckbox({
           disabled={disabled}
           required={required}
           className={cn(
-           "transition-all duration-200",
-            isMobile &&"h-5 w-5", // Larger touch target on mobile
-            error &&"border-destructive data-[state=checked]:bg-destructive"
+            "transition-all duration-200",
+            isMobile && "h-5 w-5", // Larger touch target on mobile
+            error && "border-destructive data-[state=checked]:bg-destructive"
           )}
         />
         {label && (
           <Label
             className={cn(
-             "text-sm font-medium cursor-pointer",
-              isMobile &&"text-base",
-              error &&"text-destructive",
-              disabled &&"opacity-50 cursor-not-allowed"
+              "text-sm font-medium cursor-pointer",
+              isMobile && "text-base",
+              error && "text-destructive",
+              disabled && "opacity-50 cursor-not-allowed"
             )}
           >
             {label}
@@ -65,12 +65,12 @@ export function MobileCheckbox({
       </div>
 
       {/* Hint or Error message */}
-      {(hint || error) && (
+      {(hint ?? error) && (
         <p className={cn(
-         "text-sm ml-8", // Align with checkbox label
-          error ?"text-destructive" :"text-muted-foreground"
+          "text-sm ml-8", // Align with checkbox label
+          error ? "text-destructive" : "text-muted-foreground"
         )}>
-          {error || hint}
+          {error ?? hint}
         </p>
       )}
     </div>

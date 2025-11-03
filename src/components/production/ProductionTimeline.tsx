@@ -1,43 +1,36 @@
-/**
- * ProductionTimeline
- * Visual Gantt chart timeline for production batch scheduling
- * Shows production batches, resource allocation, and dependencies
- */
+'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { 
-  Calendar,
-  Clock, 
-  ChefHat,
-  Oven,
-  Package,
-  AlertTriangle,
-  CheckCircle,
-  Play,
-  Pause,
-  BarChart3,
-  Settings
-} from 'lucide-react'
 import { format, addHours, startOfDay, endOfDay, differenceInMinutes } from 'date-fns'
-
-import type { 
-  ProductionBatch, 
-  TimelineSlot, 
-  SchedulingResult} from '@/services/production/BatchSchedulingService';
+import { Calendar, Clock, ChefHat, Flame, Package, AlertTriangle, CheckCircle, Play, BarChart3 } from 'lucide-react'
 import {
-  batchSchedulingService 
+  type ProductionBatchWithDetails,
+  type TimelineSlot,
+  type SchedulingResult
 } from '@/services/production/BatchSchedulingService'
+
+/**
+ * ProductionTimeline
+ * Visual Gantt chart timeline for production batch scheduling
+ * Shows production batches, resource allocation, and dependencies
+ */
+
+// Define the status type for production batches based on the enum
+type ProductionStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+
+// Define the resource type
+type ResourceType = 'oven' | 'mixer' | 'decorator' | 'packaging'
 
 interface ProductionTimelineProps {
   schedulingResult?: SchedulingResult
-  onBatchSelect?: (batch: ProductionBatch) => void
-  onBatchStatusChange?: (batchId: string, status: ProductionBatch['status']) => void
+  onBatchSelect?: (batch: ProductionBatchWithDetails) => void
+  onBatchStatusChange?: (batchId: string, status: ProductionStatus) => void
   className?: string
 }
 
@@ -49,27 +42,27 @@ interface TimelineGridConfig {
   totalWidth: number
 }
 
-const RESOURCE_COLORS = {
+const _RESOURCE_COLORS: Record<ResourceType, string> = {
   oven: 'bg-orange-500',
-  mixer: 'bg-gray-100 dark:bg-gray-8000', 
-  decorator: 'bg-gray-100 dark:bg-gray-8000',
-  packaging: 'bg-gray-100 dark:bg-gray-8000'
+  mixer: 'bg-gray-100 dark:bg-gray-800',
+  decorator: 'bg-gray-100 dark:bg-gray-800',
+  packaging: 'bg-gray-100 dark:bg-gray-800'
 }
 
-const STATUS_COLORS = {
-  scheduled: 'bg-gray-400',
-  in_progress: 'bg-gray-100 dark:bg-gray-8000',
-  completed: 'bg-gray-100 dark:bg-gray-8000',
-  cancelled: 'bg-gray-100 dark:bg-gray-8000',
+const STATUS_COLORS: Record<ProductionStatus | 'blocked', string> = {
+  PLANNED: 'bg-gray-400',
+  IN_PROGRESS: 'bg-blue-500',
+  COMPLETED: 'bg-green-500',
+  CANCELLED: 'bg-gray-400',
   blocked: 'bg-red-300'
 }
 
-export default function ProductionTimeline({
+const ProductionTimeline = ({
   schedulingResult,
   onBatchSelect,
   onBatchStatusChange,
   className = ''
-}: ProductionTimelineProps) {
+}: ProductionTimelineProps) => {
   const [selectedBatch, setSelectedBatch] = useState<string | null>(null)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [zoomLevel, setZoomLevel] = useState(1)
@@ -96,15 +89,15 @@ export default function ProductionTimeline({
     }
 
     const scheduledBatches = schedulingResult.schedule.filter(b => b.scheduled_start)
-    const startTimes = scheduledBatches.map(b => new Date(b.scheduled_start!))
-    const endTimes = scheduledBatches.map(b => new Date(b.scheduled_end!))
+    const startTimes = scheduledBatches.map(b => b.scheduled_start ? new Date(b.scheduled_start) : new Date())
+    const endTimes = scheduledBatches.map(b => b.scheduled_end ? new Date(b.scheduled_end) : new Date())
 
     const startDate = startOfDay(new Date(Math.min(...startTimes.map(d => d.getTime()))))
     const endDate = endOfDay(new Date(Math.max(...endTimes.map(d => d.getTime()))))
-    
+
     const hoursPerDay = 12
     const pixelsPerHour = 60 * zoomLevel
-    
+
     return {
       startDate,
       endDate,
@@ -115,18 +108,18 @@ export default function ProductionTimeline({
   }, [schedulingResult, zoomLevel])
 
   // Calculate position of batch on timeline
-  const calculateBatchPosition = (batch: ProductionBatch) => {
-    if (!batch.scheduled_start || !batch.scheduled_end) {return null}
+  const calculateBatchPosition = (batch: ProductionBatchWithDetails) => {
+    if (!batch.scheduled_start || !batch.scheduled_end) { return null }
 
     const batchStart = new Date(batch.scheduled_start)
     const batchEnd = new Date(batch.scheduled_end)
-    
+
     const startOffsetMinutes = differenceInMinutes(batchStart, timelineGrid.startDate)
     const durationMinutes = differenceInMinutes(batchEnd, batchStart)
-    
+
     const left = (startOffsetMinutes / 60) * timelineGrid.pixelsPerHour
     const width = Math.max(40, (durationMinutes / 60) * timelineGrid.pixelsPerHour)
-    
+
     return { left, width }
   }
 
@@ -134,21 +127,21 @@ export default function ProductionTimeline({
   const timelineHours = useMemo(() => {
     const hours = []
     let currentHour = new Date(timelineGrid.startDate)
-    
+
     while (currentHour < timelineGrid.endDate) {
       hours.push(new Date(currentHour))
       currentHour = addHours(currentHour, 1)
     }
-    
+
     return hours
   }, [timelineGrid])
 
   // Group timeline slots by resource
   const resourceGroups = useMemo(() => {
-    if (!schedulingResult?.timeline) {return []}
+    if (!schedulingResult?.timeline) { return [] }
 
     const groups: Record<string, TimelineSlot[]> = {}
-    
+
     schedulingResult.timeline.forEach(slot => {
       const key = `${slot.resource_type}-${slot.resource_id}`
       if (!groups[key]) {
@@ -165,14 +158,14 @@ export default function ProductionTimeline({
     }))
   }, [schedulingResult])
 
-  const handleBatchClick = (batch: ProductionBatch) => {
+  const handleBatchClick = (batch: ProductionBatchWithDetails) => {
     setSelectedBatch(batch.id)
     onBatchSelect?.(batch)
   }
 
-  const handleStatusToggle = (batch: ProductionBatch) => {
-    const nextStatus = batch.status === 'scheduled' ? 'in_progress' : 
-                      batch.status === 'in_progress' ? 'completed' : 'scheduled'
+  const handleStatusToggle = (batch: ProductionBatchWithDetails) => {
+    const nextStatus: ProductionStatus = batch.status === 'PLANNED' ? 'IN_PROGRESS' :
+      batch.status === 'IN_PROGRESS' ? 'COMPLETED' : 'PLANNED'
     onBatchStatusChange?.(batch.id, nextStatus)
   }
 
@@ -185,7 +178,7 @@ export default function ProductionTimeline({
               <BarChart3 className="h-5 w-5" />
               Production Timeline
             </CardTitle>
-            
+
             <div className="flex items-center gap-2">
               {/* Zoom controls */}
               <Button
@@ -203,11 +196,11 @@ export default function ProductionTimeline({
                 size="sm"
                 onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.25))}
               >
-               
+                +
               </Button>
-              
+
               <Separator orientation="vertical" className="h-6" />
-              
+
               {/* View mode toggle */}
               <div className="flex rounded-lg bg-muted p-1">
                 <Button
@@ -233,19 +226,19 @@ export default function ProductionTimeline({
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <CheckCircle className="h-4 w-4" />
-                {schedulingResult.schedule.filter(b => b.status === 'scheduled').length} scheduled
+                {schedulingResult.schedule.filter(b => b.status === 'PLANNED').length} planned
               </div>
               <div className="flex items-center gap-1">
                 <Play className="h-4 w-4" />
-                {schedulingResult.schedule.filter(b => b.status === 'in_progress').length} in progress
+                {schedulingResult.schedule.filter(b => b.status === 'IN_PROGRESS').length} in progress
               </div>
               <div className="flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4" />
-                {schedulingResult.schedule.filter(b => b.status === 'blocked').length} blocked
+                {schedulingResult.schedule.filter(b => b.status === 'COMPLETED').length} completed
               </div>
               <div className="flex items-center gap-1">
                 <BarChart3 className="h-4 w-4" />
-                {Math.round(schedulingResult.resource_utilization.oven_utilization)}% oven utilization
+                {Math.round(schedulingResult.resource_utilization.oven_utilization || 0)}% oven utilization
               </div>
             </div>
           )}
@@ -264,7 +257,7 @@ export default function ProductionTimeline({
             <div className="space-y-4">
               {/* Timeline header with hours */}
               <div className="relative" style={{ height: '40px' }}>
-                <div 
+                <div
                   className="relative bg-muted/20 h-full rounded-t-lg border-b overflow-hidden"
                   style={{ width: Math.max(800, timelineGrid.totalWidth) }}
                 >
@@ -272,27 +265,27 @@ export default function ProductionTimeline({
                     <div
                       key={hour.getTime()}
                       className="absolute top-0 h-full border-l border-border/20 flex items-center px-2 text-xs text-muted-foreground"
-                      style={{ 
+                      style={{
                         left: index * timelineGrid.pixelsPerHour,
-                        width: timelineGrid.pixelsPerHour 
+                        width: timelineGrid.pixelsPerHour
                       }}
                     >
-                      {format}
+                      {format(hour, 'HH:mm')}
                     </div>
                   ))}
-                  
+
                   {/* Current time indicator */}
                   {(() => {
                     const currentOffsetMinutes = differenceInMinutes(currentTime, timelineGrid.startDate)
                     if (currentOffsetMinutes >= 0 && currentOffsetMinutes <= differenceInMinutes(timelineGrid.endDate, timelineGrid.startDate)) {
                       return (
                         <div
-                          className="absolute top-0 h-full w-0.5 bg-gray-100 dark:bg-gray-8000 z-20"
-                          style={{ 
-                            left: (currentOffsetMinutes / 60) * timelineGrid.pixelsPerHour 
+                          className="absolute top-0 h-full w-0.5 bg-gray-100 dark:bg-gray-800 z-20"
+                          style={{
+                            left: (currentOffsetMinutes / 60) * timelineGrid.pixelsPerHour
                           }}
                         >
-                          <div className="absolute -top-1 -left-1 w-2 h-2 bg-gray-100 dark:bg-gray-8000 rounded-full" />
+                          <div className="absolute -top-1 -left-1 w-2 h-2 bg-gray-100 dark:bg-gray-800 rounded-full" />
                         </div>
                       )
                     }
@@ -308,18 +301,17 @@ export default function ProductionTimeline({
                     <div key={resourceKey} className="relative">
                       {/* Resource label */}
                       <div className="flex items-center gap-2 mb-1">
-                        {resourceType === 'oven' && <Oven className="h-4 w-4" />}
+                        {resourceType === 'oven' && <Flame className="h-4 w-4" />}
                         {resourceType === 'mixer' && <ChefHat className="h-4 w-4" />}
-                        {resourceType === 'decorator' && <Package className="h-4 w-4" />}
-                        {resourceType === 'packaging' && <Package className="h-4 w-4" />}
-                        
+                        {(resourceType === 'decorator' || resourceType === 'packaging') && <Package className="h-4 w-4" />}
+
                         <span className="text-sm font-medium capitalize">
-                          {resourceType} {resourceId.split('T')[1]}
+                          {resourceType} {resourceId.split('T')[1] || resourceId}
                         </span>
                       </div>
 
                       {/* Resource timeline lane */}
-                      <div 
+                      <div
                         className="relative bg-muted/10 h-12 rounded border"
                         style={{ width: Math.max(800, timelineGrid.totalWidth) }}
                       >
@@ -335,22 +327,20 @@ export default function ProductionTimeline({
                         {/* Production batches */}
                         {slots.map((slot) => {
                           const batch = schedulingResult.schedule.find(b => b.id === slot.batch_id)
-                          if (!batch) {return null}
+                          if (!batch) { return null }
 
                           const position = calculateBatchPosition(batch)
-                          if (!position) {return null}
+                          if (!position) { return null }
 
                           return (
                             <Tooltip key={slot.batch_id}>
                               <TooltipTrigger asChild>
                                 <div
-                                  className={`absolute top-1 h-10 rounded cursor-pointer border-2 transition-all duration-200 ${
-                                    STATUS_COLORS[batch.status]
-                                  } ${
-                                    selectedBatch === batch.id 
-                                      ? 'border-primary  scale-105' 
+                                  className={`absolute top-1 h-10 rounded cursor-pointer border-2 transition-all duration-200 ${STATUS_COLORS[batch.status as ProductionStatus] || 'bg-gray-400'
+                                    } ${selectedBatch === batch.id
+                                      ? 'border-primary scale-105'
                                       : 'border-transparent hover:border-primary/50'
-                                  }`}
+                                    }`}
                                   style={{
                                     left: position.left,
                                     width: position.width
@@ -358,41 +348,39 @@ export default function ProductionTimeline({
                                   onClick={() => handleBatchClick(batch)}
                                 >
                                   <div className="flex items-center justify-between h-full px-2 text-xs text-white font-medium">
-                                    <span className="truncate">
-                                      {batch.recipe_name}
+                                    <span className="truncate-desktop-only">
+                                      {batch.recipe_id || 'Batch'}
                                     </span>
-                                    <span className="ml-1">
-                                      {batch.quantity}
+                                    <span className="ml-1 flex-shrink-0">
+                                      {batch.quantity || 0}
                                     </span>
                                   </div>
 
                                   {/* Status indicator */}
                                   <div className="absolute -top-1 -right-1">
-                                    {batch.status === 'completed' && (
+                                    {batch.status === 'COMPLETED' && (
                                       <CheckCircle className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
-                                    {batch.status === 'in_progress' && (
+                                    {batch.status === 'IN_PROGRESS' && (
                                       <Play className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
-                                    {batch.status === 'blocked' && (
-                                      <AlertTriangle className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
+                                    {batch.status === 'PLANNED' && (
+                                      <Clock className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
                                   </div>
                                 </div>
                               </TooltipTrigger>
-                              
+
                               <TooltipContent side="top" className="max-w-xs">
                                 <div className="space-y-1">
-                                  <div className="font-semibold">{batch.recipe_name}</div>
+                                  <div className="font-semibold">{batch.recipe_id || 'Production Batch'}</div>
                                   <div className="text-xs space-y-1">
-                                    <div>Quantity: {batch.quantity}</div>
-                                    <div>Priority: {batch.priority}/10</div>
-                                    <div>Duration: {batch.estimated_duration} min</div>
+                                    <div>Quantity: {batch.quantity || 0}</div>
                                     <div>Status: <Badge variant="outline" className="text-xs">{batch.status}</Badge></div>
-                                    <div>Start: {format(new Date(batch.scheduled_start!), 'HH:mm')}</div>
-                                    <div>End: {format(new Date(batch.scheduled_end!), 'HH:mm')}</div>
+                                    <div>Start: {batch.scheduled_start ? format(new Date(batch.scheduled_start), 'HH:mm') : 'Not scheduled'}</div>
+                                    <div>End: {batch.scheduled_end ? format(new Date(batch.scheduled_end), 'HH:mm') : 'Not scheduled'}</div>
                                   </div>
-                                  
+
                                   {/* Quick actions */}
                                   <div className="flex gap-1 pt-2">
                                     <Button
@@ -401,11 +389,11 @@ export default function ProductionTimeline({
                                       className="h-6 text-xs"
                                       onClick={(e) => {
                                         e.stopPropagation()
-                                        handleStatusToggle(batch)
+                                        void handleStatusToggle(batch)
                                       }}
                                     >
-                                      {batch.status === 'scheduled' ? 'Start' : 
-                                       batch.status === 'in_progress' ? 'Complete' : 'Reset'}
+                                      {batch.status === 'PLANNED' ? 'Start' :
+                                        batch.status === 'IN_PROGRESS' ? 'Complete' : 'Reset'}
                                     </Button>
                                   </div>
                                 </div>
@@ -423,26 +411,26 @@ export default function ProductionTimeline({
               <div className="flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-gray-400 rounded" />
-                  <span>Scheduled</span>
+                  <span>Planned</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-gray-100 dark:bg-gray-8000 rounded" />
+                  <div className="w-3 h-3 bg-blue-500 rounded" />
                   <span>In Progress</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-gray-100 dark:bg-gray-8000 rounded" />
+                  <div className="w-3 h-3 bg-green-500 rounded" />
                   <span>Completed</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-red-300 rounded" />
                   <span>Blocked</span>
                 </div>
-                
+
                 <Separator orientation="vertical" className="h-4" />
-                
+
                 <div className="flex items-center gap-2">
-                  <Oven className="h-4 w-4 text-orange-500" />
-                  <span>Oven</span>
+                  <Flame className="h-4 w-4 text-gray-500" />
+                  <span>Flame</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <ChefHat className="h-4 w-4 text-gray-600 dark:text-gray-400" />
@@ -450,18 +438,18 @@ export default function ProductionTimeline({
                 </div>
                 <div className="flex items-center gap-2">
                   <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                  <span>Decorator</span>
+                  <span>Other</span>
                 </div>
               </div>
 
               {/* Warnings and suggestions */}
-              {schedulingResult.warnings.length > 0 && (
+              {schedulingResult.warnings && schedulingResult.warnings.length > 0 && (
                 <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 border border-yellow-200 rounded-lg">
                   <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium mb-2">
                     <AlertTriangle className="h-4 w-4" />
-                    Scheduling Warnings
+                    Peringatan Penjadwalan
                   </div>
-                  <ul className="text-sm text-yellow-700 space-y-1">
+                  <ul className="text-sm text-gray-700 space-y-1">
                     {schedulingResult.warnings.map((warning, index: number) => (
                       <li key={index}>• {warning}</li>
                     ))}
@@ -475,3 +463,5 @@ export default function ProductionTimeline({
     </TooltipProvider>
   )
 }
+
+export default ProductionTimeline

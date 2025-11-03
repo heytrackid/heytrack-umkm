@@ -1,54 +1,34 @@
 'use client'
-import * as React from 'react'
 
+import { type ComponentType, memo, useCallback, useEffect, useState } from 'react'
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
-import { useDebounce } from '@/lib/debounce'
-import {
-    BarChart3,
-    BookOpen,
-    Package,
-    Search,
-    Settings,
-    ShoppingCart,
-    Users
-} from 'lucide-react'
+import { useDebounce } from '@/hooks/useDebounce'
 import { useRouter } from 'next/navigation'
-import { memo, useCallback, useEffect, useState } from 'react'
+import type { IngredientsTable, OrdersTable, CustomersTable, RecipesTable } from '@/types/database'
+import {
+  BarChart3,
+  BookOpen,
+  Package,
+  Search,
+  Settings,
+  ShoppingCart,
+  Users
+} from 'lucide-react'
 
-// Search data interfaces
-interface IngredientItem {
-  id: string
-  name: string
-  current_stock?: number
-  unit?: string
-}
-
-interface OrderItem {
-  id: string
-  order_no?: string
-  customer_name?: string
-}
-
-interface CustomerItem {
-  id: string
-  name: string
-  email?: string
-  phone?: string
-}
-
-interface RecipeItem {
-  id: string
-  name: string
-}
+// Extended types for search display
+type IngredientItem = Pick<IngredientsTable, 'id' | 'name' | 'current_stock' | 'unit'>
+type OrderItem = Pick<OrdersTable, 'id' | 'order_no' | 'customer_name'>
+type CustomerItem = Pick<CustomersTable, 'id' | 'name' | 'email' | 'phone'>
+type RecipeItem = Pick<RecipesTable, 'id' | 'name'>
 
 interface QuickAction {
   label: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: ComponentType<{ className?: string }>
   action: () => void
 }
 
-export const GlobalSearch = memo(function GlobalSearch() {
+export const GlobalSearch = memo(() => {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 300)
@@ -76,35 +56,35 @@ export const GlobalSearch = memo(function GlobalSearch() {
   // Filter results based on debounced search
   const filteredIngredients = (ingredients as IngredientItem[] | undefined)?.filter((item: IngredientItem) =>
     item.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
-  ).slice(0, 5) || []
+  ).slice(0, 5) ?? []
 
   const filteredOrders = (orders as OrderItem[] | undefined)?.filter((item: OrderItem) =>
     item.order_no?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
     item.customer_name?.toLowerCase().includes(debouncedSearch.toLowerCase())
-  ).slice(0, 5) || []
+  ).slice(0, 5) ?? []
 
   const filteredCustomers = (customers as CustomerItem[] | undefined)?.filter((item: CustomerItem) =>
-    item.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-    item.email?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+    item.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ??
+    item.email?.toLowerCase().includes(debouncedSearch.toLowerCase()) ??
     item.phone?.includes(debouncedSearch)
-  ).slice(0, 5) || []
+  ).slice(0, 5) ?? []
 
   const filteredRecipes = (recipes as RecipeItem[] | undefined)?.filter((item: RecipeItem) =>
     item.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
-  ).slice(0, 5) || []
+  ).slice(0, 5) ?? []
 
   // Quick actions
   const quickActions: QuickAction[] = [
-    { label: 'Buat Pesanan Baru', icon: ShoppingCart, action: () => router.push('/orders/new') },
-    { label: 'Tambah Bahan Baku', icon: Package, action: () => router.push('/ingredients/new') },
+    { label: 'Buat Pesanan Baru', icon: ShoppingCart, action: () => router.push('/orders') }, // Opens orders page with dialog
+    { label: 'Tambah Bahan Baku', icon: Package, action: () => router.push('/ingredients') }, // Opens ingredients page with dialog
     { label: 'Tambah Pelanggan', icon: Users, action: () => router.push('/customers/new') },
-    { label: 'Buat Resep Baru', icon: BookOpen, action: () => router.push('/resep/new') },
+    { label: 'Buat Resep Baru', icon: BookOpen, action: () => router.push('/recipes') },
     { label: 'Lihat Laporan', icon: BarChart3, action: () => router.push('/reports') },
     { label: 'Pengaturan', icon: Settings, action: () => router.push('/settings') },
   ]
 
   const handleSelect = useCallback((callback: () => void) => {
-    setOpen(false)
+    void setOpen(false)
     callback()
   }, [])
 
@@ -124,8 +104,8 @@ export const GlobalSearch = memo(function GlobalSearch() {
 
       {/* Search Dialog */}
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput 
-          placeholder="Cari pesanan, pelanggan, bahan baku..." 
+        <CommandInput
+          placeholder="Cari pesanan, pelanggan, bahan baku..."
           value={search}
           onValueChange={setSearch}
         />
@@ -209,7 +189,7 @@ export const GlobalSearch = memo(function GlobalSearch() {
               {filteredRecipes.map((item: RecipeItem) => (
                 <CommandItem
                   key={item.id}
-                  onSelect={() => handleSelect(() => router.push(`/resep/${item.id}`))}
+                  onSelect={() => handleSelect(() => router.push(`/recipes`))}
                 >
                   <BookOpen className="mr-2 h-4 w-4" />
                   <span>{item.name}</span>

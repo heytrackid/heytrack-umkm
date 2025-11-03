@@ -1,23 +1,38 @@
 'use client'
-import * as React from 'react'
 
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
+
+
+
+
 // Dynamically import recharts components to reduce bundle size
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { 
-  ssr: false,
-  loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
-})
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false })
-const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { 
-  ssr: false,
-  loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
-})
-const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false })
+const LineChart = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.LineChart),
+  {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
+  }
+)
+const Line = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Line),
+  { ssr: false }
+)
+const BarChart = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.BarChart),
+  {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
+  }
+)
+const Bar = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Bar),
+  { ssr: false }
+)
 const ResponsiveContainer = dynamic(
-  () => import('recharts').then(mod => mod.ResponsiveContainer),
-  { 
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.ResponsiveContainer),
+  {
     ssr: false,
     loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
   }
@@ -32,16 +47,16 @@ interface MiniChartCoreProps {
   className?: string
 }
 
-export default function MiniChartCore({
+const MiniChartCore = ({
   data,
   type = 'line',
   dataKey,
   color = '#3b82f6',
   height = 60,
   className = ''
-}: MiniChartCoreProps) {
-  return (
-    <Suspense fallback={<div className="w-full h-16 bg-muted animate-pulse rounded" />}>
+}: MiniChartCoreProps) => (
+  <div className={className} style={{ height }}>
+    <Suspense fallback={<div className="w-full h-full bg-muted animate-pulse rounded" />}>
       <ResponsiveContainer width="100%" height="100%">
         {type === 'line' ? (
           <LineChart data={data}>
@@ -61,5 +76,7 @@ export default function MiniChartCore({
         )}
       </ResponsiveContainer>
     </Suspense>
-  )
-}
+  </div>
+)
+
+export default MiniChartCore

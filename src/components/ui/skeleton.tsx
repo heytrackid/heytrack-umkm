@@ -1,12 +1,12 @@
-import * as React from 'react'
+import type { ComponentProps, HTMLAttributes } from 'react'
 import { cn } from "@/lib/utils"
+
 
 interface SkeletonProps {
   className?: string
 }
 
-function Skeleton({ className, ...props }: SkeletonProps & React.HTMLAttributes<HTMLDivElement>) {
-  return (
+const Skeleton = ({ className, ...props }: SkeletonProps & HTMLAttributes<HTMLDivElement>) => (
     <div
       data-slot="skeleton"
       className={cn(
@@ -16,14 +16,13 @@ function Skeleton({ className, ...props }: SkeletonProps & React.HTMLAttributes<
       {...props}
     />
   )
-}
 
 // Skeleton variants untuk berbagai use case
-function SkeletonText({ 
+const SkeletonText = ({ 
   className,
   lines = 1,
   ...props 
-}: SkeletonProps & { lines?: number } & React.HTMLAttributes<HTMLDivElement>) {
+}: SkeletonProps & { lines?: number } & HTMLAttributes<HTMLDivElement>) => {
   if (lines === 1) {
     return <Skeleton className={cn("h-4 w-full", className)} {...props} />
   }
@@ -45,26 +44,21 @@ function SkeletonText({
   )
 }
 
-function SkeletonAvatar({ className, ...props }: SkeletonProps) {
-  return (
+const SkeletonAvatar = ({ className, ...props }: SkeletonProps) => (
     <Skeleton
       className={cn("h-10 w-10 rounded-full", className)}
       {...props}
     />
   )
-}
 
-function SkeletonButton({ className, ...props }: SkeletonProps) {
-  return (
+const SkeletonButton = ({ className, ...props }: SkeletonProps) => (
     <Skeleton
       className={cn("h-9 w-20 rounded-md", className)}
       {...props}
     />
   )
-}
 
-function SkeletonCard({ className, ...props }: SkeletonProps) {
-  return (
+const SkeletonCard = ({ className, ...props }: SkeletonProps) => (
     <div className={cn("rounded-lg border border-gray-200 dark:border-gray-800 p-4 space-y-3", className)} {...props}>
       <div className="flex items-center justify-between">
         <SkeletonText className="h-5 w-1/3" />
@@ -76,10 +70,8 @@ function SkeletonCard({ className, ...props }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
-function SkeletonTable({ rows = 5, cols = 4, className, ...props }: SkeletonProps & { rows?: number; cols?: number }) {
-  return (
+const SkeletonTable = ({ rows = 5, cols = 4, className, ...props }: SkeletonProps & { rows?: number; cols?: number }) => (
     <div className={cn("space-y-3", className)} {...props}>
       {/* Table Header */}
       <div className="flex space-x-4">
@@ -105,10 +97,8 @@ function SkeletonTable({ rows = 5, cols = 4, className, ...props }: SkeletonProp
       ))}
     </div>
   )
-}
 
-function SkeletonChart({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const SkeletonChart = ({ className, ...props }: ComponentProps<'div'>) => (
     <div className={cn("space-y-3", className)} {...props}>
       <div className="flex justify-between items-end h-40 px-4">
         {Array.from({ length: 7 }, (_, i) => (
@@ -126,10 +116,8 @@ function SkeletonChart({ className, ...props }: React.ComponentProps<"div">) {
       </div>
     </div>
   )
-}
 
-function SkeletonForm({ className, ...props }: SkeletonProps) {
-  return (
+const SkeletonForm = ({ className, ...props }: SkeletonProps) => (
     <div className={cn("space-y-4", className)} {...props}>
       <div className="space-y-2">
         <Skeleton className="h-4 w-24" />
@@ -149,7 +137,6 @@ function SkeletonForm({ className, ...props }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
 export {
   Skeleton,

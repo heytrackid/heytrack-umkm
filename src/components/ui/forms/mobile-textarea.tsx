@@ -1,14 +1,14 @@
-/**
- * Mobile Textarea Component
- * Optimized textarea for mobile devices with character count
- */
-
-import * as React from 'react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Textarea } from '../textarea'
 import { Label } from '../label'
+
+/**
+ * Mobile Textarea Component
+ * Optimized textarea for mobile devices with character count
+ */
+
 
 interface MobileTextareaProps {
   label?: string
@@ -26,7 +26,7 @@ interface MobileTextareaProps {
   className?: string
 }
 
-export function MobileTextarea({
+export const MobileTextarea = ({
   label,
   placeholder,
   value,
@@ -40,19 +40,19 @@ export function MobileTextarea({
   rows = 4,
   maxLength,
   className
-}: MobileTextareaProps) {
+}: MobileTextareaProps) => {
   const [isFocused, setIsFocused] = useState(false)
   const { isMobile } = useResponsive()
-  const currentLength = value?.length || defaultValue?.length || 0
+  const currentLength = value?.length ?? defaultValue?.length ?? 0
 
   return (
     <div className={cn("space-y-2", className)}>
       {label && (
         <Label
           className={cn(
-           "text-sm font-medium",
-            isMobile &&"text-base",
-            error &&"text-destructive"
+            "text-sm font-medium",
+            isMobile && "text-base",
+            error && "text-destructive"
           )}
         >
           {label}
@@ -68,7 +68,7 @@ export function MobileTextarea({
           onChange={(e) => onChange?.(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
-            setIsFocused(false)
+            void setIsFocused(false)
             onBlur?.()
           }}
           disabled={disabled}
@@ -76,10 +76,10 @@ export function MobileTextarea({
           rows={isMobile ? Math.max(rows, 3) : rows}
           maxLength={maxLength}
           className={cn(
-           "transition-all duration-200 resize-none",
-            isMobile &&"text-base", // Better readability on mobile
-            error &&"border-destructive focus-visible:ring-destructive",
-            isFocused &&"ring-2 ring-ring ring-offset-2"
+            "transition-all duration-200 resize-none",
+            isMobile && "text-base", // Better readability on mobile
+            error && "border-destructive focus-visible:ring-destructive",
+            isFocused && "ring-2 ring-ring ring-offset-2"
           )}
         />
       </div>
@@ -87,16 +87,16 @@ export function MobileTextarea({
       {/* Character count and hint/error */}
       <div className="flex justify-between items-start">
         <p className={cn(
-         "text-sm",
-          error ?"text-destructive" :"text-muted-foreground"
+          "text-sm",
+          error ? "text-destructive" : "text-muted-foreground"
         )}>
-          {error || hint}
+          {error ?? hint}
         </p>
 
         {maxLength && (
           <span className={cn(
-           "text-xs",
-            currentLength > maxLength * 0.9 ?"text-destructive" :"text-muted-foreground"
+            "text-xs",
+            currentLength > maxLength * 0.9 ? "text-destructive" : "text-muted-foreground"
           )}>
             {currentLength}/{maxLength}
           </span>

@@ -4,8 +4,13 @@ import { createClient } from '@/utils/supabase/client'
 import type { Session, User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-
+import type { UserProfilesTable } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
+
+
+
+type _UserProfile = UserProfilesTable
 interface AuthState {
   user: User | null
   session: Session | null
@@ -54,13 +59,14 @@ export function useAuth() {
         }
 
         setAuthState({
-          user: user || null,
-          session: session || null,
+          user: user ?? null,
+          session: session ?? null,
           isLoading: false,
           isAuthenticated: !!user,
         })
-      } catch (error) {
-        apiLogger.error({ error: error }, 'Auth initialization error:')
+      } catch (error: unknown) {
+        const message = getErrorMessage(error)
+        apiLogger.error({ error: message }, 'Auth initialization error:')
         setAuthState({
           user: null,
           session: null,
@@ -70,16 +76,16 @@ export function useAuth() {
       }
     }
 
-    getSession()
+    void getSession()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: string, session: Session | null) => {
-        apiLogger.info('Auth state changed:', event)
+      (event, session) => {
+        apiLogger.info({ event }, 'Auth state changed')
 
         setAuthState({
-          user: session?.user || null,
-          session: session || null,
+          user: session?.user ?? null,
+          session: session ?? null,
           isLoading: false,
           isAuthenticated: !!session?.user,
         })
@@ -91,7 +97,7 @@ export function useAuth() {
 
         // Handle session expiry - redirect to login with reason
         if (event === 'SIGNED_OUT' && !session) {
-          router.push('/auth/login?reason=session_expired')
+          void router.push('/auth/login?reason=session_expired')
         }
       }
     )
@@ -114,9 +120,10 @@ export function useAuth() {
         isLoading: false,
         isAuthenticated: false,
       })
-      router.push('/auth/login')
-    } catch (error) {
-      apiLogger.error({ error: error }, 'Sign out error:')
+      void router.push('/auth/login')
+    } catch (error: unknown) {
+      const message = getErrorMessage(error)
+      apiLogger.error({ error: message }, 'Sign out error:')
     }
   }
 

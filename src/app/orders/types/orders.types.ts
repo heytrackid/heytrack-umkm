@@ -1,62 +1,19 @@
-import type { Tables } from '@/types/supabase-generated'
-// Orders module types and interfaces with multi-currency support
-export interface OrderItem {
-  id: string
-  order_id: string
-  recipe_id: string
-  recipe_name: string
-  quantity: number
-  unit_price: number
-  total_price: number
-  currency: string // Multi-currency support
-  tax_rate?: number // Item-specific tax rate
-  tax_amount?: number // Calculated tax amount
-  discount_amount?: number // Item-specific discount
-  notes?: string
-  created_at: string
-  updated_at: string
-}
+import type { OrdersTable, OrderItemsTable, CustomersTable, OrderStatus, PaymentMethod } from '@/types/database'
 
-export interface Order {
-  id: string
-  order_number: string
-  customer_id: string
-  customer_name: string
-  status: OrderStatus
-  priority: OrderPriority
-  order_date: string
-  delivery_date?: string
-  
-  // Financial details with multi-currency support
-  currency: string // Order currency
-  subtotal: number
-  tax_enabled: boolean // Whether tax applies to this order
-  tax_rate: number // Tax rate applied
-  tax_amount: number // Calculated tax amount
-  tax_inclusive: boolean // Whether prices include tax
-  discount_amount: number // Order-level discount
-  shipping_amount: number // Shipping/delivery fees
-  total_amount: number // Final total
-  
-  // Payment information
-  payment_method?: PaymentMethod
-  payment_status: 'unpaid' | 'partial' | 'paid' | 'refunded'
-  payment_terms_days: number // Payment due in X days
-  payment_due_date?: string
-  advance_payment_amount?: number
-  
-  // Additional order metadata
-  notes?: string
-  internal_notes?: string // Staff-only notes
-  tags?: string[] // Categorization tags
-  
-  created_at: string
-  updated_at: string
-  
-  // Relations
+// Orders module types and interfaces with multi-currency support
+// Use generated types from Supabase as base
+export type Order = OrdersTable
+export type OrderItem = OrderItemsTable
+
+// Re-export enums for external use
+export type { OrderStatus, PaymentMethod }
+
+// Extended Order type with relations for UI
+
+export interface OrderWithRelations extends Order {
   items: OrderItem[]
-  customer?: Tables<'customers'> // Customer data type
-  payments?: OrderPayment[] // Payment history
+  customer?: CustomersTable
+  payments?: OrderPayment[]
 }
 
 // Payment tracking
@@ -73,16 +30,17 @@ export interface OrderPayment {
 }
 
 // Import types from config to ensure consistency
-export type OrderStatus = 
-  | 'draft'
-  | 'confirmed'
-  | 'payment_pending'
-  | 'paid'
-  | 'in_production'
-  | 'ready'
-  | 'delivered'
-  | 'cancelled'
-  | 'refunded'
+// Note: Using the Supabase enum type instead of locally defined ones
+// export type OrderStatus = 
+//   | 'draft'
+//   | 'confirmed'
+//   | 'payment_pending'
+//   | 'paid'
+//   | 'in_production'
+//   | 'ready'
+//   | 'delivered'
+//   | 'cancelled'
+//   | 'refunded'
 
 export type OrderPriority = 
   | 'low'
@@ -90,14 +48,14 @@ export type OrderPriority =
   | 'high'
   | 'urgent'
 
-export type PaymentMethod = 
-  | 'cash'
-  | 'bank_transfer'
-  | 'card'
-  | 'qris'
-  | 'ewallet'
-  | 'check'
-  | 'credit'
+// export type PaymentMethod = 
+//   | 'cash'
+//   | 'bank_transfer'
+//   | 'card'
+//   | 'qris'
+//   | 'ewallet'
+//   | 'check'
+//   | 'credit'
 
 // Order creation and update interfaces
 export interface CreateOrderData {
@@ -163,7 +121,7 @@ export interface OrderFilters {
   priority?: OrderPriority[]
   customer_id?: string
   currency?: string[]
-  payment_status?: ('unpaid' | 'partial' | 'paid' | 'refunded')[]
+  payment_status?: Array<'unpaid' | 'partial' | 'paid' | 'refunded'>
   payment_method?: PaymentMethod[]
   date_from?: string
   date_to?: string

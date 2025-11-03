@@ -9,22 +9,21 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import Link from 'next/link'
-import * as React from 'react'
-import { useState, useTransition } from 'react'
+import { type FormEvent, useState, useTransition } from 'react'
 import { login } from './actions'
 
-export default function LoginPage() {
+const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
   const [isPending, startTransition] = useTransition()
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setError('')
-    setErrorAction(null)
-    setFieldErrors({})
+    void setError('')
+    void setErrorAction(null)
+    void setFieldErrors({})
 
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
@@ -43,7 +42,7 @@ export default function LoginPage() {
     }
 
     if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors)
+      void setFieldErrors(errors)
       return
     }
 
@@ -51,9 +50,9 @@ export default function LoginPage() {
       const result = await login(formData)
       if (result?.error) {
         const authError = getAuthErrorMessage(result.error)
-        setError(authError)
+        void setError(authError)
         // For now, no specific action - could be extended later
-        setErrorAction(null)
+        void setErrorAction(null)
       }
     })
   }
@@ -64,8 +63,8 @@ export default function LoginPage() {
       delete newErrors[field]
       return newErrors
     })
-    setError('')
-    setErrorAction(null)
+    void setError('')
+    void setErrorAction(null)
   }
 
   return (
@@ -222,3 +221,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
+export default LoginPage

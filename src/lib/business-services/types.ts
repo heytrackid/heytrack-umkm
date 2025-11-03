@@ -1,21 +1,11 @@
+
+
 /**
  * Business Services Types
  * Type definitions for business service operations
  */
 
-export interface ExportData {
-  filename: string
-  data: any[]
-  headers?: string[]
-  sheets?: { name: string; data: any[]; headers?: string[] }[]
-}
 
-export interface ExcelExportOptions {
-  filename?: string
-  sheetName?: string
-  includeHeaders?: boolean
-  dateFormat?: string
-}
 
 export interface ProductionBatch {
   id: string

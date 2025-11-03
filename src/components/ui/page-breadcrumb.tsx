@@ -1,8 +1,5 @@
-/**
- * Shared Page Breadcrumb Component
- * Standardized breadcrumb navigation for pages
- */
-
+import { Fragment } from 'react'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -11,7 +8,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
+
+/**
+ * Shared Page Breadcrumb Component
+ * Standardized breadcrumb navigation for pages
+ */
 
 export interface BreadcrumbItem {
   label: string
@@ -26,30 +27,28 @@ interface PageBreadcrumbProps {
 /**
  * Standardized breadcrumb component for all pages
  */
-export function PageBreadcrumb({ items, className }: PageBreadcrumbProps) {
-  return (
-    <Breadcrumb className={className}>
-      <BreadcrumbList>
-        {items.map((item, index) => (
-          <React.Fragment key={item.label}>
-            <BreadcrumbItem>
-              {item.href ? (
-                <BreadcrumbLink asChild>
-                  <PrefetchLink href={item.href}>
-                    {item.label}
-                  </PrefetchLink>
-                </BreadcrumbLink>
-              ) : (
-                <BreadcrumbPage>{item.label}</BreadcrumbPage>
-              )}
-            </BreadcrumbItem>
-            {index < items.length - 1 && <BreadcrumbSeparator />}
-          </React.Fragment>
-        ))}
-      </BreadcrumbList>
-    </Breadcrumb>
-  )
-}
+export const PageBreadcrumb = ({ items, className }: PageBreadcrumbProps) => (
+  <Breadcrumb className={className}>
+    <BreadcrumbList>
+      {items.map((item, index) => (
+        <Fragment key={item.label}>
+          <BreadcrumbItem>
+            {item.href ? (
+              <BreadcrumbLink asChild>
+                <PrefetchLink href={item.href}>
+                  {item.label}
+                </PrefetchLink>
+              </BreadcrumbLink>
+            ) : (
+              <BreadcrumbPage>{item.label}</BreadcrumbPage>
+            )}
+          </BreadcrumbItem>
+          {index < items.length - 1 && <BreadcrumbSeparator />}
+        </Fragment>
+      ))}
+    </BreadcrumbList>
+  </Breadcrumb>
+)
 
 /**
  * Predefined breadcrumb patterns for common pages
@@ -72,7 +71,7 @@ export const BreadcrumbPatterns = {
 
   recipes: [
     { label: 'Dashboard', href: '/' },
-    { label: 'Resep', href: '/resep' }
+    { label: 'Resep', href: '/recipes' }
   ],
 
   orders: [
@@ -89,7 +88,15 @@ export const BreadcrumbPatterns = {
     { label: 'Dashboard', href: '/' },
     { label: 'HPP & Pricing', href: '/hpp' }
   ],
-}
 
-// Import React for Fragment
-import * as React from 'react'
+  suppliers: [
+    { label: 'Dashboard', href: '/' },
+    { label: 'Supplier', href: '/suppliers' }
+  ],
+
+  supplierNew: [
+    { label: 'Dashboard', href: '/' },
+    { label: 'Supplier', href: '/suppliers' },
+    { label: 'Tambah Supplier' }
+  ],
+}

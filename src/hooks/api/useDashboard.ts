@@ -2,8 +2,11 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/utils/supabase/client'
-
+import type { OrdersTable, IngredientsTable, CustomersTable } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
+import { cachePresets } from '@/providers/QueryProvider'
+
+
 // Dashboard stats type
 export interface DashboardStats {
   revenue: {
@@ -78,6 +81,9 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     // Get week start (7 days ago)
     const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000)
 
+    // Create Supabase client
+    const supabase = createClient()
+    
     // Fetch orders for today and this week
     const { data: todayOrders, error: todayError } = await supabase
       .from('orders')
@@ -109,22 +115,26 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
 
     if (inventoryError) {throw inventoryError}
 
+    type Order = OrdersTable
+    type Ingredient = IngredientsTable
+    type Customer = CustomersTable
+
     // Calculate stats
-    const todayRevenue = todayOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
-    const weeklyRevenue = weeklyOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+    const todayRevenue = todayOrders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
+    const weeklyRevenue = weeklyOrders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
     
-    const lowStockItems = inventory?.filter(item => 
-      item.current_stock <= (item.reorder_point || 0)
+    const lowStockItems = inventory?.filter((item: Ingredient) => 
+      (item.current_stock ?? 0) <= (item.reorder_point ?? 0)
     ) || []
-    const outOfStockItems = inventory?.filter(item => item.current_stock === 0) || []
+    const outOfStockItems = inventory?.filter((item: Ingredient) => item.current_stock === 0) || []
     
-    const vipCustomers = customers?.filter(customer => customer.customer_type === 'vip').length || 0
+    const vipCustomers = customers?.filter((customer: Customer) => customer.customer_type === 'vip').length || 0
 
     // Get recent orders for activity
-    const recentOrders = todayOrders?.slice(-3).map(order => ({
-      customer: order.customer_name || 'Unknown',
-      amount: order.total_amount || 0,
-      time: order.created_at
+    const recentOrders = todayOrders?.slice(-3).map((order: Order) => ({
+      customer: order.customer_name ?? 'Unknown',
+      amount: order.total_amount ?? 0,
+      time: order.created_at ?? ''
     })) || []
 
     return {
@@ -169,8 +179,8 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       },
       lastUpdated: Date.now()
     }
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error fetching dashboard stats:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error fetching dashboard stats:')
     
     // Return default/empty data on error
     return {
@@ -199,7 +209,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
       
-      const { data: orders, error } = await supabase
+      const { data: orders, error } = await createClient()
         .from('orders')
         .select('*')
         .gte('created_at', dayStart.toISOString())
@@ -207,7 +217,8 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
 
       if (error) {throw error}
 
-      const revenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+      type Order = OrdersTable
+      const revenue = orders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
       
       weekData.push({
         day: date.toLocaleDateString('id-ID', { weekday: 'short' }),
@@ -217,46 +228,39 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
     }
     
     return weekData
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error fetching weekly sales:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error fetching weekly sales:')
     return []
   }
 }
 
 // Fetch top products data
-const fetchTopProducts = async (): Promise<TopProductsData[]> => {
+const fetchTopProducts = (): TopProductsData[] => {
   try {
     // This would need to be implemented based on your order_items and recipes schema
     // For now, return empty array since we're removing mock data
     return []
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error fetching top products:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error fetching top products:')
     return []
   }
 }
 
 // Hooks
-export const useDashboardStats = () => {
-  return useQuery({
+export const useDashboardStats = () => useQuery({
     queryKey: ['dashboard', 'stats'],
     queryFn: fetchDashboardStats,
-    staleTime: 30 * 1000, // 30 seconds
-    refetchInterval: 60 * 1000, // Refetch every minute
+    ...cachePresets.dashboard,
   })
-}
 
-export const useWeeklySales = () => {
-  return useQuery({
+export const useWeeklySales = () => useQuery({
     queryKey: ['dashboard', 'weekly-sales'],
     queryFn: fetchWeeklySales,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    ...cachePresets.analytics,
   })
-}
 
-export const useTopProducts = () => {
-  return useQuery({
+export const useTopProducts = () => useQuery({
     queryKey: ['dashboard', 'top-products'],
     queryFn: fetchTopProducts,
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    ...cachePresets.analytics,
   })
-}

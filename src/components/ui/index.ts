@@ -1,3 +1,4 @@
+
 /**
  * Organized Barrel Export for UI Components
  * Logically grouped UI components for better developer experience
@@ -77,6 +78,14 @@ export {
   TabsList,
   TabsTrigger
 } from './tabs'
+
+export {
+  SwipeableTabs,
+  SwipeableTabsList,
+  SwipeableTabsTrigger,
+  SwipeableTabsContent,
+  SwipeableTabsContentContainer
+} from './swipeable-tabs'
 
 export {
   Accordion,

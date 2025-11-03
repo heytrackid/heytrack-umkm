@@ -1,24 +1,25 @@
+import type { ComponentType, ReactNode } from 'react'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft, Plus } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
 /**
  * Shared Page Patterns
  * Common page layout patterns used across the application
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, Plus } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
 interface PageHeaderProps {
   title: string
   description?: string
   backHref?: string
-  actions?: React.ReactNode
+  actions?: ReactNode
 }
 
 /**
  * Standard page header with back button, title, description, and actions
  */
-export function PageHeader({ title, description, backHref, actions }: PageHeaderProps) {
+export const PageHeader = ({ title, description, backHref, actions }: PageHeaderProps) => {
   const router = useRouter()
 
   return (
@@ -48,48 +49,46 @@ export function PageHeader({ title, description, backHref, actions }: PageHeader
 interface PageActionsProps {
   onAdd?: () => void
   addText?: string
-  addIcon?: React.ComponentType<{ className?: string }>
-  children?: React.ReactNode
+  addIcon?: ComponentType<{ className?: string }>
+  children?: ReactNode
 }
 
 /**
  * Standard page action buttons
  */
-export function PageActions({
+export const PageActions = ({
   onAdd,
   addText = "Tambah",
   addIcon: Icon = Plus,
   children
-}: PageActionsProps) {
-  return (
-    <div className="flex gap-2">
-      {onAdd && (
-        <Button onClick={onAdd}>
-          <Icon className="h-4 w-4 mr-2" />
-          {addText}
-        </Button>
-      )}
-      {children}
-    </div>
-  )
-}
+}: PageActionsProps) => (
+  <div className="flex gap-2">
+    {onAdd && (
+      <Button onClick={onAdd}>
+        <Icon className="h-4 w-4 mr-2" />
+        {addText}
+      </Button>
+    )}
+    {children}
+  </div>
+)
 
 interface AlertBannerProps {
   type?: 'info' | 'warning' | 'error' | 'success'
   title?: string
   message: string
-  icon?: React.ComponentType<{ className?: string }>
+  icon?: ComponentType<{ className?: string }>
 }
 
 /**
  * Standardized alert banners for pages
  */
-export function AlertBanner({
+export const AlertBanner = ({
   type = 'info',
   title,
   message,
   icon: Icon
-}: AlertBannerProps) {
+}: AlertBannerProps) => {
   const styles = {
     info: 'bg-blue-50 border-blue-200 text-blue-800',
     warning: 'bg-orange-50 border-orange-200 text-orange-800',
@@ -97,22 +96,27 @@ export function AlertBanner({
     success: 'bg-green-50 border-green-200 text-green-800'
   }
 
+
   const defaultIcons = {
+    // eslint-disable-next-line react/no-unstable-nested-components
     info: ({ className }: { className?: string }) => (
       <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
+    // eslint-disable-next-line react/no-unstable-nested-components
     warning: ({ className }: { className?: string }) => (
       <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
       </svg>
     ),
+    // eslint-disable-next-line react/no-unstable-nested-components
     error: ({ className }: { className?: string }) => (
       <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
+    // eslint-disable-next-line react/no-unstable-nested-components
     success: ({ className }: { className?: string }) => (
       <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -120,7 +124,7 @@ export function AlertBanner({
     )
   }
 
-  const DefaultIcon = Icon || defaultIcons[type]
+  const DefaultIcon = Icon ?? defaultIcons[type]
 
   return (
     <div className={`p-4 border rounded-lg ${styles[type]}`}>
@@ -149,53 +153,48 @@ interface LoadingStateProps {
 /**
  * Standardized loading state component
  */
-export function LoadingState({
+export const LoadingState = ({
   message = "Memuat...",
   className
-}: LoadingStateProps) {
-  return (
-    <div className={`flex items-center justify-center p-8 ${className || ''}`}>
-      <div className="flex items-center gap-3">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-        <span className="text-gray-600">{message}</span>
-      </div>
+}: LoadingStateProps) => (
+  <div className={`flex items-center justify-center p-8 ${className ?? ''}`}>
+    <div className="flex items-center gap-3">
+      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
+      <span className="text-gray-600">{message}</span>
     </div>
-  )
-}
+  </div>
+)
 
 interface EmptyStateProps {
-  icon?: React.ComponentType<{ className?: string }>
+  icon?: ComponentType<{ className?: string }>
   title: string
   description: string
-  action?: React.ReactNode
+  action?: ReactNode
   className?: string
 }
 
 /**
  * Standardized empty state component
  */
-export function EmptyState({
+export const EmptyState = ({
   icon: Icon,
   title,
   description,
   action,
   className
-}: EmptyStateProps) {
-  return (
-    <div className={`text-center p-8 ${className || ''}`}>
-      {Icon && (
-        <Icon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-      )}
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        {title}
-      </h3>
-      <p className="text-gray-600 mb-4 max-w-md mx-auto">
-        {description}
-      </p>
-      {action}
-    </div>
-  )
-}
+}: EmptyStateProps) => (
+  <div className={`text-center p-8 ${className ?? ''}`}>
+    {Icon && (
+      <Icon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+    )}
+    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      {title}
+    </h3>
+    <p className="text-gray-600 mb-4 max-w-md mx-auto">
+      {description}
+    </p>
+    {action}
+  </div>
+)
 
 // Import React for types
-import * as React from 'react'

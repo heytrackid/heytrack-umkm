@@ -1,3 +1,8 @@
+import type { ReorderSummary } from './types'
+import type {IngredientsTable } from '@/types/database'
+import { inventoryLogger } from '@/lib/logger'
+
+
 /**
  * Inventory Services
  * Service for inventory management operations
@@ -5,11 +10,8 @@
 
 
 
-import type { ReorderSummary } from './types'
-import type { Database } from '@/types'
-import { inventoryLogger } from '@/lib/logger'
 
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type Ingredient = IngredientsTable
 
 export class InventoryServices {
   private static instance: InventoryServices
@@ -42,16 +44,16 @@ export class InventoryServices {
 
       const reorderItems = (ingredients as Ingredient[])
         .filter(ingredient => {
-          const currentStock = ingredient.current_stock || 0
-          const minStock = ingredient.min_stock || 0
-          const reorderPoint = ingredient.reorder_point || minStock
+          const currentStock = ingredient.current_stock ?? 0
+          const minStock = ingredient.min_stock ?? 0
+          const reorderPoint = ingredient.reorder_point ?? minStock
 
           return currentStock <= reorderPoint && reorderPoint > 0
         })
         .map(ingredient => {
-          const currentStock = ingredient.current_stock || 0
-          const minStock = ingredient.min_stock || 0
-          const reorderPoint = ingredient.reorder_point || minStock
+          const currentStock = ingredient.current_stock ?? 0
+          const minStock = ingredient.min_stock ?? 0
+          const reorderPoint = ingredient.reorder_point ?? minStock
 
           // Calculate reorder quantity (suggest 150% of min stock or reorder point)
           const suggestedReorder = Math.max(minStock * 1.5, reorderPoint * 1.5, 10)
@@ -88,8 +90,8 @@ export class InventoryServices {
         totalItems: reorderItems.length,
         criticalItems
       }
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in checkReorderNeeds')
+    } catch (err) {
+      inventoryLogger.error({ err }, 'Error in checkReorderNeeds')
       return { items: [], totalItems: 0, criticalItems: 0 }
     }
   }
@@ -111,14 +113,14 @@ export class InventoryServices {
       
       // Filter for low stock items (current_stock <= min_stock) in code
       const ingredients = (allIngredients as Ingredient[]).filter(ingredient => {
-        const currentStock = ingredient.current_stock || 0
-        const minStock = ingredient.min_stock || 0
+        const currentStock = ingredient.current_stock ?? 0
+        const minStock = ingredient.min_stock ?? 0
         return currentStock <= minStock
       })
       
       // Sort by current stock (ascending - lowest first)
       ingredients.sort((a, b) => 
-        (a.current_stock || 0) - (b.current_stock || 0)
+        (a.current_stock ?? 0) - (b.current_stock ?? 0)
       )
 
       if (error) {
@@ -126,9 +128,9 @@ export class InventoryServices {
         return []
       }
 
-      return (ingredients as Ingredient[]) || []
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in getLowStockItems')
+      return (ingredients) || []
+    } catch (err) {
+      inventoryLogger.error({ err }, 'Error in getLowStockItems')
       return []
     }
   }
@@ -155,9 +157,9 @@ export class InventoryServices {
       }
 
       inventoryLogger.info({ updatesCount: updates.length }, 'Successfully updated stock levels')
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in updateStockLevels')
-      throw error
+    } catch (err) {
+      inventoryLogger.error({ err }, 'Error in updateStockLevels')
+      throw err
     }
   }
 
@@ -193,8 +195,8 @@ export class InventoryServices {
       }> = []
 
       for (const ingredient of ingredients as Ingredient[]) {
-        const currentStock = ingredient.current_stock || 0
-        const minStock = ingredient.min_stock || 0
+        const currentStock = ingredient.current_stock ?? 0
+        const minStock = ingredient.min_stock ?? 0
 
         if (currentStock <= 0) {
           alerts.push({
@@ -230,8 +232,8 @@ export class InventoryServices {
         const priorityOrder = { out_of_stock: 3, critical: 2, low_stock: 1 }
         return priorityOrder[b.alert_type] - priorityOrder[a.alert_type]
       })
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in getStockAlerts')
+    } catch (err) {
+      inventoryLogger.error({ err }, 'Error in getStockAlerts')
       return []
     }
   }

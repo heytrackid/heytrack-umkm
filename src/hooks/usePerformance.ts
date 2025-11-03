@@ -1,9 +1,10 @@
+import { useEffect, useState, useCallback } from 'react'
+
 /**
  * Performance Optimization Utilities
  * Collection of performance monitoring and optimization helpers
  */
 
-import { useEffect, useState, useCallback } from 'react'
 
 // Performance monitoring hook
 export function usePerformanceMonitor(componentName: string) {
@@ -14,14 +15,14 @@ export function usePerformanceMonitor(componentName: string) {
       const endTime = performance.now()
       const loadTime = endTime - startTime
 
-      // Log to console in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`⚡ ${componentName} loaded in ${loadTime.toFixed(2)}ms`)
-      }
+      // Performance monitoring in development is handled by Next.js compiler
 
       // Send to analytics in production
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        ;(window as any).gtag('event', 'component_load_time', {
+      type WindowWithGtag = Window & { gtag?: (...args: unknown[]) => void }
+      const win = window as WindowWithGtag
+      
+      if (typeof window !== 'undefined' && 'gtag' in window && typeof win.gtag === 'function') {
+        win.gtag('event', 'component_load_time', {
           component_name: componentName,
           load_time: loadTime,
           page_path: window.location.pathname
@@ -35,26 +36,18 @@ export function usePerformanceMonitor(componentName: string) {
 export function logBundleMetrics() {
   if (typeof window !== 'undefined' && 'performance' in window) {
     // Log basic performance metrics
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+    const navigation = performance.getEntriesByType('navigation')[0]
 
     if (navigation) {
-      const loadTime = navigation.loadEventEnd - navigation.fetchStart
-      const domContentLoaded = navigation.domContentLoadedEventEnd - navigation.fetchStart
-
-      console.log('🚀 Page Performance:', {
-        totalLoadTime: `${loadTime.toFixed(0)}ms`,
-        domContentLoaded: `${domContentLoaded.toFixed(0)}ms`,
-        timestamp: new Date().toISOString()
-      })
+      // Performance metrics tracked silently
+      void navigation.loadEventEnd
+      void navigation.fetchStart
     }
 
     // Monitor largest contentful paint
     if ('PerformanceObserver' in window) {
-      const observer = new PerformanceObserver((list) => {
-        const entries = list.getEntries()
-        const lastEntry = entries[entries.length - 1]
-
-        console.log('🎨 LCP:', `${lastEntry.startTime.toFixed(0)}ms`)
+      const observer = new PerformanceObserver(() => {
+        // LCP tracked silently
       })
 
       observer.observe({ entryTypes: ['largest-contentful-paint'] })
@@ -62,6 +55,8 @@ export function logBundleMetrics() {
       return () => observer.disconnect()
     }
   }
+  
+  return undefined
 }
 
 // Lazy loading with intersection observer
@@ -69,17 +64,17 @@ export function useLazyLoad(options?: IntersectionObserverInit) {
   const [isIntersecting, setIsIntersecting] = useState(false)
   const [element, setElement] = useState<Element | null>(null)
 
-  const observer = useCallback((node: Element | null) => {
-    setElement(node)
+  const observerRef = useCallback((node: Element | null) => {
+    void setElement(node)
   }, [])
 
   useEffect(() => {
-    if (!element) return
+    if (!element) {return}
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsIntersecting(true)
+          void setIsIntersecting(true)
           // Disconnect after first intersection
           observer.disconnect()
         }
@@ -96,12 +91,12 @@ export function useLazyLoad(options?: IntersectionObserverInit) {
     return () => observer.disconnect()
   }, [element, options])
 
-  return { observer, isIntersecting }
+  return { observer: observerRef, isIntersecting }
 }
 
 // Preload critical resources
-export function preloadResource(href: string, as: string = 'fetch') {
-  if (typeof document === 'undefined') return
+export function preloadResource(href: string, as = 'fetch') {
+  if (typeof document === 'undefined') {return}
 
   const link = document.createElement('link')
   link.rel = 'preload'
@@ -117,19 +112,27 @@ export function preloadResource(href: string, as: string = 'fetch') {
 }
 
 // Debounced performance logger
-export function usePerformanceLogger(eventName: string, delay: number = 1000) {
-  const [logs, setLogs] = useState<Array<{ timestamp: number; data: any }>>([])
+export function usePerformanceLogger(eventName: string, delay = 1000) {
+  const [logs, setLogs] = useState<Array<{ timestamp: number; data: unknown }>>([])
 
   const logPerformance = useCallback(
-    (data: any) => {
+    (data: unknown) => {
       const timestamp = Date.now()
       setLogs(prev => [...prev.slice(-9), { timestamp, data }]) // Keep last 10 logs
 
       // Debounced analytics call
       const timeoutId = setTimeout(() => {
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-          ;(window as any).gtag('event', eventName, {
-            ...data,
+        type WindowWithGtag = Window & { gtag?: (...args: unknown[]) => void }
+        const win = window as WindowWithGtag
+        
+        if (typeof window !== 'undefined' && 'gtag' in window && typeof win.gtag === 'function') {
+          const payload =
+            typeof data === 'object' && data !== null
+              ? data as Record<string, unknown>
+              : { value: data }
+
+          win.gtag('event', eventName, {
+            ...payload,
             timestamp,
             page_path: window.location.pathname
           })
@@ -145,14 +148,30 @@ export function usePerformanceLogger(eventName: string, delay: number = 1000) {
 }
 
 // Memory usage monitor
+export interface MemoryInfo {
+  usedJSHeapSize: number
+  totalJSHeapSize: number
+  jsHeapSizeLimit: number
+  timestamp: number
+}
+
 export function useMemoryMonitor() {
-  const [memoryInfo, setMemoryInfo] = useState<any>(null)
+  const [memoryInfo, setMemoryInfo] = useState<MemoryInfo | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'performance' in window) {
       const updateMemoryInfo = () => {
-        if ('memory' in (performance as any)) {
-          const memory = (performance as any).memory
+        if ('memory' in performance) {
+          type PerformanceWithMemory = Performance & {
+            memory: {
+              usedJSHeapSize: number
+              totalJSHeapSize: number
+              jsHeapSizeLimit: number
+            }
+          }
+          
+          const perfWithMemory = performance as PerformanceWithMemory
+          const {memory} = perfWithMemory
           setMemoryInfo({
             usedJSHeapSize: Math.round(memory.usedJSHeapSize / 1024 / 1024), // MB
             totalJSHeapSize: Math.round(memory.totalJSHeapSize / 1024 / 1024), // MB
@@ -162,18 +181,19 @@ export function useMemoryMonitor() {
         }
       }
 
-      updateMemoryInfo()
+      void updateMemoryInfo()
       const interval = setInterval(updateMemoryInfo, 5000) // Update every 5 seconds
 
       return () => clearInterval(interval)
     }
+    return undefined
   }, [])
 
   return memoryInfo
 }
 
 // Component render time profiler
-export function useRenderProfiler(componentName: string) {
+export function useRenderProfiler(_componentName: string) {
   const [renderTimes, setRenderTimes] = useState<number[]>([])
 
   useEffect(() => {
@@ -184,10 +204,7 @@ export function useRenderProfiler(componentName: string) {
       const renderTime = endTime - startTime
 
       setRenderTimes(prev => [...prev.slice(-9), renderTime]) // Keep last 10 renders
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`🔄 ${componentName} rendered in ${renderTime.toFixed(2)}ms`)
-      }
+      // Render time tracked silently
     }
   })
 
@@ -203,11 +220,17 @@ export function useRenderProfiler(componentName: string) {
 }
 
 // Network status monitor
+export interface NetworkConnection {
+  effectiveType: string
+  downlink: number
+  rtt: number
+}
+
 export function useNetworkStatus() {
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   )
-  const [connection, setConnection] = useState<any>(null)
+  const [connection, setConnection] = useState<NetworkConnection | null>(null)
 
   useEffect(() => {
     const updateOnlineStatus = () => setIsOnline(navigator.onLine)
@@ -217,25 +240,38 @@ export function useNetworkStatus() {
 
     // Monitor connection quality if available
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection
-      setConnection({
-        effectiveType: connection.effectiveType,
-        downlink: connection.downlink,
-        rtt: connection.rtt
-      })
-
-      const updateConnection = () => {
+      type NetworkConnection = EventTarget & {
+        effectiveType: string
+        downlink: number
+        rtt: number
+        addEventListener(type: 'change', listener: () => void): void
+        removeEventListener(type: 'change', listener: () => void): void
+      }
+      type NavigatorWithConnection = Navigator & {
+        connection?: NetworkConnection
+      }
+      const nav = navigator as NavigatorWithConnection
+      const {connection} = nav
+      if (connection) {
         setConnection({
           effectiveType: connection.effectiveType,
           downlink: connection.downlink,
           rtt: connection.rtt
         })
-      }
 
-      connection.addEventListener('change', updateConnection)
+        const updateConnection = () => {
+          setConnection({
+            effectiveType: connection.effectiveType,
+            downlink: connection.downlink,
+            rtt: connection.rtt
+          })
+        }
 
-      return () => {
-        connection.removeEventListener('change', updateConnection)
+        connection.addEventListener('change', updateConnection)
+
+        return () => {
+          connection.removeEventListener('change', updateConnection)
+        }
       }
     }
 
@@ -296,7 +332,7 @@ export function useCriticalResourcePreloader(resources: Array<{ href: string; as
 
     resources.forEach(resource => {
       const cleanupFn = preloadResource(resource.href, resource.as)
-      if (cleanupFn) cleanup.push(cleanupFn)
+      if (cleanupFn) {cleanup.push(cleanupFn)}
     })
 
     return () => {

@@ -8,7 +8,9 @@ import { Building } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { validateBusinessInfoSettings } from '@/lib/settings-validation'
 import { useToast } from '@/hooks/use-toast'
-import type { AppSettingsState, SettingsUpdateHandler } from '../types'
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+
+
 
 type BusinessSettingsState = AppSettingsState['general']
 
@@ -20,48 +22,47 @@ interface BusinessInfoSettingsProps {
 /**
  * Business information settings component with Zod validation
  */
-export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfoSettingsProps) {
+export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfoSettingsProps) => {
   const { toast } = useToast()
   const [localSettings, setLocalSettings] = useState<BusinessSettingsState>(settings.general)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Update local state when settings change
   useEffect(() => {
-    setLocalSettings(settings.general)
+    void setLocalSettings(settings.general)
   }, [settings.general])
 
   const handleChange = (field: string, value: string) => {
     const newSettings: BusinessSettingsState = { ...localSettings, [field]: value }
-    setLocalSettings(newSettings)
+    void setLocalSettings(newSettings)
 
     // Validate on change
     try {
       const validatedData = validateBusinessInfoSettings(newSettings)
-      setErrors({})
+      void setErrors({})
       // If validation passes, update parent
-      onSettingChange('general', field, validatedData[field] ?? value)
-    } catch (error) {
-      // Don't update parent if validation fails, but allow user to continue typing
-      if (error instanceof Error) {
+      onSettingChange('general', field, validatedData[field as keyof typeof validatedData] ?? value)
+    } catch (err) {      // Don't update parent if validation fails, but allow user to continue typing
+      if (err instanceof Error) {
         // Extract field-specific errors if possible
-        const errorMessage = error.message
+        const errorMessage = err.message
         if (errorMessage.includes(field)) {
-          setErrors({ [field]: errorMessage })
+          void setErrors({ [field]: errorMessage })
         }
       }
     }
   }
 
-  const handleBlur = (field: string) => {
+  const handleBlur = (_field: string) => {
     // Final validation on blur
     try {
       validateBusinessInfoSettings(localSettings)
-      setErrors({})
-    } catch (error) {
-      if (error instanceof Error) {
+      void setErrors({})
+    } catch (err) {
+      if (err instanceof Error) {
         toast({
           title: 'Pengaturan Tidak Valid',
-          description: error.message,
+          description: err.message,
           variant: 'destructive',
         })
       }

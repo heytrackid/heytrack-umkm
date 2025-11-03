@@ -1,52 +1,46 @@
 'use client'
-import * as React from 'react'
 
-import { Badge } from '@/components/ui/badge'
+import { type ReactNode, useState, useCallback, useMemo, memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
-import {
-    Edit,
-    Eye,
-    MoreHorizontal,
-    Search,
-    SortAsc,
-    SortDesc,
-    Trash2
-} from 'lucide-react'
-import { useState, useCallback, memo } from 'react'
 import { Input } from './input'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
+import {
+  MoreHorizontal,
+  Search,
+  SortAsc,
+  SortDesc} from 'lucide-react'
 
 // Types for mobile table
-export interface MobileTableColumn<T = any> {
+export interface MobileTableColumn<T extends Record<string, unknown> = Record<string, unknown>> {
   key: string
   label: string
-  accessor: keyof T | ((item: T) => React.ReactNode)
+  accessor: keyof T | ((item: T) => ReactNode)
   sortable?: boolean
   width?: string
   className?: string
-  render?: (value: any, item: T) => React.ReactNode
+  render?: (value: unknown, item: T) => ReactNode
 }
 
-export interface MobileTableAction<T = any> {
+export interface MobileTableAction<T extends Record<string, unknown> = Record<string, unknown>> {
   label: string
-  icon?: React.ReactNode
+  icon?: ReactNode
   onClick: (item: T) => void
   variant?: 'default' | 'destructive' | 'outline'
   show?: (item: T) => boolean
 }
 
-interface MobileTableProps<T = any> {
+interface MobileTableProps<T extends Record<string, unknown> = Record<string, unknown>> {
   data: T[]
-  columns: MobileTableColumn<T>[]
-  actions?: MobileTableAction<T>[]
+  columns: Array<MobileTableColumn<T>>
+  actions?: Array<MobileTableAction<T>>
   onRowClick?: (item: T) => void
   loading?: boolean
   emptyMessage?: string
@@ -67,7 +61,7 @@ interface MobileTableProps<T = any> {
  * - Custom comparison function for data prop
  * - useCallback for event handlers
  */
-export const MobileTable = memo(function MobileTable<T extends Record<string, any>>({
+export const MobileTable = memo(<T extends Record<string, unknown>>({
   data,
   columns,
   actions = [],
@@ -81,34 +75,34 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
   onSort,
   className,
   cardMode = true
-}: MobileTableProps<T>) {
+}: MobileTableProps<T>) => {
   const { isMobile } = useResponsive()
   const [searchQuery, setSearchQuery] = useState('')
   const [sortKey, setSortKey] = useState<string>('')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query)
+    void setSearchQuery(query)
     onSearch?.(query)
   }, [onSearch])
 
   const handleSort = useCallback((key: string) => {
     const newDirection = sortKey === key && sortDirection === 'asc' ? 'desc' : 'asc'
-    setSortKey(key)
-    setSortDirection(newDirection)
+    void setSortKey(key)
+    void setSortDirection(newDirection)
     onSort?.(key, newDirection)
   }, [sortKey, sortDirection, onSort])
 
   // Filter data based on search query
-  const filteredData = React.useMemo(() => {
-    if (!searchQuery) {return data}
-    
+  const filteredData = useMemo(() => {
+    if (!searchQuery) { return data }
+
     return data.filter(item =>
       columns.some(col => {
-        const value = typeof col.accessor === 'function' 
+        const value = typeof col.accessor === 'function'
           ? col.accessor(item)
           : item[col.accessor]
-        
+
         return String(value).toLowerCase().includes(searchQuery.toLowerCase())
       })
     )
@@ -122,9 +116,9 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
           <Card key={i} className="animate-pulse">
             <CardContent className="p-4">
               <div className="space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-3 bg-gray-200 rounded w-1/2" />
+                <div className="h-3 bg-gray-200 rounded w-2/3" />
               </div>
             </CardContent>
           </Card>
@@ -139,7 +133,7 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
       <Card>
         <CardContent className="p-8 text-center">
           <div className="text-muted-foreground">
-            {emptyMessage || 'Tidak ada data'}
+            {emptyMessage ?? 'Tidak ada data'}
           </div>
         </CardContent>
       </Card>
@@ -148,14 +142,14 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
 
   // Render search bar
   const renderSearchBar = () => {
-    if (!searchable) {return null}
-    
+    if (!searchable) { return null }
+
     return (
       <div className="mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder={searchPlaceholder || 'Cari...'}
+            placeholder={searchPlaceholder ?? 'Cari...'}
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             className="pl-10"
@@ -167,39 +161,39 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
 
   // Render sort indicator
   const renderSortIndicator = (column: MobileTableColumn<T>) => {
-    if (!sortable || !column.sortable) {return null}
-    
+    if (!sortable || !column.sortable) { return null }
+
     if (sortKey === column.key) {
-      return sortDirection === 'asc' ? 
-        <SortAsc className="ml-1 h-4 w-4 inline" /> : 
+      return sortDirection === 'asc' ?
+        <SortAsc className="ml-1 h-4 w-4 inline" /> :
         <SortDesc className="ml-1 h-4 w-4 inline" />
     }
-    
+
     return null
   }
 
   // Get cell value
-  const getCellValue = (item: T, column: MobileTableColumn<T>) => {
+  const getCellValue = (item: T, column: MobileTableColumn<T>): React.ReactNode => {
     if (column.render) {
-      const value = typeof column.accessor === 'function' 
+      const value = typeof column.accessor === 'function'
         ? column.accessor(item)
         : item[column.accessor]
       return column.render(value, item)
     }
-    
+
     if (typeof column.accessor === 'function') {
       return column.accessor(item)
     }
-    
-    return item[column.accessor]
+
+    return item[column.accessor] as React.ReactNode
   }
 
   // Render card view for mobile
   const renderCardView = () => (
     <div className="space-y-4">
       {filteredData.map((item, index) => (
-        <Card 
-          key={index} 
+        <Card
+          key={index}
           className={cn(
             "transition-all hover:shadow-md cursor-pointer",
             onRowClick && "hover:bg-gray-50"
@@ -221,7 +215,7 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
                   </div>
                 </div>
               ))}
-              
+
               {actions && actions.length > 0 && (
                 <div className="flex gap-2 pt-3 border-t">
                   <DropdownMenu>
@@ -272,7 +266,7 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
         <thead className="bg-gray-50">
           <tr>
             {columns.map((column) => (
-              <th 
+              <th
                 key={column.key}
                 className={cn(
                   "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
@@ -297,7 +291,7 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
         </thead>
         <tbody className="divide-y divide-gray-200">
           {filteredData.map((item, rowIndex) => (
-            <tr 
+            <tr
               key={rowIndex}
               className={cn(
                 "hover:bg-gray-50",
@@ -306,7 +300,7 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
               onClick={() => onRowClick?.(item)}
             >
               {columns.map((column) => (
-                <td 
+                <td
                   key={column.key}
                   className={cn(
                     "px-4 py-3 text-sm",
@@ -365,19 +359,19 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
       {isMobile && cardMode ? renderCardView() : renderTableView()}
     </div>
   )
-}, (prevProps, nextProps) => {
-  // Custom comparison function for React.memo
-  return (
-    prevProps.data === nextProps.data &&
-    prevProps.columns === nextProps.columns &&
-    prevProps.actions === nextProps.actions &&
-    prevProps.loading === nextProps.loading &&
-    prevProps.emptyMessage === nextProps.emptyMessage &&
-    prevProps.searchable === nextProps.searchable &&
-    prevProps.searchPlaceholder === nextProps.searchPlaceholder &&
-    prevProps.sortable === nextProps.sortable &&
-    prevProps.cardMode === nextProps.cardMode
-  )
-})
+}, (prevProps, nextProps) =>
+// Custom comparison function for React.memo
+(
+  prevProps.data === nextProps.data &&
+  prevProps.columns === nextProps.columns &&
+  prevProps.actions === nextProps.actions &&
+  prevProps.loading === nextProps.loading &&
+  prevProps.emptyMessage === nextProps.emptyMessage &&
+  prevProps.searchable === nextProps.searchable &&
+  prevProps.searchPlaceholder === nextProps.searchPlaceholder &&
+  prevProps.sortable === nextProps.sortable &&
+  prevProps.cardMode === nextProps.cardMode
+)
+)
 
 MobileTable.displayName = 'MobileTable'

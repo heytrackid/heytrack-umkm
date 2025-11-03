@@ -76,6 +76,23 @@ stats.html
 *.tsbuildinfo
 next-env.d.ts
 
+# Temporary files
+*-report.json
+*-analysis.json
+dashboard-screenshot.png
+
+# Documentation archives
+docs/archive/
+
+# Scripts (keep only in scripts/ folder)
+/*.sh
+/*.py
+/*.cjs
+/*.mjs
+/fix-*.js
+/test-*.js
+/auto-*.js
+
 # Sensitive configuration files
 .cursor/
 .mcp.json

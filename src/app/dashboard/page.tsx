@@ -3,93 +3,139 @@
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  DashboardHeaderSkeleton,
-  RecentOrdersSkeleton,
-  StatsCardSkeleton,
-  StockAlertSkeleton
-} from '@/components/ui/skeletons/dashboard-skeletons'
-import { useSettings } from '@/contexts/settings-context'
+import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
-import { LOADING_KEYS, useLoading } from '@/hooks/loading'
-import { useResponsive } from '@/hooks/useResponsive'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
-import {
-  BarChart3,
-  ChefHat,
-  Package,
-  ShoppingCart,
-  Target
-} from 'lucide-react'
-import dynamic from 'next/dynamic'
+import { BarChart3, ChefHat, Package, ShoppingCart, Target, Calculator } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { queryLogger } from '@/lib/client-logger'
+import { PageHeader } from '@/components/layout/PageHeader'
 
-// Dynamic import to reduce bundle size
-const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
-  ssr: false,
-  loading: () => <div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />
-})
+// Import lightweight components normally - no need for lazy loading
+import StatsCardsSection from './components/StatsCardsSection'
+import RecentOrdersSection from './components/RecentOrdersSection'
+import StockAlertsSection from './components/StockAlertsSection'
+import HppDashboardWidget from './components/HppDashboardWidget'
 
-const StatsCardsSection = dynamic(() => import('./components/StatsCardsSection'), {
-  loading: () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+// Dashboard data structure
+interface DashboardData {
+  stats: {
+    totalSales: number
+    totalOrders: number
+    totalCustomers: number
+    totalIngredients: number
+    salesGrowth: number
+    ordersGrowth: number
+    customersGrowth: number
+    ingredientsLow: number
+  }
+  orders: {
+    recent: Array<{
+      id: string
+      customer: string
+      amount: number | null
+      status: string | null
+      time: string | null
+    }>
+  }
+  inventory: {
+    lowStockAlerts: Array<{
+      id: string
+      name: string
+      currentStock: number
+      reorderPoint: number
+    }>
+  }
+}
+
+// Optimized data fetching - single API call
+const fetchDashboardData = async (): Promise<DashboardData> => {
+  // ✅ FIX: Use single API call instead of 3 parallel calls
+  const response = await fetch('/api/dashboard/stats')
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch dashboard data')
+  }
+
+  const data = await response.json()
+
+  // Transform API response to match DashboardData structure
+  return {
+    stats: {
+      totalSales: data.revenue?.total ?? 0,
+      totalOrders: data.orders?.total ?? 0,
+      totalCustomers: data.customers?.total ?? 0,
+      totalIngredients: data.inventory?.total ?? 0,
+      salesGrowth: parseFloat(data.revenue?.growth ?? '0'),
+      ordersGrowth: 0, // Not provided by API yet
+      customersGrowth: 0, // Not provided by API yet
+      ingredientsLow: data.inventory?.lowStock ?? 0
+    },
+    orders: {
+      recent: data.orders?.recent ?? []
+    },
+    inventory: {
+      lowStockAlerts: data.inventory?.lowStockAlerts ?? []
+    }
+  }
+}
+
+// Dashboard Skeleton Component
+const DashboardSkeleton = () => (
+  <div className="space-y-6">
+    {/* Stats Cards Loading */}
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       {Array.from({ length: 4 }, (_, i) => (
         <StatsCardSkeleton key={i} />
       ))}
     </div>
-  ),
-})
-const RecentOrdersSection = dynamic(() => import('./components/RecentOrdersSection'), { loading: () => <RecentOrdersSkeleton /> })
-const StockAlertsSection = dynamic(() => import('./components/StockAlertsSection'), { loading: () => <StockAlertSkeleton /> })
-const HPPAlertsWidget = dynamic(() => import('./components/HPPAlertsWidget'), {
-  ssr: false,
-  loading: () => <StockAlertSkeleton />
-})
 
-// Sample data removed - now using real data from API
-// const sampleStats = {
-//   totalSales: 15420000,
-//   totalOrders: 148,
-//   totalCustomers: 89,
-//   totalIngredients: 45,
-//   salesGrowth: 12.5,
-//   ordersGrowth: 8.3,
-//   customersGrowth: 15.2,
-//   ingredientsLow: 5
-// }
+    {/* Recent Orders & Stock Alerts Loading */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <RecentOrdersSkeleton />
+      <StockAlertSkeleton />
+    </div>
 
-// Placeholder data until API integration
-const placeholderStats = {
-  totalSales: 0,
-  totalOrders: 0,
-  totalCustomers: 0,
-  totalIngredients: 0,
-  salesGrowth: 0,
-  ordersGrowth: 0,
-  customersGrowth: 0,
-  ingredientsLow: 0
-}
+    {/* HPP Widget Loading */}
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <BarChart3 className="h-5 w-5" />
+          Analisis HPP
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+      </CardContent>
+    </Card>
+  </div>
+)
 
-const recentOrders: unknown[] = []
-
-const lowStockItems: unknown[] = []
-
-export default function Dashboard() {
-  const { isMobile } = useResponsive()
+const Dashboard = () => {
   const { formatCurrency } = useCurrency()
-  const { settings } = useSettings()
   const [currentTime, setCurrentTime] = useState(new Date())
-  const { loading, setLoading, isLoading } = useLoading({
-    [LOADING_KEYS.DASHBOARD_STATS]: true,
-    [LOADING_KEYS.RECENT_ORDERS]: true,
-    [LOADING_KEYS.STOCK_ALERTS]: true
-  })
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
+
+  // ✅ OPTIMIZED: Single API call with better caching
+  const {
+    data: dashboardData,
+    isLoading: isDataLoading,
+    error
+  } = useQuery({
+    queryKey: ['dashboard', 'all-data'],
+    queryFn: fetchDashboardData,
+    staleTime: 30000, // 30 seconds - faster refresh
+    gcTime: 300000, // 5 minutes cache
+    retry: 1, // Reduce retry attempts
+    refetchOnWindowFocus: false,
+    refetchOnMount: false // Don't refetch if data is fresh
+  })
 
   // Enable smart preloading for dashboard
   usePagePreloading('dashboard')
@@ -102,7 +148,7 @@ export default function Dashboard() {
         description: 'Sesi Anda telah berakhir. Silakan login kembali.',
         variant: 'destructive',
       })
-      router.push('/auth/login')
+      void router.push('/auth/login')
     }
   }, [isAuthLoading, isAuthenticated, router, toast])
 
@@ -111,48 +157,18 @@ export default function Dashboard() {
     return () => clearInterval(timer)
   }, [])
 
-  // Simulate loading states
-  useEffect(() => {
-    // Simulate dashboard stats loading
-    const statsTimer = setTimeout(() => {
-      setLoading(LOADING_KEYS.DASHBOARD_STATS, false)
-    }, 1500)
+  // ✅ FIX: Combine loading states to prevent double skeleton
+  const isLoading = isAuthLoading || isDataLoading
 
-    // Simulate recent orders loading
-    const ordersTimer = setTimeout(() => {
-      setLoading(LOADING_KEYS.RECENT_ORDERS, false)
-    }, 2000)
-
-    // Simulate stock alerts loading  
-    const stockTimer = setTimeout(() => {
-      setLoading(LOADING_KEYS.STOCK_ALERTS, false)
-    }, 1800)
-
-    return () => {
-      clearTimeout(statsTimer)
-      clearTimeout(ordersTimer)
-      clearTimeout(stockTimer)
-    }
-  }, [])
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
-      case 'processing': return 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100'
-      case 'pending': return 'bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
-    }
-  }
-
-  // Show loading state while auth is initializing
-  if (isAuthLoading) {
+  // Show loading state while initializing
+  if (isLoading && !dashboardData) {
     return (
       <AppLayout>
         <div className="space-y-6">
           <DashboardHeaderSkeleton />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {Array.from({ length: 4 }, (_, i) => (
-              <StatsCardSkeleton key={i} />
+              <StatsCardSkeleton key={`skeleton-${i}`} />
             ))}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -164,81 +180,120 @@ export default function Dashboard() {
     )
   }
 
+  if (error) {
+    // Log error using client-safe logger
+    queryLogger.error('Dashboard data loading error')
+
+    return (
+      <AppLayout>
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-semibold mb-4">Gagal Memuat Dashboard</h2>
+          <p className="text-muted-foreground mb-6">
+            Terjadi kesalahan saat memuat data dashboard. Silakan coba lagi.
+          </p>
+          <Button onClick={() => window.location.reload()}>Muat Ulang</Button>
+        </div>
+      </AppLayout>
+    )
+  }
+
+  // Check if user has no data yet (empty state)
+  const hasNoData = dashboardData?.stats.totalOrders === 0 &&
+    dashboardData.stats.totalIngredients === 0 &&
+    dashboardData.stats.totalCustomers === 0
+
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Header */}
-        {isLoading(LOADING_KEYS.DASHBOARD_STATS) ? (
-          <DashboardHeaderSkeleton />
-        ) : (
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                HeyTrack
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                {currentTime.toLocaleDateString('id-ID', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </p>
-              {user && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  Selamat datang, {user.email}
-                </p>
-              )}
-            </div>
+        {/* Header - Always visible */}
+        <PageHeader
+          title="Beranda"
+          description={`${currentTime.toLocaleDateString('id-ID', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })}${user ? `, Selamat datang kembali, ${user.email?.split('@')[0]}! 👋` : ''}`}
+        />
 
-            <div className="flex items-center gap-2">
-              <ExcelExportButton size="sm" variant="outline" />
-            </div>
-          </div>
+        {/* Empty State - Show when user has no data */}
+        {hasNoData && (
+          <Card className="border-dashed">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Target className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Mulai Kelola Bisnis Kuliner Anda
+                  </h3>
+                  <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                    Belum ada data di sistem. Mulai dengan menambahkan bahan baku,
+                    membuat resep, atau mencatat pesanan pertama Anda.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3 justify-center pt-2">
+                  <Button asChild>
+                    <a href="/ingredients">
+                      <Package className="h-4 w-4 mr-2" />
+                      Tambah Bahan Baku
+                    </a>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <a href="/recipes">
+                      <ChefHat className="h-4 w-4 mr-2" />
+                      Buat Resep
+                    </a>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <a href="/orders">
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Catat Pesanan
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Stats Cards (Suspense + dynamic) */}
-        {isLoading(LOADING_KEYS.DASHBOARD_STATS) ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }, (_, i) => (
-              <StatsCardSkeleton key={i} />
-            ))}
+        {/* Main Dashboard Content - Single Suspense boundary to prevent cascading loading */}
+        <Suspense fallback={<DashboardSkeleton />}>
+          {/* Stats Cards */}
+          <StatsCardsSection
+            stats={dashboardData?.stats ? {
+              revenue: {
+                total: dashboardData.stats.totalSales,
+                growth: dashboardData.stats.salesGrowth.toString(),
+                trend: dashboardData.stats.salesGrowth >= 0 ? 'up' : 'down'
+              },
+              orders: {
+                total: dashboardData.stats.totalOrders,
+                active: dashboardData.stats.totalOrders // Placeholder - need to determine active orders
+              },
+              customers: {
+                total: dashboardData.stats.totalCustomers,
+                vip: 0 // Placeholder - need to determine VIP customers
+              },
+              inventory: {
+                total: dashboardData.stats.totalIngredients,
+                lowStock: dashboardData.stats.ingredientsLow
+              }
+            } : undefined}
+            formatCurrency={formatCurrency}
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Recent Orders */}
+            <RecentOrdersSection orders={dashboardData?.orders?.recent} />
+
+            {/* Low Stock Alert */}
+            <StockAlertsSection lowStockItems={dashboardData?.inventory?.lowStockAlerts} />
           </div>
-        ) : (
-          <Suspense fallback={
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 4 }, (_, i) => (
-                <StatsCardSkeleton key={i} />
-              ))}
-            </div>
-          }>
-            <StatsCardsSection formatCurrency={formatCurrency} stats={placeholderStats} />
-          </Suspense>
-        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Orders (Suspense + dynamic) */}
-          {isLoading(LOADING_KEYS.RECENT_ORDERS) ? (
-            <RecentOrdersSkeleton />
-          ) : (
-            <Suspense fallback={<RecentOrdersSkeleton />}>
-              <RecentOrdersSection />
-            </Suspense>
-          )}
-
-          {/* Low Stock Alert (Suspense + dynamic) */}
-          {isLoading(LOADING_KEYS.STOCK_ALERTS) ? (
-            <StockAlertSkeleton />
-          ) : (
-            <Suspense fallback={<StockAlertSkeleton />}>
-              <StockAlertsSection />
-            </Suspense>
-          )}
-        </div>
-
-        {/* HPP Alerts Widget */}
-        <Suspense fallback={<StockAlertSkeleton />}>
-          <HPPAlertsWidget />
+          {/* HPP Dashboard Widget */}
+          <HppDashboardWidget />
         </Suspense>
 
         {/* Quick Actions */}
@@ -246,33 +301,39 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              Aksi Cepat
+              Menu Cepat
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/resep">
-                  <ChefHat className="h-6 w-6" />
-                  <span>Resep & HPP</span>
-                </a>
-              </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/inventory">
-                  <Package className="h-6 w-6" />
-                  <span>Inventory</span>
-                </a>
-              </Button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
                 <a href="/orders">
                   <ShoppingCart className="h-6 w-6" />
-                  <span>Pesanan</span>
+                  <span className="text-sm font-medium">Pesanan</span>
+                </a>
+              </Button>
+              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
+                <a href="/recipes">
+                  <ChefHat className="h-6 w-6" />
+                  <span className="text-sm font-medium">Resep</span>
+                </a>
+              </Button>
+              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
+                <a href="/ingredients">
+                  <Package className="h-6 w-6" />
+                  <span className="text-sm font-medium">Bahan Baku</span>
+                </a>
+              </Button>
+              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
+                <a href="/hpp">
+                  <Calculator className="h-6 w-6" />
+                  <span className="text-sm font-medium">Biaya Produksi</span>
                 </a>
               </Button>
               <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
                 <a href="/reports">
                   <BarChart3 className="h-6 w-6" />
-                  <span>Laporan</span>
+                  <span className="text-sm font-medium">Laporan</span>
                 </a>
               </Button>
             </div>
@@ -282,3 +343,5 @@ export default function Dashboard() {
     </AppLayout>
   )
 }
+
+export default Dashboard

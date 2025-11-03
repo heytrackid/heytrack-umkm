@@ -1,20 +1,19 @@
-import { createServiceRoleClient } from '@/utils/supabase'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
-
+import { createClient } from '@/utils/supabase/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-interface FinancialTransaction {
+import { safeParseAmount, safeString } from '@/lib/api-helpers'
+
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+// Partial type for cash flow queries (only fields we fetch)
+interface FinancialRecordPartial {
   id: string
-  reference_id?: string
   date: string | null
   description: string
   category: string
-  subcategory?: string
-  amount: string | number
-  type: string
-  user_id: string
-  created_at: string | null
-  reference?: string | null
+  amount: number
+  reference: string | null
 }
 
 interface PeriodCashFlow {
@@ -39,6 +38,11 @@ interface Subcategory {
   count: number
 }
 
+const normalizeDateParam = (value?: string | null) => {
+  const trimmed = value?.trim()
+  return trimmed && trimmed.length > 0 ? trimmed : undefined
+}
+
 interface CategoryBreakdownProcessing {
   category: string
   total: number
@@ -60,20 +64,34 @@ interface CategoryBreakdownProcessing {
  */
 export async function GET(request: NextRequest) {
   try {
+    // ✅ CRITICAL FIX: Add authentication
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
 
     // Parse query parameters
-    const startDate = searchParams.get('start_date') || new Date(new Date().setDate(1)).toISOString().split('T')[0] // First day of current month
-    const endDate = searchParams.get('end_date') || new Date().toISOString().split('T')[0] // Today
-    const period = searchParams.get('period') || 'daily'
+    const startDateParam = searchParams.get('start_date')
+    const endDateParam = searchParams.get('end_date')
+    const periodParam = searchParams.get('period')
     const compare = searchParams.get('compare') === 'true'
+    
+    const defaultStartDate = new Date(new Date().setDate(1)).toISOString().split('T')[0] // First day of current month
+    const defaultEndDate = new Date().toISOString().split('T')[0] // Today
 
-    const supabase = createServiceRoleClient()
+    const startDate = normalizeDateParam(startDateParam) ?? defaultStartDate
+    const endDate = normalizeDateParam(endDateParam) ?? defaultEndDate
+    const period = periodParam ?? 'daily'
 
-    // Get all transactions (income and expenses) within date range
+    // ✅ CRITICAL FIX: Filter by user_id for RLS
     const { data: transactions, error: transError } = await supabase
       .from('financial_records')
-      .select('*')
+      .select('id, date, description, category, amount, reference')
+      .eq('user_id', user.id) // ✅ RLS enforcement
       .gte('date', startDate)
       .lte('date', endDate)
       .order('date', { ascending: true })
@@ -87,13 +105,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Separate income and expenses
-    const validTransactions = (transactions || []).filter((t: any) => t.date !== null) as FinancialTransaction[]
-    const income = validTransactions.filter((t: FinancialTransaction) => (t as any).category === 'Revenue')
-    const expenses = validTransactions.filter((t: FinancialTransaction) => (t as any).category !== 'Revenue')
+    const validTransactions = (transactions || []).filter((t: FinancialRecordPartial) => t.date !== null)
+    const income = validTransactions.filter((t: FinancialRecordPartial) => t.category === 'Revenue')
+    const expenses = validTransactions.filter((t: FinancialRecordPartial) => t.category !== 'Revenue')
 
     // Calculate totals
-    const totalIncome = income.reduce((sum: number, t: FinancialTransaction) => sum + Number((t as any).amount), 0)
-    const totalExpenses = expenses.reduce((sum: number, t: FinancialTransaction) => sum + Number((t as any).amount), 0)
+    const totalIncome = income.reduce((sum: number, t: FinancialRecordPartial) => sum + safeParseAmount(t.amount), 0)
+    const totalExpenses = expenses.reduce((sum: number, t: FinancialRecordPartial) => sum + safeParseAmount(t.amount), 0)
     const netCashFlow = totalIncome - totalExpenses
 
     // Group by period
@@ -108,18 +126,23 @@ export async function GET(request: NextRequest) {
     // Compare with previous period if requested
     let comparison = null
     if (compare) {
-      comparison = await calculateComparison(supabase, startDate, endDate, period)
+      comparison = await calculateComparison(
+        supabase,
+        user.id, // ✅ Pass user_id
+        startDate,
+        endDate
+      )
     }
 
     // Transform transactions for frontend
-    const transactionsList = validTransactions.map((t: FinancialTransaction) => ({
-      id: (t as any).id,
-      reference_id: t.reference_id || (t as any).id,
-      date: t.date || '',
-      description: (t as any).description,
-      category: (t as any).category === 'Revenue' ? (t.subcategory || 'Penjualan Produk') : (t as any).category,
-      amount: Number(t.amount),
-      type: (t as any).category === 'Revenue' ? 'income' : 'expense'
+    const transactionsList = validTransactions.map((t: FinancialRecordPartial) => ({
+      id: t.id,
+      reference_id: t.reference ?? t.id,
+      date: t.date ?? '',
+      description: safeString(t.description),
+      category: safeString(t.category),
+      amount: safeParseAmount(t.amount),
+      type: t.category === 'Revenue' ? 'income' : 'expense'
     }))
 
     // Build response
@@ -144,8 +167,8 @@ export async function GET(request: NextRequest) {
       transactions: transactionsList,
       cash_flow_by_period: cashFlowByPeriod,
       category_breakdown: categoryBreakdown,
-      trend: trend,
-      comparison: comparison,
+      trend,
+      comparison,
       top_income_sources: getTopTransactions(income, 5),
       top_expenses: getTopTransactions(expenses, 5),
       generated_at: new Date().toISOString()
@@ -153,8 +176,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response)
 
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error generating cash flow report:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error generating cash flow report:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -163,30 +186,39 @@ export async function GET(request: NextRequest) {
 }
 
 // Helper: Group transactions by period
-function groupByPeriod(transactions: FinancialTransaction[], period: string) {
+function groupByPeriod(transactions: FinancialRecordPartial[], period: string) {
   const grouped: Record<string, PeriodCashFlow> = {}
 
   transactions.forEach(transaction => {
     let key = ''
-    const date = new Date((transaction as any).date)
+    const date = transaction.date ? new Date(transaction.date) : null
 
     switch (period) {
       case 'daily':
-        key = (transaction as any).date
+        key = transaction.date ?? ''
         break
-      case 'weekly':
+      case 'weekly': {
+        if (!date || Number.isNaN(date.getTime())) {
+          key = ''
+          break
+        }
         const weekStart = new Date(date)
         weekStart.setDate(date.getDate() - date.getDay())
-        key = weekStart.toISOString().split('T')[0]
+        key = Number.isNaN(weekStart.getTime())
+          ? ''
+          : weekStart.toISOString().split('T')[0]
         break
+      }
       case 'monthly':
-        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        key = date && !Number.isNaN(date.getTime())
+          ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+          : ''
         break
       case 'yearly':
-        key = `${date.getFullYear()}`
+        key = date && !Number.isNaN(date.getTime()) ? `${date.getFullYear()}` : ''
         break
       default:
-        key = (transaction as any).date
+        key = transaction.date ?? ''
     }
 
     if (!grouped[key]) {
@@ -199,14 +231,14 @@ function groupByPeriod(transactions: FinancialTransaction[], period: string) {
       }
     }
 
-    const currentGroup = grouped[key]!
-    const amount = Number((transaction as any).amount)
-    if ((transaction as any).category === 'Revenue') {
+    const currentGroup = grouped[key]
+    const amount = safeParseAmount(transaction.amount)
+    if (transaction.category === 'Revenue') {
       currentGroup.income += amount
     } else {
       currentGroup.expenses += amount
     }
-    (currentGroup as any).net_cash_flow = currentGroup.income - currentGroup.expenses
+    currentGroup.net_cash_flow = currentGroup.income - currentGroup.expenses
     currentGroup.transaction_count++
   })
 
@@ -216,16 +248,16 @@ function groupByPeriod(transactions: FinancialTransaction[], period: string) {
 }
 
 // Helper: Calculate category breakdown
-function calculateCategoryBreakdown(transactions: FinancialTransaction[]) {
+function calculateCategoryBreakdown(transactions: FinancialRecordPartial[]) {
   const breakdown: Record<string, CategoryBreakdownProcessing> = {}
 
   transactions.forEach(transaction => {
-    const category = (transaction as any).category
-    const subcategory = transaction.subcategory || 'Other'
+    const category = safeString(transaction.category)
+    const subcategory = 'Other' // No subcategory in financial_records
 
     if (!breakdown[category]) {
       breakdown[category] = {
-        category: category,
+        category,
         total: 0,
         count: 0,
         percentage: 0,
@@ -233,7 +265,7 @@ function calculateCategoryBreakdown(transactions: FinancialTransaction[]) {
       }
     }
 
-    const amount = Number((transaction as any).amount)
+    const amount = safeParseAmount(transaction.amount)
     breakdown[category].total += amount
     breakdown[category].count++
 
@@ -249,56 +281,83 @@ function calculateCategoryBreakdown(transactions: FinancialTransaction[]) {
   })
 
   // Calculate percentages
-  const totalAmount = Object.values(breakdown).reduce((sum: number, cat: CategoryBreakdownProcessing) => sum + (cat as any).total, 0)
+  const totalAmount = Object.values(breakdown).reduce((sum: number, cat: CategoryBreakdownProcessing) => sum + cat.total, 0)
   Object.values(breakdown).forEach((cat: CategoryBreakdownProcessing) => {
-    cat.percentage = totalAmount > 0 ? ((cat as any).total / totalAmount) * 100 : 0
-    ;(cat as any as CategoryBreakdown).subcategories = Object.values(cat.subcategories)
+    cat.percentage = totalAmount > 0 ? (cat.total / totalAmount) * 100 : 0
+    // Convert subcategories record to array
+    ;(cat as unknown as CategoryBreakdown).subcategories = Object.values(cat.subcategories)
   })
 
-  return Object.values(breakdown).map(cat => cat as any as CategoryBreakdown).sort((a: CategoryBreakdown, b: CategoryBreakdown) => (b as any).total - (a as any).total)
+  return Object.values(breakdown).map((cat: CategoryBreakdownProcessing) => {
+    const result: CategoryBreakdown = {
+      category: cat.category,
+      total: cat.total,
+      count: cat.count,
+      percentage: cat.percentage,
+      subcategories: Object.values(cat.subcategories)
+    }
+    return result
+  }).sort((a: CategoryBreakdown, b: CategoryBreakdown) => b.total - a.total)
 }
 
 // Helper: Group by category for summary
-function groupByCategory(transactions: unknown[]) {
+function groupByCategory(transactions: FinancialRecordPartial[]) {
   const grouped: Record<string, number> = {}
   transactions.forEach(t => {
-    const category = (t as any).category === 'Revenue' ? ((t as any).subcategory || 'Penjualan Produk') : (t as any).category
-    grouped[category] = (grouped[category] || 0) + Number((t as any).amount)
+    const category = safeString(t.category)
+    grouped[category] = (grouped[category] || 0) + safeParseAmount(t.amount)
   })
   return grouped
 }
 
 // Helper: Calculate trend
-function calculateTrend(cashFlowByPeriod: unknown[]) {
+function calculateTrend(cashFlowByPeriod: PeriodCashFlow[]) {
   if (cashFlowByPeriod.length < 2) {
     return {
-      direction: 'stable',
+      direction: 'stable' as const,
       change_percentage: 0,
-      average_cash_flow: (cashFlowByPeriod[0] as any)?.net_cash_flow || 0
+      average_cash_flow: cashFlowByPeriod[0]?.net_cash_flow || 0
     }
   }
 
-  const recent = (cashFlowByPeriod[cashFlowByPeriod.length - 1] as any).net_cash_flow
-  const previous = (cashFlowByPeriod[cashFlowByPeriod.length - 2] as any).net_cash_flow
+  const recentItem = cashFlowByPeriod[cashFlowByPeriod.length - 1]
+  const previousItem = cashFlowByPeriod[cashFlowByPeriod.length - 2]
+  
+  if (!recentItem || !previousItem) {
+    return {
+      direction: 'stable' as const,
+      change_percentage: 0,
+      average_cash_flow: 0
+    }
+  }
+
+  const recent = recentItem.net_cash_flow
+  const previous = previousItem.net_cash_flow
 
   const change = recent - previous
   const changePercentage = previous !== 0 ? (change / Math.abs(previous)) * 100 : 0
 
-  const avgCashFlow = cashFlowByPeriod.reduce((sum: number, p) => sum + (p as any).net_cash_flow, 0) / cashFlowByPeriod.length
+  const avgCashFlow = cashFlowByPeriod.reduce((sum: number, p) => sum + p.net_cash_flow, 0) / cashFlowByPeriod.length
+
+  let direction: 'increasing' | 'decreasing' | 'stable' = 'stable'
+  if (change > 0) {
+    direction = 'increasing'
+  } else if (change < 0) {
+    direction = 'decreasing'
+  }
 
   return {
-    direction: change > 0 ? 'increasing' : change < 0 ? 'decreasing' : 'stable',
+    direction,
     change_amount: change,
     change_percentage: changePercentage,
     average_cash_flow: avgCashFlow,
-    highest_period: cashFlowByPeriod.reduce((max, p) => (p as any).net_cash_flow > (max as any).net_cash_flow ? p : max),
-    lowest_period: cashFlowByPeriod.reduce((min, p) => (p as any).net_cash_flow < (min as any).net_cash_flow ? p : min)
+    highest_period: cashFlowByPeriod.reduce((max, p) => p.net_cash_flow > max.net_cash_flow ? p : max),
+    lowest_period: cashFlowByPeriod.reduce((min, p) => p.net_cash_flow < min.net_cash_flow ? p : min)
   }
 }
 
 // Helper: Calculate comparison with previous period
-async function calculateComparison(supabase: ReturnType<typeof createServiceRoleClient>, startDate: string, endDate: string, period: string) {
-  // Remove unused period parameter
+async function calculateComparison(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, startDate: string, endDate: string) {
   const start = new Date(startDate)
   const end = new Date(endDate)
   const duration = end.getTime() - start.getTime()
@@ -306,9 +365,11 @@ async function calculateComparison(supabase: ReturnType<typeof createServiceRole
   const prevStart = new Date(start.getTime() - duration)
   const prevEnd = new Date(start.getTime() - 1)
 
+  // ✅ CRITICAL FIX: Filter by user_id
   const { data: prevTransactions } = await supabase
     .from('financial_records')
-    .select('*')
+    .select('category, amount')
+    .eq('user_id', userId) // ✅ RLS enforcement
     .gte('date', prevStart.toISOString().split('T')[0])
     .lte('date', prevEnd.toISOString().split('T')[0])
 
@@ -316,11 +377,14 @@ async function calculateComparison(supabase: ReturnType<typeof createServiceRole
     return null
   }
 
-  const prevIncome = prevTransactions.filter((t: FinancialTransaction) => (t as any).category === 'Revenue')
-  const prevExpenses = prevTransactions.filter((t: FinancialTransaction) => (t as any).category !== 'Revenue')
+  // Type for the limited query result
+  interface LimitedRecord { category: string; amount: number }
+  
+  const prevIncome = prevTransactions.filter((t: LimitedRecord) => t.category === 'Revenue')
+  const prevExpenses = prevTransactions.filter((t: LimitedRecord) => t.category !== 'Revenue')
 
-  const prevTotalIncome = prevIncome.reduce((sum: number, t: FinancialTransaction) => sum + Number((t as any).amount), 0)
-  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: FinancialTransaction) => sum + Number((t as any).amount), 0)
+  const prevTotalIncome = prevIncome.reduce((sum: number, t: LimitedRecord) => sum + safeParseAmount(t.amount), 0)
+  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: LimitedRecord) => sum + safeParseAmount(t.amount), 0)
   const prevNetCashFlow = prevTotalIncome - prevTotalExpenses
 
   return {
@@ -335,15 +399,14 @@ async function calculateComparison(supabase: ReturnType<typeof createServiceRole
 }
 
 // Helper: Get top transactions
-function getTopTransactions(transactions: unknown[], limit: number) {
+function getTopTransactions(transactions: FinancialRecordPartial[], limit: number) {
   return transactions
-    .sort((a, b) => Number((b as any).amount) - Number((a as any).amount))
+    .sort((a, b) => safeParseAmount(b.amount) - safeParseAmount(a.amount))
     .slice(0, limit)
     .map(t => ({
-      description: (t as any).description,
-      amount: Number((t as any).amount),
-      date: (t as any).date,
-      category: (t as any).category,
-      subcategory: (t as any).subcategory
+      description: safeString(t.description),
+      amount: safeParseAmount(t.amount),
+      date: t.date,
+      category: safeString(t.category)
     }))
 }

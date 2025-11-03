@@ -1,8 +1,11 @@
+import { z } from 'zod'
+import { apiLogger } from '@/lib/logger'
+import { InputSanitizer } from '@/utils/security'
+
+
 // Base validation utilities and core schemas
 // Core validation functions and basic schemas used across the application
 
-import { z } from 'zod'
-import { apiLogger } from '@/lib/logger'
 
 // Base validation utilities
 export const requiredString = z.string().min(1, 'validation.fieldRequired')
@@ -19,8 +22,8 @@ export const percentage = z.number().min(0, 'validation.nonNegativePercentage').
 export const indonesianName = z.string().min(2, 'validation.nameMinLength').max(100, 'validation.nameMaxLength')
 
 // Enhanced base schemas
-export const UUIDSchema = z.string().uuid()
-export const EmailSchema = z.string().email()
+export const UUIDSchema = z.string().uuid({ message: 'Invalid UUID format' })
+export const EmailSchema = z.string().email({ message: 'Invalid email format' })
 export const PhoneSchema = z.string().regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/, 'Invalid Indonesian phone number')
 export const DateStringSchema = z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid date string')
 export const PositiveNumberSchema = z.number().positive()
@@ -50,12 +53,12 @@ export const EnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url('Invalid app URL'),
   NODE_ENV: z.enum(['development', 'production', 'test']),
 
-  // Optional: Cron Job Authentication
-  CRON_SECRET: z.string().optional(),
-}).refine((env) => {
+  // Cron removed - no longer needed
+  // CRON_SECRET: z.string().optional(),
+}).refine((env) => 
   // At least one AI service must be configured
-  return env.OPENAI_API_KEY || env.ANTHROPIC_API_KEY
-}, {
+   env.OPENAI_API_KEY ?? env.ANTHROPIC_API_KEY
+, {
   message: 'At least one AI service (OpenAI or Anthropic) must be configured',
   path: ['OPENAI_API_KEY']
 })
@@ -71,9 +74,9 @@ export function validateEnvironment(): EnvConfig {
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
     NODE_ENV: process.env.NODE_ENV || 'development',
-    CRON_SECRET: process.env.CRON_SECRET,
+    // CRON_SECRET: process.env.CRON_SECRET, // Removed
   }
 
   const validation = EnvSchema.safeParse(env)
@@ -90,7 +93,7 @@ export function validateEnvironment(): EnvConfig {
 }
 
 // Validation utility functions
-export function validateFormData<T>(schema: z.ZodSchema<T>, data: any): {
+export function validateFormData<T>(schema: z.ZodSchema<T>, data: unknown): {
   success: boolean
   data?: T
   errors?: z.ZodIssue[]
@@ -98,11 +101,11 @@ export function validateFormData<T>(schema: z.ZodSchema<T>, data: any): {
   try {
     const result = schema.parse(data)
     return { success: true, data: result }
-  } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      return { success: false, errors: error.issues }
+  } catch (err: unknown) {
+    if (err instanceof z.ZodError) {
+      return { success: false, errors: err.issues }
     }
-    throw error
+    throw err
   }
 }
 
@@ -121,7 +124,8 @@ export function zodErrorsToFieldErrors(errors: z.ZodIssue[]): Record<string, str
   errors.forEach((error) => {
     const fieldName = error.path.join('.')
     if (!fieldErrors[fieldName]) {
-      fieldErrors[fieldName] = error.message
+      // Sanitize error messages to prevent XSS
+      fieldErrors[fieldName] = InputSanitizer.sanitizeHtml(error.message)
     }
   })
 
@@ -129,40 +133,57 @@ export function zodErrorsToFieldErrors(errors: z.ZodIssue[]): Record<string, str
 }
 
 // Legacy validation function (still used in supabase.ts)
-export function validateInput(data: any, rules?: Record<string, any>): { isValid: boolean; errors: string[] } {
+export function validateInput(data: unknown, rules?: Record<string, unknown>): { isValid: boolean; errors: string[] } {
   const errors: string[] = []
 
-  for (const [field, rule] of Object.entries(rules || {})) {
-    const value = data[field]
+  if (typeof data !== 'object' || data === null) {
+    return { isValid: false, errors: ['Data must be an object'] }
+  }
 
-    if (rule?.required && (!value || value === '')) {
-      errors.push(`validation.fieldRequired`)
-      continue
-    }
+  const objData = data as Record<string, unknown>
 
-    if (value) {
-      if (rule?.type && typeof value !== rule?.type) {
-        errors.push(`validation.invalidType`)
+  for (const [field, rule] of Object.entries(rules ?? {})) {
+    const value = objData[field]
+
+    if (rule && typeof rule === 'object') {
+      const ruleObj = rule as {
+        required?: boolean
+        type?: string
+        minLength?: number
+        maxLength?: number
+        pattern?: RegExp
+        isEmail?: boolean
       }
 
-      if (rule?.minLength && value.length < rule?.minLength) {
-        errors.push(`validation.minLength`)
+      if (ruleObj?.required && (!value || value === '')) {
+        errors.push(`validation.fieldRequired`)
+        continue
       }
 
-      if (rule?.maxLength && value.length > rule?.maxLength) {
-        errors.push(`validation.maxLength`)
-      }
+      if (value !== undefined && value !== null) {
+        if (ruleObj?.type && typeof value !== ruleObj?.type) {
+          errors.push(`validation.invalidType`)
+        }
 
-      if (rule?.pattern && !rule?.pattern?.test(value)) {
-        errors.push(`validation.invalidFormat`)
-      }
+        if (ruleObj?.minLength && typeof value === 'string' && value.length < ruleObj?.minLength) {
+          errors.push(`validation.minLength`)
+        }
 
-      if (rule?.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-        errors.push(`validation.invalidEmail`)
-      }
+        if (ruleObj?.maxLength && typeof value === 'string' && value.length > ruleObj?.maxLength) {
+          errors.push(`validation.maxLength`)
+        }
 
-      if (typeof value === 'string' && /<script|javascript:|on\w+=/i.test(value)) {
-        errors.push(`validation.dangerousContent`)
+        if (ruleObj?.pattern && typeof value === 'string' && !ruleObj?.pattern?.test(value)) {
+          errors.push(`validation.invalidFormat`)
+        }
+
+        if (ruleObj?.isEmail && typeof value === 'string' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          errors.push(`validation.invalidEmail`)
+        }
+
+        if (typeof value === 'string' && /<script|javascript:|on\w+=/i.test(value)) {
+          errors.push(`validation.dangerousContent`)
+        }
       }
     }
   }

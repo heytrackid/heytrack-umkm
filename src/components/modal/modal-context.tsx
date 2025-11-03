@@ -1,8 +1,9 @@
 'use client'
 
-import type { ReactNode } from 'react';
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+
+
 
 interface ModalConfig {
   id: string
@@ -26,7 +27,7 @@ interface ModalContextType {
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined)
 
-export function ModalProvider({ children }: { children: ReactNode }) {
+export const ModalProvider = ({ children }: { children: ReactNode }) => {
   const [modals, setModals] = useState<Map<string, ModalConfig>>(new Map())
 
   const openModal = useCallback(
@@ -93,7 +94,7 @@ export function useModal() {
 /**
  * Internal component to render all modals
  */
-function ModalRenderer() {
+const ModalRenderer = () => {
   const { modals, closeModal } = useModal()
 
   const sizeClasses = {
@@ -108,13 +109,13 @@ function ModalRenderer() {
       {Array.from(modals.values()).map((modal) => (
         <Dialog
           key={modal.id}
-          open={true}
+          open
           onOpenChange={(open) => {
-            if (!open) {closeModal(modal.id)}
+            if (!open) { closeModal(modal.id) }
           }}
         >
-          <DialogContent className={sizeClasses[modal.size || 'md']}>
-            {(modal.title || modal.description) && (
+          <DialogContent className={sizeClasses[modal.size ?? 'md']}>
+            {(modal.title ?? modal.description) && (
               <DialogHeader>
                 {modal.title && <DialogTitle>{modal.title}</DialogTitle>}
                 {modal.description && <DialogDescription>{modal.description}</DialogDescription>}

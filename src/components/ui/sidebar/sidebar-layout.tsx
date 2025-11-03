@@ -1,14 +1,14 @@
-// Sidebar Layout Components
-// Header, Footer, Content, and layout-related components
-
-import * as React from "react"
+import type { ComponentProps } from 'react'
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 
-export function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+// Sidebar Layout Components
+// Header, Footer, Content, and layout-related components
+
+
+export const SidebarHeader = ({ className, ...props }: ComponentProps<'div'>) => (
     <div
       data-slot="sidebar-header"
       data-sidebar="header"
@@ -16,10 +16,8 @@ export function SidebarHeader({ className, ...props }: React.ComponentProps<"div
       {...props}
     />
   )
-}
 
-export function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+export const SidebarFooter = ({ className, ...props }: ComponentProps<'div'>) => (
     <div
       data-slot="sidebar-footer"
       data-sidebar="footer"
@@ -27,13 +25,11 @@ export function SidebarFooter({ className, ...props }: React.ComponentProps<"div
       {...props}
     />
   )
-}
 
-export function SidebarSeparator({
+export const SidebarSeparator = ({
   className,
   ...props
-}: React.ComponentProps<typeof Separator>) {
-  return (
+}: ComponentProps<typeof Separator>) => (
     <Separator
       data-slot="sidebar-separator"
       data-sidebar="separator"
@@ -41,10 +37,8 @@ export function SidebarSeparator({
       {...props}
     />
   )
-}
 
-export function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+export const SidebarContent = ({ className, ...props }: ComponentProps<'div'>) => (
     <div
       data-slot="sidebar-content"
       data-sidebar="content"
@@ -55,10 +49,8 @@ export function SidebarContent({ className, ...props }: React.ComponentProps<"di
       {...props}
     />
   )
-}
 
-export function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+export const SidebarGroup = ({ className, ...props }: ComponentProps<'div'>) => (
     <div
       data-slot="sidebar-group"
       data-sidebar="group"
@@ -66,13 +58,12 @@ export function SidebarGroup({ className, ...props }: React.ComponentProps<"div"
       {...props}
     />
   )
-}
 
-export function SidebarGroupLabel({
+export const SidebarGroupLabel = ({
   className,
   asChild = false,
   ...props
-}: React.ComponentProps<"div"> & { asChild?: boolean }) {
+}: ComponentProps<'div'> & { asChild?: boolean }) => {
   const Comp = asChild ? Slot : "div"
 
   return (
@@ -89,11 +80,11 @@ export function SidebarGroupLabel({
   )
 }
 
-export function SidebarGroupAction({
+export const SidebarGroupAction = ({
   className,
   asChild = false,
   ...props
-}: React.ComponentProps<"button"> & { asChild?: boolean }) {
+}: ComponentProps<'button'> & { asChild?: boolean }) => {
   const Comp = asChild ? Slot : "button"
 
   return (
@@ -112,11 +103,10 @@ export function SidebarGroupAction({
   )
 }
 
-export function SidebarGroupContent({
+export const SidebarGroupContent = ({
   className,
   ...props
-}: React.ComponentProps<"div">) {
-  return (
+}: ComponentProps<'div'>) => (
     <div
       data-slot="sidebar-group-content"
       data-sidebar="group-content"
@@ -124,13 +114,11 @@ export function SidebarGroupContent({
       {...props}
     />
   )
-}
 
-export function SidebarInput({
+export const SidebarInput = ({
   className,
   ...props
-}: React.ComponentProps<typeof Input>) {
-  return (
+}: ComponentProps<typeof Input>) => (
     <Input
       data-slot="sidebar-input"
       data-sidebar="input"
@@ -138,4 +126,3 @@ export function SidebarInput({
       {...props}
     />
   )
-}

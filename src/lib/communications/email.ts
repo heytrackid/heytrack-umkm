@@ -1,10 +1,12 @@
+import { automationLogger } from '@/lib/logger'
+import type { EmailConfig } from './types'
+
+
 /**
  * Email Service Module
  * Email communication service for notifications and updates
  */
 
-import { automationLogger } from '@/lib/logger'
-import type { EmailConfig } from './types'
 
 export class EmailService {
   private config: EmailConfig;
@@ -13,7 +15,7 @@ export class EmailService {
     this.config = config;
   }
 
-  async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
+  sendEmail(to: string, subject: string, _html: string): boolean {
     // Placeholder for email implementation
     automationLogger.info({ to, subject }, 'Email sent (placeholder)');
     return true;

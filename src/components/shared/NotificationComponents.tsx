@@ -1,34 +1,27 @@
 'use client'
 
-import * as React from 'react'
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Toast } from '@/components/ui/toast'
+import { cn } from '@/lib/utils'
+import { formatRelativeTime } from '@/lib/shared/utilities'
 import {
   Bell,
-  BellRing,
   CheckCircle,
   AlertTriangle,
   Info,
   X,
   XCircle,
-  Clock,
   User,
   ShoppingCart,
   Package,
   DollarSign,
-  TrendingUp,
-  MessageSquare,
   Settings,
-  AlertCircle,
   Activity
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { formatRelativeTime } from '@/lib/shared/utilities'
 
 // Notification Types
 export interface NotificationItem {
@@ -40,7 +33,7 @@ export interface NotificationItem {
   read: boolean
   actionUrl?: string
   actionLabel?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   priority: 'low' | 'medium' | 'high' | 'urgent'
 }
 
@@ -53,14 +46,14 @@ interface NotificationCenterProps {
   className?: string
 }
 
-export function NotificationCenter({
+export const NotificationCenter = ({
   notifications,
   onMarkAsRead,
   onMarkAllAsRead,
   onDelete,
   onAction,
   className = ""
-}: NotificationCenterProps) {
+}: NotificationCenterProps) => {
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
 
   const filteredNotifications = notifications.filter(notification =>
@@ -230,29 +223,30 @@ interface ToastNotificationProps {
   onClose?: () => void
 }
 
-export function ToastNotification({
+export const ToastNotification = ({
   type,
   title,
   message,
   duration = 4000,
   onClose
-}: ToastNotificationProps) {
+}: ToastNotificationProps) => {
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
-        setIsVisible(false)
+        void setIsVisible(false)
         onClose?.()
       }, duration)
 
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [duration, onClose])
 
-  if (!isVisible) return null
+  if (!isVisible) { return null }
 
-  const getToastStyles = () => {
+  const getToastStyles = (): string => {
     switch (type) {
       case 'success':
         return 'border-green-200 bg-green-50 text-green-800'
@@ -299,7 +293,7 @@ export function ToastNotification({
           variant="ghost"
           size="sm"
           onClick={() => {
-            setIsVisible(false)
+            void setIsVisible(false)
             onClose?.()
           }}
           className="flex-shrink-0 h-6 w-6 p-0"
@@ -335,7 +329,7 @@ interface ActivityItem {
     name: string
     avatar?: string
   }
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 interface ActivityFeedProps {
@@ -344,11 +338,11 @@ interface ActivityFeedProps {
   className?: string
 }
 
-export function ActivityFeed({
+export const ActivityFeed = ({
   activities,
   onViewDetails,
   className = ""
-}: ActivityFeedProps) {
+}: ActivityFeedProps) => {
   const getActivityIcon = (type: ActivityItem['type']) => {
     switch (type) {
       case 'user':
@@ -470,14 +464,14 @@ interface AlertBannerProps {
   className?: string
 }
 
-export function AlertBanner({
+export const AlertBanner = ({
   type,
   title,
   message,
   action,
   onClose,
   className = ""
-}: AlertBannerProps) {
+}: AlertBannerProps) => {
   const getAlertStyles = () => {
     switch (type) {
       case 'success':
@@ -546,13 +540,13 @@ interface NotificationBadgeProps {
   className?: string
 }
 
-export function NotificationBadge({
+export const NotificationBadge = ({
   count,
   maxCount = 99,
   variant = 'default',
   className = ""
-}: NotificationBadgeProps) {
-  if (count === 0) return null
+}: NotificationBadgeProps) => {
+  if (count === 0) { return null }
 
   const displayCount = count > maxCount ? `${maxCount}+` : count.toString()
 

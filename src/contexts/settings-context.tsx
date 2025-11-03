@@ -1,8 +1,9 @@
 'use client'
 
-import * as React from 'react'
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { uiLogger } from '@/lib/logger'
+
+
 
 export interface Currency {
   code: string
@@ -50,11 +51,11 @@ export const languages: Language[] = [
   { code: 'en', name: 'English', flag: '🇺🇸' }
 ]
 
-const DEFAULT_CURRENCY_CODE = process.env.NEXT_PUBLIC_DEFAULT_CURRENCY || 'IDR'
-const DEFAULT_LANGUAGE_CODE = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE || 'id'
+const DEFAULT_CURRENCY_CODE = process.env['NEXT_PUBLIC_DEFAULT_CURRENCY'] ?? 'IDR'
+const DEFAULT_LANGUAGE_CODE = process.env['NEXT_PUBLIC_DEFAULT_LANGUAGE'] ?? 'id'
 
-const defaultCurrency = currencies.find(c => c.code === DEFAULT_CURRENCY_CODE) || currencies[0]
-const defaultLanguage = languages.find(l => l.code === DEFAULT_LANGUAGE_CODE) || languages[0]
+const defaultCurrency = currencies.find(c => c.code === DEFAULT_CURRENCY_CODE) ?? currencies[0]
+const defaultLanguage = languages.find(l => l.code === DEFAULT_LANGUAGE_CODE) ?? languages[0]
 
 const defaultSettings: Settings = {
   currency: defaultCurrency,
@@ -63,43 +64,49 @@ const defaultSettings: Settings = {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
-export function SettingsProvider({ children }: { children: React.ReactNode }) {
+export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
+  const [_isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
-    // Load settings from localStorage
-    const savedSettings = localStorage.getItem('heytrack-settings')
-    if (savedSettings) {
-      try {
-        const parsed = JSON.parse(savedSettings)
-        const parsedCurrency = currencies.find(c => c.code === parsed?.currency?.code) || defaultCurrency
-        const parsedLanguage = languages.find(l => l.code === parsed?.language?.code) || defaultLanguage
-        const newSettings: Settings = {
-          currency: parsedCurrency,
-          language: parsedLanguage
+    // Mark as hydrated to prevent hydration mismatch
+    setIsHydrated(true)
+
+    // Load settings from localStorage (client-side only)
+    if (typeof window !== 'undefined') {
+      const savedSettings = localStorage.getItem('heytrack-settings')
+      if (savedSettings) {
+        try {
+          const parsed = JSON.parse(savedSettings)
+          const parsedCurrency = currencies.find(c => c.code === parsed?.currency?.code) ?? defaultCurrency
+          const parsedLanguage = languages.find(l => l.code === parsed?.language?.code) ?? defaultLanguage
+          const newSettings: Settings = {
+            currency: parsedCurrency,
+            language: parsedLanguage
+          }
+          void setSettings(newSettings)
+          localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
+        } catch (err: unknown) {
+          uiLogger.error({ err }, 'Failed to parse saved settings from localStorage')
+          void setSettings(defaultSettings)
+          localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
         }
-        setSettings(newSettings)
-        localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
-      } catch (error: unknown) {
-        uiLogger.error({ error }, 'Failed to parse saved settings from localStorage')
-        setSettings(defaultSettings)
+      } else {
+        void setSettings(defaultSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
       }
-    } else {
-      setSettings(defaultSettings)
-      localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
     }
   }, [])
 
   const updateCurrency = (currency: Currency) => {
     const newSettings = { ...settings, currency }
-    setSettings(newSettings)
+    void setSettings(newSettings)
     localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
   }
 
   const updateLanguage = (language: Language) => {
     const newSettings = { ...settings, language }
-    setSettings(newSettings)
+    void setSettings(newSettings)
     localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
   }
 
@@ -114,7 +121,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   }
 
   const resetToDefault = () => {
-    setSettings(defaultSettings)
+    void setSettings(defaultSettings)
     localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
   }
 

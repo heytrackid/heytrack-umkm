@@ -1,9 +1,11 @@
-// Shared API utilities and helpers
-
 import { apiLogger } from '@/lib/logger'
 
+
+// Shared API utilities and helpers
+
+
 // API response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T> {
   success: boolean
   data?: T
   error?: string
@@ -23,10 +25,10 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   }
 }
 
-export interface ApiError {
-  readonly code: string
+export interface ApiErrorInterface {
+  readonly _code: string
   readonly message: string
-  readonly details?: Record<string, any>
+  readonly details?: Record<string, unknown>
   readonly statusCode: number
 }
 
@@ -61,24 +63,20 @@ export const API_ERROR_CODES = {
 /**
  * API Error class for consistent error handling
  */
-export class ApiError extends Error {
-  public readonly code: string
-  public readonly statusCode: number
-  public readonly details?: Record<string, any>
-
+export class ApiErrorClass extends Error implements ApiErrorInterface {
   constructor(
     message: string,
-    code: string = API_ERROR_CODES.UNKNOWN_ERROR,
-    statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    details?: Record<string, any>
+    public readonly _code: string = API_ERROR_CODES.UNKNOWN_ERROR,
+    public readonly statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    public readonly details?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'ApiError'
-    this.code = code
-    this.statusCode = statusCode
-    this.details = details
   }
 }
+
+// Export as ApiError for backward compatibility
+export { ApiErrorClass as ApiError }
 
 /**
  * Create standardized API response
@@ -91,12 +89,12 @@ export const createApiResponse = {
     timestamp: new Date().toISOString(),
   }),
 
-  error: (
+  error: <T = unknown>(
     message: string,
     statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    code: string = API_ERROR_CODES.UNKNOWN_ERROR,
-    details?: Record<string, any>
-  ): ApiResponse => ({
+    _code: string = API_ERROR_CODES.UNKNOWN_ERROR,
+    details?: Record<string, unknown>
+  ): ApiResponse<T> => ({
     success: false,
     error: message,
     statusCode,
@@ -157,17 +155,17 @@ export const sleep = (ms: number): Promise<void> =>
  */
 export const retryWithBackoff = async <T>(
   operation: () => Promise<T>,
-  maxRetries: number = 3,
-  baseDelay: number = 1000,
-  maxDelay: number = 10000
+  maxRetries = 3,
+  baseDelay = 1000,
+  maxDelay = 10000
 ): Promise<T> => {
-  let lastError: Error
+  let lastError: Error | undefined
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await operation()
-    } catch (error) {
-      lastError = error as Error
+    } catch (err) {
+      lastError = err as Error
 
       if (attempt === maxRetries) {
         throw lastError
@@ -178,12 +176,13 @@ export const retryWithBackoff = async <T>(
       const jitter = Math.random() * 0.1 * exponentialDelay
       const delay = exponentialDelay + jitter
 
-      apiLogger.warn(`API call failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delay}ms:`, { error })
+      apiLogger.warn({ error: err, attempt: attempt + 1, maxRetries: maxRetries + 1, delay }, 'API call failed, retrying')
       await sleep(delay)
     }
   }
 
-  throw lastError!
+  // This should never happen due to the loop logic, but TypeScript needs the check
+  throw lastError ?? new Error('Retry failed with unknown error')
 }
 
 /**
@@ -191,9 +190,9 @@ export const retryWithBackoff = async <T>(
  */
 export const apiCache = {
   // Simple in-memory cache
-  cache: new Map<string, { data: any; timestamp: number; ttl: number }>(),
+  cache: new Map<string, { data: unknown; timestamp: number; ttl: number }>(),
 
-  set: (key: string, data: any, ttl: number = DEFAULT_API_CONFIG.cacheTimeout) => {
+  set: <T>(key: string, data: T, ttl: number = DEFAULT_API_CONFIG.cacheTimeout) => {
     apiCache.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -201,16 +200,16 @@ export const apiCache = {
     })
   },
 
-  get: (key: string) => {
+  get: <T>(key: string): T | null => {
     const cached = apiCache.cache.get(key)
-    if (!cached) return null
+    if (!cached) {return null}
 
     if (Date.now() - cached.timestamp > cached.ttl) {
       apiCache.cache.delete(key)
       return null
     }
 
-    return cached.data
+    return cached.data as T
   },
 
   clear: (key?: string) => {
@@ -234,7 +233,7 @@ export const apiCache = {
 /**
  * API request wrapper with error handling and retries
  */
-export const apiRequest = async <T>(
+export const apiRequest = <T>(
   url: string,
   options: RequestInit = {},
   config: Partial<ApiRequestConfig> = {}
@@ -244,10 +243,10 @@ export const apiRequest = async <T>(
 
   // Check cache first
   if (finalConfig.cache) {
-    const cacheKey = `${options.method || 'GET'}-${url}`
-    const cached = apiCache.get(cacheKey)
+    const cacheKey = `${options.method ?? 'GET'}-${url}`
+    const cached = apiCache.get<T>(cacheKey)
     if (cached) {
-      apiLogger.debug(`Cache hit for ${url}`)
+      apiLogger.debug({ url }, 'Cache hit')
       return cached
     }
   }
@@ -278,53 +277,53 @@ export const apiRequest = async <T>(
       clearTimeout(timeoutId)
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
+        const errorData = await response.json().catch(() => ({})) as { message?: string; _code?: string; details?: Record<string, unknown> }
 
-        throw new ApiError(
-          errorData.message || `HTTP ${response.status}: ${response.statusText}`,
-          errorData.code || API_ERROR_CODES.UNKNOWN_ERROR,
+        throw new ApiErrorClass(
+          errorData.message ?? `HTTP ${response.status}: ${response.statusText}`,
+          errorData._code ?? API_ERROR_CODES.UNKNOWN_ERROR,
           response.status,
           errorData.details
         )
       }
 
-      const data = await response.json()
+      const data = await response.json() as T
       const duration = Date.now() - startTime
 
-      apiLogger.debug(`API call to ${url} completed in ${duration}ms`)
+      apiLogger.debug({ url, duration }, 'API call completed')
 
       // Cache response if enabled
       if (finalConfig.cache) {
-        const cacheKey = `${options.method || 'GET'}-${url}`
+        const cacheKey = `${options.method ?? 'GET'}-${url}`
         apiCache.set(cacheKey, data, finalConfig.cacheTimeout)
       }
 
       return data
-    } catch (error) {
+    } catch (err) {
       clearTimeout(timeoutId)
 
-      if (error instanceof ApiError) {
-        throw error
+      if (err instanceof ApiErrorClass) {
+        throw err
       }
 
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        throw new ApiError(
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        throw new ApiErrorClass(
           'Request timeout',
           API_ERROR_CODES.TIMEOUT_ERROR,
           HTTP_STATUS.BAD_REQUEST
         )
       }
 
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new ApiError(
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        throw new ApiErrorClass(
           'Network error - please check your connection',
           API_ERROR_CODES.NETWORK_ERROR,
           HTTP_STATUS.BAD_REQUEST
         )
       }
 
-      throw new ApiError(
-        error instanceof Error ? error.message : 'Unknown error occurred',
+      throw new ApiErrorClass(
+        err instanceof Error ? err.message : 'Unknown error occurred',
         API_ERROR_CODES.UNKNOWN_ERROR,
         HTTP_STATUS.INTERNAL_SERVER_ERROR
       )
@@ -346,19 +345,19 @@ export const apiMethods = {
   get: <T>(url: string, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, { method: 'GET' }, config),
 
-  post: <T>(url: string, data?: any, config?: Partial<ApiRequestConfig>) =>
+  post: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     }, config),
 
-  put: <T>(url: string, data?: any, config?: Partial<ApiRequestConfig>) =>
+  put: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     }, config),
 
-  patch: <T>(url: string, data?: any, config?: Partial<ApiRequestConfig>) =>
+  patch: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
@@ -373,7 +372,7 @@ export const apiMethods = {
  */
 export const urlBuilder = {
   // Build URL with query parameters
-  withParams: (baseUrl: string, params: Record<string, any> = {}): string => {
+  withParams: (baseUrl: string, params: Record<string, unknown> = {}): string => {
     const url = new URL(baseUrl, typeof window !== 'undefined' ? window.location.origin : 'http://localhost')
 
     Object.entries(params).forEach(([key, value]) => {
@@ -390,21 +389,17 @@ export const urlBuilder = {
   },
 
   // Build pagination URL
-  withPagination: (baseUrl: string, page: number, limit: number, params: Record<string, any> = {}): string => {
-    return urlBuilder.withParams(baseUrl, {
+  withPagination: (baseUrl: string, page: number, limit: number, params: Record<string, unknown> = {}): string => urlBuilder.withParams(baseUrl, {
       ...params,
       page,
       limit,
-    })
-  },
+    }),
 
   // Build search URL
-  withSearch: (baseUrl: string, search: string, params: Record<string, any> = {}): string => {
-    return urlBuilder.withParams(baseUrl, {
+  withSearch: (baseUrl: string, search: string, params: Record<string, unknown> = {}): string => urlBuilder.withParams(baseUrl, {
       ...params,
       search,
-    })
-  },
+    }),
 }
 
 /**
@@ -412,7 +407,7 @@ export const urlBuilder = {
  */
 export const responseTransformers = {
   // Transform Supabase response to standardized format
-  supabaseToStandard: <T>(response: any): ApiResponse<T> => {
+  supabaseToStandard: <T>(response: { data?: T; error?: { message: string } }): ApiResponse<T> => {
     if (response.error) {
       return createApiResponse.error(
         response.error.message,
@@ -422,14 +417,21 @@ export const responseTransformers = {
       )
     }
 
+    if (!response.data) {
+      return createApiResponse.error(
+        'No data returned from database',
+        HTTP_STATUS.INTERNAL_SERVER_ERROR
+      )
+    }
+
     return createApiResponse.success(response.data)
   },
 
   // Transform array response to paginated response
   arrayToPaginated: <T>(
     data: T[],
-    page: number = 1,
-    limit: number = 10,
+    page = 1,
+    limit = 10,
     total: number = data.length
   ): PaginatedResponse<T> => {
     const totalPages = Math.ceil(total / limit)
@@ -456,9 +458,9 @@ export const responseTransformers = {
 export const apiAnalytics = {
   requests: new Map<string, { count: number; totalTime: number; errors: number }>(),
 
-  trackRequest: (url: string, duration: number, error: boolean = false) => {
+  trackRequest: (url: string, duration: number, error = false) => {
     const key = url.split('?')[0] // Remove query params for grouping
-    const existing = apiAnalytics.requests.get(key) || { count: 0, totalTime: 0, errors: 0 }
+    const existing = apiAnalytics.requests.get(key) ?? { count: 0, totalTime: 0, errors: 0 }
 
     apiAnalytics.requests.set(key, {
       count: existing.count + 1,

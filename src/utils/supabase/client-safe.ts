@@ -1,9 +1,11 @@
+import { createClient } from './client'
+
+
 /**
  * Client-safe Supabase utilities that can be imported anywhere
  * Server-specific functionality is isolated and only executed server-side
  */
 
-import { createClient } from './client'
 
 export { createClient }
 
@@ -14,7 +16,7 @@ function validateServerEnvironment() {
     throw new Error('createServerClient should only be called server-side')
   }
 
-  const runtime = process.env.NEXT_RUNTIME
+  const runtime = process.env['NEXT_RUNTIME']
   if (runtime && runtime !== 'nodejs') {
     throw new Error(`createServerClient requires NEXT_RUNTIME to be "nodejs", received "${runtime}"`)
   }
@@ -34,14 +36,13 @@ export async function createServerClient() {
 
   // In server-side environments, use dynamic import with a trick to avoid bundler detection
   // Using a dynamic import function to make it harder for static analysis tools
-  const serverModule = await (async () => {
+  const serverModule = await ((() => {
     // Import path as a variable to avoid static analysis
     const serverPath = './server'
-    return await import(serverPath)
-  })()
+    return import(serverPath)
+  })())
   
   return serverModule.createClient()
 }
 
 // Export server client only for server-side use
-export { createServiceRoleClient } from './service-role'

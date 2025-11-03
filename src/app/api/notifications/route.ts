@@ -1,134 +1,116 @@
-/**
- * GET /api/notifications - Get user notifications
- * Query parameters:
- * - category: filter by category (inventory, financial, etc.)
- * - limit: number of notifications to return (default 20)
- * - unread_only: boolean, return only unread notifications
- */
-
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
+import type { NotificationsTable } from '@/types/database'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
-export async function GET(request: NextRequest) {
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+type Notification = NotificationsTable
+
+async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const { searchParams } = new URL(request.url)
-
-    const category = searchParams.get('category')
-    const limit = parseInt(searchParams.get('limit') || '20', 10)
-    const unreadOnly = searchParams.get('unread_only') === 'true'
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-    if (userError || !user) {
+    
+    // Auth check
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Parse query params
+    const { searchParams } = new URL(request.url)
+    const unreadOnly = searchParams.get('unread_only') === 'true'
+    const category = searchParams.get('category')
+    const limit = parseInt(searchParams.get('limit') ?? '50', 10)
 
     // Build query
     let query = supabase
       .from('notifications')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(limit)
 
-    // Add filters
+    // Filter by unread
+    if (unreadOnly) {
+      query = query.eq('is_read', false).eq('is_dismissed', false)
+    }
+
+    // Filter by category
     if (category) {
       query = query.eq('category', category)
     }
 
-    if (unreadOnly) {
-      query = query.eq('is_read', false)
-    }
+    // Filter out expired notifications
+    query = query.or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
 
-    // Only show non-dismissed notifications
-    query = query.eq('is_dismissed', false)
-
-    // Optional: filter by user if notifications are user-specific
-    // For now, show all notifications (global inventory alerts)
-
-    const { data: notifications, error } = await query
+    const { data, error } = await query
 
     if (error) {
-      apiLogger.error({ error }, 'Failed to fetch notifications')
+      apiLogger.error({ error, userId: user.id }, 'Failed to fetch notifications')
       return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 })
     }
 
-    apiLogger.info({
-      category,
-      limit,
-      unreadOnly,
-      resultCount: notifications?.length || 0
-    }, 'Notifications fetched successfully')
+    // Get unread count
+    const { count: unreadCount } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('is_read', false)
+      .eq('is_dismissed', false)
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
 
-    return NextResponse.json(notifications || [])
+    return NextResponse.json({
+      notifications: data as Notification[],
+      unread_count: unreadCount ?? 0,
+    })
 
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in notifications API')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    apiLogger.error({ error }, 'Error in GET /api/notifications')
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-/**
- * PATCH /api/notifications/[id] - Update notification (mark as read/dismiss)
- */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const resolvedParams = await params
-    const notificationId = resolvedParams.id
+    
+    // Auth check
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     const body = await request.json()
-    const { is_read, is_dismissed } = body
 
-    if (typeof is_read !== 'boolean' && typeof is_dismissed !== 'boolean') {
-      return NextResponse.json(
-        { error: 'Invalid update data. Must provide is_read or is_dismissed' },
-        { status: 400 }
-      )
-    }
-
-    const updateData: any = {}
-    if (typeof is_read === 'boolean') {
-      updateData.is_read = is_read
-    }
-    if (typeof is_dismissed === 'boolean') {
-      updateData.is_dismissed = is_dismissed
-    }
-    updateData.updated_at = new Date().toISOString()
-
-    const { data: notification, error } = await supabase
+    // Create notification
+    const { data, error } = await supabase
       .from('notifications')
-      .update(updateData)
-      .eq('id', notificationId)
+      .insert({
+        ...body,
+        user_id: user.id,
+      })
       .select()
       .single()
 
     if (error) {
-      apiLogger.error({ error, notificationId }, 'Failed to update notification')
-      return NextResponse.json({ error: 'Failed to update notification' }, { status: 500 })
+      apiLogger.error({ error, userId: user.id }, 'Failed to create notification')
+      return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 })
     }
 
-    if (!notification) {
-      return NextResponse.json({ error: 'Notification not found' }, { status: 404 })
-    }
-
-    apiLogger.info({ notificationId, is_read, is_dismissed }, 'Notification updated successfully')
-
-    return NextResponse.json(notification)
+    return NextResponse.json(data, { status: 201 })
 
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in notification update API')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    apiLogger.error({ error }, 'Error in POST /api/notifications')
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+// Export secured handlers
+export { securedGET as GET, securedPOST as POST }

@@ -1,13 +1,14 @@
 'use client'
-import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useResponsive } from '@/hooks/useResponsive'
-import { Search, Filter, X, Calendar } from 'lucide-react'
+
+import { Search, X } from 'lucide-react'
 import type { OrderFilters as OrderFiltersType } from './types'
+
+
 
 interface OrderFiltersProps {
   filters: OrderFiltersType
@@ -15,24 +16,24 @@ interface OrderFiltersProps {
   onReset: () => void
 }
 
-export default function OrderFilters({ 
-  filters, 
-  onFiltersChange, 
-  onReset 
-}: OrderFiltersProps) {
-  const { isMobile } = useResponsive()
+const OrderFilters = ({
+  filters,
+  onFiltersChange,
+  onReset
+}: OrderFiltersProps) => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const handleFilterChange = (key: keyof OrderFiltersType, value: string) => {
     onFiltersChange({ ...filters, [key]: value })
   }
 
-  const hasActiveFilters = 
-    filters.status !== 'all' || 
-    filters.paymentStatus !== 'all' || 
-    filters.priority !== 'all' || 
-    filters.dateFrom || 
-    filters.dateTo || 
-    filters.searchTerm
+  const hasActiveFilters =
+    filters.status !== 'all' ||
+    filters.paymentStatus !== 'all' ||
+    filters.priority !== 'all' ||
+    Boolean(filters.dateFrom) ||
+    Boolean(filters.dateTo) ||
+    Boolean(filters.searchTerm)
 
   return (
     <Card>
@@ -103,7 +104,7 @@ export default function OrderFilters({
             <div>
               <Input
                 type="date"
-                value={filters.dateFrom || ''}
+                value={filters.dateFrom ?? ''}
                 onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
                 placeholder=""
               />
@@ -113,7 +114,7 @@ export default function OrderFilters({
             <div>
               <Input
                 type="date"
-                value={filters.dateTo || ''}
+                value={filters.dateTo ?? ''}
                 onChange={(e) => handleFilterChange('dateTo', e.target.value)}
                 placeholder=""
               />
@@ -169,7 +170,7 @@ export default function OrderFilters({
                 variant="ghost"
                 size="sm"
                 onClick={onReset}
-                className="text-red-600 hover:text-red-700"
+                className="text-gray-600 hover:text-gray-700"
               >
                 <X className="h-4 w-4 mr-2" />
                 Reset Filter
@@ -181,3 +182,5 @@ export default function OrderFilters({
     </Card>
   )
 }
+
+export default OrderFilters

@@ -1,24 +1,31 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/server'
+import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+
+
+
+type Recipe = RecipesTable
+type RecipeIngredient = RecipeIngredientsTable
+type Ingredient = IngredientsTable
+
+// Type for the Supabase query result - matches the actual structure returned by Supabase joins
+type RecipeWithIngredientsForValidation = Recipe & {
+  recipe_ingredients: Array<RecipeIngredient & {
+    ingredient: Array<Ingredient | null>
+  }>
+}
 
 /**
- * Recipe with ingredients for validation
+ * Type guard for recipe validation query result
  */
-type RecipeValidationQueryResult = {
-  id: string
-  name: string
-  recipe_ingredients: Array<{
-    quantity: number
-    unit: string
-    ingredient: Array<{
-      id: string
-      name: string
-      current_stock: number | null
-      reorder_point: number | null
-      unit_type: string | null
-      is_active: boolean | null
-    }>
-  }>
+function isRecipeValidationResult(data: unknown): data is RecipeWithIngredientsForValidation {
+  if (!data || typeof data !== 'object') {return false}
+  const recipe = data as RecipeWithIngredientsForValidation
+  return (
+    typeof recipe.id === 'string' &&
+    typeof recipe.name === 'string' &&
+    Array.isArray(recipe.recipe_ingredients)
+  )
 }
 
 /**
@@ -42,6 +49,8 @@ export class OrderValidationService {
     const errors: string[] = []
 
     try {
+      const supabase = await createClient()
+      
       for (const item of items) {
         const { data: recipe, error } = await supabase
           .from('recipes')
@@ -69,15 +78,21 @@ export class OrderValidationService {
           continue
         }
 
-        const typedRecipe = recipe as RecipeValidationQueryResult
+        if (!isRecipeValidationResult(recipe)) {
+          dbLogger.error({ recipe }, 'Invalid recipe data structure')
+          errors.push(`Data recipe ${item.recipe_id} tidak valid`)
+          continue
+        }
+
+        const typedRecipe = recipe as RecipeWithIngredientsForValidation
 
         // Check each ingredient
         for (const ri of typedRecipe.recipe_ingredients || []) {
           // Supabase returns arrays for joined data, get first element
           const ingredient = ri.ingredient?.[0]
           
-          if (!ingredient || !ingredient.is_active) {
-            errors.push(`Ingredient ${ingredient?.name || 'unknown'} untuk ${typedRecipe.name} tidak tersedia`)
+          if (!ingredient?.is_active) {
+            errors.push(`Ingredient ${ingredient?.name ?? 'unknown'} untuk ${typedRecipe.name} tidak tersedia`)
             continue
           }
 
@@ -102,8 +117,8 @@ export class OrderValidationService {
         warnings,
         errors
       }
-    } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error validating order against inventory')
+    } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Error validating order against inventory')
       return {
         isValid: false,
         warnings,

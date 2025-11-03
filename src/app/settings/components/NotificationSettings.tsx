@@ -1,10 +1,12 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
 import { Bell } from 'lucide-react'
-import type { AppSettingsState, SettingsUpdateHandler } from '../types'
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+
+
 
 interface NotificationSettingsProps {
   settings: AppSettingsState
@@ -14,9 +16,7 @@ interface NotificationSettingsProps {
 /**
  * Notification settings component
  */
-export function NotificationSettings({ settings, onSettingChange }: NotificationSettingsProps) {
-  
-  return (
+export const NotificationSettings = ({ settings, onSettingChange }: NotificationSettingsProps) => (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -32,7 +32,7 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.emailNotifications}
-            onCheckedChange={(checked) =>
+            onCheckedChange={(checked: boolean) =>
               onSettingChange('notifications', 'emailNotifications', checked)
             }
           />
@@ -45,7 +45,7 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.pushNotifications}
-            onCheckedChange={(checked) =>
+            onCheckedChange={(checked: boolean) =>
               onSettingChange('notifications', 'pushNotifications', checked)
             }
           />
@@ -58,7 +58,7 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.lowStockAlert}
-            onCheckedChange={(checked) =>
+            onCheckedChange={(checked: boolean) =>
               onSettingChange('notifications', 'lowStockAlert', checked)
             }
           />
@@ -71,7 +71,7 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.orderUpdates}
-            onCheckedChange={(checked) =>
+            onCheckedChange={(checked: boolean) =>
               onSettingChange('notifications', 'orderUpdates', checked)
             }
           />
@@ -84,7 +84,7 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.dailyReports}
-            onCheckedChange={(checked) =>
+            onCheckedChange={(checked: boolean) =>
               onSettingChange('notifications', 'dailyReports', checked)
             }
           />
@@ -97,7 +97,7 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.weeklyReports}
-            onCheckedChange={(checked) =>
+            onCheckedChange={(checked: boolean) =>
               onSettingChange('notifications', 'weeklyReports', checked)
             }
           />
@@ -118,4 +118,3 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
       </CardContent>
     </Card>
   )
-}

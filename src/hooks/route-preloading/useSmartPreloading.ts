@@ -1,7 +1,9 @@
 'use client'
+
 import { useEffect } from 'react'
 
-import { apiLogger } from '@/lib/logger'
+
+// Removed unused import: apiLogger
 
 /**
  * Smart preloading based on user behavior patterns
@@ -11,7 +13,7 @@ export const useSmartPreloading = () => {
   useEffect(() => {
     // Track user navigation patterns
     const navigationHistory = JSON.parse(
-      localStorage.getItem('user_navigation_patterns') || '[]'
+      localStorage.getItem('user_navigation_patterns') ?? '[]'
     ).slice(-10) // Keep last 10 routes
 
     // Add current route to history
@@ -37,7 +39,7 @@ export const useSmartPreloading = () => {
       popularRoutes.forEach(route => {
         if (route !== currentRoute) {
           // Router prefetch would go here if needed
-          console.log('Popular route identified:', route)
+          // Popular route identified silently
         }
       })
     }, 2000)

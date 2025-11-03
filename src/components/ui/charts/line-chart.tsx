@@ -1,15 +1,15 @@
-/**
- * Mobile Line Chart Component
- * Optimized line chart for mobile devices
- */
-
-import * as React from 'react'
 import { memo } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
-import { CHART_COLORS, BaseMobileChartProps } from './types'
+import { type BaseMobileChartProps, CHART_COLORS } from './types'
+
+/**
+ * Mobile Line Chart Component
+ * Optimized line chart for mobile devices
+ */
+
 
 interface MobileLineChartProps extends BaseMobileChartProps {
   xKey: string
@@ -28,7 +28,7 @@ interface MobileLineChartProps extends BaseMobileChartProps {
  * MobileLineChart - Optimized with React.memo
  * Prevents unnecessary re-renders when data hasn't changed
  */
-export const MobileLineChart = memo(function MobileLineChart({
+export const MobileLineChart = memo(({
   data,
   xKey,
   lines,
@@ -36,7 +36,7 @@ export const MobileLineChart = memo(function MobileLineChart({
   showLegend = true,
   curved = true,
   ...baseProps
-}: MobileLineChartProps) {
+}: MobileLineChartProps) => {
   const { isMobile } = useResponsive()
 
   return (
@@ -80,11 +80,11 @@ export const MobileLineChart = memo(function MobileLineChart({
           {lines.map((line, _index) => (
             <Line
               key={line.key}
-              type={curved ?"monotone" :"linear"}
+              type={curved ? "monotone" : "linear"}
               dataKey={line.key}
-              stroke={line.color || CHART_COLORS.primary[_index % CHART_COLORS.primary.length]}
-              strokeWidth={line.strokeWidth || (isMobile ? 2 : 3)}
-              dot={{ fill: line.color || CHART_COLORS.primary[_index], strokeWidth: 0, r: isMobile ? 3 : 4 }}
+              stroke={line.color ?? CHART_COLORS.primary[_index % CHART_COLORS.primary.length]}
+              strokeWidth={line.strokeWidth ?? (isMobile ? 2 : 3)}
+              dot={{ fill: line.color ?? CHART_COLORS.primary[_index], strokeWidth: 0, r: isMobile ? 3 : 4 }}
               activeDot={{ r: isMobile ? 5 : 6, strokeWidth: 0 }}
               name={line.name}
             />
@@ -93,6 +93,4 @@ export const MobileLineChart = memo(function MobileLineChart({
       </ResponsiveContainer>
     </BaseMobileChart>
   )
-}, (prevProps: MobileLineChartProps, nextProps: MobileLineChartProps) => {
-  return prevProps.data === nextProps.data && prevProps.lines === nextProps.lines
-})
+}, (prevProps: MobileLineChartProps, nextProps: MobileLineChartProps) => prevProps.data === nextProps.data && prevProps.lines === nextProps.lines)

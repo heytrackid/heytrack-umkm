@@ -1,10 +1,11 @@
+import type { NextRequest, NextResponse } from 'next/server'
+import { createErrorResponse } from '@/lib/api-core/responses'
+
 /**
  * Rate Limiting Middleware Module
  * API rate limiting protection
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { createErrorResponse } from '../responses'
 
 /**
  * Create rate limiting middleware
@@ -13,7 +14,7 @@ export function withRateLimit(options: { windowMs: number; maxRequests: number }
   const requests = new Map<string, { count: number; resetTime: number }>()
 
   return (request: NextRequest): NextResponse | null => {
-    const ip = request.headers.get('x-forwarded-for') || 'anonymous'
+    const ip = request.headers.get('x-forwarded-for') ?? 'anonymous'
     const now = Date.now()
     const windowData = requests.get(ip)
 

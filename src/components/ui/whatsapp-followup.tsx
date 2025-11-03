@@ -1,16 +1,16 @@
 'use client'
-import * as React from 'react'
 
 import { useState, useEffect } from 'react'
+import type { OrdersTable, OrderItemsTable, RecipesTable } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+
 import { apiLogger } from '@/lib/logger'
-import { 
+import {
   MessageCircle,
   Send,
   Copy,
@@ -19,34 +19,29 @@ import {
   Smartphone,
   User,
   Clock,
-  Calendar,
   Package,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react'
 
-interface Order {
-  id: string
-  order_number: string
-  customer_name: string
-  customer_phone?: string
-  status: string
-  order_date: string
+type Order = OrdersTable
+type OrderItem = OrderItemsTable
+// payment_status is a string field, not an enum
+type _PaymentStatus = string
+type Recipe = RecipesTable
+
+// Extended type for WhatsApp follow-up
+interface OrderForWhatsApp extends Order {
+  order_no: string
   due_date?: string
-  total_amount: number
-  items: Array<{
-    recipe?: {
-      name: string
-    }
-    product_name?: string
-    quantity: number
+  items: Array<OrderItem & {
+    recipe?: Pick<Recipe, 'name'>
   }>
-  payment_status?: string
   remaining_amount?: number
 }
 
 interface WhatsAppFollowUpProps {
-  order: Order
+  order: OrderForWhatsApp
   onSent?: (method: 'whatsapp' | 'business', message: string, phone: string) => void
 }
 
@@ -73,116 +68,110 @@ const getTemplateIcon = (category: string) => {
   return icons[category as keyof typeof icons] || <MessageCircle className="h-4 w-4" />
 }
 
-export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProps) {
+const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>([])
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [customMessage, setCustomMessage] = useState('')
-  const [phoneNumber, setPhoneNumber] = useState(order.customer_phone || '')
+  const [phoneNumber, setPhoneNumber] = useState(order.customer_phone ?? '')
   const [whatsappType, setWhatsappType] = useState<'whatsapp' | 'business'>('whatsapp')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
   // Fetch templates on component mount
   useEffect(() => {
-    fetchTemplates()
+    void fetchTemplates()
   }, [])
 
   const fetchTemplates = async () => {
     try {
-      setLoading(true)
+      void setLoading(true)
       const response = await fetch('/api/whatsapp-templates?active=true')
       if (response.ok) {
         const data = await response.json()
-        setTemplates(data)
+        void setTemplates(data)
         // Set default template if available
         const defaultTemplate = data.find((t: WhatsAppTemplate) => t.is_default)
         if (defaultTemplate && !selectedTemplateId) {
-          setSelectedTemplateId(defaultTemplate.id)
+          void setSelectedTemplateId(defaultTemplate.id)
         } else if (data.length > 0 && !selectedTemplateId) {
-          setSelectedTemplateId(data[0].id)
+          void setSelectedTemplateId(data[0].id)
         }
       }
     } catch (err) {
       apiLogger.error({ error: err }, 'Error fetching templates:')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
-  const getCurrentTemplate = () => {
-    return templates.find(t => t.id === selectedTemplateId)
-  }
+  const getCurrentTemplate = () => templates.find(t => t.id === selectedTemplateId)
 
-  const processTemplate = (templateContent: string, orderData: Order): string => {
+  const processTemplate = (templateContent: string, orderData: OrderForWhatsApp): string => {
     let processed = templateContent
-    
+
     // Replace common variables
     const replacements = {
-      'customer_name': orderData.customer_name,
-      'order_number': orderData.order_number,
-      'order_date': new Date(orderData.order_date).toLocaleDateString('id-ID'),
+      'customer_name': orderData.customer_name ?? '',
+      'order_no': orderData.order_no || '',
+      'order_date': new Date(orderData.order_date ?? new Date()).toLocaleDateString('id-ID'),
       'due_date': orderData.due_date ? new Date(orderData.due_date).toLocaleDateString('id-ID') : '',
-      'total_amount': orderData.total_amount.toLocaleString('id-ID'),
-      'remaining_amount': orderData.remaining_amount ? orderData.remaining_amount.toLocaleString('id-ID') : '0',
+      'total_amount': (orderData.total_amount ?? 0).toLocaleString('id-ID'),
+      'remaining_amount': (orderData.remaining_amount ?? 0).toLocaleString('id-ID'),
       'estimated_arrival': orderData.due_date ? new Date(orderData.due_date).toLocaleDateString('id-ID') : ''
     }
-    
+
     // Replace simple variables
     Object.entries(replacements).forEach(([key, value]) => {
       const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g')
       processed = processed.replace(regex, value.toString())
     })
-    
+
     // Handle order_items array
     const itemsRegex = /\{\{#each order_items\}\}([\s\S]*?)\{\{\/each\}\}/g
-    processed = processed.replace(itemsRegex, (match, itemTemplate) => {
-      return orderData.items.map(item => {
-        return itemTemplate
-          .replace(/\{\{product_name\}\}/g, item.recipe?.name || item.product_name || 'Unknown Product')
-          .replace(/\{\{quantity\}\}/g, item.quantity.toString())
-      }).join('')
-    })
-    
+    processed = processed.replace(itemsRegex, (match, itemTemplate) => orderData.items.map(item => itemTemplate
+      .replace(/\{\{product_name\}\}/g, item.recipe?.name ?? item.product_name ?? 'Unknown Product')
+      .replace(/\{\{quantity\}\}/g, item.quantity.toString())).join(''))
+
     // Handle conditional blocks
     const ifRegex = /\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g
     processed = processed.replace(ifRegex, (match, condition, content) => {
       const value = replacements[condition as keyof typeof replacements]
       return value && value !== '' ? content : ''
     })
-    
+
     return processed
   }
 
   const getCurrentMessage = () => {
     const template = getCurrentTemplate()
     if (!template) {
-      return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_number}...\n\n[Silakan pilih template atau tulis pesan custom]`
+      return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_no}...\n\n[Silakan pilih template atau tulis pesan custom]`
     }
-    
+
     if (selectedTemplateId === 'custom') {
-      return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_number}...\n\n[Tulis pesan Anda di sini]`
+      return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_no}...\n\n[Tulis pesan Anda di sini]`
     }
-    
+
     return processTemplate(template.template_content, order)
   }
 
   const formatPhoneNumber = (phone: string) => {
     // Remove all non-digit characters
     let cleaned = phone.replace(/\D/g, '')
-    
+
     // If starts with 08, replace with 628
     if (cleaned.startsWith('08')) {
-      cleaned = '62' + cleaned.substring(1)
+      cleaned = `62${cleaned.substring(1)}`
     }
     // If starts with 8, add 62
     else if (cleaned.startsWith('8')) {
-      cleaned = '62' + cleaned
+      cleaned = `62${cleaned}`
     }
     // If doesn't start with 62, add it
     else if (!cleaned.startsWith('62')) {
-      cleaned = '62' + cleaned
+      cleaned = `62${cleaned}`
     }
-    
+
     return cleaned
   }
 
@@ -190,7 +179,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
     const message = getCurrentMessage()
     const formattedPhone = formatPhoneNumber(phoneNumber)
     const encodedMessage = encodeURIComponent(message);
-    
+
     let url: string
     if (type === 'business') {
       // WhatsApp Business API - opens in web browser
@@ -199,30 +188,30 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
       // Regular WhatsApp - tries to open app first, falls back to web
       url = `https://wa.me/${formattedPhone}?text=${encodedMessage}`
     }
-    
+
     // Open in new tab
     window.open(url, '_blank')
-    
+
     // Call callback if provided
     onSent?.(type, message, formattedPhone)
-    
+
     // Close dialog
-    setIsDialogOpen(false)
+    void setIsDialogOpen(false)
   }
 
   const handleCopyMessage = () => {
     const message = getCurrentMessage()
-    navigator.clipboard.writeText(text)
+    void navigator.clipboard.writeText(message)
   }
 
   const getStatusBadgeColor = (status: string) => {
     const colors = {
       'pending': 'bg-gray-100 text-gray-800',
-      'confirmed': 'bg-blue-100 text-blue-800',
-      'in_production': 'bg-orange-100 text-orange-800',
-      'ready': 'bg-green-100 text-green-800',
+      'confirmed': 'bg-gray-100 text-gray-800',
+      'in_production': 'bg-gray-100 text-gray-800',
+      'ready': 'bg-gray-100 text-gray-800',
       'delivered': 'bg-gray-100 text-gray-800',
-      'cancelled': 'bg-red-100 text-red-800'
+      'cancelled': 'bg-gray-100 text-gray-800'
     }
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800'
   }
@@ -239,7 +228,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
-            WhatsApp Follow-up - {order.order_number}
+            WhatsApp Follow-up - {order.order_no}
           </DialogTitle>
           <DialogDescription>
             Kirim pesan follow-up kepada pelanggan melalui WhatsApp
@@ -264,17 +253,17 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">No. Pesanan:</span>
-                  <span className="font-mono">{order.order_number}</span>
+                  <span className="font-mono">{order.order_no}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                  <Badge className={getStatusBadgeColor(order.status)}>
-                    {order.status.replace('_', ' ').toUpperCase()}
+                  <Badge className={getStatusBadgeColor(order.status ?? '')}>
+                    {(order.status ?? '').replace('_', ' ').toUpperCase()}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Total:</span>
-                  <span className="font-medium">Rp {order.total_amount.toLocaleString('id-ID')}</span>
+                  <span className="font-medium">Rp {(order.total_amount ?? 0).toLocaleString('id-ID')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Items:</span>
@@ -321,10 +310,10 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                     [1, 2, 3].map((i) => (
                       <div key={i} className="p-4 border-2 rounded-lg animate-pulse">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                          <div className="w-8 h-8 bg-gray-200 rounded-full" />
                           <div className="flex-1">
-                            <div className="h-4 bg-gray-200 rounded w-24 mb-1"></div>
-                            <div className="h-3 bg-gray-200 rounded w-32"></div>
+                            <div className="h-4 bg-gray-200 rounded w-24 mb-1" />
+                            <div className="h-3 bg-gray-200 rounded w-32" />
                           </div>
                         </div>
                       </div>
@@ -335,24 +324,22 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                         <button
                           key={template.id}
                           onClick={() => setSelectedTemplateId(template.id)}
-                          className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${
-                            selectedTemplateId === template.id
-                              ? 'border-blue-500 bg-blue-50 text-blue-900 '
-                              : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:'
-                          }`}
+                          className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${selectedTemplateId === template.id
+                            ? 'border-gray-500 bg-gray-50 text-gray-900 '
+                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:'
+                            }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${
-                              selectedTemplateId === template.id ? 'bg-blue-100' : 'bg-gray-100'
-                            }`}>
+                             <div className={`p-2 rounded-full ${selectedTemplateId === template.id ? 'bg-gray-100' : 'bg-gray-100'
+                               }`}>
                               {getTemplateIcon(template.category)}
                             </div>
                             <div>
                               <div className="font-medium text-sm flex items-center gap-2">
                                 {template.name}
-                                {template.is_default && (
-                                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Default</span>
-                                )}
+                                 {template.is_default && (
+                                   <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">Default</span>
+                                 )}
                               </div>
                               <div className="text-xs text-muted-foreground mt-1">
                                 {template.description || `Template untuk ${template.category.replace('_', ' ')}`}
@@ -361,20 +348,18 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                           </div>
                         </button>
                       ))}
-                      
+
                       {/* Custom Template Option */}
                       <button
                         onClick={() => setSelectedTemplateId('custom')}
-                        className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${
-                          selectedTemplateId === 'custom'
-                            ? 'border-blue-500 bg-blue-50 text-blue-900 '
-                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:'
-                        }`}
+                        className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${selectedTemplateId === 'custom'
+                          ? 'border-gray-500 bg-gray-50 text-gray-900 '
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:'
+                          }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-full ${
-                            selectedTemplateId === 'custom' ? 'bg-blue-100' : 'bg-gray-100'
-                          }`}>
+                          <div className={`p-2 rounded-full ${selectedTemplateId === 'custom' ? 'bg-gray-100' : 'bg-gray-100'
+                            }`}>
                             <MessageCircle className="h-4 w-4" />
                           </div>
                           <div>
@@ -408,7 +393,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                     <Textarea
                       value={customMessage}
                       onChange={(e) => setCustomMessage(e.target.value)}
-                      placeholder={`Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_number}...\n\n[Tulis pesan Anda di sini]`}
+                      placeholder={`Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_no}...\n\n[Tulis pesan Anda di sini]`}
                       rows={12}
                       className="font-mono text-sm"
                     />
@@ -417,12 +402,12 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                     </p>
                   </div>
                 ) : (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-h-80 overflow-y-auto">
-                    <div className="flex items-center gap-2 mb-3 pb-2 border-b border-green-200">
-                      <Smartphone className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-medium text-green-800">Preview WhatsApp</span>
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-80 overflow-y-auto">
+                    <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
+                      <Smartphone className="h-4 w-4 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-800">Preview WhatsApp</span>
                     </div>
-                    <pre className="whitespace-pre-wrap text-sm font-mono text-green-800 leading-relaxed">
+                    <pre className="whitespace-pre-wrap text-sm font-mono text-gray-800 leading-relaxed">
                       {getCurrentMessage()}
                     </pre>
                   </div>
@@ -436,24 +421,24 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                 <CardTitle className="text-sm">Kirim Pesan</CardTitle>
               </CardHeader>
               <CardContent>
-                <Tabs value={whatsappType} onValueChange={(value) => setWhatsappType(value as 'whatsapp' | 'business')}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="whatsapp" className="text-sm">WhatsApp Regular</TabsTrigger>
-                    <TabsTrigger value="business" className="text-sm">WhatsApp Business</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="whatsapp" className="mt-4 space-y-4">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <SwipeableTabs value={whatsappType} onValueChange={(value) => setWhatsappType(value as 'whatsapp' | 'business')}>
+                  <SwipeableTabsList className="grid w-full grid-cols-2">
+                    <SwipeableTabsTrigger value="whatsapp" className="text-sm">WhatsApp Regular</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="business" className="text-sm">WhatsApp Business</SwipeableTabsTrigger>
+                  </SwipeableTabsList>
+
+                  <SwipeableTabsContent value="whatsapp" className="mt-4 space-y-4">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <Smartphone className="h-5 w-5 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-800">WhatsApp Regular</span>
+                        <Smartphone className="h-5 w-5 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-800">WhatsApp Regular</span>
                       </div>
-                      <p className="text-xs text-blue-700">
+                      <p className="text-xs text-gray-700">
                         Akan mencoba membuka aplikasi WhatsApp di perangkat, jika tidak tersedia akan buka di browser.
                       </p>
                     </div>
                     <div className="flex gap-3">
-                      <Button 
+                      <Button
                         onClick={() => handleSendWhatsApp('whatsapp')}
                         disabled={!phoneNumber.trim()}
                         className="flex-1 h-11 text-sm"
@@ -462,8 +447,8 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                         <Send className="h-4 w-4 mr-2" />
                         Kirim via WhatsApp
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={handleCopyMessage}
                         size="lg"
                         className="h-11 px-4"
@@ -471,20 +456,20 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="business" className="mt-4 space-y-4">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  </SwipeableTabsContent>
+
+                  <SwipeableTabsContent value="business" className="mt-4 space-y-4">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <User className="h-5 w-5 text-green-600" />
-                        <span className="text-sm font-medium text-green-800">WhatsApp Business</span>
+                        <User className="h-5 w-5 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-800">WhatsApp Business</span>
                       </div>
-                      <p className="text-xs text-green-700">
+                      <p className="text-xs text-gray-700">
                         Menggunakan WhatsApp Business API untuk komunikasi profesional dengan pelanggan.
                       </p>
                     </div>
                     <div className="flex gap-3">
-                      <Button 
+                      <Button
                         onClick={() => handleSendWhatsApp('business')}
                         disabled={!phoneNumber.trim()}
                         className="flex-1 bg-green-600 hover:bg-green-700 h-11 text-sm"
@@ -493,8 +478,8 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                         <Send className="h-4 w-4 mr-2" />
                         Kirim via WA Business
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={handleCopyMessage}
                         size="lg"
                         className="h-11 px-4"
@@ -502,8 +487,8 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
-                  </TabsContent>
-                </Tabs>
+                  </SwipeableTabsContent>
+                </SwipeableTabs>
 
                 <div className="mt-4 text-xs text-gray-600 dark:text-gray-400">
                   <p className="flex items-center gap-1 mb-1">
@@ -520,3 +505,5 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
     </Dialog>
   )
 }
+
+export default WhatsAppFollowUp

@@ -1,18 +1,19 @@
+import type { NextRequest } from 'next/server'
+import type { PaginationParams, PaginationState } from './types'
+
 /**
  * Pagination Module
  * Pagination utilities for API responses
  */
 
-import { NextRequest } from 'next/server'
-import type { PaginationParams, PaginationState } from './types'
 
 /**
  * Extract pagination parameters from request
  */
 export function extractPagination(request: NextRequest): PaginationState {
   const { searchParams } = new URL(request.url)
-  const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
-  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10')))
+  const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'))
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') ?? '10')))
   const offset = (page - 1) * limit
 
   return { page, limit, offset, total: 0, pages: 0 }
@@ -47,7 +48,7 @@ export function createPaginationMeta(
 /**
  * Apply pagination to array of items
  */
-export function usePagination(items: any[], params: PaginationParams) {
+export function usePagination<T>(items: T[], params: PaginationParams) {
   const { page = 1, limit = 10, offset } = params
   const actualOffset = offset ?? calculateOffset(page, limit)
   const paginatedItems = items.slice(actualOffset, actualOffset + limit)

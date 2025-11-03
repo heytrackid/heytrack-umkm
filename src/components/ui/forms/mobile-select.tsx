@@ -1,13 +1,13 @@
+import { cn } from '@/lib/utils'
+import { useResponsive } from '@/hooks/useResponsive'
+import { Label } from '../label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select'
+
 /**
  * Mobile Select Component
  * Optimized select dropdown for mobile devices
  */
 
-import * as React from 'react'
-import { cn } from '@/lib/utils'
-import { useResponsive } from '@/hooks/useResponsive'
-import { Label } from '../label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select'
 
 interface MobileSelectProps {
   label?: string
@@ -23,7 +23,7 @@ interface MobileSelectProps {
   className?: string
 }
 
-export function MobileSelect({
+export const MobileSelect = ({
   label,
   placeholder,
   value,
@@ -35,7 +35,7 @@ export function MobileSelect({
   error,
   hint,
   className
-}: MobileSelectProps) {
+}: MobileSelectProps) => {
   const { isMobile } = useResponsive()
 
   return (
@@ -43,9 +43,9 @@ export function MobileSelect({
       {label && (
         <Label
           className={cn(
-           "text-sm font-medium",
-            isMobile &&"text-base",
-            error &&"text-destructive"
+            "text-sm font-medium",
+            isMobile && "text-base",
+            error && "text-destructive"
           )}
         >
           {label}
@@ -62,9 +62,9 @@ export function MobileSelect({
       >
         <SelectTrigger
           className={cn(
-           "transition-all duration-200",
-            isMobile &&"h-12 text-base",
-            error &&"border-destructive focus:ring-destructive"
+            "transition-all duration-200",
+            isMobile && "h-12 text-base",
+            error && "border-destructive focus:ring-destructive"
           )}
         >
           <SelectValue placeholder={placeholder} />
@@ -74,7 +74,7 @@ export function MobileSelect({
             <SelectItem
               key={option.value}
               value={option.value}
-              className={cn(isMobile &&"text-base py-3")}
+              className={cn(isMobile && "text-base py-3")}
             >
               {option.label}
             </SelectItem>
@@ -83,12 +83,12 @@ export function MobileSelect({
       </Select>
 
       {/* Hint or Error message */}
-      {(hint || error) && (
+      {(hint ?? error) && (
         <p className={cn(
-         "text-sm",
-          error ?"text-destructive" :"text-muted-foreground"
+          "text-sm",
+          error ? "text-destructive" : "text-muted-foreground"
         )}>
-          {error || hint}
+          {error ?? hint}
         </p>
       )}
     </div>

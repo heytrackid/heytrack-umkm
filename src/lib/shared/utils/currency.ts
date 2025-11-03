@@ -1,9 +1,11 @@
+import { DEFAULT_CURRENCY } from '@/lib/currency'
+
+
 /**
  * Regional currency and business settings
  * Defines country-specific defaults for currency, tax rates, and business culture
  */
 
-import { DEFAULT_CURRENCY } from '@/lib/currency'
 
 // Regional defaults for different countries
 export interface RegionalDefaults {

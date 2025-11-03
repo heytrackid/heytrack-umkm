@@ -1,12 +1,11 @@
-import React, { Suspense } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Search, Tags, AlertCircle } from 'lucide-react'
+import { Plus, Search, Tags } from 'lucide-react'
 import { CategoryTable } from './CategoryTable'
 import type {
   Category,
-  CategoryView,
   PageSize
 } from '../constants'
 
@@ -47,7 +46,7 @@ interface CategoryListProps {
   onClearSelection: () => void
 }
 
-export default function CategoryList({
+const CategoryList = ({
   categories,
   filteredCategories,
   paginatedCategories,
@@ -71,8 +70,7 @@ export default function CategoryList({
   onBulkEdit,
   onBulkDelete,
   onClearSelection
-}: CategoryListProps) {
-  return (
+}: CategoryListProps) => (
     <div className="space-y-6">
       {/* Header */}
       <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
@@ -125,37 +123,30 @@ export default function CategoryList({
         </div>
 
         {/* Category Table */}
-        <Suspense fallback={
-          <Card>
-            <CardContent className="p-6">
-              <div className="h-96 bg-gray-100 animate-pulse rounded" />
-            </CardContent>
-          </Card>
-        }>
-          <CategoryTable
-            categories={categories}
-            filteredCategories={filteredCategories}
-            paginatedCategories={paginatedCategories}
-            selectedItems={selectedItems}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            pageSize={pageSize}
-            paginationInfo={paginationInfo}
-            isLoading={isLoading}
-            searchTerm={searchTerm}
-            onSelectAll={onSelectAll}
-            onSelectItem={onSelectItem}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onView={onView}
-            onPageChange={onPageChange}
-            onPageSizeChange={onPageSizeChange}
-            onBulkEdit={onBulkEdit}
-            onBulkDelete={onBulkDelete}
-            onClearSelection={onClearSelection}
-          />
-        </Suspense>
+        <CategoryTable
+          categories={categories}
+          filteredCategories={filteredCategories}
+          paginatedCategories={paginatedCategories}
+          selectedItems={selectedItems}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          paginationInfo={paginationInfo}
+          isLoading={isLoading}
+          searchTerm={searchTerm}
+          onSelectAll={onSelectAll}
+          onSelectItem={onSelectItem}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onView={onView}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          onBulkEdit={onBulkEdit}
+          onBulkDelete={onBulkDelete}
+          onClearSelection={onClearSelection}
+        />
       </div>
     </div>
-  )
-}
+)
+
+export default CategoryList

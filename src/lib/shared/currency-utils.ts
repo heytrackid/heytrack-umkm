@@ -1,9 +1,11 @@
+import { type Currency, formatCurrency, getCurrentCurrency } from '@/lib/currency'
+
+
 /**
  * Shared Currency Utilities
  * Centralized currency formatting and utilities
  */
 
-import { formatCurrency, getCurrentCurrency, Currency } from '@/lib/currency'
 
 // Enhanced currency formatting with consistent patterns
 export function formatPrice(amount: number): string {
@@ -11,7 +13,7 @@ export function formatPrice(amount: number): string {
 }
 
 export function formatPriceWithCurrency(amount: number, currency?: Currency): string {
-  const currencyToUse = currency || getCurrentCurrency()
+  const currencyToUse = currency ?? getCurrentCurrency()
   return formatCurrency(amount, currencyToUse)
 }
 
@@ -66,7 +68,7 @@ export function isValidPrice(price: number): boolean {
   return typeof price === 'number' && price >= 0 && !isNaN(price)
 }
 
-export function clampPrice(price: number, min: number = 0, max: number = 100000000): number {
+export function clampPrice(price: number, min = 0, max = 100000000): number {
   return Math.max(min, Math.min(max, price))
 }
 
@@ -80,7 +82,7 @@ export function calculateMarkup(cost: number, markupPercent: number): number {
 }
 
 export function calculateMargin(price: number, cost: number): number {
-  if (price === 0) return 0
+  if (price === 0) {return 0}
   return ((price - cost) / price) * 100
 }
 
@@ -141,7 +143,7 @@ export function sumPrices(prices: number[]): {
 }
 
 // Tax calculations (basic)
-export function calculateTax(amount: number, taxRate: number = 0.11): {
+export function calculateTax(amount: number, taxRate = 0.11): {
   taxAmount: number
   totalWithTax: number
   formattedTax: string

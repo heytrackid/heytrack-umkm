@@ -1,30 +1,19 @@
-import { formatCurrency } from '@/shared/utils'
+import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 
-export interface Recipe {
-  id: string
-  name: string
-  description: string
-  servings: number
-  prep_time: number
-  cook_time: number
-  difficulty: 'easy' | 'medium' | 'hard'
-  category: string
-  is_active: boolean
-  price?: number
-  margin?: number
-}
 
-export interface RecipeIngredient {
-  id: string
-  recipe_id: string
-  ingredient_id: string
-  quantity: number
-  unit: string
+
+// Use generated types from Supabase
+export type Recipe = RecipesTable
+export type RecipeIngredient = RecipeIngredientsTable
+export type Ingredient = IngredientsTable
+
+// Extended type for recipe with ingredient details
+export interface RecipeIngredientWithDetails extends RecipeIngredient {
   ingredient?: {
     id: string
     name: string
-    unit_cost: number
-    unit_type: string
+    price_per_unit: number
+    unit: string
   }
 }
 
@@ -32,10 +21,10 @@ export interface RecipeIngredient {
  * Calculate recipe HPP (Harga Pokok Produksi)
  */
 export function calculateRecipeHPP(
-  ingredients: RecipeIngredient[],
-  overheadRate: number = 0.15,
-  laborCost: number = 0,
-  packagingCost: number = 0
+  ingredients: RecipeIngredientWithDetails[],
+  overheadRate = 0.15,
+  laborCost = 0,
+  packagingCost = 0
 ) {
   const ingredientCost = ingredients.reduce((total, recipeIngredient) => {
     if (!recipeIngredient.ingredient) {return total}
@@ -43,8 +32,8 @@ export function calculateRecipeHPP(
     const cost = calculateIngredientCost(
       recipeIngredient.quantity,
       recipeIngredient.unit,
-      recipeIngredient.ingredient.unit_cost,
-      recipeIngredient.ingredient.unit_type
+      recipeIngredient.ingredient.price_per_unit,
+      recipeIngredient.ingredient.unit
     )
     return total + cost
   }, 0)
@@ -94,10 +83,10 @@ export function formatRecipeServings(servings: number): string {
  * Scale recipe quantities up or down
  */
 export function scaleRecipe(
-  ingredients: RecipeIngredient[],
+  ingredients: RecipeIngredientWithDetails[],
   currentServings: number,
   targetServings: number
-): RecipeIngredient[] {
+): RecipeIngredientWithDetails[] {
   const scaleFactor = targetServings / currentServings
   
   return ingredients.map(ingredient => ({
@@ -116,23 +105,19 @@ export function validateRecipe(recipe: Partial<Recipe>): { isValid: boolean; err
     errors.push('Nama resep harus diisi')
   }
 
-  if (!recipe.servings || recipe.servings <= 0) {
+  if (recipe.servings !== undefined && recipe.servings !== null && recipe.servings <= 0) {
     errors.push('Jumlah porsi harus lebih dari 0')
   }
 
-  if (!recipe.prep_time || recipe.prep_time < 0) {
+  if (recipe.prep_time !== undefined && recipe.prep_time !== null && recipe.prep_time < 0) {
     errors.push('Waktu persiapan tidak boleh negatif')
   }
 
-  if (!recipe.cook_time || recipe.cook_time < 0) {
+  if (recipe.cook_time !== undefined && recipe.cook_time !== null && recipe.cook_time < 0) {
     errors.push('Waktu memasak tidak boleh negatif')
   }
 
-  if (!recipe.difficulty || !['easy', 'medium', 'hard'].includes(recipe.difficulty)) {
-    errors.push('Tingkat kesulitan harus dipilih')
-  }
-
-  if (!recipe.category || recipe.category.trim().length === 0) {
+  if (recipe.category?.trim().length === 0) {
     errors.push('Kategori harus dipilih')
   }
 
@@ -181,7 +166,16 @@ function getUnitConversionFactor(fromUnit: string, toUnit: string): number {
 /**
  * Get difficulty level display info
  */
-export function getDifficultyInfo(difficulty: string) {
+export function getDifficultyInfo(difficulty: string | null) {
+  if (!difficulty) {
+    return {
+      label: 'Unknown',
+      color: 'bg-gray-100 text-gray-800',
+      icon: '⚫',
+      description: 'Tingkat kesulitan tidak diketahui'
+    }
+  }
+  
   switch (difficulty) {
     case 'easy':
       return {
@@ -302,19 +296,25 @@ export function calculateComplexityScore(
 /**
  * Generate recipe summary statistics
  */
-export function generateRecipeSummary(recipe: Recipe, ingredients: RecipeIngredient[]) {
-  const totalTime = recipe.prep_time + recipe.cook_time
+export function generateRecipeSummary(recipe: Recipe, ingredients: RecipeIngredientWithDetails[]) {
+  const prepTime = recipe.prep_time ?? 0
+  const cookTime = recipe.cook_time ?? 0
+  const totalTime = prepTime + cookTime
+  const servings = recipe.servings ?? 1
+  const difficulty = recipe.difficulty ?? 'medium'
+  const category = recipe.category ?? 'other'
+  
   const complexityScore = calculateComplexityScore(
     ingredients.length,
     totalTime,
-    recipe.difficulty
+    difficulty
   )
-  const difficultyInfo = getDifficultyInfo(recipe.difficulty)
-  const categoryInfo = getCategoryInfo(recipe.category)
+  const difficultyInfo = getDifficultyInfo(difficulty)
+  const categoryInfo = getCategoryInfo(category)
 
   return {
-    timeFormatted: formatRecipeTime(recipe.prep_time, recipe.cook_time),
-    servingsFormatted: formatRecipeServings(recipe.servings),
+    timeFormatted: formatRecipeTime(prepTime, cookTime),
+    servingsFormatted: formatRecipeServings(servings),
     complexityScore,
     difficulty: difficultyInfo,
     category: categoryInfo,

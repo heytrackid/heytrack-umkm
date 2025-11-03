@@ -1,11 +1,13 @@
+import type { ComponentType } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Pencil, Trash2, Eye, MoreHorizontal, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react'
+
 /**
  * Shared Status and Action Components
  * Reusable status badges, action buttons, and indicators
  */
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, Eye, MoreHorizontal, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react'
 
 // Status badge patterns for different entities
 export const StatusBadges = {
@@ -66,7 +68,7 @@ export const StatusBadges = {
 
   // Generic boolean status
   boolean: (value: boolean, labels?: { true: string; false: string }) => {
-    const { true: trueLabel = 'Aktif', false: falseLabel = 'Tidak Aktif' } = labels || {}
+    const { true: trueLabel = 'Aktif', false: falseLabel = 'Tidak Aktif' } = labels ?? {}
 
     return (
       <Badge variant={value ? 'default' : 'secondary'}>
@@ -87,7 +89,7 @@ interface ActionButtonsProps {
   showLabels?: boolean
 }
 
-export function ActionButtons({
+export const ActionButtons = ({
   onEdit,
   onDelete,
   onView,
@@ -95,60 +97,58 @@ export function ActionButtons({
   size = 'sm',
   variant = 'ghost',
   showLabels = false
-}: ActionButtonsProps) {
-  return (
-    <div className="flex gap-1">
-      {onView && (
-        <Button
-          variant={variant}
-          size={size}
-          onClick={onView}
-          title="Lihat Detail"
-        >
-          <Eye className="h-4 w-4" />
-          {showLabels && <span className="ml-1">Lihat</span>}
-        </Button>
-      )}
+}: ActionButtonsProps) => (
+  <div className="flex gap-1">
+    {onView && (
+      <Button
+        variant={variant}
+        size={size}
+        onClick={onView}
+        title="Lihat Detail"
+      >
+        <Eye className="h-4 w-4" />
+        {showLabels && <span className="ml-1">Lihat</span>}
+      </Button>
+    )}
 
-      {onEdit && (
-        <Button
-          variant={variant}
-          size={size}
-          onClick={onEdit}
-          title="Edit"
-        >
-          <Pencil className="h-4 w-4" />
-          {showLabels && <span className="ml-1">Edit</span>}
-        </Button>
-      )}
+    {onEdit && (
+      <Button
+        variant={variant}
+        size={size}
+        onClick={onEdit}
+        title="Edit"
+      >
+        <Pencil className="h-4 w-4" />
+        {showLabels && <span className="ml-1">Ubah</span>}
+      </Button>
+    )}
 
-      {onDelete && (
-        <Button
-          variant="ghost"
-          size={size}
-          onClick={onDelete}
-          title="Hapus"
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <Trash2 className="h-4 w-4" />
-          {showLabels && <span className="ml-1">Hapus</span>}
-        </Button>
-      )}
+    {onDelete && (
+      <Button
+        variant="ghost"
+        size={size}
+        onClick={onDelete}
+        title="Hapus"
+        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+      >
+        <Trash2 className="h-4 w-4" />
+        {showLabels && <span className="ml-1">Hapus</span>}
+      </Button>
+    )}
 
-      {onMore && (
-        <Button
-          variant={variant}
-          size={size}
-          onClick={onMore}
-          title="More Actions"
-        >
-          <MoreHorizontal className="h-4 w-4" />
-          {showLabels && <span className="ml-1">More</span>}
-        </Button>
-      )}
-    </div>
-  )
-}
+    {onMore && (
+      <Button
+        variant={variant}
+        size={size}
+        onClick={onMore}
+        title="More Actions"
+      >
+        <MoreHorizontal className="h-4 w-4" />
+        {showLabels && <span className="ml-1">More</span>}
+      </Button>
+    )}
+  </div>
+)
 
 // Quick action buttons for common operations
 export const QuickActions = {
@@ -169,7 +169,7 @@ export const QuickActions = {
   add: ({ onClick, label = "Tambah", icon: Icon = Plus }: {
     onClick: () => void;
     label?: string;
-    icon?: React.ComponentType<{ className?: string }>
+    icon?: ComponentType<{ className?: string }>
   }) => (
     <Button onClick={onClick}>
       <Icon className="h-4 w-4 mr-2" />
@@ -182,8 +182,8 @@ export const QuickActions = {
       {loading ? (
         <>
           <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
           Menyimpan...
         </>
@@ -197,8 +197,6 @@ export const QuickActions = {
   )
 }
 
-// Import React for types
-import * as React from 'react'
 const Plus = ({ className }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

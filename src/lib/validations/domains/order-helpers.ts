@@ -1,10 +1,15 @@
+import { z } from 'zod'
+import { OrderInsertSchema, type OrderInsert, type OrderUpdate } from './order'
+
+
 /**
  * Order Validation Helpers
  * Domain-specific validation helpers for order-related business rules
  */
 
-import { z } from 'zod'
-import { OrderInsertSchema, OrderUpdateSchema, type OrderInsert, type OrderUpdate } from './order'
+
+// Re-export for convenience
+export { OrderUpdateSchema } from './order'
 
 // Enhanced order validation with business rules
 export const EnhancedOrderInsertSchema = OrderInsertSchema
@@ -81,9 +86,9 @@ export class OrderValidationHelpers {
     try {
       const validatedData = EnhancedOrderInsertSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -97,9 +102,9 @@ export class OrderValidationHelpers {
     try {
       const validatedData = EnhancedOrderUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -122,8 +127,8 @@ export class OrderValidationHelpers {
   } {
     const subtotal = items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0)
     const tax_amount = options.taxRate ? subtotal * (options.taxRate / 100) : 0
-    const discount_amount = options.discountAmount || 0
-    const delivery_fee = options.deliveryFee || 0
+    const discount_amount = options.discountAmount ?? 0
+    const delivery_fee = options.deliveryFee ?? 0
 
     const total_amount = subtotal + tax_amount - discount_amount + delivery_fee
 
@@ -189,21 +194,21 @@ export class OrderValidationHelpers {
    * Validate bulk order import
    */
   static validateBulkImport(orders: unknown[]): {
-    valid: any[]
-    invalid: Array<{ index: number; data: any; errors: string[] }>
+    valid: OrderInsert[]
+    invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: any[] = []
-    const invalid: Array<{ index: number; data: any; errors: string[] }> = []
+    const valid: OrderInsert[] = []
+    const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     orders.forEach((order, index) => {
       const result = this.validateInsert(order)
-      if (result.success) {
+      if (result.success && result.data) {
         valid.push(result.data)
       } else {
         invalid.push({
           index,
           data: order,
-          errors: result.errors || []
+          errors: result.errors ?? []
         })
       }
     })

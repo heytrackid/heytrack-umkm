@@ -1,33 +1,18 @@
-/**
- * Shared Empty and Error States
- * Reusable empty states and error displays
- */
-
+import type { ComponentType } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import {
-  AlertTriangle,
-  FileX,
-  Search,
-  Package,
-  Users,
-  ShoppingCart,
-  Calculator,
-  RefreshCw,
-  Plus,
-  Home
-} from 'lucide-react'
+import { /** * Shared Empty and Error States * Reusable empty states and error displays */ AlertTriangle, FileX, Search, Package, Users, ShoppingCart, Calculator, RefreshCw, Plus, Home } from 'lucide-react' 
 
 // Empty state for different contexts
 interface EmptyStateProps {
-  icon?: React.ComponentType<{ className?: string }>
+  icon?: ComponentType<{ className?: string }>
   title: string
   description: string
   action?: {
     label: string
     onClick: () => void
-    icon?: React.ComponentType<{ className?: string }>
+    icon?: ComponentType<{ className?: string }>
   }
   secondaryAction?: {
     label: string
@@ -36,14 +21,14 @@ interface EmptyStateProps {
   variant?: 'default' | 'minimal' | 'card'
 }
 
-export function EmptyState({
+export const EmptyState = ({
   icon: Icon,
   title,
   description,
   action,
   secondaryAction,
   variant = 'default'
-}: EmptyStateProps) {
+}: EmptyStateProps) => {
   const content = (
     <div className="text-center py-12">
       {Icon && (
@@ -217,13 +202,13 @@ interface ErrorStateProps {
   variant?: 'page' | 'section' | 'inline'
 }
 
-export function ErrorState({
+export const ErrorState = ({
   title = "Terjadi Kesalahan",
   message,
   onRetry,
   showHomeButton = false,
   variant = 'page'
-}: ErrorStateProps) {
+}: ErrorStateProps) => {
   const content = (
     <div className="text-center">
       <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
@@ -294,28 +279,23 @@ export function ErrorState({
 }
 
 // Network error state
-export function NetworkError({ onRetry }: { onRetry?: () => void }) {
-  return (
+export const NetworkError = ({ onRetry }: { onRetry?: () => void }) => (
     <ErrorState
       title="Koneksi Terputus"
       message="Tidak dapat terhubung ke server. Periksa koneksi internet Anda dan coba lagi."
       onRetry={onRetry}
-      showHomeButton={true}
+      showHomeButton
     />
   )
-}
 
 // Permission denied error
-export function PermissionError({ resource = "halaman ini" }: { resource?: string }) {
-  return (
+export const PermissionError = ({ resource = "halaman ini" }: { resource?: string }) => (
     <ErrorState
       title="Akses Ditolak"
       message={`Anda tidak memiliki izin untuk mengakses ${resource}.`}
-      showHomeButton={true}
+      showHomeButton
       variant="page"
     />
   )
-}
 
 // Import React for types
-import * as React from 'react'

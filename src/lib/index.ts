@@ -1,3 +1,5 @@
+
+
 /**
  * Barrel export for all lib utilities
  * Provides convenient single-import access to all library functions
@@ -21,7 +23,7 @@
 // UTILITIES
 // ============================================================================
 
-export { cn } from '../shared'
+export { cn } from '@/shared'
 export { logger, uiLogger } from './logger'
 
 // ============================================================================
@@ -110,7 +112,7 @@ export {
   PAYMENT_METHODS,
   CATEGORIES,
   UNITS,
-} from '../shared'
+} from '@/shared'
 
 export type {
   BusinessType,
@@ -121,7 +123,7 @@ export type {
   BusinessEntity,
   Address,
   Contact,
-} from '../shared'
+} from '@/shared'
 
 // ============================================================================
 // API CORE
@@ -201,20 +203,10 @@ export {
 } from './currency'
 
 // ============================================================================
-// SCHEDULING & CRON JOBS
+// SCHEDULING & CRON JOBS - REMOVED
 // ============================================================================
-
-export {
-  CronScheduler,
-  InventoryCronJobs,
-  FinancialCronJobs,
-  OrderCronJobs,
-  HPPCronJobs,
-  GeneralCronJobs,
-  runScheduledJobs,
-  setupCronJobs,
-  getAutomationStatus,
-} from './cron/'
+// Cron jobs have been removed from the codebase
+// Use external schedulers (Vercel Cron, GitHub Actions, etc.) instead
 
 // ============================================================================
 // BUSINESS SERVICES
@@ -228,16 +220,14 @@ export {
 // ============================================================================
 
 export {
-  HPPCalculator,
-  HPPAlertDetector,
-  HPPSnapshotManager,
-  HPPUtils,
-  calculateHPP,
-  detectHPPAlerts,
-  takeSnapshot,
-  getSnapshots,
-  compareSnapshots,
-} from './hpp/'
+  // HPPCalculator,
+  // HPPUtils,
+}
+
+// HPP functions moved to modules/hpp
+// export {
+//   calculateHPP,
+// } from './hpp/'
 
 export {
   AIClient,

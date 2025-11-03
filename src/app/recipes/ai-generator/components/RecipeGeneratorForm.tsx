@@ -1,12 +1,10 @@
-// Recipe Generator Form Component - Lazy Loaded
-// Input form for AI recipe generation parameters
-
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { AlertCircle, ChefHat, Loader2, Sparkles } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -14,12 +12,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { AlertCircle, ChefHat, Loader2, Sparkles } from 'lucide-react'
-import type {
-  AvailableIngredient,
-  PRODUCT_TYPES,
-  DIETARY_RESTRICTIONS
-} from './types'
+import type { AvailableIngredient } from './types'
 
 interface RecipeGeneratorFormProps {
   productName: string
@@ -37,9 +30,10 @@ interface RecipeGeneratorFormProps {
   availableIngredients: AvailableIngredient[]
   loading: boolean
   onGenerate: () => void
+  mode: 'complete' | 'quick'
 }
 
-export default function RecipeGeneratorForm({
+const RecipeGeneratorForm = ({
   productName,
   setProductName,
   productType,
@@ -55,7 +49,7 @@ export default function RecipeGeneratorForm({
   availableIngredients,
   loading,
   onGenerate
-}: RecipeGeneratorFormProps) {
+}: RecipeGeneratorFormProps) => {
   const toggleDietaryRestriction = (restriction: string) => {
     setDietaryRestrictions(
       dietaryRestrictions.includes(restriction)
@@ -216,3 +210,5 @@ export default function RecipeGeneratorForm({
     </Card>
   )
 }
+
+export default RecipeGeneratorForm

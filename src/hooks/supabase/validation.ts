@@ -1,3 +1,4 @@
+
 /**
  * Validation utilities for Supabase operations
  */
@@ -27,7 +28,7 @@ export function validateQueryParams(params: {
 /**
  * Validate CRUD operation data
  */
-export function validateCRUDData(operation: 'create' | 'update', data: any, id?: string) {
+export function validateCRUDData(operation: 'create' | 'update', data: Record<string, unknown>, id?: string) {
   if (!data || typeof data !== 'object') {
     throw new Error('Data must be a valid object')
   }
@@ -37,12 +38,12 @@ export function validateCRUDData(operation: 'create' | 'update', data: any, id?:
   }
 
   // Check for required fields based on common patterns
-  if (operation === 'create' && !data.created_at) {
-    data.created_at = new Date().toISOString()
+  if (operation === 'create' && data['created_at'] === undefined) {
+    data['created_at'] = new Date().toISOString()
   }
 
-  if (data.updated_at !== undefined) {
-    data.updated_at = new Date().toISOString()
+  if (data['updated_at'] !== undefined) {
+    data['updated_at'] = new Date().toISOString()
   }
 }
 

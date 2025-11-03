@@ -1,9 +1,12 @@
+import { z } from 'zod'
+
+
+/* eslint-disable */
 /**
  * Validation Caching System
  * Performance optimization for validation operations
  */
 
-import { z } from 'zod'
 
 // Cache entry interface
 interface ValidationCacheEntry<T> {
@@ -21,7 +24,7 @@ interface ValidationCacheConfig {
 
 // Global cache instance
 class ValidationCache {
-  private cache = new Map<string, ValidationCacheEntry<any>>()
+  private cache = new Map<string, ValidationCacheEntry<unknown>>()
   private config: ValidationCacheConfig
 
   constructor(config: Partial<ValidationCacheConfig> = {}) {
@@ -41,7 +44,7 @@ class ValidationCache {
       // Create a deterministic string representation of the data
       const dataString = JSON.stringify(data, Object.keys(data as any).sort())
       return `${schemaName}:${this.hashString(dataString)}`
-    } catch {
+    } catch (error) {
       // Fallback for non-serializable data
       return `${schemaName}:${Date.now()}:${Math.random()}`
     }
@@ -71,13 +74,13 @@ class ValidationCache {
    * Get cached validation result
    */
   get<T>(schemaName: string, data: unknown): ValidationCacheEntry<T> | null {
-    if (!this.config.enableCache) return null
+    if (!this.config.enableCache) {return null}
 
     const key = this.generateCacheKey(schemaName, data)
     const entry = this.cache.get(key)
 
     if (entry && this.isValid(entry)) {
-      return entry
+      return entry as ValidationCacheEntry<T>
     }
 
     // Remove expired entry
@@ -92,7 +95,7 @@ class ValidationCache {
    * Set validation result in cache
    */
   set<T>(schemaName: string, data: unknown, result: { success: boolean; data?: T; errors?: string[] }, ttl?: number): void {
-    if (!this.config.enableCache) return
+    if (!this.config.enableCache) {return}
 
     const key = this.generateCacheKey(schemaName, data)
 
@@ -186,9 +189,9 @@ export function withValidationCache<T>(
     try {
       const validatedData = schema.parse(data)
       result = { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         result = { success: false, errors }
       } else {
         result = { success: false, errors: ['Validation failed'] }
@@ -213,6 +216,7 @@ export class CachedValidationHelpers {
    */
   static validateCustomer(data: unknown) {
     // Dynamic import to avoid circular dependencies
+   
     const { CustomerInsertSchema } = require('./domains/customer')
     return withValidationCache(
       CustomerInsertSchema,
@@ -224,6 +228,7 @@ export class CachedValidationHelpers {
   /**
    * Cached ingredient validation
    */
+   
   static validateIngredient(data: unknown) {
     const { IngredientInsertSchema } = require('./domains/ingredient')
     return withValidationCache(
@@ -235,6 +240,7 @@ export class CachedValidationHelpers {
 
   /**
    * Cached order validation
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
    */
   static validateOrder(data: unknown) {
     const { OrderInsertSchema } = require('./domains/order')
@@ -246,6 +252,7 @@ export class CachedValidationHelpers {
   }
 
   /**
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
    * Cached recipe validation
    */
   static validateRecipe(data: unknown) {

@@ -3,7 +3,6 @@
  * Additional type definitions specific to financial automation
  */
 
-import type { FinancialMetrics, FinancialTrend, FinancialAlert } from '../types'
 
 // Financial Projection Types
 export interface FinancialProjection {

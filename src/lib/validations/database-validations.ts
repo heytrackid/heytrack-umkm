@@ -1,8 +1,6 @@
-// Database validation schemas
-// Validation schemas specifically for database operations and CRUD
-
 import { z } from 'zod'
 import {
+
   UUIDSchema,
   EmailSchema,
   PhoneSchema,
@@ -10,11 +8,11 @@ import {
   PositiveNumberSchema,
   NonNegativeNumberSchema,
   OrderStatusEnum,
-  PaymentMethodEnum,
-  BusinessUnitEnum,
-  RecordTypeEnum,
-  TransactionTypeEnum
+  PaymentMethodEnum
 } from './base-validations'
+
+// Database validation schemas
+// Validation schemas specifically for database operations and CRUD 
 
 // Customer database schemas
 export const CustomerInsertSchema = z.object({

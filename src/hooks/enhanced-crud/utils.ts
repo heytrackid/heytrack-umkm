@@ -1,10 +1,11 @@
+import { apiLogger } from '@/lib/logger'
+import { errorToast } from '@/hooks/use-toast'
+
 /**
  * Enhanced CRUD Utilities
  * Helper functions for CRUD operations and error handling
  */
 
-import { apiLogger } from '@/lib/logger'
-import { errorToast } from '@/hooks/use-toast'
 
 /**
  * Get operation label for user-friendly messages
@@ -24,7 +25,7 @@ export const getOperationLabel = (operation: 'create' | 'update' | 'delete'): st
 export const handleCRUDError = (
   error: Error,
   operation: 'create' | 'update' | 'delete',
-  showErrorToast: boolean = true,
+  showErrorToast = true,
   customErrorHandler?: (error: Error, operation: 'create' | 'update' | 'delete') => void
 ): void => {
   const errorMessage = error.message || 'Terjadi kesalahan tak terduga'
@@ -46,7 +47,7 @@ export const handleCRUDError = (
  */
 export const validateCRUDInputs = (
   operation: 'create' | 'update' | 'delete',
-  data?: any,
+  data?: unknown,
   id?: string
 ): void => {
   if (operation === 'create' || operation === 'update') {
@@ -65,7 +66,7 @@ export const validateCRUDInputs = (
  */
 export const validateBulkInputs = (
   operation: 'create' | 'update' | 'delete',
-  data: any[]
+  data: Array<Record<string, unknown>>
 ): void => {
   if (!Array.isArray(data) || data.length === 0) {
     throw new Error('Data tidak valid atau kosong')
@@ -73,7 +74,7 @@ export const validateBulkInputs = (
 
   if (operation === 'update') {
     data.forEach((item, index) => {
-      if (!item.id || !item.data) {
+      if (typeof item.id !== 'string' || item.id.length === 0 || !('data' in item)) {
         throw new Error(`Item ${index + 1}: ID dan data diperlukan`)
       }
     })

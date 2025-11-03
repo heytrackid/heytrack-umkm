@@ -1,6 +1,3 @@
-// AI Recipe Generator Layout - Enhanced Interactive Version
-// Improved UX with live preview, quick mode, and better guidance
-
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -10,26 +7,29 @@ import { ChefHat, Sparkles, Zap } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { createClient as createSupabaseClient } from '@/utils/supabase'
+import { Button } from '@/components/ui/button'
 import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/client'
+import { typedInsert } from '@/lib/supabase-client'
+import type { RecipesInsert, RecipeIngredientsInsert, IngredientsTable } from '@/types/database'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
+import { RecipeTemplateSelector } from './RecipeTemplateSelector'
+import { HppEstimator } from './HppEstimator'
+import { SmartIngredientSelector } from './SmartIngredientSelector'
+import { matchIngredientsWithTemplate, saveDraft, loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
+import type { RecipeTemplate } from '@/lib/constants/recipe-templates'
+import GeneratedRecipeDisplay from './GeneratedRecipeDisplay'
+import RecipePreviewCard from './RecipePreviewCard'
+import RecipeGeneratorForm from './RecipeGeneratorForm'
 
-// Lazy load heavy components
-import dynamic from 'next/dynamic'
+// AI Recipe Generator Layout - Enhanced Interactive Version
+// Improved UX with live preview, quick mode, and better guidance
 
-const RecipeGeneratorForm = dynamic(() => import('./RecipeGeneratorFormEnhanced'), {
-  loading: () => <div className="p-4">Loading form...</div>
-})
 
-const GeneratedRecipeDisplay = dynamic(() => import('./GeneratedRecipeDisplay'), {
-  loading: () => <div className="p-4">Loading recipe display...</div>
-})
 
-const RecipePreviewCard = dynamic(() => import('./RecipePreviewCard'), {
-  loading: () => <div className="p-4">Loading preview...</div>
-})
+// Import components normally (lightweight UI components)
 
-export default function AIRecipeGeneratorPage() {
+const AIRecipeGeneratorPage = () => {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
@@ -46,9 +46,12 @@ export default function AIRecipeGeneratorPage() {
   // Generation state
   const [loading, setLoading] = useState(false)
   const [generatedRecipe, setGeneratedRecipe] = useState<GeneratedRecipe | null>(null)
-  
+
   // Mode state (quick vs complete)
   const [mode, setMode] = useState<'quick' | 'complete'>('quick')
+
+  // Sprint 1: Template state
+  const [selectedTemplate, setSelectedTemplate] = useState<RecipeTemplate | null>(null)
 
   // Handle auth errors
   useEffect(() => {
@@ -58,24 +61,89 @@ export default function AIRecipeGeneratorPage() {
         description: 'Sesi Anda telah berakhir. Silakan login kembali.',
         variant: 'destructive',
       })
-      router.push('/auth/login')
+      void router.push('/auth/login')
     }
   }, [isAuthLoading, isAuthenticated, router, toast])
 
+  // Sprint 1: Load draft on mount
   useEffect(() => {
-    fetchIngredients()
+    const draft = loadDraft()
+    if (draft) {
+      toast({
+        title: '📝 Draft ditemukan!',
+        description: 'Mau lanjutin draft sebelumnya?',
+        action: (
+          <Button size="sm" onClick={() => {
+            setProductName(draft.productName)
+            setProductType(draft.productType)
+            setServings(draft.servings)
+            setSelectedIngredients(draft.selectedIngredients)
+            if (draft.targetPrice) { setTargetPrice(draft.targetPrice) }
+          }}>
+            Restore
+          </Button>
+        )
+      })
+    }
+  }, [])
+
+  // Sprint 1: Auto-save draft
+  useEffect(() => {
+    if (productName || selectedIngredients.length > 0) {
+      saveDraft({
+        productName,
+        productType,
+        servings,
+        selectedIngredients,
+        targetPrice
+      })
+    }
+  }, [productName, productType, servings, selectedIngredients, targetPrice])
+
+  useEffect(() => {
+    void fetchIngredients()
   }, [])
 
   const fetchIngredients = async () => {
-    const supabase = createSupabaseClient()
+    const supabase = createClient()
     const { data, error } = await supabase
       .from('ingredients')
       .select('*')
       .order('name')
+      .returns<IngredientsTable[]>()
 
     if (!error && data) {
-      setAvailableIngredients(data)
+      const ingredients: AvailableIngredient[] = data.map((item) => ({
+        id: item.id,
+        name: item.name,
+        unit: item.unit,
+        price_per_unit: item.price_per_unit,
+        current_stock: item.current_stock,
+        minimum_stock: item.min_stock ?? undefined
+      }))
+
+      void setAvailableIngredients(ingredients)
     }
+  }
+
+  // Sprint 1: Handle template selection
+  const handleTemplateSelect = (template: RecipeTemplate) => {
+    setSelectedTemplate(template)
+    setProductName(template.name)
+    setProductType(template.type)
+    setServings(template.servings)
+
+    // Auto-match ingredients
+    const matchedIds = matchIngredientsWithTemplate(
+      availableIngredients,
+      template.ingredients
+    )
+    setSelectedIngredients(matchedIds)
+
+    toast({
+      title: '✨ Template dimuat!',
+      description: `${template.name} siap untuk di-generate`,
+    })
   }
 
   const handleGenerate = async () => {
@@ -88,11 +156,11 @@ export default function AIRecipeGeneratorPage() {
       return
     }
 
-    setLoading(true)
-    setGeneratedRecipe(null)
+    void setLoading(true)
+    void setGeneratedRecipe(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -117,12 +185,12 @@ export default function AIRecipeGeneratorPage() {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || 'Failed to generate recipe')
+        throw new Error(error.error ?? 'Failed to generate recipe')
       }
 
       const data = await response.json()
-      setGeneratedRecipe(data.recipe)
-      
+      void setGeneratedRecipe(data.recipe)
+
       toast({
         title: '✨ Resep berhasil dibuat!',
         description: 'AI telah meracik resep profesional untuk Anda',
@@ -135,15 +203,15 @@ export default function AIRecipeGeneratorPage() {
         variant: 'destructive',
       })
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
   const handleSaveRecipe = async () => {
-    if (!generatedRecipe) {return}
+    if (!generatedRecipe) { return }
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -151,59 +219,66 @@ export default function AIRecipeGeneratorPage() {
       }
 
       // Save recipe to database
-      const { data: recipe, error: recipeError } = await supabase
-        .from('recipes')
-        .insert({
-          user_id: user.id,
-          name: generatedRecipe.name,
-          category: generatedRecipe.category,
-          servings: generatedRecipe.servings,
-          prep_time: generatedRecipe.prep_time_minutes,
-          cook_time: generatedRecipe.bake_time_minutes,
-          description: generatedRecipe.description,
-          instructions: generatedRecipe.instructions,
-          tips: generatedRecipe.tips,
-          storage_instructions: generatedRecipe.storage,
-          shelf_life: generatedRecipe.shelf_life,
-          is_active: true
-        })
-        .select()
-        .single()
+      const recipeInsert: RecipesInsert = {
+        user_id: user.id,
+        name: generatedRecipe.name,
+        category: generatedRecipe.category,
+        servings: generatedRecipe.servings,
+        prep_time: generatedRecipe.prep_time_minutes,
+        cook_time: generatedRecipe.bake_time_minutes,
+        description: generatedRecipe.description,
+        instructions: JSON.stringify(generatedRecipe.instructions), // Convert to JSON string
+        is_active: true
+      }
 
-      if (recipeError) {throw recipeError}
+      const { data: recipeRows, error: recipeError } = await typedInsert(supabase as never, 'recipes', recipeInsert)
+
+      if (recipeError) { throw recipeError }
+      const recipe = recipeRows?.[0]
+      if (!recipe) {
+        throw new Error('Failed to create recipe record')
+      }
 
       // Save recipe ingredients
-      const recipeIngredients = generatedRecipe.ingredients.map((ing) => {
-        const ingredient = availableIngredients.find(
-          i => i.name.toLowerCase() === ing.name.toLowerCase()
-        )
+      const recipeIngredients: RecipeIngredientsInsert[] = generatedRecipe.ingredients
+        .map((ing) => {
+          const ingredient = availableIngredients.find(
+            i => i.name.toLowerCase() === ing.name.toLowerCase()
+          )
 
-        return {
-          recipe_id: recipe.id,
-          ingredient_id: ingredient?.id,
-          quantity: ing.quantity,
-          unit: ing.unit,
-          notes: ing.notes
-        }
-      })
+          if (!ingredient) {
+            return null
+          }
 
-      const { error: ingredientsError } = await supabase
-        .from('recipe_ingredients')
-        .insert(recipeIngredients)
+          return {
+            recipe_id: recipe.id,
+            ingredient_id: ingredient.id,
+            quantity: ing.quantity,
+            unit: ing.unit,
+            user_id: user.id
+          }
+        })
+        .filter((value): value is RecipeIngredientsInsert => value !== null)
 
-      if (ingredientsError) {throw ingredientsError}
+      if (recipeIngredients.length > 0) {
+      const { error: ingredientsError } = await typedInsert(supabase as never, 'recipe_ingredients', recipeIngredients)
+
+        if (ingredientsError) { throw ingredientsError }
+      }
 
       toast({
         title: '✅ Resep berhasil disimpan!',
         description: 'Resep sudah tersimpan di database Anda',
       })
 
-      // Reset form
-      setGeneratedRecipe(null)
-      setProductName('')
-      setServings(2)
-      setTargetPrice('')
-      setSelectedIngredients([])
+      // Reset form & clear draft
+      void setGeneratedRecipe(null)
+      void setProductName('')
+      void setServings(2)
+      void setTargetPrice('')
+      void setSelectedIngredients([])
+      void setSelectedTemplate(null)
+      clearDraft() // Sprint 1: Clear saved draft
 
     } catch (error: unknown) {
       apiLogger.error({ error }, 'Error saving recipe:')
@@ -216,7 +291,7 @@ export default function AIRecipeGeneratorPage() {
   }
 
   const handleGenerateAgain = () => {
-    setGeneratedRecipe(null)
+    void setGeneratedRecipe(null)
   }
 
   // Show loading state while auth is initializing
@@ -242,39 +317,39 @@ export default function AIRecipeGeneratorPage() {
     <AppLayout>
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Header with Mode Toggle */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <Sparkles className="h-6 w-6 text-white" />
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+              <Sparkles className="h-7 w-7 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">AI Recipe Generator</h1>
-              <p className="text-muted-foreground">
-                Generate resep UMKM profesional dengan AI dalam hitungan detik
+              <h1 className="text-3xl font-bold">
+                Generator Resep AI
+              </h1>
+              <p className="text-muted-foreground text-sm mt-1">
+                ✨ Buat resep UMKM profesional dengan AI dalam hitungan detik
               </p>
             </div>
           </div>
-          
+
           {/* Mode Toggle */}
-          <div className="flex gap-2 bg-muted p-1 rounded-lg">
+          <div className="flex gap-2 bg-muted/50 p-1.5 rounded-xl border">
             <button
               onClick={() => setMode('quick')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                mode === 'quick'
-                  ? 'bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'quick'
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
             >
               <Zap className="h-4 w-4" />
               Mode Cepat
             </button>
             <button
               onClick={() => setMode('complete')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                mode === 'complete'
-                  ? 'bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'complete'
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
             >
               <ChefHat className="h-4 w-4" />
               Mode Lengkap
@@ -282,45 +357,114 @@ export default function AIRecipeGeneratorPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Input Form - Enhanced */}
-          <RecipeGeneratorForm
-            productName={productName}
-            setProductName={setProductName}
-            productType={productType}
-            setProductType={setProductType}
-            servings={servings}
-            setServings={setServings}
-            targetPrice={targetPrice}
-            setTargetPrice={setTargetPrice}
-            dietaryRestrictions={dietaryRestrictions}
-            setDietaryRestrictions={setDietaryRestrictions}
-            selectedIngredients={selectedIngredients}
-            setSelectedIngredients={setSelectedIngredients}
-            availableIngredients={availableIngredients}
-            loading={loading}
-            onGenerate={handleGenerate}
-            mode={mode}
+        {/* Sprint 1: Template Selector */}
+        {!generatedRecipe && (
+          <RecipeTemplateSelector
+            onSelectTemplate={handleTemplateSelect}
+            selectedTemplateId={selectedTemplate?.id}
           />
+        )}
 
-          {/* Right Side - Preview or Result */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Left Column: Form & Ingredients */}
           <div className="space-y-6">
+            {/* Input Form - Enhanced */}
+            <RecipeGeneratorForm
+              productName={productName}
+              setProductName={setProductName}
+              productType={productType}
+              setProductType={setProductType}
+              servings={servings}
+              setServings={setServings}
+              targetPrice={targetPrice}
+              setTargetPrice={setTargetPrice}
+              dietaryRestrictions={dietaryRestrictions}
+              setDietaryRestrictions={setDietaryRestrictions}
+              selectedIngredients={selectedIngredients}
+              setSelectedIngredients={setSelectedIngredients}
+              availableIngredients={availableIngredients}
+              loading={loading}
+              onGenerate={handleGenerate}
+              mode={mode}
+            />
+
+            {/* Sprint 1: Smart Ingredient Selector */}
+            {!generatedRecipe && (
+              <SmartIngredientSelector
+                availableIngredients={availableIngredients.map(ing => ({
+                  id: ing.id,
+                  name: ing.name,
+                  unit: ing.unit,
+                  price_per_unit: ing.price_per_unit,
+                  current_stock: ing.current_stock ?? 0,
+                  minimum_stock: ing.minimum_stock ?? undefined
+                }))}
+                selectedIngredients={selectedIngredients}
+                onSelectionChange={setSelectedIngredients}
+                productType={productType}
+              />
+            )}
+          </div>
+
+          {/* Right Column: HPP Estimator & Preview */}
+          <div className="space-y-6">
+            {/* Sprint 1: HPP Estimator */}
+            {!generatedRecipe && !loading && (
+              <HppEstimator
+                selectedIngredients={availableIngredients
+                  .filter(ing => selectedIngredients.includes(ing.id))
+                  .map(ing => ({
+                    id: ing.id,
+                    name: ing.name,
+                    unit: ing.unit,
+                    price_per_unit: ing.price_per_unit,
+                    current_stock: ing.current_stock ?? 0
+                  }))}
+                servings={servings}
+                targetPrice={targetPrice ? parseFloat(targetPrice) : undefined}
+              />
+            )}
             {loading && (
-              <Card>
-                <CardContent className="py-12">
-                  <div className="text-center space-y-4">
-                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto">
-                      <ChefHat className="h-8 w-8 text-white animate-bounce" />
+              <Card className="border-2 border-purple-200 dark:border-purple-800">
+                <CardContent className="py-16">
+                  <div className="text-center space-y-6">
+                    <div className="relative">
+                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto shadow-xl">
+                        <ChefHat className="h-10 w-10 text-white animate-bounce" />
+                      </div>
+                      <div className="absolute inset-0 h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mx-auto animate-ping opacity-20" />
                     </div>
                     <div>
-                      <p className="font-medium text-lg">🧑‍🍳 AI sedang meracik resep...</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Tunggu sebentar ya, ini butuh waktu 10-30 detik
+                      <p className="font-semibold text-xl mb-2">🧑‍🍳 AI sedang meracik resep...</p>
+                      <p className="text-sm text-muted-foreground">
+                        Tunggu sebentar ya, proses ini membutuhkan waktu 10-30 detik
                       </p>
-                      <div className="mt-4 flex justify-center gap-1">
-                        <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <div className="mt-6 flex justify-center gap-2">
+                        <div className="h-3 w-3 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="h-3 w-3 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="h-3 w-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                    </div>
+
+                    {/* Progress Steps */}
+                    <div className="mt-8 space-y-3 max-w-sm mx-auto">
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="h-6 w-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                          <span className="text-white text-xs">✓</span>
+                        </div>
+                        <span className="text-muted-foreground">Menganalisis input Anda</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="h-6 w-6 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0 animate-pulse">
+                          <span className="text-white text-xs">⚡</span>
+                        </div>
+                        <span className="font-medium">Meracik komposisi bahan</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <span className="text-muted-foreground text-xs">3</span>
+                        </div>
+                        <span className="text-muted-foreground">Menyusun instruksi</span>
                       </div>
                     </div>
                   </div>
@@ -353,3 +497,5 @@ export default function AIRecipeGeneratorPage() {
     </AppLayout>
   )
 }
+
+export default AIRecipeGeneratorPage

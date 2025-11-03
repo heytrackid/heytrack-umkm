@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export function AuthFormSkeleton() {
-    return (
+
+export const AuthFormSkeleton = () => (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4">
             <div className="w-full max-w-md space-y-6">
                 {/* Logo/Brand Skeleton */}
@@ -44,4 +44,3 @@ export function AuthFormSkeleton() {
             </div>
         </div>
     )
-}

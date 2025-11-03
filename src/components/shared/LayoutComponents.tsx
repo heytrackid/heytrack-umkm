@@ -1,21 +1,13 @@
 'use client'
 
-import * as React from 'react'
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Fragment, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { cn } from '@/lib/utils'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -24,36 +16,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
 import {
-  ChevronDown,
   ChevronRight,
   Menu,
-  X,
-  Home,
-  Settings,
-  User,
-  Bell,
-  Search,
-  Filter,
   Grid,
   List,
   Table,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  MoreHorizontal,
-  ArrowLeft,
-  RefreshCw
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { useResponsive } from '@/hooks/useResponsive'
 
 interface BreadcrumbItem {
   label: string
   href?: string
-  icon?: React.ReactNode
+  icon?: ReactNode
 }
 
 interface PageHeaderProps {
@@ -61,28 +35,28 @@ interface PageHeaderProps {
   subtitle?: string
   description?: string
   breadcrumbs?: BreadcrumbItem[]
-  actions?: React.ReactNode
+  actions?: ReactNode
   className?: string
 }
 
 interface PageLayoutProps {
-  header?: React.ReactNode
-  sidebar?: React.ReactNode
-  footer?: React.ReactNode
-  children: React.ReactNode
+  header?: ReactNode
+  sidebar?: ReactNode
+  footer?: ReactNode
+  children: ReactNode
   className?: string
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
 }
 
 interface ContentGridProps {
-  children: React.ReactNode
+  children: ReactNode
   columns?: 1 | 2 | 3 | 4 | 6 | 12
   gap?: 'sm' | 'md' | 'lg' | 'xl'
   className?: string
 }
 
 interface CardGridProps {
-  children: React.ReactNode
+  children: ReactNode
   columns?: {
     default: number
     sm?: number
@@ -98,8 +72,8 @@ interface SectionProps {
   title?: string
   subtitle?: string
   description?: string
-  actions?: React.ReactNode
-  children: React.ReactNode
+  actions?: ReactNode
+  children: ReactNode
   className?: string
   variant?: 'default' | 'card' | 'bordered'
 }
@@ -108,95 +82,93 @@ interface DataViewProps {
   title?: string
   viewMode?: 'grid' | 'list' | 'table'
   onViewModeChange?: (mode: 'grid' | 'list' | 'table') => void
-  filterComponent?: React.ReactNode
-  searchComponent?: React.ReactNode
-  actions?: React.ReactNode
-  children: React.ReactNode
+  filterComponent?: ReactNode
+  searchComponent?: ReactNode
+  actions?: ReactNode
+  children: ReactNode
   loading?: boolean
-  emptyState?: React.ReactNode
+  emptyState?: ReactNode
   className?: string
 }
 
 /**
  * Shared Page Header Component
  */
-export function PageHeader({
+export const PageHeader = ({
   title,
   subtitle,
   description,
   breadcrumbs,
   actions,
   className = ""
-}: PageHeaderProps) {
-  return (
-    <div className={cn("space-y-4", className)}>
-      {/* Breadcrumbs */}
-      {breadcrumbs && breadcrumbs.length > 0 && (
-        <Breadcrumb>
-          <BreadcrumbList>
-            {breadcrumbs.map((item, index) => (
-              <React.Fragment key={index}>
-                <BreadcrumbItem>
-                  {item.href ? (
-                    <BreadcrumbLink asChild>
-                      <PrefetchLink href={item.href} className="flex items-center gap-1">
-                        {item.icon}
-                        {item.label}
-                      </PrefetchLink>
-                    </BreadcrumbLink>
-                  ) : (
-                    <BreadcrumbPage className="flex items-center gap-1">
+}: PageHeaderProps) => (
+  <div className={cn("space-y-4", className)}>
+    {/* Breadcrumbs */}
+    {breadcrumbs && breadcrumbs.length > 0 && (
+      <Breadcrumb>
+        <BreadcrumbList>
+          {breadcrumbs.map((item, index) => (
+            <Fragment key={index}>
+              <BreadcrumbItem>
+                {item.href ? (
+                  <BreadcrumbLink asChild>
+                    <PrefetchLink href={item.href} className="flex items-center gap-1">
                       {item.icon}
                       {item.label}
-                    </BreadcrumbPage>
-                  )}
-                </BreadcrumbItem>
-                {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
-              </React.Fragment>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
-      )}
+                    </PrefetchLink>
+                  </BreadcrumbLink>
+                ) : (
+                  <BreadcrumbPage className="flex items-center gap-1">
+                    {item.icon}
+                    {item.label}
+                  </BreadcrumbPage>
+                )}
+              </BreadcrumbItem>
+              {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+            </Fragment>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
+    )}
 
-      {/* Header Content */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            {title}
-          </h1>
-          {subtitle && (
-            <p className="text-lg text-muted-foreground">
-              {subtitle}
-            </p>
-          )}
-          {description && (
-            <p className="text-sm text-muted-foreground max-w-2xl">
-              {description}
-            </p>
-          )}
-        </div>
-
-        {actions && (
-          <div className="flex items-center gap-2">
-            {actions}
-          </div>
+    {/* Header Content */}
+    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+      <div className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          {title}
+        </h1>
+        {subtitle && (
+          <p className="text-lg text-muted-foreground">
+            {subtitle}
+          </p>
+        )}
+        {description && (
+          <p className="text-sm text-muted-foreground max-w-2xl">
+            {description}
+          </p>
         )}
       </div>
+
+      {actions && (
+        <div className="flex items-center gap-2">
+          {actions}
+        </div>
+      )}
     </div>
-  )
-}
+  </div>
+)
 
 /**
  * Shared Page Layout Component
  */
-export function PageLayout({
+export const PageLayout = ({
   header,
   sidebar,
   footer,
   children,
   className = "",
   maxWidth = 'full'
-}: PageLayoutProps) {
+}: PageLayoutProps) => {
   const maxWidthClasses = {
     sm: 'max-w-2xl',
     md: 'max-w-4xl',
@@ -245,12 +217,12 @@ export function PageLayout({
 /**
  * Content Grid Layout Component
  */
-export function ContentGrid({
+export const ContentGrid = ({
   children,
   columns = 1,
   gap = 'md',
   className = ""
-}: ContentGridProps) {
+}: ContentGridProps) => {
   const gapClasses = {
     sm: 'gap-2',
     md: 'gap-4',
@@ -273,12 +245,12 @@ export function ContentGrid({
 /**
  * Card Grid Layout Component
  */
-export function CardGrid({
+export const CardGrid = ({
   children,
   columns = { default: 1, sm: 2, md: 3, lg: 4 },
   gap = 'md',
   className = ""
-}: CardGridProps) {
+}: CardGridProps) => {
   const gapClasses = {
     sm: 'gap-2',
     md: 'gap-4',
@@ -308,7 +280,7 @@ export function CardGrid({
 /**
  * Section Component with Header
  */
-export function Section({
+export const Section = ({
   title,
   subtitle,
   description,
@@ -316,7 +288,7 @@ export function Section({
   children,
   className = "",
   variant = 'default'
-}: SectionProps) {
+}: SectionProps) => {
   const variantClasses = {
     default: '',
     card: 'bg-card border rounded-lg p-6',
@@ -325,7 +297,7 @@ export function Section({
 
   return (
     <section className={cn("space-y-4", variantClasses[variant], className)}>
-      {(title || subtitle || description || actions) && (
+      {(title ?? subtitle ?? description ?? actions) && (
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="space-y-1">
             {title && (
@@ -365,7 +337,7 @@ export function Section({
 /**
  * Data View Component with View Mode Toggle
  */
-export function DataView({
+export const DataView = ({
   title,
   viewMode = 'grid',
   onViewModeChange,
@@ -376,7 +348,7 @@ export function DataView({
   loading = false,
   emptyState,
   className = ""
-}: DataViewProps) {
+}: DataViewProps) => {
   const viewModeOptions = [
     { value: 'grid', icon: Grid, label: 'Grid' },
     { value: 'list', icon: List, label: 'List' },
@@ -386,7 +358,7 @@ export function DataView({
   return (
     <div className={cn("space-y-4", className)}>
       {/* Header */}
-      {(title || searchComponent || filterComponent || actions) && (
+      {(title ?? searchComponent ?? filterComponent ?? actions) && (
         <div className="flex flex-col lg:flex-row lg:items-center gap-4">
           <div className="flex-1">
             {title && (
@@ -441,17 +413,14 @@ export function DataView({
       <div className="relative">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
-        ) : children ? (
-          children
-        ) : (
-          emptyState || (
+        ) : (children ?? emptyState ?? (
             <div className="text-center py-12 text-muted-foreground">
-              No data available
+              Tidak ada data tersedia
             </div>
-          )
-        )}
+          ))
+        }
       </div>
     </div>
   )
@@ -461,18 +430,18 @@ export function DataView({
  * Responsive Container Component
  */
 interface ContainerProps {
-  children: React.ReactNode
+  children: ReactNode
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
   padding?: 'none' | 'sm' | 'md' | 'lg'
   className?: string
 }
 
-export function Container({
+export const Container = ({
   children,
   size = 'lg',
   padding = 'md',
   className = ""
-}: ContainerProps) {
+}: ContainerProps) => {
   const sizeClasses = {
     sm: 'max-w-2xl',
     md: 'max-w-4xl',
@@ -506,7 +475,7 @@ export function Container({
 interface SidebarItem {
   label: string
   href?: string
-  icon?: React.ReactNode
+  icon?: ReactNode
   badge?: string | number
   children?: SidebarItem[]
 }
@@ -518,12 +487,12 @@ interface SidebarProps {
   className?: string
 }
 
-export function Sidebar({
+export const Sidebar = ({
   items,
   currentPath,
   onItemClick,
   className = ""
-}: SidebarProps) {
+}: SidebarProps) => {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
 
   const toggleExpanded = (itemId: string) => {
@@ -533,7 +502,7 @@ export function Sidebar({
     } else {
       newExpanded.add(itemId)
     }
-    setExpandedItems(newExpanded)
+    void setExpandedItems(newExpanded)
   }
 
   const renderItem = (item: SidebarItem, depth = 0) => {
@@ -578,7 +547,7 @@ export function Sidebar({
 
         {hasChildren && isExpanded && (
           <div className="mt-1">
-            {item.children!.map(child => renderItem(child, depth + 1))}
+            {item.children?.map(child => renderItem(child, depth + 1))}
           </div>
         )}
       </div>
@@ -596,22 +565,22 @@ export function Sidebar({
  * Mobile Navigation Component
  */
 interface MobileNavProps {
-  children: React.ReactNode
-  trigger?: React.ReactNode
+  children: ReactNode
+  trigger?: ReactNode
   className?: string
 }
 
-export function MobileNav({
+export const MobileNav = ({
   children,
   trigger,
   className = ""
-}: MobileNavProps) {
+}: MobileNavProps) => {
   const [open, setOpen] = useState(false)
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        {trigger || (
+        {trigger ?? (
           <Button variant="ghost" size="sm">
             <Menu className="h-5 w-5" />
           </Button>

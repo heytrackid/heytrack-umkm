@@ -1,8 +1,10 @@
-"use client"
+'use client';
 
-import * as React from"react"
-
+import { forwardRef } from 'react'
 import { cn } from"@/lib/utils"
+
+
+
 
 // Simple switch implementation without external dependencies
 interface SwitchProps {
@@ -13,9 +15,8 @@ interface SwitchProps {
   id?: string
 }
 
-const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
-  ({ className, checked = false, onCheckedChange, disabled = false, id, ...props }, ref) => {
-    return (
+const Switch = forwardRef<HTMLButtonElement, SwitchProps>(
+  ({ className, checked = false, onCheckedChange, disabled = false, id, ...props }, ref) => (
       <button
         type="button"
         role="switch"
@@ -39,7 +40,6 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
         />
       </button>
     )
-  }
 )
 Switch.displayName ="Switch"
 

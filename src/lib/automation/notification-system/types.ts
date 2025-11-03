@@ -1,7 +1,11 @@
+import type {IngredientsTable } from '@/types/database'
+
 /**
  * Notification System Module Types
  * Type definitions for notification system functionality
  */
+
+// Use generated types for database entities
 
 export interface SmartNotification {
   type: 'critical' | 'warning' | 'info' | 'success'
@@ -11,7 +15,7 @@ export interface SmartNotification {
   action?: string
   priority: 'low' | 'medium' | 'high'
   timestamp?: Date
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 }
 
 export interface AutomationConfig {
@@ -30,13 +34,7 @@ export interface FinancialMetrics {
   revenue: number
 }
 
-export interface Ingredient {
-  id: string
-  name: string
-  current_stock?: number
-  min_stock?: number
-  unit?: string
-}
+export type Ingredient = IngredientsTable
 
 export interface OrderForNotification {
   delivery_date: string

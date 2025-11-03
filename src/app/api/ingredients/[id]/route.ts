@@ -1,31 +1,47 @@
 import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
 import { withValidation } from '@/lib/api-core/middleware'
 import { handleDatabaseError } from '@/lib/errors'
-import { createServiceRoleClient } from '@/utils/supabase'
-import {
-  IdParamSchema,
-  IngredientUpdateSchema
-} from '@/lib/validations'
+import { createClient } from '@/utils/supabase/server'
+import { IdParamSchema, IngredientUpdateSchema } from '@/lib/validations' 
 import type { NextRequest } from 'next/server'
+import type { IngredientsTable } from '@/types/database'
+import { isValidUUID } from '@/lib/type-guards'
+
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+type Ingredient = IngredientsTable
 
 // GET /api/ingredients/[id] - Get single bahan baku
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   try {
+    // Validate UUID format first
+    if (!isValidUUID(id)) {
+      return createErrorResponse('Invalid bahan baku ID format', 400)
+    }
+    
     // Validate ID parameter
     const validation = IdParamSchema.safeParse({ id })
     if (!validation.success) {
       return createErrorResponse('Invalid bahan baku ID format', 400)
     }
 
-    const supabase = createServiceRoleClient()
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return createErrorResponse('Unauthorized', 401)
+    }
+
     const { data, error } = await supabase
       .from('ingredients')
-      .select('*')
+      .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, description, supplier, created_at, updated_at, user_id')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (error) {
@@ -35,7 +51,11 @@ export async function GET(
       return handleDatabaseError(error)
     }
 
-    return createSuccessResponse(data as any)
+    if (!data) {
+      return createErrorResponse('Bahan baku tidak ditemukan', 404)
+    }
+
+    return createSuccessResponse(data as Ingredient)
 
   } catch (error: unknown) {
     return handleDatabaseError(error)
@@ -45,9 +65,15 @@ export async function GET(
 // PUT /api/ingredients/[id] - Update bahan baku
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
+  
+  // Validate UUID format first
+  if (!isValidUUID(id)) {
+    return createErrorResponse('Invalid bahan baku ID format', 400)
+  }
+  
   const validationResult = await withValidation(IngredientUpdateSchema)(request)
 
   if (validationResult instanceof Response) {
@@ -63,14 +89,20 @@ export async function PUT(
       return createErrorResponse('Invalid bahan baku ID format', 400)
     }
 
-    const supabase = createServiceRoleClient()
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return createErrorResponse('Unauthorized', 401)
+    }
 
     // Update bahan baku
     const { data, error } = await supabase
       .from('ingredients')
-      .update(validatedData as any)
+      .update(validatedData)
       .eq('id', id)
-      .select('*')
+      .eq('user_id', user.id)
+      .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, description, supplier, updated_at')
       .single()
 
     if (error) {
@@ -80,7 +112,7 @@ export async function PUT(
       return handleDatabaseError(error)
     }
 
-    return createSuccessResponse(data as any, 'Bahan baku berhasil diupdate')
+    return createSuccessResponse(data as Ingredient, 'Bahan baku berhasil diupdate')
 
   } catch (error: unknown) {
     return handleDatabaseError(error)
@@ -90,23 +122,34 @@ export async function PUT(
 // DELETE /api/ingredients/[id] - Delete bahan baku
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   try {
+    // Validate UUID format first
+    if (!isValidUUID(id)) {
+      return createErrorResponse('Invalid bahan baku ID format', 400)
+    }
+    
     // Validate ID parameter
     const validation = IdParamSchema.safeParse({ id })
     if (!validation.success) {
       return createErrorResponse('Invalid bahan baku ID format', 400)
     }
 
-    const supabase = createServiceRoleClient()
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return createErrorResponse('Unauthorized', 401)
+    }
 
-    // Check if bahan baku exists
+    // Check if bahan baku exists and belongs to user
     const { data: existing } = await supabase
       .from('ingredients')
-      .select('*')
+      .select('id')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (!existing) {
@@ -116,7 +159,7 @@ export async function DELETE(
     // Check if bahan baku is used in recipes (recipe_ingredients table with ingredient_id foreign key)
     const { data: resepItems } = await supabase
       .from('recipe_ingredients')
-      .select('*')
+      .select('id')
       .eq('ingredient_id', id)
       .limit(1)
 
@@ -132,12 +175,13 @@ export async function DELETE(
       .from('ingredients')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) {
       return handleDatabaseError(error)
     }
 
-    return createSuccessResponse(null as any, 'Bahan baku berhasil dihapus')
+    return createSuccessResponse(null, 'Bahan baku berhasil dihapus')
 
   } catch (error: unknown) {
     return handleDatabaseError(error)

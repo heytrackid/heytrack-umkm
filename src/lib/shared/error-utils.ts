@@ -1,16 +1,19 @@
+import { useToast } from '@/hooks/use-toast'
+import { getErrorMessage } from '@/shared'
+import { logger } from '@/lib/logger'
+
+
 /**
  * Shared Error Handling Utilities
  * Consistent error handling patterns across the application
  */
 
-import { useToast } from '@/hooks/use-toast'
-import { getErrorMessage } from '@/shared'
 
 // Error types
 export interface AppError {
   code: string
   message: string
-  details?: any
+  details?: Record<string, unknown>
   timestamp: Date
 }
 
@@ -22,11 +25,11 @@ export interface ValidationError {
 export interface APIError {
   status: number
   message: string
-  details?: any
+  details?: Record<string, unknown>
 }
 
 // Error creation utilities
-export function createAppError(code: string, message: string, details?: any): AppError {
+export function createAppError(code: string, message: string, details?: Record<string, unknown>): AppError {
   return {
     code,
     message,
@@ -39,7 +42,7 @@ export function createValidationError(field: string, message: string): Validatio
   return { field, message }
 }
 
-export function createAPIError(status: number, message: string, details?: any): APIError {
+export function createAPIError(status: number, message: string, details?: Record<string, unknown>): APIError {
   return { status, message, details }
 }
 
@@ -51,7 +54,7 @@ export function useErrorHandler() {
     const message = getErrorMessage(error)
     const title = context ? `${context} Error` : 'Error'
 
-    console.error(`[${context || 'App'} Error]`, error)
+    logger.error({ error }, `${context ?? 'App'} Error`)
 
     toast({
       title,
@@ -68,8 +71,8 @@ export function useErrorHandler() {
   ): Promise<T | null> => {
     try {
       return await asyncFn()
-    } catch (error) {
-      handleError(error, context)
+    } catch (err) {
+      void handleError(err, context)
       return null
     }
   }
@@ -78,8 +81,9 @@ export function useErrorHandler() {
 }
 
 // API error handling
+// eslint-disable-next-line react-hooks/rules-of-hooks -- This utility function needs refactoring to not use hooks directly
 export function handleAPIResponse<T>(
-  response: { data?: T; error?: any },
+  response: { data?: T; error?: unknown },
   successMessage?: string,
   errorContext?: string
 ) {
@@ -89,7 +93,7 @@ export function handleAPIResponse<T>(
     const message = getErrorMessage(response.error)
 
     toast({
-      title: errorContext || 'API Error',
+      title: errorContext ?? 'API Error',
       description: message,
       variant: 'destructive'
     })
@@ -108,31 +112,31 @@ export function handleAPIResponse<T>(
 }
 
 // Form error handling
-export function formatFormErrors(errors: Record<string, any>): string[] {
+export function formatFormErrors(errors: Record<string, unknown>): string[] {
   return Object.entries(errors).map(([field, error]) => {
-    const message = typeof error === 'string' ? error : error?.message || 'Invalid value'
+    const message = typeof error === 'string' ? error : (error as { message?: string })?.message ?? 'Invalid value'
     return `${field}: ${message}`
   })
 }
 
 // Error boundary helpers
-export function logErrorToService(error: Error, context?: any) {
+export function logErrorToService(error: Error, context?: unknown) {
   // In a real app, send to error monitoring service like Sentry
-  console.error('Error logged to service:', {
+  logger.error({
     error: error.message,
     stack: error.stack,
     context,
     timestamp: new Date().toISOString(),
     userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
     url: typeof window !== 'undefined' ? window.location.href : 'server'
-  })
+  }, 'Error logged to service')
 }
 
 // Retry utilities
 export function withRetry<T>(
   fn: () => Promise<T>,
-  maxRetries: number = 3,
-  delay: number = 1000
+  maxRetries = 3,
+  delay = 1000
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     let retries = 0
@@ -143,7 +147,7 @@ export function withRetry<T>(
         .catch((error) => {
           if (retries < maxRetries) {
             retries++
-            setTimeout(attempt, delay * retries)
+            void setTimeout(attempt, delay * retries)
           } else {
             reject(error)
           }
@@ -163,18 +167,14 @@ export function createErrorRecovery<T>(
   return async (): Promise<T> => {
     try {
       return await primaryFn()
-    } catch (error) {
-      errorHandler?.(error as Error)
+    } catch (err) {
+      errorHandler?.(err as Error)
 
       if (fallbackFn) {
-        try {
-          return await fallbackFn()
-        } catch (fallbackError) {
-          throw fallbackError
-        }
+        return fallbackFn()
       }
 
-      throw error
+      throw err
     }
   }
 }
@@ -194,15 +194,15 @@ export const ERROR_MESSAGES = {
 // Error classification
 export function classifyError(error: unknown): keyof typeof ERROR_MESSAGES {
   if (typeof error === 'string') {
-    if (error.includes('network') || error.includes('fetch')) return 'NETWORK'
-    if (error.includes('timeout')) return 'TIMEOUT'
+    if (error.includes('network') || error.includes('fetch')) {return 'NETWORK'}
+    if (error.includes('timeout')) {return 'TIMEOUT'}
   }
 
   if (error instanceof Error) {
-    if (error.message.includes('401')) return 'UNAUTHORIZED'
-    if (error.message.includes('403')) return 'FORBIDDEN'
-    if (error.message.includes('404')) return 'NOT_FOUND'
-    if (error.message.includes('500')) return 'SERVER_ERROR'
+    if (error.message.includes('401')) {return 'UNAUTHORIZED'}
+    if (error.message.includes('403')) {return 'FORBIDDEN'}
+    if (error.message.includes('404')) {return 'NOT_FOUND'}
+    if (error.message.includes('500')) {return 'SERVER_ERROR'}
   }
 
   return 'UNKNOWN'

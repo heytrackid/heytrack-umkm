@@ -1,127 +1,104 @@
 // Orders Domain Types
 // Comprehensive type definitions for order management system
+// Uses generated Supabase types as base
 
-export type OrderStatus = 
-  | 'draft'         // Order sedang dibuat
-  | 'pending'       // Menunggu konfirmasi
-  | 'confirmed'     // Dikonfirmasi, siap produksi
-  | 'in_production' // Sedang diproduksi
-  | 'ready'         // Siap diambil/dikirim  
-  | 'completed'     // Selesai/sudah diambil
-  | 'cancelled'     // Dibatalkan
+import type { 
+  CustomersTable, 
+  OrdersTable, 
+  OrderItemsTable, 
+  PaymentsTable,
+  CustomersInsert,
+  CustomersUpdate,
+  OrdersInsert,
+  OrdersUpdate,
+  OrderItemsInsert,
+  OrderItemsUpdate,
+  PaymentsInsert,
+  PaymentsUpdate,
+  OrderStatus,
+  PaymentMethod
+} from '@/types/database'
 
-export type PaymentStatus = 
-  | 'unpaid'        // Belum dibayar
-  | 'partial'       // Dibayar sebagian (DP)
-  | 'paid'          // Lunas
-  | 'refunded'      // Dikembalikan
+// Use generated types from Supabase
+export type Customer = CustomersTable
+export type CustomerInsert = CustomersInsert
+export type CustomerUpdate = CustomersUpdate
 
-export type PaymentMethod = 
-  | 'cash'          // Tunai
-  | 'transfer'      // Transfer bank
-  | 'qris'          // QRIS
-  | 'card'          // Kartu kredit/debit
-  | 'ewallet'       // E-wallet (GoPay, OVO, dll)
+export type OrderItem = OrderItemsTable
+export type OrderItemInsert = OrderItemsInsert
+export type OrderItemUpdate = OrderItemsUpdate
 
-export type DeliveryMethod = 
-  | 'pickup'        // Ambil sendiri
-  | 'delivery'      // Diantar
-  | 'shipping'      // Dikirim via ekspedisi
+export type Order = OrdersTable
+export type OrderInsert = OrdersInsert
+export type OrderUpdate = OrdersUpdate
 
-export interface Customer {
-  id: string
-  name: string
-  email?: string
-  phone?: string
-  address?: string
-  notes?: string
-  created_at: string
-  updated_at: string
-}
+// Re-export enums from database
+export type { PaymentMethod, OrderStatus } from '@/types/database'
 
-export interface OrderItem {
-  id: string
-  order_id: string
-  recipe_id: string
+// Custom types (not in database enums)
+export type PaymentStatus = 'PENDING' | 'PAID' | 'PARTIAL' | 'REFUNDED'
+export type DeliveryMethod = 'PICKUP' | 'DELIVERY' | 'DINE_IN'
+
+// Extended types with relations for UI
+export interface OrderItemWithRecipe extends OrderItem {
   recipe?: {
     id: string
     name: string
-    price: number
-    category: string
-    servings: number
-    description?: string
+    selling_price: number | null // Use actual DB column name
+    category: string | null
+    servings: number | null
+    description: string | null
   }
+}
+
+export type Payment = PaymentsTable
+export type PaymentInsert = PaymentsInsert
+export type PaymentUpdate = PaymentsUpdate
+
+// Extended Order type with relations for UI
+export interface OrderWithRelations extends Order {
+  customer?: Customer
+  items?: OrderItemWithRecipe[]
+  payments?: Payment[]
+}
+
+// Service types for order-recipe operations
+export interface RecipeOption {
+  id: string
+  name: string
+  category: string
+  servings: number
+  description?: string | null
+  selling_price: number // Use actual DB column name
+  cost_per_unit: number | null // Use actual DB column name
+  margin_percentage: number | null // Use actual DB column name
+  is_available: boolean
+  prep_time: number | null // Use actual DB column name
+  cook_time: number | null // Use actual DB column name
+}
+
+export interface OrderItemCalculation {
+  recipe_id: string
+  recipe_name: string
   quantity: number
   unit_price: number
   total_price: number
-  notes?: string
-  created_at: string
-  updated_at: string
+  cost_per_unit: number // Use actual DB column name
+  total_cost: number
+  profit: number
+  margin_percentage: number
 }
 
-export interface Payment {
-  id: string
-  order_id: string
-  amount: number
-  method: PaymentMethod
-  status: PaymentStatus
-  reference_number?: string
-  notes?: string
-  created_at: string
-  updated_at: string
-}
-
-export interface Order {
-  id: string
-  customer_id?: string
-  customer?: Customer
-  customer_name: string
-  customer_phone?: string
-  customer_email?: string
-  customer_address?: string
-  
-  // Order details
-  order_number: string
-  status: OrderStatus
-  priority: 'low' | 'normal' | 'high' | 'urgent'
-  
-  // Timing
-  order_date: string
-  due_date: string
-  delivery_date?: string
-  completed_date?: string
-  
-  // Items and pricing
-  items: OrderItem[]
+export interface OrderPricing {
+  items: OrderItemCalculation[]
   subtotal: number
   tax_amount: number
   tax_rate: number
   discount_amount: number
-  discount_percentage: number
   total_amount: number
-  
-  // Payment
-  payments: Payment[]
-  payment_status: PaymentStatus
-  paid_amount: number
-  remaining_amount: number
-  
-  // Delivery
-  delivery_method: DeliveryMethod
-  delivery_address?: string
-  delivery_fee: number
-  delivery_notes?: string
-  
-  // Additional info
-  notes?: string
-  internal_notes?: string
-  special_requirements?: string
-  
-  // Metadata
-  created_by?: string
-  updated_by?: string
-  created_at: string
-  updated_at: string
+  total_estimated_cost: number
+  total_profit: number
+  overall_margin: number
 }
 
 // API Response types
@@ -162,11 +139,11 @@ export interface OrderFilters {
   status?: OrderStatus[]
   payment_status?: PaymentStatus[]
   delivery_method?: DeliveryMethod[]
-  priority?: ('low' | 'normal' | 'high' | 'urgent')[]
+  priority?: Array<'low' | 'normal' | 'high' | 'urgent'>
   date_from?: string
   date_to?: string
   customer_search?: string
-  order_number_search?: string
+  order_no_search?: string
   min_amount?: number
   max_amount?: number
 }
@@ -229,7 +206,7 @@ export interface OrderAnalytics {
 
 // UI Component Props
 export interface OrderFormProps {
-  order?: Order
+  order?: OrderWithRelations
   onSubmit: (data: CreateOrderRequest | UpdateOrderRequest) => Promise<void>
   onCancel: () => void
   loading?: boolean
@@ -237,18 +214,18 @@ export interface OrderFormProps {
 }
 
 export interface OrderDetailProps {
-  order: Order
-  onEdit: (order: Order) => void
+  order: OrderWithRelations
+  onEdit: (order: OrderWithRelations) => void
   onUpdateStatus: (orderId: string, status: OrderStatus) => Promise<void>
-  onAddPayment: (orderId: string, payment: Omit<Payment, 'id' | 'created_at' | 'updated_at'>) => Promise<void>
+  onAddPayment: (orderId: string, payment: PaymentInsert) => Promise<void>
   loading?: boolean
 }
 
 export interface OrdersListProps {
-  orders: Order[]
+  orders: OrderWithRelations[]
   loading?: boolean
-  onEdit: (order: Order) => void
-  onView: (order: Order) => void
+  onEdit: (order: OrderWithRelations) => void
+  onView: (order: OrderWithRelations) => void
   onUpdateStatus: (orderId: string, status: OrderStatus) => Promise<void>
   filters: OrderFilters
   onFiltersChange: (filters: OrderFilters) => void
@@ -256,7 +233,7 @@ export interface OrdersListProps {
 
 // Hook return types
 export interface UseOrdersDataReturn {
-  orders: Order[]
+  orders: OrderWithRelations[]
   loading: boolean
   error: string | null
   stats: OrderStats | null
@@ -283,32 +260,31 @@ export interface UseOrderFormReturn {
 
 // Constants
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  draft: 'Draft',
-  pending: 'Menunggu Konfirmasi',
-  confirmed: 'Dikonfirmasi', 
-  in_production: 'Sedang Diproduksi',
-  ready: 'Siap Diambil',
-  completed: 'Selesai',
-  cancelled: 'Dibatalkan'
+  PENDING: 'Menunggu Konfirmasi',
+  CONFIRMED: 'Dikonfirmasi', 
+  IN_PROGRESS: 'Sedang Diproduksi',
+  READY: 'Siap Diambil',
+  DELIVERED: 'Selesai',
+  CANCELLED: 'Dibatalkan'
 }
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
-  unpaid: 'Belum Dibayar',
-  partial: 'Dibayar Sebagian',
-  paid: 'Lunas',
-  refunded: 'Dikembalikan'
+  PENDING: 'Belum Dibayar',
+  PARTIAL: 'Dibayar Sebagian',
+  PAID: 'Lunas',
+  REFUNDED: 'Dikembalikan'
 }
 
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
-  cash: 'Tunai',
-  transfer: 'Transfer Bank',
-  qris: 'QRIS',
-  card: 'Kartu',
-  ewallet: 'E-Wallet'
+  CASH: 'Tunai',
+  BANK_TRANSFER: 'Transfer Bank',
+  CREDIT_CARD: 'Kartu Kredit',
+  DIGITAL_WALLET: 'E-Wallet',
+  OTHER: 'Lainnya'
 }
 
 export const DELIVERY_METHOD_LABELS: Record<DeliveryMethod, string> = {
-  pickup: 'Ambil Sendiri',
-  delivery: 'Diantar',
-  shipping: 'Dikirim'
+  PICKUP: 'Ambil Sendiri',
+  DELIVERY: 'Diantar',
+  DINE_IN: 'Dine In'
 }

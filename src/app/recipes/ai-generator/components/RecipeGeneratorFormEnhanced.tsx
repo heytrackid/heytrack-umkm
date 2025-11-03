@@ -1,7 +1,5 @@
-// Enhanced Recipe Generator Form with Quick/Complete Mode
-// Improved UX with contextual placeholders and better guidance
-
 'use client'
+
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,20 +7,13 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles, Info, ChefHat } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import type { AvailableIngredient } from './types'
+
+// Enhanced Recipe Generator Form with Quick/Complete Mode
+// Improved UX with contextual placeholders and better guidance
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from '@/components/ui/tooltip'
 
 interface RecipeGeneratorFormProps {
   productName: string
@@ -61,7 +52,7 @@ const dietaryOptions = [
   { value: 'gluten-free', label: 'Bebas Gluten' },
 ]
 
-export default function RecipeGeneratorFormEnhanced({
+const RecipeGeneratorFormEnhanced = ({
   productName,
   setProductName,
   productType,
@@ -78,16 +69,16 @@ export default function RecipeGeneratorFormEnhanced({
   loading,
   onGenerate,
   mode,
-}: RecipeGeneratorFormProps) {
+}: RecipeGeneratorFormProps) => {
   const currentProductType = productTypes.find(p => p.value === productType)
-  const servingsLabel = currentProductType?.unit || 'porsi'
-  const servingsExample = currentProductType?.example || '5 porsi'
+  const servingsLabel = currentProductType?.unit ?? 'porsi'
+  const servingsExample = currentProductType?.example ?? '5 porsi'
 
   const toggleDietaryRestriction = (value: string) => {
     if (dietaryRestrictions.includes(value)) {
       setDietaryRestrictions(dietaryRestrictions.filter(d => d !== value))
     } else {
-      setDietaryRestrictions([...dietaryRestrictions, value])
+      void setDietaryRestrictions([...dietaryRestrictions, value])
     }
   }
 
@@ -95,22 +86,28 @@ export default function RecipeGeneratorFormEnhanced({
     if (selectedIngredients.includes(ingredientName)) {
       setSelectedIngredients(selectedIngredients.filter(i => i !== ingredientName))
     } else {
-      setSelectedIngredients([...selectedIngredients, ingredientName])
+      void setSelectedIngredients([...selectedIngredients, ingredientName])
     }
   }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ChefHat className="h-5 w-5" />
-          {mode === 'quick' ? 'Input Cepat' : 'Input Lengkap'}
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          {mode === 'quick' 
-            ? 'Isi nama produk & jumlah, AI akan otomatis menyesuaikan resep'
-            : 'Isi detail lengkap untuk hasil yang lebih akurat'}
-        </p>
+      <CardHeader className="bg-card">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <ChefHat className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <CardTitle className="text-lg">
+              {mode === 'quick' ? '⚡ Input Cepat' : '🎯 Input Lengkap'}
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {mode === 'quick'
+                ? 'Isi nama produk & jumlah, AI akan otomatis menyesuaikan resep'
+                : 'Isi detail lengkap untuk hasil yang lebih akurat'}
+            </p>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Product Name */}
@@ -259,36 +256,51 @@ export default function RecipeGeneratorFormEnhanced({
         )}
 
         {/* AI Logic Indicator */}
-        <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
-          <p className="text-xs text-purple-900 dark:text-purple-100 flex items-start gap-2">
-            <Sparkles className="h-4 w-4 mt-0.5 flex-shrink-0" />
-            <span>
-              AI akan menyesuaikan resep berdasarkan {mode === 'quick' ? 'jenis produk & jumlah hasil' : 'target harga jual & bahan yang Anda pilih'}. 
-              Setiap hasil bisa berbeda untuk memberikan variasi terbaik.
-            </span>
-          </p>
+        <div className="bg-muted/50 border rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-purple-900 dark:text-purple-100 mb-1">
+                💡 Cara Kerja AI
+              </p>
+              <p className="text-xs text-purple-800 dark:text-purple-200">
+                AI akan menyesuaikan resep berdasarkan {mode === 'quick' ? 'jenis produk & jumlah hasil' : 'target harga jual & bahan yang Anda pilih'}.
+                Setiap hasil bisa berbeda untuk memberikan variasi terbaik.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Generate Button */}
         <Button
           onClick={onGenerate}
-          disabled={loading || !productName || !servings}
-          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+          disabled={(loading || false) || !productName || !servings}
+          className="w-full shadow-lg hover:shadow-xl transition-all"
           size="lg"
         >
           {loading ? (
             <>
               <ChefHat className="mr-2 h-5 w-5 animate-bounce" />
-              Sedang Generate...
+              <span className="font-semibold">Sedang Generate...</span>
             </>
           ) : (
             <>
               <Sparkles className="mr-2 h-5 w-5" />
-              Generate Resep dengan AI
+              <span className="font-semibold">Generate Resep dengan AI</span>
             </>
           )}
         </Button>
+
+        {!loading && (!productName || !servings) && (
+          <p className="text-xs text-center text-muted-foreground -mt-2">
+            Isi nama produk dan jumlah hasil untuk mulai generate
+          </p>
+        )}
       </CardContent>
     </Card>
   )
 }
+
+export default RecipeGeneratorFormEnhanced

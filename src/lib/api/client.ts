@@ -1,9 +1,10 @@
+import { apiLogger } from '@/lib/logger'
+
 /**
  * API Client
  * Centralized API client with error handling and type safety
  */
 
-import { apiLogger } from '@/lib/logger'
 
 export interface ApiResponse<T = unknown> {
   success: boolean
@@ -16,13 +17,16 @@ export interface ApiRequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean>
 }
 
+// Alias for backward compatibility
+export type RequestConfig = ApiRequestOptions
+
 /**
  * Base API client
  */
 export class ApiClient {
   private baseUrl: string
 
-  constructor(baseUrl: string = '/api') {
+  constructor(baseUrl = '/api') {
     this.baseUrl = baseUrl
   }
 
@@ -41,9 +45,9 @@ export class ApiClient {
         }
       })
 
-      return await this.handleResponse<T>(response)
-    } catch (error) {
-      return this.handleError(error)
+      return this.handleResponse<T>(response)
+    } catch (err) {
+      return this.handleError(err) as ApiResponse<T>
     }
   }
 
@@ -63,9 +67,9 @@ export class ApiClient {
         body: data ? JSON.stringify(data) : undefined
       })
 
-      return await this.handleResponse<T>(response)
-    } catch (error) {
-      return this.handleError(error)
+      return this.handleResponse<T>(response)
+    } catch (err) {
+      return this.handleError(err) as ApiResponse<T>
     }
   }
 
@@ -85,9 +89,31 @@ export class ApiClient {
         body: data ? JSON.stringify(data) : undefined
       })
 
-      return await this.handleResponse<T>(response)
-    } catch (error) {
-      return this.handleError(error)
+      return this.handleResponse<T>(response)
+    } catch (err) {
+      return this.handleError(err) as ApiResponse<T>
+    }
+  }
+
+  /**
+   * Make a PATCH request
+   */
+  async patch<T>(endpoint: string, data?: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
+    try {
+      const url = this.buildUrl(endpoint, options?.params)
+      const response = await fetch(url, {
+        ...options,
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers
+        },
+        body: data ? JSON.stringify(data) : undefined
+      })
+
+      return this.handleResponse<T>(response)
+    } catch (err) {
+      return this.handleError(err) as ApiResponse<T>
     }
   }
 
@@ -107,8 +133,8 @@ export class ApiClient {
       })
 
       return await this.handleResponse<T>(response)
-    } catch (error) {
-      return this.handleError(error)
+    } catch (err) {
+      return this.handleError(err) as ApiResponse<T>
     }
   }
 
@@ -118,7 +144,7 @@ export class ApiClient {
   private buildUrl(endpoint: string, params?: Record<string, string | number | boolean>): string {
     const url = `${this.baseUrl}${endpoint}`
     
-    if (!params) return url
+    if (!params) {return url}
 
     const searchParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
@@ -141,7 +167,7 @@ export class ApiClient {
       
       return {
         success: false,
-        error: error.error || error.message || 'Request failed'
+        error: error.error ?? error.message ?? 'Request failed'
       }
     }
 

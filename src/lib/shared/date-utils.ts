@@ -1,3 +1,5 @@
+
+
 /**
  * Shared Date and Time Utilities
  * Consistent date formatting and manipulation across the application
@@ -24,11 +26,11 @@ export function formatRelativeTime(date: Date | string): string {
   const diffMs = now.getTime() - past.getTime()
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-  if (diffDays === 0) return 'Hari ini'
-  if (diffDays === 1) return 'Kemarin'
-  if (diffDays < 7) return `${diffDays} hari yang lalu`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} minggu yang lalu`
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} bulan yang lalu`
+  if (diffDays === 0) {return 'Hari ini'}
+  if (diffDays === 1) {return 'Kemarin'}
+  if (diffDays < 7) {return `${diffDays} hari yang lalu`}
+  if (diffDays < 30) {return `${Math.floor(diffDays / 7)} minggu yang lalu`}
+  if (diffDays < 365) {return `${Math.floor(diffDays / 30)} bulan yang lalu`}
   return `${Math.floor(diffDays / 365)} tahun yang lalu`
 }
 
@@ -166,12 +168,12 @@ export function addBusinessDays(date: Date, businessDays: number): Date {
 }
 
 // Date validation utilities
-export function isValidDate(date: any): date is Date {
+export function isValidDate(date: unknown): date is Date {
   return date instanceof Date && !isNaN(date.getTime())
 }
 
 export function parseDate(dateString: string): Date | null {
-  if (!dateString) return null
+  if (!dateString) {return null}
   const date = new Date(dateString)
   return isValidDate(date) ? date : null
 }
@@ -208,13 +210,13 @@ export function formatRelativeTimeIndonesian(date: Date | string): string {
   const diffMonths = Math.floor(diffDays / 30)
   const diffYears = Math.floor(diffDays / 365)
 
-  if (diffSeconds < 10) return RELATIVE_TIME_LABELS.now
-  if (diffSeconds < 60) return `${diffSeconds} ${RELATIVE_TIME_LABELS.seconds}`
-  if (diffMinutes < 60) return `${diffMinutes} ${RELATIVE_TIME_LABELS.minutes}`
-  if (diffHours < 24) return `${diffHours} ${RELATIVE_TIME_LABELS.hours}`
-  if (diffDays < 7) return `${diffDays} ${RELATIVE_TIME_LABELS.days}`
-  if (diffWeeks < 4) return `${diffWeeks} ${RELATIVE_TIME_LABELS.weeks}`
-  if (diffMonths < 12) return `${diffMonths} ${RELATIVE_TIME_LABELS.months}`
+  if (diffSeconds < 10) {return RELATIVE_TIME_LABELS.now}
+  if (diffSeconds < 60) {return `${diffSeconds} ${RELATIVE_TIME_LABELS.seconds}`}
+  if (diffMinutes < 60) {return `${diffMinutes} ${RELATIVE_TIME_LABELS.minutes}`}
+  if (diffHours < 24) {return `${diffHours} ${RELATIVE_TIME_LABELS.hours}`}
+  if (diffDays < 7) {return `${diffDays} ${RELATIVE_TIME_LABELS.days}`}
+  if (diffWeeks < 4) {return `${diffWeeks} ${RELATIVE_TIME_LABELS.weeks}`}
+  if (diffMonths < 12) {return `${diffMonths} ${RELATIVE_TIME_LABELS.months}`}
   return `${diffYears} ${RELATIVE_TIME_LABELS.years}`
 }
 
@@ -247,18 +249,21 @@ export function getDateRangeForPeriod(
       end = endOfDay(now)
       break
     case 'yesterday':
-      const yesterday = addDays(now, -1)
-      start = startOfDay(yesterday)
-      end = endOfDay(yesterday)
-      break
-    case 'thisWeek':
+      {
+        const yesterday = addDays(now, -1)
+        start = startOfDay(yesterday)
+        end = endOfDay(yesterday)
+        break
+      }
+    case 'thisWeek': {
       start = new Date(now.setDate(now.getDate() - now.getDay()))
       start.setHours(0, 0, 0, 0)
       end = new Date(start)
       end.setDate(start.getDate() + 6)
       end.setHours(23, 59, 59, 999)
       break
-    case 'lastWeek':
+    }
+    case 'lastWeek': {
       const lastWeekStart = new Date(now.setDate(now.getDate() - now.getDay() - 7))
       start = new Date(lastWeekStart)
       start.setHours(0, 0, 0, 0)
@@ -266,23 +271,27 @@ export function getDateRangeForPeriod(
       end.setDate(lastWeekStart.getDate() + 6)
       end.setHours(23, 59, 59, 999)
       break
+    }
     case 'thisMonth':
       start = startOfMonth(now)
       end = endOfMonth(now)
       break
-    case 'lastMonth':
+    case 'lastMonth': {
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1)
       start = startOfMonth(lastMonth)
       end = endOfMonth(lastMonth)
       break
+    }
     case 'thisYear':
       start = new Date(now.getFullYear(), 0, 1)
       end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999)
       break
-    case 'lastYear':
-      start = new Date(now.getFullYear() - 1, 0, 1)
-      end = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999)
+    case 'lastYear': {
+      const lastYear = new Date(now.getFullYear() - 1, 0, 1)
+      start = new Date(lastYear)
+      end = new Date(lastYear.getFullYear(), 11, 31, 23, 59, 59, 999)
       break
+    }
     default:
       throw new Error(`Unknown period: ${period}`)
   }

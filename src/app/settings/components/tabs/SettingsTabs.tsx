@@ -1,17 +1,18 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { AppSettingsState, SettingsUpdateHandler } from '../../types'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+import { BusinessInfoSettings } from '@/app/settings/components/BusinessInfoSettings'
+import { BusinessSettings } from '@/app/settings/components/BusinessSettings'
+import { NotificationSettings } from '@/app/settings/components/NotificationSettings'
+import { ProfileSettings } from '@/app/settings/components/ProfileSettings'
+import { RegionalSettings } from '@/app/settings/components/RegionalSettings'
+import { SecuritySettings } from '@/app/settings/components/SecuritySettings'
+import { UIThemeSettings } from '@/app/settings/components/UIThemeSettings'
+import { DateTimeSettings } from '@/app/settings/components/DateTimeSettings'
+import { NumberCurrencySettings } from '@/app/settings/components/NumberCurrencySettings'
+import { DangerZone } from '@/app/settings/components/DangerZone'
+
 
 // Import existing components
-import { BusinessInfoSettings } from '../BusinessInfoSettings'
-import { BusinessSettings } from '../BusinessSettings'
-import { NotificationSettings } from '../NotificationSettings'
-import { ProfileSettings } from '../ProfileSettings'
-import { RegionalSettings } from '../RegionalSettings'
-import { SecuritySettings } from '../SecuritySettings'
-import { UIThemeSettings } from '../UIThemeSettings'
-import { DateTimeSettings } from '../DateTimeSettings'
-import { NumberCurrencySettings } from '../NumberCurrencySettings'
-import { DangerZone } from '../DangerZone'
 
 interface SettingsTabsProps {
   activeTab: string
@@ -20,46 +21,44 @@ interface SettingsTabsProps {
   onSettingChange: SettingsUpdateHandler
 }
 
-export function SettingsTabs({ activeTab, onTabChange, settings, onSettingChange }: SettingsTabsProps) {
-  return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-4">
-      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1">
-        <TabsTrigger value="general" className="text-xs sm:text-sm">Umum</TabsTrigger>
-        <TabsTrigger value="profile" className="text-xs sm:text-sm">Profil</TabsTrigger>
-        <TabsTrigger value="notifications" className="text-xs sm:text-sm">Notifikasi</TabsTrigger>
-        <TabsTrigger value="system" className="text-xs sm:text-sm">Sistem</TabsTrigger>
-        <TabsTrigger value="ui" className="text-xs sm:text-sm">Tampilan</TabsTrigger>
-      </TabsList>
+export const SettingsTabs = ({ activeTab, onTabChange, settings, onSettingChange }: SettingsTabsProps) => (
+  <SwipeableTabs value={activeTab} onValueChange={onTabChange} className="space-y-4">
+    <SwipeableTabsList>
+      <SwipeableTabsTrigger value="general" className="text-xs sm:text-sm">Umum</SwipeableTabsTrigger>
+      <SwipeableTabsTrigger value="profile" className="text-xs sm:text-sm">Profil</SwipeableTabsTrigger>
+      <SwipeableTabsTrigger value="notifications" className="text-xs sm:text-sm">Notifikasi</SwipeableTabsTrigger>
+      <SwipeableTabsTrigger value="system" className="text-xs sm:text-sm">Sistem</SwipeableTabsTrigger>
+      <SwipeableTabsTrigger value="ui" className="text-xs sm:text-sm">Tampilan</SwipeableTabsTrigger>
+    </SwipeableTabsList>
 
-      {/* General Settings */}
-      <TabsContent value="general" className="space-y-6">
-        <BusinessInfoSettings settings={settings} onSettingChange={onSettingChange} />
-        <RegionalSettings settings={settings} onSettingChange={onSettingChange} />
-      </TabsContent>
+    {/* General Settings */}
+    <SwipeableTabsContent value="general" className="space-y-6">
+      <BusinessInfoSettings settings={settings} onSettingChange={onSettingChange} />
+      <RegionalSettings settings={settings} onSettingChange={onSettingChange} />
+    </SwipeableTabsContent>
 
-      {/* Profile Settings */}
-      <TabsContent value="profile" className="space-y-6">
-        <ProfileSettings settings={settings} onSettingChange={onSettingChange} />
-        <SecuritySettings />
-      </TabsContent>
+    {/* Profile Settings */}
+    <SwipeableTabsContent value="profile" className="space-y-6">
+      <ProfileSettings settings={settings} onSettingChange={onSettingChange} />
+      <SecuritySettings />
+    </SwipeableTabsContent>
 
-      {/* Notifications Settings */}
-      <TabsContent value="notifications" className="space-y-6">
-        <NotificationSettings settings={settings} onSettingChange={onSettingChange} />
-      </TabsContent>
+    {/* Notifications Settings */}
+    <SwipeableTabsContent value="notifications" className="space-y-6">
+      <NotificationSettings settings={settings} onSettingChange={onSettingChange} />
+    </SwipeableTabsContent>
 
-      {/* System Settings */}
-      <TabsContent value="system" className="space-y-6">
-        <BusinessSettings settings={settings} onSettingChange={onSettingChange} />
-        <DangerZone />
-      </TabsContent>
+    {/* System Settings */}
+    <SwipeableTabsContent value="system" className="space-y-6">
+      <BusinessSettings settings={settings} onSettingChange={onSettingChange} />
+      <DangerZone />
+    </SwipeableTabsContent>
 
-      {/* UI Settings */}
-      <TabsContent value="ui" className="space-y-6">
-        <UIThemeSettings settings={settings} onSettingChange={onSettingChange} />
-        <DateTimeSettings settings={settings} onSettingChange={onSettingChange} />
-        <NumberCurrencySettings settings={settings} onSettingChange={onSettingChange} />
-      </TabsContent>
-    </Tabs>
-  )
-}
+    {/* UI Settings */}
+    <SwipeableTabsContent value="ui" className="space-y-6">
+      <UIThemeSettings settings={settings} onSettingChange={onSettingChange} />
+      <DateTimeSettings settings={settings} onSettingChange={onSettingChange} />
+      <NumberCurrencySettings settings={settings} onSettingChange={onSettingChange} />
+    </SwipeableTabsContent>
+  </SwipeableTabs>
+)

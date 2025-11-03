@@ -1,13 +1,14 @@
-import type { Database } from '@/types'
+import type { Database, TablesUpdate } from '@/types/database'
 
-export type Tables = Database['public']['Tables']
 
-export interface UseSupabaseQueryOptions<T extends keyof Tables> {
+type TablesMap = Database['public']['Tables']
+
+export interface UseSupabaseQueryOptions<T extends keyof TablesMap> {
   select?: string
-  filter?: Record<string, unknown>
-  orderBy?: { column: string; ascending?: boolean }
+  filter?: Partial<Record<keyof TablesMap[T]['Row'] & string, string | number | boolean | null>>
+  orderBy?: { column: keyof TablesMap[T]['Row'] & string; ascending?: boolean }
   limit?: number
-  initial?: unknown[]
+  initial?: Array<TablesMap[T]['Row']>
   refetchOnMount?: boolean
   realtime?: boolean
 }
@@ -23,7 +24,7 @@ export interface CRUDOptions {
   customErrorHandler?: (error: Error, operation: 'create' | 'update' | 'delete') => void
 }
 
-export interface BulkUpdateItem<T extends keyof Tables> {
+export interface BulkUpdateItem<T extends keyof TablesMap> {
   id: string
-  data: Tables[T]['Update']
+  data: TablesUpdate<T>
 }

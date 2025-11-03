@@ -1,17 +1,27 @@
+import { automationLogger } from '@/lib/logger'
+import type { WorkflowEventData, WorkflowContext, WorkflowResult, AutomationConfig } from '@/types/features/automation'
+
 /**
  * Base Workflow Automation
  * Core workflow automation system with event processing
  */
 
-import { automationLogger } from '@/lib/logger'
-import type { WorkflowEvent, WorkflowEventData, WorkflowContext, WorkflowResult, AutomationConfig } from './types'
 
 export abstract class BaseWorkflowAutomation {
   protected config: AutomationConfig = {
     enabled: true,
     maxConcurrentJobs: 5,
     retryAttempts: 3,
-    notificationEnabled: true
+    notificationEnabled: true,
+    defaultProfitMargin: 0.3,
+    minimumProfitMargin: 0.15,
+    maximumProfitMargin: 0.6,
+    autoReorderDays: 7,
+    safetyStockMultiplier: 1.5,
+    productionLeadTime: 2,
+    batchOptimizationThreshold: 10,
+    lowProfitabilityThreshold: 0.2,
+    cashFlowWarningDays: 30
   }
 
   private eventQueue: WorkflowEventData[] = []
@@ -25,10 +35,14 @@ export abstract class BaseWorkflowAutomation {
    * Trigger workflow automation event
    */
   async triggerEvent(eventData: Partial<WorkflowEventData>) {
+    if (!eventData.event || !eventData.entityId) {
+      throw new Error('Event and entityId are required')
+    }
+    
     const event: WorkflowEventData = {
-      event: eventData.event!,
-      entityId: eventData.entityId!,
-      data: eventData.data || {},
+      event: eventData.event,
+      entityId: eventData.entityId,
+      data: eventData.data ?? {},
       timestamp: new Date().toISOString()
     }
 
@@ -50,7 +64,7 @@ export abstract class BaseWorkflowAutomation {
    * Process event queue
    */
   private async processEventQueue() {
-    if (this.eventQueue.length === 0 || this.isProcessing) return
+    if (this.eventQueue.length === 0 || this.isProcessing) {return}
 
     this.isProcessing = true
 
@@ -83,14 +97,14 @@ export abstract class BaseWorkflowAutomation {
         automationLogger.error({
           event: event.event,
           entityId: event.entityId,
-          error: result.error || result.message
+          error: result.error ?? result.message
         }, 'Workflow event processing failed')
       }
 
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       automationLogger.error({
         event: event.event,
-        error: error instanceof Error ? error.message : String(error)
+        error: err instanceof Error ? err.message : String(err)
       }, 'Error processing workflow event')
     }
   }

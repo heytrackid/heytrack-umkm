@@ -1,0 +1,19 @@
+# SAFE TO DELETE (0 imports) - Execute this command:
+
+rm src/lib/toast-helpers.ts
+rm src/lib/supabase-helpers.ts
+rm src/lib/supabase-typed-client.ts
+rm src/lib/data-synchronization.ts
+rm src/lib/query-optimization.ts
+
+# Then run: pnpm type-check
+
+# REVIEW FIRST (1-2 imports) - Check usage before deleting:
+
+# src/hooks/responsive/compatibility.ts (1 import) - @deprecated
+# src/lib/automation-engine.ts (1 import)
+# src/lib/business-services.ts (2 imports)
+# src/lib/cron.ts (2 imports)
+# src/lib/debounce.ts (1 import)
+# src/lib/ingredients-toast.ts (1 import)
+# src/lib/settings-validation.ts (1 import)

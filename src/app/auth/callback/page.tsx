@@ -1,13 +1,13 @@
 'use client'
 
-import * as React from 'react'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
 import { Loader2 } from 'lucide-react'
 
 import { apiLogger } from '@/lib/logger'
-export default function AuthCallbackPage() {
+import { createClient } from '@/utils/supabase/client'
+
+const AuthCallbackPage = () => {
   const router = useRouter()
   const supabase = createClient()
 
@@ -17,23 +17,24 @@ export default function AuthCallbackPage() {
         const { data, error } = await supabase.auth.getSession()
 
         if (error) {
-          apiLogger.error({ error: error }, 'Auth callback error:')
-          router.push('/auth/login?error=auth_callback_error')
+          apiLogger.error({ error }, 'Auth callback error:')
+          void router.push('/auth/login?error=auth_callback_error')
           return
         }
 
         if (data.session) {
-          router.push('/dashboard')
+          void router.push('/dashboard')
         } else {
-          router.push('/auth/login')
+          void router.push('/auth/login')
         }
-      } catch (error) {
-        apiLogger.error({ error: error }, 'Unexpected error in auth callback:')
-        router.push('/auth/login?error=unexpected_error')
+      } catch (err: unknown) {
+        const error = err as Error
+        apiLogger.error({ error }, 'Unexpected error in auth callback:')
+        void router.push('/auth/login?error=unexpected_error')
       }
     }
 
-    handleAuthCallback()
+    void handleAuthCallback()
   }, [router, supabase.auth])
 
   return (
@@ -46,3 +47,5 @@ export default function AuthCallbackPage() {
     </div>
   )
 }
+
+export default AuthCallbackPage

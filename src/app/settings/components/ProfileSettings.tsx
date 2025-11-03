@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { User, Upload } from 'lucide-react'
-import type { AppSettingsState, SettingsUpdateHandler } from '../types'
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+
+
 
 interface ProfileSettingsProps {
   settings: AppSettingsState
@@ -16,9 +18,7 @@ interface ProfileSettingsProps {
 /**
  * User profile settings component
  */
-export function ProfileSettings({ settings, onSettingChange }: ProfileSettingsProps) {
-  
-  return (
+export const ProfileSettings = ({ settings, onSettingChange }: ProfileSettingsProps) => (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -87,4 +87,3 @@ export function ProfileSettings({ settings, onSettingChange }: ProfileSettingsPr
       </CardContent>
     </Card>
   )
-}

@@ -1,4 +1,3 @@
-import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Edit2, Trash2, X } from 'lucide-react'
 import type { Category } from '../constants'
@@ -11,14 +10,14 @@ interface BulkActionsProps {
   onBulkDelete: () => void
 }
 
-export function BulkActions({
+export const BulkActions = ({
   selectedItems,
   filteredCategories,
   onClearSelection,
   onBulkEdit,
   onBulkDelete
-}: BulkActionsProps) {
-  if (selectedItems.length === 0) {return null}
+}: BulkActionsProps) => {
+  if (selectedItems.length === 0) { return null }
 
   const selectedCategories = filteredCategories.filter(category =>
     selectedItems.includes(category.id)

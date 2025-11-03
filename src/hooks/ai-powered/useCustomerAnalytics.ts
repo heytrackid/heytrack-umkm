@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { apiLogger } from '@/lib/logger'
 import type { AIAnalysisState, CustomerAnalyticsRequest } from './types'
+
+
 
 /**
  * AI-Powered Customer Analytics Hook
@@ -30,7 +31,7 @@ export function useCustomerAnalytics() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to analyze customers')
+        throw new Error(result.error ?? 'Failed to analyze customers')
       }
 
       setState({

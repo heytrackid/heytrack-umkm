@@ -1,8 +1,7 @@
-/**
- * Production Planner Module
- * Core production planning logic
- */
-
+import type { OrderForProduction } from './types'
+import { AvailabilityChecker } from './availability-checker'
+import { TimeCalculator } from './time-calculator'
+import { ProductionRecommendations } from './recommendations'
 import type {
   Recipe,
   RecipeIngredient,
@@ -10,13 +9,13 @@ import type {
   ProductionPlan,
   ProductionPlanItem,
   ProductionPlanSummary,
-  AvailabilityCheck,
   AutomationConfig
-} from '../types'
-import type { OrderForProduction } from './types'
-import { AvailabilityChecker } from './availability-checker'
-import { TimeCalculator } from './time-calculator'
-import { ProductionRecommendations } from './recommendations'
+} from '@/lib/automation/types'
+
+/**
+ * Production Planner Module
+ * Core production planning logic
+ */
 
 export class ProductionPlanner {
   /**
@@ -29,7 +28,7 @@ export class ProductionPlanner {
     config: AutomationConfig
   ): ProductionPlan {
     const productionPlan = orders.map(order => {
-      const recipe = recipes.find(r => r.id === order.recipe_id)!
+      const recipe = recipes.find(r => r.id === order.recipe_id)
       if (!recipe) {
         throw new Error(`Recipe not found for order: ${order.recipe_id}`)
       }
@@ -42,7 +41,7 @@ export class ProductionPlanner {
       const startTime = TimeCalculator.calculateOptimalStartTime(order.delivery_date, productionTime, config)
 
       return {
-        orderId: order.recipe_id + '-' + Date.now(),
+        orderId: `${order.recipe_id  }-${  Date.now()}`,
         recipe,
         quantity: order.quantity,
         deliveryDate: new Date(order.delivery_date),
@@ -50,7 +49,7 @@ export class ProductionPlanner {
           canProduce: availabilityCheck.canProduce,
           startTime,
           estimatedDuration: productionTime,
-          batchCount: Math.ceil(order.quantity / (recipe.servings || 1)),
+          batchCount: Math.ceil(order.quantity / (recipe.servings ?? 1)),
         },
         ingredients: availabilityCheck,
         recommendations: ProductionRecommendations.generateProductionRecommendations(availabilityCheck, productionTime)

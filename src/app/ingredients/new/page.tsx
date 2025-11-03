@@ -1,81 +1,151 @@
-'use client';
+'use client'
 
-import * as React from 'react'
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import AppLayout from '@/components/layout/app-layout';
-import { Button } from '@/components/ui/button';
-import { useSupabaseCRUD } from '@/hooks/supabase';
-import { IngredientSchema, type IngredientFormData } from '@/lib/validations/form-validations';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-// Shared components
-import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb';
-import { PageHeader } from '@/components/ui/page-patterns';
-import { IngredientFormFields } from '@/components/forms/shared/IngredientFormFields';
-import { CrudForm, FormActions } from '@/components/ui/crud-form';
-
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import AppLayout from '@/components/layout/app-layout'
+import { useSupabaseCRUD } from '@/hooks/supabase'
+import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
+import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
+import { EnhancedIngredientForm } from '@/components/ingredients'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import { Save } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client'
+import { ArrowLeft, Package } from 'lucide-react'
+import type { IngredientsInsert } from '@/types/database'
 
-export default function NewIngredientPage() {
-  const router = useRouter();
-  const { create: createIngredient } = useSupabaseCRUD('ingredients');
 
-  const [loading, setLoading] = useState(false);
 
-  const form = useForm<IngredientFormData>({
-    resolver: zodResolver(IngredientSchema),
+
+type IngredientInsert = IngredientsInsert
+
+const NewIngredientPage = () => {
+  const router = useRouter()
+  const { create: createIngredient } = useSupabaseCRUD('ingredients')
+  const { toast } = useToast()
+
+  const [loading, setLoading] = useState(false)
+
+  const form = useForm<SimpleIngredientFormData>({
+    resolver: zodResolver(IngredientFormSchema),
     defaultValues: {
       name: '',
       unit: 'kg',
       price_per_unit: 0,
       current_stock: 0,
       min_stock: 0,
-      description: '',
+      description: ''
     }
-  });
+  })
 
-  const handleSubmit = async (data: IngredientFormData) => {
+  const handleSubmit = async (data: SimpleIngredientFormData) => {
     try {
-      setLoading(true);
-      await createIngredient(data);
-      router.push('/ingredients');
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Failed to create ingredient:')
+      setLoading(true)
+
+      const supabase = createClient()
+      const {
+        data: { user },
+        error: authError
+      } = await supabase.auth.getUser()
+
+      if (authError || !user) {
+        throw authError ?? new Error('User not authenticated')
+      }
+
+      const payload: IngredientInsert = {
+        name: data.name,
+        unit: data.unit,
+        price_per_unit: data.price_per_unit,
+        current_stock: data.current_stock,
+        min_stock: data.min_stock ?? 0,
+        description: data.description ?? null,
+        user_id: user.id,
+        is_active: true,
+        weighted_average_cost: 0
+      }
+
+      await createIngredient(payload)
+
+      toast({
+        title: 'Berhasil',
+        description: `Bahan baku "${data.name}" berhasil ditambahkan`,
+      })
+
+      router.push('/ingredients')
+    } catch (err: unknown) {
+      apiLogger.error({ error: err }, 'Failed to create ingredient:')
+      toast({
+        title: 'Gagal',
+        description: 'Gagal menambahkan bahan baku. Silakan coba lagi.',
+        variant: 'destructive',
+      })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         <PageBreadcrumb items={BreadcrumbPatterns.ingredientNew} />
 
-        <PageHeader
-          title="Tambah Bahan Baku Baru"
-          description="Tambahkan bahan baku baru ke dalam sistem"
-          backHref="/ingredients"
-        />
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="shrink-0"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+              <Package className="h-7 w-7 sm:h-8 sm:w-8" />
+              Tambah Bahan Baku
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Tambahkan bahan baku baru ke dalam sistem
+            </p>
+          </div>
+        </div>
 
         {/* Form */}
-        <div className="max-w-2xl">
-          <CrudForm onSubmit={form.handleSubmit(handleSubmit)}>
-            <IngredientFormFields
-              register={form.register}
-              errors={form.formState.errors}
-            />
+        <div className="max-w-3xl">
+          <Card>
+            <CardContent className="p-6">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                <EnhancedIngredientForm form={form} mode="create" />
 
-            <FormActions
-              onCancel={() => router.back()}
-              submitText="Simpan Bahan Baku"
-              loading={loading}
-            />
-          </CrudForm>
+                {/* Actions */}
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.back()}
+                    disabled={loading}
+                    className="flex-1 sm:flex-none"
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 sm:flex-none"
+                  >
+                    {loading ? 'Menyimpan...' : 'Simpan Bahan Baku'}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AppLayout>
-  );
+  )
 }
+
+export default NewIngredientPage

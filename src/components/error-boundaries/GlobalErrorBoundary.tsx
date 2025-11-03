@@ -1,14 +1,15 @@
-// Global Error Boundary Component
-// Catches React errors and provides graceful fallback UI
-
 'use client'
 
-import type { ErrorInfo, ReactNode } from 'react';
-import React, { Component } from 'react'
+import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import { apiLogger } from '@/lib/logger'
+
+// Global Error Boundary Component
+// Catches React errors and provides graceful fallback UI
+
+
 
 interface Props {
   children: ReactNode
@@ -40,7 +41,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log the error
-    const errorId = this.state.errorId || `error_${Date.now()}`
+    const errorId = this.state.errorId ?? `error_${Date.now()}`
 
     apiLogger.error({
       error: error.message,
@@ -95,7 +96,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
                 We encountered an unexpected error. Our team has been notified and is working to fix this issue.
               </p>
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {this.state.error && (
                 <details className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs font-mono">
                   <summary className="cursor-pointer text-gray-700 dark:text-gray-300 mb-2">
                     Error Details (Development Only)
@@ -133,7 +134,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
               </div>
 
               <div className="text-center text-xs text-gray-500 dark:text-gray-400">
-                Error ID: {this.state.errorId || 'Unknown'}
+                Error ID: {this.state.errorId ?? 'Unknown'}
               </div>
             </CardContent>
           </Card>

@@ -1,9 +1,10 @@
+import type { Recipe, Ingredient, RecipeIngredient, AvailabilityCheck, IngredientRequirement } from '@/lib/automation/types'
+
 /**
  * Availability Checker Module
  * Handles ingredient availability checking for production
  */
 
-import type { Recipe, Ingredient, RecipeIngredient, AvailabilityCheck, IngredientRequirement } from '../types'
 
 export class AvailabilityChecker {
   /**
@@ -14,10 +15,10 @@ export class AvailabilityChecker {
     quantity: number,
     inventory: Ingredient[]
   ): AvailabilityCheck {
-    const requirements: IngredientRequirement[] = recipe.recipe_ingredients.map(ri => {
+    const requirements: IngredientRequirement[] = recipe.recipe_ingredients.map((ri: RecipeIngredient & { ingredient: Ingredient }) => {
       const needed = ri.quantity * quantity
       const inventoryItem = inventory.find(inv => inv.id === ri.ingredient_id)
-      const available = inventoryItem?.current_stock || 0
+      const available = inventoryItem?.current_stock ?? 0
 
       return {
         ingredient: ri.ingredient,

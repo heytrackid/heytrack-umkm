@@ -1,9 +1,10 @@
+import { useSettings } from '@/contexts/settings-context'
+import type { Currency } from '@/shared'
+
 /**
  * Custom hook for currency formatting using settings context
  */
 
-import { useSettings } from '@/contexts/settings-context'
-import type { Currency } from '@/shared'
 
 interface UseCurrencyReturn {
   formatPrice: (amount: number) => string
@@ -18,25 +19,15 @@ interface UseCurrencyReturn {
 export function useCurrency(): UseCurrencyReturn {
   const { settings, formatCurrency: contextFormatCurrency } = useSettings()
   
-  const formatPrice = (amount: number) => {
-    return contextFormatCurrency(amount)
-  }
+  const formatPrice = (amount: number) => contextFormatCurrency(amount)
   
-  const formatAmount = (amount: number) => {
-    return contextFormatCurrency(amount)
-  }
+  const formatAmount = (amount: number) => contextFormatCurrency(amount)
   
-  const getCurrencySymbol = () => {
-    return settings.currency.symbol
-  }
+  const getCurrencySymbol = () => settings.currency.symbol
   
-  const getCurrencyCode = () => {
-    return settings.currency.code
-  }
+  const getCurrencyCode = () => settings.currency.code
   
-  const getCurrencyDecimals = () => {
-    return settings.currency.decimals
-  }
+  const getCurrencyDecimals = () => settings.currency.decimals
   
   return {
     formatPrice,

@@ -1,6 +1,7 @@
 import { formatCurrentCurrency } from '@/shared'
-
 import type {
+
+
   AutomationConfig,
   Recipe,
   RecipeIngredient,
@@ -21,9 +22,7 @@ export class PricingAutomation {
     recipe: Recipe & { recipe_ingredients: Array<RecipeIngredient & { ingredient: Ingredient }> }
   ): SmartPricingResult {
     // 1. Calculate exact HPP from ingredients
-    const ingredientCost = recipe.recipe_ingredients.reduce((total, ri) => {
-      return total + (ri.ingredient.price_per_unit * ri.quantity)
-    }, 0)
+    const ingredientCost = recipe.recipe_ingredients.reduce((total: number, ri: RecipeIngredient & { ingredient: Ingredient }) => total + (ri.ingredient.price_per_unit * ri.quantity), 0)
 
     // 2. Add overhead costs (utilities, labor, packaging, etc.)
     const overheadPercentage = 15 // 15% overhead
@@ -39,7 +38,7 @@ export class PricingAutomation {
         ingredientCost,
         overheadCost,
         totalCost,
-        costPerServing: totalCost / (recipe.servings || 1)
+        costPerServing: totalCost / (recipe.servings ?? 1)
       },
       pricing: competitivePricing,
       analysis: profitabilityAnalysis,
@@ -78,12 +77,15 @@ export class PricingAutomation {
    * Analyze profitability for each pricing tier
    */
   private analyzeProfitability(cost: number, pricing: CompetitivePricing): ProfitabilityAnalysis[] {
-    return Object.entries(pricing).map(([tier, data]) => ({
-      tier,
-      profitAmount: data.price - cost,
-      profitMargin: ((data.price - cost) / data.price) * 100,
-      breakEvenVolume: Math.ceil(1000 / (data.price - cost)) // Assuming 1000 fixed costs
-    }))
+    return Object.entries(pricing).map(([tier, data]) => {
+      const pricingData = data as { price: number; margin: number; positioning: string }
+      return {
+        tier,
+        profitAmount: pricingData.price - cost,
+        profitMargin: ((pricingData.price - cost) / pricingData.price) * 100,
+        breakEvenVolume: Math.ceil(1000 / (pricingData.price - cost)) // Assuming 1000 fixed costs
+      }
+    })
   }
 
   /**
@@ -117,7 +119,7 @@ export class PricingAutomation {
     basePricing: CompetitivePricing,
     demandFactor: number, // 0.5 = low demand, 1.0 = normal, 1.5 = high demand
     competitionFactor: number, // 0.8 = high competition, 1.0 = normal, 1.2 = low competition
-    seasonFactor: number = 1.0 // seasonal adjustment
+    seasonFactor = 1.0 // seasonal adjustment
   ): CompetitivePricing {
     const adjustmentMultiplier = demandFactor * competitionFactor * seasonFactor
 
@@ -142,10 +144,10 @@ export class PricingAutomation {
    */
   analyzePriceSensitivity(
     salesHistory: Array<{ price: number; quantity: number; date: string }>,
-    currentPricing: CompetitivePricing
+    _currentPricing: CompetitivePricing
   ) {
     // Simple price elasticity analysis
-    const avgQuantityByPrice = salesHistory.reduce((acc, sale) => {
+    const avgQuantityByPrice = salesHistory.reduce<Record<number, { totalQty: number; count: number }>>((acc, sale) => {
       const priceRange = Math.floor(sale.price / 5000) * 5000 // Group by 5k ranges
       if (!acc[priceRange]) {
         acc[priceRange] = { totalQty: 0, count: 0 }
@@ -153,15 +155,17 @@ export class PricingAutomation {
       acc[priceRange].totalQty += sale.quantity
       acc[priceRange].count += 1
       return acc
-    }, {} as Record<number, { totalQty: number; count: number }>)
+    }, {})
 
-    const priceElasticity = Object.entries(avgQuantityByPrice).map(([price, data]) => ({
+    const priceElasticityEntries = Object.entries(avgQuantityByPrice) as Array<[string, { totalQty: number; count: number }]>
+
+    const priceElasticity = priceElasticityEntries.map(([price, data]) => ({
       price: parseInt(price),
       avgQuantity: data.totalQty / data.count,
       totalRevenue: parseInt(price) * (data.totalQty / data.count)
     })).sort((a, b) => b.totalRevenue - a.totalRevenue)
 
-    const optimalPrice = priceElasticity[0]
+    const optimalPrice = priceElasticity[0] || { price: 0, avgQuantity: 0, totalRevenue: 0 }
 
     return {
       elasticity: priceElasticity,

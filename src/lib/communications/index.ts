@@ -1,3 +1,9 @@
+import { WhatsAppService } from './whatsapp'
+import { SmartNotificationSystem } from './notifications'
+import { CommunicationsManager } from './manager'
+import type { SmartNotification } from './types'
+
+
 /**
  * Communications Module - Main Entry Point
  * Unified communication services for WhatsApp, notifications, and email
@@ -13,15 +19,11 @@ export { EmailService } from './email'
 export { CommunicationsManager } from './manager'
 
 // Re-export convenience functions for backward compatibility
-import { WhatsAppService } from './whatsapp'
-import { SmartNotificationSystem } from './notifications'
-import { CommunicationsManager } from './manager'
-import type { SmartNotification } from './types'
 
 /**
  * Send WhatsApp message (convenience function)
  */
-export async function sendWhatsAppMessage(to: string, templateId: string, data: Record<string, any>): Promise<boolean> {
+export function sendWhatsAppMessage(to: string, templateId: string, data: Record<string, unknown>): boolean {
   // This would need proper configuration in a real app
   const config = {
     businessNumber: '',

@@ -2,8 +2,7 @@ import { cn } from "@/lib/utils"
 import { 
   Skeleton, 
   SkeletonText, 
-  SkeletonButton,
-  SkeletonForm
+  SkeletonButton
 } from "@/components/ui/skeleton"
 
 interface SkeletonProps {
@@ -11,38 +10,31 @@ interface SkeletonProps {
 }
 
 // Skeleton untuk Form Field
-export function FormFieldSkeleton({ className }: SkeletonProps) {
-  return (
+export const FormFieldSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("space-y-2", className)}>
       <SkeletonText className="h-4 w-24" />
       <Skeleton className="h-9 w-full" />
     </div>
   )
-}
 
 // Skeleton untuk Textarea Field
-export function TextareaFieldSkeleton({ className }: SkeletonProps) {
-  return (
+export const TextareaFieldSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("space-y-2", className)}>
       <SkeletonText className="h-4 w-32" />
       <Skeleton className="h-24 w-full" />
     </div>
   )
-}
 
 // Skeleton untuk Select Field
-export function SelectFieldSkeleton({ className }: SkeletonProps) {
-  return (
+export const SelectFieldSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("space-y-2", className)}>
       <SkeletonText className="h-4 w-28" />
       <Skeleton className="h-9 w-full" />
     </div>
   )
-}
 
 // Skeleton untuk Recipe Form
-export function RecipeFormSkeleton({ className }: SkeletonProps) {
-  return (
+export const RecipeFormSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("space-y-6", className)}>
       {/* Header */}
       <div className="space-y-4">
@@ -91,11 +83,9 @@ export function RecipeFormSkeleton({ className }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Order Form
-export function OrderFormSkeleton({ className }: SkeletonProps) {
-  return (
+export const OrderFormSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("space-y-6", className)}>
       {/* Header */}
       <div className="space-y-2">
@@ -148,11 +138,9 @@ export function OrderFormSkeleton({ className }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Settings Form
-export function SettingsFormSkeleton({ className }: SkeletonProps) {
-  return (
+export const SettingsFormSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("space-y-8", className)}>
       {/* Profile Section */}
       <div className="space-y-4">
@@ -194,11 +182,9 @@ export function SettingsFormSkeleton({ className }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Login/Register Form
-export function AuthFormSkeleton({ className, type = "login" }: SkeletonProps & { type?: "login" | "register" }) {
-  return (
+export const AuthFormSkeleton = ({ className, type = "login" }: SkeletonProps & { type?: "login" | "register" }) => (
     <div className={cn("space-y-6", className)}>
       {/* Header */}
       <div className="text-center space-y-2">
@@ -224,11 +210,9 @@ export function AuthFormSkeleton({ className, type = "login" }: SkeletonProps & 
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Modal Form
-export function ModalFormSkeleton({ className }: SkeletonProps) {
-  return (
+export const ModalFormSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("space-y-6", className)}>
       {/* Modal Header */}
       <div className="flex items-center justify-between">
@@ -250,4 +234,3 @@ export function ModalFormSkeleton({ className }: SkeletonProps) {
       </div>
     </div>
   )
-}

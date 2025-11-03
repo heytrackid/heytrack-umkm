@@ -1,9 +1,10 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useCurrency } from '@/hooks/useCurrency'
+import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
+
 // Inventory Report Component
 // Handles inventory data filtering, calculations, and display
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseCRUD } from '@/hooks/supabase'
 
 interface InventoryReportProps {
   dateRange: {
@@ -12,19 +13,39 @@ interface InventoryReportProps {
   }
 }
 
-export default function InventoryReport({ dateRange }: InventoryReportProps) {
+interface InventoryStats {
+  totalValue: number
+  lowStock: number
+  outOfStock: number
+}
+
+const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps) => {
   const { formatCurrency } = useCurrency()
-  const { data: ingredients } = useSupabaseCRUD('ingredients')
+  const { data: ingredients } = useSupabaseCRUD<'ingredients'>('ingredients')
 
   // Calculate inventory report
-  const inventoryStats = {
-    totalItems: ingredients?.length || 0,
-    lowStock: ingredients?.filter((i: any) => (i.current_stock || 0) <= (i.min_stock || 0)).length || 0,
-    totalValue: ingredients?.reduce((sum: number, i: any) =>
-      sum + ((i.current_stock || 0) * (i.price_per_unit || 0)), 0
-    ) || 0,
-    outOfStock: ingredients?.filter((i: any) => (i.current_stock || 0) === 0).length || 0
-  }
+  const ingredientList = ingredients ?? []
+
+  const inventoryStats = ingredientList.reduce<InventoryStats>(
+    (stats, ingredient) => {
+      const currentStock = ingredient.current_stock ?? 0
+      const minimumStock = ingredient.min_stock ?? 0
+
+      if (currentStock <= minimumStock) {
+        stats.lowStock += 1
+      }
+
+      if (currentStock === 0) {
+        stats.outOfStock += 1
+      }
+
+      stats.totalValue += currentStock * ingredient.price_per_unit
+      return stats
+    },
+    { totalValue: 0, lowStock: 0, outOfStock: 0 }
+  )
+
+  const totalItems = ingredientList.length
 
   return (
     <div className="space-y-4">
@@ -36,7 +57,7 @@ export default function InventoryReport({ dateRange }: InventoryReportProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{inventoryStats.totalItems}</p>
+            <p className="text-2xl font-bold">{totalItems}</p>
           </CardContent>
         </Card>
         <Card>
@@ -73,3 +94,5 @@ export default function InventoryReport({ dateRange }: InventoryReportProps) {
     </div>
   )
 }
+
+export default InventoryReport

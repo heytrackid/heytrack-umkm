@@ -1,12 +1,13 @@
-// Generated Recipe Display Component - Lazy Loaded
-// Displays the complete AI-generated recipe with all sections
-
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChefHat, Clock, DollarSign } from 'lucide-react'
 import { useSettings } from '@/contexts/settings-context'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
+
+// Generated Recipe Display Component - Lazy Loaded
+// Displays the complete AI-generated recipe with all sections
+
 
 interface GeneratedRecipeDisplayProps {
   recipe: GeneratedRecipe
@@ -15,12 +16,11 @@ interface GeneratedRecipeDisplayProps {
   availableIngredients: AvailableIngredient[]
 }
 
-export default function GeneratedRecipeDisplay({
+const GeneratedRecipeDisplay = ({
   recipe,
   onSave,
-  onGenerateAgain,
-  availableIngredients
-}: GeneratedRecipeDisplayProps) {
+  onGenerateAgain
+}: GeneratedRecipeDisplayProps) => {
   const { formatCurrency } = useSettings()
 
   return (
@@ -55,7 +55,7 @@ export default function GeneratedRecipeDisplay({
             <div className="text-center p-3 bg-muted rounded-lg">
               <DollarSign className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
               <p className="text-sm font-medium">
-                {formatCurrency(recipe.hpp?.hppPerUnit || 0)}
+                {formatCurrency(recipe.hpp?.hppPerUnit ?? 0)}
               </p>
               <p className="text-xs text-muted-foreground">HPP/unit</p>
             </div>
@@ -206,3 +206,5 @@ export default function GeneratedRecipeDisplay({
     </div>
   )
 }
+
+export default GeneratedRecipeDisplay

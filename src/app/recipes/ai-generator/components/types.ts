@@ -1,3 +1,4 @@
+
 // AI Recipe Generator Types
 // Type definitions for AI-powered recipe generation
 
@@ -55,9 +56,10 @@ export interface GenerationParams {
 export interface AvailableIngredient {
   id: string
   name: string
-  current_stock: number
+  current_stock: number | null
   unit: string
   price_per_unit: number
+  minimum_stock?: number
 }
 
 export const PRODUCT_TYPES = [

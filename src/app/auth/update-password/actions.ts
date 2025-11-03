@@ -19,7 +19,7 @@ export async function updatePassword(formData: FormData) {
     }
 
     const { error } = await supabase.auth.updateUser({
-        password: password
+        password
     })
 
     if (error) {

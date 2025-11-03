@@ -1,12 +1,13 @@
 import { createClient } from '@/utils/supabase/server'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
-import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import type { Database } from '@/types'
-
+import { CUSTOMER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
-import { createApiResponse } from '@/lib/shared/api'
+import { typedInsert } from '@/lib/supabase/typed-insert'
+import { getErrorMessage, safeNumber, safeString } from '@/lib/type-guards'
+
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
 
 // GET /api/customers - Get all customers
 export async function GET(request: NextRequest) {
@@ -28,24 +29,25 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
 
     // Parse query parameters with defaults
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const search = searchParams.get('search')
-    const sort_by = searchParams.get('sort_by')
-    const sort_order = searchParams.get('sort_order')
+    const page = safeNumber(searchParams.get('page'), 1)
+    const limit = safeNumber(searchParams.get('limit'), 10)
+    const search = safeString(searchParams.get('search'), '')
+    const sort_by = safeString(searchParams.get('sort_by'), 'name')
+    const sort_order = safeString(searchParams.get('sort_order'), 'asc')
 
+    // ✅ OPTIMIZED: Use specific fields instead of SELECT *
     let query = supabase
       .from('customers')
-      .select('*')
-      .eq('user_id', (user as any).id)
+      .select(CUSTOMER_FIELDS.LIST)
+      .eq('user_id', user.id)
 
     // Add search filter if provided
-    if (search) {
+    if (search && search.length > 0) {
       query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`)
     }
 
     // Add sorting
-    const sortField = sort_by || 'name'
+    const sortField = sort_by
     const sortDirection = sort_order === 'asc'
     query = query.order(sortField, { ascending: sortDirection })
 
@@ -65,9 +67,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Unexpected error in GET /api/customers')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Unexpected error in GET /api/customers')
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -93,7 +95,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate request body
-    const validation = CustomerInsertSchema.safeParse(body)
+    const validation = CustomerInsertSchema.safeParse({
+      ...body,
+      user_id: user.id
+    })
+    
     if (!validation.success) {
       return NextResponse.json(
         {
@@ -105,23 +111,25 @@ export async function POST(request: NextRequest) {
     }
 
     const validatedData = validation.data
-
+    
+    // Type-safe data preparation (see docs/SUPABASE_TYPE_WORKAROUND.md)
+    const customerData = typedInsert<'customers'>({
+      user_id: user.id,
+      name: validatedData.name,
+      email: validatedData.email ?? null,
+      phone: validatedData.phone ?? null,
+      address: validatedData.address ?? null,
+      customer_type: validatedData.customer_type ?? 'regular',
+      discount_percentage: validatedData.discount_percentage ?? null,
+      notes: validatedData.notes ?? null,
+      is_active: validatedData.is_active ?? true,
+    })
+    
+    // Insert with proper typing
     const { data, error } = await supabase
       .from('customers')
-      .insert({
-        user_id: (user as any).id,
-        name: validatedData.name,
-        email: validatedData.email,
-        phone: validatedData.phone,
-        address: validatedData.address,
-        customer_type: validatedData.customer_type || 'retail',
-        discount_percentage: validatedData.discount_percentage,
-        notes: validatedData.notes,
-        is_active: validatedData.is_active,
-        loyalty_points: validatedData.loyalty_points,
-        favorite_items: validatedData.favorite_items,
-      })
-      .select('*')
+      .insert(customerData)
+      .select('id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, created_at, updated_at')
       .single()
 
     if (error) {
@@ -140,9 +148,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data, { status: 201 })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Unexpected error in POST /api/customers')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Unexpected error in POST /api/customers')
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }

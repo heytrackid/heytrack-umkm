@@ -1,5 +1,6 @@
 import type { Settings as SettingsContextState } from '@/contexts/settings-context'
 
+
 export type ThemeOption = 'light' | 'dark' | 'system'
 export type TimeFormatOption = '24h' | '12h'
 export type DateFormatOption = 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD'
@@ -12,6 +13,7 @@ export interface GeneralSettings {
   phone: string
   email: string
   website: string
+  description: string
   taxNumber: string
   currency: string
   timezone: string
@@ -75,6 +77,7 @@ export const DEFAULT_APP_SETTINGS: AppSettingsState = {
     phone: '',
     email: '',
     website: '',
+    description: '',
     taxNumber: '',
     currency: 'IDR',
     timezone: 'Asia/Jakarta',
@@ -145,10 +148,10 @@ export const normalizeSettings = (
   const ui: UISettings = {
     ...DEFAULT_APP_SETTINGS.ui,
     ...uiSource,
-    language: (uiSource.language as LanguageOption | undefined) ?? DEFAULT_APP_SETTINGS.ui.language,
-    theme: (uiSource.theme as ThemeOption | undefined) ?? DEFAULT_APP_SETTINGS.ui.theme,
-    dateFormat: (uiSource.dateFormat as DateFormatOption | undefined) ?? DEFAULT_APP_SETTINGS.ui.dateFormat,
-    timeFormat: (uiSource.timeFormat as TimeFormatOption | undefined) ?? DEFAULT_APP_SETTINGS.ui.timeFormat,
+    language: (uiSource.language) ?? DEFAULT_APP_SETTINGS.ui.language,
+    theme: (uiSource.theme) ?? DEFAULT_APP_SETTINGS.ui.theme,
+    dateFormat: (uiSource.dateFormat) ?? DEFAULT_APP_SETTINGS.ui.dateFormat,
+    timeFormat: (uiSource.timeFormat) ?? DEFAULT_APP_SETTINGS.ui.timeFormat,
   }
 
   if (contextSettings) {

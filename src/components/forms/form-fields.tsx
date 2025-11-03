@@ -1,11 +1,13 @@
 'use client'
 
-import * as React from 'react'
+import { type ReactNode, type InputHTMLAttributes, type TextareaHTMLAttributes, forwardRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
+
+
 
 interface FormFieldProps {
   label?: string
@@ -15,16 +17,16 @@ interface FormFieldProps {
   className?: string
 }
 
-interface FormInputProps extends FormFieldProps, React.InputHTMLAttributes<HTMLInputElement> {
+interface FormInputProps extends FormFieldProps, InputHTMLAttributes<HTMLInputElement> {
   label?: string
 }
 
 /**
  * FormInput - Reusable input field with error handling
  */
-export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
+export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ label, error, required, helperText, className, ...props }, ref) => {
-    const id = props.id || props.name
+    const id = props.id ?? props.name
     return (
       <div className={cn('space-y-2', className)}>
         {label && (
@@ -57,16 +59,16 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
 
 FormInput.displayName = 'FormInput'
 
-interface FormTextareaProps extends FormFieldProps, React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface FormTextareaProps extends FormFieldProps, TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string
 }
 
 /**
  * FormTextarea - Reusable textarea field with error handling
  */
-export const FormTextarea = React.forwardRef<HTMLTextAreaElement, FormTextareaProps>(
+export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
   ({ label, error, required, helperText, className, ...props }, ref) => {
-    const id = props.id || props.name
+    const id = props.id ?? props.name
     return (
       <div className={cn('space-y-2', className)}>
         {label && (
@@ -111,7 +113,7 @@ interface FormSelectProps extends FormFieldProps {
 /**
  * FormSelect - Reusable select field with error handling
  */
-export const FormSelect = React.forwardRef<HTMLButtonElement, FormSelectProps>(
+export const FormSelect = forwardRef<HTMLButtonElement, FormSelectProps>(
   ({ label, error, required, helperText, className, options, onValueChange, placeholder, value, disabled }, ref) => {
     const id = `select-${Math.random().toString(36).substr(2, 9)}`
     return (
@@ -157,7 +159,7 @@ export const FormSelect = React.forwardRef<HTMLButtonElement, FormSelectProps>(
 FormSelect.displayName = 'FormSelect'
 
 interface FormFieldsContainerProps {
-  children: React.ReactNode
+  children: ReactNode
   columns?: 1 | 2 | 3
   className?: string
 }

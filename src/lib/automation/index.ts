@@ -1,22 +1,23 @@
+import type { AutomationConfig } from './types'
+
 /**
  * Automation Engine - Main Entry Point
  * Modular automation system untuk UMKM F&B
  */
 
-// Re-export all automation modules
-export * from './financial-automation'
-export * from './hpp-automation'
-export * from './inventory-automation'
-export * from './notification-system'
-export * from './pricing-automation'
-export * from './production-automation'
-export * from './types'
+// Re-export all automation modules (selective to avoid conflicts)
+export { FinancialAutomation } from './financial-automation'
+// export * from './hpp-automation' // TODO: Implement HPP automation
+export { InventoryAutomation } from './inventory-automation'
+export { NotificationSystem } from './notification-system'
+export { PricingAutomation } from './pricing-automation'
+export { ProductionAutomation } from './production-automation'
+export type * from './types'
 
 // Re-export workflow system
 export * from './workflows'
 
 // Import for default engine
-import type { AutomationConfig } from './types'
 
 // Default configuration for Indonesian UMKM F&B
 export const UMKM_CONFIG: AutomationConfig = {
@@ -64,10 +65,5 @@ export class AutomationEngine {
 // Export default instance
 export const defaultAutomationEngine = new AutomationEngine(UMKM_CONFIG)
 
-// Backward compatibility exports
-export { FinancialAutomation } from './financial-automation'
-export { InventoryAutomation } from './inventory-automation'
-export { NotificationSystem } from './notification-system'
-export { PricingAutomation } from './pricing-automation'
-export { ProductionAutomation } from './production-automation'
+// Note: Main exports already done above
 

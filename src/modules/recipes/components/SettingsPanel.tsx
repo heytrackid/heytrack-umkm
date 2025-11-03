@@ -6,9 +6,13 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Calculator, Package } from 'lucide-react'
-import type { PricingMethod } from '../services/EnhancedHPPCalculationService'
+import type { PricingMethod } from '@/modules/recipes/types'
 import { UMKMTooltip } from './UMKMTooltip'
 import { useSettings } from '@/contexts/settings-context'
+
+
+
+
 
 // Method descriptions for UMKM
 const getPricingMethodDescription = (method: PricingMethod) => {
@@ -64,14 +68,14 @@ interface SettingsPanelProps {
 /**
  * Settings panel component for HPP calculation parameters
  */
-export function SettingsPanel({
+export const SettingsPanel = ({
   selectedPricingMethod,
   profitMarginPercent,
   includeOperationalCosts,
   onPricingMethodChange,
   onProfitMarginChange,
   onIncludeOperationalCostsChange
-}: SettingsPanelProps) {
+}: SettingsPanelProps) => {
   const methodInfo = getPricingMethodDescription(selectedPricingMethod)
   const { formatCurrency } = useSettings()
 

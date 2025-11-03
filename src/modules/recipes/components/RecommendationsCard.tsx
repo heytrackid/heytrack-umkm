@@ -3,7 +3,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Lightbulb, Info } from 'lucide-react'
-import type { HPPCalculationResult } from '../services/EnhancedHPPCalculationService'
+import type { HPPCalculationResult } from '@/modules/recipes/types'
+
+
+
+
 
 interface RecommendationsCardProps {
   calculationResult: HPPCalculationResult
@@ -12,7 +16,7 @@ interface RecommendationsCardProps {
 /**
  * Recommendations display card component
  */
-export function RecommendationsCard({ calculationResult }: RecommendationsCardProps) {
+export const RecommendationsCard = ({ calculationResult }: RecommendationsCardProps) => {
   if (calculationResult.recommendations.length === 0) {return null}
 
   return (
@@ -25,8 +29,8 @@ export function RecommendationsCard({ calculationResult }: RecommendationsCardPr
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {calculationResult.recommendations.map((recommendation, index: number) => (
-            <Alert key={index}>
+          {calculationResult.recommendations.map((recommendation) => (
+            <Alert key={recommendation}>
               <Info className="h-4 w-4" />
               <AlertDescription>
                 {recommendation}

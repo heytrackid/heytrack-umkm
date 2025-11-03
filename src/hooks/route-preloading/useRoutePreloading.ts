@@ -1,17 +1,15 @@
 'use client'
-import * as React from 'react'
-
 import { apiLogger } from '@/lib/logger'
-import {
+import { usePathname, useRouter } from 'next/navigation' 
+import { useCallback, useEffect } from 'react'
+import { ROUTE_PRELOADING_PATTERNS } from './routePatterns'
+import { PreloadPriority } from './types'
+import { 
   globalLazyLoadingUtils,
   preloadChartBundle,
   preloadModalComponent
 } from '@/components/lazy/index'
-import { usePathname, useRouter } from 'next/navigation'
-import { useCallback, useEffect } from 'react'
 
-import { ROUTE_PRELOADING_PATTERNS } from './routePatterns'
-import { PreloadPriority } from './types'
 
 /**
  * Route-based preloading hook
@@ -24,12 +22,12 @@ export const useRoutePreloading = () => {
   // Preload components based on current route
   const preloadForCurrentRoute = useCallback(async (priority: PreloadPriority = PreloadPriority.IMMEDIATE) => {
     const currentRoute = pathname
-    const config = ROUTE_PRELOADING_PATTERNS[currentRoute as keyof typeof ROUTE_PRELOADING_PATTERNS]
+    const config = ROUTE_PRELOADING_PATTERNS[currentRoute]
 
     if (!config) {return}
 
     const startTime = performance.now()
-    const preloadPromises: Promise<unknown>[] = []
+    const preloadPromises: Array<Promise<unknown>> = []
 
     try {
       // Preload based on priority
@@ -47,7 +45,7 @@ export const useRoutePreloading = () => {
           // Preload critical modals
           if (config.modals) {
             config.modals.forEach(modal => {
-              preloadModalComponent(modal as any).catch(() => {})
+              preloadModalComponent(modal as Parameters<typeof preloadModalComponent>[0]).catch(() => {})
             })
           }
           break
@@ -57,7 +55,7 @@ export const useRoutePreloading = () => {
           if (config.immediate) {
             config.immediate.forEach(route => {
               // Preload the route component (prefetch is sync, wrapping in Promise)
-              router.prefetch(route)
+              void router.prefetch(route)
             })
           }
           break
@@ -67,7 +65,7 @@ export const useRoutePreloading = () => {
           if (config.onHover) {
             config.onHover.forEach(route => {
               // Preload the route component (prefetch is sync)
-              router.prefetch(route)
+              void router.prefetch(route)
             })
           }
           break
@@ -77,27 +75,27 @@ export const useRoutePreloading = () => {
 
       const endTime = performance.now()
       if (preloadPromises.length > 0) {
-        apiLogger.info(`✅ Preloaded ${priority} resources for ${currentRoute} in ${(endTime - startTime).toFixed(2)}ms`)
+        apiLogger.info({ priority, currentRoute, duration: (endTime - startTime).toFixed(2) }, 'Preloaded resources')
       }
 
-    } catch (error: unknown) {
-      console.warn(`⚠️ Failed to preload resources for ${currentRoute}`, error)
+    } catch (_err: unknown) {
+      // Failed to preload resources
     }
   }, [pathname, router])
 
   // Preload on route change
   useEffect(() => {
     // Immediate preloading
-    preloadForCurrentRoute(PreloadPriority.IMMEDIATE)
+    void preloadForCurrentRoute(PreloadPriority.IMMEDIATE)
 
     // High priority preloading after a short delay
     const highPriorityTimer = setTimeout(() => {
-      preloadForCurrentRoute(PreloadPriority.HIGH)
+      void preloadForCurrentRoute(PreloadPriority.HIGH)
     }, 100)
 
     // Medium priority preloading after longer delay
     const mediumPriorityTimer = setTimeout(() => {
-      preloadForCurrentRoute(PreloadPriority.MEDIUM)
+      void preloadForCurrentRoute(PreloadPriority.MEDIUM)
     }, 500)
 
     return () => {
@@ -108,11 +106,14 @@ export const useRoutePreloading = () => {
 
   // Manual preload function for user interactions
   const preloadRoute = useCallback((targetRoute: string) => {
+    const validRoutes = ['inventory', 'customers', 'recipes', 'orders', 'finance', 'dashboard', 'settings'] as const
+    type ValidRoute = typeof validRoutes[number]
+    
     const config = ROUTE_PRELOADING_PATTERNS[targetRoute]
-    if (config?.components) {
-      globalLazyLoadingUtils.preloadForRoute(targetRoute as any).catch(() => {})
+    if (config?.components && validRoutes.includes(targetRoute as ValidRoute)) {
+      globalLazyLoadingUtils.preloadForRoute(targetRoute as ValidRoute).catch(() => {})
     }
-    router.prefetch(targetRoute)
+    void router.prefetch(targetRoute)
   }, [router])
 
   return {

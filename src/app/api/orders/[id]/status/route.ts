@@ -1,17 +1,23 @@
-import { triggerWorkflow } from '@/lib/automation-engine'
-import { createServiceRoleClient } from '@/utils/supabase'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
-
+import 'server-only'
+import { triggerWorkflow } from '@/lib/automation/workflows/index'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
+import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-// PATCH /api/orders/[id]/status - Update order status dengan automatic workflow triggers
-export async function PATCH(
+
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+interface RouteContext {
+  params: Promise<{ id: string }>
+}
+
+// PUT /api/orders/[id]/status - Update order status dengan automatic workflow triggers
+export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: RouteContext
 ) {
   try {
-    const resolvedParams = await params
-    const orderId = (resolvedParams as any).id
+    const { id: orderId } = await context.params
 
     const body = await request.json()
     const { status, notes } = body
@@ -31,7 +37,7 @@ export async function PATCH(
 
     if (!validStatuses.includes(status)) {
       return NextResponse.json(
-        { error: 'Invalid status. Must be one of: ' + validStatuses.join(', ') },
+        { error: `Invalid status. Must be one of: ${  validStatuses.join(', ')}` },
         { status: 400 }
       )
     }
@@ -39,10 +45,9 @@ export async function PATCH(
     const supabase = createServiceRoleClient()
 
     // Get current order to check previous status
-    // @ts-ignore
     const { data: currentOrder, error: fetchError } = await supabase
       .from('orders')
-      .select('*')
+      .select('id, order_no, status, total_amount, delivery_date, order_date, customer_name, user_id')
       .eq('id', orderId)
       .single()
 
@@ -53,22 +58,22 @@ export async function PATCH(
       )
     }
 
-    const previousStatus = (currentOrder as any).status
+    const previousStatus = currentOrder.status
     let incomeRecordId = null
 
     // If transitioning to DELIVERED, create income record
-    if (status === 'DELIVERED' && previousStatus !== 'DELIVERED' && (currentOrder as any).total_amount > 0) {
+    if (status === 'DELIVERED' && previousStatus !== 'DELIVERED' && currentOrder.total_amount !== null && currentOrder.total_amount > 0) {
       const { data: incomeRecord, error: incomeError } = await supabase
         .from('financial_records')
-        .insert({
+        .insert([{
           type: 'INCOME',
           category: 'Revenue',
-          amount: (currentOrder as any).total_amount,
-          date: (currentOrder as any).delivery_date || (currentOrder as any).order_date || new Date().toISOString().split('T')[0],
-          reference: `Order #${(currentOrder as any).order_no}${(currentOrder as any).customer_name ? ' - ' + (currentOrder as any).customer_name : ''}`,
-          description: `Income from order ${(currentOrder as any).order_no}`,
-          user_id: (currentOrder as any).user_id
-        })
+          amount: currentOrder.total_amount || 0,
+          date: (currentOrder.delivery_date ?? currentOrder.order_date ?? new Date().toISOString().split('T')[0]),
+          reference: `Order #${currentOrder.order_no || ''}${currentOrder.customer_name ? ` - ${  currentOrder.customer_name}` : ''}`,
+          description: `Income from order ${currentOrder.order_no || ''}`,
+          user_id: currentOrder.user_id
+        }])
         .select()
         .single()
 
@@ -80,21 +85,21 @@ export async function PATCH(
         )
       }
 
-      incomeRecordId = (incomeRecord as any).id
-      apiLogger.info(`💰 Income record created for order ${(currentOrder as any).order_no}: ${(currentOrder as any).total_amount}`)
+      incomeRecordId = incomeRecord.id
+      apiLogger.info(`💰 Income record created for order ${currentOrder.order_no}: ${currentOrder.total_amount}`)
     }
 
     // Update order status with financial_record_id if income was created
     const { data: updatedOrder, error: updateError } = await supabase
       .from('orders')
       .update({
-        status: status,
+        status,
         updated_at: new Date().toISOString(),
-        ...(notes && { notes: notes }),
+        ...(notes && { notes }),
         ...(incomeRecordId && { financial_record_id: incomeRecordId })
-      } as any)
+      })
       .eq('id', orderId)
-      .select('*')
+      .select('id, order_no, status, total_amount, customer_name, delivery_date, order_date, updated_at, financial_record_id')
       .single()
 
     if (updateError) {
@@ -112,7 +117,7 @@ export async function PATCH(
       )
     }
 
-    apiLogger.info(`🔄 Order ${(currentOrder as any).order_no}: ${previousStatus} → ${status}`)
+    apiLogger.info(`🔄 Order ${currentOrder.order_no}: ${previousStatus} → ${status}`)
 
     // TRIGGER AUTOMATION WORKFLOWS based on status change
     try {
@@ -121,7 +126,7 @@ export async function PATCH(
         apiLogger.info('🚀 Triggering order completion automation...')
         await triggerWorkflow('order.completed', orderId, {
           order: updatedOrder,
-          previousStatus,
+          previousStatus: previousStatus ?? '',
           newStatus: status
         })
       }
@@ -131,16 +136,16 @@ export async function PATCH(
         apiLogger.info('🚀 Triggering order cancellation automation...')
         await triggerWorkflow('order.cancelled', orderId, {
           order: updatedOrder,
-          previousStatus,
+          previousStatus: previousStatus ?? '',
           newStatus: status,
-          reason: notes || 'Order cancelled'
+          reason: notes ?? 'Order cancelled'
         })
       }
 
       // General status change trigger
       await triggerWorkflow('order.status_changed', orderId, {
         order: updatedOrder,
-        previousStatus,
+        previousStatus: previousStatus ?? '',
         newStatus: status,
         notes
       })
@@ -155,24 +160,24 @@ export async function PATCH(
       success: true,
       order: updatedOrder,
       status_change: {
-        from: previousStatus,
+        from: previousStatus ?? '',
         to: status,
         timestamp: new Date().toISOString()
       },
       automation: {
         triggered: status === 'DELIVERED' || status === 'CANCELLED',
-        workflows: getTriggeredWorkflows(status, previousStatus)
+        workflows: getTriggeredWorkflows(status, previousStatus ?? '')
       },
       financial: {
         income_recorded: !!incomeRecordId,
         income_record_id: incomeRecordId,
-        amount: incomeRecordId ? (currentOrder as any).total_amount : null
+        amount: incomeRecordId ? (currentOrder.total_amount ?? 0) : null
       },
       message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing and income tracking' : ''}`
     })
 
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in order status update:')
+    apiLogger.error({ error }, 'Error in order status update:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -182,19 +187,18 @@ export async function PATCH(
 
 // GET /api/orders/[id]/status - Get order status history (optional)
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  context: RouteContext
 ) {
   try {
-    const resolvedParams = await params
-    const orderId = (resolvedParams as any).id
+    const { id: orderId } = await context.params
 
     const supabase = createServiceRoleClient()
 
     // Get order with basic info
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('*')
+      .select('id, order_no, status, updated_at')
       .eq('id', orderId)
       .single()
 
@@ -208,21 +212,21 @@ export async function GET(
     // Note: Status history would require a separate audit table in production
     // For now, return current status info
     const statusInfo = {
-      current_status: (order as any).status,
-      status_display: getStatusDisplay((order as any).status),
-      can_transition_to: getValidTransitions((order as any).status),
-      automation_enabled: isAutomationEnabled((order as any).status),
-      updated_at: (order as any).updated_at
+      current_status: order.status,
+      status_display: order.status ? getStatusDisplay(order.status) : 'Unknown',
+      can_transition_to: order.status ? getValidTransitions(order.status) : [],
+      automation_enabled: order.status ? isAutomationEnabled(order.status) : false,
+      updated_at: order.updated_at
     }
 
     return NextResponse.json({
-      order_id: (order as any).id,
-      order_no: (order as any).order_no,
+      order_id: order.id,
+      order_no: order.order_no,
       status_info: statusInfo
     })
 
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error getting order status:')
+    apiLogger.error({ error }, 'Error getting order status:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

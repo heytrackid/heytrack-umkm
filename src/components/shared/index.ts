@@ -1,3 +1,4 @@
+
 // Shared Components and Utilities Index
 
 // Error Boundary
@@ -65,17 +66,8 @@ export {
   NotificationBadge
 } from './NotificationComponents'
 
-// User Components
-export {
-  UserProfileCard,
-  UserManagementTable,
-  PasswordChange,
-  UserPermissions,
-  RoleManagement
-} from './UserComponents'
-
 // Re-export utilities
-export * from '../../lib/shared/utilities'
-export * from '../../lib/shared/constants'
-export * from '../../lib/shared/validation'
-export * from '../../lib/shared/data-management'
+export * from '@/lib/shared/utilities'
+export * from '@/lib/shared/constants'
+export * from '@/lib/shared/validation'
+export * from '@/lib/shared/data-management'

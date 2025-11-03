@@ -9,11 +9,10 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 import { CheckCircle, Loader2, Mail } from 'lucide-react'
 import Link from 'next/link'
-import * as React from 'react'
-import { useState, useTransition } from 'react'
+import { type FormEvent, useState, useTransition } from 'react'
 import { resetPassword } from './actions'
 
-export default function ResetPasswordPage() {
+const ResetPasswordPage = () => {
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string }>({})
@@ -21,11 +20,11 @@ export default function ResetPasswordPage() {
   const [email, setEmail] = useState('')
   const [isPending, startTransition] = useTransition()
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setError('')
-    setErrorAction(null)
-    setFieldErrors({})
+    void setError('')
+    void setErrorAction(null)
+    void setFieldErrors({})
 
     const formData = new FormData(e.currentTarget)
     const emailValue = formData.get('email') as string
@@ -33,7 +32,7 @@ export default function ResetPasswordPage() {
     // Client-side validation
     const emailValidation = validateEmail(emailValue)
     if (!emailValidation.isValid) {
-      setFieldErrors({ email: emailValidation.error })
+      void setFieldErrors({ email: emailValidation.error })
       return
     }
 
@@ -41,17 +40,17 @@ export default function ResetPasswordPage() {
       const result = await resetPassword(formData)
       if (result?.error) {
         const authErrorMessage = getAuthErrorMessage(result.error)
-        setError(authErrorMessage)
+        void setError(authErrorMessage)
       } else if (result?.success) {
-        setSuccess(true)
+        void setSuccess(true)
       }
     })
   }
 
   const clearFieldError = () => {
-    setFieldErrors({})
-    setError('')
-    setErrorAction(null)
+    void setFieldErrors({})
+    void setError('')
+    void setErrorAction(null)
   }
 
   if (success) {
@@ -155,7 +154,7 @@ export default function ResetPasswordPage() {
                     disabled={isPending}
                     value={email}
                     onChange={(e) => {
-                      setEmail(e.target.value)
+                      void setEmail(e.target.value)
                       clearFieldError()
                     }}
                     aria-invalid={!!fieldErrors.email}
@@ -200,3 +199,5 @@ export default function ResetPasswordPage() {
     </div>
   )
 }
+
+export default ResetPasswordPage

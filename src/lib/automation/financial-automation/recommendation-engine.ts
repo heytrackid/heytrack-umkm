@@ -1,10 +1,10 @@
+import type { FinancialMetrics, SaleData, ExpenseData } from '@/lib/automation/types'
+
 /**
  * Recommendation Engine Module
  * Generates financial recommendations and insights
  */
 
-import type { FinancialMetrics, SaleData, ExpenseData } from '../types'
-import type { ExpensesByCategory } from './types'
 
 export class RecommendationEngine {
   /**
@@ -83,14 +83,16 @@ export class RecommendationEngine {
   private static generateCostRecommendations(metrics: FinancialMetrics, expenses: ExpenseData[]): string[] {
     const recommendations: string[] = []
 
-    const expensesByCategory = expenses.reduce((acc, exp) => {
-      if (!acc[exp.category]) acc[exp.category] = 0
+    const expensesByCategory = expenses.reduce<Record<string, number>>((acc, exp) => {
+      if (!acc[exp.category]) {acc[exp.category] = 0}
       acc[exp.category] += exp.amount
       return acc
-    }, {} as ExpensesByCategory)
+    }, {})
 
-    const topExpenseCategory = Object.entries(expensesByCategory)
+    const topExpenseCategoryEntry = (Object.entries(expensesByCategory))
       .sort(([,a], [,b]) => b - a)[0]
+
+    const topExpenseCategory: [string, number] | undefined = topExpenseCategoryEntry
 
     if (topExpenseCategory && topExpenseCategory[1] > metrics.revenue * 0.3) {
       recommendations.push(
@@ -160,6 +162,10 @@ export class RecommendationEngine {
    * Calculate coefficient of variation for variability analysis
    */
   private static calculateVariability(values: number[]): number {
+    if (values.length === 0) {
+      return 0
+    }
+
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length
     const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length
     return Math.sqrt(variance) / mean // Coefficient of variation

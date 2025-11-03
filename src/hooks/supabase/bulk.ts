@@ -1,68 +1,67 @@
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types'
+import type { TableName, Row, Insert} from '@/types/database'
+import { typed } from '@/types/type-utilities'
 import type { BulkUpdateItem } from './types'
-
-type Tables = Database['public']['Tables']
 
 /**
  * Bulk operations for Supabase tables
  */
 export class useSupabaseBulk {
-  static async createMultiple<T extends keyof Tables>(
+  static async createMultiple<T extends TableName>(
     table: T,
-    records: Tables[T]['Insert'][]
+    records: Array<Insert<T>>
   ) {
-    const supabase = createClient()
+    const supabase = typed(createClient())
 
     const { data, error } = await supabase
-      .from(table as any)
-      .insert(records as any)
-      .select('*')
+      .from(table)
+      .insert(records as never)
+      .select('*') as { data: Array<Row<T>> | null; error: Error | null }
 
     if (error) {
       throw new Error((error instanceof Error ? error.message : String(error)))
     }
 
-    return data
+    return data as Array<Row<T>>
   }
 
-  static async updateMultiple<T extends keyof Tables>(
+  static async updateMultiple<T extends TableName>(
     table: T,
-    updates: BulkUpdateItem<T>[]
+    updates: Array<BulkUpdateItem<T>>
   ) {
-    const supabase = createClient()
+    const supabase = typed(createClient())
     const results = []
 
     for (const update of updates) {
       const { data, error } = await supabase
-        .from(table as any)
-        .update(update.data as any)
-        .eq('id', update.id)
+        .from(table)
+        .update(update.data as never)
+        .eq('id', update.id as never)
         .select('*')
-        .single()
+        .single() as { data: Row<T> | null; error: Error | null }
 
       if (error) {
         throw new Error(`Failed to update record ${update.id}: ${error.message}`)
       }
 
-      results.push(data)
+      results.push(data as Row<T>)
     }
 
     return results
   }
 
-  static async deleteMultiple<T extends keyof Tables>(
+  static async deleteMultiple<T extends TableName>(
     table: T,
     ids: string[]
   ) {
-    const supabase = createClient()
+    const supabase = typed(createClient())
 
     const { error } = await supabase
-      .from(table as any)
+      .from(table)
       .delete()
-      .in('id', ids)
+      .in('id', ids as never)
 
     if (error) {
       throw new Error((error instanceof Error ? error.message : String(error)))
@@ -71,22 +70,22 @@ export class useSupabaseBulk {
     return true
   }
 
-  static async upsertMultiple<T extends keyof Tables>(
+  static async upsertMultiple<T extends TableName>(
     table: T,
-    records: Tables[T]['Insert'][],
+    records: Array<Insert<T>>,
     conflictColumns: string[] = ['id']
   ) {
-    const supabase = createClient()
+    const supabase = typed(createClient())
 
     const { data, error } = await supabase
-      .from(table as any)
-      .upsert(records as any, { onConflict: conflictColumns.join(',') })
-      .select('*')
+      .from(table)
+      .upsert(records as never, { onConflict: conflictColumns.join(',') })
+      .select('*') as { data: Array<Row<T>> | null; error: Error | null }
 
     if (error) {
       throw new Error((error instanceof Error ? error.message : String(error)))
     }
 
-    return data
+    return data as Array<Row<T>>
   }
 }

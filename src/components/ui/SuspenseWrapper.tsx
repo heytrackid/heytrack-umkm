@@ -1,12 +1,5 @@
-/**
- * Suspense Wrapper for Lazy Components
- * Provides consistent loading states and error boundaries
- */
-
-import React, { Suspense, ComponentType, ReactNode } from 'react'
+import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from 'react'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
-
-// Import comprehensive skeletons
 import {
   OrdersTableSkeleton,
   CustomersTableSkeleton,
@@ -27,6 +20,19 @@ import {
   DashboardHeaderSkeleton,
   ChartCardSkeleton
 } from '@/components/ui/skeletons'
+import { globalLazyLoadingUtils } from '../lazy'
+
+// Type for window with lazy loading metrics
+interface WindowWithMetrics extends Window {
+  LazyLoadingMetrics?: {
+    trackComponentLoad: (componentName: string, startTime: number) => void
+  }
+}
+
+/**
+ * Suspense Wrapper for Lazy Components
+ * Provides consistent loading states and error boundaries
+ */
 
 interface SkeletonProps {
   className?: string
@@ -35,7 +41,7 @@ interface SkeletonProps {
 }
 
 // Loading components mapped to skeleton types
-const loadingComponents: Record<string, ComponentType<any>> = {
+const loadingComponents: Record<string, ComponentType<Record<string, unknown>>> = {
   // Page-level skeletons
   page: () => <div className="p-6 space-y-6">
     <DashboardHeaderSkeleton />
@@ -77,7 +83,7 @@ const loadingComponents: Record<string, ComponentType<any>> = {
   dashboardHeader: DashboardHeaderSkeleton,
 
   // Default fallback
-  default: () => <div className="flex items-center justify-center p-4"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>
+  default: () => <div className="flex items-center justify-center p-4"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" /></div>
 }
 
 interface SuspenseWrapperProps {
@@ -90,17 +96,17 @@ interface SuspenseWrapperProps {
 /**
  * Generic suspense wrapper with consistent loading states
  */
-export function SuspenseWrapper({
+export const SuspenseWrapper = ({
   children,
   fallback,
   loadingType = 'default',
   errorFallback
-}: SuspenseWrapperProps) {
+}: SuspenseWrapperProps) => {
   const LoadingComponent = loadingComponents[loadingType]
 
   return (
     <ErrorBoundary fallback={errorFallback}>
-      <Suspense fallback={fallback || <LoadingComponent />}>
+      <Suspense fallback={fallback ?? <LoadingComponent />}>
         {children}
       </Suspense>
     </ErrorBoundary>
@@ -136,52 +142,45 @@ export function withSuspense<P extends object>(
 /**
  * Route-based lazy loading wrapper
  */
-export function RouteSuspenseWrapper({
+export const RouteSuspenseWrapper = ({
   children,
   routeName
 }: {
   children: ReactNode
   routeName: string
-}) {
+}) => {
   // Preload critical components for this route
-  React.useEffect(() => {
+  useEffect(() => {
     // Import the lazy loading utils and preload for route
-    import('@/components/lazy').then(({ globalLazyLoadingUtils }) => {
-      globalLazyLoadingUtils.preloadForRoute(routeName as any).catch(() => {
-        // Ignore preload errors
-      })
+    // Type assertion is safe here as we're catching errors from invalid routes
+    void globalLazyLoadingUtils.preloadForRoute(routeName as never).catch(() => {
+      // Ignore preload errors for invalid routes
     })
   }, [routeName])
 
-  return (
-    <SuspenseWrapper loadingType="page">
-      {children}
-    </SuspenseWrapper>
-  )
+  return <>{children}</>
 }
 
 /**
  * Lazy component with automatic performance tracking
  */
-export function createTrackedLazyComponent<T extends ComponentType<any>>(
-  importFn: () => Promise<{ default: T }>,
+export function createTrackedLazyComponent(
   componentName: string,
   options: {
     loadingType?: keyof typeof loadingComponents
     errorFallback?: ReactNode
   } = {}
 ) {
-  const LazyComponent = React.lazy(() =>
-    importFn().then(module => {
+  const LazyComponent = lazy(() =>
+    import(`../path/to/component/${componentName}`).then(module => {
       // Track component load time
       const startTime = performance.now()
       setTimeout(() => {
-        import('@/components/lazy').then(({ LazyLoadingMetrics }) => {
-          LazyLoadingMetrics.trackComponentLoad(componentName, startTime)
-        })
+        if (typeof window !== 'undefined' && (window as WindowWithMetrics).LazyLoadingMetrics) {
+          (window as WindowWithMetrics).LazyLoadingMetrics?.trackComponentLoad(componentName, startTime)
+        }
       }, 0)
-
-      return { default: module.default }
+      return module
     })
   )
 

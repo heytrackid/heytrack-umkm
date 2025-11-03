@@ -1,15 +1,14 @@
 'use client'
-import * as React from 'react'
 
-import { useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useState, useEffect, useMemo } from 'react'
 import { useMobile } from '@/hooks/useResponsive'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Search, 
-  Filter, 
+import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import {
+  Search,
   Plus,
   Eye,
   Edit,
@@ -24,32 +23,35 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from"@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from"@/components/ui/select"
-import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+} from "@/components/ui/select"
 
-interface SimpleColumn<T> {
-  key: keyof T | string
+type SortableValue = string | number | boolean | Date | null | undefined
+
+export interface SimpleColumn<T, TValue = unknown> {
+  key: keyof T
   header: string
-  render?: (value: any, item: T) => React.ReactNode
+  accessor?: (item: T) => TValue
+  render?: (value: TValue, item: T) => ReactNode
   sortable?: boolean
+  sortAccessor?: (item: T) => SortableValue
   filterable?: boolean
   filterType?: 'text' | 'select'
-  filterOptions?: { label: string; value: string }[]
+  filterOptions?: Array<{ label: string; value: string }>
   hideOnMobile?: boolean
 }
 
-interface SimpleDataTableProps<T> {
+interface SimpleDataTableProps<T, TValue = unknown> {
   title?: string
   description?: string
   data: T[]
-  columns: SimpleColumn<T>[]
+  columns: Array<SimpleColumn<T, TValue>>
   searchPlaceholder?: string
   onAdd?: () => void
   onView?: (item: T) => void
@@ -64,7 +66,7 @@ interface SimpleDataTableProps<T> {
   initialPageSize?: number
 }
 
-export function SimpleDataTable<T extends Record<string, unknown>>({
+export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[keyof T]>({
   title,
   description,
   data,
@@ -81,7 +83,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   enablePagination = true,
   pageSizeOptions,
   initialPageSize
-}: SimpleDataTableProps<T>) {
+}: SimpleDataTableProps<T, TValue>) => {
   const { isMobile } = useMobile()
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
@@ -89,13 +91,13 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   const sanitizedPageSizeOptions = useMemo(() => {
-    if (!enablePagination) {return [Math.max(data.length, 1)]}
-    if (pageSizeOptions && pageSizeOptions.length > 0) {return pageSizeOptions}
+    if (!enablePagination) { return [Math.max(data.length, 1)] }
+    if (pageSizeOptions && pageSizeOptions.length > 0) { return pageSizeOptions }
     return [10, 25, 50]
   }, [enablePagination, pageSizeOptions, data.length])
 
   const sanitizedInitialPageSize = useMemo(() => {
-    if (!enablePagination) {return Math.max(data.length, 1)}
+    if (!enablePagination) { return Math.max(data.length, 1) }
     if (initialPageSize && sanitizedPageSizeOptions.includes(initialPageSize)) {
       return initialPageSize
     }
@@ -107,18 +109,19 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
 
   // Filter data berdasarkan search dan filter
   const filteredData = data.filter(item => {
-    // Search filter
-    const matchesSearch = !searchTerm || 
-      columns.some(col => {
-        const value = getValue(item, col.key)
-        return value != null && String(value).toLowerCase().includes(searchTerm.toLowerCase())
-      })
+    const searchLower = searchTerm.toLowerCase()
 
-    // Column filters
+    const matchesSearch = !searchTerm || columns.some(col => {
+      const value = getColumnValue(item, col)
+      return value !== null && String(value).toLowerCase().includes(searchLower)
+    })
+
     const matchesFilters = Object.entries(filters).every(([key, filterValue]) => {
-      if (!filterValue || filterValue === 'all') {return true}
-      const itemValue = getValue(item, key)
-      return String(itemValue) === filterValue
+      if (!filterValue || filterValue === 'all') { return true }
+      const column = columns.find(col => String(col.key) === key)
+      if (!column) { return true }
+      const itemValue = getColumnValue(item, column)
+      return String(itemValue ?? '') === filterValue
     })
 
     return matchesSearch && matchesFilters
@@ -126,14 +129,22 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
 
   // Sort data
   const sortedData = sortBy ? [...filteredData].sort((a, b) => {
-    const aVal = getValue(a, sortBy)
-    const bVal = getValue(b, sortBy)
-    
-    if (sortOrder === 'asc') {
-      return aVal > bVal ? 1 : -1
-    } else {
-      return aVal < bVal ? 1 : -1
-    }
+    const column = columns.find(col => String(col.key) === sortBy)
+    if (!column) { return 0 }
+
+    const rawA = column.sortAccessor ? column.sortAccessor(a) : getColumnValue(a, column)
+    const rawB = column.sortAccessor ? column.sortAccessor(b) : getColumnValue(b, column)
+
+    const aVal = toSortableValue(rawA)
+    const bVal = toSortableValue(rawB)
+
+    if (aVal === bVal) { return 0 }
+    if (aVal === null || aVal === undefined) { return sortOrder === 'asc' ? -1 : 1 }
+    if (bVal === null || bVal === undefined) { return sortOrder === 'asc' ? 1 : -1 }
+
+    if (aVal < bVal) { return sortOrder === 'asc' ? -1 : 1 }
+    if (aVal > bVal) { return sortOrder === 'asc' ? 1 : -1 }
+    return 0
   }) : filteredData
 
   const totalItems = sortedData.length
@@ -146,39 +157,47 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
     ? sortedData.slice(pageStart - 1, pageEnd)
     : sortedData
 
-  function getValue(item: T, key: keyof T | string): unknown {
-    if (typeof key === 'string' && key.includes('.')) {
-      return key.split('.').reduce((obj, k) => obj?.[k], item)
+  function getColumnValue(item: T, column: SimpleColumn<T, TValue>): TValue {
+    if (column.accessor) {
+      return column.accessor(item)
     }
-    return item[key as keyof T]
+    return item[column.key] as TValue
+  }
+
+  function toSortableValue(value: unknown): SortableValue {
+    if (value instanceof Date) { return value.getTime() }
+    if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean' || value === null) {
+      return value as SortableValue
+    }
+    return String(value)
   }
 
   useEffect(() => {
-    if (!enablePagination) {return}
-    setCurrentPage(1)
+    if (!enablePagination) { return }
+    void setCurrentPage(1)
   }, [searchTerm, JSON.stringify(filters), sortBy, sortOrder, rowsPerPage, enablePagination])
 
   useEffect(() => {
-    if (!enablePagination) {return}
+    if (!enablePagination) { return }
     const maxPage = Math.max(1, Math.ceil(totalItems / rowsPerPage))
     if (currentPage > maxPage) {
-      setCurrentPage(maxPage)
+      void setCurrentPage(maxPage)
     }
   }, [currentPage, rowsPerPage, totalItems, enablePagination])
 
   useEffect(() => {
-    if (!enablePagination) {return}
+    if (!enablePagination) { return }
     if (!sanitizedPageSizeOptions.includes(rowsPerPage)) {
-      setRowsPerPage(sanitizedInitialPageSize)
+      void setRowsPerPage(sanitizedInitialPageSize)
     }
   }, [rowsPerPage, sanitizedInitialPageSize, sanitizedPageSizeOptions, enablePagination])
 
   function handleSort(columnKey: string) {
     if (sortBy === columnKey) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+      void setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
     } else {
-      setSortBy(columnKey)
-      setSortOrder('asc')
+      void setSortBy(columnKey)
+      void setSortOrder('asc')
     }
   }
 
@@ -190,14 +209,14 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   }
 
   function handleExport() {
-    if (!exportData) {return}
-    
+    if (!exportData) { return }
+
     const csvContent = [
       columns.map(col => col.header).join(','),
-      ...sortedData.map(item => 
+      ...sortedData.map(item =>
         columns.map(col => {
-          const value = getValue(item, col.key)
-          return `"${String(value || '')}"`
+          const value = getColumnValue(item, col)
+          return `"${String(value ?? '')}"`
         }).join(',')
       )
     ].join('\n')
@@ -218,9 +237,9 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
       <Card>
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4" />
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-4 bg-gray-200 rounded"></div>
+              <div key={i} className="h-4 bg-gray-200 rounded" />
             ))}
           </div>
         </CardContent>
@@ -231,7 +250,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   return (
     <Card>
       {/* Header */}
-      {(title || onAdd) && (
+      {(title ?? onAdd) && (
         <CardHeader className={isMobile ? 'p-4' : ''}>
           <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-col sm:flex-row sm:items-center sm:justify-between gap-4'}`}>
             <div>
@@ -240,15 +259,15 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
             </div>
             <div className={`flex gap-2 ${isMobile ? 'w-full' : ''}`}>
               {exportData && (
-                <Button variant="outline" size={isMobile ?"sm" :"sm"} onClick={handleExport} className={isMobile ? 'flex-1' : ''}>
+                <Button variant="outline" size={isMobile ? "sm" : "sm"} onClick={handleExport} className={isMobile ? 'flex-1' : ''}>
                   <Download className="h-4 w-4 mr-2" />
                   Informasi
                 </Button>
               )}
               {onAdd && (
-                <Button onClick={onAdd} size={isMobile ?"sm" :"default"} className={isMobile ? 'flex-1' : ''}>
+                <Button onClick={onAdd} size={isMobile ? "sm" : "default"} className={isMobile ? 'flex-1' : ''}>
                   <Plus className="h-4 w-4 mr-2" />
-                  {addButtonText || "Tambah Data"}
+                  {addButtonText ?? "Tambah Data"}
                 </Button>
               )}
             </div>
@@ -263,7 +282,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
           <div className={`relative ${isMobile ? 'w-full' : 'flex-1'}`}>
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={searchPlaceholder || "Cari..."}
+              placeholder={searchPlaceholder ?? "Cari..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -283,7 +302,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                     onValueChange={(value) => handleFilterChange(String(col.key), value)}
                   >
                     <SelectTrigger className={isMobile ? 'w-full' : 'w-[150px]'}>
-                      <SelectValue placeholder={`Filter ${col.header}`} />
+                      <SelectValue placeholder={`_Filter ${col.header}`} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Informasi {col.header}</SelectItem>
@@ -302,7 +321,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
         {/* Table / Mobile Cards */}
         {sortedData.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">{emptyMessage || "Tidak ada data"}</p>
+            <p className="text-muted-foreground">{emptyMessage ?? "Tidak ada data"}</p>
           </div>
         ) : isMobile ? (
           /* Mobile Card Layout */
@@ -320,16 +339,19 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                               {col.header}:
                             </span>
                             <div className="text-sm flex-1 text-right">
-                              {col.render 
-                                ? col.render(getValue(item, col.key), item)
-                                : String(getValue(item, col.key) || '-')
-                              }
+                              {(() => {
+                                const value = getColumnValue(item, col)
+                                if (col.render) {
+                                  return col.render(value, item)
+                                }
+                                return value === null ? '-' : String(value)
+                              })()}
                             </div>
                           </div>
                         ))
                       }
-                      
-                      {(onView || onEdit || onDelete) && (
+
+                      {(onView ?? onEdit ?? onDelete) && (
                         <div className="flex gap-2 pt-3 border-t">
                           {onView && (
                             <Button variant="outline" size="sm" onClick={() => onView(item)} className="flex-1">
@@ -364,8 +386,8 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                 onPageChange={setCurrentPage}
                 pageSize={rowsPerPage}
                 onPageSizeChange={(size) => {
-                  setRowsPerPage(size)
-                  setCurrentPage(1)
+                  void setRowsPerPage(size)
+                  void setCurrentPage(1)
                 }}
                 totalItems={totalItems}
                 pageStart={pageStart}
@@ -385,9 +407,8 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                     {columns.map(col => (
                       <th
                         key={String(col.key)}
-                        className={`text-left p-2 font-medium text-muted-foreground ${
-                          col.hideOnMobile ? 'hidden sm:table-cell' : ''
-                        }`}
+                        className={`text-left p-2 font-medium text-muted-foreground ${col.hideOnMobile ? 'hidden sm:table-cell' : ''
+                          }`}
                       >
                         {col.sortable ? (
                           <Button
@@ -408,7 +429,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                         )}
                       </th>
                     ))}
-                    {(onView || onEdit || onDelete) && (
+                    {(onView ?? onEdit ?? onDelete) && (
                       <th className="text-right p-2 font-medium text-muted-foreground">
                         Informasi
                       </th>
@@ -423,13 +444,23 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                           key={String(col.key)}
                           className={`p-2 ${col.hideOnMobile ? 'hidden sm:table-cell' : ''}`}
                         >
-                          {col.render 
-                            ? col.render(getValue(item, col.key), item)
-                            : String(getValue(item, col.key) || '-')
-                          }
+                          {(() => {
+                            const value = getColumnValue(item, col)
+                            if (col.render) {
+                              return col.render(value, item)
+                            }
+                            if (typeof value === 'boolean') {
+                              return (
+                                <Badge variant={value ? "default" : "secondary"}>
+                                  {value ? 'Yes' : 'No'}
+                                </Badge>
+                              )
+                            }
+                            return value === null ? '-' : String(value)
+                          })()}
                         </td>
                       ))}
-                      {(onView || onEdit || onDelete) && (
+                      {(onView ?? onEdit ?? onDelete) && (
                         <td className="text-right p-2">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -453,7 +484,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                                 </DropdownMenuItem>
                               )}
                               {onDelete && (
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   onClick={() => onDelete(item)}
                                   className="text-red-600"
                                 >
@@ -478,8 +509,8 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                 onPageChange={setCurrentPage}
                 pageSize={rowsPerPage}
                 onPageSizeChange={(size) => {
-                  setRowsPerPage(size)
-                  setCurrentPage(1)
+                  void setRowsPerPage(size)
+                  void setCurrentPage(1)
                 }}
                 totalItems={totalItems}
                 pageStart={pageStart}

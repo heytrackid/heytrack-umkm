@@ -1,37 +1,41 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { IngredientsCRUD } from '@/components/crud/ingredients-crud';
+import { EnhancedIngredientsPage as IngredientsCRUD } from '@/components/ingredients/EnhancedIngredientsPage';
 import AppLayout from '@/components/layout/app-layout';
-import { StatsCards, StatCardPatterns } from '@/components/ui';
-import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui';
-import { useSettings } from '@/contexts/settings-context';
-import { useIngredients } from '@/hooks';
+import { StatsCards, StatCardPatterns, PageBreadcrumb, BreadcrumbPatterns, PageHeader } from '@/components/ui'
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import {
-  AlertTriangle,
-  DollarSign,
-  Package,
-  Plus,
-  ShoppingCart,
-  TrendingDown
-} from 'lucide-react';
+import { useIngredients } from '@/hooks/useIngredients';
+import type { IngredientsTable } from '@/types/database';
+import { Button } from '@/components/ui/button';
+import { Plus, ShoppingCart, Upload, AlertTriangle } from 'lucide-react';
+import { ImportDialog } from '@/components/import/ImportDialog';
+import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog';
+import { parseIngredientsCSV, generateIngredientsTemplate } from '@/components/import/csv-helpers';
 
-export default function IngredientsPage() {
-  const { formatCurrency } = useSettings();
-  const { data: ingredients, loading, error } = useIngredients({ realtime: true });
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuth();
+const IngredientsPage = () => {
+  const { data: ingredients, isLoading: loading, error } = useIngredients();
+  const { isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+
+  // Generate template URL
+  const templateUrl = useMemo(() => {
+    const template = generateIngredientsTemplate()
+    const blob = new Blob([template], { type: 'text/csv' })
+    return URL.createObjectURL(blob)
+  }, []);
 
   // Handle auth errors
   useEffect(() => {
-    if (error && typeof error === 'object' && (error as Error).message?.includes('401')) {
+    if (error && typeof error === 'object' && (error).message?.includes('401')) {
       toast({
         title: 'Sesi berakhir',
-        description: typeof error === 'string' ? error : (error as Error).message || 'Terjadi kesalahan autentikasi',
+        description: typeof error === 'string' ? error : (error).message || 'Terjadi kesalahan autentikasi',
         variant: 'destructive',
       });
       router.push('/auth/login');
@@ -45,33 +49,68 @@ export default function IngredientsPage() {
   }, [error, router, toast]);
 
   // Calculate stats
-  const totalIngredients = ingredients?.length || 0;
-  const lowStockCount = ingredients?.filter(i =>
-    i.stok_tersedia <= (i.stok_minimum || 0)
-  ).length || 0;
-  const totalValue = ingredients?.reduce((sum, i) =>
-    sum + (i.stok_tersedia * i.harga_per_satuan), 0
-  ) || 0;
-  const outOfStockCount = ingredients?.filter(i => i.stok_tersedia <= 0).length || 0;
+  const totalIngredients = ingredients?.length ?? 0;
+  const lowStockCount = ingredients?.filter((i: IngredientsTable) =>
+    (i.current_stock ?? 0) <= (i.min_stock ?? 0) && (i.current_stock ?? 0) > 0
+  ).length ?? 0;
+  const totalValue = ingredients?.reduce((sum: number, i: IngredientsTable) =>
+    sum + ((i.current_stock ?? 0) * (i.price_per_unit ?? 0)), 0
+  ) ?? 0;
+  const outOfStockCount = ingredients?.filter((i: IngredientsTable) => (i.current_stock ?? 0) <= 0).length ?? 0;
 
-  // Show loading state while auth is initializing
-  if (isAuthLoading) {
+  // ✅ FIX: Combine loading states
+  const isLoading = isAuthLoading || loading
+
+  // Show loading state
+  if (isLoading && !ingredients) {
     return (
       <AppLayout>
-        <div className="space-y-6">
+        <div className="space-y-6 p-6">
           <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                <Package className="h-8 w-8" />
-                Bahan Baku
-              </h1>
-              <p className="text-muted-foreground">
-                Kelola stok dan harga bahan baku untuk produksi
-              </p>
+
+          {/* Header - Always visible */}
+          <PageHeader
+            title="Bahan Baku"
+            description="Kelola stok dan harga bahan baku"
+            actions={
+              <div className="flex gap-2">
+                <Button variant="outline" disabled className="flex-1 sm:flex-none">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import
+                </Button>
+                <Button variant="outline" disabled className="flex-1 sm:flex-none">
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Pembelian
+                </Button>
+                <Button disabled className="flex-1 sm:flex-none">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah
+                </Button>
+              </div>
+            }
+          />
+
+          {/* Stats skeleton */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={`skeleton-${i}`} className="p-6 bg-card rounded-lg border">
+                <div className="animate-pulse space-y-3">
+                  <div className="h-4 bg-muted rounded w-2/3" />
+                  <div className="h-8 bg-muted rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Table skeleton */}
+          <div className="border rounded-lg p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-10 bg-muted rounded" />
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={`row-${i}`} className="h-16 bg-muted rounded" />
+              ))}
             </div>
           </div>
-          <StatsCards stats={StatCardPatterns.ingredients({ total: 0, lowStock: 0, outOfStock: 0, totalValue: 0 })} />
         </div>
       </AppLayout>
     );
@@ -79,53 +118,64 @@ export default function IngredientsPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
 
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Package className="h-8 w-8" />
-              Bahan Baku
-            </h1>
-            <p className="text-muted-foreground">
-              Kelola stok dan harga bahan baku untuk produksi
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Pembelian
-            </button>
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Bahan Baku
-            </button>
-          </div>
-        </div>
+        <PageHeader
+          title="Bahan Baku"
+          description="Kelola stok dan harga bahan baku"
+          actions={
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setImportDialogOpen(true)}
+                className="flex-1 sm:flex-none"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/ingredients/purchases')}
+                className="flex-1 sm:flex-none"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Pembelian
+              </Button>
+              <Button
+                onClick={() => setShowAddDialog(true)}
+                className="flex-1 sm:flex-none"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Tambah
+              </Button>
+            </div>
+          }
+        />
 
         {/* Stats Cards */}
-        {!loading && (
-          <StatsCards stats={StatCardPatterns.ingredients({
-            total: totalIngredients,
-            lowStock: lowStockCount,
-            outOfStock: outOfStockCount,
-            totalValue: totalValue
-          })} />
-        )}
+        <StatsCards stats={StatCardPatterns.ingredients({
+          total: totalIngredients,
+          lowStock: lowStockCount,
+          outOfStock: outOfStockCount,
+          totalValue
+        })} />
 
         {/* Alert for Low Stock */}
-        {!loading && lowStockCount > 0 && (
+        {(lowStockCount > 0 || outOfStockCount > 0) && (
           <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
-              <div>
+              <div className="flex-1">
                 <h3 className="font-semibold text-orange-900 text-sm mb-1">
-                  Peringatan Stok Rendah
+                  Peringatan Stok
                 </h3>
                 <p className="text-sm text-orange-700">
-                  {lowStockCount} bahan baku mencapai atau di bawah stok minimum. Segera lakukan pemesanan untuk menghindari kehabisan stok.
+                  {outOfStockCount > 0 && `${outOfStockCount} bahan habis`}
+                  {outOfStockCount > 0 && lowStockCount > 0 && ', '}
+                  {lowStockCount > 0 && `${lowStockCount} bahan stok rendah`}
+                  . Segera lakukan pemesanan.
                 </p>
               </div>
             </div>
@@ -133,10 +183,60 @@ export default function IngredientsPage() {
         )}
 
         {/* Main Content */}
-        <div className="bg-white rounded-lg border">
-          <IngredientsCRUD />
-        </div>
+        <IngredientsCRUD onAdd={() => setShowAddDialog(true)} />
+
+        {/* Import Dialog */}
+        <ImportDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          title="Import Bahan Baku"
+          description="Upload file CSV untuk import data bahan baku secara massal"
+          templateUrl={templateUrl}
+          templateFilename="template-bahan-baku.csv"
+          parseCSV={parseIngredientsCSV}
+          onImport={async (data) => {
+            try {
+              const response = await fetch('/api/ingredients/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ingredients: data })
+              })
+
+              const result = await response.json()
+
+              if (!response.ok) {
+                return {
+                  success: false,
+                  error: result.error ?? 'Import gagal',
+                  details: result.details
+                }
+              }
+
+              // Refresh data
+              window.location.reload()
+
+              return {
+                success: true,
+                count: result.count
+              }
+            } catch (_error) {
+              return {
+                success: false,
+                error: 'Terjadi kesalahan saat import'
+              }
+            }
+          }}
+        />
+
+        {/* Add/Edit Dialog */}
+        <IngredientFormDialog
+          open={showAddDialog}
+          onOpenChange={setShowAddDialog}
+          onSuccess={() => window.location.reload()}
+        />
       </div>
     </AppLayout>
   );
 }
+
+export default IngredientsPage

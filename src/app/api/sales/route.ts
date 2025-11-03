@@ -1,12 +1,19 @@
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/utils/supabase/server'
 import { getErrorMessage } from '@/lib/type-guards'
-import { createClient as createSupabaseClient } from '@/utils/supabase';
-import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations';
-import { typedInsert, typedUpdate, castRow, castRows } from '@/lib/supabase-client-typed'
-import { createTypedClient, hasData, hasArrayData, isQueryError } from '@/lib/supabase-typed-client'
+import { apiLogger } from '@/lib/logger'
+import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations'
+import type { FinancialRecordsInsert } from '@/types/database'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
-export async function GET(request: NextRequest) {
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+// Note: 'sales' table doesn't exist - sales data is tracked through orders and order_items
+// type Sale = SalesTable
+
+// Define the original GET function
+async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
   // Validate query parameters
@@ -30,7 +37,7 @@ export async function GET(request: NextRequest) {
     start_date: searchParams.get('start_date'),
     end_date: searchParams.get('end_date'),
     recipe_id: searchParams.get('recipe_id'),
-    period: searchParams.get('period') || 'monthly',
+    period: searchParams.get('period') ?? 'monthly',
     include_trends: searchParams.get('include_trends') === 'true',
   })
 
@@ -45,17 +52,24 @@ export async function GET(request: NextRequest) {
   const { start_date, end_date, recipe_id } = salesQueryValidation.data
 
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient()
+    
+    // Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     // Calculate offset for pagination
     const offset = (page - 1) * limit
 
-    let query: any = supabase
+    let query = supabase
       .from('financial_records')
       .select(`
         *
       `)
       .eq('record_type', 'INCOME')
+      .eq('user_id', user.id)
       .range(offset, offset + limit - 1)
 
     // Add filters
@@ -76,7 +90,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Add sorting
-    const sortField = sort_by || 'date'
+    const sortField = sort_by ?? 'date'
     const sortDirection = sort_order === 'asc'
     query = query.order(sortField, { ascending: sortDirection })
 
@@ -85,7 +99,7 @@ export async function GET(request: NextRequest) {
     if (error) {throw error;}
 
     // Get total count
-    let countQuery = supabase.from('financial_records').select('*', { count: 'exact', head: true }).eq('record_type', 'INCOME')
+    let countQuery = supabase.from('financial_records').select('*', { count: 'exact', head: true }).eq('record_type', 'INCOME').eq('user_id', user.id)
 
     // Apply same filters to count query
     if (search) {
@@ -108,19 +122,29 @@ export async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit)
+        total: count ?? 0,
+        totalPages: Math.ceil((count ?? 0) / limit)
       }
-    });
+    })
   } catch (error: unknown) {
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
+    apiLogger.error({ error }, 'Error in GET /api/sales')
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
 
-export async function POST(request: Request) {
+// Define the original POST function
+async function POST(request: NextRequest) {
   try {
-    const supabase = createSupabaseClient();
-    const body = await request.json();
+    const supabase = await createClient()
+    
+    // Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    
+    // The request body is already sanitized by the security middleware
+    const body = await request.json()
 
     // Validate request body
     const validation = SalesInsertSchema.safeParse(body)
@@ -136,18 +160,38 @@ export async function POST(request: Request) {
 
     const validatedData = validation.data
 
+    // Map sales data to financial_records structure
+    const insertPayload: FinancialRecordsInsert = {
+      amount: validatedData.total_amount,
+      category: 'Sales',
+      description: `Sale of recipe ${validatedData.recipe_id}${validatedData.customer_name ? ` to ${validatedData.customer_name}` : ''}`,
+      date: validatedData.date,
+      reference: validatedData.recipe_id,
+      type: 'INCOME',
+      user_id: user.id
+    }
+
     const { data: sale, error } = await supabase
       .from('financial_records')
-      .insert([{ ...validatedData, record_type: 'INCOME' }] as any)
-      .select(`
-        *
-      `)
-      .single();
+      .insert(insertPayload)
+      .select('*')
+      .single()
 
-    if (error) {throw error;}
+    if (error) {
+      apiLogger.error({ error }, 'Error creating sale')
+      return NextResponse.json({ error: 'Failed to create sale' }, { status: 500 })
+    }
 
-    return NextResponse.json(sale, { status: 201 });
+    return NextResponse.json(sale, { status: 201 })
   } catch (error: unknown) {
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
+    apiLogger.error({ error }, 'Error in POST /api/sales')
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
+
+// Apply security middleware with enhanced security configuration
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+// Export secured handlers
+export { securedGET as GET, securedPOST as POST }

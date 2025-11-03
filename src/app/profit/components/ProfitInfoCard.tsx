@@ -1,14 +1,13 @@
+import { Card, CardContent } from '@/components/ui/card'
+import { AlertCircle } from 'lucide-react'
+
 /**
  * Profit Info Card Component
  * Information about WAC methodology
  */
 
-import React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { AlertCircle } from 'lucide-react'
 
-export function ProfitInfoCard() {
-  return (
+export const ProfitInfoCard = () => (
     <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
       <CardContent className="pt-6">
         <div className="flex gap-3">
@@ -30,4 +29,3 @@ export function ProfitInfoCard() {
       </CardContent>
     </Card>
   )
-}

@@ -1,11 +1,11 @@
 'use client'
-import * as React from 'react'
 
-import type { ReactNode} from 'react';
-import { useState, useEffect, Suspense } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useEffect, Suspense, type ReactNode } from 'react'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+
+
 
 // Progressive loading for heavy data operations
 interface ProgressiveLoaderProps {
@@ -21,7 +21,7 @@ export const ProgressiveLoader = ({
   fallback,
   timeout = 3000,
   showRetry = true,
-  loadingMessage ="Loading content..."
+  loadingMessage = "Loading content..."
 }: ProgressiveLoaderProps) => {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -30,25 +30,25 @@ export const ProgressiveLoader = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading) {
-        setShowTimeout
+        setShowTimeout(true)
       }
     }, timeout)
 
     // Simulate loading completion
     const loadTimer = setTimeout(() => {
-      setIsLoading(false)
+      void setIsLoading(false)
     }, Math.random() * 2000 + 500)
 
     return () => {
-      clearTimeout
-      clearTimeout
+      clearTimeout(timer)
+      clearTimeout(loadTimer)
     }
   }, [timeout, isLoading])
 
   const handleRetry = () => {
-    setIsLoading(true)
-    setHasError(false)
-    setShowTimeout
+    void setIsLoading(true)
+    void setHasError(false)
+    setShowTimeout(false)
   }
 
   if (hasError) {
@@ -69,11 +69,11 @@ export const ProgressiveLoader = ({
   }
 
   if (isLoading) {
-    return fallback || (
+    return fallback ?? (
       <Card className="w-full">
         <CardContent className="p-6">
           <div className="flex items-center justify-center mb-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             <span className="ml-3">{loadingMessage}</span>
           </div>
           {showTimeout && (
@@ -95,14 +95,19 @@ export const ProgressiveLoader = ({
 }
 
 // Lazy data table dengan progressive loading
-export const ProgressiveDataTable = ({
+interface TableColumn<T extends Record<string, ReactNode>> {
+  header: string
+  accessor: keyof T
+}
+
+export const ProgressiveDataTable = <T extends Record<string, ReactNode>>({
   data,
   columns,
   pageSize = 10,
   virtualizeThreshold = 100
 }: {
-  data: unknown[]
-  columns: unknown[]
+  data: T[]
+  columns: Array<TableColumn<T>>
   pageSize?: number
   virtualizeThreshold?: number
 }) => {
@@ -113,10 +118,10 @@ export const ProgressiveDataTable = ({
   const displayedData = data.slice(0, loadedPages * pageSize)
 
   const loadMore = async () => {
-    setIsLoadingMore(true)
-    await new Promise(resolve => setTimeout)
-    setLoadedPages(prev => prev + 1)
-    setIsLoadingMore(false)
+    void setIsLoadingMore(true)
+    await new Promise(resolve => setTimeout(resolve, 500))
+    void setLoadedPages(prev => prev + 1)
+    void setIsLoadingMore(false)
   }
 
   if (shouldVirtualize) {
@@ -136,17 +141,17 @@ export const ProgressiveDataTable = ({
   return (
     <div>
       <SimpleTableView data={displayedData} columns={columns} />
-      
+
       {displayedData.length < data.length && (
         <div className="text-center p-4 border-t">
-          <Button 
-            onClick={loadMore} 
+          <Button
+            onClick={loadMore}
             disabled={isLoadingMore}
             variant="outline"
           >
             {isLoadingMore ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" />
                 Loading more...
               </>
             ) : (
@@ -221,25 +226,31 @@ export const StatsCardSkeleton = () => (
 )
 
 // Virtual table loader for heavy datasets
-const VirtualizedTableLoader = ({ data, ...props }: any) => {
-  // Simulate heavy data processing
-  return (
-    <div className="p-4 border rounded-lg bg-muted/50">
-      <p className="text-sm">Optimized view ready for {data?.length || 0} items</p>
-      <Button className="mt-2" variant="outline" size="sm">
-        Load Virtual Table
-      </Button>
-    </div>
-  )
-}
+const VirtualizedTableLoader = <T extends { length?: number }>({ data }: { data?: T; columns?: unknown }) =>
+// Simulate heavy data processing
+(
+  <div className="p-4 border rounded-lg bg-muted/50">
+    <p className="text-sm">Optimized view ready for {data?.length ?? 0} items</p>
+    <Button className="mt-2" variant="outline" size="sm">
+      Load Virtual Table
+    </Button>
+  </div>
+)
+
 
 // Simple table view for smaller datasets
-const SimpleTableView = ({ data, columns, ...props }: any) => (
+const SimpleTableView = <T extends Record<string, ReactNode>>({
+  data,
+  columns
+}: {
+  data: T[];
+  columns: Array<TableColumn<T>>
+}) => (
   <div className="overflow-x-auto">
     <table className="w-full border-collapse">
       <thead>
         <tr className="border-b">
-          {columns?.map((col: any, i: number) => (
+          {columns?.map((col, i: number) => (
             <th key={i} className="p-2 text-left font-medium">
               {col.header}
             </th>
@@ -247,11 +258,11 @@ const SimpleTableView = ({ data, columns, ...props }: any) => (
         </tr>
       </thead>
       <tbody>
-        {data.map((row: any, i: number) => (
+        {data.map((row, i: number) => (
           <tr key={i} className="border-b hover:bg-muted/50">
-            {columns.map((col: any, j: number) => (
+            {columns.map((col, j: number) => (
               <td key={j} className="p-2">
-                {row[col.accessor]}
+                {row[col.accessor] ?? null}
               </td>
             ))}
           </tr>
@@ -262,10 +273,10 @@ const SimpleTableView = ({ data, columns, ...props }: any) => (
 )
 
 // Progressive image loading
-export const ProgressiveImage = ({ 
-  src, 
-  alt, 
-  className ="",
+export const ProgressiveImage = ({
+  src,
+  alt,
+  className = "",
   fallback
 }: {
   src: string
@@ -305,24 +316,25 @@ export function useProgressiveData<T>(
 
   const loadData = async () => {
     try {
-      setLoading(true)
-      setError(null)
+      void setLoading(true)
+      void setError(null)
       const result = await fetchFunction()
-      setData(result)
-    } catch (err) {
-      setError(err as Error)
+      void setData(result)
+    } catch (err: unknown) {
+      const error = err as Error
+      void setError(error)
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
   const retry = () => {
-    setRetryCount
-    loadData()
+    setRetryCount((prev) => prev + 1)
+    void loadData()
   }
 
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [...deps, retryCount])
 
   return { data, loading, error, retry }

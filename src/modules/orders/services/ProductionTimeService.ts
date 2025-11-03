@@ -1,9 +1,15 @@
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
-import type { Recipe } from '@/types'
+import { createClient } from '@/utils/supabase/server'
+import type { RecipesTable } from '@/types/database'
+
+
+
+type Recipe = RecipesTable
 
 /**
  * Service for calculating production time estimates for orders
+ * SERVER-ONLY: Uses server client for database operations
  */
 export class ProductionTimeService {
   /**
@@ -21,20 +27,23 @@ export class ProductionTimeService {
     parallel_processing_time: number
   }> {
     try {
+      const supabase = await createClient()
       const recipeIds = items.map(item => item.recipe_id)
-      const { data: recipes, error } = await supabase
+      const { data, error } = await supabase
         .from('recipes')
         .select('id, prep_time, cook_time')
         .in('id', recipeIds)
 
       if (error) {throw error}
+      
+      const recipes = data as Array<Pick<Recipe, 'id' | 'prep_time' | 'cook_time'>>
 
       let total_prep_time = 0
       let total_cook_time = 0
       let max_single_recipe_time = 0
 
       items.forEach(item => {
-        const recipe = recipes?.find((r: Recipe) => r.id === item.recipe_id)
+        const recipe = recipes?.find((r) => r.id === item.recipe_id)
         if (recipe) {
           const prep_time = (recipe.prep_time ?? 0) * item.quantity
           const cook_time = (recipe.cook_time ?? 0) * item.quantity
@@ -64,8 +73,8 @@ export class ProductionTimeService {
         estimated_completion,
         parallel_processing_time
       }
-    } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error calculating production time')
+    } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Error calculating production time')
       return {
         total_prep_time: 0,
         total_cook_time: 0,

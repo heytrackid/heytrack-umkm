@@ -1,22 +1,41 @@
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
-import type { TablesInsert, TablesUpdate } from '@/types'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
+import { extractFirst } from '@/lib/type-guards'
+import type { TablesInsert, RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
+
+
+
+type Recipe = RecipesTable
+type RecipeIngredient = RecipeIngredientsTable
+type Ingredient = IngredientsTable
 
 /**
  * Recipe ingredients query result type
+ * Uses generated types as base
  */
-type RecipeIngredientsQueryResult = {
-  recipe_ingredients: Array<{
-    quantity: number
-    ingredient: {
-      id: string
-      current_stock: number | null
-    }[]
+type RecipeIngredientsQueryResult = Recipe & {
+  recipe_ingredients: Array<RecipeIngredient & {
+    ingredient: Array<Pick<Ingredient, 'id' | 'current_stock'>>  // Supabase returns arrays
   }>
 }
 
 /**
+ * Type guard for recipe ingredients query result
+ */
+function isRecipeIngredientsResult(data: unknown): data is RecipeIngredientsQueryResult {
+  if (!data || typeof data !== 'object') {return false}
+  const recipe = data as RecipeIngredientsQueryResult
+  return (
+    typeof recipe.id === 'string' &&
+    Array.isArray(recipe.recipe_ingredients)
+  )
+}
+
+/**
  * Service for updating inventory after order confirmation
+ * SERVER-ONLY: Uses service role client for bypassing RLS
  */
 export class InventoryUpdateService {
   /**
@@ -24,12 +43,15 @@ export class InventoryUpdateService {
    */
   static async updateInventoryForOrder(
     order_id: string,
+    user_id: string,
     items: Array<{
       recipe_id: string
       quantity: number
     }>
   ): Promise<void> {
     try {
+      const supabase = createServiceRoleClient()
+      
       // This would be called when order status changes to 'in_production'
       for (const item of items) {
         const { data: recipe, error } = await supabase
@@ -48,49 +70,50 @@ export class InventoryUpdateService {
 
         if (error || !recipe) {continue}
 
-        const typedRecipe = recipe as RecipeIngredientsQueryResult
+        if (!isRecipeIngredientsResult(recipe)) {
+          dbLogger.error({ recipe }, 'Invalid recipe data structure')
+          continue
+        }
 
-        // Update ingredient stock
+        const typedRecipe = recipe
+
+        // ✅ FIX: Only create stock transaction, let trigger handle stock update
         for (const ri of typedRecipe.recipe_ingredients || []) {
-          // Supabase returns arrays for joined data, get first element
-          const ingredient = ri.ingredient?.[0]
+          // Supabase returns arrays for joined data, extract safely
+          const ingredient = extractFirst(ri.ingredient)
           if (ingredient) {
             const usedQuantity = ri.quantity * item.quantity
-            const currentStock = ingredient.current_stock ?? 0
-            const newStock = Math.max(0, currentStock - usedQuantity)
 
-            const ingredientUpdate: TablesUpdate<'ingredients'> = {
-              current_stock: newStock,
-              updated_at: new Date().toISOString()
-            }
-
-            const { error: updateError } = await supabase
-              .from('ingredients')
-              .update(ingredientUpdate)
-              .eq('id', ingredient.id)
-
-            if (updateError) {
-              dbLogger.error({ err: updateError }, 'Error updating ingredient stock')
-            }
-
-            // Create stock transaction record
+            // Create stock transaction record - trigger will auto-update current_stock
             const stockTransaction: TablesInsert<'stock_transactions'> = {
               ingredient_id: ingredient.id,
               type: 'USAGE',
-              quantity: -usedQuantity, // Negative for usage
+              quantity: usedQuantity, // Positive value, trigger handles the deduction
               reference: order_id,
               notes: `Used for order production`,
-              user_id: '' // Should be set from auth context
+              user_id
             }
 
-            await supabase
+            const { error: transactionError } = await supabase
               .from('stock_transactions')
               .insert(stockTransaction)
+
+            if (transactionError) {
+              dbLogger.error({ error: transactionError }, 'Error creating stock transaction')
+              continue
+            }
+
+            // Check and create inventory alert if needed (async, don't wait)
+            const alertService = new InventoryAlertService()
+            alertService.checkIngredientAlert(ingredient.id, user_id)
+              .catch(err => {
+                dbLogger.error({ error: err }, 'Failed to check inventory alert')
+              })
           }
         }
       }
     } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error updating inventory for order')
+      dbLogger.error({ error }, 'Error updating inventory for order')
       throw new Error('Failed to update inventory')
     }
   }

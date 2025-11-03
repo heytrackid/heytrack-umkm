@@ -1,48 +1,56 @@
+import { FormField, FormGrid, FormSection } from '@/components/ui/crud-form'
+import type { UseFormRegister, FieldErrors } from 'react-hook-form'
+import type { SupplierForm } from '@/lib/validations/form-validations'
+
 /**
  * Shared Form Fields Components
  * Reusable form field components to reduce duplicate code
  */
 
-import { FormField, FormGrid, FormSection } from '@/components/ui/crud-form'
 
 interface SupplierFormFieldsProps {
-  register: any
-  errors: any
+  register: UseFormRegister<SupplierForm>
+  errors: FieldErrors<SupplierForm>
   showNotes?: boolean
 }
 
 /**
  * Supplier form fields
  */
-export function SupplierFormFields({
+export const SupplierFormFields = ({
   register,
   errors,
   showNotes = true
-}: SupplierFormFieldsProps) {
-  return (
+}: SupplierFormFieldsProps) => (
     <>
       <FormSection
         title="Informasi Dasar"
         description="Masukkan informasi dasar supplier"
       >
         <FormField
-          label="Nama Supplier"
           name="name"
-          type="text"
-          {...register('name')}
+          label="Nama Supplier"
           error={errors.name?.message}
           required
-          hint="Nama supplier atau perusahaan"
-        />
+        >
+          <input
+            {...register('name')}
+            type="text"
+            placeholder="Nama supplier atau perusahaan"
+          />
+        </FormField>
 
         <FormField
-          label="Contact Person"
           name="contact_person"
-          type="text"
-          {...register('contact_person')}
+          label="Contact Person"
           error={errors.contact_person?.message}
-          hint="Nama orang yang bisa dihubungi"
-        />
+        >
+          <input
+            {...register('contact_person')}
+            type="text"
+            placeholder="Nama orang yang bisa dihubungi"
+          />
+        </FormField>
       </FormSection>
 
       <FormSection
@@ -51,50 +59,59 @@ export function SupplierFormFields({
       >
         <FormGrid cols={2}>
           <FormField
-            label="Nomor Telepon"
             name="phone"
-            type="tel"
-            {...register('phone')}
+            label="Nomor Telepon"
             error={errors.phone?.message}
-            hint="Nomor telepon yang bisa dihubungi"
-          />
+          >
+            <input
+              {...register('phone')}
+              type="tel"
+              placeholder="Nomor telepon yang bisa dihubungi"
+            />
+          </FormField>
 
           <FormField
-            label="Email"
             name="email"
-            type="email"
-            {...register('email')}
+            label="Email"
             error={errors.email?.message}
-            hint="Alamat email untuk komunikasi"
-          />
+          >
+            <input
+              {...register('email')}
+              type="email"
+              placeholder="Alamat email untuk komunikasi"
+            />
+          </FormField>
         </FormGrid>
       </FormSection>
 
       <FormSection title="Alamat">
         <FormField
-          label="Alamat Lengkap"
           name="address"
-          type="textarea"
-          {...register('address')}
+          label="Alamat Lengkap"
           error={errors.address?.message}
-          rows={3}
-          hint="Alamat lengkap supplier"
-        />
+        >
+          <textarea
+            {...register('address')}
+            placeholder="Alamat lengkap supplier"
+            rows={3}
+          />
+        </FormField>
       </FormSection>
 
       {showNotes && (
         <FormSection title="Catatan Tambahan">
           <FormField
-            label="Catatan"
             name="notes"
-            type="textarea"
-            {...register('notes')}
+            label="Catatan"
             error={errors.notes?.message}
-            rows={2}
-            hint="Catatan tambahan tentang supplier (opsional)"
-          />
+          >
+            <textarea
+              {...register('notes')}
+              placeholder="Catatan tambahan tentang supplier (opsional)"
+              rows={2}
+            />
+          </FormField>
         </FormSection>
       )}
     </>
   )
-}

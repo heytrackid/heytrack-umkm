@@ -1,10 +1,12 @@
+import { automationLogger } from '@/lib/logger'
+import type { SmartNotification, NotificationRule, NotificationConfig } from './types'
+
+
 /**
  * Smart Notification System Module
  * Intelligent notification system with rules and real-time updates
  */
 
-import { automationLogger } from '@/lib/logger'
-import type { SmartNotification, NotificationRule, NotificationConfig } from './types'
 
 export class SmartNotificationSystem {
   private static instance: SmartNotificationSystem
@@ -112,11 +114,11 @@ export class SmartNotificationSystem {
   /**
    * Evaluate rules against data
    */
-  evaluateRules(data: Record<string, any>, category: SmartNotification['category']): void {
-    if (!this.config.enableSmartRules) return;
+  evaluateRules(data: Record<string, unknown>, category: SmartNotification['category']): void {
+    if (!this.config.enableSmartRules) {return;}
 
     for (const rule of this.rules) {
-      if (!rule.enabled || rule.category !== category) continue;
+      if (!rule.enabled || rule.category !== category) {continue;}
 
       let shouldTrigger = true;
 
@@ -152,15 +154,38 @@ export class SmartNotificationSystem {
   /**
    * Evaluate single condition
    */
-  private evaluateCondition(value: any, condition: NotificationRule['conditions'][0]): boolean {
+  private evaluateCondition(value: unknown, condition: NotificationRule['conditions'][0]): boolean {
+    if (value === null || value === undefined) {
+      return false
+    }
+
+    if (condition.operator === 'contains') {
+      return String(value).toLowerCase().includes(String(condition.value ?? '').toLowerCase())
+    }
+
+    const numericValue = typeof value === 'number' ? value : Number(value)
+    const numericTarget = typeof condition.value === 'number' ? condition.value : Number(condition.value)
+
+    if (!Number.isFinite(numericValue) || !Number.isFinite(numericTarget)) {
+      if (condition.operator === 'eq') {
+        return String(value) === String(condition.value)
+      }
+      return false
+    }
+
     switch (condition.operator) {
-      case 'gt': return value > condition.value;
-      case 'lt': return value < condition.value;
-      case 'eq': return value === condition.value;
-      case 'gte': return value >= condition.value;
-      case 'lte': return value <= condition.value;
-      case 'contains': return String(value).toLowerCase().includes(String(condition.value).toLowerCase());
-      default: return false;
+      case 'gt':
+        return numericValue > numericTarget
+      case 'lt':
+        return numericValue < numericTarget
+      case 'eq':
+        return numericValue === numericTarget
+      case 'gte':
+        return numericValue >= numericTarget
+      case 'lte':
+        return numericValue <= numericTarget
+      default:
+        return false
     }
   }
 
@@ -181,8 +206,8 @@ export class SmartNotificationSystem {
     this.subscribers.forEach(callback => {
       try {
         callback([...this.notifications]);
-      } catch (error) {
-        automationLogger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error notifying subscriber');
+      } catch (err) {
+        automationLogger.error({ err: err instanceof Error ? err.message : String(err) }, 'Error notifying subscriber');
       }
     });
   }
@@ -193,7 +218,7 @@ export class SmartNotificationSystem {
   cleanup(): void {
     const now = new Date();
     this.notifications = this.notifications.filter(notification => {
-      if (!notification.expiresAt) return true;
+      if (!notification.expiresAt) {return true;}
       return new Date(notification.expiresAt) > now;
     });
     this.notifySubscribers();

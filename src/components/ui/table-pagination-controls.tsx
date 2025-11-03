@@ -31,7 +31,7 @@ interface TablePaginationControlsProps {
   className?: string
 }
 
-export function TablePaginationControls({
+export const TablePaginationControls = ({
   currentPage,
   totalPages,
   onPageChange,
@@ -42,8 +42,8 @@ export function TablePaginationControls({
   pageEnd,
   pageSizeOptions = [10, 25, 50],
   className,
-}: TablePaginationControlsProps) {
-  const pages = buildPageList
+}: TablePaginationControlsProps) => {
+  const pages = buildPageList(currentPage, totalPages)
 
   const safeStart = totalItems === 0 ? 0 : pageStart
   const safeEnd = totalItems === 0 ? 0 : pageEnd
@@ -85,7 +85,7 @@ export function TablePaginationControls({
               <PaginationPrevious
                 href="#"
                 onClick={(event) => {
-                  event.preventDefault
+                  event.preventDefault()
                   if (currentPage > 1) {
                     onPageChange(currentPage - 1)
                   }
@@ -104,8 +104,10 @@ export function TablePaginationControls({
                     href="#"
                     isActive={page === currentPage}
                     onClick={(event) => {
-                      event.preventDefault
-                      onPageChange(page)
+                      event.preventDefault()
+                      if (typeof page === 'number') {
+                        onPageChange(page)
+                      }
                     }}
                   >
                     {page}
@@ -118,7 +120,7 @@ export function TablePaginationControls({
               <PaginationNext
                 href="#"
                 onClick={(event) => {
-                  event.preventDefault
+                  event.preventDefault()
                   if (currentPage < totalPages) {
                     onPageChange(currentPage + 1)
                   }
@@ -136,7 +138,7 @@ export function TablePaginationControls({
   )
 }
 
-function buildPageList(currentPage: number, totalPages: number): (number | string)[] {
+function buildPageList(currentPage: number, totalPages: number): Array<number | string> {
   if (totalPages <= 5) {
     return Array.from({ length: totalPages }, (_, index) => index + 1)
   }

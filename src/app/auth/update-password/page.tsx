@@ -6,17 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import {
-  getAuthErrorMessage,
-  validatePassword,
-} from '@/lib/auth-errors'
+import { getAuthErrorMessage, validatePassword, } from '@/lib/auth-errors'
 import { Check, CheckCircle, Eye, EyeOff, Loader2, Lock, X } from 'lucide-react'
 import Link from 'next/link'
-import * as React from 'react'
-import { useState, useTransition } from 'react'
+import { type FormEvent, useState, useTransition } from 'react'
 import { updatePassword } from './actions'
 
-export default function UpdatePasswordPage() {
+const UpdatePasswordPage = () => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -32,11 +28,11 @@ export default function UpdatePasswordPage() {
   // Password strength calculation
   const getPasswordStrength = (pwd: string) => {
     let strength = 0
-    if (pwd.length >= 8) {strength++}
-    if (pwd.length >= 12) {strength++}
-    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) {strength++}
-    if (/\d/.test(pwd)) {strength++}
-    if (/[^a-zA-Z\d]/.test(pwd)) {strength++}
+    if (pwd.length >= 8) { strength++ }
+    if (pwd.length >= 12) { strength++ }
+    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) { strength++ }
+    if (/\d/.test(pwd)) { strength++ }
+    if (/[^a-zA-Z\d]/.test(pwd)) { strength++ }
     return strength
   }
 
@@ -50,10 +46,10 @@ export default function UpdatePasswordPage() {
     { label: 'Mengandung angka', met: /\d/.test(password) },
   ]
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setError('')
-    setFieldErrors({})
+    void setError('')
+    void setFieldErrors({})
 
     const formData = new FormData(e.currentTarget)
     const pwd = formData.get('password') as string
@@ -72,7 +68,7 @@ export default function UpdatePasswordPage() {
     }
 
     if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors)
+      void setFieldErrors(errors)
       return
     }
 
@@ -80,9 +76,9 @@ export default function UpdatePasswordPage() {
       const result = await updatePassword(formData)
       if (result?.error) {
         const authError = getAuthErrorMessage(result.error)
-        setError(authError)
+        void setError(authError)
       } else if (result?.success) {
-        setSuccess(true)
+        void setSuccess(true)
       }
     })
   }
@@ -93,7 +89,7 @@ export default function UpdatePasswordPage() {
       delete newErrors[field]
       return newErrors
     })
-    setError('')
+    void setError('')
   }
 
   if (success) {
@@ -105,8 +101,8 @@ export default function UpdatePasswordPage() {
         <Card className="w-full max-w-md shadow-xl border-slate-200 dark:border-slate-800 animate-fade-in-scale">
           <CardContent className="pt-6 pb-6 sm:pt-8 sm:pb-8 px-4 sm:px-6">
             <div className="text-center space-y-4">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto animate-success-pulse">
-                <CheckCircle className="h-7 w-7 sm:h-8 sm:w-8 text-green-600 dark:text-green-400" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 dark:bg-gray-900/30 rounded-full flex items-center justify-center mx-auto animate-success-pulse">
+                <CheckCircle className="h-7 w-7 sm:h-8 sm:w-8 text-gray-600 dark:text-gray-400" />
               </div>
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -174,7 +170,7 @@ export default function UpdatePasswordPage() {
                     placeholder="Minimal 8 karakter"
                     value={password}
                     onChange={(e) => {
-                      setPassword(e.target.value)
+                      void setPassword(e.target.value)
                       clearFieldError('password')
                     }}
                     className={`pl-10 pr-12 h-11 text-base transition-all duration-200 ${fieldErrors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
@@ -201,7 +197,7 @@ export default function UpdatePasswordPage() {
                   </Button>
                 </div>
                 {fieldErrors.password && (
-                  <p id="password-error" className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
+                  <p id="password-error" className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in" role="alert">
                     {fieldErrors.password}
                   </p>
                 )}
@@ -212,7 +208,7 @@ export default function UpdatePasswordPage() {
                     <div className="flex gap-1">
                       {[...Array(5)].map((_, i) => (
                         <div
-                          key={i}
+                          key={`bar-${i}`}
                           className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-slate-200 dark:bg-slate-700'
                             }`}
                         />
@@ -230,14 +226,14 @@ export default function UpdatePasswordPage() {
                     <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Persyaratan Password:
                     </p>
-                    {passwordRequirements.map((req, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs transition-all duration-200">
+                    {passwordRequirements.map((req) => (
+                      <div key={req.label} className="flex items-center gap-2 text-xs transition-all duration-200">
                         {req.met ? (
-                          <Check className="h-3 w-3 text-green-600 dark:text-green-400 transition-all duration-200" />
+                          <Check className="h-3 w-3 text-gray-600 dark:text-gray-400 transition-all duration-200" />
                         ) : (
                           <X className="h-3 w-3 text-slate-400 transition-all duration-200" />
                         )}
-                        <span className={`transition-colors duration-200 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-slate-500'}`}>
+                        <span className={`transition-colors duration-200 ${req.met ? 'text-gray-600 dark:text-gray-400' : 'text-slate-500'}`}>
                           {req.label}
                         </span>
                       </div>
@@ -259,7 +255,7 @@ export default function UpdatePasswordPage() {
                     placeholder="Ulangi password baru"
                     value={confirmPassword}
                     onChange={(e) => {
-                      setConfirmPassword(e.target.value)
+                      void setConfirmPassword(e.target.value)
                       clearFieldError('confirmPassword')
                     }}
                     className={`pl-10 pr-12 h-11 text-base transition-all duration-200 ${fieldErrors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
@@ -327,3 +323,5 @@ export default function UpdatePasswordPage() {
     </div>
   )
 }
+
+export default UpdatePasswordPage

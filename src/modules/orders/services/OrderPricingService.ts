@@ -1,25 +1,25 @@
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
-import { HPPCalculationService } from '@/modules/recipes'
-import { ORDER_CONFIG } from '../constants'
-import type { OrderItemCalculation, OrderPricing } from './OrderRecipeService'
-import type { Recipe, RecipeIngredient, Ingredient } from '@/types'
+import { createClient } from '@/utils/supabase/server'
+import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import { ORDER_CONFIG } from '@/lib/constants'
+import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
+import type { OrderItemCalculation, OrderPricing } from '../types'
 
-/**
- * Recipe with ingredients for pricing calculation
- */
-interface RecipeWithIngredients extends Recipe {
-  recipe_ingredients?: Array<RecipeIngredient & {
-    ingredient?: Ingredient
-  }>
-}
+
+
+type Recipe = RecipesTable
+type RecipeIngredient = RecipeIngredientsTable
+type Ingredient = IngredientsTable
 
 /**
  * Service for handling order pricing calculations
+ * SERVER-ONLY: Uses server client for database operations
  */
 export class OrderPricingService {
   /**
    * Calculate pricing for order items
+   * ✅ NEW: Supports customer_id for automatic discount application
    */
   static async calculateOrderPricing(
     items: Array<{
@@ -31,14 +31,38 @@ export class OrderPricingService {
       tax_rate?: number
       discount_amount?: number
       discount_percentage?: number
+      customer_id?: string  // ✅ NEW: Auto-apply customer discount
     } = {}
   ): Promise<OrderPricing> {
     try {
       const {
         tax_rate = ORDER_CONFIG.DEFAULT_TAX_RATE,
-        discount_amount = 0,
-        discount_percentage = 0
+        discount_amount: initialDiscountAmount = 0,
+        discount_percentage: initialDiscountPercentage = 0,
+        customer_id
       } = options
+      
+      const discount_amount = initialDiscountAmount
+      let discount_percentage = initialDiscountPercentage
+
+      // ✅ NEW: Auto-apply customer discount if customer_id provided
+      const supabase = await createClient()
+      
+      if (customer_id && discount_percentage === 0 && discount_amount === 0) {
+        const { data: customer } = await supabase
+          .from('customers')
+          .select('discount_percentage, loyalty_points')
+          .eq('id', customer_id)
+          .single()
+
+        if (customer?.discount_percentage) {
+          discount_percentage = Number(customer.discount_percentage)
+          dbLogger.info({ 
+            customerId: customer_id, 
+            discount: discount_percentage 
+          }, 'Applied customer discount')
+        }
+      }
 
       // Get recipe details for pricing
       const recipeIds = items.map(item => item.recipe_id)
@@ -49,6 +73,7 @@ export class OrderPricingService {
           name,
           selling_price,
           servings,
+          user_id,
           recipe_ingredients (
             quantity,
             unit,
@@ -63,44 +88,81 @@ export class OrderPricingService {
       if (error) {throw error}
       if (!recipes) {throw new Error('Recipes not found')}
 
-      // Type assertion for Supabase query result
-      type RecipeQueryResult = {
-        id: string
-        name: string
-        selling_price: number | null
-        servings: number | null
-        recipe_ingredients: Array<{
-          quantity: number
-          unit: string
-          ingredient: {
-            price_per_unit: number
-            unit: string
-          }[]
+      // Define query result type using generated types
+      type RecipeQueryResult = Recipe & {
+        recipe_ingredients: Array<RecipeIngredient & {
+          ingredient: Array<Pick<Ingredient, 'price_per_unit' | 'unit'>>  // Supabase returns arrays
         }>
       }
 
-      // Calculate each item
+      /**
+       * Type guard for recipe query result
+       */
+      function isRecipeQueryResult(data: unknown): data is RecipeQueryResult {
+        if (!data || typeof data !== 'object') {return false}
+        const recipe = data as RecipeQueryResult
+        return (
+          typeof recipe.id === 'string' &&
+          typeof recipe.name === 'string' &&
+          Array.isArray(recipe.recipe_ingredients)
+        )
+      }
+
+      // Validate data structure
+      if (!Array.isArray(recipes) || !recipes.every(isRecipeQueryResult)) {
+        dbLogger.error({ recipes }, 'Invalid recipes data structure')
+        throw new Error('Invalid recipes data structure')
+      }
+
+      // Calculate each item with real HPP
+      const hppCalculator = new HppCalculatorService()
       const calculatedItems: OrderItemCalculation[] = await Promise.all(
         items.map(async (item) => {
-          const recipe = (recipes as RecipeQueryResult[]).find(r => r.id === item.recipe_id)
+          const recipe = recipes.find(r => r.id === item.recipe_id)
           if (!recipe) {
             throw new Error(`Recipe with ID ${item.recipe_id} not found`)
           }
 
-          // Calculate HPP cost
-          const hppCalculation = await HPPCalculationService.calculateAdvancedHPP(
-            recipe.id,
-            {
-              overheadRate: 0.15,
-              laborCostPerHour: 25000,
-              targetMargin: 0.6
+          // Use recipe selling price as unit price
+          const baseUnitPrice = item.custom_price ?? recipe.selling_price ?? 0
+          const unit_price = baseUnitPrice
+          const total_price = baseUnitPrice * item.quantity
+          
+          // Try to get real HPP calculation
+          let estimated_cost = baseUnitPrice * ORDER_CONFIG.DEFAULT_HPP_PERCENTAGE // Fallback estimate
+          
+          try {
+            const latestHpp = await hppCalculator.getLatestHpp(supabase, recipe.id, recipe.user_id)
+            if (latestHpp && latestHpp.cost_per_unit > 0) {
+              estimated_cost = latestHpp.cost_per_unit
+              dbLogger.info({ 
+                recipeId: recipe.id, 
+                hpp: estimated_cost 
+              }, 'Using real HPP for order pricing')
+            } else {
+              // If no HPP exists, try to calculate it
+              try {
+                const hppResult = await hppCalculator.calculateRecipeHpp(supabase, recipe.id, recipe.user_id)
+                estimated_cost = hppResult.cost_per_unit
+                dbLogger.info({ 
+                  recipeId: recipe.id, 
+                  hpp: estimated_cost 
+                }, 'Calculated new HPP for order pricing')
+              } catch (calcError) {
+                dbLogger.warn({ 
+                  recipeId: recipe.id, 
+                  error: calcError 
+                }, 'Failed to calculate HPP, using estimate')
+              }
             }
-          )
-
-          const unit_price = item.custom_price || recipe.selling_price || hppCalculation.suggestedPricing.standard.price
-          const total_price = unit_price * item.quantity
-          const hpp_cost = hppCalculation.costPerServing
-          const total_cost = hpp_cost * item.quantity
+          } catch (hppError) {
+            dbLogger.warn({ 
+              recipeId: recipe.id, 
+              error: hppError 
+            }, 'Failed to fetch HPP, using estimate')
+          }
+          
+          const total_cost = estimated_cost * item.quantity
           const profit = total_price - total_cost
           const margin_percentage = total_price > 0 ? (profit / total_price) * 100 : 0
 
@@ -110,10 +172,11 @@ export class OrderPricingService {
             quantity: item.quantity,
             unit_price,
             total_price,
-            hpp_cost,
+            estimated_cost,
             total_cost,
             profit,
-            margin_percentage
+            margin_percentage,
+            cost_per_unit: estimated_cost
           }
         })
       )
@@ -132,8 +195,8 @@ export class OrderPricingService {
       const tax_amount = final_subtotal * tax_rate
       const total_amount = final_subtotal + tax_amount
 
-      const total_hpp_cost = calculatedItems.reduce((sum, item) => sum + item.total_cost, 0)
-      const total_profit = final_subtotal - total_hpp_cost
+      const total_estimated_cost = calculatedItems.reduce((sum, item) => sum + item.total_cost, 0)
+      const total_profit = final_subtotal - total_estimated_cost
       const overall_margin = final_subtotal > 0 ? (total_profit / final_subtotal) * 100 : 0
 
       return {
@@ -145,12 +208,12 @@ export class OrderPricingService {
           ? subtotal * (discount_percentage / 100)
           : discount_amount,
         total_amount,
-        total_hpp_cost,
+        total_estimated_cost,
         total_profit,
         overall_margin
       }
-    } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error calculating order pricing')
+    } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Error calculating order pricing')
       throw new Error('Failed to calculate order pricing')
     }
   }

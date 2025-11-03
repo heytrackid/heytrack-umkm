@@ -1,13 +1,23 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { logger } from '@/lib/logger'
+
+
 // Performance monitoring and optimization utilities
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+
+// Log performance metrics
+export function logPerformance(metric: string, value: number) {
+  logger.info({ metric, value }, 'Performance metric')
+}
 
 // Performance monitoring types
+type PerformanceMetricType = PerformanceEntry['entryType']
+
 export interface PerformanceMetric {
   name: string
   value: number
   timestamp: number
-  type: 'measure' | 'mark' | 'navigation' | 'resource' | 'paint'
+  type: PerformanceMetricType
 }
 
 export interface PerformanceReport {
@@ -35,15 +45,14 @@ export interface WebVitalsMetric {
 
 // Performance monitoring hooks
 export function usePerformanceMonitor() {
-  const [metrics, setMetrics] = useState<PerformanceMetric[]>([])
-  const [webVitals, setWebVitals] = useState<WebVitalsMetric[]>([])
+  const [metrics, _setMetrics] = useState<PerformanceMetric[]>([])
   const observerRef = useRef<PerformanceObserver | null>(null)
 
   useEffect(() => {
     // Monitor navigation timing
     if (typeof window !== 'undefined' && 'performance' in window) {
       try {
-        const navigation = performance.getEntriesByType('navigation')[0] as any
+        const navigation = performance.getEntriesByType('navigation')[0]
 
         if (navigation) {
           const navMetrics: PerformanceMetric[] = [
@@ -67,10 +76,10 @@ export function usePerformanceMonitor() {
             }
           ]
 
-          setMetrics(prev => [...prev, ...navMetrics])
+          void _setMetrics(prev => [...prev, ...navMetrics])
         }
-      } catch (error) {
-        console.warn('Navigation timing not available:', error)
+      } catch {
+        // Navigation timing not available
       }
 
       // Monitor paint timing
@@ -79,14 +88,14 @@ export function usePerformanceMonitor() {
         paintEntries.forEach(entry => {
           const paintMetric: PerformanceMetric = {
             name: entry.name,
-            value: (entry as any).startTime || 0,
+            value: entry.startTime || 0,
             timestamp: Date.now(),
             type: 'paint'
           }
-          setMetrics(prev => [...prev, paintMetric])
+          void _setMetrics(prev => [...prev, paintMetric])
         })
-      } catch (error) {
-        console.warn('Paint timing not available:', error)
+      } catch {
+        // Paint timing not available
       }
 
       // Create performance observer for ongoing monitoring
@@ -96,18 +105,18 @@ export function usePerformanceMonitor() {
             const entries = list.getEntries()
             const newMetrics: PerformanceMetric[] = entries.map(entry => ({
               name: entry.name,
-              value: 'duration' in entry ? (entry as any).duration : ((entry as any).startTime || 0),
+              value: 'duration' in entry ? (entry).duration : (entry as PerformanceEntry).startTime || 0,
               timestamp: Date.now(),
-              type: entry.entryType as any
+              type: entry.entryType
             }))
 
-            setMetrics(prev => [...prev, ...newMetrics])
+            void _setMetrics(prev => [...prev, ...newMetrics])
           })
 
           // Observe different performance entry types
           observerRef.current.observe({ entryTypes: ['measure', 'mark', 'resource', 'navigation', 'paint'] })
-        } catch (error) {
-          console.warn('Performance monitoring not fully supported:', error)
+        } catch {
+          // Performance monitoring not fully supported
         }
       }
     }
@@ -133,16 +142,16 @@ export function usePerformanceMonitor() {
           const entry = entries[entries.length - 1]
           const metric: PerformanceMetric = {
             name,
-            value: 'duration' in entry ? (entry as any).duration : ((entry as any).startTime || 0),
+            value: 'duration' in entry ? (entry).duration : (entry as PerformanceEntry).startTime || 0,
             timestamp: Date.now(),
-            type: entry.entryType as any
+            type: entry.entryType
           }
 
-          setMetrics(prev => [...prev, metric])
+          void _setMetrics(prev => [...prev, metric])
           return metric
         }
-      } catch (error) {
-        console.warn('Performance measurement failed:', error)
+      } catch {
+        // Performance measurement failed
       }
     }
     return null
@@ -158,10 +167,10 @@ export function usePerformanceMonitor() {
           timestamp: Date.now(),
           type: 'mark'
         }
-        setMetrics(prev => [...prev, metric])
+        void _setMetrics(prev => [...prev, metric])
         return metric
-      } catch (error) {
-        console.warn('Performance mark failed:', error)
+      } catch {
+        // Performance mark failed
       }
     }
     return null
@@ -234,7 +243,6 @@ export function usePerformanceMonitor() {
 
   return {
     metrics,
-    webVitals,
     measurePerformance,
     markPerformance,
     getPerformanceReport,
@@ -243,12 +251,11 @@ export function usePerformanceMonitor() {
 
 // Web Vitals monitoring hook - simplified to avoid import issues
 export function useWebVitals() {
-  const [metrics, setMetrics] = useState<WebVitalsMetric[]>([])
+  const [metrics, _setMetrics] = useState<WebVitalsMetric[]>([])
 
   useEffect(() => {
     // Web Vitals monitoring disabled to avoid import issues
     // In a real implementation, you would conditionally import web-vitals
-    console.log('Web Vitals monitoring is disabled')
   }, [])
 
   return metrics
@@ -266,24 +273,24 @@ export function useMemoryMonitor() {
   useEffect(() => {
     const updateMemoryInfo = () => {
       if (typeof window !== 'undefined' && 'performance' in window) {
-        const memory = (performance as any).memory
+        const {memory} = performance as typeof performance & { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }
         if (memory) {
-          const used = memory.usedJSHeapSize
-          const total = memory.totalJSHeapSize
-          const limit = memory.jsHeapSizeLimit
+          const usedMemory = memory.usedJSHeapSize
+          const totalMemory = memory.totalJSHeapSize
+          const limitMemory = memory.jsHeapSizeLimit
 
           setMemoryInfo({
-            usedJSHeapSize: used,
-            totalJSHeapSize: total,
-            jsHeapSizeLimit: limit,
-            usagePercentage: (used / limit) * 100
+            usedJSHeapSize: usedMemory,
+            totalJSHeapSize: totalMemory,
+            jsHeapSizeLimit: limitMemory,
+            usagePercentage: (usedMemory / limitMemory) * 100
           })
         }
       }
     }
 
     // Update immediately and then every 5 seconds
-    updateMemoryInfo()
+    void updateMemoryInfo()
     const interval = setInterval(updateMemoryInfo, 5000)
 
     return () => clearInterval(interval)
@@ -307,7 +314,28 @@ export function useNetworkMonitor() {
 
   useEffect(() => {
     const updateNetworkInfo = () => {
-      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
+      type NavigatorWithConnection = Navigator & {
+        connection?: {
+          effectiveType: string
+          downlink: number
+          rtt: number
+          addEventListener: (event: string, handler: () => void) => void
+          removeEventListener: (event: string, handler: () => void) => void
+        }
+        mozConnection?: {
+          effectiveType: string
+          downlink: number
+          rtt: number
+        }
+        webkitConnection?: {
+          effectiveType: string
+          downlink: number
+          rtt: number
+        }
+      }
+      
+      const nav = navigator as NavigatorWithConnection
+      const connection = nav.connection ?? nav.mozConnection ?? nav.webkitConnection
 
       setNetworkInfo({
         isOnline: navigator.onLine,
@@ -319,7 +347,7 @@ export function useNetworkMonitor() {
       })
     }
 
-    updateNetworkInfo()
+    void updateNetworkInfo()
 
     const handleOnline = () => setNetworkInfo(prev => ({ ...prev, isOnline: true }))
     const handleOffline = () => setNetworkInfo(prev => ({ ...prev, isOnline: false }))
@@ -327,16 +355,24 @@ export function useNetworkMonitor() {
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
-    if ((navigator as any).connection) {
-      ;(navigator as any).connection.addEventListener('change', updateNetworkInfo)
+    type NavigatorWithConnection = Navigator & {
+      connection?: {
+        addEventListener: (event: string, handler: () => void) => void
+        removeEventListener: (event: string, handler: () => void) => void
+      }
+    }
+    
+    const nav = navigator as NavigatorWithConnection
+    if (nav.connection) {
+      nav.connection.addEventListener('change', updateNetworkInfo)
     }
 
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
 
-      if ((navigator as any).connection) {
-        ;(navigator as any).connection.removeEventListener('change', updateNetworkInfo)
+      if (nav.connection) {
+        nav.connection.removeEventListener('change', updateNetworkInfo)
       }
     }
   }, [])
@@ -358,7 +394,7 @@ export function useBundleAnalyzer() {
 
   useEffect(() => {
     // Simplified bundle analysis - in real app, load from build artifacts
-    setBundleInfo(null)
+    void setBundleInfo(null)
   }, [])
 
   return bundleInfo
@@ -367,7 +403,7 @@ export function useBundleAnalyzer() {
 // Performance optimization utilities
 export const perfUtils = {
   // Debounce function
-  debounce: <T extends (...args: any[]) => any>(
+  debounce: <T extends (...args: Parameters<T>) => ReturnType<T>>(
     func: T,
     wait: number,
     immediate = false
@@ -377,20 +413,20 @@ export const perfUtils = {
     return (...args: Parameters<T>) => {
       const later = () => {
         timeout = null
-        if (!immediate) func(...args)
+        if (!immediate) {func(...args)}
       }
 
       const callNow = immediate && !timeout
 
-      if (timeout) clearTimeout(timeout)
+      if (timeout) {clearTimeout(timeout)}
       timeout = setTimeout(later, wait)
 
-      if (callNow) func(...args)
+      if (callNow) {func(...args)}
     }
   },
 
   // Throttle function
-  throttle: <T extends (...args: any[]) => any>(
+  throttle: <T extends (...args: Parameters<T>) => ReturnType<T>>(
     func: T,
     limit: number
   ): ((...args: Parameters<T>) => void) => {
@@ -406,7 +442,7 @@ export const perfUtils = {
   },
 
   // Memoization utility
-  memoize: <T extends (...args: any[]) => any>(
+  memoize: <T extends (...args: Parameters<T>) => ReturnType<T>>(
     func: T,
     getKey?: (...args: Parameters<T>) => string
   ): T => {
@@ -416,7 +452,10 @@ export const perfUtils = {
       const key = getKey ? getKey(...args) : JSON.stringify(args)
 
       if (cache.has(key)) {
-        return cache.get(key)!
+        const cached = cache.get(key)
+        if (cached !== undefined) {
+          return cached
+        }
       }
 
       const result = func(...args)
@@ -428,9 +467,13 @@ export const perfUtils = {
   // Request idle callback
   requestIdleCallback: (callback: () => void, timeout = 5000) => {
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      ;(window as any).requestIdleCallback(callback, { timeout })
+      interface WindowWithIdleCallback extends Window {
+        requestIdleCallback: (cb: IdleRequestCallback, opts?: IdleRequestOptions) => number
+      }
+      const ric = (window as WindowWithIdleCallback).requestIdleCallback
+      ric(callback, { timeout })
     } else {
-      setTimeout(callback, 0)
+      void setTimeout(callback, 0)
     }
   }
 }

@@ -1,11 +1,11 @@
+
+
 /**
  * Recipes Domain Module
- * Centralized exports untuk semua functionality terkait recipe management & HPP calculation
+ * Centralized exports untuk semua functionality terkait recipe management
  */
 
 // Core recipe components
-export { default as RecipesPage } from './components/RecipesPage'
-export { default as AdvancedHPPCalculator } from './components/AdvancedHPPCalculator'
 export { default as SmartPricingAssistant } from './components/SmartPricingAssistant'
 
 // Extracted HPP calculator components
@@ -18,7 +18,6 @@ export { EducationalFooter } from './components/EducationalFooter'
 
 // Lazy loaded recipe components
 export { 
-  LazyAdvancedHPPCalculator,
   LazySmartPricingAssistant,
   preloadRecipeComponents,
   RecipeDashboardWithProgressiveLoading,
@@ -28,14 +27,9 @@ export {
 
 // Hooks
 export { useRecipesData } from './hooks/useRecipesData'
-export { useHPPCalculation } from './hooks/useHPPCalculation'
-
-// Services
-export { HPPCalculationService } from './services/HPPCalculationService'
 
 // Utils
 export { 
-  calculateRecipeHPP,
   calculateIngredientCost,
   calculateProfitMargin,
   formatRecipeServings,
@@ -57,8 +51,7 @@ export {
   OVERHEAD_RATES,
   LABOR_COSTS,
   VALIDATION_RULES,
-  DEFAULT_RECIPE,
-  HPP_CONSTANTS
+  DEFAULT_RECIPE
 } from './constants'
 
 // Types - export interfaces from utils for now

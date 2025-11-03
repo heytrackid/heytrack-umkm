@@ -1,12 +1,13 @@
+import { cn } from '@/lib/utils'
+import type { ReactNode } from 'react'
+import { Badge } from './badge'
+import { Card, CardContent } from './card'
+
 /**
  * Card List Component
  * Mobile-friendly alternative to tables
  */
 
-import { cn } from '@/lib/utils'
-import type { ReactNode } from 'react'
-import { Badge } from './badge'
-import { Card, CardContent } from './card'
 
 interface CardListItem {
   id: string
@@ -21,13 +22,13 @@ interface CardListProps<T extends CardListItem> {
   emptyState?: ReactNode
 }
 
-export function CardList<T extends CardListItem>({
+export const CardList = <T extends CardListItem>({
   items,
   renderCard,
   onItemClick,
   className,
   emptyState
-}: CardListProps<T>) {
+}: CardListProps<T>) => {
   if (items.length === 0 && emptyState) {
     return <>{emptyState}</>
   }
@@ -68,55 +69,53 @@ interface DataCardProps {
   }>
 }
 
-export function DataCard({
+export const DataCard = ({
   title,
   subtitle,
   description,
   badge,
   actions,
   metadata
-}: DataCardProps) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold truncate">{title}</h3>
-            {badge && (
-              <Badge variant={badge.variant || 'default'} className="text-xs">
-                {badge.label}
-              </Badge>
-            )}
-          </div>
-          {subtitle && (
-            <p className="text-sm text-muted-foreground truncate">
-              {subtitle}
-            </p>
+}: DataCardProps) => (
+  <div className="space-y-3">
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
+          <h3 className="font-semibold truncate-desktop-only">{title}</h3>
+          {badge && (
+            <Badge variant = {badge.variant ?? 'default'} className="text-xs flex-shrink-0">
+              {badge.label}
+            </Badge>
           )}
         </div>
-        {actions && (
-          <div className="flex items-center gap-1 ml-2">
-            {actions}
-          </div>
+        {subtitle && (
+          <p className="text-sm text-muted-foreground text-wrap-mobile">
+            {subtitle}
+          </p>
         )}
       </div>
-
-      {description && (
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {description}
-        </p>
-      )}
-
-      {metadata && metadata.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 pt-3 border-t">
-          {metadata.map((item, index) => (
-            <div key={index}>
-              <p className="text-xs text-muted-foreground">{item.label}</p>
-              <p className="text-sm font-medium">{item.value}</p>
-            </div>
-          ))}
+      {actions && (
+        <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+          {actions}
         </div>
       )}
     </div>
-  )
-}
+
+    {description && (
+      <p className="text-sm text-muted-foreground text-wrap-mobile">
+        {description}
+      </p>
+    )}
+
+    {metadata && metadata.length > 0 && (
+      <div className="grid grid-cols-2 gap-3 pt-3 border-t">
+        {metadata.map((item, index) => (
+          <div key={index}>
+            <p className="text-xs text-muted-foreground">{item.label}</p>
+            <p className="text-sm font-medium">{item.value}</p>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)

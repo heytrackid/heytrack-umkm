@@ -1,3 +1,5 @@
+
+
 /**
  * Business Services Module Exports
  * Centralized exports for all business service functionality
@@ -10,7 +12,6 @@
 export * from './types'
 
 // Services
-export { ExcelExportService } from './excel-export'
 export { InventoryServices } from './inventory'
 export { ProductionServices } from './production'
 // export { BusinessServicesManager } from './manager' // File was empty, removed

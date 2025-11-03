@@ -1,23 +1,24 @@
-'use client';
-import * as React from 'react'
+'use client'
 
-import { useState } from 'react';
-import { MessageCircle, Send, Edit, Copy, Check } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { MessageCircle, Send, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { OrderData, WhatsAppTemplate } from '@/lib/communications/types';
+import type { OrderData } from '@/lib/communications/types';
 import { WhatsAppService } from '@/lib/communications/whatsapp';
 import { toast } from 'react-hot-toast';
 import { useSettings } from '@/contexts/settings-context';
-
 import { apiLogger } from '@/lib/logger'
+
+
+
 interface OrderItemData {
   recipe_name: string;
   quantity: number;
@@ -40,11 +41,11 @@ interface WhatsAppFollowUpProps {
   onSent?: (type: 'whatsapp' | 'business', message: string) => void;
 }
 
-const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({ 
-  order, 
+const WhatsAppFollowUp = ({
+  order,
   businessName = 'UMKM UMKM',
-  onSent 
-}) => {
+  onSent
+}: WhatsAppFollowUpProps) => {
   const { formatCurrency } = useSettings();
   const [selectedTemplate, setSelectedTemplate] = useState<string>('order_confirmation');
   const [customMessage, setCustomMessage] = useState('');
@@ -68,10 +69,10 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
     delivery_date: order.delivery_date,
     status: order.status,
     items: order.order_items?.map((item: OrderItemData) => ({
-      name: item.recipe_name || item.name || 'Product',
+      name: (item.recipe_name ?? item.name) ?? 'Product',
       quantity: item.quantity || 1,
       price: item.price_per_unit || 0
-    })) || [],
+    })) ?? [],
     notes: order.notes
   });
 
@@ -85,13 +86,13 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
     try {
       const orderData = convertOrderData(order);
       const template = templates.find(t => t.id === selectedTemplate);
-      
+
       if (!template) {
         throw new Error('Template not found');
       }
 
       let message = template.template;
-      
+
       // Format order items
       const orderItems = orderData.items.map(item =>
         `• ${item.name} (${item.quantity}x) - ${formatCurrency(item.price * item.quantity)}`
@@ -102,10 +103,10 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
         customer_name: orderData.customer_name,
         order_id: orderData.id,
         total_amount: formatCurrency(orderData.total_amount),
-        delivery_date: orderData.delivery_date || 'Sesuai kesepakatan',
+        delivery_date: orderData.delivery_date ?? 'Sesuai kesepakatan',
         business_name: businessName,
         order_items: orderItems,
-        notes: orderData.notes || '',
+        notes: orderData.notes ?? '',
         payment_deadline: new Date().toLocaleDateString('id-ID'),
         payment_account: paymentDetails,
         delivery_status: 'Dalam perjalanan',
@@ -120,8 +121,8 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
       });
 
       setGeneratedMessage(message);
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Error generating message:');
+    } catch (err: unknown) {
+      apiLogger.error({ err }, 'Error generating message:');
       toast.error('Gagal generate pesan. Coba template lain.');
     }
   };
@@ -132,7 +133,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
     const message = generatedMessage || customMessage;
     const encodedMessage = encodeURIComponent(message);
     const phone = orderData.customer_phone.replace(/\D/g, ''); // Remove non-digits
-    
+
     return {
       whatsapp: `https://wa.me/${phone}?text=${encodedMessage}`,
       business: `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`
@@ -146,7 +147,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
       setCopied(type);
       toast.success('Berhasil disalin!');
       setTimeout(() => setCopied(null), 2000);
-    } catch (error: unknown) {
+    } catch (_err: unknown) {
       toast.error('Gagal menyalin text');
     }
   };
@@ -156,22 +157,23 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
     const urls = getWhatsAppURLs();
     const url = type === 'whatsapp' ? urls.whatsapp : urls.business;
     const message = generatedMessage || customMessage;
-    
+
     // Open WhatsApp with the message
     window.open(url, '_blank');
-    
+
     // Call callback if provided
     if (onSent) {
       onSent(type, message);
     }
-    
+
     toast.success(`WhatsApp ${type === 'business' ? 'Business' : ''} terbuka!`);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isCustomTemplate) {
       generateMessage();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTemplate, paymentDetails, businessName, isCustomTemplate]);
 
   return (
@@ -182,7 +184,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
           WhatsApp Follow-up
         </Button>
       </DialogTrigger>
-      
+
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -202,8 +204,8 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
                 {/* Template Selection */}
                 <div className="space-y-2">
                   <Label>Pilih Template</Label>
-                  <Select 
-                    value={isCustomTemplate ? 'custom' : selectedTemplate} 
+                  <Select
+                    value={isCustomTemplate ? 'custom' : selectedTemplate}
                     onValueChange={(value) => {
                       if (value === 'custom') {
                         setIsCustomTemplate(true);
@@ -282,10 +284,10 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
                   <div><strong>Customer:</strong> {order.customer_name}</div>
                   <div><strong>Phone:</strong> {order.customer_phone}</div>
                   <div><strong>Total:</strong> {formatCurrency(order.total_amount)}</div>
-                  <div><strong>Status:</strong> 
+                  <div><strong>Status:</strong>
                     <Badge className="ml-2" variant={
                       order.status === 'COMPLETED' ? 'default' :
-                      order.status === 'PENDING' ? 'secondary' : 'outline'
+                        order.status === 'PENDING' ? 'secondary' : 'outline'
                     }>
                       {order.status}
                     </Badge>
@@ -322,7 +324,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
                         {generatedMessage || 'Generating message...'}
                       </div>
                     </div>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -343,13 +345,13 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
                 <CardTitle className="text-lg">Kirim via WhatsApp</CardTitle>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="regular" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="regular">WhatsApp Biasa</TabsTrigger>
-                    <TabsTrigger value="business">WhatsApp Business</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="regular" className="space-y-4">
+                <SwipeableTabs defaultValue="regular" className="w-full">
+                  <SwipeableTabsList className="grid w-full grid-cols-2">
+                    <SwipeableTabsTrigger value="regular">WhatsApp Biasa</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="business">WhatsApp Business</SwipeableTabsTrigger>
+                  </SwipeableTabsList>
+
+                  <SwipeableTabsContent value="regular" className="space-y-4">
                     <div className="text-sm text-gray-600">
                       Buka WhatsApp regular dengan pesan yang sudah disiapkan
                     </div>
@@ -361,9 +363,9 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
                       <Send className="h-4 w-4" />
                       Buka WhatsApp
                     </Button>
-                  </TabsContent>
-                  
-                  <TabsContent value="business" className="space-y-4">
+                  </SwipeableTabsContent>
+
+                  <SwipeableTabsContent value="business" className="space-y-4">
                     <div className="text-sm text-gray-600">
                       Buka WhatsApp Business dengan pesan yang sudah disiapkan
                     </div>
@@ -375,8 +377,8 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
                       <Send className="h-4 w-4" />
                       Buka WhatsApp Business
                     </Button>
-                  </TabsContent>
-                </Tabs>
+                  </SwipeableTabsContent>
+                </SwipeableTabs>
 
                 {/* URL Preview */}
                 <div className="mt-4 space-y-2">

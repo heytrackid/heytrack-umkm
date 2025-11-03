@@ -1,3 +1,4 @@
+
 /**
  * Production Automation Module
  * Comprehensive production planning and automation system
@@ -7,4 +8,4 @@
  */
 
 // Re-export everything from the modular structure
-export * from './production-automation'
+export * from './production-automation/index'

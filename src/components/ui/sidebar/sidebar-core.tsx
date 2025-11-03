@@ -1,12 +1,8 @@
-// Core Sidebar Components
-// Main sidebar structure and layout components
-
-import * as React from "react"
+import type { ComponentProps, CSSProperties } from 'react'
 import { PanelLeftIcon } from "lucide-react"
-
-import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useSidebar } from "./sidebar-context"
 import {
   Sheet,
   SheetContent,
@@ -14,26 +10,28 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { useSidebar } from "./sidebar-context"
 
-const SIDEBAR_WIDTH = "16rem"
+// Core Sidebar Components
+// Main sidebar structure and layout components
+
+const _SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
-const SIDEBAR_WIDTH_ICON = "3rem"
+const _SIDEBAR_WIDTH_ICON = "3rem"
 
-interface SidebarProps extends React.ComponentProps<"div"> {
+interface SidebarProps extends ComponentProps<'div'> {
   side?: "left" | "right"
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }
 
-export function Sidebar({
+export const Sidebar = ({
   side = "left",
   variant = "sidebar",
   collapsible = "offcanvas",
   className,
   children,
   ...props
-}: SidebarProps) {
+}: SidebarProps) => {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
   if (collapsible === "none") {
@@ -62,7 +60,7 @@ export function Sidebar({
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
+            } as CSSProperties
           }
           side={side}
         >
@@ -124,11 +122,11 @@ export function Sidebar({
   )
 }
 
-export function SidebarTrigger({
+export const SidebarTrigger = ({
   className,
   onClick,
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: ComponentProps<typeof Button>) => {
   const { toggleSidebar } = useSidebar()
 
   return (
@@ -150,7 +148,7 @@ export function SidebarTrigger({
   )
 }
 
-export function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
+export const SidebarRail = ({ className, ...props }: ComponentProps<'button'>) => {
   const { toggleSidebar } = useSidebar()
 
   return (
@@ -175,16 +173,14 @@ export function SidebarRail({ className, ...props }: React.ComponentProps<"butto
   )
 }
 
-export function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
-  return (
-    <main
-      data-slot="sidebar-inset"
-      className={cn(
-        "bg-background relative flex w-full flex-1 flex-col",
-        "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]: md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+export const SidebarInset = ({ className, ...props }: ComponentProps<'main'>) => (
+  <main
+    data-slot="sidebar-inset"
+    className={cn(
+      "bg-background relative flex w-full flex-1 flex-col",
+      "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]: md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
+      className
+    )}
+    {...props}
+  />
+)

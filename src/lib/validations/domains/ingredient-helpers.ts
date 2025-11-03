@@ -1,10 +1,15 @@
+import { z } from 'zod'
+import { IngredientInsertSchema, type IngredientInsert } from './ingredient'
+
+
 /**
  * Ingredient Validation Helpers
  * Domain-specific validation helpers for ingredient-related business rules
  */
 
-import { z } from 'zod'
-import { IngredientInsertSchema, IngredientUpdateSchema, type IngredientInsert, type IngredientUpdate } from './ingredient'
+
+// Re-export for convenience
+export { IngredientUpdateSchema } from './ingredient'
 
 // Enhanced ingredient validation with business rules
 export const EnhancedIngredientInsertSchema = IngredientInsertSchema
@@ -23,7 +28,7 @@ export const EnhancedIngredientInsertSchema = IngredientInsertSchema
 
     // Category validation
     category: z.string().max(100).optional().refine((category) => {
-      if (!category) return true
+      if (!category) {return true}
       const validCategories = ['dairy', 'meat', 'vegetables', 'fruits', 'grains', 'spices', 'oils', 'beverages', 'bakery', 'other']
       return validCategories.includes(category.toLowerCase())
     }, {
@@ -68,9 +73,9 @@ export class IngredientValidationHelpers {
     try {
       const validatedData = EnhancedIngredientInsertSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -80,13 +85,13 @@ export class IngredientValidationHelpers {
   /**
    * Validate ingredient update data
    */
-  static validateUpdate(data: unknown): { success: boolean; data?: IngredientUpdate; errors?: string[] } {
+  static validateUpdate(data: unknown): { success: boolean; data?: EnhancedIngredientUpdate; errors?: string[] } {
     try {
       const validatedData = EnhancedIngredientUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -116,10 +121,10 @@ export class IngredientValidationHelpers {
       : 30 // Default assumption
 
     // Calculate reorder point considering lead time
-    const effectiveReorderPoint = min_stock + (usage_rate_daily || 0) * reorder_lead_time
+    const effectiveReorderPoint = min_stock + (usage_rate_daily ?? 0) * reorder_lead_time
 
     const shouldReorder = current_stock <= effectiveReorderPoint
-    let recommendedQuantity = (max_stock || min_stock * 2) - current_stock
+    let recommendedQuantity = (max_stock ?? min_stock * 2) - current_stock
     let priority: 'low' | 'medium' | 'high' | 'critical' = 'low'
     let reason = 'Stock at reorder level'
 
@@ -131,13 +136,13 @@ export class IngredientValidationHelpers {
     if (daysUntilEmpty <= reorder_lead_time) {
       priority = 'critical'
       reason = `Stock will run out in ${daysUntilEmpty} days (lead time: ${reorder_lead_time} days)`
-      recommendedQuantity = Math.max(recommendedQuantity, (usage_rate_daily || 1) * reorder_lead_time * 2)
+      recommendedQuantity = Math.max(recommendedQuantity, (usage_rate_daily ?? 1) * reorder_lead_time * 2)
     }
 
     if (current_stock <= 0) {
       priority = 'critical'
       reason = 'Out of stock'
-      recommendedQuantity = Math.max(min_stock * 2, (usage_rate_daily || 1) * reorder_lead_time * 3)
+      recommendedQuantity = Math.max(min_stock * 2, (usage_rate_daily ?? 1) * reorder_lead_time * 3)
     }
 
     return {
@@ -152,21 +157,21 @@ export class IngredientValidationHelpers {
    * Validate bulk ingredient import
    */
   static validateBulkImport(ingredients: unknown[]): {
-    valid: any[]
-    invalid: Array<{ index: number; data: any; errors: string[] }>
+    valid: IngredientInsert[]
+    invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: any[] = []
-    const invalid: Array<{ index: number; data: any; errors: string[] }> = []
+    const valid: IngredientInsert[] = []
+    const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     ingredients.forEach((ingredient, index) => {
       const result = this.validateInsert(ingredient)
-      if (result.success) {
+      if (result.success && result.data) {
         valid.push(result.data)
       } else {
         invalid.push({
           index,
           data: ingredient,
-          errors: result.errors || []
+          errors: result.errors ?? []
         })
       }
     })

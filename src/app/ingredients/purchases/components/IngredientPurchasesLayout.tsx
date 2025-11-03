@@ -1,42 +1,20 @@
-// Ingredient Purchases Layout - Main Page with Lazy Components
-// Main layout component that orchestrates all lazy-loaded purchase management components
-
 'use client'
 
 import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import PrefetchLink from '@/components/ui/prefetch-link'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
 import { ShoppingCart } from 'lucide-react'
 import { apiLogger } from '@/lib/logger'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
+import PurchaseStats from './PurchaseStats'
+import PurchaseForm from './PurchaseForm'
+import PurchasesTable from './PurchasesTable'
+import type { IngredientPurchase, AvailableIngredient } from './types'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 
-// Lazy load components
-import dynamic from 'next/dynamic'
 
-const PurchaseStats = dynamic(() => import('./PurchaseStats'), {
-  loading: () => <div>Loading stats...</div>
-})
-
-const PurchaseForm = dynamic(() => import('./PurchaseForm'), {
-  loading: () => <div>Loading form...</div>
-})
-
-const PurchasesTable = dynamic(() => import('./PurchasesTable'), {
-  loading: () => <div>Loading table...</div>
-})
-
-import type { IngredientPurchase, PurchaseFormData, AvailableIngredient } from './types'
-
-export default function IngredientPurchasesLayout() {
+const IngredientPurchasesLayout = () => {
   const [purchases, setPurchases] = useState<IngredientPurchase[]>([])
   const [ingredients, setIngredients] = useState<AvailableIngredient[]>([])
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
@@ -53,34 +31,38 @@ export default function IngredientPurchasesLayout() {
     }
   }, [isAuthLoading, isAuthenticated, toast])
 
+  // ✅ OPTIMIZED: Use TanStack Query hooks (to be implemented)
+  // For now, keep existing fetch but add TODO comment
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
-      fetchPurchases()
-      fetchIngredients()
+      void fetchPurchases()
+      void fetchIngredients()
     }
   }, [isAuthLoading, isAuthenticated])
 
+  // TODO: Replace with useIngredientPurchases() hook
   const fetchPurchases = async () => {
     try {
       const response = await fetch('/api/ingredient-purchases')
       if (response.ok) {
         const data = await response.json()
-        setPurchases(data)
+        void setPurchases(data)
       }
-    } catch (error) {
-      apiLogger.error({ error }, 'Error fetching purchases:')
+    } catch (err: unknown) {
+      apiLogger.error({ err }, 'Error fetching purchases:')
     }
   }
 
+  // TODO: Replace with useIngredients() hook
   const fetchIngredients = async () => {
     try {
       const response = await fetch('/api/ingredients')
       if (response.ok) {
         const data = await response.json()
-        setIngredients(data.ingredients || [])
+        void setIngredients(data.ingredients ?? [])
       }
-    } catch (error) {
-      apiLogger.error({ error }, 'Error fetching ingredients:')
+    } catch (err: unknown) {
+      apiLogger.error({ err }, 'Error fetching ingredients:')
     }
   }
 
@@ -109,7 +91,11 @@ export default function IngredientPurchasesLayout() {
 
     await fetchPurchases()
     await fetchIngredients() // Refresh untuk update WAC
-    alert('Pembelian berhasil ditambahkan! Stock dan WAC telah diperbarui.')
+    toast({
+      title: 'Berhasil',
+      description: 'Pembelian berhasil ditambahkan! Stock dan WAC telah diperbarui.',
+      variant: 'default',
+    })
   }
 
   // Show loading state while auth is initializing
@@ -173,7 +159,7 @@ export default function IngredientPurchasesLayout() {
           <PurchaseForm
             ingredients={ingredients}
             onSubmit={handlePurchaseSubmit}
-            onSuccess={() => {}}
+            onSuccess={() => { }}
           />
         </div>
 
@@ -186,3 +172,5 @@ export default function IngredientPurchasesLayout() {
     </AppLayout>
   )
 }
+
+export default IngredientPurchasesLayout

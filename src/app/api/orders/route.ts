@@ -1,16 +1,30 @@
 import { createClient } from '@/utils/supabase/server'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
+
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import type { Database } from '@/types'
+import { createPaginationMeta } from '@/lib/validations/pagination'
+import type { OrderStatus, FinancialRecordsInsert, FinancialRecordsUpdate, OrdersInsert, OrdersTable } from '@/types/database'
+import { ORDER_FIELDS } from '@/lib/database/query-fields'
+import { apiLogger, logError } from '@/lib/logger'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+type FinancialRecordInsert = FinancialRecordsInsert
+type FinancialRecordUpdate = FinancialRecordsUpdate
+type OrderInsert = OrdersInsert
 
-import { apiLogger } from '@/lib/logger'
+const normalizeDateValue = (value?: string | null) => {
+  const trimmed = value?.trim()
+  return trimmed && trimmed.length > 0 ? trimmed : undefined
+}
 
-type OrdersTable = Database['public']['Tables']['orders']
 // GET /api/orders - Get all orders
-export async function GET(request: NextRequest) {
+async function GET(request: NextRequest) {
   try {
+    apiLogger.info({ url: request.url }, 'GET /api/orders - Request received')
+    
     // Create authenticated Supabase client
     const supabase = await createClient()
 
@@ -18,12 +32,17 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
+      logError(apiLogger, authError, 'GET /api/orders - Unauthorized', {
+        userId: user?.id,
+        url: request.url,
+      })
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
+
+    apiLogger.info({ userId: user.id }, 'GET /api/orders - User authenticated')
 
     const { searchParams } = new URL(request.url)
 
@@ -37,6 +56,10 @@ export async function GET(request: NextRequest) {
     })
 
     if (!queryValidation.success) {
+      logError(apiLogger, new Error('Invalid query parameters'), 'GET /api/orders - Validation failed', {
+        userId: user.id,
+        url: request.url
+      })
       return NextResponse.json(
         { error: 'Invalid query parameters', details: queryValidation.error.issues },
         { status: 400 }
@@ -46,21 +69,38 @@ export async function GET(request: NextRequest) {
     const { page, limit, search, sort_by, sort_order } = queryValidation.data
     const status = searchParams.get('status') // Status filter is separate from pagination
 
+    // Get total count
+    let countQuery = supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+
+    if (search) {
+      countQuery = countQuery.or(`order_no.ilike.%${search}%,customer_name.ilike.%${search}%`)
+    }
+
+    if (status) {
+      countQuery = countQuery.eq('status', status as OrderStatus)
+    }
+
+    const { count, error: countError } = await countQuery
+
+    if (countError) {
+      logError(apiLogger, countError, 'GET /api/orders - Failed to count orders', {
+        userId: user.id,
+        url: request.url
+      })
+      return NextResponse.json(
+        { error: 'Failed to count orders' },
+        { status: 500 }
+      )
+    }
+
+    // ✅ OPTIMIZED: Use specific fields instead of SELECT *
     let query = supabase
       .from('orders')
-      .select(`
-        *,
-        order_items (
-          id,
-          recipe_id,
-          product_name,
-          quantity,
-          unit_price,
-          total_price,
-          special_requests
-        )
-      `)
-      .eq('user_id', (user as any).id)
+      .select(ORDER_FIELDS.DETAIL) // Specific fields for better performance
+      .eq('user_id', user.id)
 
     // Add search filter
     if (search) {
@@ -69,11 +109,12 @@ export async function GET(request: NextRequest) {
 
     // Add status filter
     if (status) {
-      query = query.eq('status', status)
+      // Type assertion for status - validated by database enum
+      query = query.eq('status', status as OrderStatus)
     }
 
     // Add sorting
-    const sortField = sort_by || 'created_at'
+    const sortField = sort_by ?? 'created_at'
     const sortDirection = sort_order === 'asc'
     query = query.order(sortField, { ascending: sortDirection })
 
@@ -84,7 +125,10 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      apiLogger.error({ error: error }, 'Error fetching orders:')
+      logError(apiLogger, error, 'GET /api/orders - Failed to fetch orders', {
+        userId: user.id,
+        url: request.url
+      })
       return NextResponse.json(
         { error: 'Failed to fetch orders' },
         { status: 500 }
@@ -92,24 +136,56 @@ export async function GET(request: NextRequest) {
     }
 
     // Map data to match our interface (order_items -> items)
-    const mappedData = data?.map((order: OrdersTable['Row'] & { order_items?: unknown[] }) => ({
+    // The query returns order_items with nested recipe data
+    interface OrderItemWithRecipe {
+      id: string
+      quantity: number
+      unit_price: number
+      total_price: number
+      product_name: string | null
+      special_requests: string | null
+      recipe_id: string
+      recipe: {
+        id: string
+        name: string
+        image_url: string | null
+      }
+    }
+    
+    type OrderWithItems = OrdersTable & { 
+      order_items?: OrderItemWithRecipe[]
+    }
+    
+    const mappedData = data?.map((order) => ({
       ...order,
-      items: (order as any).order_items || []
+      items: (order as OrderWithItems).order_items ?? []
     }))
 
-    return NextResponse.json(mappedData)
+    apiLogger.info({ 
+      userId: user.id,
+      count: mappedData?.length || 0,
+      totalCount: count ?? 0,
+      page,
+      limit
+    }, 'GET /api/orders - Success')
+
+    return NextResponse.json({
+      data: mappedData,
+      meta: createPaginationMeta(page, limit, count ?? 0)
+    })
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in GET /api/orders:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    logError(apiLogger, error, 'GET /api/orders - Unexpected error', {
+      url: request.url,
+    })
+    return handleAPIError(error, 'GET /api/orders');
   }
 }
 
 // POST /api/orders - Create new order with income tracking
-export async function POST(request: NextRequest) {
+async function POST(request: NextRequest) {
   try {
+    apiLogger.info({ url: request.url }, 'POST /api/orders - Request received')
+    
     // Create authenticated Supabase client
     const supabase = await createClient()
 
@@ -117,18 +193,28 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
+      logError(apiLogger, authError, 'POST /api/orders - Unauthorized', {
+        userId: user?.id,
+        url: request.url,
+      })
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
+    apiLogger.info({ userId: user.id }, 'POST /api/orders - User authenticated')
+
+    // The request body is already sanitized by the security middleware
     const body = await request.json()
 
     // Validate request body
     const validation = OrderInsertSchema.safeParse(body)
     if (!validation.success) {
+      logError(apiLogger, new Error('Invalid request data'), 'POST /api/orders - Validation failed', {
+        userId: user.id,
+        url: request.url
+      })
       return NextResponse.json(
         {
           error: 'Invalid request data',
@@ -138,71 +224,90 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    apiLogger.info({ 
+      userId: user.id,
+      orderNo: validation.data.order_no,
+      itemsCount: validation.data.items?.length ?? 0
+    }, 'POST /api/orders - Validation passed')
+
     const validatedData = validation.data
-    const orderStatus = (validatedData as any).status || 'PENDING'
+    const orderStatus = validatedData.status || 'PENDING'
     let incomeRecordId = null
 
     // If order is DELIVERED, create income record first
-    if (orderStatus === 'DELIVERED' && (validatedData as any).total_amount && (validatedData as any).total_amount > 0) {
-      // @ts-ignore
+    if (orderStatus === 'DELIVERED' && validatedData.total_amount && validatedData.total_amount > 0) {
+      const incomeDate = normalizeDateValue(validatedData.delivery_date)
+ ?? normalizeDateValue(validatedData.order_date)
+ ?? new Date().toISOString().split('T')[0]
+
+      const incomeData: FinancialRecordInsert = {
+        user_id: user.id,
+        type: 'INCOME',
+        category: 'Revenue',
+        amount: validatedData.total_amount,
+        date: incomeDate,
+        reference: `Order #${validatedData.order_no}${validatedData.customer_name ? ` - ${  validatedData.customer_name}` : ''}`,
+        description: `Income from order ${validatedData.order_no}`
+      }
+    
     const { data: incomeRecord, error: incomeError } = await supabase
         .from('financial_records')
-        .insert({
-          user_id: (user as any).id,
-          type: 'INCOME',
-          category: 'Revenue',
-          amount: (validatedData as any).total_amount,
-          date: validatedData.delivery_date || (validatedData as any).order_date || new Date().toISOString().split('T')[0],
-          reference: `Order #${(validatedData as any).order_no}${validatedData.customer_name ? ' - ' + (validatedData as any).customer_name : ''}`,
-          description: `Income from order ${(validatedData as any).order_no}`
-        })
-        .select()
+        .insert(incomeData)
+        .select('id')
         .single()
 
       if (incomeError) {
-        apiLogger.error({ error: incomeError }, 'Error creating income record:')
+        logError(apiLogger, incomeError, 'POST /api/orders - Failed to create income record', {
+          userId: user.id,
+          url: request.url
+        })
         return NextResponse.json(
           { error: 'Failed to create income record' },
           { status: 500 }
         )
       }
 
-      incomeRecordId = (incomeRecord as any).id
+      incomeRecordId = incomeRecord.id
     }
 
     // Create order with financial_record_id if income was created
-    const { data: orderData, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        user_id: (user as any).id,
+    const orderInsertData: OrderInsert = {
+        user_id: user.id,
         order_no: validatedData.order_no,
         customer_id: validatedData.customer_id,
-        customer_name: (validatedData as any).customer_name,
+        customer_name: validatedData.customer_name,
         customer_phone: validatedData.customer_phone,
         status: orderStatus,
-        order_date: (validatedData as any).order_date || new Date().toISOString().split('T')[0],
-        delivery_date: (validatedData as any).delivery_date,
+        order_date: validatedData.order_date ?? new Date().toISOString().split('T')[0],
+        delivery_date: validatedData.delivery_date,
         delivery_time: validatedData.delivery_time,
-        total_amount: (validatedData as any).total_amount,
+        total_amount: validatedData.total_amount,
         tax_amount: validatedData.tax_amount || 0,
         payment_status: validatedData.payment_status || 'UNPAID',
         payment_method: validatedData.payment_method,
         notes: validatedData.notes,
         special_instructions: validatedData.special_instructions,
         financial_record_id: incomeRecordId
-      })
-      .select('*')
+      }
+    
+    const { data: orderData, error: orderError } = await supabase
+      .from('orders')
+      .insert(orderInsertData)
+      .select('id, order_no, customer_name, status, total_amount, created_at')
       .single()
 
     if (orderError) {
-      apiLogger.error({ error: orderError }, 'Error creating order:')
+      logError(apiLogger, orderError, 'POST /api/orders - Failed to create order', {
+        userId: user.id,
+        url: request.url
+      })
       // Rollback income record if order creation fails
       if (incomeRecordId) {
         await supabase
           .from('financial_records')
           .delete()
           .eq('id', incomeRecordId)
-          .eq('user_id', (user as any).id)
+          .eq('user_id', user.id)
       }
       return NextResponse.json(
         { error: 'Failed to create order' },
@@ -210,39 +315,58 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const createdOrder = orderData
+
     // Update income record with order reference
     if (incomeRecordId) {
+      const updateData: FinancialRecordUpdate = { 
+          reference: `Order ${createdOrder.id} - ${validatedData.customer_name || 'Customer'}` 
+        }
       await supabase
         .from('financial_records')
-        .update({ reference: `Order ${(orderData as any).id} - ${(validatedData as any).customer_name || 'Customer'}` } as any)
+        .update(updateData)
         .eq('id', incomeRecordId)
-        .eq('user_id', (user as any).id)
+        .eq('user_id', user.id)
     }
 
     // If order items provided, create them
     if (validatedData.items && validatedData.items.length > 0) {
       const orderItems = validatedData.items.map((item) => ({
-        order_id: (orderData as any).id,
-        recipe_id: (item as any).recipe_id,
-        product_name: item.product_name,
+        recipe_id: item.recipe_id,
+        product_name: item.product_name ?? null,
         quantity: item.quantity,
         unit_price: item.unit_price,
         total_price: item.total_price || (item.quantity * item.unit_price),
-        special_requests: item.special_requests
+        special_requests: item.special_requests ?? null,
+        order_id: createdOrder.id,
+        user_id: user.id
       }))
 
       const { error: itemsError } = await supabase
         .from('order_items')
-        .insert(orderItems as any)
+        .insert(orderItems)
 
       if (itemsError) {
-        apiLogger.error({ error: itemsError }, 'Error creating order items:')
-        // Rollback order creation if items fail
+        logError(apiLogger, itemsError, 'POST /api/orders - Failed to create order items', {
+          userId: user.id,
+          url: request.url
+        })
+        
+        // Complete rollback: delete order AND financial record
         await supabase
           .from('orders')
           .delete()
-          .eq('id', (orderData as any).id)
-          .eq('user_id', (user as any).id)
+          .eq('id', createdOrder.id)
+          .eq('user_id', user.id)
+        
+        // Also rollback financial record if it was created
+        if (incomeRecordId) {
+          await supabase
+            .from('financial_records')
+            .delete()
+            .eq('id', incomeRecordId)
+            .eq('user_id', user.id)
+        }
 
         return NextResponse.json(
           { error: 'Failed to create order items' },
@@ -252,15 +376,28 @@ export async function POST(request: NextRequest) {
     }
 
     // Return order data with income tracking info
+    apiLogger.info({ 
+      userId: user.id,
+      orderId: createdOrder.id,
+      orderNo: createdOrder.order_no,
+      incomeRecorded: !!incomeRecordId
+    }, 'POST /api/orders - Success')
+    
     return NextResponse.json({
-      ...orderData,
+      ...createdOrder,
       income_recorded: !!incomeRecordId
     }, { status: 201 })
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in POST /api/orders:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    logError(apiLogger, error, 'POST /api/orders - Unexpected error', {
+      url: request.url,
+    })
+    return handleAPIError(error, 'POST /api/orders');
   }
 }
+
+// Apply security middleware with enhanced security configuration
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+// Export secured handlers
+export { securedGET as GET, securedPOST as POST }

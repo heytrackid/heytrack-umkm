@@ -1,87 +1,100 @@
----
-inclusion: always
----
-
 # Technology Stack
 
-## Framework & Runtime
+## Core Framework
 
-- **Next.js 16**: React framework with App Router architecture
-- **React 18.3**: UI library with Server/Client Components
-- **TypeScript 5.9**: Strict type checking enabled
-- **Node.js**: Runtime environment
-- **pnpm 9.15**: Package manager (required)
+- **Next.js 16**: React framework with App Router, Server Components, and Server Actions
+- **React 18.3**: UI library with hooks and concurrent features
+- **TypeScript 5.9**: Strict type checking enabled across the entire codebase
 
 ## Backend & Database
 
-- **Supabase**: PostgreSQL database with real-time capabilities
-- **Supabase Auth**: Authentication and authorization
-- **Row Level Security (RLS)**: Enforced on all tables
-- **Edge Functions**: Deno-based serverless functions for automation
-- **pg_cron**: Scheduled jobs for daily snapshots and alerts
+- **Supabase**: PostgreSQL database with real-time subscriptions, authentication, and Row Level Security (RLS)
+- **Supabase Auth**: User authentication and session management
+- **PostgreSQL Views**: Materialized views for complex queries (inventory_status, recipe_availability, order_summary)
+
+## State Management & Data Fetching
+
+- **TanStack Query (React Query)**: Server state management, caching, and data synchronization
+- **Zustand**: Lightweight client state management
+- **React Hook Form**: Form state and validation
 
 ## UI & Styling
 
 - **Tailwind CSS 4**: Utility-first CSS framework
-- **Radix UI**: Accessible component primitives
-- **shadcn/ui**: Component library built on Radix
+- **Radix UI**: Accessible, unstyled component primitives
+- **shadcn/ui**: Pre-built component library built on Radix UI
+- **Recharts**: Data visualization and charting
 - **Lucide React**: Icon library
-- **Recharts**: Data visualization
 
-## State & Data Management
+## Validation & Type Safety
 
-- **TanStack Query (React Query)**: Server state management
-- **Zustand**: Client state management
-- **React Hook Form**: Form handling with Zod validation
-- **Zod**: Schema validation
-
-## Key Libraries
-
-- **date-fns**: Date manipulation
-- **ExcelJS**: Excel export functionality
-- **Pino**: Structured logging (use instead of console)
-- **next-themes**: Dark/light mode support
+- **Zod**: Runtime schema validation for API requests and forms
+- **TypeScript Strict Mode**: All strict compiler options enabled
 
 ## Development Tools
 
-- **ESLint**: Code linting with strict rules
-- **TypeScript**: Strict mode with no implicit any
-- **Bundle Analyzer**: Performance monitoring
+- **ESLint 9**: Strict linting rules for code quality and consistency
+- **Prettier**: Code formatting
+- **pnpm**: Fast, disk-efficient package manager
+- **Vitest**: Unit testing framework
+
+## Performance & Optimization
+
+- **Next.js Image Optimization**: Automatic image optimization with WebP/AVIF
+- **Dynamic Imports**: Code splitting for lazy-loaded components
+- **Web Workers**: Background processing for HPP calculations
+- **API Response Caching**: In-memory caching for frequently accessed data
+
+## Security
+
+- **Content Security Policy (CSP)**: Strict CSP headers with nonce-based script execution
+- **DOMPurify**: XSS protection for user-generated content
+- **API Middleware**: Rate limiting, input sanitization, and security headers
+- **Row Level Security**: Database-level access control via Supabase RLS policies
+
+## Logging & Monitoring
+
+- **Pino**: Structured JSON logging for server-side operations
+- **Client Logger**: Browser-based logging with error tracking
+- **Vercel Analytics**: Performance and usage analytics
 
 ## Common Commands
 
 ```bash
 # Development
-pnpm dev                    # Start dev server (uses Turbopack)
-pnpm dev:webpack           # Start dev with webpack
+pnpm dev                    # Start development server
+pnpm dev:turbo             # Start with Turbopack (faster)
+pnpm dev:clean             # Clean cache and start fresh
 
 # Building
 pnpm build                 # Production build
 pnpm build:analyze         # Build with bundle analysis
-pnpm type-check            # TypeScript type checking
+pnpm start                 # Start production server
 
-# Quality
-pnpm lint                  # Run ESLint
+# Code Quality
+pnpm lint                  # Run ESLint (strict, no warnings allowed)
+pnpm lint:fix              # Auto-fix linting issues
+pnpm type-check            # Run TypeScript compiler checks
+
+# Database
+pnpm supabase:types        # Generate TypeScript types from local Supabase
+pnpm supabase:types:remote # Generate types from remote Supabase project
+
+# Maintenance
+pnpm clean                 # Remove build artifacts and cache
+pnpm clean:all             # Full clean including node_modules
 ```
 
-## Code Quality Rules
+## Environment Variables
 
-1. **No console usage**: Use `logger` from `@/lib/logger` instead
-2. **No explicit any**: Must use proper types or add eslint-disable with reason
-3. **Strict TypeScript**: All strict flags enabled
-4. **Type imports**: Use `import type` for type-only imports
-5. **Server-only imports**: Use `server-only` package for server code
+Required environment variables (see `.env.example`):
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY`: Supabase service role key (server-only)
+- `NEXT_PUBLIC_APP_DOMAIN`: Application domain for CORS
 
-## API Conventions
+## Runtime Configuration
 
-- **Route handlers**: Located in `src/app/api/[feature]/route.ts`
-- **Validation**: Use Zod schemas from `@/lib/validations`
-- **Error handling**: Use typed errors from `@/lib/errors`
-- **Supabase client**: Use typed client from `@/lib/supabase-client`
-
-## Database Conventions
-
-- **All tables have RLS**: User isolation enforced at database level
-- **user_id column**: Required on all user-owned tables
-- **Timestamps**: created_at, updated_at on all tables
-- **Soft deletes**: Use deleted_at instead of hard deletes where applicable
+- **Node.js Runtime**: Required for API routes (DOMPurify/jsdom dependency)
+- **Standalone Output**: Optimized for containerized deployments
+- **Turbopack**: Enabled for faster development builds

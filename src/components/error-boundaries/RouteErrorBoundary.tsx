@@ -1,14 +1,15 @@
-// Route-level Error Boundary
-// Wraps individual routes/pages to isolate errors
-
 'use client'
 
-import type { ErrorInfo, ReactNode } from 'react';
-import React, { Component } from 'react'
+import { Component, type ComponentType, type ErrorInfo, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
 import { apiLogger } from '@/lib/logger'
+
+// Route-level Error Boundary
+// Wraps individual routes/pages to isolate errors
+
+
 
 interface Props {
   children: ReactNode
@@ -39,7 +40,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    const routeName = this.props.routeName || 'Unknown Route'
+    const routeName = this.props.routeName ?? 'Unknown Route'
 
     apiLogger.error({
       error: error.message,
@@ -70,7 +71,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
 
   override render() {
     if (this.state.hasError) {
-      const routeName = this.props.routeName || 'this page'
+      const routeName = this.props.routeName ?? 'this page'
       const maxRetries = 3
 
       return (
@@ -101,7 +102,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
                 Go Back
               </Button>
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {this.state.error && (
                 <details className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs">
                   <summary className="cursor-pointer text-gray-700 dark:text-gray-300 mb-2">
                     Error Details
@@ -123,7 +124,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
 
 // Higher-order component for wrapping routes
 export function withRouteErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
+  Component: ComponentType<P>,
   routeName?: string
 ) {
   const WrappedComponent = (props: P) => (
@@ -132,7 +133,7 @@ export function withRouteErrorBoundary<P extends object>(
     </RouteErrorBoundary>
   )
 
-  WrappedComponent.displayName = `withRouteErrorBoundary(${Component.displayName || Component.name})`
+  WrappedComponent.displayName = `withRouteErrorBoundary(${Component.displayName ?? Component.name})`
 
   return WrappedComponent
 }

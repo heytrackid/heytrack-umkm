@@ -1,3 +1,4 @@
+
 /**
  * Notification System Module
  * Comprehensive notification generation and management system
@@ -7,4 +8,4 @@
  */
 
 // Re-export everything from the modular structure
-export * from './notification-system'
+export * from './notification-system/index'

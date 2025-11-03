@@ -1,64 +1,67 @@
 'use client'
 
 import AppLayout from '@/components/layout/app-layout'
+import type { Order } from '@/types'
 import { Badge } from '@/components/ui/badge'
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
-import type { Database } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DeleteConfirmDialog } from '@/components/ui/confirm-dialog'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
-import { ProfileSkeleton, CardSkeleton } from '@/components/ui'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseCRUD } from '@/hooks/supabase'
 import {
-    ArrowLeft,
-    Edit,
-    Mail,
-    MapPin,
-    Phone,
-    ShoppingCart,
-    Trash2,
-    TrendingUp,
-    User
-} from 'lucide-react'
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage
+} from '@/components/ui/breadcrumb'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+
+// Helper function to get status variant
+const getStatusVariant = (status: string) => {
+  switch (status) {
+    case 'DELIVERED':
+      return 'default'
+    case 'CANCELLED':
+      return 'destructive'
+    default:
+      return 'secondary'
+  }
+}
+import { useCurrency } from '@/hooks/useCurrency'
+import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/supabase'
+import { ArrowLeft, Edit, Mail, MapPin, Phone, ShoppingCart, Trash2, TrendingUp, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import * as React from 'react'
 import { use, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
-export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = use(params)
   const router = useRouter()
   const { formatCurrency } = useCurrency()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Fetch customer data
-  const { data: customers, loading: customerLoading, remove } = useSupabaseCRUD('customers', {
+  const { data: customers, loading: customerLoading } = useSupabaseQuery('customers', {
     filter: { id }
   })
   const customer = customers?.[0]
 
+  // CRUD operations
+  const { delete: deleteCustomer } = useSupabaseCRUD('customers')
+
   // Fetch customer orders
-  const { data: orders, loading: ordersLoading } = useSupabaseCRUD('orders', {
+  const { data: orders, loading: ordersLoading } = useSupabaseQuery('orders', {
     filter: { customer_id: id },
     orderBy: { column: 'created_at', ascending: false }
   })
 
   const handleDelete = async () => {
     try {
-      await remove(id)
+      await deleteCustomer(id)
       toast.success('Pelanggan berhasil dihapus')
-      router.push('/customers')
-    } catch (error) {
+      void router.push('/customers')
+    } catch (_err) {
       toast.error('Gagal menghapus pelanggan')
     }
   }
@@ -67,8 +70,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     return (
       <AppLayout>
         <div className="space-y-6">
-          <ProfileSkeleton />
-          <CardSkeleton rows={4} />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-64 w-full" />
         </div>
       </AppLayout>
     )
@@ -88,9 +91,9 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   }
 
   const stats = {
-    totalOrders: customer.total_orders || 0,
-    totalSpent: customer.total_spent || 0,
-    averageOrder: customer.total_orders > 0 ? customer.total_spent / customer.total_orders : 0,
+    totalOrders: customer.total_orders ?? 0,
+    totalSpent: customer.total_spent ?? 0,
+    averageOrder: (customer.total_orders ?? 0) > 0 ? (customer.total_spent ?? 0) / (customer.total_orders ?? 0) : 0,
     lastOrder: customer.last_order_date
   }
 
@@ -178,7 +181,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
               )}
               <div className="pt-4 border-t">
                 <Badge variant={customer.customer_type === 'vip' ? 'default' : 'secondary'}>
-                  {customer.customer_type?.toUpperCase() || 'REGULAR'}
+                  {customer.customer_type?.toUpperCase() ?? 'REGULAR'}
                 </Badge>
               </div>
             </CardContent>
@@ -209,7 +212,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Pesanan Terakhir</p>
                   <p className="text-sm font-medium">
-                    {stats.lastOrder 
+                    {stats.lastOrder
                       ? new Date(stats.lastOrder).toLocaleDateString('id-ID')
                       : '-'
                     }
@@ -229,52 +232,59 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {ordersLoading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map(i => <Skeleton key={i} className="h-16" />)}
-              </div>
-            ) : orders && orders.length > 0 ? (
-              <div className="space-y-3">
-                {orders.map((order: Database['public']['Tables']['orders']['Row']) => (
-                  <div
-                    key={order.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => router.push(`/orders/${order.id}`)}
-                  >
-                    <div>
-                      <p className="font-medium">{order.order_no}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(order.created_at).toLocaleDateString('id-ID')}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{formatCurrency(order.total_amount)}</p>
-                      <Badge variant={
-                        order.status === 'DELIVERED' ? 'default' :
-                        order.status === 'CANCELLED' ? 'destructive' :
-                        'secondary'
-                      }>
-                        {order.status}
-                      </Badge>
-                    </div>
+            {(() => {
+              if (ordersLoading) {
+                return (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map(i => <Skeleton key={i} className="h-16" />)}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                Belum ada riwayat pesanan
-              </p>
-            )}
+                )
+              }
+              if (orders?.length) {
+                return (
+                  <div className="space-y-3">
+                    {orders.map((order: Order) => (
+                      <div
+                        key={order.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => router.push(`/orders/${order.id}`)}
+                      >
+                        <div>
+                          <p className="font-medium">{order.order_no}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(order.created_at ?? '').toLocaleDateString('id-ID')}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">{formatCurrency(order.total_amount ?? 0)}</p>
+                          <Badge variant={getStatusVariant(order.status ?? 'PENDING')}>
+                            {order.status ?? 'PENDING'}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              }
+              return (
+                <p className="text-center text-muted-foreground py-8">
+                  Belum ada riwayat pesanan
+                </p>
+              )
+            })()}
           </CardContent>
         </Card>
 
-        <DeleteConfirmDialog
+        <ConfirmationDialog
           open={showDeleteConfirm}
           onOpenChange={setShowDeleteConfirm}
           onConfirm={handleDelete}
-          itemName={customer.name}
+          title="Hapus Pelanggan"
+          description="Apakah Anda yakin ingin menghapus pelanggan ini? Tindakan ini tidak dapat dibatalkan."
         />
       </div>
     </AppLayout>
   )
 }
+
+export default CustomerDetailPage

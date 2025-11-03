@@ -1,8 +1,3 @@
-/**
- * Notification System Orchestrator
- * Main coordinator for all notification generation and management
- */
-
 import { automationLogger } from '@/lib/logger'
 import { InventoryNotifications } from './inventory-notifications'
 import { OrderNotifications } from './order-notifications'
@@ -11,6 +6,12 @@ import { MaintenanceNotifications } from './maintenance-notifications'
 import { SeasonalNotifications } from './seasonal-notifications'
 import { NotificationFilter } from './notification-filter'
 import type {
+
+/**
+ * Notification System Orchestrator
+ * Main coordinator for all notification generation and management
+ */
+
   SmartNotification,
   Ingredient,
   OrderForNotification,
@@ -56,8 +57,8 @@ export class NotificationSystem {
         if (priorityDiff !== 0) {return priorityDiff}
 
         // If same priority, sort by timestamp (newer first)
-        const aTime = a.timestamp?.getTime() || 0
-        const bTime = b.timestamp?.getTime() || 0
+        const aTime = a.timestamp?.getTime() ?? 0
+        const bTime = b.timestamp?.getTime() ?? 0
         return bTime - aTime
       })
       .slice(0, 20) // Limit to 20 most important notifications

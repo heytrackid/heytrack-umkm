@@ -1,10 +1,11 @@
+import { formatCurrency } from '@/lib/currency'
+import type { PriceOption, PricingOptimizationResult } from './types'
+
 /**
  * Pricing Optimizer Module
  * Handles pricing optimization and analysis
  */
 
-import { formatCurrency } from '@/lib/currency'
-import type { PriceOption, PricingOptimizationResult } from './types'
 
 export class PricingOptimizer {
   /**
@@ -14,7 +15,7 @@ export class PricingOptimizer {
     currentPrice: number,
     currentVolume: number,
     costPerUnit: number,
-    priceElasticity: number = -1.2 // Default price elasticity for food products
+    priceElasticity = -1.2 // Default price elasticity for food products
   ): PricingOptimizationResult {
     const currentProfit = (currentPrice - costPerUnit) * currentVolume
     const priceOptions: PriceOption[] = []

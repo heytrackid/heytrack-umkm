@@ -1,8 +1,3 @@
-/**
- * Inventory Notifications Component
- * Displays inventory-related notifications and alerts
- */
-
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -12,9 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { AlertTriangle, Package, ShoppingCart, X } from 'lucide-react'
 import { uiLogger } from '@/lib/logger'
-import type { NotificationsTable } from '@/types/notifications'
+import type { NotificationsTable } from '@/types/database'
 
-type InventoryNotification = NotificationsTable['Row'] & {
+/**
+ * Inventory Notifications Component
+ * Displays inventory-related notifications and alerts
+ */
+
+
+
+type InventoryNotification = NotificationsTable & {
   metadata?: {
     ingredient_id?: string
     ingredient_name?: string
@@ -25,18 +27,18 @@ type InventoryNotification = NotificationsTable['Row'] & {
   }
 }
 
-export function InventoryNotifications() {
+export const InventoryNotifications = () => {
   const [notifications, setNotifications] = useState<InventoryNotification[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchNotifications()
+    void fetchNotifications()
   }, [])
 
   const fetchNotifications = async () => {
     try {
-      setLoading(true)
+      void setLoading(true)
       const response = await fetch('/api/notifications?category=inventory&limit=10')
 
       if (!response.ok) {
@@ -44,20 +46,21 @@ export function InventoryNotifications() {
       }
 
       const data = await response.json()
-      setNotifications(data)
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      setError(errorMessage)
-      uiLogger.error({ err }, 'Failed to fetch inventory notifications')
+      void setNotifications(data)
+    } catch (err: unknown) {
+      const error = err as Error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      void setError(errorMessage)
+      uiLogger.error({ error }, 'Failed to fetch inventory notifications')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
   const markAsRead = async (notificationId: string) => {
     try {
       const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_read: true })
       })
@@ -67,15 +70,16 @@ export function InventoryNotifications() {
           prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
         )
       }
-    } catch (err) {
-      uiLogger.error({ err, notificationId }, 'Failed to mark notification as read')
+    } catch (err: unknown) {
+      const error = err as Error
+      uiLogger.error({ error, notificationId }, 'Failed to mark notification as read')
     }
   }
 
   const dismissNotification = async (notificationId: string) => {
     try {
       const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_dismissed: true })
       })
@@ -83,8 +87,9 @@ export function InventoryNotifications() {
       if (response.ok) {
         setNotifications(prev => prev.filter(n => n.id !== notificationId))
       }
-    } catch (err) {
-      uiLogger.error({ err, notificationId }, 'Failed to dismiss notification')
+    } catch (err: unknown) {
+      const error = err as Error
+      uiLogger.error({ error, notificationId }, 'Failed to dismiss notification')
     }
   }
 
@@ -123,7 +128,7 @@ export function InventoryNotifications() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
           </div>
         </CardContent>
       </Card>
@@ -188,9 +193,8 @@ export function InventoryNotifications() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 border rounded-lg ${
-                    !notification.is_read ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-200' : 'bg-card'
-                  }`}
+                  className={`p-4 border rounded-lg ${!notification.is_read ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-200' : 'bg-card'
+                    }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 flex-1">
@@ -241,7 +245,7 @@ export function InventoryNotifications() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => window.location.href = notification.action_url!}
+                              onClick={() => window.location.href = notification.action_url ?? ''}
                             >
                               View Details
                             </Button>

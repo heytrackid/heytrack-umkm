@@ -1,3 +1,11 @@
+import { MetricsCalculator } from './metrics-calculator'
+import { TrendAnalyzer } from './trend-analyzer'
+import { AlertGenerator } from './alert-generator'
+import { RecommendationEngine } from './recommendation-engine'
+import { BreakEvenAnalyzer } from './break-even-analyzer'
+import { ProjectionEngine } from './projection-engine'
+import { PricingOptimizer } from './pricing-optimizer'
+
 /**
  * Financial Automation System Orchestrator
  * Main coordinator for financial automation functionality
@@ -9,20 +17,14 @@ import type {
   ExpenseData,
   Ingredient,
   FinancialAnalysis
-} from '../types'
+} from '@/lib/automation/types'
 import type {
   BreakEvenResult,
   ROIResult,
   PricingOptimizationResult,
-  HistoricalData
+  HistoricalData,
+  ProjectionResult
 } from './types'
-import { MetricsCalculator } from './metrics-calculator'
-import { TrendAnalyzer } from './trend-analyzer'
-import { AlertGenerator } from './alert-generator'
-import { RecommendationEngine } from './recommendation-engine'
-import { BreakEvenAnalyzer } from './break-even-analyzer'
-import { ProjectionEngine } from './projection-engine'
-import { PricingOptimizer } from './pricing-optimizer'
 
 export class FinancialAutomation {
   constructor(private config: AutomationConfig) {}
@@ -67,8 +69,8 @@ export class FinancialAutomation {
    */
   projectFinancialPerformance(
     historicalData: HistoricalData[],
-    projectionMonths: number = 12
-  ): any {
+    projectionMonths = 12
+  ): ProjectionResult | { error: string } {
     return ProjectionEngine.projectFinancialPerformance(historicalData, projectionMonths)
   }
 
@@ -78,7 +80,7 @@ export class FinancialAutomation {
   calculateROI(
     initialInvestment: number,
     expectedAnnualBenefit: number,
-    timeHorizonYears: number = 3
+    timeHorizonYears = 3
   ): ROIResult {
     const totalBenefits = expectedAnnualBenefit * timeHorizonYears
     const simpleROI = ((totalBenefits - initialInvestment) / initialInvestment) * 100
@@ -109,7 +111,7 @@ export class FinancialAutomation {
     currentPrice: number,
     currentVolume: number,
     costPerUnit: number,
-    priceElasticity: number = -1.2
+    priceElasticity = -1.2
   ): PricingOptimizationResult {
     return PricingOptimizer.optimizePricing(currentPrice, currentVolume, costPerUnit, priceElasticity)
   }
@@ -120,12 +122,12 @@ export class FinancialAutomation {
   private generateROIRecommendation(roi: number, npv: number, payback: number): string {
     if (npv > 0 && roi > 20 && payback < 2) {
       return '🟢 Excellent investment - high returns with quick payback'
-    } else if (npv > 0 && roi > 10) {
+    } if (npv > 0 && roi > 10) {
       return '🟡 Good investment - positive returns expected'
-    } else if (npv > 0) {
+    } if (npv > 0) {
       return '🟠 Marginal investment - consider alternatives'
-    } else {
+    } 
       return '🔴 Poor investment - negative returns expected'
-    }
+    
   }
 }

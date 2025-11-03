@@ -1,3 +1,9 @@
+import type { ProductionBatch } from './types'
+import type {RecipesTable, IngredientsTable } from '@/types/database'
+import { productionLogger } from '@/lib/logger'
+import { isIngredient } from '@/lib/type-guards'
+
+
 /**
  * Production Services
  * Service for production management operations
@@ -5,12 +11,9 @@
 
 
 
-import type { ProductionBatch } from './types'
-import type { Database } from '@/types'
-import { productionLogger } from '@/lib/logger'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type _Recipe = RecipesTable
+type _Ingredient = IngredientsTable
 
 export class ProductionServices {
   private static instance: ProductionServices
@@ -38,7 +41,7 @@ export class ProductionServices {
         .single()
 
       if (recipeError || !recipe) {
-        throw new Error(`Recipe not found or inactive: ${batch.recipe_id}`)
+        throw new Error(`_Recipe not found or inactive: ${batch.recipe_id}`)
       }
 
       // Check if we have enough ingredients for production
@@ -55,7 +58,7 @@ export class ProductionServices {
         id: batchId,
         status: 'pending',
         scheduled_date: batch.scheduled_date || new Date().toISOString(),
-        notes: batch.notes || `Production batch for ${recipe.name}`
+        notes: batch.notes ?? `Production batch for ${recipe.name}`
       }
 
       // TODO: Save to production_batches table when it's implemented
@@ -66,9 +69,9 @@ export class ProductionServices {
 
       productionLogger.info({ batchId, recipeId: batch.recipe_id, quantity: batch.quantity }, 'Production batch scheduled successfully')
       return newBatch
-    } catch (error) {
-      productionLogger.error({ error, recipeId: batch.recipe_id }, 'Error in scheduleProductionBatch')
-      throw error
+    } catch (err) {
+      productionLogger.error({ err, recipeId: batch.recipe_id }, 'Error in scheduleProductionBatch')
+      throw err
     }
   }
 
@@ -107,10 +110,10 @@ export class ProductionServices {
         .single()
 
       if (recipeError || !recipe) {
-        throw new Error(`Recipe not found: ${recipeId}`)
+        throw new Error(`_Recipe not found: ${recipeId}`)
       }
 
-      const recipeIngredients = (recipe as any).recipe_ingredients || []
+      const recipeIngredients = (recipe).recipe_ingredients ?? []
       const insufficientIngredients: string[] = []
       const requiredIngredients: Array<{
         ingredient_id: string
@@ -123,16 +126,27 @@ export class ProductionServices {
       let feasible = true
 
       for (const ri of recipeIngredients) {
-        const ingredient = ri.ingredients as Ingredient
+        if (!ri.ingredients) {
+          productionLogger.warn({ recipeId, ingredientId: ri.ingredient_id }, 'Missing ingredient data for recipe ingredient')
+          continue
+        }
+        
+        // Use type guard to validate ingredient data
+        if (!isIngredient(ri.ingredients)) {
+          productionLogger.warn({ recipeId, ingredientId: ri.ingredient_id }, 'Invalid ingredient data structure')
+          continue
+        }
+        
+        const ingredient = ri.ingredients
         const requiredQuantity = ri.quantity_needed * quantity
-        const availableQuantity = ingredient.current_stock || 0
+        const availableQuantity = ingredient.current_stock ?? 0
 
         requiredIngredients.push({
           ingredient_id: ingredient.id,
           ingredient_name: ingredient.name,
           required_quantity: requiredQuantity,
           available_quantity: availableQuantity,
-          unit: ingredient.unit || 'pcs'
+          unit: ingredient.unit ?? 'pcs'
         })
 
         if (availableQuantity < requiredQuantity) {
@@ -146,8 +160,8 @@ export class ProductionServices {
         insufficientIngredients,
         requiredIngredients
       }
-    } catch (error) {
-      productionLogger.error({ error, recipeId, quantity }, 'Error in checkProductionFeasibility')
+    } catch (err) {
+      productionLogger.error({ err, recipeId, quantity }, 'Error in checkProductionFeasibility')
       return {
         feasible: false,
         insufficientIngredients: ['Error checking feasibility'],
@@ -178,10 +192,21 @@ export class ProductionServices {
       }
 
       // Update stock levels for each ingredient
-      for (const ri of recipeIngredients || []) {
-        const ingredient = ri.ingredients as unknown as Ingredient
+      for (const ri of recipeIngredients ?? []) {
+        if (!ri.ingredients) {
+          productionLogger.warn({ recipeId, ingredientId: ri.ingredient_id }, 'Missing ingredient data for recipe ingredient')
+          continue
+        }
+        
+        // Use type guard to validate ingredient data
+        if (!isIngredient(ri.ingredients)) {
+          productionLogger.warn({ recipeId, ingredientId: ri.ingredient_id }, 'Invalid ingredient data structure')
+          continue
+        }
+        
+        const ingredient = ri.ingredients
         const requiredQuantity = ri.quantity_needed * quantity
-        const newStock = Math.max(0, (ingredient.current_stock || 0) - requiredQuantity)
+        const newStock = Math.max(0, (ingredient.current_stock ?? 0) - requiredQuantity)
 
         const { error: updateError } = await supabase
           .from('ingredients')
@@ -204,33 +229,33 @@ export class ProductionServices {
     }
   }
 
-  async getProductionQueue(): Promise<ProductionBatch[]> {
+  getProductionQueue(): ProductionBatch[] {
     try {
       // TODO: Implement when production_batches table is created
       // For now, return empty array
       return []
-    } catch (error) {
-      productionLogger.error({ error }, 'Error in getProductionQueue')
+    } catch (err) {
+      productionLogger.error({ err }, 'Error in getProductionQueue')
       return []
     }
   }
 
-  async updateBatchStatus(batchId: string, status: ProductionBatch['status']): Promise<void> {
+  updateBatchStatus(batchId: string, status: ProductionBatch['status']): void {
     try {
       // TODO: Implement when production_batches table is created
       productionLogger.info({ batchId, status }, 'Updating production batch status')
-    } catch (error) {
-      productionLogger.error({ error, batchId, status }, 'Error in updateBatchStatus')
-      throw error
+    } catch (err) {
+      productionLogger.error({ err, batchId, status }, 'Error in updateBatchStatus')
+      throw err
     }
   }
 
-  async getActiveBatches(): Promise<ProductionBatch[]> {
+  getActiveBatches(): ProductionBatch[] {
     try {
       // TODO: Implement when production_batches table is created
       return []
-    } catch (error) {
-      productionLogger.error({ error }, 'Error in getActiveBatches')
+    } catch (err) {
+      productionLogger.error({ err }, 'Error in getActiveBatches')
       return []
     }
   }
@@ -238,9 +263,9 @@ export class ProductionServices {
   async cancelProductionBatch(batchId: string): Promise<void> {
     try {
       const { createServerClient } = await import('@/utils/supabase/client-safe')
-      const supabase = await createServerClient()
+      const _supabase = await createServerClient()
 
-      // TODO: Implement batch cancellation logic
+      // TODO: Implement batch cancellation logic using _supabase
       // This would involve:
       // 1. Finding the batch
       // 2. Returning reserved ingredients to stock
@@ -270,7 +295,7 @@ export class ProductionServices {
         .single()
 
       if (error || !recipe) {
-        throw new Error(`Recipe not found: ${recipeId}`)
+        throw new Error(`_Recipe not found: ${recipeId}`)
       }
 
       // Simple capacity calculation based on available ingredients

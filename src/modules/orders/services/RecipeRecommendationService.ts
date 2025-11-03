@@ -1,9 +1,14 @@
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
-import type { RecipeOption } from './OrderRecipeService'
+import { createClient } from '@/utils/supabase/server'
+import type { OrdersTable, OrderItemsTable, RecipesTable } from '@/types/database'
+import type { RecipeOption } from '../types'
+
+
 
 /**
  * Service for handling recipe recommendations based on order history
+ * SERVER-ONLY: Uses server client for database operations
  */
 export class RecipeRecommendationService {
   /**
@@ -11,9 +16,10 @@ export class RecipeRecommendationService {
    */
   static async getRecipeRecommendations(
     customer_name?: string,
-    limit: number = 5
+    limit = 5
   ): Promise<RecipeOption[]> {
     try {
+      const supabase = await createClient()
       let query = supabase
         .from('orders')
         .select(`
@@ -24,7 +30,12 @@ export class RecipeRecommendationService {
               id,
               name,
               category,
-              price
+              selling_price,
+              cost_per_unit,
+              margin_percentage,
+              prep_time,
+              cook_time,
+              servings
             )
           )
         `)
@@ -34,7 +45,7 @@ export class RecipeRecommendationService {
       }
 
       query = query
-        .eq('status', 'completed')
+        .eq('status', 'DELIVERED')
         .order('created_at', { ascending: false })
         .limit(50) // Get recent orders
 
@@ -43,28 +54,55 @@ export class RecipeRecommendationService {
       if (error) {throw error}
       if (!orders) {return []}
 
-      // Analyze order patterns
+      // Define types for order query result using generated types
+      type Order = OrdersTable
+      type OrderItem = OrderItemsTable
+      type Recipe = RecipesTable
+
+      type OrderQueryResult = Order & {
+        order_items: Array<OrderItem & {
+          recipe: Array<Pick<Recipe, 'id' | 'name' | 'category' | 'selling_price' | 'cost_per_unit' | 'margin_percentage' | 'prep_time' | 'cook_time'>> | null
+        }> | null
+      }
+
+      // Analyze order patterns - use type instead of interface
       interface RecipeFrequencyData {
         count: number
         recipe: {
           id: string
           name: string
           category: string | null
-          price: number | null
+          selling_price: number | null
+          cost_per_unit: number | null
+          margin_percentage: number | null
+          prep_time: number | null
+          cook_time: number | null
         }
       }
       const recipeFrequency = new Map<string, RecipeFrequencyData>()
 
-      orders.forEach(order => {
-        order.order_items?.forEach((item: { recipe_id: string; quantity: number; recipe: RecipeFrequencyData['recipe'] | null }) => {
-          if (item.recipe) {
-            const existing = recipeFrequency.get(item.recipe.id)
+      orders.forEach((order: unknown) => {
+        const typedOrder = order as OrderQueryResult
+        typedOrder.order_items?.forEach((item) => {
+          // Supabase returns arrays for joins, get first element
+          const recipe = item.recipe?.[0]
+          if (recipe) {
+            const existing = recipeFrequency.get(recipe.id)
             if (existing) {
               existing.count += item.quantity
             } else {
-              recipeFrequency.set(item.recipe.id, {
+              recipeFrequency.set(recipe.id, {
                 count: item.quantity,
-                recipe: item.recipe
+                recipe: {
+                  id: recipe.id,
+                  name: recipe.name,
+                  category: recipe.category,
+                  selling_price: recipe.selling_price,
+                  cost_per_unit: recipe.cost_per_unit,
+                  margin_percentage: recipe.margin_percentage,
+                  prep_time: recipe.prep_time,
+                  cook_time: recipe.cook_time
+                }
               })
             }
           }
@@ -75,21 +113,22 @@ export class RecipeRecommendationService {
       const recommendations = Array.from(recipeFrequency.entries())
         .sort((a, b) => b[1].count - a[1].count)
         .slice(0, limit)
-        .map(([recipeId, data]) => ({
+        .map(([, data]) => ({
           id: data.recipe.id,
           name: data.recipe.name,
           category: data.recipe.category,
           servings: 1, // Default
-          price: data.recipe.price || 0,
-          hpp_cost: 0, // Would need to calculate
-          margin: 0, // Would need to calculate
+          selling_price: data.recipe.selling_price ?? 0,
+          cost_per_unit: data.recipe.cost_per_unit ?? null,
+          margin_percentage: data.recipe.margin_percentage ?? null,
           is_available: true, // Would need to check
-          estimated_prep_time: 0 // Would need to calculate
-        }))
+          prep_time: data.recipe.prep_time ?? null,
+          cook_time: data.recipe.cook_time ?? null
+        } as RecipeOption))
 
       return recommendations
-    } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error getting recipe recommendations')
+    } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Error getting recipe recommendations')
       return []
     }
   }

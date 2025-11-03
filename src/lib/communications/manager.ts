@@ -1,12 +1,14 @@
+import { WhatsAppService } from './whatsapp'
+import { SmartNotificationSystem } from './notifications'
+import { EmailService } from './email'
+import type { CommunicationConfig, OrderData, SmartNotification } from './types'
+
+
 /**
  * Communications Manager Module
  * Unified manager for all communication services
  */
 
-import { WhatsAppService } from './whatsapp'
-import { SmartNotificationSystem } from './notifications'
-import { EmailService } from './email'
-import type { CommunicationConfig, OrderData, SmartNotification } from './types'
 
 export class CommunicationsManager {
   private static instance: CommunicationsManager;
@@ -49,18 +51,18 @@ export class CommunicationsManager {
   /**
    * Send order notification via appropriate channel
    */
-  async sendOrderNotification(orderData: OrderData, type: 'confirmation' | 'reminder' | 'payment' | 'followup'): Promise<void> {
+  sendOrderNotification(orderData: OrderData, type: 'confirmation' | 'reminder' | 'payment' | 'followup'): void {
     // Send WhatsApp message
     if (this.whatsapp) {
       switch (type) {
         case 'confirmation':
-          await this.whatsapp.sendOrderConfirmation(orderData);
+          this.whatsapp.sendOrderConfirmation(orderData);
           break;
         case 'reminder':
-          await this.whatsapp.sendDeliveryReminder(orderData);
+          this.whatsapp.sendDeliveryReminder(orderData);
           break;
         case 'followup':
-          await this.whatsapp.sendFollowUp(orderData);
+          this.whatsapp.sendFollowUp(orderData);
           break;
       }
     }
@@ -71,7 +73,7 @@ export class CommunicationsManager {
       priority: 'medium' as const,
       title: `Pesanan ${orderData.id}`,
       message: `Status pesanan: ${orderData.status}`,
-      data: orderData,
+      data: JSON.parse(JSON.stringify(orderData)) as Record<string, unknown>,
       status: 'sent' as const
     };
 

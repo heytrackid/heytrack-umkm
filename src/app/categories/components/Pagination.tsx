@@ -1,9 +1,7 @@
-import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import type { PageSize } from '../constants'
-import { PAGINATION_DEFAULTS } from '../constants'
+import { type PageSize, PAGINATION_DEFAULTS } from '@/app/categories/constants'
 
 interface PaginationProps {
   currentPage: number
@@ -16,7 +14,7 @@ interface PaginationProps {
   onPageSizeChange: (size: PageSize) => void
 }
 
-export function Pagination({
+export const Pagination = ({
   currentPage,
   totalPages,
   pageSize,
@@ -25,8 +23,8 @@ export function Pagination({
   endItem,
   onPageChange,
   onPageSizeChange
-}: PaginationProps) {
-  if (totalPages <= 1) {return null}
+}: PaginationProps) => {
+  if (totalPages <= 1) { return null }
 
   return (
     <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">

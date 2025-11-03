@@ -1,16 +1,8 @@
-import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Calendar } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import type { PeriodType } from '../constants'
-import { filterPeriodOptions } from '../constants'
+import { Badge } from '@/components/ui/badge'
+import { type PeriodType } from '@/app/cash-flow/constants'
 
 interface FilterPeriodProps {
   selectedPeriod: PeriodType
@@ -24,7 +16,14 @@ interface FilterPeriodProps {
   isMobile: boolean
 }
 
-export default function FilterPeriod({
+const presetPeriods = [
+  { value: 'week' as PeriodType, label: '7 Hari', shortLabel: '7D' },
+  { value: 'month' as PeriodType, label: '30 Hari', shortLabel: '30D' },
+  { value: 'year' as PeriodType, label: 'Tahun Ini', shortLabel: 'Tahun' },
+  { value: 'custom' as PeriodType, label: 'Kustom', shortLabel: 'Kustom' }
+]
+
+const FilterPeriod = ({
   selectedPeriod,
   onPeriodChange,
   startDate,
@@ -34,63 +33,89 @@ export default function FilterPeriod({
   onApplyFilters,
   loading,
   isMobile
-}: FilterPeriodProps) {
+}: FilterPeriodProps) => {
+  const handlePresetClick = (period: PeriodType) => {
+    onPeriodChange(period)
+    if (period !== 'custom') {
+      // Auto-apply for preset periods
+      setTimeout(() => onApplyFilters(), 100)
+    }
+  }
+
+  const getActivePeriodText = () => {
+    if (selectedPeriod === 'custom' && startDate && endDate) {
+      const start = new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+      const end = new Date(endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+      return `${start} – ${end}`
+    }
+    return presetPeriods.find(p => p.value === selectedPeriod)?.label ?? ''
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
-          Filter Periode
-        </CardTitle>
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Filter Periode
+            </CardTitle>
+            <CardDescription className="mt-1">
+              Periode aktif: <Badge variant="secondary" className="ml-1">{getActivePeriodText()}</Badge>
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-4'}`}>
-          <div>
-            <label className="text-sm font-medium mb-2 block">Periode</label>
-            <Select value={selectedPeriod} onValueChange={onPeriodChange}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {filterPeriodOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="space-y-4">
+          {/* Preset Buttons */}
+          <div className={`grid gap-2 ${isMobile ? 'grid-cols-4' : 'grid-cols-4'}`}>
+            {presetPeriods.map(preset => (
+              <Button
+                key={preset.value}
+                variant={selectedPeriod === preset.value ? 'default' : 'outline'}
+                size={isMobile ? 'sm' : 'default'}
+                onClick={() => handlePresetClick(preset.value)}
+                disabled={loading}
+                className="w-full"
+              >
+                {isMobile ? preset.shortLabel : preset.label}
+              </Button>
+            ))}
           </div>
 
+          {/* Custom Date Range */}
           {selectedPeriod === 'custom' && (
-            <>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => onStartDateChange(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                />
+            <div className="space-y-3 pt-2 border-t">
+              <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => onStartDateChange(e.target.value)}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => onEndDateChange(e.target.value)}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => onEndDateChange(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                />
-              </div>
-            </>
+              <Button onClick={onApplyFilters} className="w-full" disabled={loading}>
+                {loading ? 'Memuat...' : 'Terapkan Filter'}
+              </Button>
+            </div>
           )}
-
-          <div className="flex items-end">
-            <Button onClick={onApplyFilters} className="w-full" disabled={loading}>
-              {loading ? 'Memuat...' : 'Terapkan Filter'}
-            </Button>
-          </div>
         </div>
       </CardContent>
     </Card>
   )
 }
+
+export default FilterPeriod

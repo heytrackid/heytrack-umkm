@@ -1,14 +1,15 @@
+import { Suspense, lazy, Component, type ComponentType, type ReactNode, useEffect, type FC } from 'react'
+import { Loader2 } from 'lucide-react'
+import { uiLogger } from '@/lib/logger'
+
 /**
  * Lazy Wrapper Component
  * Provides consistent lazy loading with skeletons and error boundaries
  */
 
-import React, { ComponentType, Suspense, lazy, Component, ReactNode } from 'react'
-import { Loader2 } from 'lucide-react'
-import { uiLogger } from '@/lib/logger'
 
 // Lazy loading wrapper with consistent loading states
-export function LazyWrapper({
+export const LazyWrapper = ({
   children,
   fallback,
   errorFallback
@@ -16,7 +17,7 @@ export function LazyWrapper({
   children: ReactNode
   fallback?: ReactNode
   errorFallback?: ReactNode
-}) {
+}) => {
   const defaultFallback = (
     <div className="flex items-center justify-center p-8">
       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -38,8 +39,8 @@ export function LazyWrapper({
   )
 
   return (
-    <ErrorBoundary fallback={errorFallback || defaultErrorFallback}>
-      <Suspense fallback={fallback || defaultFallback}>
+    <ErrorBoundary fallback={errorFallback ?? defaultErrorFallback}>
+      <Suspense fallback={fallback ?? defaultFallback}>
         {children}
       </Suspense>
     </ErrorBoundary>
@@ -60,11 +61,11 @@ class ErrorBoundary extends Component<
     return { hasError: true }
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
-    uiLogger.error({ error: error, errorInfo: errorInfo }, 'Lazy loading error:')
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    uiLogger.error({ error, errorInfo }, 'Lazy loading error:')
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return this.props.fallback
     }
@@ -75,30 +76,34 @@ class ErrorBoundary extends Component<
 
 // Utility function to create lazy components with consistent patterns
 export function createLazyComponent(
-  importFunc: () => Promise<{ default: ComponentType<any> }>,
+  importFunc: () => Promise<{ default: ComponentType<Record<string, unknown>> }>,
   fallback?: ReactNode
-) {
+): ComponentType<Record<string, unknown>> {
   const LazyComponent = lazy(importFunc)
 
-  return (props: any) => (
+  const WrappedComponent: FC<Record<string, unknown>> = (props) => (
     <LazyWrapper fallback={fallback}>
       <LazyComponent {...props} />
     </LazyWrapper>
   )
+
+  WrappedComponent.displayName = 'LazyComponent'
+
+  return WrappedComponent
 }
 
 // Preload utility for critical components
-export function preloadComponent(importFunc: () => Promise<any>) {
-  const link = document.createElement('link')
-  link.rel = 'preload'
-  link.as = 'script'
-  link.href = '' // This would need to be implemented based on the import
-  document.head.appendChild(link)
+export function preloadComponent<T = Record<string, unknown>>(importFunc: () => Promise<{ default: ComponentType<T> }>) {
+  // Note: Actual implementation would need dynamic import URL resolution
+  // For now, we just type the function properly
+  // The actual preload would need the resolved module URL
+  const modulePromise = importFunc();
+  return modulePromise;
 }
 
 // Performance monitoring hook
 export function usePerformanceMonitor(componentName: string) {
-  React.useEffect(() => {
+  useEffect(() => {
     const startTime = performance.now()
 
     return () => {
@@ -106,11 +111,16 @@ export function usePerformanceMonitor(componentName: string) {
       const loadTime = endTime - startTime
 
       // Log component load time
-      uiLogger.info({ componentName: componentName, loadTime: loadTime }, `${componentName} loaded in ${loadTime.toFixed(2)}ms`)
+      uiLogger.info({ componentName, loadTime }, `${componentName} loaded in ${loadTime.toFixed(2)}ms`)
 
       // Could send to analytics service
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        ;(window as any).gtag('event', 'component_load_time', {
+      interface WindowWithGtag extends Window {
+        gtag?: (event: string, action: string, params: Record<string, unknown>) => void
+      }
+
+      const win = window as WindowWithGtag
+      if (typeof window !== 'undefined' && win.gtag) {
+        win.gtag('event', 'component_load_time', {
           component_name: componentName,
           load_time: loadTime,
           page_path: window.location.pathname
@@ -124,13 +134,13 @@ export function usePerformanceMonitor(componentName: string) {
 export function logBundleSize() {
   if (typeof window !== 'undefined' && 'performance' in window) {
     // Get navigation timing
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+    const navigation = performance.getEntriesByType('navigation')[0]
 
     if (navigation) {
       const loadTime = navigation.loadEventEnd - navigation.fetchStart
       const domContentLoaded = navigation.domContentLoadedEventEnd - navigation.fetchStart
 
-      uiLogger.info({ 
+      uiLogger.info({
         performanceData: {
           totalLoadTime: `${loadTime.toFixed(0)}ms`,
           domContentLoaded: `${domContentLoaded.toFixed(0)}ms`,
@@ -153,4 +163,6 @@ export function logBundleSize() {
       return () => observer.disconnect()
     }
   }
+
+  return null
 }

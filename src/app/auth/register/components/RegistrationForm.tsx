@@ -1,16 +1,16 @@
-import { useState } from 'react'
-import * as React from 'react'
+'use client'
+
+import { type FormEvent, useEffect } from 'react'
 import Link from 'next/link'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Check, Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator'
 import { PasswordRequirements } from './PasswordRequirements'
-import { useRegistration } from '../hooks/useRegistration'
-import type { ErrorAction } from '../types'
+import { useRegistration } from '@/app/auth/register/hooks/useRegistration'
 
 interface RegistrationFormProps {
   password: string
@@ -24,7 +24,7 @@ interface RegistrationFormProps {
   onSuccess?: () => void
 }
 
-export function RegistrationForm({
+export const RegistrationForm = ({
   password,
   confirmPassword,
   showPassword,
@@ -34,7 +34,7 @@ export function RegistrationForm({
   onTogglePasswordVisibility,
   onToggleConfirmPasswordVisibility,
   onSuccess
-}: RegistrationFormProps) {
+}: RegistrationFormProps) => {
   const {
     error,
     errorAction,
@@ -46,16 +46,16 @@ export function RegistrationForm({
   } = useRegistration()
 
   // Notify parent of success
-  React.useEffect(() => {
+  useEffect(() => {
     if (success && onSuccess) {
       onSuccess()
     }
   }, [success, onSuccess])
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    await handleSubmit(formData)
+    handleSubmit(formData)
   }
 
   return (
@@ -107,7 +107,7 @@ export function RegistrationForm({
               />
             </div>
             {fieldErrors.email && (
-              <p id="email-error" className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
+              <p id="email-error" className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in" role="alert">
                 {fieldErrors.email}
               </p>
             )}
@@ -153,7 +153,7 @@ export function RegistrationForm({
               </Button>
             </div>
             {fieldErrors.password && (
-              <p id="password-error" className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
+              <p id="password-error" className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in" role="alert">
                 {fieldErrors.password}
               </p>
             )}
@@ -204,7 +204,7 @@ export function RegistrationForm({
             {fieldErrors.confirmPassword && (
               <p
                 id="confirm-password-error"
-                className="text-sm text-red-600 dark:text-red-400 animate-fade-in"
+                className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in"
                 role="alert"
               >
                 {fieldErrors.confirmPassword}

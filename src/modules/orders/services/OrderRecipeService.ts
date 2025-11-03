@@ -4,43 +4,9 @@ import { OrderValidationService } from './OrderValidationService'
 import { RecipeRecommendationService } from './RecipeRecommendationService'
 import { ProductionTimeService } from './ProductionTimeService'
 import { InventoryUpdateService } from './InventoryUpdateService'
+import type { RecipeOption, OrderPricing } from '../types'
 
-export interface RecipeOption {
-  id: string
-  name: string
-  category: string
-  servings: number
-  description?: string
-  price: number
-  hpp_cost: number
-  margin: number
-  is_available: boolean
-  estimated_prep_time: number
-}
 
-export interface OrderItemCalculation {
-  recipe_id: string
-  recipe_name: string
-  quantity: number
-  unit_price: number
-  total_price: number
-  hpp_cost: number
-  total_cost: number
-  profit: number
-  margin_percentage: number
-}
-
-export interface OrderPricing {
-  items: OrderItemCalculation[]
-  subtotal: number
-  tax_amount: number
-  tax_rate: number
-  discount_amount: number
-  total_amount: number
-  total_hpp_cost: number
-  total_profit: number
-  overall_margin: number
-}
 
 /**
  * Main service class for order-recipe operations
@@ -50,14 +16,14 @@ export class OrderRecipeService {
   /**
    * Get available recipes for order selection
    */
-  static async getAvailableRecipes(): Promise<RecipeOption[]> {
+  static getAvailableRecipes(): Promise<RecipeOption[]> {
     return RecipeAvailabilityService.getAvailableRecipes()
   }
 
   /**
    * Calculate pricing for order items
    */
-  static async calculateOrderPricing(
+  static calculateOrderPricing(
     items: Array<{
       recipe_id: string
       quantity: number
@@ -75,7 +41,7 @@ export class OrderRecipeService {
   /**
    * Validate order items against inventory
    */
-  static async validateOrderAgainstInventory(
+  static validateOrderAgainstInventory(
     items: Array<{
       recipe_id: string
       quantity: number
@@ -91,9 +57,9 @@ export class OrderRecipeService {
   /**
    * Get recipe recommendations based on order history
    */
-  static async getRecipeRecommendations(
+  static getRecipeRecommendations(
     customer_name?: string,
-    limit: number = 5
+    limit = 5
   ): Promise<RecipeOption[]> {
     return RecipeRecommendationService.getRecipeRecommendations(customer_name, limit)
   }
@@ -101,7 +67,7 @@ export class OrderRecipeService {
   /**
    * Calculate production time estimate for order
    */
-  static async calculateProductionTime(
+  static calculateProductionTime(
     items: Array<{
       recipe_id: string
       quantity: number
@@ -118,13 +84,14 @@ export class OrderRecipeService {
   /**
    * Update ingredient inventory after order confirmation
    */
-  static async updateInventoryForOrder(
+  static updateInventoryForOrder(
     order_id: string,
+    user_id: string,
     items: Array<{
       recipe_id: string
       quantity: number
     }>
   ): Promise<void> {
-    return InventoryUpdateService.updateInventoryForOrder(order_id, items)
+    return InventoryUpdateService.updateInventoryForOrder(order_id, user_id, items)
   }
 }

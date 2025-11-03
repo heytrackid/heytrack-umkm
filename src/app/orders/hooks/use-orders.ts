@@ -1,31 +1,52 @@
-// Orders service hooks with multi-currency and optional VAT support
-'use client'
-
-import * as React from 'react'
 import { useMemo } from 'react'
-import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks';
+import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks'
+import { formatCurrency, parseCurrencyString } from '@/lib/currency'
 import type {
   Order,
   OrderItem,
-  OrderPayment,
   CreateOrderData,
   UpdateOrderData,
   OrderFilters,
   OrderSummary,
-  OrderStatus,
   OrderTotalsBreakdown,
   InvoiceData
-} from '../types/orders.types';
-import {
-  OrderAnalytics
-} from '../types/orders.types'
-import {
-  DEFAULT_ORDERS_CONFIG,
-  calculateOrderTotals,
-  type OrdersModuleConfig
-} from '../config/orders.config'
-import { REGIONAL_DEFAULTS, RegionalDefaults } from '@/lib/shared/utils/currency'
-import { formatCurrency, parseCurrencyString } from '@/lib/currency'
+} from '@/app/orders/types/orders.types'
+import { DEFAULT_ORDERS_CONFIG, calculateOrderTotals, type OrdersModuleConfig, type OrderPriority } from '../config/orders.config' 
+
+interface FinancialMetadata {
+  currency?: string | null
+  tax_rate?: number | null
+  tax_inclusive?: boolean | null
+}
+
+const hasFinancialMetadata = (order: Order): order is Order & FinancialMetadata =>
+  typeof order === 'object' &&
+  order !== null &&
+  ('currency' in order || 'tax_rate' in order || 'tax_inclusive' in order)
+
+const resolveOrderCurrency = (order: Order): string => {
+  if (hasFinancialMetadata(order) && typeof order.currency === 'string' && order.currency.trim().length > 0) {
+    return order.currency
+  }
+
+  return DEFAULT_ORDERS_CONFIG.currency.default
+}
+
+const resolveOrderTaxRate = (order: Order): number => {
+  if (hasFinancialMetadata(order) && typeof order.tax_rate === 'number') {
+    return order.tax_rate
+  }
+
+  return DEFAULT_ORDERS_CONFIG.tax.default_rate
+}
+
+const resolveOrderTaxInclusive = (order: Order): boolean => {
+  if (hasFinancialMetadata(order) && typeof order.tax_inclusive === 'boolean') {
+    return order.tax_inclusive
+  }
+
+  return DEFAULT_ORDERS_CONFIG.tax.is_inclusive
+}
 
 // Main orders hook
 export function useOrders(filters?: OrderFilters) {
@@ -51,40 +72,69 @@ export function useOrders(filters?: OrderFilters) {
   } = useSupabaseCRUD('orders')
 
   // Combine loading states
-  const loading = queryLoading || crudLoading
+  const loading = [queryLoading, crudLoading].some(Boolean)
 
   // Combine errors
-  const error = queryError || crudError
+  const error = queryError ?? crudError
 
   // Memoized orders data
   const orders = useMemo(() => {
-    if (!ordersData) return []
+    if (!ordersData) {return []}
 
     // Apply filters if provided
     let filteredOrders = ordersData
 
     if (filters) {
-      if (filters.status) {
-        filteredOrders = filteredOrders.filter(order => order.status === filters.status)
-      }
-      if (filters.payment_status) {
-        filteredOrders = filteredOrders.filter(order => order.payment_status === filters.payment_status)
-      }
-      if (filters.priority) {
-        filteredOrders = filteredOrders.filter(order => order.priority === filters.priority)
-      }
-      if (filters.date_from) {
-        filteredOrders = filteredOrders.filter(order => new Date(order.created_at!) >= new Date(filters.date_from!))
-      }
-      if (filters.date_to) {
-        filteredOrders = filteredOrders.filter(order => new Date(order.created_at!) <= new Date(filters.date_to!))
-      }
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase()
-        filteredOrders = filteredOrders.filter(order =>
-          order.customer_name?.toLowerCase().includes(searchLower) ||
-          order.order_no?.toLowerCase().includes(searchLower)
+      const {
+        status,
+        payment_status: paymentStatus,
+        priority,
+        date_from: dateFrom,
+        date_to: dateTo,
+        search
+      } = filters
+
+      if (Array.isArray(status) && status.length > 0) {
+        filteredOrders = filteredOrders.filter(({ status: orderStatus }) =>
+          typeof orderStatus === 'string' && status.includes(orderStatus)
         )
+      }
+
+      if (paymentStatus && Array.isArray(paymentStatus) && paymentStatus.length > 0) {
+        filteredOrders = filteredOrders.filter(({ payment_status: orderPaymentStatus }) =>
+          typeof orderPaymentStatus === 'string' && (paymentStatus as string[]).includes(orderPaymentStatus)
+        )
+      }
+
+      if (Array.isArray(priority) && priority.length > 0) {
+        filteredOrders = filteredOrders.filter(({ priority: orderPriority }) =>
+          typeof orderPriority === 'string' && priority.includes(orderPriority as OrderPriority)
+        )
+      }
+
+      if (dateFrom) {
+        const fromDate = new Date(dateFrom)
+        filteredOrders = filteredOrders.filter(({ created_at }) => {
+          if (!created_at) {return false}
+          return new Date(created_at) >= fromDate
+        })
+      }
+
+      if (dateTo) {
+        const toDate = new Date(dateTo)
+        filteredOrders = filteredOrders.filter(({ created_at }) => {
+          if (!created_at) {return false}
+          return new Date(created_at) <= toDate
+        })
+      }
+
+      if (typeof search === 'string' && search.trim().length > 0) {
+        const searchLower = search.toLowerCase()
+        filteredOrders = filteredOrders.filter(order => {
+          const name = order.customer_name?.toLowerCase() ?? ''
+          const orderNo = order.order_no?.toLowerCase() || ''
+          return name.includes(searchLower) || orderNo.includes(searchLower)
+        })
       }
     }
 
@@ -114,7 +164,7 @@ export function useOrderItems(orderId: string) {
     refetch
   } = useSupabaseQuery('order_items', {
     filter: { order_id: orderId },
-    orderBy: { column: 'created_at', ascending: true }
+    orderBy: { column: 'id', ascending: true }
   })
 
   // Use useSupabaseCRUD for operations
@@ -137,18 +187,20 @@ export function useOrderItems(orderId: string) {
 }
 
 // Order payments tracking
-export function useOrderPayments(orderId: string) {
+export function useOrderPayments(_orderId: string) {
   // TODO: Implement when order_payments table is created
   // For now, return empty data structure
+  const notImplemented = (action: string) => Promise.reject(new Error(`${action} order payments is not yet implemented`))
+
   return {
-    data: [],
-    payments: [],
+    data: [] as never[],
+    payments: [] as never[],
     loading: false,
     error: null,
-    create: async () => { throw new Error('Order payments not yet implemented') },
-    update: async () => { throw new Error('Order payments not yet implemented') },
-    remove: async () => { throw new Error('Order payments not yet implemented') },
-    refresh: async () => {}
+    create: () => notImplemented('Creating'),
+    update: () => notImplemented('Updating'),
+    remove: () => notImplemented('Removing'),
+    refresh: () => Promise.resolve()
   }
 }
 
@@ -206,45 +258,31 @@ export function useOrderSummary(filters?: OrderFilters): {
     let cancelledOrders = 0
 
     orders.forEach(order => {
-      // Revenue tracking by currency
-      if (!revenueByCurrency[order.currency]) {
-        revenueByCurrency[order.currency] = 0
+      const currency = resolveOrderCurrency(order)
+      revenueByCurrency[currency] ||= 0
+      if (typeof order.total_amount === 'number') {
+        revenueByCurrency[currency] += order.total_amount
+        totalRevenue += order.total_amount
       }
-      revenueByCurrency[order.currency] += order.total_amount
-      totalRevenue += order.total_amount // Assuming base currency conversion
 
       // Status counts
       switch (order.status) {
-        case 'delivered':
+        case 'DELIVERED':
           completedOrders++
           break
-        case 'cancelled':
-        case 'refunded':
+        case 'CANCELLED':
           cancelledOrders++
           break
-        case 'draft':
-        case 'confirmed':
-        case 'payment_pending':
-        case 'paid':
-        case 'in_production':
-        case 'ready':
+        case 'PENDING':
+        case 'CONFIRMED':
+        case 'IN_PROGRESS':
+        case 'READY':
           pendingOrders++
           break
       }
 
-      // Top selling items tracking
-      order.items?.forEach((item: any) => {
-        if (!topSellingItems[item.recipe_id]) {
-          topSellingItems[item.recipe_id] = {
-            recipe_id: item.recipe_id,
-            recipe_name: item.recipe_name,
-            quantity_sold: 0,
-            revenue: 0
-          }
-        }
-        topSellingItems[item.recipe_id].quantity_sold += item.quantity
-        topSellingItems[item.recipe_id].revenue += item.total_price
-      })
+      // Top selling items tracking - items would need to be fetched separately
+      // Skipping for now as order.items doesn't exist on the base type
     })
 
     return {
@@ -274,8 +312,8 @@ export function useOrderStatus(orderId: string) {
         status: newStatus,
         notes: reason ? `Status changed to ${newStatus}: ${reason}` : undefined
       })
-    } catch (error: unknown) {
-      throw new Error(`Failed to update order status: ${error}`)
+    } catch (err: unknown) {
+      throw new Error(`Failed to update order status: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
@@ -303,19 +341,21 @@ export function useOrderStatus(orderId: string) {
 export function useOrderCurrency(currency?: string) {
   const defaultCurrency = DEFAULT_ORDERS_CONFIG.currency.default
 
-  const formatAmount = (amount: number, options?: {
+  const formatAmount = (amount: number, _options?: {
     showSymbol?: boolean
     showCode?: boolean
   }) => {
-    return formatCurrency(amount, { code: currency || defaultCurrency, symbol: '$', name: 'USD', decimals: 2 })
+    const activeCurrency = currency ?? defaultCurrency
+    return formatCurrency(amount, { code: activeCurrency, symbol: '$', name: 'USD', decimals: 2 })
   }
 
   const parseAmount = (currencyString: string) => {
-    return parseCurrencyString(currencyString, { code: currency || defaultCurrency, symbol: '$', name: 'USD', decimals: 2 })
+    const activeCurrency = currency ?? defaultCurrency
+    return parseCurrencyString(currencyString, { code: activeCurrency, symbol: '$', name: 'USD', decimals: 2 })
   }
 
   return {
-    currency: currency || defaultCurrency,
+    currency: currency ?? defaultCurrency,
     formatAmount,
     parseAmount
   }
@@ -324,21 +364,30 @@ export function useOrderCurrency(currency?: string) {
 // Invoice generation hook
 export function useInvoiceGeneration() {
   const generateInvoice = (order: Order, companyInfo?: InvoiceData['company_info']): InvoiceData => {
+    // Calculate subtotal from total_amount and discount
+    const discountAmount = order.discount ?? 0
+    const totalAmount = order.total_amount ?? 0
+    const taxAmount = order.tax_amount ?? 0
+    const shippingAmount = order.delivery_fee ?? 0
+    const itemsSubtotal = totalAmount - taxAmount - shippingAmount + discountAmount
+    
     const totalsBreakdown: OrderTotalsBreakdown = {
-      items_subtotal: order.subtotal,
-      discount_amount: order.discount_amount,
-      taxable_amount: order.subtotal - order.discount_amount,
-      tax_amount: order.tax_amount,
-      shipping_amount: order.shipping_amount,
-      total_amount: order.total_amount,
-      currency: order.currency,
-      tax_rate: order.tax_rate,
-      tax_inclusive: order.tax_inclusive
+      items_subtotal: itemsSubtotal,
+      discount_amount: discountAmount,
+      taxable_amount: itemsSubtotal - discountAmount,
+      tax_amount: taxAmount,
+      shipping_amount: shippingAmount,
+      total_amount: totalAmount,
+      currency: resolveOrderCurrency(order),
+      tax_rate: resolveOrderTaxRate(order),
+      tax_inclusive: resolveOrderTaxInclusive(order)
     }
 
-    const paymentTerms = `Payment due within ${order.payment_terms_days} days`
-    const dueDate = new Date(order.order_date)
-    dueDate.setDate(dueDate.getDate() + order.payment_terms_days)
+    // Default payment terms (30 days) since field doesn't exist in DB
+    const paymentTermsDays = DEFAULT_ORDERS_CONFIG.payment.default_terms_days
+    const paymentTerms = `Payment due within ${paymentTermsDays} days`
+    const dueDate = new Date(order.order_date ?? new Date())
+    dueDate.setDate(dueDate.getDate() + paymentTermsDays)
 
     return {
       order,
@@ -346,8 +395,8 @@ export function useInvoiceGeneration() {
       totals_breakdown: totalsBreakdown,
       payment_terms: paymentTerms,
       due_date: dueDate.toISOString().split('T')[0],
-      invoice_number: order.order_number,
-      notes: order.notes
+      invoice_number: order.order_no || `INV-${order.id.slice(-8)}`,
+      notes: order.notes ?? undefined
     }
   }
 
@@ -395,7 +444,7 @@ export function useOrderValidation() {
     return errors
   }
 
-  const validateOrderUpdate = (updateData: UpdateOrderData): string[] => {
+  const validateOrderUpdate = (_updateData: UpdateOrderData): string[] => {
     const errors: string[] = []
 
     // Status transition validation would go here

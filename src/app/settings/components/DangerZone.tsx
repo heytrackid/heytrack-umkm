@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, Trash2 } from 'lucide-react'
 
+
+
 /**
  * Danger zone component for destructive actions
  */
-export function DangerZone() {
-  
-  return (
+export const DangerZone = () => (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
@@ -31,4 +31,3 @@ export function DangerZone() {
       </CardContent>
     </Card>
   )
-}

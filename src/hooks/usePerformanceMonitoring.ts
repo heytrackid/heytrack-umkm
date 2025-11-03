@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 
+
+
 interface PerformanceMetrics {
   // Core Web Vitals
   lcp: number | null // Largest Contentful Paint
@@ -27,11 +29,10 @@ interface PerformanceMetrics {
   }
 }
 
-interface PerformanceObserverEntry {
-  name: string
+// PerformanceLayoutShift interface for CLS tracking
+interface PerformanceLayoutShift extends PerformanceEntry {
   value: number
-  rating?: 'good' | 'needs-improvement' | 'poor'
-  timestamp: number
+  hadRecentInput: boolean
 }
 
 export function usePerformanceMonitoring() {
@@ -60,11 +61,11 @@ export function usePerformanceMonitoring() {
   // Initialize performance monitoring
   useEffect(() => {
     if (typeof window === 'undefined' || !('PerformanceObserver' in window)) {
-      setIsSupported(false)
+      void setIsSupported(false)
       return
     }
 
-    setIsSupported(true)
+    void setIsSupported(true)
 
     // Observe Core Web Vitals
     observeCoreWebVitals()
@@ -78,7 +79,7 @@ export function usePerformanceMonitoring() {
     // Monitor memory usage (Chrome only)
     if ('memory' in performance) {
       const memoryInterval = setInterval(() => {
-        updateMemoryUsage()
+        void updateMemoryUsage()
       }, 5000) // Update every 5 seconds
 
       return () => {
@@ -104,25 +105,26 @@ export function usePerformanceMonitoring() {
       })
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
       observersRef.current.push(lcpObserver)
-    } catch (e) {
-      console.warn('LCP observation not supported')
+    } catch (_e) {
+      // LCP observation not supported
     }
 
     // First Input Delay (FID)
     try {
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries()
-        entries.forEach((entry: any) => {
+        entries.forEach((entry: PerformanceEntry) => {
+          const firstInputEntry = entry as PerformanceEventTiming
           setMetrics(prev => ({
             ...prev,
-            fid: entry.processingStart - entry.startTime
+            fid: firstInputEntry.processingStart - firstInputEntry.startTime
           }))
         })
       })
       fidObserver.observe({ entryTypes: ['first-input'] })
       observersRef.current.push(fidObserver)
-    } catch (e) {
-      console.warn('FID observation not supported')
+    } catch (_e) {
+      // FID observation not supported
     }
 
     // Cumulative Layout Shift (CLS)
@@ -130,9 +132,10 @@ export function usePerformanceMonitoring() {
       let clsValue = 0
       const clsObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries()
-        entries.forEach((entry: any) => {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value
+        entries.forEach((entry: PerformanceEntry) => {
+          const layoutShiftEntry = entry as PerformanceLayoutShift
+          if (!layoutShiftEntry.hadRecentInput) {
+            clsValue += layoutShiftEntry.value
           }
         })
         setMetrics(prev => ({
@@ -142,8 +145,8 @@ export function usePerformanceMonitoring() {
       })
       clsObserver.observe({ entryTypes: ['layout-shift'] })
       observersRef.current.push(clsObserver)
-    } catch (e) {
-      console.warn('CLS observation not supported')
+    } catch (_e) {
+      // CLS observation not supported
     }
 
     // First Contentful Paint (FCP)
@@ -159,14 +162,14 @@ export function usePerformanceMonitoring() {
       })
       fcpObserver.observe({ entryTypes: ['paint'] })
       observersRef.current.push(fcpObserver)
-    } catch (e) {
-      console.warn('FCP observation not supported')
+    } catch (_e) {
+      // FCP observation not supported
     }
   }
 
   const observeNavigationTiming = () => {
     // Use Navigation Timing API
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+    const navigation = performance.getEntriesByType('navigation')[0]
 
     if (navigation) {
       setMetrics(prev => ({
@@ -198,10 +201,9 @@ export function usePerformanceMonitoring() {
 
   const observeResourceTiming = () => {
     // Monitor resource loading performance
-    const resourceObserver = new PerformanceObserver((list) => {
-      const entries = list.getEntries()
+    const resourceObserver = new PerformanceObserver(() => {
       // Could analyze resource loading times here
-      console.log('[Performance] Resource timing:', entries.length, 'resources loaded')
+      // Silently track resource timing
     })
     resourceObserver.observe({ entryTypes: ['resource'] })
     observersRef.current.push(resourceObserver)
@@ -209,13 +211,22 @@ export function usePerformanceMonitoring() {
 
   const updateMemoryUsage = () => {
     if ('memory' in performance) {
-      const memory = (performance as any).memory
+      type PerformanceWithMemory = Performance & {
+        memory: {
+          usedJSHeapSize?: number
+          totalJSHeapSize?: number
+          jsHeapSizeLimit?: number
+        }
+      }
+      
+      const perfWithMemory = performance as PerformanceWithMemory
+      const {memory} = perfWithMemory
       setMetrics(prev => ({
         ...prev,
         memoryUsage: {
-          used: memory.usedJSHeapSize || null,
-          total: memory.totalJSHeapSize || null,
-          limit: memory.jsHeapSizeLimit || null
+          used: memory.usedJSHeapSize ?? null,
+          total: memory.totalJSHeapSize ?? null,
+          limit: memory.jsHeapSizeLimit ?? null
         }
       }))
     }
@@ -240,16 +251,16 @@ export function usePerformanceMonitoring() {
     let score = 100
 
     // LCP scoring
-    if (lcp > 4000) score -= 30 // Poor
-    else if (lcp > 2500) score -= 15 // Needs improvement
+    if (lcp > 4000) {score -= 30} // Poor
+    else if (lcp > 2500) {score -= 15} // Needs improvement
 
     // FID scoring
-    if (fid > 300) score -= 30 // Poor
-    else if (fid > 100) score -= 15 // Needs improvement
+    if (fid > 300) {score -= 30} // Poor
+    else if (fid > 100) {score -= 15} // Needs improvement
 
     // CLS scoring
-    if (cls > 0.25) score -= 30 // Poor
-    else if (cls > 0.1) score -= 15 // Needs improvement
+    if (cls > 0.25) {score -= 30} // Poor
+    else if (cls > 0.1) {score -= 15} // Needs improvement
 
     return Math.max(0, Math.min(100, score))
   }, [metrics])
@@ -257,24 +268,22 @@ export function usePerformanceMonitoring() {
   // Get performance rating
   const getPerformanceRating = useCallback(() => {
     const score = getPerformanceScore()
-    if (score === null) return 'unknown'
-    if (score >= 90) return 'excellent'
-    if (score >= 70) return 'good'
-    if (score >= 50) return 'needs-improvement'
+    if (score === null) {return 'unknown'}
+    if (score >= 90) {return 'excellent'}
+    if (score >= 70) {return 'good'}
+    if (score >= 50) {return 'needs-improvement'}
     return 'poor'
   }, [getPerformanceScore])
 
   // Export metrics for analytics
-  const exportMetrics = useCallback(() => {
-    return {
+  const exportMetrics = useCallback(() => ({
       ...metrics,
       timestamp: Date.now(),
       url: window.location.href,
       userAgent: navigator.userAgent,
       score: getPerformanceScore(),
       rating: getPerformanceRating()
-    }
-  }, [metrics, getPerformanceScore, getPerformanceRating])
+    }), [metrics, getPerformanceScore, getPerformanceRating])
 
   return {
     metrics,

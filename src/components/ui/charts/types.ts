@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 /**
  * Chart Types and Constants
  * Shared types and constants for all chart components
@@ -44,7 +46,7 @@ export interface BaseMobileChartProps {
   showFullscreen?: boolean
   showDownload?: boolean
   showShare?: boolean
-  actions?: React.ReactNode
+  actions?: ReactNode
   trend?: {
     value: number
     label?: string

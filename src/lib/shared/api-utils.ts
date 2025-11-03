@@ -1,26 +1,30 @@
+import { type NextRequest, NextResponse } from 'next/server'
+import { getErrorMessage } from '@/shared'
+import { apiLogger } from '@/lib/logger'
+import type { ZodSchema } from 'zod'
+
+
+/* eslint-disable */
 /**
  * Shared API Utilities
  * Common API response patterns and utilities
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { getErrorMessage } from '@/shared'
-import { apiLogger } from '@/lib/logger'
 
 // API Response helpers
 export function createSuccessResponse<T>(
   data: T,
   message?: string,
-  status: number = 200
+  status = 200
 ) {
-  const response: any = {
+  const response = {
     success: true,
     data,
     timestamp: new Date().toISOString()
   }
 
   if (message) {
-    response.message = message
+    Object.assign(response, { message })
   }
 
   return NextResponse.json(response, { status })
@@ -28,17 +32,17 @@ export function createSuccessResponse<T>(
 
 export function createErrorResponse(
   message: string,
-  status: number = 500,
-  details?: any
+  status = 500,
+  details?: unknown
 ) {
-  const errorResponse: any = {
+  const errorResponse = {
     success: false,
     error: message,
     timestamp: new Date().toISOString()
   }
 
   if (details) {
-    errorResponse.details = details
+    Object.assign(errorResponse, { details })
   }
 
   apiLogger.error({ message, status, details }, 'API Error Response')
@@ -66,9 +70,10 @@ export function createPaginatedResponse<T>(
 }
 
 // Request validation helpers
+
 export async function validateRequestData<T>(
   request: NextRequest,
-  schema: any
+  schema: ZodSchema<T>
 ): Promise<T> {
   try {
     const body = await request.json()
@@ -78,9 +83,9 @@ export async function validateRequestData<T>(
       throw new Error(`Validation failed: ${result.error.issues.map(i => i.message).join(', ')}`)
     }
 
-    return result.data as T
-  } catch (error) {
-    throw new Error(`Request validation failed: ${getErrorMessage(error)}`)
+    return result.data
+  } catch (err) {
+    throw new Error(`Request validation failed: ${getErrorMessage(err)}`)
   }
 }
 
@@ -89,7 +94,7 @@ export function extractPagination(request: NextRequest): {
   limit: number
   offset: number
 } {
-  const searchParams = request.nextUrl.searchParams
+  const {searchParams} = request.nextUrl
   const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
   const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10')))
 
@@ -127,18 +132,18 @@ export function createPaginationMeta(
 // Search and filter helpers
 export function extractSearchParams(request: NextRequest): {
   search?: string
-  filters: Record<string, any>
+  filters: Record<string, unknown>
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 } {
-  const searchParams = request.nextUrl.searchParams
+  const {searchParams} = request.nextUrl
 
   const search = searchParams.get('search') || undefined
   const sortBy = searchParams.get('sortBy') || undefined
   const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || 'asc'
 
   // Extract filters (any param that starts with 'filter_')
-  const filters: Record<string, any> = {}
+  const filters: Record<string, unknown> = {}
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
       const filterKey = key.replace('filter_', '')
@@ -155,7 +160,8 @@ export function createRateLimitKey(identifier: string, action: string): string {
 }
 
 // Caching helpers
-export function generateETag(data: any): string {
+export function generateETag(data: unknown): string {
+   
   const crypto = require('crypto')
   return crypto.createHash('md5').update(JSON.stringify(data)).digest('hex')
 }
@@ -179,9 +185,12 @@ export function handleConditionalGET(
 export function logAPIRequest(
   request: NextRequest,
   userId?: string,
-  additionalData?: any
+  additionalData?: unknown
 ) {
   const url = new URL(request.url)
+  const extra = (typeof additionalData === 'object' && additionalData !== null)
+    ? additionalData as Record<string, unknown>
+    : undefined
   const logData = {
     method: request.method,
     path: url.pathname,
@@ -189,7 +198,7 @@ export function logAPIRequest(
     userId,
     userAgent: request.headers.get('user-agent'),
     ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
-    ...additionalData
+    ...(extra ?? {})
   }
 
   apiLogger.info(logData, 'API Request')
@@ -230,10 +239,10 @@ export function withTiming<T extends any[]>(
       const duration = Date.now() - start
       logger(duration, ...args)
       return result
-    } catch (error) {
+    } catch (err) {
       const duration = Date.now() - start
       logger(duration, ...args)
-      throw error
+      throw err
     }
   }
 }

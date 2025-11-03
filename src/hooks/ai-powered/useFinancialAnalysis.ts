@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { apiLogger } from '@/lib/logger'
 import type { AIAnalysisState, FinancialAnalysisRequest } from './types'
+
+
 
 /**
  * AI-Powered Financial Analysis Hook
@@ -30,7 +31,7 @@ export function useFinancialAnalysis() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to analyze financials')
+        throw new Error(result.error ?? 'Failed to analyze financials')
       }
 
       setState({
@@ -43,14 +44,14 @@ export function useFinancialAnalysis() {
 
       return result
 
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setState(prev => ({
         ...prev,
         loading: false,
         error: errorMessage
       }))
-      throw error
+      throw err
     }
   }, [])
 

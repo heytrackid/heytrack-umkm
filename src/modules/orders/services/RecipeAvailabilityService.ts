@@ -1,10 +1,13 @@
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
-import { HPPCalculationService } from '@/modules/recipes'
-import type { RecipeOption } from './OrderRecipeService'
+import { createClient } from '@/utils/supabase/server'
+import type { RecipeOption } from '../types'
+
+
 
 /**
  * Service for handling recipe availability and ingredient checking
+ * SERVER-ONLY: Uses server client for database operations
  */
 export class RecipeAvailabilityService {
   /**
@@ -13,17 +16,17 @@ export class RecipeAvailabilityService {
   static checkIngredientAvailability(recipeIngredients: Array<{
     quantity: number
     ingredient: {
-      is_active: boolean
+      is_active: boolean | null
       current_stock: number | null
       reorder_point: number | null
     } | null
   }>): boolean {
     return recipeIngredients.every(ri => {
-      if (!ri.ingredient || !ri.ingredient.is_active) {return false}
+      if (!ri.ingredient?.is_active) {return false}
 
       // Check if current stock is above reorder point
-      const currentStock = ri.ingredient.current_stock ?? 0 || 0
-      const reorderPoint = ri.ingredient.reorder_point || 0
+      const currentStock = ri.ingredient.current_stock ?? 0
+      const reorderPoint = ri.ingredient.reorder_point ?? 0
       const requiredQuantity = ri.quantity || 0
 
       return currentStock >= Math.max(reorderPoint, requiredQuantity)
@@ -35,6 +38,8 @@ export class RecipeAvailabilityService {
    */
   static async getAvailableRecipes(): Promise<RecipeOption[]> {
     try {
+      const supabase = await createClient()
+      
       const { data: recipes, error } = await supabase
         .from('recipes')
         .select(`
@@ -43,11 +48,12 @@ export class RecipeAvailabilityService {
           category,
           servings,
           description,
-          price,
-          margin,
+          selling_price,
+          is_active,
+          cost_per_unit,
+          margin_percentage,
           prep_time,
           cook_time,
-          is_active,
           recipe_ingredients!inner (
             quantity,
             unit,
@@ -56,7 +62,6 @@ export class RecipeAvailabilityService {
               name,
               current_stock,
               reorder_point,
-              unit_cost,
               is_active
             )
           )
@@ -68,39 +73,35 @@ export class RecipeAvailabilityService {
       if (!recipes) {return []}
 
       // Process recipes and check availability
-      const recipeOptions: RecipeOption[] = await Promise.all(
-        recipes.map(async (recipe) => {
-          // Calculate HPP and check ingredient availability
-          const hppCalculation = await HPPCalculationService.calculateAdvancedHPP(
-            recipe.id,
-            {
-              overheadRate: 0.15,
-              laborCostPerHour: 25000,
-              targetMargin: 0.6
-            }
-          )
+      const recipeOptions: RecipeOption[] = recipes.map((recipe) => {
+        const price = recipe.selling_price ?? 0
+        const estimatedMargin = 0.3 // Default 30% margin
 
-          // Check ingredient availability
-          const isAvailable = this.checkIngredientAvailability(recipe.recipe_ingredients)
+        const recipeIngredients = (recipe.recipe_ingredients || []).map(ri => ({
+          ...ri,
+          ingredient: ri.ingredient || null
+        }))
 
-          return {
-            id: recipe.id,
-            name: recipe.name,
-            category: recipe.category,
-            servings: recipe.servings,
-            description: recipe.description,
-            price: recipe.price || hppCalculation.suggestedPricing.standard.price,
-            hpp_cost: hppCalculation.costPerServing,
-            margin: recipe.margin || hppCalculation.suggestedPricing.standard.margin,
-            is_available: isAvailable,
-            estimated_prep_time: (recipe.prep_time || 0) + (recipe.cook_time || 0)
-          }
-        })
-      )
+        const isAvailable = this.checkIngredientAvailability(recipeIngredients)
+
+        return {
+          id: recipe.id,
+          name: recipe.name,
+          category: recipe.category ?? '',
+          servings: recipe.servings ?? 1,
+          description: recipe.description,
+          selling_price: price,
+          cost_per_unit: recipe.cost_per_unit ?? (price * 0.7),
+          margin_percentage: recipe.margin_percentage ?? estimatedMargin,
+          is_available: isAvailable,
+          prep_time: recipe.prep_time ?? null,
+          cook_time: recipe.cook_time ?? null
+        }
+      })
 
       return recipeOptions
-    } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error fetching available recipes')
+    } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Error fetching available recipes')
       throw new Error('Failed to fetch available recipes')
     }
   }

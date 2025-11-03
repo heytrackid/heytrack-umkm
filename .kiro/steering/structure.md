@@ -1,209 +1,199 @@
----
-inclusion: always
----
-
 # Project Structure
 
-## Root Organization
+## Architecture Pattern
+
+The project follows a **modular monolith** architecture with domain-driven design principles:
+
+- **Feature Modules**: Self-contained domains in `src/modules/` (orders, recipes, inventory, hpp, production, reports)
+- **Shared Infrastructure**: Common utilities in `src/lib/`, `src/hooks/`, `src/components/`
+- **Next.js App Router**: File-based routing in `src/app/`
+- **Type-First Design**: Centralized type definitions in `src/types/`
+
+## Directory Structure
 
 ```
-/
-├── src/                    # Application source code
-├── supabase/              # Database migrations and Edge Functions
-├── public/                # Static assets
-├── docs/                  # Documentation
-└── .kiro/                 # Kiro AI configuration
-```
+src/
+├── app/                      # Next.js App Router (pages, layouts, API routes)
+│   ├── (dashboard)/         # Dashboard route group
+│   ├── api/                 # API route handlers
+│   │   ├── ingredients/     # Ingredient CRUD endpoints
+│   │   ├── orders/          # Order management endpoints
+│   │   ├── recipes/         # Recipe endpoints
+│   │   ├── hpp/             # HPP calculation endpoints
+│   │   └── ...              # Other domain endpoints
+│   ├── auth/                # Authentication pages
+│   ├── ingredients/         # Ingredient management pages
+│   ├── orders/              # Order management pages
+│   ├── recipes/             # Recipe management pages
+│   ├── hpp/                 # HPP calculator pages
+│   └── ...                  # Other feature pages
+│
+├── modules/                  # Feature modules (domain logic)
+│   ├── orders/              # Order domain
+│   │   ├── components/      # Order-specific components
+│   │   ├── services/        # Business logic services
+│   │   ├── hooks/           # Order-specific hooks
+│   │   ├── types/           # Order type definitions
+│   │   ├── constants.ts     # Order constants and config
+│   │   └── index.ts         # Public API exports
+│   ├── recipes/             # Recipe domain
+│   ├── inventory/           # Inventory domain
+│   ├── hpp/                 # HPP calculation domain
+│   ├── production/          # Production planning domain
+│   └── reports/             # Reporting domain
+│
+├── components/               # Shared UI components
+│   ├── ui/                  # Base UI components (shadcn/ui)
+│   ├── forms/               # Reusable form components
+│   ├── layout/              # Layout components
+│   ├── error-boundaries/    # Error boundary components
+│   └── ...                  # Domain-specific shared components
+│
+├── lib/                      # Shared utilities and services
+│   ├── api-core.ts          # API response helpers
+│   ├── error-handler.ts     # Error handling utilities
+│   ├── logger.ts            # Logging utilities
+│   ├── supabase-client.ts   # Supabase client utilities
+│   ├── validations/         # Zod schemas
+│   ├── database/            # Database query helpers
+│   ├── auth/                # Authentication utilities
+│   └── ...                  # Other shared utilities
+│
+├── hooks/                    # Shared React hooks
+│   ├── api/                 # API data fetching hooks
+│   ├── supabase/            # Supabase-specific hooks
+│   ├── useAuth.ts           # Authentication hook
+│   ├── useDebounce.ts       # Debounce utility hook
+│   └── ...                  # Other shared hooks
+│
+├── types/                    # TypeScript type definitions
+│   ├── database.ts          # Database table types (re-exports)
+│   ├── supabase-generated.ts # Auto-generated Supabase types
+│   ├── domain/              # Domain-specific types
+│   ├── features/            # Feature-specific types
+│   └── common.ts            # Common shared types
+│
+├── utils/                    # Utility functions
+│   ├── supabase/            # Supabase utilities
+│   │   ├── client.ts        # Client-side Supabase client
+│   │   ├── server.ts        # Server-side Supabase client
+│   │   ├── middleware.ts    # Supabase middleware
+│   │   └── helpers.ts       # Supabase helper functions
+│   └── security/            # Security utilities
+│
+├── services/                 # Business logic services
+│   ├── hpp/                 # HPP calculation services
+│   ├── inventory/           # Inventory management services
+│   ├── orders/              # Order processing services
+│   ├── production/          # Production planning services
+│   └── recipes/             # Recipe management services
+│
+├── providers/                # React context providers
+│   ├── QueryProvider.tsx    # TanStack Query provider
+│   └── SupabaseProvider.tsx # Supabase client provider
+│
+└── workers/                  # Web Workers
+    └── hpp-calculator.worker.ts # HPP calculation worker
 
-## Source Directory (`src/`)
-
-### App Router (`src/app/`)
-
-Next.js 16 App Router with route groups and API routes:
-
-```
-src/app/
-├── (dashboard)/           # Protected dashboard routes
-├── auth/                  # Authentication pages (login, register, etc)
-├── api/                   # API route handlers
-│   ├── ai/               # AI-related endpoints
-│   ├── hpp/              # HPP calculation endpoints
-│   ├── ingredients/      # Ingredient CRUD
-│   ├── recipes/          # Recipe CRUD
-│   ├── orders/           # Order management
-│   └── reports/          # Financial reports
-├── dashboard/            # Main dashboard page
-├── hpp/                  # HPP tracking pages
-├── ingredients/          # Ingredient management pages
-├── orders/               # Order management pages
-├── recipes/              # Recipe management pages
-├── customers/            # Customer management pages
-├── reports/              # Reporting pages
-├── layout.tsx            # Root layout
-├── page.tsx              # Home page
-└── globals.css           # Global styles
-```
-
-**Conventions:**
-- Route groups use `(name)` for organization without affecting URL
-- Each feature has its own folder with page.tsx and components/
-- API routes follow REST conventions in route.ts files
-
-### Components (`src/components/`)
-
-Organized by feature and type:
-
-```
-src/components/
-├── ui/                    # shadcn/ui components (Button, Card, etc)
-├── forms/                 # Reusable form components
-├── shared/                # Shared business components
-├── automation/            # Automation feature components
-├── dashboard/             # Dashboard-specific components
-├── orders/                # Order-related components
-├── production/            # Production management components
-├── lazy/                  # Lazy-loaded components for performance
-└── error-boundaries/      # Error boundary components
-```
-
-**Conventions:**
-- UI primitives in `ui/` folder
-- Feature-specific components in feature folders
-- Shared components in `shared/`
-- Use lazy loading for heavy components
-
-### Types (`src/types/`)
-
-Centralized type definitions:
-
-```
-src/types/
-├── database.ts            # Re-exports from supabase-generated
-├── supabase-generated.ts  # Auto-generated from Supabase
-├── index.ts               # Main type exports
-├── hpp-tracking.ts        # HPP-specific types
-├── inventory.ts           # Inventory types
-├── orders.ts              # Order types
-├── finance.ts             # Financial types
-├── guards.ts              # Type guard functions
-└── common.ts              # Common utility types
-```
-
-**Conventions:**
-- Import from `@/types` or `@/types/[specific]`
-- Use generated types from Supabase as source of truth
-- Create type guards for runtime validation
-
-### Library (`src/lib/`)
-
-Shared utilities and business logic:
-
-```
-src/lib/
-├── supabase-client.ts     # Typed Supabase client utilities
-├── validations/           # Zod schemas for validation
-├── automation/            # Automation engine
-├── hpp/                   # HPP calculation logic
-├── business-services/     # Business logic services
-├── logger.ts              # Structured logging (use instead of console)
-├── errors.ts              # Error handling utilities
-├── currency.ts            # Currency formatting
-└── utils.ts               # General utilities
-```
-
-**Conventions:**
-- Business logic goes in `lib/`, not components
-- Use logger instead of console
-- Validation schemas in `validations/`
-
-### Hooks (`src/hooks/`)
-
-Custom React hooks:
-
-```
-src/hooks/
-├── api/                   # API data fetching hooks
-├── supabase/              # Supabase-specific hooks
-├── shared/                # Shared utility hooks
-├── useAuth.ts             # Authentication hook
-├── useDebounce.ts         # Debounce utility
-└── useResponsive.ts       # Responsive design hook
-```
-
-**Conventions:**
-- Prefix with `use`
-- API hooks use TanStack Query
-- Keep hooks focused and composable
-
-### Modules (`src/modules/`)
-
-Feature modules with encapsulated logic:
-
-```
-src/modules/
-├── orders/
-│   ├── components/        # Order-specific components
-│   ├── services/          # Order business logic
-│   └── types/             # Order types
-├── recipes/
-├── production/
-└── reports/
-```
-
-**Conventions:**
-- Self-contained feature modules
-- Services contain business logic
-- Components are feature-specific
-
-## Supabase Directory (`supabase/`)
-
-Database and serverless functions:
-
-```
 supabase/
-├── functions/             # Edge Functions (Deno)
-│   ├── hpp-daily-snapshots/
-│   ├── hpp-alert-detection/
-│   └── hpp-data-archival/
-└── schema.sql             # Database schema and migrations
+├── migrations/               # Database migrations
+└── functions/                # Edge functions (Deno runtime)
 ```
 
-**Conventions:**
-- Edge Functions use Deno runtime
-- Each function has index.ts as entry point
-- Include types.ts for function-specific types
+## Key Conventions
 
-## Path Aliases
+### Module Structure
 
-Configured in `tsconfig.json`:
-
-```typescript
-"@/*"           → "./src/*"
-"@/modules/*"   → "./src/modules/*"
-"@/shared/*"    → "./src/shared/*"
+Each feature module follows this pattern:
+```
+modules/[domain]/
+├── components/          # UI components specific to this domain
+├── services/           # Business logic and data operations
+├── hooks/              # Domain-specific React hooks
+├── types/              # Type definitions
+├── constants.ts        # Configuration and constants
+├── utils/              # Helper functions
+└── index.ts            # Public API (exports only what's needed)
 ```
 
-## File Naming Conventions
+### API Routes
+
+API routes follow RESTful conventions:
+- `GET /api/[resource]` - List resources with pagination
+- `POST /api/[resource]` - Create new resource
+- `GET /api/[resource]/[id]` - Get single resource
+- `PUT /api/[resource]/[id]` - Update resource
+- `DELETE /api/[resource]/[id]` - Delete resource
+
+All API routes:
+- Use `runtime = 'nodejs'` export for Node.js runtime
+- Apply security middleware with `withSecurity()`
+- Validate input with Zod schemas
+- Use centralized error handling from `@/lib/api-core`
+- Return standardized responses via `createSuccessResponse()` / `createErrorResponse()`
+
+### Type Definitions
+
+- **Database Types**: Auto-generated from Supabase schema in `src/types/supabase-generated.ts`
+- **Domain Types**: Defined in `src/types/database.ts` (re-exports with cleaner names)
+- **Feature Types**: Defined in module-specific `types/` directories
+- **Naming Convention**: 
+  - Table rows: `[TableName]Table` (e.g., `IngredientsTable`)
+  - Insert types: `[TableName]Insert` (e.g., `IngredientsInsert`)
+  - Update types: `[TableName]Update` (e.g., `IngredientsUpdate`)
+
+### Import Aliases
+
+Use absolute imports with path aliases:
+- `@/*` - Root src directory
+- `@/modules/*` - Feature modules
+- `@/shared/*` - Shared utilities
+- `@/inventory`, `@/orders`, `@/recipes`, etc. - Direct module access
+
+**Never use relative imports** beyond the same directory (enforced by ESLint).
+
+### Component Patterns
+
+- **Server Components**: Default for pages and layouts (no hooks)
+- **Client Components**: Mark with `'use client'` directive
+- **Lazy Loading**: Use dynamic imports for heavy components
+- **Error Boundaries**: Wrap async components with error boundaries
+- **Function Components**: Use arrow functions (enforced by ESLint)
+
+### Error Handling
+
+- Use `try-catch` blocks in API routes and async operations
+- Catch parameter must be named `error` (enforced by custom ESLint rule)
+- Use `handleAPIError()` from `@/lib/api-core` for consistent error responses
+- Log errors with `apiLogger` from `@/lib/logger`
+- Never use `console.log/error/warn` (enforced by ESLint)
+
+### Database Access
+
+- **Client-side**: Use `createClient()` from `@/utils/supabase/client`
+- **Server-side**: Use `createClient()` from `@/utils/supabase/server`
+- **Type-safe queries**: Use helper functions from `@/lib/supabase-client`
+- **Field selection**: Use constants from `@/lib/database/query-fields` instead of `SELECT *`
+- **RLS**: All queries automatically filtered by user_id via Row Level Security
+
+### Validation
+
+- Define Zod schemas in `@/lib/validations/domains/[domain]`
+- Validate API inputs with `withQueryValidation()` helper
+- Validate form inputs with React Hook Form + Zod resolver
+- Sanitize user input with DOMPurify in API middleware
+
+### Logging
+
+- Server-side: Use `apiLogger` from `@/lib/logger` (Pino-based)
+- Client-side: Use `clientLogger` from `@/lib/client-logger`
+- Never use `console.*` methods (enforced by ESLint)
+- Log format: Structured JSON with context
+
+## File Naming
 
 - **Components**: PascalCase (e.g., `OrderForm.tsx`)
-- **Utilities**: kebab-case (e.g., `hpp-calculator.ts`)
+- **Utilities**: kebab-case (e.g., `api-helpers.ts`)
 - **Hooks**: camelCase with `use` prefix (e.g., `useOrders.ts`)
 - **Types**: kebab-case (e.g., `order-types.ts`)
-- **API routes**: `route.ts` (Next.js convention)
-- **Pages**: `page.tsx` (Next.js convention)
-
-## Import Order
-
-1. External packages (React, Next.js, etc)
-2. Internal aliases (`@/components`, `@/lib`, etc)
-3. Relative imports (`./`, `../`)
-4. Type imports (use `import type`)
-
-## Key Architectural Patterns
-
-1. **Server/Client Component Split**: Use Server Components by default, Client Components only when needed
-2. **API Layer**: All database access through API routes, not direct from components
-3. **Type Safety**: Leverage Supabase generated types throughout
-4. **Error Boundaries**: Wrap features in error boundaries for graceful failures
-5. **Lazy Loading**: Use dynamic imports for heavy components
-6. **RLS Enforcement**: All data access respects user_id isolation at database level
+- **Constants**: kebab-case (e.g., `order-constants.ts`)

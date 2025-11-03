@@ -1,4 +1,5 @@
 import type {
+
   AutomationConfig,
   Ingredient,
   InventoryAnalysis,
@@ -30,7 +31,7 @@ export class InventoryAutomation {
         status: this.getInventoryStatus(daysRemaining, ingredient.current_stock ?? 0, ingredient.min_stock ?? 0),
         daysRemaining: Math.floor(daysRemaining),
         reorderRecommendation: {
-          shouldReorder: ingredient.current_stock ?? 0 <= reorderPoint,
+          shouldReorder: ingredient.current_stock ?? reorderPoint >= 0,
           quantity: optimalOrderQuantity,
           urgency: this.getReorderUrgency(daysRemaining),
           estimatedCost: optimalOrderQuantity * ingredient.price_per_unit
@@ -125,7 +126,7 @@ export class InventoryAutomation {
   predictInventoryNeeds(
     ingredients: Ingredient[],
     historicalUsage: Record<string, Array<{ date: string; quantity: number }>>,
-    forecastDays: number = 30
+    forecastDays = 30
   ) {
     return ingredients.map(ingredient => {
       const usage = historicalUsage[ingredient.id] || []
@@ -210,8 +211,15 @@ export class InventoryAutomation {
     const urgentReorders = inventoryAnalysis
       .filter(analysis => analysis.reorderRecommendation.shouldReorder)
       .sort((a, b) => {
-        const urgencyOrder = { urgent: 3, soon: 2, normal: 1 }
-        return urgencyOrder[b.reorderRecommendation.urgency] - urgencyOrder[a.reorderRecommendation.urgency]
+        const urgencyOrder: Record<ReorderUrgency, number> = {
+          urgent: 3,
+          soon: 2,
+          normal: 1
+        }
+
+        const getUrgencyScore = (urgency: ReorderUrgency) => urgencyOrder[urgency] ?? 0
+
+        return getUrgencyScore(b.reorderRecommendation.urgency) - getUrgencyScore(a.reorderRecommendation.urgency)
       })
 
     return {
@@ -252,7 +260,7 @@ export class InventoryAutomation {
     const holdingCostRate = 0.25 // 25% per year
     
     return ingredients.map(ingredient => {
-      const inventoryValue = ingredient.current_stock ?? 0 * ingredient.price_per_unit
+      const inventoryValue = (ingredient.current_stock ?? 0) * (ingredient.price_per_unit ?? 0)
       const annualCarryingCost = inventoryValue * holdingCostRate
       const monthlyCarryingCost = annualCarryingCost / 12
 
@@ -272,7 +280,7 @@ export class InventoryAutomation {
    */
   private calculateTurnoverRate(ingredient: Ingredient): number {
     // Simplified calculation - would use actual historical data
-    const avgStock = (ingredient.current_stock ?? 0 + ingredient.min_stock) / 2
+    const avgStock = ((ingredient.current_stock ?? 0) + (ingredient.min_stock ?? 0)) / 2
     const estimatedMonthlyCOGS = avgStock * ingredient.price_per_unit * 0.1 // Assume 10% monthly usage
     
     if (avgStock === 0) {return 0}
@@ -283,8 +291,8 @@ export class InventoryAutomation {
    * Calculate storage efficiency score
    */
   private calculateStorageEfficiency(ingredient: Ingredient): number {
-    const optimalStock = ingredient.min_stock ?? 0 * 2 // Optimal is 2x minimum
-    const currentRatio = ingredient.current_stock ?? 0 / optimalStock
+    const optimalStock = (ingredient.min_stock ?? 0) * 2 // Optimal is 2x minimum
+    const currentRatio = (ingredient.current_stock ?? 0) / optimalStock
     
     // Efficiency score: 100% when at optimal, decreases with over/understocking
     if (currentRatio <= 1) {return currentRatio * 100}

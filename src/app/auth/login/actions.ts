@@ -28,7 +28,7 @@ export async function loginWithGoogle() {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+            redirectTo: `${process.env['NEXT_PUBLIC_SITE_URL'] ?? 'http://localhost:3000'}/auth/callback`,
         },
     })
 
@@ -39,4 +39,6 @@ export async function loginWithGoogle() {
     if (data.url) {
         redirect(data.url)
     }
+    
+    return { error: 'Failed to initiate Google login' }
 }

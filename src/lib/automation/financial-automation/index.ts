@@ -1,11 +1,11 @@
+
 /**
  * Financial Automation Module - Main Entry Point
  * Comprehensive financial analysis and automation system
  */
 
-// Export all types
-export * from '../types' // Main automation types
-export * from './types' // Local financial types
+// Export all types relevant to financial automation
+export * from './types'
 
 // Export all modules
 export { MetricsCalculator } from './metrics-calculator'

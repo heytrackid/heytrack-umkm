@@ -1,3 +1,9 @@
+import { useCallback, useMemo } from 'react'
+import { apiLogger } from '@/lib/logger'
+    import('@/components').catch(() => {})
+    import('@/components').catch(() => {})
+    import('@/components').catch(() => {})
+
 /**
  * Performance Optimizations untuk Skeleton Loading System
  * 
@@ -5,9 +11,7 @@
  * skeleton loading dan memastikan smooth transitions.
  */
 
-import { useCallback, useMemo } from 'react'
 
-import { apiLogger } from '@/lib/logger'
 // Minimum loading duration untuk smooth UX
 export const MIN_LOADING_DURATION = {
   FAST: 300,    // For simple operations
@@ -27,7 +31,7 @@ export function useSkeletonDebounce(delay: number = MIN_LOADING_DURATION.FAST) {
 export function useSkeletonArray(length: number, dependency?: unknown[]) {
   return useMemo(
     () => Array.from({ length }, (_, i) => i),
-    [length, ...(dependency || [])]
+    [length, ...(dependency ?? [])]
   )
 }
 
@@ -75,7 +79,11 @@ export function getCachedSkeleton(
   if (!skeletonCache.has(key)) {
     skeletonCache.set(key, factory())
   }
-  return skeletonCache.get(key)!
+  const cached = skeletonCache.get(key)
+  if (!cached) {
+    throw new Error(`Skeleton cache failed for key: ${key}`)
+  }
+  return cached
 }
 
 // Animation timing untuk smooth transitions
@@ -90,9 +98,7 @@ export const ANIMATION_CONFIG = {
 export function preloadSkeletonComponents() {
   // Preload common skeleton components to avoid loading delays
   if (typeof window !== 'undefined') {
-    import('@/components').catch(() => {})
-    import('@/components').catch(() => {})
-    import('@/components').catch(() => {})
+    // TODO: Implement preload logic for skeleton components
   }
 }
 
@@ -166,15 +172,15 @@ export const globalSkeletonMonitor = new SkeletonPerformanceMonitor()
 
 // Bundle size optimization - lazy load skeleton components
 export const LazySkeletons = {
-  Dashboard: () => import('@/components').then(m => m.StatsCardSkeleton),
-  Table: () => import('@/components').then(m => m.DataGridSkeleton),
-  Form: () => import('@/components').then(m => m.FormFieldSkeleton),
+  Dashboard: () => import('@/components/ui/skeleton').then(m => ({ default: m.Skeleton })),
+  Table: () => import('@/components/ui/skeleton').then(m => ({ default: m.Skeleton })),
+  Form: () => import('@/components/ui/skeleton').then(m => ({ default: m.Skeleton })),
 }
 
 // Memory optimization - cleanup skeleton cache periodically
 let skeletonCacheCleanupInterval: NodeJS.Timeout | null = null
 
-export function startSkeletonCacheCleanup(intervalMs: number = 300000) { // 5 minutes
+export function startSkeletonCacheCleanup(intervalMs = 300000) { // 5 minutes
   if (skeletonCacheCleanupInterval) {
     clearInterval(skeletonCacheCleanupInterval)
   }

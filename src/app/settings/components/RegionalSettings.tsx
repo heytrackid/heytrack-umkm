@@ -5,9 +5,10 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useSettings } from '@/contexts/settings-context'
 import { Settings, RotateCcw } from 'lucide-react'
-import * as React from 'react'
 import { useState } from 'react'
-import type { AppSettingsState, SettingsUpdateHandler } from '../types'
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+
+
 
 interface RegionalSettingsProps {
   settings: AppSettingsState
@@ -17,7 +18,7 @@ interface RegionalSettingsProps {
 /**
  * Regional settings component for currency and timezone
  */
-export function RegionalSettings({ settings, onSettingChange }: RegionalSettingsProps) {
+export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettingsProps) => {
   const { settings: contextSettings, currencies, updateCurrency, resetToDefault } = useSettings()
   const [isResetting, setIsResetting] = useState(false)
 
@@ -39,10 +40,10 @@ export function RegionalSettings({ settings, onSettingChange }: RegionalSettings
   }
 
   const handleResetCurrency = () => {
-    setIsResetting(true)
+    void setIsResetting(true)
     resetToDefault()
     setTimeout(() => {
-      setIsResetting(false)
+      void setIsResetting(false)
     }, 500)
   }
 
@@ -54,9 +55,9 @@ export function RegionalSettings({ settings, onSettingChange }: RegionalSettings
             <Settings className="h-5 w-5" />
             Pengaturan Regional
           </div>
-          <Button 
-            size="sm" 
-            variant="outline" 
+          <Button
+            size="sm"
+            variant="outline"
             onClick={handleResetCurrency}
             disabled={isResetting}
             className="text-xs"
@@ -82,7 +83,7 @@ export function RegionalSettings({ settings, onSettingChange }: RegionalSettings
               onChange={(e) => {
                 const selected = currencies.find(c => c.code === e.target.value)
                 if (selected) {
-                  updateCurrency(selected)
+                  void updateCurrency(selected)
                   onSettingChange('general', 'currency', selected.code)
                   onSettingChange('ui', 'currency', selected.code)
                 }

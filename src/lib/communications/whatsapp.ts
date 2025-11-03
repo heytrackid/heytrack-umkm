@@ -1,11 +1,13 @@
+import { automationLogger } from '@/lib/logger'
+import { formatCurrentCurrency } from '@/lib/currency'
+import type { WhatsAppTemplate, WhatsAppConfig, OrderData } from './types'
+
+
 /**
  * WhatsApp Service Module
  * WhatsApp messaging service for order notifications and customer communication
  */
 
-import { automationLogger } from '@/lib/logger'
-import { formatCurrentCurrency } from '@/lib/currency'
-import type { WhatsAppTemplate, WhatsAppConfig, OrderData } from './types'
 
 export class WhatsAppService {
   private config: WhatsAppConfig;
@@ -123,11 +125,12 @@ Kami tunggu orderan selanjutnya! 🙏
   }
 
   /**
-   * Send WhatsApp message
+   * Send WhatsApp message using wa.me link
+   * ✅ NEW: Opens WhatsApp with pre-filled message using wa.me
    */
-  async sendMessage(to: string, templateId: string, data: Record<string, any>): Promise<boolean> {
+  sendMessage(to: string, templateId: string, data: Record<string, unknown>): boolean {
     try {
-      const template = this.config.defaultTemplates.find(t => t.id === templateId) ||
+      const template = this.config.defaultTemplates.find(t => t.id === templateId) ??
                       WhatsAppService.getDefaultTemplates().find(t => t.id === templateId);
 
       if (!template) {
@@ -144,20 +147,53 @@ Kami tunggu orderan selanjutnya! 🙏
         }
       });
 
-      // For demo purposes - in real implementation, this would call WhatsApp API
-      automationLogger.info({ to, templateId, message }, 'WhatsApp message sent (simulated)');
+      // Clean phone number (remove non-digits)
+      const cleanPhone = to.replace(/\D/g, '');
+      
+      // Add country code if not present (assume Indonesia +62)
+      const phoneWithCountry = cleanPhone.startsWith('62') ? cleanPhone : `62${cleanPhone.replace(/^0/, '')}`;
 
+      // Encode message for URL
+      const encodedMessage = encodeURIComponent(message);
+
+      // Generate wa.me link
+      const waLink = `https://wa.me/${phoneWithCountry}?text=${encodedMessage}`;
+
+      automationLogger.info({ 
+        to: phoneWithCountry, 
+        templateId, 
+        waLink 
+      }, 'WhatsApp link generated');
+
+      // Return the link in the response (client can open it)
+      // In browser context, you can use: window.open(waLink, '_blank')
       return true;
-    } catch (error) {
-      automationLogger.error({ error: error instanceof Error ? error.message : String(error), to, templateId }, 'Failed to send WhatsApp message');
+    } catch (err) {
+      automationLogger.error({ 
+        err: err instanceof Error ? err.message : String(err), 
+        to, 
+        templateId 
+      }, 'Failed to generate WhatsApp link');
       return false;
     }
   }
 
   /**
+   * Generate WhatsApp link for message
+   * ✅ NEW: Public method to get wa.me link
+   */
+  generateWhatsAppLink(to: string, message: string): string {
+    // Clean phone number
+    const cleanPhone = to.replace(/\D/g, '');
+    const phoneWithCountry = cleanPhone.startsWith('62') ? cleanPhone : `62${cleanPhone.replace(/^0/, '')}`;
+    const encodedMessage = encodeURIComponent(message);
+    return `https://wa.me/${phoneWithCountry}?text=${encodedMessage}`;
+  }
+
+  /**
    * Send order confirmation
    */
-  async sendOrderConfirmation(orderData: OrderData): Promise<boolean> {
+  sendOrderConfirmation(orderData: OrderData): boolean {
     const orderItems = orderData.items.map(item =>
       `• ${item.name} (${item.quantity}x) - ${formatCurrentCurrency(item.price * item.quantity)}`
     ).join('\n');
@@ -166,8 +202,8 @@ Kami tunggu orderan selanjutnya! 🙏
       customer_name: orderData.customer_name,
       order_items: orderItems,
       total_amount: formatCurrentCurrency(orderData.total_amount),
-      delivery_date: orderData.delivery_date || 'Segera',
-      notes: orderData.notes || ''
+      delivery_date: orderData.delivery_date ?? 'Segera',
+      notes: orderData.notes ?? ''
     };
 
     return this.sendMessage(orderData.customer_phone, 'order_confirmation', data);
@@ -176,7 +212,7 @@ Kami tunggu orderan selanjutnya! 🙏
   /**
    * Send delivery reminder
    */
-  async sendDeliveryReminder(orderData: OrderData): Promise<boolean> {
+  sendDeliveryReminder(orderData: OrderData): boolean {
     const orderItems = orderData.items.map(item =>
       `• ${item.name} (${item.quantity}x)`
     ).join('\n');
@@ -185,7 +221,7 @@ Kami tunggu orderan selanjutnya! 🙏
       customer_name: orderData.customer_name,
       order_items: orderItems,
       total_amount: formatCurrentCurrency(orderData.total_amount),
-      delivery_date: orderData.delivery_date || 'Hari ini'
+      delivery_date: orderData.delivery_date ?? 'Hari ini'
     };
 
     return this.sendMessage(orderData.customer_phone, 'order_reminder', data);
@@ -194,7 +230,7 @@ Kami tunggu orderan selanjutnya! 🙏
   /**
    * Send payment reminder
    */
-  async sendPaymentReminder(orderData: OrderData, deadline: string, paymentAccount: string): Promise<boolean> {
+  sendPaymentReminder(orderData: OrderData, deadline: string, paymentAccount: string): boolean {
     const orderItems = orderData.items.map(item =>
       `• ${item.name} (${item.quantity}x)`
     ).join('\n');
@@ -213,7 +249,7 @@ Kami tunggu orderan selanjutnya! 🙏
   /**
    * Send follow-up message
    */
-  async sendFollowUp(orderData: OrderData): Promise<boolean> {
+  sendFollowUp(orderData: OrderData): boolean {
     const orderItems = orderData.items.map(item =>
       `• ${item.name} (${item.quantity}x)`
     ).join('\n');

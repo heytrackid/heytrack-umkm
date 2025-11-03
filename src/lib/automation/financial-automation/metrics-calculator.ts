@@ -1,9 +1,10 @@
+import type { SaleData, ExpenseData, Ingredient, FinancialMetrics } from '@/lib/automation/types'
+
 /**
  * Metrics Calculator Module
  * Handles core financial metrics calculation
  */
 
-import type { SaleData, ExpenseData, Ingredient, FinancialMetrics } from '../types'
 
 export class MetricsCalculator {
   /**
@@ -21,7 +22,7 @@ export class MetricsCalculator {
     const netProfit = grossProfit - totalExpenses
 
     // Inventory value calculation
-    const inventoryValue = inventory.reduce((sum, i) => sum + (i.current_stock || 0) * (i.price_per_unit || 0), 0)
+    const inventoryValue = inventory.reduce((sum, i) => sum + (i.current_stock ?? 0) * (i.price_per_unit ?? 0), 0)
 
     return {
       revenue: totalRevenue,
@@ -38,7 +39,7 @@ export class MetricsCalculator {
    */
   static filterRecentData<T extends { date: string }>(
     data: T[],
-    days: number = 30
+    days = 30
   ): T[] {
     const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
     return data.filter(item => new Date(item.date) >= cutoffDate)
@@ -48,7 +49,7 @@ export class MetricsCalculator {
    * Calculate inventory value
    */
   static calculateInventoryValue(inventory: Ingredient[]): number {
-    return inventory.reduce((sum, i) => sum + (i.current_stock || 0) * (i.price_per_unit || 0), 0)
+    return inventory.reduce((sum, i) => sum + (i.current_stock ?? 0) * (i.price_per_unit ?? 0), 0)
   }
 
   /**

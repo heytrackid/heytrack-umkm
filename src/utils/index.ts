@@ -1,3 +1,5 @@
+
+
 /**
  * Barrel export for utility functions
  * 
@@ -18,7 +20,7 @@ export {
 } from './responsive'
 
 // Re-export BREAKPOINTS and DEVICE_BREAKPOINTS from types
-export { BREAKPOINTS, DEVICE_BREAKPOINTS } from '../types/responsive'
+export { BREAKPOINTS, DEVICE_BREAKPOINTS } from '@/types/responsive'
 
 // ============================================================================
 // SUPABASE UTILITIES

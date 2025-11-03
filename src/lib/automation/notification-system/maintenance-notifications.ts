@@ -1,9 +1,10 @@
+import type { SmartNotification, Equipment } from './types'
+
 /**
  * Maintenance Notifications Module
  * Handles equipment maintenance notification generation
  */
 
-import type { SmartNotification, Equipment } from './types'
 
 export class MaintenanceNotifications {
   /**

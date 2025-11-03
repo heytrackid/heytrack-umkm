@@ -1,9 +1,10 @@
+import { z } from 'zod'
+
 /**
  * Authentication Error Handling Utilities
  * Provides user-friendly error messages and validation for auth operations
  */
 
-import { z } from 'zod'
 
 // ============================================================================
 // AUTH ERROR MESSAGES
@@ -43,7 +44,7 @@ export const AUTH_ERROR_MESSAGES = {
 export function getAuthErrorMessage(error: string | Error | { message?: string }): string {
   const errorMessage = typeof error === 'string'
     ? error
-    : error?.message || 'Terjadi kesalahan autentikasi'
+    : error?.message ?? 'Terjadi kesalahan autentikasi'
 
   // Check for exact matches in our error messages
   if (AUTH_ERROR_MESSAGES[errorMessage as keyof typeof AUTH_ERROR_MESSAGES]) {
@@ -130,11 +131,11 @@ export function validatePassword(password: string): {
     }
 
     return { isValid: true, strength }
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+  } catch (err) {
+    if (err instanceof z.ZodError) {
       return {
         isValid: false,
-        error: error.issues[0]?.message || 'Password tidak valid'
+        error: err.issues[0]?.message || 'Password tidak valid'
       }
     }
     return {
@@ -194,8 +195,8 @@ export const UpdatePasswordSchema = z.object({
  * Extract error message from various error formats
  */
 export function extractAuthError(error: unknown): string {
-  if (typeof error === 'string') return error
-  if (error instanceof Error) return error.message
+  if (typeof error === 'string') {return error}
+  if (error instanceof Error) {return error.message}
   if (typeof error === 'object' && error !== null && 'message' in error) {
     return String(error.message)
   }

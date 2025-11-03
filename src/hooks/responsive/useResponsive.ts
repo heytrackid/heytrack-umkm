@@ -1,11 +1,11 @@
 'use client'
 
-import * as React from 'react'
 import { useEffect, useState } from 'react'
-import { BREAKPOINTS, ScreenSize, ResponsiveState } from './types'
+import { type ScreenSize, type ResponsiveState, BREAKPOINTS } from './types'
 
-const MOBILE_BREAKPOINT = 768
-const TABLET_BREAKPOINT = BREAKPOINTS.lg
+
+
+// Removed unused constants: MOBILE_BREAKPOINT, TABLET_BREAKPOINT
 
 /**
  * Unified responsive hook untuk deteksi breakpoint
@@ -19,23 +19,23 @@ export function useResponsive(): ResponsiveState {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    void setMounted(true)
 
     const updateBreakpoint = () => {
       const w = window.innerWidth
 
       if (w < BREAKPOINTS.md) {
-        setBreakpoint('mobile')
+        void setBreakpoint('mobile')
       } else if (w < BREAKPOINTS.lg) {
-        setBreakpoint('tablet')
+        void setBreakpoint('tablet')
       } else {
-        setBreakpoint('desktop')
+        void setBreakpoint('desktop')
       }
 
-      setWidth(w)
+      void setWidth(w)
     }
 
-    updateBreakpoint()
+    void updateBreakpoint()
 
     const debounce = (fn: () => void) => {
       let timeout: NodeJS.Timeout

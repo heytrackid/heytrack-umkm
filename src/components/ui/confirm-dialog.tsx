@@ -1,46 +1,61 @@
-/**
- * Confirmation Dialog Component
- * Prevents accidental destructive actions
- */
+'use client'
 
-import { cn } from '@/lib/utils'
+import { useState } from 'react'
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from './alert-dialog'
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface ConfirmDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
   description: string
-  onConfirm: () => void | Promise<void>
   confirmText?: string
   cancelText?: string
   variant?: 'default' | 'destructive'
+  onConfirm: () => void | Promise<void>
+  consequences?: string[]
+  requireConfirmation?: boolean
+  confirmationText?: string
   loading?: boolean
 }
 
-export function ConfirmDialog({
+export const ConfirmDialog = ({
   open,
   onOpenChange,
   title,
   description,
-  onConfirm,
   confirmText = 'Konfirmasi',
   cancelText = 'Batal',
   variant = 'default',
-  loading = false
-}: ConfirmDialogProps) {
+  onConfirm,
+  consequences = [],
+  requireConfirmation = false,
+  confirmationText = ''
+}: ConfirmDialogProps) => {
+  const [inputValue, setInputValue] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const canConfirm = !requireConfirmation || inputValue === confirmationText
+
   const handleConfirm = async () => {
-    await onConfirm()
-    onOpenChange(false)
+    if (!canConfirm) { return }
+
+    setIsLoading(true)
+    try {
+      await onConfirm()
+      onOpenChange(false)
+      setInputValue('')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -48,22 +63,52 @@ export function ConfirmDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {description}
+          <AlertDialogDescription className="space-y-3">
+            <p>{description}</p>
+
+            {consequences.length > 0 && (
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-start gap-2">
+                  <svg className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div className="text-sm">
+                    <p className="font-medium text-yellow-900 dark:text-yellow-200 mb-1">Perhatian:</p>
+                    <ul className="list-disc list-inside space-y-1 text-yellow-800 dark:text-yellow-300">
+                      {consequences.map((consequence, index) => (
+                        <li key={index}>{consequence}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {requireConfirmation && (
+              <div className="space-y-2">
+                <p className="text-sm">
+                  Ketik <strong className="font-mono bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded">{confirmationText}</strong> untuk konfirmasi
+                </p>
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder={`Ketik "${confirmationText}"`}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>
-            {cancelText}
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
-            disabled={loading}
-            className={cn(
-              variant === 'destructive' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
-            )}
+            disabled={!canConfirm || isLoading}
+            className={variant === 'destructive' ? 'bg-red-600 hover:bg-red-700 disabled:bg-red-300' : ''}
           >
-            {loading ? 'Memproses...' : confirmText}
+            {isLoading ? 'Memproses...' : confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -71,85 +116,40 @@ export function ConfirmDialog({
   )
 }
 
-// Preset confirmation dialogs
-export function DeleteConfirmDialog({
-  open,
-  onOpenChange,
-  onConfirm,
-  itemName,
-  loading
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: () => void | Promise<void>
-  itemName?: string
-  loading?: boolean
-}) {
-  return (
-    <ConfirmDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={`Hapus ${itemName || 'item ini'}?`}
-      description="Tindakan ini tidak dapat dibatalkan. Data akan dihapus secara permanen dari sistem."
-      onConfirm={onConfirm}
-      confirmText="Hapus"
-      cancelText="Batal"
-      variant="destructive"
-      loading={loading}
-    />
-  )
-}
+// Hook untuk mudah pakai
+export function useConfirm() {
+  const [state, setState] = useState<{
+    open: boolean
+    title: string
+    description: string
+    confirmText?: string
+    cancelText?: string
+    variant?: 'default' | 'destructive'
+    onConfirm?: () => void | Promise<void>
+  }>({
+    open: false,
+    title: '',
+    description: '',
+    onConfirm: undefined
+  })
 
-export function BulkDeleteConfirmDialog({
-  open,
-  onOpenChange,
-  onConfirm,
-  count,
-  loading
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: () => void | Promise<void>
-  count: number
-  loading?: boolean
-}) {
-  return (
-    <ConfirmDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={`Hapus ${count} item?`}
-      description={`Anda akan menghapus ${count} item sekaligus. Tindakan ini tidak dapat dibatalkan.`}
-      onConfirm={onConfirm}
-      confirmText={`Hapus ${count} Item`}
-      cancelText="Batal"
-      variant="destructive"
-      loading={loading}
-    />
-  )
-}
+  const confirm = (options: Omit<typeof state, 'open' | 'onConfirm'>) => new Promise<boolean>((resolve) => {
+    setState({
+      ...options,
+      open: true,
+      onConfirm: () => {
+        resolve(true)
+      }
+    })
+  })
 
-export function ResetConfirmDialog({
-  open,
-  onOpenChange,
-  onConfirm,
-  loading
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: () => void | Promise<void>
-  loading?: boolean
-}) {
-  return (
+  const ConfirmDialogComponent = () => (
     <ConfirmDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Reset ke pengaturan default?"
-      description="Semua perubahan yang belum disimpan akan hilang dan pengaturan akan kembali ke nilai default."
-      onConfirm={onConfirm}
-      confirmText="Reset"
-      cancelText="Batal"
-      variant="destructive"
-      loading={loading}
+      {...state}
+      onConfirm={() => state.onConfirm?.()}
+      onOpenChange={(open) => setState(prev => ({ ...prev, open }))}
     />
   )
+
+  return { confirm, ConfirmDialog: ConfirmDialogComponent }
 }

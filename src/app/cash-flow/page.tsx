@@ -1,49 +1,49 @@
 'use client'
 
-import * as React from 'react'
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
-import { Download, AlertCircle, Loader2 } from 'lucide-react'
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
+import { AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb' 
 import { StatsSkeleton, CardSkeleton } from '@/components/ui'
+import { PageHeader } from '@/components/layout/PageHeader'
 
-// Lazy load extracted components for better performance and code splitting
-const TransactionForm = lazy(() => import('./components/TransactionForm'))
-const SummaryCards = lazy(() => import('./components/SummaryCards'))
-const CashFlowChart = lazy(() => import('./components/CashFlowChart'))
-const TransactionList = lazy(() => import('./components/TransactionList'))
-const CategoryBreakdown = lazy(() => import('./components/CategoryBreakdown'))
-const FilterPeriod = lazy(() => import('./components/FilterPeriod'))
+// Import components directly - no lazy loading for better parallel loading
+import EnhancedTransactionForm from './components/EnhancedTransactionForm'
+import EnhancedSummaryCards from './components/EnhancedSummaryCards'
+import EnhancedCashFlowChart from './components/EnhancedCashFlowChart'
+import EnhancedTransactionList from './components/EnhancedTransactionList'
+import CategoryBreakdown from './components/CategoryBreakdown'
+import FilterPeriod from './components/FilterPeriod'
 
-import { useCashFlow } from './hooks/useCashFlow'
+import { useEnhancedCashFlow } from './hooks/useEnhancedCashFlow'
 
-export default function CashFlowPage() {
+// Summary cards skeleton component
+const SummaryCardsSkeleton = () => (
+  Array.from({ length: 3 }, (_, i) => (
+    <div key={`summary-card-${i}`} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
+  ))
+)
+
+const CashFlowPage = () => {
   const { formatCurrency } = useSettings()
   const { isMobile } = useResponsive()
 
-  // Use the custom hook for all cash flow logic
+  // Use the enhanced hook for all cash flow logic
   const {
     loading,
     error,
     cashFlowData,
+    comparison,
     selectedPeriod,
     startDate,
     endDate,
     isAddDialogOpen,
     transactionType,
-    formData,
     chartData,
     transactions,
     summary,
@@ -52,12 +52,10 @@ export default function CashFlowPage() {
     setEndDate,
     setIsAddDialogOpen,
     setTransactionType,
-    setFormData,
     fetchCashFlowData,
     handleAddTransaction,
-    handleDeleteTransaction,
-    exportReport
-  } = useCashFlow()
+    handleDeleteTransaction
+  } = useEnhancedCashFlow()
 
   // Loading state
   if (loading && !cashFlowData) {
@@ -80,7 +78,10 @@ export default function CashFlowPage() {
             <div className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Terjadi Kesalahan</h3>
-              <p className="text-muted-foreground mb-4">{error}</p>
+              <p className="text-muted-foreground mb-2">{error}</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Periksa koneksi internet Anda atau coba lagi dalam beberapa saat
+              </p>
               <Button onClick={fetchCashFlowData}>Coba Lagi</Button>
             </div>
           </CardContent>
@@ -108,36 +109,43 @@ export default function CashFlowPage() {
         </Breadcrumb>
 
         {/* Header */}
-        <div className={`flex gap-4 ${isMobile ? 'flex-col' : 'justify-between items-center'}`}>
-          <div>
-            <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-              Arus Kas
-            </h1>
-            <p className="text-muted-foreground">
-              Kelola semua transaksi pemasukan dan pengeluaran
-            </p>
-          </div>
-
-          <div className={`flex gap-2 ${isMobile ? 'flex-col w-full' : ''}`}>
-            <Button className={isMobile ? 'w-full' : ''} onClick={() => setIsAddDialogOpen(true)}>
-              <Download className="h-4 w-4 mr-2" />
+        <PageHeader
+          title="Arus Kas"
+          description="Kelola semua transaksi pemasukan dan pengeluaran"
+          action={
+            <Button
+              onClick={() => setIsAddDialogOpen(true)}
+              disabled={loading}
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
               Tambah Transaksi
             </Button>
+          }
+        />
 
-            <Button
-              variant="outline"
-              onClick={() => exportReport('csv')}
-              className={isMobile ? 'w-full' : ''}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Ekspor
-            </Button>
+        {/* Main Content - Single Suspense boundary for parallel loading */}
+        <Suspense fallback={
+          <div className="space-y-6">
+            {/* Filters Loading */}
+            <div className="h-32 bg-gray-100 animate-pulse rounded-lg" />
+
+            {/* Summary Cards Loading */}
+            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
+              <SummaryCardsSkeleton />
+            </div>
+
+            {/* Chart Loading */}
+            <div className="h-80 bg-gray-100 animate-pulse rounded-lg" />
+
+            {/* Transactions Loading */}
+            <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
+
+            {/* Category Breakdown Loading */}
+            <div className="h-48 bg-gray-100 animate-pulse rounded-lg" />
           </div>
-        </div>
-
-        {/* Transaction Form Dialog */}
-        <Suspense fallback={null}>
-          <TransactionForm
+        }>
+          {/* Enhanced Transaction Form Dialog */}
+          <EnhancedTransactionForm
             isOpen={isAddDialogOpen}
             onOpenChange={setIsAddDialogOpen}
             transactionType={transactionType}
@@ -145,10 +153,40 @@ export default function CashFlowPage() {
             onSubmit={handleAddTransaction}
             loading={loading}
           />
-        </Suspense>
 
-        {/* Filters */}
-        <Suspense fallback={<div className="h-32 bg-gray-100 animate-pulse rounded-lg" />}>
+          {/* Quick Actions for Mobile */}
+          {isMobile && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex-col gap-2"
+                    onClick={() => {
+                      setTransactionType('income')
+                      setIsAddDialogOpen(true)
+                    }}
+                  >
+                    <ArrowUpCircle className="h-6 w-6 text-green-600" />
+                    <span className="text-sm">Pemasukan</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-20 flex-col gap-2"
+                    onClick={() => {
+                      setTransactionType('expense')
+                      setIsAddDialogOpen(true)
+                    }}
+                  >
+                    <ArrowDownCircle className="h-6 w-6 text-red-600" />
+                    <span className="text-sm">Pengeluaran</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Filters */}
           <FilterPeriod
             selectedPeriod={selectedPeriod}
             onPeriodChange={setSelectedPeriod}
@@ -160,26 +198,17 @@ export default function CashFlowPage() {
             loading={loading}
             isMobile={isMobile}
           />
-        </Suspense>
 
-        {/* Summary Cards */}
-        <Suspense fallback={
-          <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
-            {Array.from({ length: 3 }, (_, i) => (
-              <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg"></div>
-            ))}
-          </div>
-        }>
-          <SummaryCards
+          {/* Enhanced Summary Cards */}
+          <EnhancedSummaryCards
             summary={summary}
+            comparison={comparison}
             formatCurrency={formatCurrency}
             isMobile={isMobile}
           />
-        </Suspense>
 
-        {/* Cash Flow Trend Chart */}
-        <Suspense fallback={<div className="h-80 bg-gray-100 animate-pulse rounded-lg" />}>
-          <CashFlowChart
+          {/* Enhanced Cash Flow Trend Chart */}
+          <EnhancedCashFlowChart
             chartData={chartData}
             selectedPeriod={selectedPeriod}
             onPeriodChange={setSelectedPeriod}
@@ -189,20 +218,16 @@ export default function CashFlowPage() {
             onEndDateChange={setEndDate}
             isMobile={isMobile}
           />
-        </Suspense>
 
-        {/* Transactions List */}
-        <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse rounded-lg" />}>
-          <TransactionList
+          {/* Enhanced Transactions List */}
+          <EnhancedTransactionList
             transactions={transactions}
             onDeleteTransaction={handleDeleteTransaction}
             formatCurrency={formatCurrency}
             loading={loading}
           />
-        </Suspense>
 
-        {/* Category Breakdown */}
-        <Suspense fallback={<div className="h-48 bg-gray-100 animate-pulse rounded-lg" />}>
+          {/* Category Breakdown */}
           <CategoryBreakdown
             summary={summary}
             formatCurrency={formatCurrency}
@@ -213,3 +238,5 @@ export default function CashFlowPage() {
     </AppLayout>
   )
 }
+
+export default CashFlowPage

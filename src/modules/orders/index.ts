@@ -1,3 +1,5 @@
+
+
 /**
  * Orders Domain Module
  * Centralized exports untuk semua functionality terkait order management & sales
@@ -11,11 +13,6 @@ export { OrdersTableView } from './components/OrdersTableView'
 
 // Services
 export { OrderRecipeService } from './services/OrderRecipeService'
-export type { 
-  RecipeOption, 
-  OrderItemCalculation, 
-  OrderPricing 
-} from './services/OrderRecipeService'
 
 // Types
 export type {
@@ -64,7 +61,7 @@ export {
 export {
   getStatusInfo,
   getPriorityInfo,
-  generateOrderNumber,
+  generateOrderNo,
   calculateOrderTotals,
   getPaymentStatus
 } from './utils/helpers'

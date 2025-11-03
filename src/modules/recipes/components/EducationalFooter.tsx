@@ -2,11 +2,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+
+
+
+
 /**
  * Educational footer cards component for UMKM guidance
  */
-export function EducationalFooter() {
-  return (
+export const EducationalFooter = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card className="border-green-200 bg-green-50">
         <CardHeader>
@@ -33,4 +36,3 @@ export function EducationalFooter() {
       </Card>
     </div>
   )
-}

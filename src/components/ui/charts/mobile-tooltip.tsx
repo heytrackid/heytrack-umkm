@@ -1,32 +1,33 @@
+import type { ReactNode } from 'react'
+import { useResponsive } from '@/hooks/useResponsive'
+import { cn } from '@/lib/utils'
+import type { TooltipEntry } from './types'
+
 /**
  * Mobile Tooltip Component
  * Optimized tooltip for mobile chart interactions
  */
 
-import * as React from 'react'
-import { useResponsive } from '@/hooks/useResponsive'
-import { cn } from '@/lib/utils'
-import { TooltipEntry } from './types'
 
 // Mobile-optimized tooltip component
 interface MobileTooltipProps {
   active?: boolean
   payload?: TooltipEntry[]
   label?: string | number
-  formatter?: (value: number | string, name: string, props: TooltipEntry) => [React.ReactNode, string]
-  labelFormatter?: (value: string | number) => React.ReactNode
+  formatter?: (value: number | string, name: string, props: TooltipEntry) => [ReactNode, string]
+  labelFormatter?: (value: string | number) => ReactNode
 }
 
-export function MobileTooltip({
+export const MobileTooltip = ({
   active,
   payload,
   label,
   formatter,
   labelFormatter
-}: MobileTooltipProps) {
+}: MobileTooltipProps) => {
   const { isMobile } = useResponsive()
 
-  if (active && payload && payload.length) {
+  if (active && payload?.length) {
     return (
       <div className={cn(
        "bg-background/95 backdrop-blur-sm border rounded-lg  p-3",

@@ -1,9 +1,10 @@
+import type { SmartNotification, UserPreferences } from './types'
+
 /**
  * Notification Filter Module
  * Handles notification filtering based on user preferences
  */
 
-import type { SmartNotification, UserPreferences } from './types'
 
 export class NotificationFilter {
   /**

@@ -1,34 +1,34 @@
----
-inclusion: always
----
+# Product Overview
 
-# HeyTrack Product Overview
+HeyTrack is a comprehensive UMKM (Usaha Mikro, Kecil, dan Menengah) culinary business management system designed for Indonesian small and medium food businesses.
 
-HeyTrack is a comprehensive business management system designed specifically for Indonesian culinary SMEs (UMKM). The application focuses on accurate cost tracking, inventory management, and financial analysis for food production businesses.
+## Core Features
 
-## Core Value Proposition
-
-- **Automated HPP (Cost of Goods) Calculation**: Real-time cost tracking using WAC (Weighted Average Cost) methodology
-- **Financial Intelligence**: Accurate profit analysis accounting for ingredient price fluctuations
-- **Inventory Management**: Stock tracking with automated reorder alerts
-- **Order Management**: Complete order lifecycle from creation to delivery with automatic financial recording
-- **Production Planning**: Recipe management with cost breakdown and batch production tracking
-
-## Key Features
-
-1. **HPP Calculator**: Automated calculation of production costs including materials and operational expenses
-2. **WAC Implementation**: Weighted Average Cost tracking for accurate inventory valuation
-3. **Historical Tracking**: Daily snapshots of HPP with trend analysis and alerts
-4. **Recipe Management**: Complete recipe database with ingredient composition and cost analysis
-5. **Order Processing**: Full order workflow with automatic stock deduction and income recording
-6. **Financial Reports**: Cash flow, profit/loss, and operational cost tracking
-7. **AI Integration**: Recipe generation using OpenAI/Anthropic APIs
-8. **Automation**: Scheduled jobs for daily snapshots, alert detection, and data archival
+- **Inventory Management**: Track ingredients, stock levels, purchases, and suppliers with automated reorder alerts
+- **Recipe Management**: Create recipes with ingredient lists, calculate costs, and manage production batches
+- **Order Management**: Process customer orders, track payments, manage delivery, and generate WhatsApp follow-ups
+- **HPP Calculator**: Calculate Harga Pokok Produksi (Cost of Goods Sold) with weighted average cost tracking and historical analysis
+- **Production Planning**: Schedule production batches, manage capacity, and track production status
+- **Financial Tracking**: Monitor cash flow, expenses, operational costs, and profit margins
+- **AI Assistant**: Context-aware chatbot for business insights, recipe generation, and data analysis
+- **Reports & Analytics**: Comprehensive dashboards with sales summaries, profit analysis, and trend visualization
 
 ## Target Users
 
-Small to medium culinary businesses in Indonesia that need:
-- Accurate cost tracking for pricing decisions
-- Inventory management to prevent stockouts
-- Financial visibility for business growth
-- Production planning and scheduling
+Indonesian culinary UMKM owners and operators who need to:
+- Track ingredient costs and inventory
+- Calculate accurate product pricing
+- Manage customer orders and payments
+- Monitor business profitability
+- Plan production schedules
+- Generate business insights
+
+## Language
+
+The application uses Indonesian (Bahasa Indonesia) for:
+- User interface labels and messages
+- Error messages and notifications
+- Database field names (some legacy fields)
+- Business terminology (e.g., "Bahan Baku" for ingredients, "HPP" for COGS)
+
+Code, comments, and technical documentation use English.

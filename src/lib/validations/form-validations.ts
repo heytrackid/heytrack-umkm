@@ -1,20 +1,19 @@
-// Form validation schemas
-// Validation schemas specifically for form submissions and user input
-
 import { z } from 'zod'
+import type { OrderFormData as OrderFormValues } from '@/components/orders/types'
 import {
+
   UUIDSchema,
   EmailSchema,
   PhoneSchema,
-  DateStringSchema,
-  PositiveNumberSchema,
-  NonNegativeNumberSchema,
   indonesianName,
   optionalString,
   positiveNumber,
   rupiah,
   percentage
 } from './base-validations'
+
+// Form validation schemas
+// Validation schemas specifically for form submissions and user input 
 
 // Common validation field types for forms
 const RequiredString = z.string().min(1, 'Field ini wajib diisi')
@@ -105,10 +104,10 @@ export const CustomerSchema = z.object({
   }).optional().default("REGULAR"),
   notes: optionalString,
   is_active: z.boolean().default(true)
-}).refine(data => {
+}).refine(data => 
   // At least one contact method should be provided
-  return data.email || data.phone
-}, {
+   data.email ?? data.phone
+, {
   message: 'validation.contactRequired',
   path: ['email']
 })
@@ -117,7 +116,7 @@ export type CustomerFormData = z.infer<typeof CustomerSchema>
 
 // Order validation schema
 export const OrderSchema = z.object({
-  order_no: z.string().min(1, 'validation.orderNumberRequired'),
+  order_no: z.string().min(1, 'validation.OrderNoRequired'),
   customer_id: UUIDSchema.optional(),
   customer_name: optionalString,
   customer_phone: PhoneSchema.optional(),
@@ -271,9 +270,7 @@ export const OperationalCostFormSchema = z.object({
 // Simple Ingredient Form Schema (matches the form fields used)
 export const IngredientFormSchema = z.object({
   name: indonesianName,
-  unit: z.enum(['kg', 'g', 'l', 'ml', 'pcs', 'dozen'], {
-    message: 'Satuan tidak valid'
-  }),
+  unit: z.string().min(1, { message: 'Satuan harus diisi' }),
   price_per_unit: z.number().positive('Harga harus lebih dari 0'),
   current_stock: positiveNumber,
   min_stock: positiveNumber.optional(),
@@ -303,22 +300,22 @@ export type SupplierForm = z.infer<typeof SupplierFormSchema>
 export type OperationalCostForm = z.infer<typeof OperationalCostFormSchema>
 
 // Order validation helper function (moved from components/orders/utils.ts)
-export function validateOrderData(data: any): string[] {
+export function validateOrderData(data: OrderFormValues): string[] {
   const errors: string[] = []
 
-  if (!data.customer_name?.trim()) {
+  if (!data.customer_name.trim()) {
     errors.push('Nama pelanggan harus diisi')
   }
 
-  if (!data.customer_phone?.trim()) {
+  if (!data.customer_phone.trim()) {
     errors.push('Nomor telepon harus diisi')
   }
 
-  if (!data.delivery_date) {
+  if (!data.delivery_date?.trim()) {
     errors.push('Tanggal pengiriman harus diisi')
   }
 
-  if (!data.order_items || data.order_items.length === 0) {
+  if (data.order_items.length === 0) {
     errors.push('Minimal harus ada 1 item pesanan')
   }
 

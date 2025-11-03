@@ -1,10 +1,10 @@
+import { type Recipe, type AutomationConfig } from '@/lib/automation/types'
+
 /**
  * Time Calculator Module
  * Handles production time calculations and scheduling
  */
 
-import type { Recipe } from '../types'
-import type { AutomationConfig } from '../types'
 
 export class TimeCalculator {
   /**
@@ -12,10 +12,10 @@ export class TimeCalculator {
    */
   static calculateProductionTime(recipe: Recipe, quantity: number): number {
     // Base time + time per batch + prep time
-    const batchSize = recipe.servings || 1
+    const batchSize = recipe.servings ?? 1
     const batches = Math.ceil(quantity / batchSize)
-    const prepTime = recipe.prep_time || 30 // minutes
-    const cookTime = recipe.cook_time || 45 // minutes
+    const prepTime = recipe.prep_time ?? 30 // minutes
+    const cookTime = recipe.cook_time ?? 45 // minutes
 
     // Sequential batches with some parallelization efficiency
     const baseTime = prepTime + cookTime
@@ -56,7 +56,7 @@ export class TimeCalculator {
    * Schedule production orders with optimal timing
    */
   static scheduleOptimalProduction(
-    plan: any[], // ProductionPlanItem[]
+    plan: Array<{ recipeId: string; quantity: number; priority: number; deliveryDate: Date; production: { estimatedDuration: number } }>,
     workingHours: { start: number; end: number }
   ) {
     // Sort by delivery date priority
@@ -85,7 +85,7 @@ export class TimeCalculator {
           scheduledEnd: newEnd,
           isOnTime: newEnd <= item.deliveryDate
         }
-      } else {
+      } 
         currentTime = scheduledEnd
 
         return {
@@ -94,7 +94,7 @@ export class TimeCalculator {
           scheduledEnd,
           isOnTime: scheduledEnd <= item.deliveryDate
         }
-      }
+      
     })
   }
 }

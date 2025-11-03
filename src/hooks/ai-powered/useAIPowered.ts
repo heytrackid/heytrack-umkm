@@ -8,6 +8,8 @@ import { useFinancialAnalysis } from './useFinancialAnalysis'
 import { useSmartInsights } from './useSmartInsights'
 import type { AnalysisType } from './types'
 
+
+
 /**
  * React Hook for AI-Powered Business Intelligence
  * Provides intelligent insights powered by OpenRouter AI
@@ -53,7 +55,7 @@ export function useAIPowered() {
     try {
       const response = await fetch('/api/ai/health')
       return response.ok
-    } catch {
+    } catch (_error: unknown) {
       return false
     }
   }, [])
@@ -76,20 +78,20 @@ export function useAIPowered() {
 
     // Computed
     isAnyLoading: pricingAnalysis.loading || inventoryAnalysis.loading || customerAnalysis.loading || financialAnalysis.loading,
-    hasAnyData: !!(pricingAnalysis.data || inventoryAnalysis.data || customerAnalysis.data || financialAnalysis.data),
+    hasAnyData: !!(pricingAnalysis.data ?? inventoryAnalysis.data ?? customerAnalysis.data ?? financialAnalysis.data),
 
     // Helper functions
     getConfidenceLevel: (confidence: number) => {
-      if (confidence >= 0.8) return 'high'
-      if (confidence >= 0.6) return 'medium'
+      if (confidence >= 0.8) {return 'high'}
+      if (confidence >= 0.6) {return 'medium'}
       return 'low'
     },
 
-    formatInsight: (insight: any, type: string) => ({
+    formatInsight: (insight: Record<string, unknown>, type: string) => ({
       ...insight,
       type,
-      confidence: insight.metadata?.confidence || 0.7,
-      timestamp: insight.metadata?.timestamp || new Date().toISOString(),
+      confidence: (insight.metadata as Record<string, unknown> | undefined)?.confidence as number || 0.7,
+      timestamp: (insight.metadata as Record<string, unknown> | undefined)?.timestamp as string || new Date().toISOString(),
       isAIPowered: true
     })
   }

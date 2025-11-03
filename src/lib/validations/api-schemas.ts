@@ -1,11 +1,20 @@
+import { z } from 'zod'
+import { 
+
+
 /**
  * API Request Validation Schemas
  * 
  * Comprehensive Zod schemas for all API endpoints
  * Use these schemas to validate request bodies and ensure type safety
+ * 
+ * NOTE: Order schemas now use domain schemas as source of truth
  */
 
-import { z } from 'zod'
+  OrderInsertSchema, 
+  OrderUpdateSchema as DomainOrderUpdateSchema, 
+  OrderStatusUpdateSchema
+} from './domains/order'
 
 // ============================================
 // Base Schemas
@@ -107,47 +116,14 @@ export const UpdateCustomerSchema = CreateCustomerSchema.partial()
 // ============================================
 // Order Schemas
 // ============================================
+// Using domain schemas as source of truth for consistency
 
-export const OrderItemSchema = z.object({
-  recipe_id: UUIDSchema,
-  quantity: z.number().int().positive(),
-  unit_price: PositiveNumberSchema,
-  total_price: PositiveNumberSchema,
-  product_name: z.string().max(255).optional(),
-  special_requests: z.string().max(500).optional(),
-})
+export const CreateOrderSchema = OrderInsertSchema
+export const UpdateOrderSchema = DomainOrderUpdateSchema
+export const UpdateOrderStatusSchema = OrderStatusUpdateSchema
 
-export const CreateOrderSchema = z.object({
-  order_no: z.string().min(1).max(50),
-  customer_id: UUIDSchema.optional(),
-  customer_name: z.string().min(1).max(255).optional(),
-  customer_phone: PhoneSchema,
-  customer_address: z.string().max(500).optional(),
-  status: z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED']).default('PENDING'),
-  total_amount: PositiveNumberSchema,
-  paid_amount: NonNegativeNumberSchema.default(0),
-  discount: NonNegativeNumberSchema.default(0),
-  tax_amount: NonNegativeNumberSchema.default(0),
-  delivery_fee: NonNegativeNumberSchema.default(0),
-  delivery_date: DateStringSchema.optional(),
-  delivery_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
-  order_date: z.string().optional(),
-  payment_status: z.enum(['UNPAID', 'PARTIAL', 'PAID']).default('UNPAID'),
-  payment_method: z.enum(['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET']).default('CASH'),
-  priority: z.enum(['low', 'normal', 'high']).default('normal'),
-  notes: z.string().max(1000).optional(),
-  special_instructions: z.string().max(1000).optional(),
-  items: z.array(OrderItemSchema).min(1, 'At least one item required'),
-})
-
-export const UpdateOrderSchema = CreateOrderSchema.partial().extend({
-  items: z.array(OrderItemSchema).optional(),
-})
-
-export const UpdateOrderStatusSchema = z.object({
-  status: z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED']),
-  notes: z.string().max(1000).optional(),
-})
+// Re-export for backward compatibility
+export { OrderItemInsertSchema as OrderItemSchema } from './domains/order'
 
 // ============================================
 // Operational Cost Schemas
@@ -186,7 +162,7 @@ export const CreateExpenseSchema = z.object({
   payment_method: z.enum(['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET']).default('CASH'),
   status: z.enum(['pending', 'paid', 'overdue', 'cancelled']).default('paid'),
   tags: z.array(z.string()).optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const UpdateExpenseSchema = CreateExpenseSchema.partial()
@@ -239,11 +215,6 @@ export const HPPAutomationSchema = z.object({
   force: z.boolean().default(false),
 })
 
-export const HPPSnapshotSchema = z.object({
-  recipe_ids: z.array(UUIDSchema).optional(),
-  user_id: UUIDSchema.optional(),
-})
-
 // ============================================
 // AI Recipe Generation Schemas
 // ============================================
@@ -276,7 +247,7 @@ export const ErrorLogSchema = z.object({
   url: z.string().optional(),
   stack: z.string().optional(),
   level: z.enum(['error', 'warn', 'info']).default('error'),
-  context: z.record(z.any()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
   timestamp: DateStringSchema.optional(),
 })
 
@@ -321,7 +292,6 @@ export const APISchemas = {
   
   // HPP
   HPPAutomation: HPPAutomationSchema,
-  HPPSnapshot: HPPSnapshotSchema,
   
   // AI
   AIRecipeGeneration: AIRecipeGenerationSchema,
@@ -361,7 +331,6 @@ export type CreateSupplierInput = z.infer<typeof CreateSupplierSchema>
 export type UpdateSupplierInput = z.infer<typeof UpdateSupplierSchema>
 
 export type HPPAutomationInput = z.infer<typeof HPPAutomationSchema>
-export type HPPSnapshotInput = z.infer<typeof HPPSnapshotSchema>
 
 export type AIRecipeGenerationInput = z.infer<typeof AIRecipeGenerationSchema>
 export type AutomationTaskInput = z.infer<typeof AutomationTaskSchema>

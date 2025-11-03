@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import type { ScreenSizeState } from './types'
 
+
+
 /**
  * Get current screen size in pixels
  */
@@ -13,7 +15,7 @@ export function useScreenSize(): ScreenSizeState {
   })
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') {return}
 
     const updateSize = () => {
       setScreenSize({
@@ -22,7 +24,7 @@ export function useScreenSize(): ScreenSizeState {
       })
     }
 
-    updateSize()
+    void updateSize()
     window.addEventListener('resize', updateSize)
     return () => window.removeEventListener('resize', updateSize)
   }, [])

@@ -1,9 +1,10 @@
+import type { Recipe, Ingredient, RecipeIngredient } from '@/lib/automation/types'
+
 /**
  * Production Automation Module Types
  * Additional type definitions specific to production automation
  */
 
-import type { Recipe, Ingredient, RecipeIngredient } from '../types'
 
 // Additional production types
 export interface OrderForProduction {
@@ -32,7 +33,7 @@ export interface ScheduledProductionItem {
     estimatedDuration: number
     batchCount: number
   }
-  ingredients: any // AvailabilityCheck
+  ingredients: { available: boolean; missing: string[] } // AvailabilityCheck
   recommendations: string[]
   scheduledStart: Date
   scheduledEnd: Date

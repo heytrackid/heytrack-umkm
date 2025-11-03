@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,32 +11,35 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { 
+import { FormField } from './shared/FormField'
+import type { FinancialRecordsTable } from '@/types/database'
+import {
   FinancialRecordSchema,
   type FinancialRecordFormData
 } from '@/lib/validations'
-import { FormField } from './shared/FormField'
+
+type FinancialRecord = FinancialRecordsTable
 
 interface FinancialRecordFormProps {
-  initialData?: Partial<FinancialRecordFormData>
+  initialData?: Partial<FinancialRecordFormData> & Partial<FinancialRecord>
   onSubmit: (data: FinancialRecordFormData) => Promise<void>
   isLoading?: boolean
 }
 
-export function FinancialRecordForm({ initialData, onSubmit, isLoading }: FinancialRecordFormProps) {
+export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: FinancialRecordFormProps) => {
   const { toast } = useToast()
-  
+
   const form = useForm<FinancialRecordFormData>({
     resolver: zodResolver(FinancialRecordSchema),
     defaultValues: {
-      type: initialData?.type || 'EXPENSE',
-      category: initialData?.category || '',
-      amount: initialData?.amount || 0,
-      description: initialData?.description || '',
-      date: initialData?.date || new Date().toISOString(),
-      payment_method: initialData?.payment_method || 'CASH',
+      type: initialData?.type ?? 'EXPENSE',
+      category: initialData?.category ?? '',
+      amount: initialData?.amount ?? 0,
+      description: initialData?.description ?? '',
+      date: initialData?.date ?? new Date().toISOString(),
+      payment_method: initialData?.payment_method ?? 'CASH',
       is_recurring: initialData?.is_recurring ?? false,
-      notes: initialData?.notes || '',
+      notes: initialData?.notes ?? '',
       ...initialData
     }
   })
@@ -52,7 +54,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
       if (!initialData) {
         form.reset()
       }
-    } catch (error: unknown) {
+    } catch (_err: unknown) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan catatan keuangan',
@@ -69,14 +71,18 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
       <CardContent>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField 
-              label="Tipe Transaksi" 
-              required 
+            <FormField
+              label="Tipe Transaksi"
+              required
               error={form.formState.errors.type?.message}
             >
-              <Select 
-                value={form.watch('type')} 
-                onValueChange={(value) => form.setValue('type', value as any)}
+              <Select
+                value={form.watch('type')}
+                onValueChange={(value) => {
+                  if (value === 'INCOME' || value === 'EXPENSE') {
+                    form.setValue('type', value)
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -88,49 +94,56 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
               </Select>
             </FormField>
 
-            <FormField 
-              label="Kategori" 
-              required 
+            <FormField
+              label="Kategori"
+              required
               error={form.formState.errors.category?.message}
             >
-              <Input 
+              <Input
                 {...form.register('category')}
-
               />
             </FormField>
 
-            <FormField 
-              label="Jumlah (Rp)" 
-              required 
+            <FormField
+              label="Jumlah (Rp)"
+              required
               error={form.formState.errors.amount?.message}
             >
-              <Input 
+              <Input
                 type="number"
                 min="0"
                 step="0.01"
                 {...form.register('amount', { valueAsNumber: true })}
-
               />
             </FormField>
 
-            <FormField 
-              label="Tanggal" 
-              required 
+            <FormField
+              label="Tanggal"
+              required
               error={form.formState.errors.date?.message}
             >
-              <Input 
+              <Input
                 type="datetime-local"
                 {...form.register('date')}
               />
             </FormField>
 
-            <FormField 
-              label="Metode Pembayaran" 
+            <FormField
+              label="Metode Pembayaran"
               error={form.formState.errors.payment_method?.message}
             >
-              <Select 
-                value={form.watch('payment_method')} 
-                onValueChange={(value) => form.setValue('payment_method', value as any)}
+              <Select
+                value={form.watch('payment_method')}
+                onValueChange={(value) => {
+                  if (
+                    value === 'CASH' ||
+                    value === 'TRANSFER' ||
+                    value === 'CREDIT_CARD' ||
+                    value === 'E_WALLET'
+                  ) {
+                    form.setValue('payment_method', value)
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -144,42 +157,39 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
               </Select>
             </FormField>
 
-            <FormField 
-              label="Nomor Referensi" 
+            <FormField
+              label="Nomor Referensi"
               error={form.formState.errors.reference_no?.message}
             >
-              <Input 
+              <Input
                 {...form.register('reference_no')}
-
               />
             </FormField>
           </div>
 
-          <FormField 
-            label="Deskripsi" 
-            required 
+          <FormField
+            label="Deskripsi"
+            required
             error={form.formState.errors.description?.message}
           >
-            <Textarea 
+            <Textarea
               {...form.register('description')}
-
               rows={3}
             />
           </FormField>
 
-          <FormField 
-            label="Catatan" 
+          <FormField
+            label="Catatan"
             error={form.formState.errors.notes?.message}
           >
-            <Textarea 
+            <Textarea
               {...form.register('notes')}
-
               rows={2}
             />
           </FormField>
 
           <div className="flex items-center space-x-2">
-            <Checkbox 
+            <Checkbox
               checked={form.watch('is_recurring')}
               onCheckedChange={(checked) => form.setValue('is_recurring', !!checked)}
             />
@@ -187,13 +197,22 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
           </div>
 
           {form.watch('is_recurring') && (
-            <FormField 
-              label="Periode Berulang" 
+            <FormField
+              label="Periode Berulang"
               error={form.formState.errors.recurring_period?.message}
             >
-              <Select 
-                value={form.watch('recurring_period')} 
-                onValueChange={(value) => form.setValue('recurring_period', value as any)}
+              <Select
+                value={form.watch('recurring_period')}
+                onValueChange={(value) => {
+                  if (
+                    value === 'DAILY' ||
+                    value === 'WEEKLY' ||
+                    value === 'MONTHLY' ||
+                    value === 'YEARLY'
+                  ) {
+                    form.setValue('recurring_period', value)
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -208,9 +227,9 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
             </FormField>
           )}
 
-          <Button 
-            type="submit" 
-            disabled={isLoading || !form.formState.isValid}
+          <Button
+            type="submit"
+            disabled={isLoading ?? !form.formState.isValid}
             className="w-full"
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

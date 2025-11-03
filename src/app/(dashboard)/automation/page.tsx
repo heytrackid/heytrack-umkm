@@ -5,19 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CardSkeleton } from '@/components/ui'
 import { apiLogger } from '@/lib/logger'
-import { 
-  Play, 
-  RefreshCw, 
-  CheckCircle, 
-  Clock, 
-  Bell, 
-  Package, 
-  Settings,
-  AlertTriangle,
-  TrendingUp
-} from 'lucide-react'
+import { Play, RefreshCw, CheckCircle, Clock, Bell, Package, Settings, AlertTriangle, TrendingUp } from 'lucide-react'
 
 interface AutomationStatus {
   timestamp: string
@@ -39,7 +28,7 @@ interface TaskResult {
   cleanup?: unknown
 }
 
-export default function AutomationPage() {
+const AutomationPage = () => {
   const [status, setStatus] = useState<AutomationStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [running, setRunning] = useState<string | null>(null)
@@ -47,33 +36,33 @@ export default function AutomationPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchStatus()
+    void fetchStatus()
   }, [])
 
   const fetchStatus = async () => {
     try {
-      setLoading(true)
-      setError(null)
+      void setLoading(true)
+      void setError(null)
       const response = await fetch('/api/automation/run')
       if (!response.ok) {
         throw new Error('Failed to fetch status')
       }
       const data = await response.json()
-      setStatus(data)
+      void setStatus(data)
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
-      setError(errorMessage)
+      void setError(errorMessage)
       apiLogger.error({ error: err }, 'Error fetching status:')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
   const runTask = async (task: string) => {
     try {
-      setRunning(task)
-      setError(null)
-      setResult(null)
+      void setRunning(task)
+      void setError(null)
+      void setResult(null)
 
       const response = await fetch('/api/automation/run', {
         method: 'POST',
@@ -82,26 +71,30 @@ export default function AutomationPage() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to run task')
+        const errorData = await response.json().catch(() => null)
+        const apiMessage =
+          errorData && typeof errorData.error === 'string' && errorData.error.trim().length > 0
+            ? errorData.error
+            : null
+        throw new Error(apiMessage ?? 'Failed to run task')
       }
 
       const data = await response.json()
-      setResult(data)
-      
+      void setResult(data)
+
       // Refresh status after task completion
-      setTimeout(fetchStatus, 1000)
+      setTimeout(() => void fetchStatus(), 1000)
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
-      setError(errorMessage)
+      void setError(errorMessage)
       apiLogger.error({ error: err }, 'Error running task:')
     } finally {
-      setRunning(null)
+      void setRunning(null)
     }
   }
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) {return 'Never'}
+    if (!dateString) { return 'Never' }
     const date = new Date(dateString)
     return date.toLocaleString('id-ID', {
       day: '2-digit',
@@ -115,7 +108,31 @@ export default function AutomationPage() {
   if (loading) {
     return (
       <div className="space-y-6 p-6">
-        <CardSkeleton rows={4} />
+        {/* Header skeleton */}
+        <div className="space-y-2">
+          <div className="h-8 bg-muted rounded w-1/3 animate-pulse" />
+          <div className="h-4 bg-muted rounded w-2/3 animate-pulse" />
+        </div>
+
+        {/* Status card skeleton */}
+        <Card>
+          <CardHeader>
+            <div className="h-6 bg-muted rounded w-1/4 animate-pulse" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[1, 2, 3, 4].map(i => (
+                <div key={`skeleton-${i}`} className="flex items-center justify-between">
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 bg-muted rounded w-1/3 animate-pulse" />
+                    <div className="h-3 bg-muted rounded w-2/3 animate-pulse" />
+                  </div>
+                  <div className="h-10 w-24 bg-muted rounded animate-pulse" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -143,7 +160,7 @@ export default function AutomationPage() {
       )}
 
       {/* Success Result */}
-      {result && result.status === 'success' && (
+      {result?.status === 'success' && (
         <Alert className="bg-green-50 border-green-200">
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">
@@ -170,9 +187,9 @@ export default function AutomationPage() {
             <div className="space-y-3">
               <div className="flex items-center text-sm text-gray-600">
                 <Clock className="w-4 h-4 mr-2" />
-                Last run: {formatDate(status?.automation.autoReorder.lastRun || null)}
+                Last run: {formatDate(status?.automation.autoReorder.lastRun ?? null)}
               </div>
-              <Button 
+              <Button
                 onClick={() => runTask('reorder')}
                 disabled={running === 'reorder'}
                 className="w-full"
@@ -209,9 +226,9 @@ export default function AutomationPage() {
             <div className="space-y-3">
               <div className="flex items-center text-sm text-gray-600">
                 <Clock className="w-4 h-4 mr-2" />
-                Last run: {formatDate(status?.automation.smartNotifications.lastRun || null)}
+                Last run: {formatDate(status?.automation.smartNotifications.lastRun ?? null)}
               </div>
-              <Button 
+              <Button
                 onClick={() => runTask('notifications')}
                 disabled={running === 'notifications'}
                 className="w-full"
@@ -248,9 +265,9 @@ export default function AutomationPage() {
             <div className="space-y-3">
               <div className="flex items-center text-sm text-gray-600">
                 <Clock className="w-4 h-4 mr-2" />
-                Last run: {formatDate(status?.automation.automationEngine.lastRun || null)}
+                Last run: {formatDate(status?.automation.automationEngine.lastRun ?? null)}
               </div>
-              <Button 
+              <Button
                 onClick={() => runTask('engine')}
                 disabled={running === 'engine'}
                 className="w-full"
@@ -280,7 +297,7 @@ export default function AutomationPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button 
+            <Button
               onClick={() => runTask('all')}
               disabled={running === 'all'}
               size="lg"
@@ -298,8 +315,8 @@ export default function AutomationPage() {
                 </>
               )}
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={() => runTask('cleanup')}
               disabled={running === 'cleanup'}
               size="lg"
@@ -368,3 +385,5 @@ export default function AutomationPage() {
     </div>
   )
 }
+
+export default AutomationPage

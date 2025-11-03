@@ -1,15 +1,15 @@
-/**
- * Mobile Input Component
- * Optimized input field for mobile devices with password toggle
- */
-
-import * as React from 'react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Input } from '../input'
 import { Label } from '../label'
 import { Eye, EyeOff } from 'lucide-react'
+
+/**
+ * Mobile Input Component
+ * Optimized input field for mobile devices with password toggle
+ */
+
 
 interface MobileInputProps {
   label?: string
@@ -27,7 +27,7 @@ interface MobileInputProps {
   showPasswordToggle?: boolean
 }
 
-export function MobileInput({
+export const MobileInput = ({
   label,
   placeholder,
   value,
@@ -41,7 +41,7 @@ export function MobileInput({
   hint,
   className,
   showPasswordToggle = false
-}: MobileInputProps) {
+}: MobileInputProps) => {
   const [showPassword, setShowPassword] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const { isMobile } = useResponsive()
@@ -64,9 +64,9 @@ export function MobileInput({
       {label && (
         <Label
           className={cn(
-           "text-sm font-medium",
-            isMobile &&"text-base",
-            error &&"text-destructive"
+            "text-sm font-medium",
+            isMobile && "text-base",
+            error && "text-destructive"
           )}
         >
           {label}
@@ -83,17 +83,17 @@ export function MobileInput({
           onChange={(e) => onChange?.(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
-            setIsFocused(false)
+            void setIsFocused(false)
             onBlur?.()
           }}
           disabled={disabled}
           required={required}
           inputMode={getInputMode()}
           className={cn(
-           "transition-all duration-200 pr-10",
-            isMobile &&"text-base h-12", // Better readability on mobile
-            error &&"border-destructive focus-visible:ring-destructive",
-            isFocused &&"ring-2 ring-ring ring-offset-2"
+            "transition-all duration-200 pr-10",
+            isMobile && "text-base h-12", // Better readability on mobile
+            error && "border-destructive focus-visible:ring-destructive",
+            isFocused && "ring-2 ring-ring ring-offset-2"
           )}
         />
 
@@ -114,12 +114,12 @@ export function MobileInput({
       </div>
 
       {/* Hint or Error message */}
-      {(hint || error) && (
+      {(hint ?? error) && (
         <p className={cn(
-         "text-sm",
-          error ?"text-destructive" :"text-muted-foreground"
+          "text-sm",
+          error ? "text-destructive" : "text-muted-foreground"
         )}>
-          {error || hint}
+          {error ?? hint}
         </p>
       )}
     </div>

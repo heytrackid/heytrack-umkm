@@ -1,30 +1,21 @@
 'use client'
-import * as React from 'react'
 
-import { lazy, Suspense } from 'react'
+import { Fragment } from 'react'
 import AppLayout from '@/components/layout/app-layout'
-import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 
-// Lazy load extracted components for better performance and code splitting
-const CategoryList = lazy(() => import('./components/CategoryList'))
-const CategoryForm = lazy(() => import('./components/CategoryForm').then(m => ({ default: m.CategoryForm })))
+// Import components directly for better parallel loading
+import CategoryList from './components/CategoryList'
+import { CategoryForm } from './components/CategoryForm'
 
 import { useCategories } from './hooks/useCategories'
 
 // Breadcrumb helper
 const getBreadcrumbItems = (currentView: string) => [
   { label: "Home", href: '/' },
-  { label: "Resep", href: '/resep' },
+  { label: "Resep", href: '/recipes' },
   {
     label: "Kategori",
     href: currentView === 'list' ? undefined : '/categories'
@@ -34,14 +25,13 @@ const getBreadcrumbItems = (currentView: string) => [
   }] : [])
 ]
 
-export default function CategoriesPage() {
+const CategoriesPage = () => {
   const { isMobile } = useResponsive()
 
   // Use the custom hook for all categories logic
   const {
     categories,
     currentView,
-    editingCategory,
     selectedItems,
     searchTerm,
     isLoading,
@@ -73,7 +63,7 @@ export default function CategoriesPage() {
         <Breadcrumb>
           <BreadcrumbList>
             {getBreadcrumbItems(currentView).map((item, index) => (
-              <React.Fragment key={index}>
+              <Fragment key={item.label}>
                 <BreadcrumbItem>
                   {item.href ? (
                     <BreadcrumbLink asChild>
@@ -86,67 +76,59 @@ export default function CategoriesPage() {
                   )}
                 </BreadcrumbItem>
                 {index < getBreadcrumbItems(currentView).length - 1 && <BreadcrumbSeparator />}
-              </React.Fragment>
+              </Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
 
         {currentView === 'list' ? (
-          <Suspense fallback={
-            <div className="space-y-6">
-              <div className="h-24 bg-gray-100 animate-pulse rounded-lg" />
-              <div className="h-12 bg-gray-100 animate-pulse rounded-lg" />
-              <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
-            </div>
-          }>
-            <CategoryList
-              categories={categories}
-              filteredCategories={filteredCategories}
-              paginatedCategories={paginatedCategories}
-              selectedItems={selectedItems}
-              searchTerm={searchTerm}
-              isMobile={isMobile}
-              isLoading={isLoading}
-              currentPage={currentPage}
-              totalPages={paginationInfo.totalPages}
-              pageSize={pageSize}
-              paginationInfo={{
-                startItem: paginationInfo.startItem,
-                endItem: paginationInfo.endItem,
-                totalItems: paginationInfo.totalItems
-              }}
-              onAddNew={() => setCurrentView('add')}
-              onSearchChange={setSearchTerm}
-              onSelectAll={handleSelectAll}
-              onSelectItem={handleSelectItem}
-              onEdit={handleEditCategory}
-              onDelete={handleDeleteCategory}
-              onView={handleViewCategory}
-              onPageChange={setCurrentPage}
-              onPageSizeChange={setPageSize}
-              onBulkEdit={handleBulkEdit}
-              onBulkDelete={handleBulkDelete}
-              onClearSelection={() => handleSelectAll()}
-            />
-          </Suspense>
+          // No Suspense - CategoryList handles its own loading state
+          <CategoryList
+            categories={categories}
+            filteredCategories={filteredCategories}
+            paginatedCategories={paginatedCategories}
+            selectedItems={selectedItems}
+            searchTerm={searchTerm}
+            isMobile={isMobile}
+            isLoading={isLoading}
+            currentPage={currentPage}
+            totalPages={paginationInfo.totalPages}
+            pageSize={pageSize}
+            paginationInfo={{
+              startItem: paginationInfo.startItem,
+              endItem: paginationInfo.endItem,
+              totalItems: paginationInfo.totalItems
+            }}
+            onAddNew={() => setCurrentView('add')}
+            onSearchChange={setSearchTerm}
+            onSelectAll={handleSelectAll}
+            onSelectItem={handleSelectItem}
+            onEdit={handleEditCategory}
+            onDelete={handleDeleteCategory}
+            onView={handleViewCategory}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+            onBulkEdit={handleBulkEdit}
+            onBulkDelete={handleBulkDelete}
+            onClearSelection={() => handleSelectAll()}
+          />
         ) : (
-          <Suspense fallback={
-            <div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
-          }>
-            <CategoryForm
-              category={formData}
-              currentView={currentView as 'add' | 'edit'}
-              isMobile={isMobile}
-              onCategoryChange={setFormData}
-              onSave={handleSaveCategory}
-              onCancel={() => {
-                resetForm()
-                setCurrentView('list')
-              }}
-            />
-          </Suspense>
+          // No Suspense - CategoryForm handles its own loading state
+          <CategoryForm
+            category={formData}
+            currentView={currentView}
+            isMobile={isMobile}
+            onCategoryChange={setFormData}
+            onSave={handleSaveCategory}
+            onCancel={() => {
+              resetForm()
+              void setCurrentView('list')
+            }}
+          />
         )}
       </div>
-    </AppLayout>
+    </AppLayout >
   )
 }
+
+export default CategoriesPage

@@ -1,38 +1,43 @@
-/**
- * Cache Utility for API Responses
- * Provides in-memory caching with TTL support for better performance
- */
+import { apiLogger } from './logger'
 
+
+
+// Cache keys structure
+export const cacheKeys = {
+  hpp: {
+    overview: 'hpp:overview',
+    // snapshots: // REMOVED 'hpp:snapshots',
+    alerts: 'hpp:alerts',
+    recommendations: 'hpp:recommendations',
+    comparison: 'hpp:comparison',
+    calculations: 'hpp:calculations'
+  },
+  recipes: {
+    list: 'recipes:list',
+    all: 'recipes:all',
+    detail: (id: string) => `recipes:detail:${id}`
+  },
+  ingredients: {
+    list: 'ingredients:list',
+    detail: (id: string) => `ingredients:detail:${id}`
+  },
+  orders: {
+    list: 'orders:list',
+    detail: (id: string) => `orders:detail:${id}`
+  }
+}
+
+// In-memory cache with TTL
 interface CacheEntry<T> {
   data: T
   timestamp: number
   ttl: number
 }
 
-class CacheManager {
-  private cache = new Map<string, CacheEntry<any>>()
-  private readonly defaultTTL = 5 * 60 * 1000 // 5 minutes
+class MemoryCache {
+  private cache = new Map<string, CacheEntry<unknown>>()
 
-  /**
-   * Get cached data if still valid
-   */
-  get<T>(key: string): T | null {
-    const entry = this.cache.get(key)
-    if (!entry) return null
-
-    const now = Date.now()
-    if (now - entry.timestamp > entry.ttl) {
-      this.cache.delete(key)
-      return null
-    }
-
-    return entry.data
-  }
-
-  /**
-   * Set data in cache with TTL
-   */
-  set<T>(key: string, data: T, ttl: number = this.defaultTTL): void {
+  set<T>(key: string, data: T, ttl: number): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -40,152 +45,129 @@ class CacheManager {
     })
   }
 
-  /**
-   * Delete cache entry
-   */
+  get<T>(key: string): T | null {
+    const entry = this.cache.get(key)
+    
+    if (!entry) {
+      return null
+    }
+
+    const now = Date.now()
+    const age = now - entry.timestamp
+
+    if (age > entry.ttl * 1000) {
+      this.cache.delete(key)
+      return null
+    }
+
+    return entry.data as T
+  }
+
   delete(key: string): void {
     this.cache.delete(key)
   }
 
-  /**
-   * Clear all cache
-   */
-  clear(): void {
-    this.cache.clear()
-  }
-
-  /**
-   * Get cache stats
-   */
-  getStats() {
-    return {
-      size: this.cache.size,
-      entries: Array.from(this.cache.keys())
-    }
-  }
-
-  /**
-   * Clean expired entries
-   */
-  cleanup(): void {
-    const now = Date.now()
-    for (const [key, entry] of this.cache.entries()) {
-      if (now - entry.timestamp > entry.ttl) {
+  deletePattern(pattern: string): void {
+    const regex = new RegExp(pattern)
+    for (const key of this.cache.keys()) {
+      if (regex.test(key)) {
         this.cache.delete(key)
       }
     }
   }
+
+  clear(): void {
+    this.cache.clear()
+  }
+
+  size(): number {
+    return this.cache.size
+  }
 }
 
-// Global cache instance
-export const cacheManager = new CacheManager()
+export const memoryCache = new MemoryCache()
 
-// Auto cleanup expired entries every 10 minutes
-if (typeof globalThis !== 'undefined') {
-  setInterval(() => {
-    cacheManager.cleanup()
-  }, 10 * 60 * 1000)
-}
-
-/**
- * Cached API Response Wrapper
- * Wraps API handlers to automatically cache responses
- */
-export function withCache<T>(
-  handler: () => Promise<T>,
-  cacheKey: string,
-  ttl: number = 5 * 60 * 1000 // 5 minutes
+// Cache wrapper with stale-while-revalidate
+export async function withCache<T>(
+  fn: () => Promise<T>,
+  key: string,
+  ttl = 300 // 5 minutes default
 ): Promise<T> {
-  // Try to get from cache first
-  const cached = cacheManager.get<T>(cacheKey)
-  if (cached !== null) {
-    return Promise.resolve(cached)
+  // Try to get from cache
+  const cached = memoryCache.get<T>(key)
+  
+  if (cached) {
+    apiLogger.debug({ key, hit: true }, 'Cache hit')
+    return cached
   }
 
-  // Execute handler and cache result
-  return handler().then(result => {
-    cacheManager.set(cacheKey, result, ttl)
-    return result
-  })
+  // Cache miss - fetch fresh data
+  apiLogger.debug({ key, hit: false }, 'Cache miss')
+  const data = await fn()
+  
+  // Store in cache
+  memoryCache.set(key, data, ttl)
+  
+  return data
 }
 
-/**
- * Cache key generators for common patterns
- */
-export const cacheKeys = {
-  // Recipes cache keys
-  recipes: {
-    all: 'recipes:all',
-    active: 'recipes:active',
-    byId: (id: string) => `recipes:id:${id}`,
-    search: (query: string) => `recipes:search:${query}`
-  },
-
-  // Ingredients cache keys
-  ingredients: {
-    all: 'ingredients:all',
-    active: 'ingredients:active',
-    byId: (id: string) => `ingredients:id:${id}`,
-    lowStock: 'ingredients:low_stock'
-  },
-
-  // Orders cache keys
-  orders: {
-    recent: 'orders:recent',
-    byStatus: (status: string) => `orders:status:${status}`,
-    byId: (id: string) => `orders:id:${id}`,
-    stats: 'orders:stats'
-  },
-
-  // Customers cache keys
-  customers: {
-    all: 'customers:all',
-    search: (query: string) => `customers:search:${query}`,
-    byId: (id: string) => `customers:id:${id}`
-  },
-
-  // Notifications cache keys
-  notifications: {
-    user: (userId: string) => `notifications:user:${userId}`,
-    unread: (userId: string) => `notifications:unread:${userId}`,
-    inventory: 'notifications:inventory'
-  }
-}
-
-/**
- * Cache invalidation helpers
- */
+// Granular cache invalidation
 export const cacheInvalidation = {
-  // Invalidate all caches
-  all: () => cacheManager.clear(),
-
-  // Invalidate recipes
-  recipes: () => {
-    const keys = cacheManager.getStats().entries.filter(key => key.startsWith('recipes:'))
-    keys.forEach(key => cacheManager.delete(key))
+  hpp: () => {
+    memoryCache.deletePattern('^hpp:')
+    apiLogger.info('HPP cache invalidated')
   },
-
-  // Invalidate ingredients
-  ingredients: () => {
-    const keys = cacheManager.getStats().entries.filter(key => key.startsWith('ingredients:'))
-    keys.forEach(key => cacheManager.delete(key))
+  
+  recipes: (recipeId?: string) => {
+    if (recipeId) {
+      memoryCache.delete(cacheKeys.recipes.detail(recipeId))
+    }
+    memoryCache.deletePattern('^recipes:')
+    apiLogger.info({ recipeId }, 'Recipes cache invalidated')
   },
-
-  // Invalidate orders
-  orders: () => {
-    const keys = cacheManager.getStats().entries.filter(key => key.startsWith('orders:'))
-    keys.forEach(key => cacheManager.delete(key))
+  
+  ingredients: (ingredientId?: string) => {
+    if (ingredientId) {
+      memoryCache.delete(cacheKeys.ingredients.detail(ingredientId))
+    }
+    memoryCache.deletePattern('^ingredients:')
+    apiLogger.info({ ingredientId }, 'Ingredients cache invalidated')
   },
-
-  // Invalidate customers
-  customers: () => {
-    const keys = cacheManager.getStats().entries.filter(key => key.startsWith('customers:'))
-    keys.forEach(key => cacheManager.delete(key))
+  
+  orders: (orderId?: string) => {
+    if (orderId) {
+      memoryCache.delete(cacheKeys.orders.detail(orderId))
+    }
+    memoryCache.deletePattern('^orders:')
+    apiLogger.info({ orderId }, 'Orders cache invalidated')
   },
+  
+  customers: (customerId?: string) => {
+    if (customerId) {
+      memoryCache.deletePattern(`^customers:.*${customerId}`)
+    }
+    memoryCache.deletePattern('^customers:')
+    apiLogger.info({ customerId }, 'Customers cache invalidated')
+  },
+  
+  suppliers: (supplierId?: string) => {
+    if (supplierId) {
+      memoryCache.deletePattern(`^suppliers:.*${supplierId}`)
+    }
+    memoryCache.deletePattern('^suppliers:')
+    apiLogger.info({ supplierId }, 'Suppliers cache invalidated')
+  },
+  
+  all: () => {
+    memoryCache.clear()
+    apiLogger.info('All cache cleared')
+  }
+}
 
-  // Invalidate notifications
-  notifications: () => {
-    const keys = cacheManager.getStats().entries.filter(key => key.startsWith('notifications:'))
-    keys.forEach(key => cacheManager.delete(key))
+// Cache statistics
+export function getCacheStats() {
+  return {
+    size: memoryCache.size(),
+    timestamp: new Date().toISOString()
   }
 }

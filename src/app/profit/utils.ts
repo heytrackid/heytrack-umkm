@@ -1,12 +1,13 @@
 import type { ProfitData, ProfitPeriodType, ChartDataPoint } from './constants'
 
+
 /**
  * Calculate date range based on period type
  */
 export function calculateProfitDateRange(period: ProfitPeriodType, startDate?: string, endDate?: string) {
   const today = new Date()
   let calculatedStartDate = startDate
-  const calculatedEndDate = endDate || today.toISOString().split('T')[0]
+  const calculatedEndDate = endDate ?? today.toISOString().split('T')[0]
 
   if (!startDate) {
     if (period === 'week') {
@@ -34,7 +35,7 @@ export function prepareProductChartData(products: ProfitData['products']): Chart
     .slice(0, 10) // Top 10 products
     .map(product => ({
       name: product.product_name.length > 15
-        ? product.product_name.substring(0, 15) + '...'
+        ? `${product.product_name.substring(0, 15)  }...`
         : product.product_name,
       revenue: product.revenue,
       cogs: product.cogs,
@@ -74,7 +75,7 @@ export function calculateProfitMetrics(summary: ProfitData['summary']) {
  * Validate profit data
  */
 export function validateProfitData(data: ProfitData): boolean {
-  return !!(data && data.summary && data.products && data.ingredients && data.operating_expenses)
+  return !!(data?.summary && data?.products && data?.ingredients && data?.operating_expenses)
 }
 
 /**

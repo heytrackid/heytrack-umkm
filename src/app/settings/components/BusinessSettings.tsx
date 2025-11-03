@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { DollarSign } from 'lucide-react'
-import type { AppSettingsState, SettingsUpdateHandler } from '../types'
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+
+
 
 interface BusinessSettingsProps {
   settings: AppSettingsState
@@ -14,8 +16,7 @@ interface BusinessSettingsProps {
 /**
  * Business settings component for tax and stock thresholds
  */
-export function BusinessSettings({ settings, onSettingChange }: BusinessSettingsProps) {
-  return (
+export const BusinessSettings = ({ settings, onSettingChange }: BusinessSettingsProps) => (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -52,4 +53,3 @@ export function BusinessSettings({ settings, onSettingChange }: BusinessSettings
       </CardContent>
     </Card>
   )
-}

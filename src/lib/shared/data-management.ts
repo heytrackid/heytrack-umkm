@@ -1,12 +1,19 @@
-// Shared data management and caching utilities
+'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { logger } from '@/lib/logger'
+
+
+ 
+
+// Shared data management and caching utilities
+
 
 // Cache implementation
 class MemoryCache {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
+  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
 
-  set(key: string, data: any, ttl = 5 * 60 * 1000) { // 5 minutes default
+  set<T>(key: string, data: T, ttl = 5 * 60 * 1000) { // 5 minutes default
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -14,16 +21,16 @@ class MemoryCache {
     })
   }
 
-  get(key: string) {
+  get<T = unknown>(key: string): T | null {
     const item = this.cache.get(key)
-    if (!item) return null
+    if (!item) {return null}
 
     if (Date.now() - item.timestamp > item.ttl) {
       this.cache.delete(key)
       return null
     }
 
-    return item.data
+    return item.data as T
   }
 
   delete(key: string) {
@@ -79,41 +86,41 @@ export function useCachedData<T>(
   const [error, setError] = useState<Error | null>(null)
 
   const fetchData = useCallback(async (force = false) => {
-    if (!enabled) return
+    if (!enabled) {return}
 
     // Check cache first unless forcing refresh
     if (!force) {
-      const cached = globalCache.get(key)
+      const cached = globalCache.get<T>(key)
       if (cached) {
-        setData(cached)
+        void setData(cached)
         return
       }
     }
 
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const result = await fetcher()
-      setData(result)
-      globalCache.set(key, result, ttl)
+      void setData(result)
+      globalCache.set<T>(key, result, ttl)
     } catch (err) {
-      setError(err as Error)
+      void setError(err as Error)
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [key, fetcher, ttl, enabled])
 
   useEffect(() => {
     if (refetchOnMount) {
-      fetchData()
+      void fetchData()
     } else {
       // Try to get from cache first
-      const cached = globalCache.get(key)
+      const cached = globalCache.get<T>(key)
       if (cached) {
-        setData(cached)
+        void setData(cached)
       } else {
-        fetchData()
+        void fetchData()
       }
     }
   }, [fetchData, refetchOnMount, key])
@@ -141,23 +148,23 @@ export function useDataSync<T>(
   const [lastSynced, setLastSynced] = useState<Date | null>(null)
 
   const sync = useCallback(async () => {
-    setSyncing(true)
+    void setSyncing(true)
     try {
       const syncedData = await syncFunction(data)
-      setData(syncedData)
+      void setData(syncedData)
       setLastSynced(new Date())
       globalCache.set(`${key}_synced`, syncedData)
-    } catch (error) {
-      console.error('Sync failed:', error)
-      throw error
+    } catch (err) {
+      logger.error({ err, key }, 'Sync failed')
+      throw err
     } finally {
-      setSyncing(false)
+      void setSyncing(false)
     }
   }, [data, key, syncFunction])
 
   const updateData = useCallback((updater: T | ((prev: T) => T)) => {
     setData(prev => {
-      const newData = typeof updater === 'function' ? (updater as Function)(prev) : updater
+      const newData = typeof updater === 'function' ? (updater as (prev: T) => T)(prev) : updater
       // Cache the updated data
       globalCache.set(key, newData)
       return newData
@@ -186,9 +193,9 @@ export function useOptimisticUpdate<T>(
     const previousData = data
 
     // Optimistically update UI
-    setData(newData)
-    setUpdating(true)
-    setError(null)
+    void setData(newData)
+    void setUpdating(true)
+    void setError(null)
 
     try {
       // Attempt to persist the change
@@ -196,11 +203,11 @@ export function useOptimisticUpdate<T>(
       setData(result) // Use server response
     } catch (err) {
       // Revert on error
-      setData(previousData)
-      setError(err as Error)
+      void setData(previousData)
+      void setError(err as Error)
       throw err
     } finally {
-      setUpdating(false)
+      void setUpdating(false)
     }
   }, [data, updateFunction])
 
@@ -233,7 +240,7 @@ export function usePagination(
 
   const goToPage = useCallback((newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage)
+      void setPage(newPage)
     }
   }, [totalPages])
 
@@ -246,12 +253,12 @@ export function usePagination(
   }, [page, goToPage])
 
   const changeLimit = useCallback((newLimit: number) => {
-    setLimit(newLimit)
+    void setLimit(newLimit)
     setPage(1) // Reset to first page when changing limit
   }, [])
 
   const updateTotal = useCallback((newTotal: number) => {
-    setTotal(newTotal)
+    void setTotal(newTotal)
   }, [])
 
   const pagination: PaginationState = {
@@ -287,28 +294,28 @@ export function useInfiniteScroll<T>(
   const [error, setError] = useState<Error | null>(null)
 
   const loadMore = useCallback(async () => {
-    if (loading || !hasMore) return
+    if (loading || !hasMore) {return}
 
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const result = await fetchFunction(page, limit)
-      setData(prev => [...prev, ...result.data])
-      setHasMore(result.hasMore)
-      setPage(prev => prev + 1)
+      void setData(prev => [...prev, ...result.data])
+      void setHasMore(result.hasMore)
+      void setPage(prev => prev + 1)
     } catch (err) {
-      setError(err as Error)
+      void setError(err as Error)
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [fetchFunction, page, limit, loading, hasMore])
 
   const reset = useCallback(() => {
-    setData([])
-    setPage(1)
-    setHasMore(true)
-    setError(null)
+    void setData([])
+    void setPage(1)
+    void setHasMore(true)
+    void setError(null)
   }, [])
 
   const refresh = useCallback(async () => {
@@ -330,15 +337,15 @@ export function useInfiniteScroll<T>(
 // Search and filter hook
 export function useSearchAndFilter<T>(
   data: T[],
-  searchFields: (keyof T)[] = [],
-  filterOptions: {
+  searchFields: Array<keyof T> = [],
+  filterOptions: Array<{
     field: keyof T
-    value: any
+    value: unknown
     operator?: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'greaterThan' | 'lessThan'
-  }[] = []
+  }> = []
 ) {
   const [searchTerm, setSearchTerm] = useState('')
-  const [filters, setFilters] = useState<Record<string, any>>({})
+  const [filters, setFilters] = useState<Record<string, unknown>>({})
 
   const filteredData = useCallback(() => {
     let filtered = data
@@ -389,7 +396,7 @@ export function useSearchAndFilter<T>(
     return filtered
   }, [data, searchTerm, searchFields, filters, filterOptions])
 
-  const setFilter = useCallback((field: string, value: any) => {
+  const setFilter = useCallback((field: string, value: unknown) => {
     setFilters(prev => ({ ...prev, [field]: value }))
   }, [])
 
@@ -402,8 +409,8 @@ export function useSearchAndFilter<T>(
   }, [])
 
   const clearAllFilters = useCallback(() => {
-    setFilters({})
-    setSearchTerm('')
+    void setFilters({})
+    void setSearchTerm('')
   }, [])
 
   return {
@@ -419,8 +426,8 @@ export function useSearchAndFilter<T>(
 
 // Export cache utilities
 export const cacheUtils = {
-  get: (key: string) => globalCache.get(key),
-  set: (key: string, data: any, ttl?: number) => globalCache.set(key, data, ttl),
+  get: <T = unknown>(key: string) => globalCache.get<T>(key),
+  set: <T = unknown>(key: string, data: T, ttl?: number) => globalCache.set(key, data, ttl),
   delete: (key: string) => globalCache.delete(key),
   clear: () => globalCache.clear(),
   size: () => globalCache.size()
