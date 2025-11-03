@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
 import type { IngredientsTable, IngredientsInsert, IngredientsUpdate } from '@/types/database'
 
@@ -99,7 +101,7 @@ export function useCreateIngredient() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Failed to create ingredient')
+      logger.error({ error: message }, 'Failed to create ingredient')
       
       toast({
         title: 'Error',
@@ -143,7 +145,7 @@ export function useUpdateIngredient() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Failed to update ingredient')
+      logger.error({ error: message }, 'Failed to update ingredient')
       
       toast({
         title: 'Error',
@@ -184,7 +186,7 @@ export function useDeleteIngredient() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Failed to delete ingredient')
+      logger.error({ error: message }, 'Failed to delete ingredient')
       
       toast({
         title: 'Error',

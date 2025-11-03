@@ -1,4 +1,6 @@
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 import type { ChatContext } from './types'
 
 /**
@@ -26,13 +28,13 @@ export class ContextManager {
   async initializeSession(): Promise<void> {
     try {
       this.context.conversationHistory = []
-      apiLogger.info(
+      logger.info(
         { userId: this.context.userId, sessionId: this.context.sessionId },
         'AI session initialized'
       )
       await Promise.resolve()
     } catch (err) {
-      apiLogger.error({ err }, 'Error initializing AI session')
+      logger.error({ err }, 'Error initializing AI session')
       throw err
     }
   }

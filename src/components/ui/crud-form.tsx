@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary */
+'use client'
+
 import { AlertCircle, Check, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { useState, type ChangeEvent, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react';
 

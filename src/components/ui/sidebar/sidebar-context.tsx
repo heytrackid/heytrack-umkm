@@ -1,3 +1,5 @@
+'use client'
+
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ComponentProps } from 'react'
 import { useIsMobile } from "@/hooks/use-mobile"
 

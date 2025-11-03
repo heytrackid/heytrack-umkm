@@ -8,7 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency as formatCurrencyUtil } from '@/lib/currency'
 import { useCurrency } from '@/hooks/useCurrency'
 import type { Currency } from '@/shared'
-import { uiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 
 
 
@@ -56,7 +58,7 @@ export const HppCostTrendsChart = ({
 
   const chartData = useMemo(() => {
     if (data && data.length > 0) { return data }
-    uiLogger.debug('HppCostTrendsChart: using fallback data')
+    logger.debug('HppCostTrendsChart: using fallback data')
     return generateFallbackData()
   }, [data])
 

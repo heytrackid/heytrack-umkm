@@ -3,7 +3,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/utils/supabase/client'
 import type { OrdersTable, IngredientsTable, CustomersTable } from '@/types/database'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { cachePresets } from '@/providers/QueryProvider'
 
 
@@ -180,7 +182,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       lastUpdated: Date.now()
     }
   } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error fetching dashboard stats:')
+    logger.error({ err }, 'Error fetching dashboard stats:')
     
     // Return default/empty data on error
     return {
@@ -229,7 +231,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
     
     return weekData
   } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error fetching weekly sales:')
+    logger.error({ err }, 'Error fetching weekly sales:')
     return []
   }
 }
@@ -241,7 +243,7 @@ const fetchTopProducts = (): TopProductsData[] => {
     // For now, return empty array since we're removing mock data
     return []
   } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error fetching top products:')
+    logger.error({ err }, 'Error fetching top products:')
     return []
   }
 }

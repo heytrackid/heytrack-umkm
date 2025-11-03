@@ -1,6 +1,8 @@
 import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/shared'
-import { logger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 
 
 /**

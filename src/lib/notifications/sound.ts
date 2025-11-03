@@ -1,4 +1,6 @@
-import { uiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 
 
 
@@ -57,7 +59,7 @@ export function playNotificationSound(volume: number = soundVolume): void {
   } catch (error: unknown) {
     // Silent fail - notification sounds are non-critical
     if (process.env.NODE_ENV === 'development') {
-      uiLogger.error({ error }, 'Failed to play notification sound')
+      logger.error({ error }, 'Failed to play notification sound')
     }
   }
 }
@@ -99,7 +101,7 @@ export function playUrgentNotificationSound(volume: number = soundVolume): void 
   } catch (error: unknown) {
     // Silent fail - notification sounds are non-critical
     if (process.env.NODE_ENV === 'development') {
-      uiLogger.error({ error }, 'Failed to play urgent notification sound')
+      logger.error({ error }, 'Failed to play urgent notification sound')
     }
   }
 }

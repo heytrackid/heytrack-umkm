@@ -1,4 +1,8 @@
-import { logger } from '@/lib/logger';
+'use client'
+
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook');
 import { getErrorMessage } from '@/lib/type-guards';
 import type { ChatMessage, ChatSuggestion, SessionListItem } from '@/types/features/chat';
 import { usePathname } from 'next/navigation';

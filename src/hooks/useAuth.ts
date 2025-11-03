@@ -5,7 +5,9 @@ import type { Session, User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import type { UserProfilesTable } from '@/types/database'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
 
 
@@ -42,7 +44,7 @@ export function useAuth() {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
         if (sessionError) {
-          apiLogger.error({ error: sessionError }, 'Session error:')
+          logger.error({ error: sessionError }, 'Session error:')
           setAuthState({
             user: null,
             session: null,
@@ -55,7 +57,7 @@ export function useAuth() {
         const { data: { user }, error: userError } = await supabase.auth.getUser()
 
         if (userError) {
-          apiLogger.error({ error: userError }, 'User error:')
+          logger.error({ error: userError }, 'User error:')
         }
 
         setAuthState({
@@ -66,7 +68,7 @@ export function useAuth() {
         })
       } catch (error: unknown) {
         const message = getErrorMessage(error)
-        apiLogger.error({ error: message }, 'Auth initialization error:')
+        logger.error({ error: message }, 'Auth initialization error:')
         setAuthState({
           user: null,
           session: null,
@@ -81,7 +83,7 @@ export function useAuth() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        apiLogger.info({ event }, 'Auth state changed')
+        logger.info({ event }, 'Auth state changed')
 
         setAuthState({
           user: session?.user ?? null,
@@ -123,7 +125,7 @@ export function useAuth() {
       void router.push('/auth/login')
     } catch (error: unknown) {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Sign out error:')
+      logger.error({ error: message }, 'Sign out error:')
     }
   }
 

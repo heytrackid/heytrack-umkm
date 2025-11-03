@@ -1,3 +1,5 @@
+'use client'
+
 import { useCallback, useEffect, useState } from 'react'
 import { type ApiResponse, type ApiRequestOptions, apiClient } from '@/lib/api/client'
 

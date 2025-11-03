@@ -1,3 +1,5 @@
+'use client'
+
 import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from 'react'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import {

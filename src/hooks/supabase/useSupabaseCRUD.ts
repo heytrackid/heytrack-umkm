@@ -1,5 +1,9 @@
+'use client'
+
 import { useEffect, useState } from 'react'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
@@ -85,19 +89,19 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       if (queryError) {
         if (process.env.NODE_ENV === 'development') {
-          apiLogger.error({ table, error: queryError }, 'Error fetching from table')
+          logger.error({ table, error: queryError }, 'Error fetching from table')
         }
         throw queryError
       }
 
-      apiLogger.debug({ 
+      logger.debug({ 
         table, 
         rowCount: result?.length ?? 0 
       }, `Fetched rows from ${table}`)
       void setData(result)
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
-        apiLogger.error({ error: err, table }, 'Error in fetchData')
+        logger.error({ error: err, table }, 'Error in fetchData')
       }
       setError(new Error(getErrorMessage(err)))
     } finally {
@@ -124,7 +128,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       if (readError) {
         if (process.env.NODE_ENV === 'development') {
-          apiLogger.error({ table, error: readError }, 'Read error')
+          logger.error({ table, error: readError }, 'Read error')
         }
         throw readError
       }
@@ -132,7 +136,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       return result
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
-        apiLogger.error({ error: err, table }, 'Error in read')
+        logger.error({ error: err, table }, 'Error in read')
       }
       const error = new Error(getErrorMessage(err))
       setError(error)
@@ -158,7 +162,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       if (deleteError) {
         if (process.env.NODE_ENV === 'development') {
-          apiLogger.error({ table, error: deleteError }, 'Delete error')
+          logger.error({ table, error: deleteError }, 'Delete error')
         }
         throw deleteError
       }
@@ -167,7 +171,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       await fetchData()
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
-        apiLogger.error({ error: err, table }, 'Error in remove')
+        logger.error({ error: err, table }, 'Error in remove')
       }
       const error = new Error(getErrorMessage(err))
       setError(error)
@@ -199,7 +203,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       if (createError) {
         if (process.env.NODE_ENV === 'development') {
-          apiLogger.error({ table, error: createError }, 'Create error')
+          logger.error({ table, error: createError }, 'Create error')
         }
         throw createError
       }
@@ -209,7 +213,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       return result
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
-        apiLogger.error({ error: err, table }, 'Error in create')
+        logger.error({ error: err, table }, 'Error in create')
       }
       const error = new Error(getErrorMessage(err))
       setError(error)
@@ -237,7 +241,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       if (updateError) {
         if (process.env.NODE_ENV === 'development') {
-          apiLogger.error({ table, error: updateError }, 'Update error')
+          logger.error({ table, error: updateError }, 'Update error')
         }
         throw updateError
       }
@@ -247,7 +251,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       return result
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
-        apiLogger.error({ error: err, table }, 'Error in update')
+        logger.error({ error: err, table }, 'Error in update')
       }
       const error = new Error(getErrorMessage(err))
       setError(error)

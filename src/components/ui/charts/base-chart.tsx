@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary */
+'use client'
+
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 import { Download, Maximize2, Minimize2, Share2, TrendingDown, TrendingUp } from 'lucide-react'

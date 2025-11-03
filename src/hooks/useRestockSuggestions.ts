@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
 
-
-
 interface RestockSuggestion {
   ingredient_id: string
   ingredient_name: string

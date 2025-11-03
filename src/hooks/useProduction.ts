@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
 
 /**
@@ -60,7 +62,7 @@ export function useCreateProductionBatch() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Failed to create production batch')
+      logger.error({ error: message }, 'Failed to create production batch')
       
       toast({
         title: 'Error',
@@ -103,7 +105,7 @@ export function useUpdateProductionBatch() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Failed to update production batch')
+      logger.error({ error: message }, 'Failed to update production batch')
       
       toast({
         title: 'Error',

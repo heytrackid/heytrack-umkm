@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect } from 'react'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { preloadChartBundle } from '@/components/lazy/index'
 
 
@@ -27,7 +29,7 @@ export const useNetworkAwarePreloading = () => {
       const isFastConnection = connection.effectiveType === '4g' || connection.downlink > 1.5
 
       if (isFastConnection) {
-        apiLogger.info({}, '🚀 Fast connection detected - enabling aggressive preloading')
+        logger.info({}, '🚀 Fast connection detected - enabling aggressive preloading')
 
         // Preload more aggressively on fast connections
         setTimeout(() => {

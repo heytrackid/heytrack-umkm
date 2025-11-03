@@ -1,3 +1,5 @@
+'use client'
+
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useQuery, type QueryKey, type UseQueryOptions } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'

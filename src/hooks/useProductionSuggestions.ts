@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 
 
 
@@ -61,14 +63,14 @@ export function useCreateProductionBatch() {
       return response.json()
     },
     onSuccess: (data) => {
-      apiLogger.info({ batchId: data.batch_id }, 'Production batch created:')
+      logger.info({ batchId: data.batch_id }, 'Production batch created:')
       // Invalidate related queries
       void queryClient.invalidateQueries({ queryKey: ['production-suggestions'] })
       void queryClient.invalidateQueries({ queryKey: ['productions'] })
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
     },
     onError: (error) => {
-      apiLogger.error({ error }, 'Failed to create production batch:')
+      logger.error({ error }, 'Failed to create production batch:')
     }
   })
 }

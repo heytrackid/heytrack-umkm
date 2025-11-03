@@ -1,4 +1,6 @@
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { errorToast } from '@/hooks/use-toast'
 
 /**
@@ -39,7 +41,7 @@ export const handleCRUDError = (
     )
   }
 
-  apiLogger.error({ message: `CRUD ${operation} error`, error }, 'Console error replaced with logger')
+  logger.error({ message: `CRUD ${operation} error`, error }, 'Console error replaced with logger')
 }
 
 /**

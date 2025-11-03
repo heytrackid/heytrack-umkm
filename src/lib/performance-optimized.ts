@@ -1,4 +1,8 @@
-import { createLogger } from '@/lib/logger'
+'use client'
+
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 import { useCallback, useEffect, useMemo, useRef, useState, type DependencyList } from 'react'
 
 
@@ -8,7 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type DependencyList 
  */
 
 
-const perfLogger = createLogger('PerformanceOptimized')
+const perfLogger = createClientLogger('Component')
 
 /**
  * Memoize array operations to prevent unnecessary recalculations

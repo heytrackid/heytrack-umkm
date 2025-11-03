@@ -2,7 +2,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 
 
 
@@ -79,7 +81,7 @@ export function useHppOverview() {
         queryClient.setQueryData(['hpp-overview'], context.previousData)
       }
       
-      apiLogger.error({ err: error, alertId }, 'Failed to mark alert as read')
+      logger.error({ err: error, alertId }, 'Failed to mark alert as read')
       toast({
         title: 'Error',
         description: 'Failed to mark alert as read',
@@ -113,7 +115,7 @@ export function useHppOverview() {
       })
     },
     onError: (error) => {
-      apiLogger.error({ err: error }, 'Failed to mark all alerts as read')
+      logger.error({ err: error }, 'Failed to mark all alerts as read')
       toast({
         title: 'Error',
         description: 'Failed to mark all alerts as read',

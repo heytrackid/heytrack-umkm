@@ -1,4 +1,6 @@
-import { uiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 
 
 /**
@@ -201,7 +203,7 @@ export const saveDraft = (draft: {
   } catch (error: unknown) {
     // Silent fail - draft saving is non-critical
     if (process.env.NODE_ENV === 'development') {
-      uiLogger.error({ error }, 'Failed to save draft')
+      logger.error({ error }, 'Failed to save draft')
     }
   }
 }
@@ -230,7 +232,7 @@ export const loadDraft = (): {
   } catch (error: unknown) {
     // Silent fail - draft loading is non-critical
     if (process.env.NODE_ENV === 'development') {
-      uiLogger.error({ error }, 'Failed to load draft')
+      logger.error({ error }, 'Failed to load draft')
     }
     return null
   }
@@ -245,7 +247,7 @@ export const clearDraft = () => {
   } catch (error: unknown) {
     // Silent fail - draft clearing is non-critical
     if (process.env.NODE_ENV === 'development') {
-      uiLogger.error({ error }, 'Failed to clear draft')
+      logger.error({ error }, 'Failed to clear draft')
     }
   }
 }
