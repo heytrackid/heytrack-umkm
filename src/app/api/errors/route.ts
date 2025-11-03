@@ -55,15 +55,21 @@ async function POST(request: NextRequest) {
       )
     }
 
-    // Sanitize error data
-    const message = (body.message || body.msg || 'Unknown error') as string
+    // Sanitize error data with proper type casting
+    const message = String(body.message || body.msg || 'Unknown error')
+    const stack = body.stack ? String(body.stack) : null
+    const url = body.url ? String(body.url) : null
+    const userAgent = body.userAgent ? String(body.userAgent) : null
+    const componentStack = body.componentStack ? String(body.componentStack) : null
+    const timestamp = body.timestamp ? String(body.timestamp) : new Date().toISOString()
+    
     const sanitizedErrorData = {
       message: message.substring(0, 1000), // Limit message length
-      stack: body.stack ? body.stack.substring(0, 5000) : null, // Limit stack trace
-      url: body.url ? body.url.substring(0, 500) : null,
-      userAgent: body.userAgent ? body.userAgent.substring(0, 500) : null,
-      timestamp: body.timestamp ?? new Date().toISOString(),
-      componentStack: body.componentStack ? body.componentStack.substring(0, 2000) : null,
+      stack: stack ? stack.substring(0, 5000) : null, // Limit stack trace
+      url: url ? url.substring(0, 500) : null,
+      userAgent: userAgent ? userAgent.substring(0, 500) : null,
+      timestamp,
+      componentStack: componentStack ? componentStack.substring(0, 2000) : null,
       // Add any additional fields you want to log
     }
 
@@ -75,16 +81,16 @@ async function POST(request: NextRequest) {
           user_id: userId,
           endpoint: sanitizedErrorData.url ?? 'unknown',
           error_message: sanitizedErrorData.message,
-          error_type: body.errorType ?? 'ClientError',
+          error_type: String(body.errorType ?? 'ClientError'),
           stack_trace: sanitizedErrorData.stack,
           timestamp: sanitizedErrorData.timestamp,
           metadata: {
             url: sanitizedErrorData.url,
             userAgent: sanitizedErrorData.userAgent,
             componentStack: sanitizedErrorData.componentStack,
-            browser: body.browser,
-            os: body.os,
-            device: body.device,
+            browser: body.browser ? String(body.browser) : undefined,
+            os: body.os ? String(body.os) : undefined,
+            device: body.device ? String(body.device) : undefined,
           }
         }
         
