@@ -115,7 +115,14 @@ export const ProductionScheduleWidget = () => {
                 <CardContent>
                     {production_schedule && production_schedule.length > 0 ? (
                         <div className="space-y-4">
-                            {production_schedule.map((batch) => (
+                            {production_schedule.map((batch) => {
+                                const getBadgeVariant = () => {
+                                    if (batch.batch_status === 'COMPLETED') {return 'default'}
+                                    if (batch.batch_status === 'IN_PROGRESS') {return 'secondary'}
+                                    return 'outline'
+                                }
+                                
+                                return (
                                 <div key={batch.id} className="flex items-center justify-between border-b pb-3 last:border-0">
                                     <div className="flex-1">
                                         <p className="font-medium">{batch.recipe.name}</p>
@@ -123,15 +130,12 @@ export const ProductionScheduleWidget = () => {
                                             {batch.quantity} units • {batch.total_orders} orders
                                         </p>
                                     </div>
-                                    <Badge variant={
-                                        batch.batch_status === 'COMPLETED' ? 'default' :
-                                            batch.batch_status === 'IN_PROGRESS' ? 'secondary' :
-                                                'outline'
-                                    }>
+                                    <Badge variant={getBadgeVariant()}>
                                         {batch.batch_status}
                                     </Badge>
                                 </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     ) : (
                         <p className="text-sm text-muted-foreground">No production batches scheduled for today</p>

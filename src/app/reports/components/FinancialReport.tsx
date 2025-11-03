@@ -55,7 +55,7 @@ const FinancialReport = ({ dateRange }: FinancialReportProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-600">
+            <p className="text-2xl font-bold text-gray-600">
               {formatCurrency(financialStats.totalIncome)}
             </p>
           </CardContent>
@@ -79,7 +79,7 @@ const FinancialReport = ({ dateRange }: FinancialReportProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-2xl font-bold ${netProfit >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
               {formatCurrency(netProfit)}
             </p>
           </CardContent>

@@ -1,5 +1,7 @@
 'use client'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { usePathname, useRouter } from 'next/navigation' 
 import { useCallback, useEffect } from 'react'
 import { ROUTE_PRELOADING_PATTERNS } from './routePatterns'
@@ -75,7 +77,7 @@ export const useRoutePreloading = () => {
 
       const endTime = performance.now()
       if (preloadPromises.length > 0) {
-        apiLogger.info({ priority, currentRoute, duration: (endTime - startTime).toFixed(2) }, 'Preloaded resources')
+        logger.info({ priority, currentRoute, duration: (endTime - startTime).toFixed(2) }, 'Preloaded resources')
       }
 
     } catch (_err: unknown) {

@@ -41,7 +41,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     icon: <Package className="h-8 w-8" />,
     action: 'Tambah Bahan',
     href: '/ingredients',
-    color: 'bg-blue-500'
+    color: 'bg-gray-500'
   },
   {
     id: 'recipes',
@@ -50,7 +50,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     icon: <ChefHat className="h-8 w-8" />,
     action: 'Buat Resep',
     href: '/recipes/new',
-    color: 'bg-purple-500'
+    color: 'bg-gray-500'
   },
   {
     id: 'hpp',
@@ -59,7 +59,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     icon: <Calculator className="h-8 w-8" />,
     action: 'Hitung HPP',
     href: '/hpp',
-    color: 'bg-green-500'
+    color: 'bg-gray-500'
   },
   {
     id: 'orders',
@@ -117,7 +117,7 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-2xl">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl">
@@ -155,12 +155,12 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
               className={cn(
                 'flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all hover:border-primary',
                 currentStep === index ? 'border-primary bg-primary/5' : 'border-transparent',
-                completedSteps.includes(step.id) && 'bg-green-50 border-green-200'
+                completedSteps.includes(step.id) && 'bg-gray-50 border-gray-300'
               )}
             >
               <div className={cn(
                 'relative rounded-full p-2 text-white',
-                completedSteps.includes(step.id) ? 'bg-green-500' : step.color
+                completedSteps.includes(step.id) ? 'bg-gray-500' : step.color
               )}>
                 {completedSteps.includes(step.id) ? (
                   <CheckCircle2 className="h-4 w-4" />
@@ -193,7 +193,7 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
                       {currentStepData.title}
                     </h3>
                     {completedSteps.includes(currentStepData.id) && (
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      <CheckCircle2 className="h-5 w-5 text-gray-500" />
                     )}
                   </div>
                   <p className="text-muted-foreground">
@@ -213,8 +213,8 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
               </Button>
 
               {/* Tips */}
-              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <p className="text-sm text-blue-900 dark:text-blue-100">
+              <div className="bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-lg p-4">
+                <p className="text-sm text-gray-900 dark:text-gray-100">
                   <strong>💡 Tips:</strong> {getStepTip(currentStepData.id)}
                 </p>
               </div>

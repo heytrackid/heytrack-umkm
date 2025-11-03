@@ -1,8 +1,11 @@
 // Smart notification detection logic
 
 import type { IngredientsTable, OrdersTable } from '@/types/database'
-import type { Notification, NotificationType } from './notification-types'
-import { NOTIFICATION_CONFIGS } from './notification-types'
+import { 
+  type Notification, 
+  type NotificationType,
+  NOTIFICATION_CONFIGS 
+} from './notification-types'
 
 // Generate unique notification ID
 function generateNotificationId(type: NotificationType, itemId: string): string {
@@ -97,7 +100,7 @@ export function detectOrderNotifications(orders: OrdersTable[]): Notification[] 
   orders.forEach((order) => {
     // Pending orders
     if (order.status === 'PENDING') {
-      const orderDate = new Date(order.created_at || now)
+      const orderDate = new Date(order.created_at ?? now)
       const hoursSincePending = (now.getTime() - orderDate.getTime()) / (1000 * 60 * 60)
 
       if (hoursSincePending > 24) {

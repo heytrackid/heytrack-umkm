@@ -13,10 +13,10 @@ interface CategoryBreakdownProps {
 
 // Color palette for categories (consistent with charts)
 const categoryColors = [
-  'bg-blue-500',
-  'bg-green-500',
+  'bg-gray-500',
+  'bg-gray-500',
   'bg-yellow-500',
-  'bg-purple-500',
+  'bg-gray-500',
   'bg-pink-500',
   'bg-indigo-500',
   'bg-orange-500',
@@ -77,7 +77,7 @@ const CategoryBreakdown = ({ summary, formatCurrency, isMobile }: CategoryBreakd
                           <Badge variant="secondary" className="text-xs">
                             {percentage.toFixed(0)}%
                           </Badge>
-                          <span className="font-semibold text-green-600">
+                          <span className="font-semibold text-gray-600">
                             {formatCurrency(amount)}
                           </span>
                         </div>

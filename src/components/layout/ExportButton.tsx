@@ -8,7 +8,11 @@ import { uiLogger } from '@/lib/logger'
 
 
 
-export const ExportButton = () => {
+interface ExportButtonProps {
+    collapsed?: boolean
+}
+
+export const ExportButton = ({ collapsed = false }: ExportButtonProps = {}) => {
     const [isExporting, setIsExporting] = useState(false)
 
     const handleExport = async () => {
@@ -42,16 +46,27 @@ export const ExportButton = () => {
         }
     }
 
+    const getButtonTitle = () => {
+        if (!collapsed) {return undefined}
+        return isExporting ? 'Mengexport...' : 'Export Data'
+    }
+
+    const getButtonText = () => {
+        if (collapsed) {return null}
+        return isExporting ? 'Mengexport...' : 'Export Data'
+    }
+
     return (
         <Button
             variant="outline"
             size="sm"
             onClick={handleExport}
             disabled={isExporting}
-            className="w-full justify-start gap-2"
+            className={collapsed ? "w-auto" : "w-full justify-start gap-2"}
+            title={getButtonTitle()}
         >
-            <Download className="h-4 w-4" />
-            {isExporting ? 'Mengexport...' : 'Export Data'}
+            <Download className="h-4 w-4 flex-shrink-0" />
+            {getButtonText()}
         </Button>
     )
 }

@@ -63,7 +63,7 @@ export const ContextAwareChatbot = () => {
       <CardHeader className="flex-shrink-0 border-b bg-card">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -161,7 +161,7 @@ export const ContextAwareChatbot = () => {
         <div className="flex-1 overflow-y-auto p-4 scroll-smooth" ref={scrollRef}>
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-full text-center p-8">
-              <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-4">
+              <div className="h-20 w-20 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center mb-4">
                 <Bot className="h-10 w-10 text-white" />
               </div>
               <h3 className="text-xl font-semibold mb-2">
@@ -237,7 +237,7 @@ export const ContextAwareChatbot = () => {
                   className={`flex gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.role === 'assistant' && (
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center flex-shrink-0">
                       <Bot className="h-4 w-4 text-white" />
                     </div>
                   )}
@@ -285,7 +285,7 @@ export const ContextAwareChatbot = () => {
 
               {isLoading && (
                 <div className="flex gap-2 justify-start">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center flex-shrink-0">
                     <Bot className="h-4 w-4 text-white" />
                   </div>
                   <div className="bg-muted rounded-2xl px-4 py-3">
@@ -343,7 +343,7 @@ export const ContextAwareChatbot = () => {
           </form>
 
           <div className="flex items-start gap-2 mt-3 text-xs text-muted-foreground">
-            <div className="h-3.5 w-3.5 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mt-0.5 flex-shrink-0">
+            <div className="h-3.5 w-3.5 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center mt-0.5 flex-shrink-0">
               <Sparkles className="h-2 w-2 text-white" />
             </div>
             <p>

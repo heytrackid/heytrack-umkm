@@ -1,8 +1,9 @@
+ 
 'use client'
 
-import { useState, useEffect, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { X } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Button } from './button'
 
 interface BottomSheetProps {
@@ -26,8 +27,8 @@ export const BottomSheet = ({
   defaultSnap = 0,
   className
 }: BottomSheetProps) => {
-  const [snapIndex, setSnapIndex] = useState(defaultSnap)
-  const currentSnap = snapPoints[snapIndex] || snapPoints[0]
+  const [snapIndex, _setSnapIndex] = useState(defaultSnap)
+  const currentSnap = snapPoints[snapIndex] ?? snapPoints[0]
 
   useEffect(() => {
     if (open) {
@@ -79,7 +80,7 @@ export const BottomSheet = ({
         </div>
 
         {/* Header */}
-        {(title || description) && (
+        {(title ?? description) && (
           <div className="px-6 py-4 border-b">
             <div className="flex items-center justify-between">
               <div>

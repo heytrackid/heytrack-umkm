@@ -125,7 +125,7 @@ export const SettingsPanel = ({
               </div>
               <p className="text-gray-600 mb-2">{methodInfo.description}</p>
               <div className="grid grid-cols-1 gap-1">
-                <p className="text-green-600">✅ {methodInfo.pros}</p>
+                <p className="text-gray-600">✅ {methodInfo.pros}</p>
                 <p className="text-orange-600">⚠️ {methodInfo.cons}</p>
               </div>
             </div>

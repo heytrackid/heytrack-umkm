@@ -1,5 +1,9 @@
+'use client'
+
 import { useEffect, useState } from 'react'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
 
 
@@ -39,7 +43,7 @@ export function useExpenses() {
     } catch (err: unknown) {
       const errorMessage = getErrorMessage(err)
       void setError(errorMessage)
-      apiLogger.error({ error: errorMessage }, 'Error fetching expenses:')
+      logger.error({ error: errorMessage }, 'Error fetching expenses:')
     } finally {
       void setLoading(false)
     }

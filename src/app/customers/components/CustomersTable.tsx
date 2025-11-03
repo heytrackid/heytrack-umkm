@@ -1,3 +1,5 @@
+'use client'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -135,7 +137,7 @@ const CustomersTable = ({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="font-medium text-green-600">
+                    <span className="font-medium text-gray-600">
                       {formatCurrency(customer.total_spent ?? 0)}
                     </span>
                   </TableCell>

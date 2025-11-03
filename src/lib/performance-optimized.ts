@@ -1,5 +1,9 @@
+'use client'
+
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 import { useCallback, useEffect, useMemo, useRef, useState, type DependencyList } from 'react'
-import { createLogger } from '@/lib/logger'
 
 
 /**
@@ -8,7 +12,7 @@ import { createLogger } from '@/lib/logger'
  */
 
 
-const perfLogger = createLogger('PerformanceOptimized')
+const perfLogger = createClientLogger('Component')
 
 /**
  * Memoize array operations to prevent unnecessary recalculations
@@ -53,7 +57,8 @@ export function useExpensiveCalculation<T, R>(
   calculator: (data: T) => R,
   deps: DependencyList = []
 ): R {
-  return useMemo(() => calculator(data), [data, ...deps])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => calculator(data), [data, calculator, ...deps])
 }
 
 /**
@@ -259,14 +264,15 @@ export function usePerformanceMonitor(componentName: string, enabled = false) {
 
     renderCount.current += 1
     const startTime = performance.now()
+    const currentRenderTimes = renderTimes.current
 
     return () => {
       const endTime = performance.now()
       const renderTime = endTime - startTime
-      renderTimes.current.push(renderTime)
+      currentRenderTimes.push(renderTime)
 
       if (renderCount.current % 10 === 0) {
-        const avg = renderTimes.current.reduce((a, b) => a + b, 0) / renderTimes.current.length
+        const avg = currentRenderTimes.reduce((a, b) => a + b, 0) / currentRenderTimes.length
         perfLogger.info({
           componentName,
           renders: renderCount.current,

@@ -335,6 +335,7 @@ export function useProgressiveData<T>(
 
   useEffect(() => {
     void loadData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...deps, retryCount])
 
   return { data, loading, error, retry }

@@ -211,11 +211,11 @@ const EnhancedTransactionList = ({
                                     >
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
                                             <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${transaction.type === 'income'
-                                                ? 'bg-green-100 dark:bg-green-900'
+                                                ? 'bg-gray-100 dark:bg-gray-900'
                                                 : 'bg-red-100 dark:bg-red-900'
                                                 }`}>
                                                 {transaction.type === 'income' ? (
-                                                    <ArrowUpCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                                    <ArrowUpCircle className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                                                 ) : (
                                                     <ArrowDownCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
                                                 )}
@@ -238,7 +238,7 @@ const EnhancedTransactionList = ({
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3 flex-shrink-0">
-                                            <p className={`text-base md:text-lg font-semibold ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                                            <p className={`text-base md:text-lg font-semibold ${transaction.type === 'income' ? 'text-gray-600' : 'text-red-600'
                                                 }`}>
                                                 {transaction.type === 'income' ? '+' : '-'}
                                                 {formatCurrency(Math.abs(transaction.amount))}

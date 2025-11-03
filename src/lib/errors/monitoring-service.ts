@@ -189,24 +189,16 @@ class ErrorMonitoringService {
   /**
    * Send error to external monitoring service (placeholder implementation)
    */
-  private async sendError(errorEvent: ErrorEvent): Promise<void> {
+  private sendError(errorEvent: ErrorEvent): void {
     try {
       // If a DSN is provided, we could send to external service
       if (this.config.dsn) {
         // This is where you'd implement the specific monitoring service API call
         // For example, for Sentry: fetch(this.config.dsn, { ... })
-        // For now, we'll log to our API
-        const response = await fetch('/api/errors', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(errorEvent),
-        })
-
-        if (!response.ok) {
-          throw new Error(`Failed to send error to monitoring service: ${response.statusText}`)
-        }
+        apiLogger.error({
+          ...errorEvent,
+          dsn_used: !!this.config.dsn
+        }, 'External error monitoring DSN configured but not implemented')
       } else {
         // Log to our own error log for now
         apiLogger.error({

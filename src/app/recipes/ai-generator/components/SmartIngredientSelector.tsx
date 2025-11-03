@@ -109,7 +109,7 @@ export const SmartIngredientSelector = ({
         if ((ingredient.current_stock || 0) < minimumStock) {
             return { label: 'Menipis', color: 'bg-yellow-500' }
         }
-        return { label: 'Tersedia', color: 'bg-green-500' }
+        return { label: 'Tersedia', color: 'bg-gray-500' }
     }
 
     return (
@@ -169,7 +169,7 @@ export const SmartIngredientSelector = ({
                 {suggestedIngredients.length > 0 && (
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                            <Sparkles className="h-4 w-4 text-purple-500" />
+                            <Sparkles className="h-4 w-4 text-gray-500" />
                             <span className="text-sm font-semibold">Bahan yang Disarankan</span>
                             <Badge variant="secondary" className="text-xs">
                                 Untuk {productType}

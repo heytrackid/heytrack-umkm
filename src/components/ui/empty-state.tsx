@@ -52,14 +52,15 @@ export const EmptyState = ({
         'rounded-full bg-muted flex items-center justify-center mb-4',
         compact ? 'w-16 h-16' : 'w-20 h-20'
       )}>
-        {Icon ? (
+        {Icon && (
           <Icon className={cn(
             'text-muted-foreground',
             compact ? 'w-8 h-8' : 'w-10 h-10'
           )} />
-        ) : emoji ? (
+        )}
+        {!Icon && emoji && (
           <span className={compact ? 'text-3xl' : 'text-4xl'}>{emoji}</span>
-        ) : null}
+        )}
       </div>
 
       {/* Title */}

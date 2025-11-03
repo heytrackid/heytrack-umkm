@@ -1,6 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { apiLogger } from '@/lib/logger';
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('EnhancedErrorBoundary');
 
 /**
  * Enhanced Error Boundary Component
@@ -35,7 +37,7 @@ class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBou
     const { errorId } = this.state;
 
     // Log the error with additional context
-    apiLogger.error({
+    logger.error({
       error: error.message,
       stack: error.stack,
       errorInfo,

@@ -1,7 +1,10 @@
-import { type ReactNode, useState } from 'react'
+/* eslint-disable no-nested-ternary */
+'use client'
+
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
-import { Maximize2, Minimize2, Download, Share2, TrendingDown, TrendingUp } from 'lucide-react'
+import { Download, Maximize2, Minimize2, Share2, TrendingDown, TrendingUp } from 'lucide-react'
+import { type ReactNode, useState } from 'react'
 import { Badge } from '../badge'
 import { Button } from '../button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../card'
@@ -42,7 +45,9 @@ const BaseMobileChart = ({
     return trend.value > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />
   }
 
-  const chartHeight = isFullscreen ? '70vh' : (isMobile ? Math.min(height, 250) : height)
+  const chartHeight = isFullscreen 
+    ? '70vh' 
+    : (isMobile ? Math.min(height, 250) : height)
 
   return (
     <Card className={cn(

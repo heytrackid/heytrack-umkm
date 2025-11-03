@@ -1,5 +1,7 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 
 
 
@@ -66,7 +68,7 @@ export function useCheckMultipleRecipes() {
       }>
     },
     onError: (error) => {
-      apiLogger.error({ error }, 'Failed to check multiple recipes:')
+      logger.error({ error }, 'Failed to check multiple recipes:')
     }
   })
 }

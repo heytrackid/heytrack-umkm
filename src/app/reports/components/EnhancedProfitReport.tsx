@@ -150,13 +150,13 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
     const { summary } = profitData
 
     const getTrendIcon = (value: number) => {
-        if (value > 0) { return <ArrowUpRight className="h-4 w-4 text-green-600" /> }
+        if (value > 0) { return <ArrowUpRight className="h-4 w-4 text-gray-600" /> }
         if (value < 0) { return <ArrowDownRight className="h-4 w-4 text-red-600" /> }
         return <Minus className="h-4 w-4 text-gray-400" />
     }
 
     const getTrendColor = (value: number) => {
-        if (value > 0) { return 'text-green-600' }
+        if (value > 0) { return 'text-gray-600' }
         if (value < 0) { return 'text-red-600' }
         return 'text-gray-600'
     }
@@ -216,7 +216,7 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
                             <CardTitle className="text-sm font-medium text-muted-foreground">
                                 Total Revenue
                             </CardTitle>
-                            <DollarSign className="h-5 w-5 text-blue-600" />
+                            <DollarSign className="h-5 w-5 text-gray-600" />
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -265,12 +265,12 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
                             <CardTitle className="text-sm font-medium text-muted-foreground">
                                 Gross Profit
                             </CardTitle>
-                            <TrendingUp className="h-5 w-5 text-green-600" />
+                            <TrendingUp className="h-5 w-5 text-gray-600" />
                         </div>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-1">
-                            <p className={`text-2xl font-bold ${summary.gross_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <p className={`text-2xl font-bold ${summary.gross_profit >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
                                 {formatCurrency(summary.gross_profit)}
                             </p>
                             <div className="flex items-center gap-1">
@@ -288,12 +288,12 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
                             <CardTitle className="text-sm font-medium text-muted-foreground">
                                 Net Profit
                             </CardTitle>
-                            <ShoppingCart className="h-5 w-5 text-purple-600" />
+                            <ShoppingCart className="h-5 w-5 text-gray-600" />
                         </div>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-1">
-                            <p className={`text-2xl font-bold ${summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <p className={`text-2xl font-bold ${summary.net_profit >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
                                 {formatCurrency(summary.net_profit)}
                             </p>
                             <div className="flex items-center gap-1">
@@ -313,7 +313,7 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        <div className="flex justify-between items-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                        <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-950 rounded-lg">
                             <span className="font-medium">Total Revenue</span>
                             <span className="text-lg font-bold">{formatCurrency(summary.total_revenue)}</span>
                         </div>
@@ -323,9 +323,9 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
                                 ({formatCurrency(summary.total_cogs)})
                             </span>
                         </div>
-                        <div className="flex justify-between items-center p-4 bg-green-50 dark:bg-green-950 rounded-lg border-2 border-green-200">
+                        <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-green-950 rounded-lg border-2 border-gray-300">
                             <span className="font-medium">= Gross Profit</span>
-                            <span className="text-lg font-bold text-green-600">
+                            <span className="text-lg font-bold text-gray-600">
                                 {formatCurrency(summary.gross_profit)}
                             </span>
                         </div>
@@ -335,9 +335,9 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
                                 ({formatCurrency(summary.total_operating_expenses)})
                             </span>
                         </div>
-                        <div className="flex justify-between items-center p-4 bg-purple-50 dark:bg-purple-950 rounded-lg border-2 border-purple-200">
+                        <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-950 rounded-lg border-2 border-gray-300">
                             <span className="font-bold">= Net Profit</span>
-                            <span className={`text-xl font-bold ${summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <span className={`text-xl font-bold ${summary.net_profit >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
                                 {formatCurrency(summary.net_profit)}
                             </span>
                         </div>
@@ -381,21 +381,21 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
-                                    <TrendingUp className="h-5 w-5 text-green-600" />
+                                    <TrendingUp className="h-5 w-5 text-gray-600" />
                                     Top 5 Produk Paling Menguntungkan
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
                                     {profitData.top_profitable_products.map((product, index) => (
-                                        <div key={index} className="flex justify-between items-center p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-green-950 rounded-lg">
                                             <div>
                                                 <p className="font-medium">{product.product_name}</p>
                                                 <p className="text-sm text-muted-foreground">
                                                     Margin: {product.gross_margin.toFixed(1)}%
                                                 </p>
                                             </div>
-                                            <p className="font-bold text-green-600">
+                                            <p className="font-bold text-gray-600">
                                                 {formatCurrency(product.gross_profit)}
                                             </p>
                                         </div>

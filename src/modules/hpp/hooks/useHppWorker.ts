@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 import type { HppCalculationResult, MaterialBreakdown } from '@/modules/hpp/types'
 
 
@@ -50,7 +52,7 @@ export function useHppWorker() {
   useEffect(() => {
     // Check if Web Workers are supported
     if (typeof Worker === 'undefined') {
-      apiLogger.warn('Web Workers not supported in this browser')
+      logger.warn('Web Workers not supported in this browser')
       return undefined
     }
 
@@ -63,12 +65,12 @@ export function useHppWorker() {
 
         if (type === 'READY') {
           void setIsReady(true)
-          apiLogger.info('HPP Worker initialized successfully')
+          logger.info('HPP Worker initialized successfully')
         }
       }
 
       workerRef.current.onerror = (error) => {
-        apiLogger.error({ err: error }, 'HPP Worker error')
+        logger.error({ err: error }, 'HPP Worker error')
         void setIsReady(false)
       }
 
@@ -76,7 +78,7 @@ export function useHppWorker() {
         workerRef.current?.terminate()
       }
     } catch (err) {
-      apiLogger.error({ error: err }, 'Failed to initialize HPP Worker')
+      logger.error({ error: err }, 'Failed to initialize HPP Worker')
       return undefined
     }
   }, [])

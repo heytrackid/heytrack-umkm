@@ -40,7 +40,7 @@ export const MemoizedStatCard = memo(({
         )}
         {trend && (
           <div
-            className={`text-xs ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}
+            className={`text-xs ${trend.isPositive ? 'text-gray-600' : 'text-red-600'}`}
           >
             {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
           </div>

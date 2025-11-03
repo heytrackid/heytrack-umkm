@@ -2,7 +2,9 @@
 
 import { useCallback, useState } from 'react'
 import { errorToast, infoToast, successToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import type { AsyncOperationOptions } from './types'
 
 
@@ -51,7 +53,7 @@ export function useAsyncOperation() {
         )
       }
 
-      apiLogger.error({ error: err }, 'Async operation error:')
+      logger.error({ error: err }, 'Async operation error:')
       return null
     } finally {
       void setLoading(false)

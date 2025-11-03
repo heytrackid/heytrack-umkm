@@ -1,19 +1,16 @@
 import type {
-  Database as DatabaseType,
-  Tables as SupabaseTables, 
-  TablesInsert as SupabaseTablesInsert, 
-  TablesUpdate as SupabaseTablesUpdate,
-  Enums as SupabaseEnums
+    Database as DatabaseType,
+    Enums as SupabaseEnums,
+    Tables as SupabaseTables,
+    TablesInsert as SupabaseTablesInsert,
+    TablesUpdate as SupabaseTablesUpdate
 } from './supabase-generated'
 
 // Core Supabase-generated helpers
 export type {
-  Database,
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-  Enums,
-  CompositeTypes,
+    CompositeTypes, Database, Enums, Tables,
+    TablesInsert,
+    TablesUpdate
 } from './supabase-generated'
 
 // Re-export Json type from supabase-generated
@@ -66,6 +63,7 @@ export type RecipesTable = SupabaseTables<'recipes'>
 export type StockTransactionsTable = SupabaseTables<'stock_transactions'>
 export type SupplierIngredientsTable = SupabaseTables<'supplier_ingredients'>
 export type SuppliersTable = SupabaseTables<'suppliers'>
+export type StockReservationsTable = SupabaseTables<'stock_reservations'>
 export type UsageAnalyticsTable = SupabaseTables<'usage_analytics'>
 export type UserProfilesTable = SupabaseTables<'user_profiles'>
 export type WhatsappTemplatesTable = SupabaseTables<'whatsapp_templates'>
@@ -111,6 +109,7 @@ export type RecipesInsert = SupabaseTablesInsert<'recipes'>
 export type StockTransactionsInsert = SupabaseTablesInsert<'stock_transactions'>
 export type SupplierIngredientsInsert = SupabaseTablesInsert<'supplier_ingredients'>
 export type SuppliersInsert = SupabaseTablesInsert<'suppliers'>
+export type StockReservationsInsert = SupabaseTablesInsert<'stock_reservations'>
 export type UsageAnalyticsInsert = SupabaseTablesInsert<'usage_analytics'>
 export type UserProfilesInsert = SupabaseTablesInsert<'user_profiles'>
 export type WhatsappTemplatesInsert = SupabaseTablesInsert<'whatsapp_templates'>
@@ -151,6 +150,7 @@ export type RecipesUpdate = SupabaseTablesUpdate<'recipes'>
 export type StockTransactionsUpdate = SupabaseTablesUpdate<'stock_transactions'>
 export type SupplierIngredientsUpdate = SupabaseTablesUpdate<'supplier_ingredients'>
 export type SuppliersUpdate = SupabaseTablesUpdate<'suppliers'>
+export type StockReservationsUpdate = SupabaseTablesUpdate<'stock_reservations'>
 export type UsageAnalyticsUpdate = SupabaseTablesUpdate<'usage_analytics'>
 export type UserProfilesUpdate = SupabaseTablesUpdate<'user_profiles'>
 export type WhatsappTemplatesUpdate = SupabaseTablesUpdate<'whatsapp_templates'>
@@ -256,24 +256,8 @@ export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse
 // Stock Reservation Status
 export type StockReservationStatus = 'ACTIVE' | 'CONSUMED' | 'RELEASED' | 'EXPIRED'
 
-// Stock Reservation with relations
-export interface StockReservation {
-  id: string
-  ingredient_id: string
-  order_id: string
-  reserved_quantity: number
-  status: StockReservationStatus
-  reserved_at: string | null
-  consumed_at: string | null
-  released_at: string | null
-  notes: string | null
-  user_id: string
-  created_at: string | null
-  updated_at: string | null
-}
-
-export type StockReservationInsert = Omit<StockReservation, 'id' | 'created_at' | 'updated_at'>
-export type StockReservationUpdate = Partial<StockReservationInsert>
+// Stock Reservation - now using generated types
+export type StockReservation = StockReservationsTable
 
 // Order Item with calculated fields
 export type OrderItemWithProfit = OrderItemsTable & {

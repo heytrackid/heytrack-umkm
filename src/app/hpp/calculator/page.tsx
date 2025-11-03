@@ -195,7 +195,7 @@ const HppCalculatorPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">
+                <div className="text-3xl font-bold text-gray-600">
                   {formatCurrency(calculation.total_cost)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -212,7 +212,7 @@ const HppCalculatorPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-blue-600">
+                <div className="text-3xl font-bold text-gray-600">
                   {formatCurrency(calculation.cost_per_unit)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -229,7 +229,7 @@ const HppCalculatorPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-3xl font-bold ${(calculation.wac_adjustment || 0) >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                <div className={`text-3xl font-bold ${(calculation.wac_adjustment || 0) >= 0 ? 'text-red-600' : 'text-gray-600'}`}>
                   {(calculation.wac_adjustment || 0) >= 0 ? '+' : ''}{formatCurrency(calculation.wac_adjustment || 0)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">

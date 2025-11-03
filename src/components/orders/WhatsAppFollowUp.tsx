@@ -1,21 +1,24 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { useState, useEffect } from 'react'
-import { MessageCircle, Send, Copy, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { useSettings } from '@/contexts/settings-context';
 import type { OrderData } from '@/lib/communications/types';
 import { WhatsAppService } from '@/lib/communications/whatsapp';
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('WhatsAppFollowUp');
+import { Check, Copy, MessageCircle, Send } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useSettings } from '@/contexts/settings-context';
-import { apiLogger } from '@/lib/logger'
 
 
 
@@ -122,7 +125,7 @@ const WhatsAppFollowUp = ({
 
       setGeneratedMessage(message);
     } catch (err: unknown) {
-      apiLogger.error({ err }, 'Error generating message:');
+      logger.error({ err }, 'Error generating message:');
       toast.error('Gagal generate pesan. Coba template lain.');
     }
   };
@@ -185,10 +188,10 @@ const WhatsAppFollowUp = ({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-green-600" />
+            <MessageCircle className="h-5 w-5 text-gray-600" />
             WhatsApp Follow-up untuk {order.customer_name}
           </DialogTitle>
         </DialogHeader>
@@ -319,8 +322,8 @@ const WhatsAppFollowUp = ({
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="text-sm text-green-800 whitespace-pre-wrap font-mono">
+                    <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap font-mono">
                         {generatedMessage || 'Generating message...'}
                       </div>
                     </div>
@@ -371,7 +374,7 @@ const WhatsAppFollowUp = ({
                     </div>
                     <Button
                       onClick={() => handleSend('business')}
-                      className="w-full gap-2 bg-green-800 hover:bg-green-900"
+                      className="w-full gap-2 bg-green-800 hover:bg-gray-900"
                       disabled={!generatedMessage && !customMessage}
                     >
                       <Send className="h-4 w-4" />

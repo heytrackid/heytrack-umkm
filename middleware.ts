@@ -1,8 +1,8 @@
+import { generateNonce, getStrictCSP } from '@/lib/csp'
+import { middlewareLogger } from '@/lib/logger'
+import { updateSession } from '@/utils/supabase/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
-import { middlewareLogger } from '@/lib/logger'
-import { generateNonce, getStrictCSP } from '@/lib/csp'
-import { updateSession } from '@/utils/supabase/middleware'
 
 
 
@@ -36,7 +36,7 @@ const UrlValidationSchema = z.object({
   search: z.string().max(2048).optional(),
 })
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const isDev = process.env.NODE_ENV === 'development'
   const nonce = generateNonce()
 

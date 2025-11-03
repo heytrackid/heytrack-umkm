@@ -67,7 +67,7 @@ export class NotificationService {
       priority: 'high',
       entity_type: 'ingredient',
       entity_id: ingredientId,
-      action_url: `/inventory?highlight=${ingredientId}`,
+      action_url: `/ingredients?highlight=${ingredientId}`,
       metadata: {
         ingredient_name: ingredientName,
         current_stock: currentStock,

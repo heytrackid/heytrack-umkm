@@ -56,9 +56,9 @@ export const StockBadge = ({
         },
         normal: {
             label: 'Normal',
-            color: 'bg-green-100 text-green-800 border-green-200',
+            color: 'bg-gray-100 text-gray-800 border-gray-300',
             icon: CheckCircle,
-            iconColor: 'text-green-600'
+            iconColor: 'text-gray-600'
         }
     }
 
@@ -101,12 +101,17 @@ export const CompactStockIndicator = ({
     minStock,
     unit
 }: Omit<StockBadgeProps, 'showIcon' | 'compact' | 'className'>) => {
-    const status = currentStock <= 0 ? 'out' : currentStock <= minStock ? 'low' : 'normal'
+    const getStatus = () => {
+        if (currentStock <= 0) {return 'out'}
+        if (currentStock <= minStock) {return 'low'}
+        return 'normal'
+    }
+    const status = getStatus()
 
     const colors = {
         out: 'bg-red-500',
         low: 'bg-yellow-500',
-        normal: 'bg-green-500'
+        normal: 'bg-gray-500'
     }
 
     return (

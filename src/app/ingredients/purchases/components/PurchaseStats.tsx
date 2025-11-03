@@ -26,24 +26,24 @@ const PurchaseStats = ({ purchases }: PurchaseStatsProps) => {
       title: 'Pembelian (Bulan Ini)',
       value: thisMonth.length,
       icon: ShoppingCart,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-50',
       description: `Total ${purchases.length} pembelian`
     },
     {
       title: 'Pengeluaran (Bulan Ini)',
       value: `Rp ${thisMonth.reduce((sum, p) => sum + (p.total_price || 0), 0).toLocaleString()}`,
       icon: DollarSign,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-50',
       description: 'Auto-recorded ke expense'
     },
     {
       title: 'Supplier Aktif',
       value: uniqueSuppliers.size,
       icon: Package,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-50',
       description: `${new Set(purchases.map((p) => p.ingredient_id)).size} item dibeli`
     },
     {

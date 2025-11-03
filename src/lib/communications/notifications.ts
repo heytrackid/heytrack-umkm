@@ -1,4 +1,6 @@
-import { automationLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 import type { SmartNotification, NotificationRule, NotificationConfig } from './types'
 
 
@@ -56,7 +58,7 @@ export class SmartNotificationSystem {
     // Notify subscribers
     this.notifySubscribers();
 
-    automationLogger.info({ notificationId: id, category: notification.category }, 'Notification added');
+    logger.info({ notificationId: id, category: notification.category }, 'Notification added');
   }
 
   /**
@@ -108,7 +110,7 @@ export class SmartNotificationSystem {
    */
   addRule(rule: NotificationRule): void {
     this.rules.push(rule);
-    automationLogger.info({ ruleId: rule.id, category: rule.category }, 'Notification rule added');
+    logger.info({ ruleId: rule.id, category: rule.category }, 'Notification rule added');
   }
 
   /**
@@ -207,7 +209,7 @@ export class SmartNotificationSystem {
       try {
         callback([...this.notifications]);
       } catch (err) {
-        automationLogger.error({ err: err instanceof Error ? err.message : String(err) }, 'Error notifying subscriber');
+        logger.error({ err: err instanceof Error ? err.message : String(err) }, 'Error notifying subscriber');
       }
     });
   }

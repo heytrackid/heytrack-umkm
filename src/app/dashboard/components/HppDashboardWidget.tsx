@@ -1,15 +1,17 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calculator, AlertTriangle, Target, DollarSign, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react' 
-import { useCurrency } from '@/hooks/useCurrency'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { QuickActionsSkeleton, StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
+import { createClientLogger } from '@/lib/client-logger'
+import { AlertTriangle, BarChart3, Calculator, DollarSign, Target, TrendingDown, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
-import { dbLogger } from '@/lib/logger'
-import { StatsCardSkeleton, QuickActionsSkeleton } from '@/components/ui/skeletons/dashboard-skeletons' 
+import { useEffect, useState } from 'react'
+
+const logger = createClientLogger('HppDashboardWidget') 
 
 interface HppDashboardData {
   totalRecipes: number
@@ -59,7 +61,7 @@ const HppDashboardWidget = () => {
       const realData: HppDashboardData = await response.json()
       setData(realData)
     } catch (error: unknown) {
-      dbLogger.error({ error }, 'Failed to load HPP dashboard data')
+      logger.error({ error }, 'Failed to load HPP dashboard data')
       toast({
         title: 'Error',
         description: 'Failed to load HPP data',
@@ -114,7 +116,7 @@ const HppDashboardWidget = () => {
         {/* Key Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600 flex items-center justify-center">
+            <div className="text-2xl font-bold text-gray-600 flex items-center justify-center">
               <Target className="h-4 w-4 mr-1" />
               {data.recipesWithHpp}/{data.totalRecipes}
             </div>
@@ -122,7 +124,7 @@ const HppDashboardWidget = () => {
           </div>
 
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600 flex items-center justify-center">
+            <div className="text-2xl font-bold text-gray-600 flex items-center justify-center">
               <DollarSign className="h-4 w-4 mr-1" />
               {formatCurrency(data.averageHpp)}
             </div>
@@ -130,7 +132,7 @@ const HppDashboardWidget = () => {
           </div>
 
           <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">
+            <div className="text-2xl font-bold text-gray-600">
               {data.averageMargin}%
             </div>
             <div className="text-sm text-muted-foreground">Avg Margin</div>
@@ -188,9 +190,9 @@ const HppDashboardWidget = () => {
                     {change.direction === 'increase' ? (
                       <TrendingUp className="h-4 w-4 text-red-500" />
                     ) : (
-                      <TrendingDown className="h-4 w-4 text-green-500" />
+                      <TrendingDown className="h-4 w-4 text-gray-500" />
                     )}
-                    <span className={`font-semibold ${change.direction === 'increase' ? 'text-red-600' : 'text-green-600'
+                    <span className={`font-semibold ${change.direction === 'increase' ? 'text-red-600' : 'text-gray-600'
                       }`}>
                       {change.direction === 'increase' ? '+' : ''}{change.change_percentage}%
                     </span>

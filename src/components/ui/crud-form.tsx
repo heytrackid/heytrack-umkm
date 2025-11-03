@@ -1,6 +1,8 @@
- 
+/* eslint-disable no-nested-ternary */
+'use client'
+
+import { AlertCircle, Check, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { useState, type ChangeEvent, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react';
-import { Eye, EyeOff, ChevronDown, AlertCircle, Check } from 'lucide-react';
 
 interface FormFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onBlur'> {
   label: string;
@@ -75,7 +77,7 @@ export const FormField = (props: FormFieldProps) => {
       return `${baseInputClasses} border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-gray-300 dark:border-gray-600`;
     }
     if (hasSuccess) {
-      return `${baseInputClasses} border-green-300 text-green-900 placeholder-green-300 focus:ring-green-500 focus:border-gray-300 dark:border-gray-600`;
+      return `${baseInputClasses} border-gray-400 text-gray-900 placeholder-green-300 focus:ring-green-500 focus:border-gray-300 dark:border-gray-600`;
     }
     return `${baseInputClasses} border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 hover:border-gray-400`;
   };
@@ -165,32 +167,34 @@ export const FormField = (props: FormFieldProps) => {
           <textarea
             {...textareaSpecificProps}
           />
-        ) : type === 'select' ? (
-          <div className="relative">
-            <select
-              {...selectSpecificProps}
-            >
-              <option value="" disabled>
-                {placeholder ?? "Pilih opsi"}
-              </option>
-              {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <ChevronDown className="h-4 w-4 text-gray-400" />
-            </div>
-          </div>
         ) : (
-          <input
-            {...inputSpecificProps}
-            type={isPassword && showPassword ? 'text' : type}
-            min={min}
-            max={max}
-            step={step}
-          />
+          type === 'select' ? (
+            <div className="relative">
+              <select
+                {...selectSpecificProps}
+              >
+                <option value="" disabled>
+                  {placeholder ?? "Pilih opsi"}
+                </option>
+                {options.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              </div>
+            </div>
+          ) : (
+            <input
+              {...inputSpecificProps}
+              type={isPassword && showPassword ? 'text' : type}
+              min={min}
+              max={max}
+              step={step}
+            />
+          )
         )}
 
         {/* Password Toggle */}
@@ -435,7 +439,7 @@ export const ConfirmDialog = ({
   const typeStyles = {
     danger: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
     warning: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500',
-    info: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
+    info: 'bg-gray-600 hover:bg-blue-700 focus:ring-blue-500',
   };
 
   return (

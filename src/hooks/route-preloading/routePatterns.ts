@@ -8,38 +8,31 @@ import type { RoutePreloadingPatterns } from './types'
 export const ROUTE_PRELOADING_PATTERNS: RoutePreloadingPatterns = {
   // Dashboard -> likely next routes
   '/dashboard': {
-    immediate: ['/orders', '/finance', '/inventory'],
-    onHover: ['/customers', '/ingredients'],
+    immediate: ['/orders', '/cash-flow', '/ingredients'],
+    onHover: ['/customers', '/recipes'],
     components: ['orders-table', 'financial-summary']
   },
 
   // Orders -> likely next routes
   '/orders': {
     immediate: ['/orders/new', '/customers'],
-    onHover: ['/finance', '/dashboard'],
+    onHover: ['/cash-flow', '/dashboard'],
     components: ['order-form', 'customer-detail'],
     modals: ['order-form', 'customer-form']
   },
 
-  // Finance -> likely next routes
-  '/finance': {
+  // Cash Flow -> likely next routes
+  '/cash-flow': {
     immediate: ['/orders', '/dashboard'],
     onHover: ['/reports', '/operational-costs'],
     components: ['financial-charts', 'transaction-table'],
-    modals: ['finance-form']
+    modals: ['transaction-form']
   },
 
-  // Inventory/Ingredients -> likely next routes
-  '/inventory': {
-    immediate: ['/ingredients', '/orders'],
-    onHover: ['/suppliers', '/recipes'],
-    components: ['inventory-table', 'ingredient-form'],
-    modals: ['ingredient-form', 'inventory-detail']
-  },
-
+  // Ingredients -> likely next routes
   '/ingredients': {
-    immediate: ['/inventory', '/recipes'],
-    onHover: ['/orders', '/suppliers'],
+    immediate: ['/recipes', '/orders'],
+    onHover: ['/suppliers', '/hpp'],
     components: ['ingredients-table', 'recipe-calculator'],
     modals: ['ingredient-form', 'recipe-form']
   },
@@ -47,7 +40,7 @@ export const ROUTE_PRELOADING_PATTERNS: RoutePreloadingPatterns = {
   // Customers -> likely next routes
   '/customers': {
     immediate: ['/orders', '/orders/new'],
-    onHover: ['/finance', '/dashboard'],
+    onHover: ['/cash-flow', '/dashboard'],
     components: ['customer-table', 'order-history'],
     modals: ['customer-form', 'order-form']
   },

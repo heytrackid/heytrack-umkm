@@ -25,7 +25,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
           <div>
             <p className="text-2xl font-bold">{formatCurrency(summary.total_revenue)}</p>
             {trends?.revenue_trend && trends.revenue_trend !== 0 && (
-              <p className={`text-xs flex items-center gap-1 mt-1 ${trends.revenue_trend > 0 ? 'text-green-600' : 'text-red-600'
+              <p className={`text-xs flex items-center gap-1 mt-1 ${trends.revenue_trend > 0 ? 'text-gray-600' : 'text-red-600'
                 }`}>
                 {trends.revenue_trend > 0 ? (
                   <ArrowUpRight className="h-3 w-3" />
@@ -75,7 +75,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
       <CardContent>
         <div className="flex items-center justify-between">
           <div>
-            <p className={`text-2xl font-bold ${summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'
+            <p className={`text-2xl font-bold ${summary.net_profit >= 0 ? 'text-gray-600' : 'text-red-600'
               }`}>
               {formatCurrency(summary.net_profit)}
             </p>

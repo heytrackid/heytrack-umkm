@@ -67,7 +67,12 @@ export const PullToRefresh = ({
     startY.current = 0
   }
 
-  const rotation = isRefreshing ? 'animate-spin' : shouldRefresh ? 'rotate-180' : 'rotate-0'
+  const getRotation = () => {
+    if (isRefreshing) {return 'animate-spin'}
+    if (shouldRefresh) {return 'rotate-180'}
+    return 'rotate-0'
+  }
+  const rotation = getRotation()
   const opacity = pullDistance > 0 ? Math.min(pullDistance / threshold, 1) : 0
 
   return (

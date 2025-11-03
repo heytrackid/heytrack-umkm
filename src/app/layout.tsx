@@ -3,6 +3,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 import QueryProvider from '@/providers/QueryProvider';
+import { AuthProvider } from '@/providers/AuthProvider';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -53,41 +54,43 @@ const RootLayout = async ({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <QueryProvider>
-            <SettingsProvider>
-              <PreloadingProvider
-                enableSmartPreloading
-                enableIdlePreloading
-                enableNetworkAware
-                debug={false}
-              >
-                <GlobalErrorBoundary>
-                  {/* Header temporarily disabled during development */}
-                  {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
-                  <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
-                    🚧 Development Mode - Auth Disabled
-                  </div>
-                </header> */}
-                  {children}
-                </GlobalErrorBoundary>
-              </PreloadingProvider>
-              <Toaster
-                position="bottom-right"
-                toastOptions={{
-                  duration: 4000,
-                  className: 'toast-custom',
-                }}
-              />
-              {/* Performance Monitoring - Removed temporarily */}
-            </SettingsProvider>
-          </QueryProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <QueryProvider>
+              <SettingsProvider>
+                <PreloadingProvider
+                  enableSmartPreloading
+                  enableIdlePreloading
+                  enableNetworkAware
+                  debug={false}
+                >
+                  <GlobalErrorBoundary>
+                    {/* Header temporarily disabled during development */}
+                    {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
+                    <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
+                      🚧 Development Mode - Auth Disabled
+                    </div>
+                  </header> */}
+                    {children}
+                  </GlobalErrorBoundary>
+                </PreloadingProvider>
+                <Toaster
+                  position="bottom-right"
+                  toastOptions={{
+                    duration: 4000,
+                    className: 'toast-custom',
+                  }}
+                />
+                {/* Performance Monitoring - Removed temporarily */}
+              </SettingsProvider>
+            </QueryProvider>
+          </ThemeProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

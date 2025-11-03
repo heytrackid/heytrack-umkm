@@ -1,4 +1,6 @@
-import { automationLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 import { formatCurrentCurrency } from '@/lib/currency'
 import type { WhatsAppTemplate, WhatsAppConfig, OrderData } from './types'
 
@@ -159,7 +161,7 @@ Kami tunggu orderan selanjutnya! 🙏
       // Generate wa.me link
       const waLink = `https://wa.me/${phoneWithCountry}?text=${encodedMessage}`;
 
-      automationLogger.info({ 
+      logger.info({ 
         to: phoneWithCountry, 
         templateId, 
         waLink 
@@ -169,7 +171,7 @@ Kami tunggu orderan selanjutnya! 🙏
       // In browser context, you can use: window.open(waLink, '_blank')
       return true;
     } catch (err) {
-      automationLogger.error({ 
+      logger.error({ 
         err: err instanceof Error ? err.message : String(err), 
         to, 
         templateId 

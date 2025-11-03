@@ -2,7 +2,9 @@
 
 import { useCallback, useState } from 'react'
 import { getErrorMessage } from '@/lib/type-guards'
-import { logger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import type { AppError, ErrorState } from './types'
 
 

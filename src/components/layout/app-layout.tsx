@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, memo, type ReactNode } from 'react'
+import { useState, useEffect, useCallback, memo, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { NotificationCenter } from '@/components/ui/notification-center'
 import { useMobile } from '@/hooks/useResponsive'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useSidebar } from '@/hooks/useSidebar'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { Search, User } from 'lucide-react'
@@ -34,6 +35,7 @@ const AppLayout = memo(({
   showMobileHeader = true
 }: AppLayoutProps) => {
   const { isMobile } = useMobile()
+  const { isCollapsed } = useSidebar()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<SupabaseUser | null>(null)
@@ -90,7 +92,9 @@ const AppLayout = memo(({
   }, [isMobile, mobileMenuOpen])
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev)
-  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+  const toggleMobileMenu = useCallback(() => {
+    setMobileMenuOpen((prev) => !prev)
+  }, [])
 
   // Keyboard shortcuts for sidebar
   useEffect(() => {
@@ -103,7 +107,7 @@ const AppLayout = memo(({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isMobile, mobileMenuOpen])
+  }, [isMobile, mobileMenuOpen, toggleMobileMenu])
 
   return (
     <div className={cn(
@@ -118,19 +122,19 @@ const AppLayout = memo(({
         />
       )}
 
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar Overlay with backdrop blur */}
       {isMobile && mobileMenuOpen && (
         <div
-          className="sidebar-overlay"
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
           onClick={toggleMobileMenu}
           aria-hidden="true"
         />
       )}
 
-      {/* Mobile Sidebar */}
+      {/* Mobile Sidebar with slide animation */}
       {isMobile && (
         <div className={cn(
-          "fixed inset-y-0 left-0 z-40 w-72 bg-background shadow-lg transition-transform duration-300 ease-in-out",
+          "fixed inset-y-0 left-0 z-40 w-72 bg-background shadow-2xl transition-transform duration-300 ease-out",
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <Sidebar
@@ -155,12 +159,12 @@ const AppLayout = memo(({
       )}
 
       <div className={cn(
-        "flex flex-1 flex-col min-w-0 overflow-hidden transition-all duration-300",
-        !isMobile && "ml-72"
+        "flex flex-1 flex-col min-w-0 overflow-hidden transition-all duration-300 ease-in-out",
+        !isMobile && (isCollapsed ? "ml-20" : "ml-72")
       )}>
         {/* Desktop Header */}
         {!isMobile && (
-          <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6 flex-shrink-0">
+          <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6 flex-shrink-0 transition-all duration-300">
             <div className="flex items-center space-x-4">
               <div className="relative hidden sm:block">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -181,9 +185,11 @@ const AppLayout = memo(({
               
               <ThemeToggle />
               {/* User Authentication */}
-              {loading ? (
+              {loading && (
                 <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
-              ) : user ? (
+              )}
+              
+              {!loading && user && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm">
@@ -209,7 +215,9 @@ const AppLayout = memo(({
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              ) : (
+              )}
+              
+              {!loading && !user && (
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="ghost"

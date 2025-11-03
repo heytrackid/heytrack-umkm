@@ -8,7 +8,11 @@ import { uiLogger } from '@/lib/logger'
 
 
 
-export const LogoutButton = () => {
+interface LogoutButtonProps {
+    collapsed?: boolean
+}
+
+export const LogoutButton = ({ collapsed = false }: LogoutButtonProps = {}) => {
     const [isLoggingOut, setIsLoggingOut] = useState(false)
     const router = useRouter()
 
@@ -37,14 +41,25 @@ export const LogoutButton = () => {
         }
     }
 
+    const getButtonTitle = () => {
+        if (!collapsed) {return undefined}
+        return isLoggingOut ? 'Logging out...' : 'Logout'
+    }
+
+    const getButtonText = () => {
+        if (collapsed) {return null}
+        return isLoggingOut ? 'Logging out...' : 'Logout'
+    }
+
     return (
         <button
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors hover:bg-destructive/10 hover:text-destructive text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200 hover:bg-destructive/10 hover:text-destructive hover:scale-105 text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed ${collapsed ? 'w-auto justify-center' : 'w-full'}`}
+            title={getButtonTitle()}
         >
             <LogOut className="h-4 w-4 flex-shrink-0" />
-            <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
+            {!collapsed && <span>{getButtonText()}</span>}
         </button>
     )
 }

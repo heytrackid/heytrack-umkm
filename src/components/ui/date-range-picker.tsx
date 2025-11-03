@@ -107,17 +107,13 @@ export const DateRangePicker = ({
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, 'dd MMM yyyy', { locale: idLocale })} -{' '}
-                  {format(date.to, 'dd MMM yyyy', { locale: idLocale })}
-                </>
-              ) : (
-                format(date.from, 'dd MMM yyyy', { locale: idLocale })
-              )
-            ) : (
-              <span>Pilih periode</span>
+            {!date?.from && <span>Pilih periode</span>}
+            {date?.from && !date.to && format(date.from, 'dd MMM yyyy', { locale: idLocale })}
+            {date?.from && date.to && (
+              <>
+                {format(date.from, 'dd MMM yyyy', { locale: idLocale })} -{' '}
+                {format(date.to, 'dd MMM yyyy', { locale: idLocale })}
+              </>
             )}
           </Button>
         </PopoverTrigger>

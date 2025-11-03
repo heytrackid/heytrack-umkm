@@ -4,7 +4,9 @@ import { type ReactNode, type TouchEvent as ReactTouchEvent, useState, useEffect
 import { cn } from '@/lib/utils'
 import { Loader2, RefreshCw } from 'lucide-react'
 import { isTouchDevice } from '@/utils/responsive'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('MobileGestures')
 
 
 
@@ -63,7 +65,7 @@ export const PullToRefresh = ({
       try {
         await onRefresh()
       } catch (_error: unknown) {
-        apiLogger.error({ error: _error }, 'Refresh failed:')
+        logger.error({ error: _error }, 'Refresh failed:')
       } finally {
         setIsRefreshing(false)
       }
@@ -363,7 +365,7 @@ export const SwipeActions = ({
     const colors = {
       red: 'bg-gray-100 dark:bg-gray-8000 hover:bg-red-600 text-white',
       green: 'bg-gray-100 dark:bg-gray-8000 hover:bg-green-600 text-white',
-      blue: 'bg-gray-100 dark:bg-gray-8000 hover:bg-blue-600 text-white',
+      blue: 'bg-gray-100 dark:bg-gray-8000 hover:bg-gray-600 text-white',
       yellow: 'bg-gray-100 dark:bg-gray-8000 hover:bg-yellow-600 text-white',
       gray: 'bg-gray-500 hover:bg-gray-600 text-white'
     }

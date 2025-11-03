@@ -1,14 +1,16 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { usePathname } from 'next/navigation'
-import { apiLogger } from '@/lib/logger'
-import { useRoutePreloading } from '@/hooks/useRoutePreloading'
 import {
-  useSmartPreloading,
-  useIdleTimePreloading,
-  useNetworkAwarePreloading
+    useIdleTimePreloading,
+    useNetworkAwarePreloading,
+    useSmartPreloading
 } from '@/hooks/route-preloading'
+import { useRoutePreloading } from '@/hooks/useRoutePreloading'
+import { createClientLogger } from '@/lib/client-logger'
+import { usePathname } from 'next/navigation'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+
+const logger = createClientLogger('PreloadingProvider')
 
 interface PreloadingMetrics {
   currentRoute: string
@@ -92,7 +94,7 @@ export const PreloadingProvider = ({
   // Track preloaded routes
   const preloadRoute = (route: string): Promise<void> => {
     if (preloadedRoutes.has(route)) {
-      if (debug) { apiLogger.info(`🔄 Route ${route} already preloaded`) }
+      if (debug) { logger.info(`🔄 Route ${route} already preloaded`) }
       return Promise.resolve()
     }
 
@@ -105,12 +107,12 @@ export const PreloadingProvider = ({
 
       const endTime = performance.now()
       if (debug) {
-        apiLogger.info(`✅ Preloaded route ${route} in ${(endTime - startTime).toFixed(2)}ms`)
+        logger.info(`✅ Preloaded route ${route} in ${(endTime - startTime).toFixed(2)}ms`)
       }
     } catch (err: unknown) {
       if (debug) {
         const errorMsg = err instanceof Error ? err.message : String(err)
-        apiLogger.warn(`❌ Failed to preload route ${route}: ${errorMsg}`)
+        logger.warn(`❌ Failed to preload route ${route}: ${errorMsg}`)
       }
     } finally {
       void setIsPreloading(false)
@@ -121,9 +123,9 @@ export const PreloadingProvider = ({
   // Debug logging
   useEffect(() => {
     if (debug) {
-      apiLogger.info(`🛣️ Route changed to: ${pathname}`)
-      apiLogger.info(`📊 Preloaded routes: ${preloadedRoutes.size}`)
-      apiLogger.info(`🧩 Preloaded components: ${_preloadedComponents.size}`)
+      logger.info(`🛣️ Route changed to: ${pathname}`)
+      logger.info(`📊 Preloaded routes: ${preloadedRoutes.size}`)
+      logger.info(`🧩 Preloaded components: ${_preloadedComponents.size}`)
     }
   }, [pathname, preloadedRoutes.size, _preloadedComponents.size, debug])
 
@@ -288,7 +290,7 @@ export const usePreloadingAnalytics = () => {
 
       if (metrics.preloadedRoutesCount > 0 || metrics.preloadedComponentsCount > 0) {
         // Here you could send metrics to your analytics service
-        apiLogger.info({
+        logger.info({
           params: {
             route: metrics.currentRoute,
             preloadedRoutes: metrics.preloadedRoutesCount,

@@ -1,37 +1,40 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { useState, useEffect } from 'react'
-import type { RecipesTable } from '@/types/database'
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { LabelWithTooltip } from '@/components/ui/tooltip-helper'
-import { useResponsive } from '@/hooks/useResponsive'
-import type { Order, OrderFormData, Priority, OrderFormItem } from './types'
-import { calculateOrderTotal, normalizePriority } from './utils'
-import { validateOrderData } from '@/lib/validations/form-validations'
 import { useCurrency } from '@/hooks/useCurrency'
-import { apiLogger } from '@/lib/logger'
+import { useResponsive } from '@/hooks/useResponsive'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('EnhancedOrderForm')
+import { isRecipe } from '@/lib/type-guards'
+import { validateOrderData } from '@/lib/validations/form-validations'
+import type { RecipesTable } from '@/types/database'
 import {
-    Plus,
-    Trash2,
-    Save,
+    AlertCircle,
     ArrowLeft,
-    User,
-    Phone,
-    MapPin,
     Calendar,
     Clock,
+    MapPin,
     Package,
-    AlertCircle,
+    Phone,
+    Plus,
+    Save,
     Search,
-    ShoppingCart
+    ShoppingCart,
+    Trash2,
+    User
 } from 'lucide-react'
-import { isRecipe } from '@/lib/type-guards'
+import { useEffect, useState } from 'react'
+import type { Order, OrderFormData, OrderFormItem, Priority } from './types'
+import { calculateOrderTotal, normalizePriority } from './utils'
 
 interface EnhancedOrderFormProps {
     order?: Order
@@ -121,7 +124,7 @@ const EnhancedOrderForm = ({
             setRecipes(recipeList)
             setFilteredRecipes(recipeList)
         } catch (err: unknown) {
-            apiLogger.error({ err }, 'Error fetching recipes')
+            logger.error({ err }, 'Error fetching recipes')
         }
     }
 
@@ -563,14 +566,14 @@ const EnhancedOrderForm = ({
                                 className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${currentStep === step
                                     ? 'border-primary bg-primary text-white'
                                     : currentStep > step
-                                        ? 'border-green-500 bg-green-500 text-white'
+                                        ? 'border-green-500 bg-gray-500 text-white'
                                         : 'border-gray-300 text-gray-400'
                                     }`}
                             >
                                 {step}
                             </button>
                             {step < 3 && (
-                                <div className={`w-12 h-0.5 ${currentStep > step ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                <div className={`w-12 h-0.5 ${currentStep > step ? 'bg-gray-500' : 'bg-gray-300'}`} />
                             )}
                         </div>
                     ))}

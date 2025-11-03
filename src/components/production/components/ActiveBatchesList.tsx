@@ -41,8 +41,8 @@ const ActiveBatchesList = ({
   const getStatusColor = (status: ProductionStatus) => {
     switch (status) {
       case 'PLANNED': return 'bg-gray-500'
-      case 'IN_PROGRESS': return 'bg-blue-500'
-      case 'COMPLETED': return 'bg-green-500'
+      case 'IN_PROGRESS': return 'bg-gray-500'
+      case 'COMPLETED': return 'bg-gray-500'
       case 'CANCELLED': return 'bg-gray-400'
       default: return 'bg-gray-500'
     }

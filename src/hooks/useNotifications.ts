@@ -1,8 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { Notification, NotificationPreferences } from '@/lib/notifications/notification-types'
-import { DEFAULT_NOTIFICATION_PREFERENCES } from '@/lib/notifications/notification-types'
+import { 
+  type Notification, 
+  type NotificationPreferences,
+  DEFAULT_NOTIFICATION_PREFERENCES 
+} from '@/lib/notifications/notification-types'
 import { detectAllNotifications } from '@/lib/notifications/notification-detector'
 import { useIngredients } from './useIngredients'
 import type { OrdersTable } from '@/types/database'
@@ -26,7 +29,7 @@ export function useNotifications() {
           ...n,
           timestamp: new Date(n.timestamp)
         })))
-      } catch (e) {
+      } catch (_e) {
         // Invalid data, ignore
       }
     }
@@ -35,7 +38,7 @@ export function useNotifications() {
     if (savedPrefs) {
       try {
         setPreferences(JSON.parse(savedPrefs))
-      } catch (e) {
+      } catch (_e) {
         // Invalid data, use defaults
       }
     }
@@ -62,7 +65,7 @@ export function useNotifications() {
           const data = await response.json()
           setOrders(Array.isArray(data) ? data : [])
         }
-      } catch (e) {
+      } catch (_e) {
         // Silently fail
       }
     }
@@ -78,8 +81,8 @@ export function useNotifications() {
 
     const checkNotifications = () => {
       const newNotifications = detectAllNotifications({
-        ingredients: ingredients || [],
-        orders: orders || []
+        ingredients: ingredients ?? [],
+        orders: orders ?? []
       })
 
       // Filter by preferences
@@ -188,7 +191,7 @@ function playNotificationSound() {
 
     oscillator.start(audioContext.currentTime)
     oscillator.stop(audioContext.currentTime + 0.3)
-  } catch (e) {
+  } catch (_e) {
     // Browser doesn't support Web Audio API
   }
 }

@@ -1,3 +1,5 @@
+'use client'
+
 import { useMemo, type ComponentProps, type CSSProperties } from 'react'
 import { Slot } from "@radix-ui/react-slot"
 import { type VariantProps, cva } from 'class-variance-authority'

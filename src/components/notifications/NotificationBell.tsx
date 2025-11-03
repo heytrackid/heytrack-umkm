@@ -1,20 +1,22 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { Bell } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { NotificationList } from './NotificationList'
-import { createClient } from '@/utils/supabase/client'
-import type { Notification } from '@/types/domain/notifications'
-import type { NotificationPreferences } from '@/types/domain/notification-preferences'
-import { playNotificationSound, playUrgentNotificationSound, setSoundEnabled, setSoundVolume } from '@/lib/notifications/sound'
-import { apiLogger } from '@/lib/logger'
+import { Button } from '@/components/ui/button'
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
+import { createClientLogger } from '@/lib/client-logger'
+import { playNotificationSound, playUrgentNotificationSound, setSoundEnabled, setSoundVolume } from '@/lib/notifications/sound'
+import type { NotificationPreferences } from '@/types/domain/notification-preferences'
+import type { Notification } from '@/types/domain/notifications'
+import { createClient } from '@/utils/supabase/client'
+import { Bell } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { NotificationList } from './NotificationList'
+
+const logger = createClientLogger('NotificationBell')
 
 export const NotificationBell = () => {
     const [notifications, setNotifications] = useState<Notification[]>([])
@@ -39,7 +41,7 @@ export const NotificationBell = () => {
         } catch (error: unknown) {
             // Silent fail - preferences are non-critical
             if (process.env.NODE_ENV === 'development') {
-                apiLogger.error({ error }, 'Failed to fetch preferences')
+                logger.error({ error }, 'Failed to fetch preferences')
             }
         }
     }, [])
@@ -81,7 +83,7 @@ export const NotificationBell = () => {
         } catch (error: unknown) {
             // Silent fail - will retry on next fetch
             if (process.env.NODE_ENV === 'development') {
-                apiLogger.error({ error }, 'Failed to fetch notifications')
+                logger.error({ error }, 'Failed to fetch notifications')
             }
         } finally {
             setIsLoading(false)
@@ -134,7 +136,7 @@ export const NotificationBell = () => {
         } catch (error: unknown) {
             // Silent fail - user can retry
             if (process.env.NODE_ENV === 'development') {
-                apiLogger.error({ error }, 'Failed to mark all as read')
+                logger.error({ error }, 'Failed to mark all as read')
             }
         }
     }
@@ -153,7 +155,7 @@ export const NotificationBell = () => {
         } catch (error: unknown) {
             // Silent fail - user can retry
             if (process.env.NODE_ENV === 'development') {
-                apiLogger.error({ error }, 'Failed to update notification')
+                logger.error({ error }, 'Failed to update notification')
             }
         }
     }

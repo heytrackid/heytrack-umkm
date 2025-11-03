@@ -11,7 +11,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ProductionCapacityManager')
 import { Users, Clock, Settings, Save, RotateCcw, Plus, Minus, AlertCircle, TrendingUp, Zap } from 'lucide-react'
 import {
   batchSchedulingService,
@@ -87,7 +89,7 @@ const ProductionCapacityManager = ({
       setOriginalConstraints(currentConstraints)
       calculateEfficiencyMetrics(currentConstraints)
     } catch (error: unknown) {
-      apiLogger.error({ error }, 'Error loading constraints:')
+      logger.error({ error }, 'Error loading constraints:')
       toast({
         title: 'Error',
         description: 'Failed to load production capacity settings',
@@ -168,7 +170,7 @@ const ProductionCapacityManager = ({
         description: 'Production capacity updated successfully'
       })
     } catch (error: unknown) {
-      apiLogger.error({ error }, 'Error saving constraints:')
+      logger.error({ error }, 'Error saving constraints:')
       toast({
         title: 'Error',
         description: 'Failed to save production capacity settings',

@@ -1,3 +1,5 @@
+'use client'
+
 import { Suspense, lazy, Component, type ComponentType, type ReactNode, useEffect, type FC } from 'react'
 import { Loader2 } from 'lucide-react'
 import { uiLogger } from '@/lib/logger'

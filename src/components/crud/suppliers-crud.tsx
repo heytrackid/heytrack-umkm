@@ -9,7 +9,9 @@ import { SimpleDataTable, type SimpleColumn } from '@/components/ui/simple-data-
 import { SupplierFormSchema, type SupplierForm } from '@/lib/validations/form-validations';
 import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields';
 import { CreateModal, EditModal, DeleteModal } from '@/components/ui';
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('SuppliersCRUD')
 import type { SuppliersTable, SuppliersInsert, SuppliersUpdate } from '@/types/database'
 
 
@@ -124,7 +126,7 @@ export const SuppliersCRUD = () => {
         notes: '',
       })
     } catch (err: unknown) {
-      apiLogger.error({ err }, 'Failed to create supplier:')
+      logger.error({ err }, 'Failed to create supplier:')
     }
   }
 
@@ -144,7 +146,7 @@ export const SuppliersCRUD = () => {
         notes: '',
       })
     } catch (err: unknown) {
-      apiLogger.error({ err }, 'Failed to update supplier:')
+      logger.error({ err }, 'Failed to update supplier:')
     }
   }
 
@@ -156,7 +158,7 @@ export const SuppliersCRUD = () => {
       setIsDeleteDialogOpen(false);
       setSelectedSupplier(null);
     } catch (err: unknown) {
-      apiLogger.error({ err }, 'Failed to delete supplier:');
+      logger.error({ err }, 'Failed to delete supplier:');
     }
   }
 

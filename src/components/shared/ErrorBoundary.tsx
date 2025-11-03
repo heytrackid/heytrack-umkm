@@ -4,7 +4,9 @@ import { Component, type ReactNode, type ErrorInfo, type ComponentType } from 'r
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ErrorBoundary')
 
 
 
@@ -54,7 +56,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error with appropriate logger
-    apiLogger.error({
+    logger.error({
       error: error.toString(),
       componentStack: errorInfo.componentStack,
       timestamp: new Date().toISOString()
@@ -191,7 +193,7 @@ export function withErrorBoundary<P extends object>(
  */
 export function useErrorHandler() {
   return (error: Error, errorInfo?: ErrorInfo) => {
-    apiLogger.error({
+    logger.error({
       error: error.toString(),
       componentStack: errorInfo?.componentStack,
       timestamp: new Date().toISOString()

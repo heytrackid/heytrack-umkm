@@ -63,10 +63,10 @@ export const EnhancedIngredientForm = ({
         <div className="space-y-6">
             {/* Current Summary (Edit Mode) */}
             {mode === 'edit' && initialData && (
-                <Card className="bg-blue-50 border-blue-200">
+                <Card className="bg-gray-50 border-gray-300">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2 text-sm font-medium text-blue-900">
+                            <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
                                 <Info className="w-4 h-4" />
                                 Data Saat Ini
                             </div>
@@ -78,20 +78,20 @@ export const EnhancedIngredientForm = ({
                         </div>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                             <div>
-                                <p className="text-blue-700 mb-1">Stok</p>
-                                <p className="text-blue-900 font-semibold">
+                                <p className="text-gray-700 mb-1">Stok</p>
+                                <p className="text-gray-900 font-semibold">
                                     {initialData.current_stock} {initialData.unit}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-blue-700 mb-1">Harga</p>
-                                <p className="text-blue-900 font-semibold">
+                                <p className="text-gray-700 mb-1">Harga</p>
+                                <p className="text-gray-900 font-semibold">
                                     {formatCurrency(initialData.price_per_unit)}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-blue-700 mb-1">Min. Stok</p>
-                                <p className="text-blue-900 font-semibold">
+                                <p className="text-gray-700 mb-1">Min. Stok</p>
+                                <p className="text-gray-900 font-semibold">
                                     {initialData.min_stock} {initialData.unit}
                                 </p>
                             </div>
@@ -224,13 +224,13 @@ export const EnhancedIngredientForm = ({
 
             {/* Tips for Create Mode */}
             {mode === 'create' && (
-                <Card className="bg-green-50 border-green-200">
+                <Card className="bg-gray-50 border-gray-300">
                     <CardContent className="p-4">
                         <div className="flex items-start gap-3">
-                            <TrendingUp className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
+                            <TrendingUp className="w-5 h-5 text-gray-600 mt-0.5 shrink-0" />
                             <div className="text-sm">
-                                <p className="font-medium text-green-900 mb-2">💡 Tips</p>
-                                <ul className="text-green-800 space-y-1 text-xs">
+                                <p className="font-medium text-gray-900 mb-2">💡 Tips</p>
+                                <ul className="text-gray-800 space-y-1 text-xs">
                                     <li>• Set stok minimum 20-30% dari stok normal Anda</li>
                                     <li>• Gunakan satuan yang konsisten untuk kemudahan tracking</li>
                                     <li>• Update harga secara berkala untuk kalkulasi HPP yang akurat</li>

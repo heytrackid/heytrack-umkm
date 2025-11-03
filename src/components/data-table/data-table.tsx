@@ -157,7 +157,7 @@ export const DataTable = <TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {isLoading && (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
@@ -166,7 +166,9 @@ export const DataTable = <TData, TValue>({
                   Memuat...
                 </TableCell>
               </TableRow>
-            ) : table.getRowModel().rows?.length ? (
+            )}
+            
+            {!isLoading && table.getRowModel().rows?.length > 0 && (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -180,7 +182,9 @@ export const DataTable = <TData, TValue>({
                   ))}
                 </TableRow>
               ))
-            ) : (
+            )}
+            
+            {!isLoading && !table.getRowModel().rows?.length && (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}

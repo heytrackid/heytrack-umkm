@@ -1,18 +1,11 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useToast } from '@/hooks/use-toast'
-import { useSupabaseCRUD } from '@/hooks/supabase'
-import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
-import { ArrowLeft, Save } from 'lucide-react'
-import type { OperationalCostsTable, OperationalCostsInsert, OperationalCostsUpdate } from '@/types/database'
 import {
     Select,
     SelectContent,
@@ -20,6 +13,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useToast } from '@/hooks/use-toast'
+import type { OperationalCostsInsert, OperationalCostsTable, OperationalCostsUpdate } from '@/types/database'
+import { createClient } from '@/utils/supabase/client'
+import { ArrowLeft, Save } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 type _OperationalCost = OperationalCostsTable
 type OperationalCostInsert = OperationalCostsInsert
@@ -322,7 +323,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                     </Button>
                     <Button type="submit" disabled={loading}>
                         <Save className="h-4 w-4 mr-2" />
-                        {loading ? 'Menyimpan...' : mode === 'create' ? 'Tambah Biaya' : 'Simpan Perubahan'}
+                        {loading ? 'Menyimpan...' : (mode === 'create' ? 'Tambah Biaya' : 'Simpan Perubahan')}
                     </Button>
                 </div>
             </form>

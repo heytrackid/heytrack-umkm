@@ -161,9 +161,9 @@ const AutomationPage = () => {
 
       {/* Success Result */}
       {result?.status === 'success' && (
-        <Alert className="bg-green-50 border-green-200">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">
+        <Alert className="bg-gray-50 border-gray-300">
+          <CheckCircle className="h-4 w-4 text-gray-600" />
+          <AlertDescription className="text-gray-800">
             Task <strong>{result.task}</strong> completed successfully at {formatDate(result.timestamp)}
           </AlertDescription>
         </Alert>
@@ -175,7 +175,7 @@ const AutomationPage = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <Package className="w-8 h-8 text-blue-600" />
+              <Package className="w-8 h-8 text-gray-600" />
               <Badge variant={status?.automation.autoReorder.enabled ? "default" : "secondary"}>
                 {status?.automation.autoReorder.enabled ? "Active" : "Inactive"}
               </Badge>
@@ -214,7 +214,7 @@ const AutomationPage = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <Bell className="w-8 h-8 text-purple-600" />
+              <Bell className="w-8 h-8 text-gray-600" />
               <Badge variant={status?.automation.smartNotifications.enabled ? "default" : "secondary"}>
                 {status?.automation.smartNotifications.enabled ? "Active" : "Inactive"}
               </Badge>

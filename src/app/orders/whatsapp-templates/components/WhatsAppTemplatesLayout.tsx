@@ -282,18 +282,18 @@ const WhatsAppTemplatesPage = () => {
 
                 {/* Info Card - Show only if no templates */}
                 {templates.length === 0 && !loading && (
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 shadow-sm">
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-xl p-6 shadow-sm">
                         <div className="flex items-start gap-4">
                             <div className="flex-shrink-0">
-                                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                                    <MessageCircle className="h-6 w-6 text-green-600" />
+                                <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                    <MessageCircle className="h-6 w-6 text-gray-600" />
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-bold text-green-900 text-lg mb-2">
+                                <h3 className="font-bold text-gray-900 text-lg mb-2">
                                     🎉 Mulai dengan Template Siap Pakai!
                                 </h3>
-                                <p className="text-green-800 mb-4">
+                                <p className="text-gray-800 mb-4">
                                     Kami sudah siapkan 8 template WhatsApp yang friendly dan profesional untuk kamu.
                                     Tinggal klik tombol di bawah, edit sesuai kebutuhan, dan langsung bisa dipakai!
                                 </p>
@@ -326,9 +326,9 @@ const WhatsAppTemplatesPage = () => {
                                         Atau Buat dari Nol
                                     </Button>
                                 </div>
-                                <div className="mt-4 pt-4 border-t border-green-200">
-                                    <p className="text-sm font-semibold text-green-900 mb-2">Template yang akan dibuat:</p>
-                                    <div className="grid grid-cols-2 gap-2 text-sm text-green-700">
+                                <div className="mt-4 pt-4 border-t border-gray-300">
+                                    <p className="text-sm font-semibold text-gray-900 mb-2">Template yang akan dibuat:</p>
+                                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
                                         <div>✅ Konfirmasi Pesanan</div>
                                         <div>✅ Pesanan Siap</div>
                                         <div>✅ Reminder Pembayaran</div>
@@ -346,10 +346,10 @@ const WhatsAppTemplatesPage = () => {
 
                 {/* Info Card - Show if has templates */}
                 {templates.length > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <h3 className="font-semibold text-blue-900 mb-2">💡 Cara Menggunakan Template</h3>
-                        <ul className="text-sm text-blue-800 space-y-1">
-                            <li>• Buat template dengan variabel dinamis seperti <code className="bg-blue-100 px-1 rounded">{'{customer_name}'}</code></li>
+                    <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
+                        <h3 className="font-semibold text-gray-900 mb-2">💡 Cara Menggunakan Template</h3>
+                        <ul className="text-sm text-gray-800 space-y-1">
+                            <li>• Buat template dengan variabel dinamis seperti <code className="bg-gray-100 px-1 rounded">{'{customer_name}'}</code></li>
                             <li>• Variabel akan otomatis diganti dengan data pesanan saat mengirim pesan</li>
                             <li>• Set template sebagai default untuk digunakan secara otomatis</li>
                             <li>• Gunakan preview untuk melihat hasil akhir dengan data contoh</li>

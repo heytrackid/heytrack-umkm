@@ -1,11 +1,11 @@
 'use client'
 
-import { type ReactNode, type InputHTMLAttributes, type TextareaHTMLAttributes, forwardRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import { type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes, forwardRef } from 'react'
 
 
 
@@ -39,7 +39,11 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           id={id}
           className={cn(error && 'border-red-500 focus-visible:ring-red-500')}
           aria-invalid={!!error}
-          aria-describedby={error ? `${id}-error` : helperText ? `${id}-helper` : undefined}
+          aria-describedby={(() => {
+            if (error) {return `${id}-error`}
+            if (helperText) {return `${id}-helper`}
+            return undefined
+          })()}
           {...props}
         />
         {error && (
@@ -81,7 +85,11 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
           id={id}
           className={cn(error && 'border-red-500 focus-visible:ring-red-500')}
           aria-invalid={!!error}
-          aria-describedby={error ? `${id}-error` : helperText ? `${id}-helper` : undefined}
+          aria-describedby={(() => {
+            if (error) {return `${id}-error`}
+            if (helperText) {return `${id}-helper`}
+            return undefined
+          })()}
           {...props}
         />
         {error && (
@@ -129,7 +137,11 @@ export const FormSelect = forwardRef<HTMLButtonElement, FormSelectProps>(
             ref={ref}
             className={cn(error && 'border-red-500 focus-visible:ring-red-500')}
             aria-invalid={!!error}
-            aria-describedby={error ? `${id}-error` : helperText ? `${id}-helper` : undefined}
+            aria-describedby={(() => {
+              if (error) {return `${id}-error`}
+              if (helperText) {return `${id}-helper`}
+              return undefined
+            })()}
           >
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>

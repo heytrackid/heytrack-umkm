@@ -1,27 +1,27 @@
 'use client'
-/* eslint-disable no-nested-ternary */
+ 
 
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
-import { usePagePreloading } from '@/providers/PreloadingProvider'
-import { BarChart3, ChefHat, Package, ShoppingCart, Target, Calculator, Sparkles } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { Suspense, useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { queryLogger } from '@/lib/client-logger'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
+import { usePagePreloading } from '@/providers/PreloadingProvider'
+import { useQuery } from '@tanstack/react-query'
+import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Target } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 
 // Import lightweight components normally - no need for lazy loading
-import StatsCardsSection from './components/StatsCardsSection'
-import RecentOrdersSection from './components/RecentOrdersSection'
-import StockAlertsSection from './components/StockAlertsSection'
 import HppDashboardWidget from './components/HppDashboardWidget'
+import RecentOrdersSection from './components/RecentOrdersSection'
+import StatsCardsSection from './components/StatsCardsSection'
+import StockAlertsSection from './components/StockAlertsSection'
 
 // Dashboard data structure
 interface DashboardData {
@@ -153,7 +153,8 @@ const Dashboard = () => {
       })
       void router.push('/auth/login')
     }
-  }, [isAuthLoading, isAuthenticated, router, toast])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthLoading, isAuthenticated])
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -162,6 +163,26 @@ const Dashboard = () => {
 
   // ✅ FIX: Combine loading states to prevent double skeleton
   const isLoading = isAuthLoading || isDataLoading
+
+  // Check if user has no data yet (empty state) - memoized to prevent unnecessary re-renders
+  // MUST be called before any conditional returns to follow Rules of Hooks
+  const hasNoData = useMemo(() => {
+    if (!dashboardData) return false
+    return dashboardData.stats.totalOrders === 0 &&
+      dashboardData.stats.totalIngredients === 0 &&
+      dashboardData.stats.totalCustomers === 0
+  }, [dashboardData])
+
+  // Show onboarding for new users - MUST be before any conditional returns
+  useEffect(() => {
+    if (hasNoData && !isLoading) {
+      const hasSkipped = localStorage.getItem('heytrack_onboarding_skipped')
+      const hasCompleted = localStorage.getItem('heytrack_onboarding_completed')
+      if (!hasSkipped && !hasCompleted) {
+        setShowOnboarding(true)
+      }
+    }
+  }, [hasNoData, isLoading])
 
   // Show loading state while initializing
   if (isLoading && !dashboardData) {
@@ -199,22 +220,6 @@ const Dashboard = () => {
       </AppLayout>
     )
   }
-
-  // Check if user has no data yet (empty state)
-  const hasNoData = dashboardData?.stats.totalOrders === 0 &&
-    dashboardData.stats.totalIngredients === 0 &&
-    dashboardData.stats.totalCustomers === 0
-
-  // Show onboarding for new users
-  useEffect(() => {
-    if (hasNoData && !isLoading) {
-      const hasSkipped = localStorage.getItem('heytrack_onboarding_skipped')
-      const hasCompleted = localStorage.getItem('heytrack_onboarding_completed')
-      if (!hasSkipped && !hasCompleted) {
-        setShowOnboarding(true)
-      }
-    }
-  }, [hasNoData, isLoading])
 
   return (
     <AppLayout>
@@ -277,19 +282,19 @@ const Dashboard = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/ingredients">
-                      <Package className="h-6 w-6 text-blue-600" />
+                      <Package className="h-6 w-6 text-gray-600" />
                       <span className="text-sm font-medium">Bahan Baku</span>
                     </a>
                   </Button>
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/recipes">
-                      <ChefHat className="h-6 w-6 text-purple-600" />
+                      <ChefHat className="h-6 w-6 text-gray-600" />
                       <span className="text-sm font-medium">Resep</span>
                     </a>
                   </Button>
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/hpp">
-                      <Calculator className="h-6 w-6 text-green-600" />
+                      <Calculator className="h-6 w-6 text-gray-600" />
                       <span className="text-sm font-medium">Hitung HPP</span>
                     </a>
                   </Button>
@@ -304,8 +309,8 @@ const Dashboard = () => {
                 {/* Feature Highlights */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto pt-6 text-left">
                   <div className="flex gap-3 items-start">
-                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
-                      <Calculator className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
+                      <Calculator className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <h4 className="font-medium text-sm mb-1">HPP Otomatis</h4>
@@ -315,8 +320,8 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex gap-3 items-start">
-                    <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center flex-shrink-0">
-                      <BarChart3 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
+                      <BarChart3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <h4 className="font-medium text-sm mb-1">Analisis Profit</h4>
@@ -326,8 +331,8 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex gap-3 items-start">
-                    <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
-                      <Package className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
+                      <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <h4 className="font-medium text-sm mb-1">Kelola Stok</h4>

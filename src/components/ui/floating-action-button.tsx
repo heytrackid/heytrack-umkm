@@ -51,7 +51,7 @@ export const FloatingActionButton = ({
                 size="lg"
                 className={cn(
                   'h-12 w-12 rounded-full shadow-lg',
-                  action.color || 'bg-primary'
+                  action.color ?? 'bg-primary'
                 )}
                 onClick={() => {
                   action.onClick()
@@ -98,6 +98,6 @@ export const SimpleFAB = ({
         className
       )}
     >
-      {icon || <Plus className="h-6 w-6" />}
+      {icon ?? <Plus className="h-6 w-6" />}
     </Button>
   )

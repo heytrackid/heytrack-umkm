@@ -190,7 +190,7 @@ const HppRecommendationsPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">
+              <div className="text-3xl font-bold text-gray-600">
                 {formatCurrency(totalPotentialSavings)}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -333,7 +333,7 @@ const HppRecommendationsPage = () => {
               <div className="space-y-3">
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    <TrendingUp className="h-4 w-4 text-gray-500" />
                     <span className="font-semibold">Supplier Cost Reduction</span>
                     <Badge variant="default">High</Badge>
                   </div>
@@ -344,7 +344,7 @@ const HppRecommendationsPage = () => {
 
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Lightbulb className="h-4 w-4 text-blue-500" />
+                    <Lightbulb className="h-4 w-4 text-gray-500" />
                     <span className="font-semibold">Recipe Optimization</span>
                     <Badge variant="secondary">Medium</Badge>
                   </div>
@@ -355,7 +355,7 @@ const HppRecommendationsPage = () => {
 
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    <Sparkles className="h-4 w-4 text-gray-500" />
                     <span className="font-semibold">Bulk Purchasing</span>
                     <Badge variant="outline">Low</Badge>
                   </div>

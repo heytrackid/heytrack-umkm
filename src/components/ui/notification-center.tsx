@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from './button'
 import { Badge } from './badge'
 import { ScrollArea } from './scroll-area'
@@ -157,7 +157,7 @@ const NotificationItem = ({ notification, onClick, onMarkAsRead, index }: Notifi
     critical: 'border-l-red-500 bg-red-50 dark:bg-red-950/20',
     high: 'border-l-orange-500 bg-orange-50 dark:bg-orange-950/20',
     medium: 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-950/20',
-    low: 'border-l-blue-500 bg-blue-50 dark:bg-blue-950/20'
+    low: 'border-l-blue-500 bg-gray-50 dark:bg-gray-950/20'
   }
 
   const timeAgo = getTimeAgo(notification.timestamp)

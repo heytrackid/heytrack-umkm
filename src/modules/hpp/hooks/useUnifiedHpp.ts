@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import type { RecipesTable } from '@/types/database'
 import { useToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import {
   useQuery,
@@ -101,7 +103,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         recipeCount = payload.recipes.length
       }
 
-      apiLogger.info({
+      logger.info({
         hasPayload: payload !== null,
         isArray: Array.isArray(payload),
         hasRecipesKey: isRecipesListResponse(payload),
@@ -233,7 +235,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
       })
     },
     onError: (error) => {
-      apiLogger.error({ error }, 'Failed to calculate HPP')
+      logger.error({ error }, 'Failed to calculate HPP')
       toast({
         title: 'Error',
         description: 'Gagal menghitung biaya produksi',
@@ -270,7 +272,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
       })
     },
     onError: (error) => {
-      apiLogger.error({ error }, 'Failed to update price')
+      logger.error({ error }, 'Failed to update price')
       toast({
         title: 'Error',
         description: 'Gagal menyimpan harga jual',

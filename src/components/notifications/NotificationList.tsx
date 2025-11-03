@@ -51,7 +51,7 @@ const typeColors = {
     info: 'text-muted-foreground',
     warning: 'text-yellow-500',
     error: 'text-red-500',
-    success: 'text-green-500',
+    success: 'text-gray-500',
     alert: 'text-orange-500',
 }
 
@@ -146,19 +146,23 @@ export const NotificationList = ({
 
             {/* Notification List */}
             <ScrollArea className="flex-1">
-                {isLoading && filteredNotifications.length === 0 ? (
+                {isLoading && filteredNotifications.length === 0 && (
                     <div className="flex items-center justify-center h-32 text-muted-foreground">
                         <RefreshCw className="h-5 w-5 animate-spin mr-2" />
                         Memuat...
                     </div>
-                ) : filteredNotifications.length === 0 ? (
+                )}
+                
+                {!isLoading && filteredNotifications.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
                         <Bell className="h-8 w-8 mb-2 opacity-50" />
                         <p className="text-sm">
                             {filter === 'unread' ? 'Tidak ada notifikasi baru' : 'Tidak ada notifikasi'}
                         </p>
                     </div>
-                ) : (
+                )}
+                
+                {filteredNotifications.length > 0 && (
                     <div className="divide-y">
                         {filteredNotifications.map((notification) => {
                             const TypeIcon = typeIcons[notification.type as keyof typeof typeIcons] || Info
@@ -171,7 +175,7 @@ export const NotificationList = ({
                                     key={notification.id}
                                     className={cn(
                                         'p-4 hover:bg-muted/50 cursor-pointer transition-colors border-l-4',
-                                        !notification.is_read && 'bg-blue-50/50',
+                                        !notification.is_read && 'bg-gray-50/50',
                                         priorityColor
                                     )}
                                     onClick={() => handleNotificationClick(notification)}
@@ -197,7 +201,7 @@ export const NotificationList = ({
                                                     </h4>
                                                 </div>
                                                 {!notification.is_read && (
-                                                    <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                                                    <div className="h-2 w-2 rounded-full bg-gray-500 flex-shrink-0" />
                                                 )}
                                             </div>
 
