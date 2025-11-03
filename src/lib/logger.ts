@@ -22,17 +22,11 @@ const getLogLevel = () => {
 
 const logger = pino({
   level: getLogLevel(),
-  ...(isDevelopment && {
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-        translateTime: 'HH:MM:ss Z',
-        ignore: 'pid,hostname',
-        singleLine: false,
-      },
-    },
-  }),
+  // Disable pino-pretty transport in development due to Turbopack compatibility issues
+  // Use browser option instead for better compatibility
+  browser: {
+    asObject: isDevelopment,
+  },
   // Add more detailed serialization for better debugging
   serializers: {
     error: (err: Error) => ({

@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { withSecurity, SecurityPresets } from '@/utils/security'
+import { checkAdminPrivileges } from '@/lib/admin-check'
 import type { ErrorLogsInsert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
@@ -80,11 +81,13 @@ async function POST(request: NextRequest) {
       }
     }
 
-    // Also log to our logger
-    apiLogger.error({
-      ...sanitizedErrorData,
-      userId
-    }, 'Client-side error reported')
+    // In development, log to console as well
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Client-side error reported:', {
+        ...sanitizedErrorData,
+        userId
+      })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
@@ -111,14 +114,19 @@ async function GET(request: NextRequest) {
       )
     }
 
-    // TODO: Add admin check
-    // const isAdmin = await isAdminUser(user.id)
-    // if (!isAdmin) {
-    //   return NextResponse.json(
-    //     { error: 'Forbidden' },
-    //     { status: 403 }
-    //   )
-    // }
+    // Check if user has admin privileges
+    const adminCheck = await checkAdminPrivileges(user)
+    if (!adminCheck.hasPermission) {
+      apiLogger.warn({ 
+        userId: user.id, 
+        email: user.email 
+      }, 'Unauthorized access attempt to error logs')
+      
+      return NextResponse.json(
+        { error: 'Forbidden - Admin access required' },
+        { status: 403 }
+      )
+    }
 
     const { searchParams } = new URL(request.url)
     const limit = parseInt(searchParams.get('limit') ?? '50', 10)
