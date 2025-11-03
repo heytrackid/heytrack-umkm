@@ -1,15 +1,17 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calculator, AlertTriangle, Target, DollarSign, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react' 
-import { useCurrency } from '@/hooks/useCurrency'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { QuickActionsSkeleton, StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
+import { createClientLogger } from '@/lib/client-logger'
+import { AlertTriangle, BarChart3, Calculator, DollarSign, Target, TrendingDown, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
-import { dbLogger } from '@/lib/logger'
-import { StatsCardSkeleton, QuickActionsSkeleton } from '@/components/ui/skeletons/dashboard-skeletons' 
+import { useEffect, useState } from 'react'
+
+const logger = createClientLogger('HppDashboardWidget') 
 
 interface HppDashboardData {
   totalRecipes: number
@@ -59,7 +61,7 @@ const HppDashboardWidget = () => {
       const realData: HppDashboardData = await response.json()
       setData(realData)
     } catch (error: unknown) {
-      dbLogger.error({ error }, 'Failed to load HPP dashboard data')
+      logger.error({ error }, 'Failed to load HPP dashboard data')
       toast({
         title: 'Error',
         description: 'Failed to load HPP data',

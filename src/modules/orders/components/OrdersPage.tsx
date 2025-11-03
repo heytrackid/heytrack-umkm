@@ -2,25 +2,27 @@
  
 'use client'
 
+import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { uiLogger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/type-guards'
-import { useState, useMemo } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { arrayCalculations } from '@/lib/performance-optimized'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import dynamic from 'next/dynamic'
-import { PageHeader } from '@/components/layout/PageHeader'
 import { useCurrency } from '@/hooks/useCurrency'
-import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
+import { createClientLogger } from '@/lib/client-logger'
+import { arrayCalculations } from '@/lib/performance-optimized'
+import { getErrorMessage } from '@/lib/type-guards'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
-import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { useMemo, useState } from 'react'
+
+const logger = createClientLogger('OrdersPage')
 
 
 
@@ -176,7 +178,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
       // Note: TanStack Query will handle cache invalidation
     } catch (error: unknown) {
       const message = getErrorMessage(error)
-      uiLogger.error({ error: message }, 'Failed to update status')
+      logger.error({ error: message }, 'Failed to update status')
     }
   }
 

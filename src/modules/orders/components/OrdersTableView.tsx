@@ -1,16 +1,18 @@
  
 'use client'
 
+import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
 import OrdersTableComponent from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { useState, useEffect } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { OrderDetailView } from './OrderDetailView'
-import { OrderForm } from './OrderForm'
-import { uiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'
 import type { OrdersTable as OrdersTableRow } from '@/types/database'
-import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { OrderDetailView } from './OrderDetailView'
+import { OrderForm } from './OrderForm'
+
+const logger = createClientLogger('OrdersTableView')
 
 
 
@@ -46,7 +48,7 @@ export const OrdersTableView = () => {
         return data
       }
 
-      uiLogger.warn({ data }, 'API returned unexpected format for orders')
+      logger.warn({ data }, 'API returned unexpected format for orders')
       return []
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
@@ -81,11 +83,11 @@ export const OrdersTableView = () => {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
-      uiLogger.info('Order deleted successfully')
+      logger.info('Order deleted successfully')
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      uiLogger.error({ error: message }, 'Error deleting order')
+      logger.error({ error: message }, 'Error deleting order')
     }
   })
 
@@ -112,16 +114,16 @@ export const OrdersTableView = () => {
         return data
       }
 
-      uiLogger.warn({ data }, 'API returned unexpected format for updated order')
+      logger.warn({ data }, 'API returned unexpected format for updated order')
       return data
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
-      uiLogger.info('Order status updated')
+      logger.info('Order status updated')
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      uiLogger.error({ error: message }, 'Error updating status')
+      logger.error({ error: message }, 'Error updating status')
     }
   })
 
@@ -130,7 +132,7 @@ export const OrdersTableView = () => {
   }
 
   const handleBulkAction = async (action: string, orderIds: string[]) => {
-    uiLogger.info({ action, orderCount: orderIds.length }, 'Bulk action triggered')
+    logger.info({ action, orderCount: orderIds.length }, 'Bulk action triggered')
 
     switch (action) {
       case 'confirm':
@@ -141,15 +143,15 @@ export const OrdersTableView = () => {
         break
       case 'export':
         // Export selected orders
-        uiLogger.debug({ orderIds }, 'Exporting orders')
+        logger.debug({ orderIds }, 'Exporting orders')
         break
       case 'print':
         // Print selected orders
-        uiLogger.debug({ orderIds }, 'Printing orders')
+        logger.debug({ orderIds }, 'Printing orders')
         break
       case 'archive':
         // Archive selected orders
-        uiLogger.debug({ orderIds }, 'Archiving orders')
+        logger.debug({ orderIds }, 'Archiving orders')
         break
       case 'cancel':
         // Cancel selected orders
@@ -167,7 +169,7 @@ export const OrdersTableView = () => {
         }
         break
       default:
-        uiLogger.warn({ action }, 'Unknown bulk action')
+        logger.warn({ action }, 'Unknown bulk action')
     }
   }
 
@@ -217,7 +219,7 @@ export const OrdersTableView = () => {
             order={editingOrder}
             onSubmit={async (data) => {
               // Handle form submission
-              uiLogger.info({ orderNo: data.order_no }, 'Order submitted')
+              logger.info({ orderNo: data.order_no }, 'Order submitted')
               await queryClient.invalidateQueries({ queryKey: ['orders'] })
               setShowOrderForm(false)
               setEditingOrder(undefined)
