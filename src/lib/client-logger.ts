@@ -87,14 +87,32 @@ class ClientLogger {
   }
 
   /**
-   * Send error to monitoring service (placeholder)
+   * Send error to monitoring service
    */
   private sendToMonitoring(logEntry: LogContext): void {
-    if (typeof window !== 'undefined' && 'sendBeacon' in navigator) {
+    if (typeof window !== 'undefined') {
       try {
-        navigator.sendBeacon('/api/errors', JSON.stringify(logEntry))
+        // Use sendBeacon with proper Content-Type
+        if ('sendBeacon' in navigator) {
+          const blob = new Blob([JSON.stringify(logEntry)], {
+            type: 'application/json'
+          })
+          navigator.sendBeacon('/api/errors', blob)
+        } else {
+          // Fallback to fetch for browsers without sendBeacon
+          void fetch('/api/errors', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(logEntry),
+            keepalive: true, // Similar to sendBeacon behavior
+          }).catch(() => {
+            // Silently fail - error reporting shouldn't break the app
+          })
+        }
       } catch {
-        // Silently fail if sendBeacon doesn't work
+        // Silently fail if error reporting doesn't work
       }
     }
   }

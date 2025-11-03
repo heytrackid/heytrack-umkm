@@ -25,10 +25,30 @@ async function POST(request: NextRequest) {
       apiLogger.debug({ error: getErrorMessage(authError) }, 'Anonymous error report')
     }
 
-    const body = await request.json()
+    // Parse body - handle both JSON and text/plain
+    let body: Record<string, unknown>
+    const contentType = request.headers.get('content-type') || ''
+    
+    try {
+      if (contentType.includes('application/json')) {
+        body = await request.json()
+      } else if (contentType.includes('text/plain')) {
+        // Try to parse text as JSON (sendBeacon might send JSON as text/plain)
+        const text = await request.text()
+        body = JSON.parse(text)
+      } else {
+        body = await request.json() // Default to JSON
+      }
+    } catch (parseError: unknown) {
+      apiLogger.error({ error: getErrorMessage(parseError), contentType }, 'Failed to parse error report body')
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      )
+    }
     
     // Validate required fields
-    if (!body.message) {
+    if (!body.message && !body.msg) {
       return NextResponse.json(
         { error: 'Message is required' },
         { status: 400 }
@@ -36,8 +56,9 @@ async function POST(request: NextRequest) {
     }
 
     // Sanitize error data
+    const message = (body.message || body.msg || 'Unknown error') as string
     const sanitizedErrorData = {
-      message: body.message.substring(0, 1000), // Limit message length
+      message: message.substring(0, 1000), // Limit message length
       stack: body.stack ? body.stack.substring(0, 5000) : null, // Limit stack trace
       url: body.url ? body.url.substring(0, 500) : null,
       userAgent: body.userAgent ? body.userAgent.substring(0, 500) : null,
@@ -158,6 +179,16 @@ async function GET(request: NextRequest) {
 }
 
 const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPOST = withSecurity(POST, SecurityPresets.basic()) // Allow anonymous error reporting
+
+// Custom config for error reporting - more permissive to accept error logs from various sources
+const securedPOST = withSecurity(POST, {
+  sanitizeInputs: true,
+  sanitizeQueryParams: true,
+  validateContentType: true,
+  allowedContentTypes: ['application/json', 'text/plain'], // Allow both JSON and text/plain for sendBeacon
+  rateLimit: { maxRequests: 200, windowMs: 15 * 60 * 1000 }, // Higher limit for error reporting
+  checkForSQLInjection: false, // Error messages might contain SQL-like text
+  checkForXSS: false, // Error messages might contain HTML-like text
+})
 
 export { securedGET as GET, securedPOST as POST }
