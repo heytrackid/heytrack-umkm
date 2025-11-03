@@ -224,8 +224,8 @@ export const SharedModalForm = <T extends Record<string, unknown>>({
       <div
         className={`bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-y-auto ${size === 'sm' ? 'max-w-md' :
           size === 'md' ? 'max-w-lg' :
-            size === 'lg' ? 'max-w-2xl' :
-              'max-w-4xl'
+            size === 'lg' ? 'w-[calc(100%-2rem)] max-w-2xl' :
+              'w-[calc(100%-2rem)] max-w-4xl'
           }`}
       >
         <div className="p-6">

@@ -117,7 +117,7 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-2xl">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl">

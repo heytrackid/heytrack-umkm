@@ -53,9 +53,9 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
     return (
         <Card>
             <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-lg flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex-1">
+                        <CardTitle className="text-lg flex items-center gap-2 flex-wrap">
                             Ringkasan HPP
                             <Badge variant={completionPercentage === 100 ? "default" : "secondary"}>
                                 {completionPercentage === 100 ? "Lengkap" : "Perlu Perhatian"}
@@ -66,7 +66,7 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
                         </p>
                     </div>
                     {completionPercentage < 100 && (
-                        <Button size="sm" onClick={handleCalculateAll}>
+                        <Button size="sm" onClick={handleCalculateAll} className="w-full sm:w-auto">
                             <Calculator className="h-4 w-4 mr-2" />
                             Hitung Semua
                         </Button>
