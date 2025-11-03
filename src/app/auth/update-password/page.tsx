@@ -37,7 +37,7 @@ const UpdatePasswordPage = () => {
   }
 
   const passwordStrength = getPasswordStrength(password)
-  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-green-500']
+  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-gray-500']
   const strengthLabels = ['Sangat Lemah', 'Lemah', 'Sedang', 'Kuat', 'Sangat Kuat']
 
   const passwordRequirements = [

@@ -135,7 +135,7 @@ const CustomersTable = ({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="font-medium text-green-600">
+                    <span className="font-medium text-gray-600">
                       {formatCurrency(customer.total_spent ?? 0)}
                     </span>
                   </TableCell>

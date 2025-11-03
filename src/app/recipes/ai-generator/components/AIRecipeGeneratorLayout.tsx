@@ -300,7 +300,7 @@ const AIRecipeGeneratorPage = () => {
       <AppLayout>
         <div className="space-y-6 max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
               <Sparkles className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -319,7 +319,7 @@ const AIRecipeGeneratorPage = () => {
         {/* Header with Mode Toggle */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center shadow-lg">
               <Sparkles className="h-7 w-7 text-white" />
             </div>
             <div>
@@ -425,14 +425,14 @@ const AIRecipeGeneratorPage = () => {
               />
             )}
             {loading && (
-              <Card className="border-2 border-purple-200 dark:border-purple-800">
+              <Card className="border-2 border-gray-300 dark:border-gray-800">
                 <CardContent className="py-16">
                   <div className="text-center space-y-6">
                     <div className="relative">
-                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto shadow-xl">
+                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center mx-auto shadow-xl">
                         <ChefHat className="h-10 w-10 text-white animate-bounce" />
                       </div>
-                      <div className="absolute inset-0 h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mx-auto animate-ping opacity-20" />
+                      <div className="absolute inset-0 h-20 w-20 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 mx-auto animate-ping opacity-20" />
                     </div>
                     <div>
                       <p className="font-semibold text-xl mb-2">🧑‍🍳 AI sedang meracik resep...</p>
@@ -440,7 +440,7 @@ const AIRecipeGeneratorPage = () => {
                         Tunggu sebentar ya, proses ini membutuhkan waktu 10-30 detik
                       </p>
                       <div className="mt-6 flex justify-center gap-2">
-                        <div className="h-3 w-3 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="h-3 w-3 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                         <div className="h-3 w-3 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                         <div className="h-3 w-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                       </div>
@@ -449,13 +449,13 @@ const AIRecipeGeneratorPage = () => {
                     {/* Progress Steps */}
                     <div className="mt-8 space-y-3 max-w-sm mx-auto">
                       <div className="flex items-center gap-3 text-sm">
-                        <div className="h-6 w-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                        <div className="h-6 w-6 rounded-full bg-gray-500 flex items-center justify-center flex-shrink-0">
                           <span className="text-white text-xs">✓</span>
                         </div>
                         <span className="text-muted-foreground">Menganalisis input Anda</span>
                       </div>
                       <div className="flex items-center gap-3 text-sm">
-                        <div className="h-6 w-6 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0 animate-pulse">
+                        <div className="h-6 w-6 rounded-full bg-gray-500 flex items-center justify-center flex-shrink-0 animate-pulse">
                           <span className="text-white text-xs">⚡</span>
                         </div>
                         <span className="font-medium">Meracik komposisi bahan</span>

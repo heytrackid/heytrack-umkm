@@ -119,7 +119,7 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                 </div>
 
                 {/* Total Cost */}
-                <div className="pt-4 border-t bg-blue-50 dark:bg-blue-900/20 -mx-6 px-6 py-4">
+                <div className="pt-4 border-t bg-gray-50 dark:bg-gray-900/20 -mx-6 px-6 py-4">
                     <div className="flex justify-between items-center">
                         <div>
                             <span className="text-base font-semibold">Total Biaya Produksi</span>

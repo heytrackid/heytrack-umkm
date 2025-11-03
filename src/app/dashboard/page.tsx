@@ -277,19 +277,19 @@ const Dashboard = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/ingredients">
-                      <Package className="h-6 w-6 text-blue-600" />
+                      <Package className="h-6 w-6 text-gray-600" />
                       <span className="text-sm font-medium">Bahan Baku</span>
                     </a>
                   </Button>
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/recipes">
-                      <ChefHat className="h-6 w-6 text-purple-600" />
+                      <ChefHat className="h-6 w-6 text-gray-600" />
                       <span className="text-sm font-medium">Resep</span>
                     </a>
                   </Button>
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/hpp">
-                      <Calculator className="h-6 w-6 text-green-600" />
+                      <Calculator className="h-6 w-6 text-gray-600" />
                       <span className="text-sm font-medium">Hitung HPP</span>
                     </a>
                   </Button>
@@ -304,8 +304,8 @@ const Dashboard = () => {
                 {/* Feature Highlights */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto pt-6 text-left">
                   <div className="flex gap-3 items-start">
-                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
-                      <Calculator className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
+                      <Calculator className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <h4 className="font-medium text-sm mb-1">HPP Otomatis</h4>
@@ -315,8 +315,8 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex gap-3 items-start">
-                    <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center flex-shrink-0">
-                      <BarChart3 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
+                      <BarChart3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <h4 className="font-medium text-sm mb-1">Analisis Profit</h4>
@@ -326,8 +326,8 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex gap-3 items-start">
-                    <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
-                      <Package className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
+                      <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <h4 className="font-medium text-sm mb-1">Kelola Stok</h4>

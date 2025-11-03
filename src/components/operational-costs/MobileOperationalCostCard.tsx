@@ -84,7 +84,7 @@ export const MobileOperationalCostCard = ({
                     {/* Badges */}
                     <div className="flex flex-wrap gap-2">
                         {cost.recurring && (
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-300">
                                 Tetap
                             </Badge>
                         )}

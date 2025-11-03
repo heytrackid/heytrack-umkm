@@ -75,7 +75,7 @@ const SalesReport = ({ dateRange }: SalesReportProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-600">{salesStats.completedOrders}</p>
+            <p className="text-2xl font-bold text-gray-600">{salesStats.completedOrders}</p>
           </CardContent>
         </Card>
         <Card>

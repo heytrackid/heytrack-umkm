@@ -39,8 +39,8 @@ const EnhancedSummaryCards = ({
             ? (summary.total_expenses / summary.total_income) * 100
             : 0
 
-        if (ratio < 50) { return { status: 'excellent', color: 'text-green-600', label: 'Sangat Baik' } }
-        if (ratio < 70) { return { status: 'good', color: 'text-blue-600', label: 'Baik' } }
+        if (ratio < 50) { return { status: 'excellent', color: 'text-gray-600', label: 'Sangat Baik' } }
+        if (ratio < 70) { return { status: 'good', color: 'text-gray-600', label: 'Baik' } }
         if (ratio < 90) { return { status: 'warning', color: 'text-yellow-600', label: 'Perhatian' } }
         return { status: 'danger', color: 'text-red-600', label: 'Bahaya' }
     }
@@ -58,7 +58,7 @@ const EnhancedSummaryCards = ({
             <Badge
                 variant="secondary"
                 className={`${isPositive
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                    ? 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
                     : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
                     }`}
             >
@@ -77,8 +77,8 @@ const EnhancedSummaryCards = ({
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
                             <span className="flex items-center gap-2">
-                                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                                    <ArrowUpCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                <div className="p-2 bg-gray-100 dark:bg-gray-900 rounded-lg">
+                                    <ArrowUpCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                                 </div>
                                 Total Pemasukan
                             </span>
@@ -86,7 +86,7 @@ const EnhancedSummaryCards = ({
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-3xl font-bold text-green-600 mb-2">
+                        <p className="text-3xl font-bold text-gray-600 mb-2">
                             {formatCurrency(summary.total_income)}
                         </p>
                         <div className="flex items-center justify-between text-xs">
@@ -96,7 +96,7 @@ const EnhancedSummaryCards = ({
                             <Button
                                 variant="link"
                                 size="sm"
-                                className="h-auto p-0 text-xs hover:text-green-600"
+                                className="h-auto p-0 text-xs hover:text-gray-600"
                                 onClick={scrollToTransactions}
                             >
                                 Lihat detail →
@@ -145,11 +145,11 @@ const EnhancedSummaryCards = ({
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
                             <span className="flex items-center gap-2">
                                 <div className={`p-2 rounded-lg ${summary.net_cash_flow >= 0
-                                    ? 'bg-blue-100 dark:bg-blue-900'
+                                    ? 'bg-gray-100 dark:bg-gray-900'
                                     : 'bg-orange-100 dark:bg-orange-900'
                                     }`}>
                                     <DollarSign className={`h-4 w-4 ${summary.net_cash_flow >= 0
-                                        ? 'text-blue-600 dark:text-blue-400'
+                                        ? 'text-gray-600 dark:text-gray-400'
                                         : 'text-orange-600 dark:text-orange-400'
                                         }`} />
                                 </div>
@@ -159,7 +159,7 @@ const EnhancedSummaryCards = ({
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className={`text-3xl font-bold mb-2 ${summary.net_cash_flow >= 0 ? 'text-blue-600' : 'text-orange-600'
+                        <p className={`text-3xl font-bold mb-2 ${summary.net_cash_flow >= 0 ? 'text-gray-600' : 'text-orange-600'
                             }`}>
                             {formatCurrency(summary.net_cash_flow)}
                         </p>
@@ -179,8 +179,8 @@ const EnhancedSummaryCards = ({
                     <div className="flex items-start gap-4">
                         <div className={`p-3 rounded-full ${
                             (() => {
-                                if (health.status === 'excellent') {return 'bg-green-100 dark:bg-green-900'}
-                                if (health.status === 'good') {return 'bg-blue-100 dark:bg-blue-900'}
+                                if (health.status === 'excellent') {return 'bg-gray-100 dark:bg-gray-900'}
+                                if (health.status === 'good') {return 'bg-gray-100 dark:bg-gray-900'}
                                 if (health.status === 'warning') {return 'bg-yellow-100 dark:bg-yellow-900'}
                                 return 'bg-red-100 dark:bg-red-900'
                             })()

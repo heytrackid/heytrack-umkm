@@ -188,7 +188,7 @@ const WhatsAppFollowUp = ({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-green-600" />
+            <MessageCircle className="h-5 w-5 text-gray-600" />
             WhatsApp Follow-up untuk {order.customer_name}
           </DialogTitle>
         </DialogHeader>
@@ -319,8 +319,8 @@ const WhatsAppFollowUp = ({
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="text-sm text-green-800 whitespace-pre-wrap font-mono">
+                    <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap font-mono">
                         {generatedMessage || 'Generating message...'}
                       </div>
                     </div>
@@ -371,7 +371,7 @@ const WhatsAppFollowUp = ({
                     </div>
                     <Button
                       onClick={() => handleSend('business')}
-                      className="w-full gap-2 bg-green-800 hover:bg-green-900"
+                      className="w-full gap-2 bg-green-800 hover:bg-gray-900"
                       disabled={!generatedMessage && !customMessage}
                     >
                       <Send className="h-4 w-4" />

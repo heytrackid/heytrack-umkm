@@ -38,7 +38,7 @@ const AuthCallbackPage = () => {
   }, [router, supabase.auth])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
         <h2 className="text-xl font-semibold mb-2">Memproses autentikasi...</h2>

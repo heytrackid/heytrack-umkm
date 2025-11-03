@@ -563,14 +563,14 @@ const EnhancedOrderForm = ({
                                 className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${currentStep === step
                                     ? 'border-primary bg-primary text-white'
                                     : currentStep > step
-                                        ? 'border-green-500 bg-green-500 text-white'
+                                        ? 'border-green-500 bg-gray-500 text-white'
                                         : 'border-gray-300 text-gray-400'
                                     }`}
                             >
                                 {step}
                             </button>
                             {step < 3 && (
-                                <div className={`w-12 h-0.5 ${currentStep > step ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                <div className={`w-12 h-0.5 ${currentStep > step ? 'bg-gray-500' : 'bg-gray-300'}`} />
                             )}
                         </div>
                     ))}

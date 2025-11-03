@@ -134,7 +134,7 @@ const PricingAssistantPage = () => {
   }
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) { return 'text-green-600' }
+    if (confidence >= 0.8) { return 'text-gray-600' }
     if (confidence >= 0.6) { return 'text-yellow-600' }
     return 'text-red-600'
   }
@@ -244,7 +244,7 @@ const PricingAssistantPage = () => {
                 <Separator />
 
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-2xl font-bold text-gray-600">
                     +{formatCurrency(recommendation.recommendedPrice - recommendation.currentPrice)}
                   </div>
                   <div className="text-sm text-muted-foreground">Potential Revenue Increase</div>
@@ -363,7 +363,7 @@ const PricingAssistantPage = () => {
               <div className="space-y-3">
                 {recommendation.reasoning.map((reason, index) => (
                   <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-gray-600 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">{reason}</span>
                   </div>
                 ))}
@@ -401,7 +401,7 @@ const PricingAssistantPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-4 border rounded-lg">
-                  <DollarSign className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                  <DollarSign className="h-8 w-8 mx-auto mb-2 text-gray-600" />
                   <h4 className="font-semibold">Cost-Based</h4>
                   <p className="text-sm text-muted-foreground">
                     Margin optimal berdasarkan HPP dan biaya produksi
@@ -409,7 +409,7 @@ const PricingAssistantPage = () => {
                 </div>
 
                 <div className="text-center p-4 border rounded-lg">
-                  <TrendingUp className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                  <TrendingUp className="h-8 w-8 mx-auto mb-2 text-gray-600" />
                   <h4 className="font-semibold">Market-Driven</h4>
                   <p className="text-sm text-muted-foreground">
                     Penyesuaian harga berdasarkan kondisi pasar dan kompetitor
@@ -417,7 +417,7 @@ const PricingAssistantPage = () => {
                 </div>
 
                 <div className="text-center p-4 border rounded-lg">
-                  <Target className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+                  <Target className="h-8 w-8 mx-auto mb-2 text-gray-600" />
                   <h4 className="font-semibold">Risk-Aware</h4>
                   <p className="text-sm text-muted-foreground">
                     Analisis risiko dan confidence level untuk setiap rekomendasi

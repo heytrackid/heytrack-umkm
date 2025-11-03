@@ -41,7 +41,7 @@ export const ProductProfitabilityTable = ({
                 <td className="py-3 px-4 text-right text-orange-600">
                   {formatCurrency(product.cogs)}
                 </td>
-                <td className={`py-3 px-4 text-right font-semibold ${product.profit >= 0 ? 'text-green-600' : 'text-red-600'
+                <td className={`py-3 px-4 text-right font-semibold ${product.profit >= 0 ? 'text-gray-600' : 'text-red-600'
                   }`}>
                   {formatCurrency(product.profit)}
                 </td>

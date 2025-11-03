@@ -214,11 +214,11 @@ export const RecipeEditor = ({
     return (
         <div className="space-y-6">
             {/* Header */}
-            <Card className="border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20">
+            <Card className="border-2 border-gray-300 dark:border-gray-800 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
-                            <ChefHat className="h-6 w-6 text-blue-600" />
+                            <ChefHat className="h-6 w-6 text-gray-600" />
                             {initialData ? 'Edit Resep' : 'Resep Baru'}
                         </CardTitle>
                         <div className="flex gap-2">
@@ -236,11 +236,11 @@ export const RecipeEditor = ({
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-blue-600">{recipe.ingredients.length}</div>
+                            <div className="text-lg font-bold text-gray-600">{recipe.ingredients.length}</div>
                             <div className="text-xs text-muted-foreground">Bahan</div>
                         </div>
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-green-600">{recipe.steps.length}</div>
+                            <div className="text-lg font-bold text-gray-600">{recipe.steps.length}</div>
                             <div className="text-xs text-muted-foreground">Langkah</div>
                         </div>
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
@@ -248,7 +248,7 @@ export const RecipeEditor = ({
                             <div className="text-xs text-muted-foreground">Total Waktu</div>
                         </div>
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-purple-600">{formatCurrency(totalCost)}</div>
+                            <div className="text-lg font-bold text-gray-600">{formatCurrency(totalCost)}</div>
                             <div className="text-xs text-muted-foreground">Est. HPP</div>
                         </div>
                     </div>
@@ -525,7 +525,7 @@ export const RecipeEditor = ({
                                         >
                                             ↑
                                         </Button>
-                                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center font-bold text-blue-600">
+                                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center font-bold text-gray-600">
                                             {step.step_number}
                                         </div>
                                         <Button

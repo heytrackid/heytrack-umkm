@@ -171,7 +171,7 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
                             )}
                             {normalCount > 0 && (
                                 <div
-                                    className="absolute h-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-medium"
+                                    className="absolute h-full bg-gradient-to-r from-gray-500 to-gray-600 flex items-center justify-center text-white text-xs font-medium"
                                     style={{
                                         left: `${((criticalCount + lowCount) / safeTotalCount) * 100}%`,
                                         width: `${(normalCount / safeTotalCount) * 100}%`
@@ -182,7 +182,7 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
                             )}
                             {goodCount > 0 && (
                                 <div
-                                    className="absolute h-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center text-white text-xs font-medium"
+                                    className="absolute h-full bg-gradient-to-r from-gray-500 to-gray-600 flex items-center justify-center text-white text-xs font-medium"
                                     style={{
                                         left: `${((criticalCount + lowCount + normalCount) / safeTotalCount) * 100}%`,
                                         width: `${(goodCount / safeTotalCount) * 100}%`
@@ -204,11 +204,11 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
                                 <span>🟠 Rendah ({lowCount})</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-blue-500" />
+                                <div className="w-3 h-3 rounded-full bg-gray-500" />
                                 <span>🔵 Normal ({normalCount})</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-green-500" />
+                                <div className="w-3 h-3 rounded-full bg-gray-500" />
                                 <span>🟢 Baik ({goodCount})</span>
                             </div>
                         </div>
@@ -271,16 +271,16 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
             })}
 
             {/* Total Value Summary */}
-            <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50/50 to-pink-50/50">
+            <Card className="border-2 border-gray-300 bg-gradient-to-br from-gray-50/50 to-gray-100/50">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
                                 <DollarSign className="h-6 w-6 text-white" />
                             </div>
                             <div>
                                 <div className="text-sm text-muted-foreground">Total Nilai Inventory</div>
-                                <div className="text-3xl font-bold text-purple-600">
+                                <div className="text-3xl font-bold text-gray-600">
                                     {formatCurrency(totalValue)}
                                 </div>
                             </div>

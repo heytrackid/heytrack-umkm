@@ -68,7 +68,7 @@ const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps) =>
               </div>
               <div className="flex items-center text-xs text-muted-foreground">
                 {stats.revenue.trend === 'up' ? (
-                  <TrendingUp className="h-3 w-3 mr-1 text-green-600 flex-shrink-0" />
+                  <TrendingUp className="h-3 w-3 mr-1 text-gray-600 flex-shrink-0" />
                 ) : (
                   <TrendingDown className="h-3 w-3 mr-1 text-red-600 flex-shrink-0" />
                 )}

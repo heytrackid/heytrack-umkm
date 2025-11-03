@@ -125,7 +125,7 @@ const AutoSyncFinancialDashboard = () => {
   const getHealthBadge = (health: string) => {
     switch (health) {
       case 'healthy':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200"><CheckCircle2 className="w-3 h-3 mr-1" />Sehat</Badge>
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-green-200"><CheckCircle2 className="w-3 h-3 mr-1" />Sehat</Badge>
       case 'warning':
         return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200"><AlertTriangle className="w-3 h-3 mr-1" />Perhatian</Badge>
       case 'error':
@@ -215,7 +215,7 @@ const AutoSyncFinancialDashboard = () => {
                   {getHealthBadge(data.status.syncHealth)}
                 </div>
               </div>
-              <Activity className="h-8 w-8 text-blue-600" />
+              <Activity className="h-8 w-8 text-gray-600" />
             </div>
           </CardContent>
         </Card>
@@ -232,7 +232,7 @@ const AutoSyncFinancialDashboard = () => {
                 </UMKMTooltip>
                 <p className="text-2xl font-bold">{data.status.totalSynced}</p>
               </div>
-              <Zap className="h-8 w-8 text-green-600" />
+              <Zap className="h-8 w-8 text-gray-600" />
             </div>
           </CardContent>
         </Card>
@@ -288,11 +288,11 @@ const AutoSyncFinancialDashboard = () => {
           <CardContent>
             <div className="space-y-3">
               {data.recommendations.recommendations.map((rec, index: number) => (
-                <Alert key={index} className={rec.includes('✅') ? 'border-green-200 bg-green-50' : ''}>
+                <Alert key={index} className={rec.includes('✅') ? 'border-gray-300 bg-gray-50' : ''}>
                   <AlertDescription className="flex items-center">
                     {rec.includes('✅') ?
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" /> :
-                      <Info className="h-4 w-4 text-blue-600 mr-2 flex-shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-gray-600 mr-2 flex-shrink-0" /> :
+                      <Info className="h-4 w-4 text-gray-600 mr-2 flex-shrink-0" />
                     }
                     {rec}
                   </AlertDescription>
@@ -308,7 +308,7 @@ const AutoSyncFinancialDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-green-600" />
+              <DollarSign className="h-5 w-5 text-gray-600" />
               Ringkasan Cashflow (30 Hari)
             </CardTitle>
           </CardHeader>
@@ -324,19 +324,19 @@ const AutoSyncFinancialDashboard = () => {
                     {formatCurrency(data.cashflow.totalExpenses)}
                   </p>
                 </div>
-                <div className="p-3 bg-green-50 rounded-lg">
+                <div className="p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-green-700">Pemasukan</span>
-                    <TrendingUp className="h-4 w-4 text-green-600" />
+                    <span className="text-sm font-medium text-gray-700">Pemasukan</span>
+                    <TrendingUp className="h-4 w-4 text-gray-600" />
                   </div>
-                  <p className="text-xl font-bold text-green-800">
+                  <p className="text-xl font-bold text-gray-800">
                     {formatCurrency(data.cashflow.totalIncome)}
                   </p>
                 </div>
               </div>
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <span className="text-sm font-medium text-blue-700">Net Cashflow</span>
-                <p className={`text-xl font-bold ${data.cashflow.netCashflow >= 0 ? 'text-green-800' : 'text-red-800'}`}>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Net Cashflow</span>
+                <p className={`text-xl font-bold ${data.cashflow.netCashflow >= 0 ? 'text-gray-800' : 'text-red-800'}`}>
                   {formatCurrency(data.cashflow.netCashflow)}
                 </p>
               </div>
@@ -347,7 +347,7 @@ const AutoSyncFinancialDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-blue-600" />
+              <Eye className="h-5 w-5 text-gray-600" />
               Transaksi Auto-Sync Terbaru
             </CardTitle>
           </CardHeader>

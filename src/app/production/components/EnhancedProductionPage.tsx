@@ -27,7 +27,7 @@ interface ProductionWithRecipe extends ProductionBatchesTable {
 const STATUS_CONFIG = {
     PLANNED: {
         label: 'Direncanakan',
-        color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
+        color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
         icon: Calendar
     },
     IN_PROGRESS: {
@@ -37,7 +37,7 @@ const STATUS_CONFIG = {
     },
     COMPLETED: {
         label: 'Selesai',
-        color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+        color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
         icon: CheckCircle
     },
     CANCELLED: {
@@ -307,7 +307,7 @@ export const EnhancedProductionPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">Direncanakan</p>
                                 <p className="text-2xl font-bold">{stats.planned}</p>
                             </div>
-                            <Calendar className="h-8 w-8 text-blue-600" />
+                            <Calendar className="h-8 w-8 text-gray-600" />
                         </div>
                     </CardContent>
                 </Card>
@@ -331,7 +331,7 @@ export const EnhancedProductionPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">Selesai</p>
                                 <p className="text-2xl font-bold">{stats.completed}</p>
                             </div>
-                            <CheckCircle className="h-8 w-8 text-green-600" />
+                            <CheckCircle className="h-8 w-8 text-gray-600" />
                         </div>
                     </CardContent>
                 </Card>
@@ -343,7 +343,7 @@ export const EnhancedProductionPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">Total Cost</p>
                                 <p className="text-lg font-bold">{formatCurrency(stats.totalCost)}</p>
                             </div>
-                            <TrendingUp className="h-8 w-8 text-purple-600" />
+                            <TrendingUp className="h-8 w-8 text-gray-600" />
                         </div>
                     </CardContent>
                 </Card>
@@ -603,7 +603,7 @@ const ProductionCard = ({
             {production.actual_cost && (
                 <div className="pt-3 border-t">
                     <p className="text-sm text-muted-foreground">Actual Cost</p>
-                    <p className="text-lg font-bold text-green-600">
+                    <p className="text-lg font-bold text-gray-600">
                         {formatCurrency(production.actual_cost)}
                     </p>
                 </div>

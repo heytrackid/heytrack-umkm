@@ -151,10 +151,10 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
     return (
         <div className="space-y-4">
             {/* Header */}
-            <Card className="border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-950/20 dark:to-pink-950/20">
+            <Card className="border-2 border-gray-300 dark:border-gray-800 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
                             <Calculator className="h-5 w-5 text-white" />
                         </div>
                         <div>
@@ -266,7 +266,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
                         </div>
                     </div>
 
-                    <div className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                    <div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg">
                         💡 <strong>Tips:</strong> Gunakan nilai negatif (contoh: -10) untuk simulasi penurunan harga atau efisiensi penggunaan bahan.
                     </div>
                 </CardContent>
@@ -288,7 +288,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
                                     key={scenario.id}
                                     className={`p-4 rounded-lg border-2 ${isNegative
                                         ? 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10'
-                                        : 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10'
+                                        : 'border-gray-300 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/10'
                                         }`}
                                 >
                                     <div className="flex items-start justify-between mb-3">

@@ -127,9 +127,9 @@ const BulkActionsBar = memo(({
   if (selectedCount === 0) { return null }
 
   return (
-    <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+    <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-300 rounded-lg">
       <div className="flex items-center gap-4">
-        <span className="text-sm font-medium text-blue-800">
+        <span className="text-sm font-medium text-gray-800">
           {selectedCount} item dipilih
         </span>
         <Badge variant="secondary" className="text-xs">
@@ -139,7 +139,7 @@ const BulkActionsBar = memo(({
           variant="ghost"
           size="sm"
           onClick={onClearSelection}
-          className="text-blue-600 hover:text-blue-800"
+          className="text-gray-600 hover:text-gray-800"
         >
           Batal
         </Button>

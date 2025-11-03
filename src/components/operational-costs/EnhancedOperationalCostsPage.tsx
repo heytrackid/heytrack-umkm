@@ -194,28 +194,37 @@ export const EnhancedOperationalCostsPage = () => {
     }
 
     const handleQuickSetup = async () => {
-        const confirmed = await confirm({
-            title: 'Tambahkan Template Biaya Operasional?',
-            description: 'Ini akan menambahkan 8 kategori biaya yang umum digunakan.',
-            confirmText: 'Tambahkan',
-            variant: 'default'
-        })
-        if (!confirmed) { return }
-
         try {
+            const confirmed = await confirm({
+                title: 'Tambahkan Template Biaya Operasional?',
+                description: 'Ini akan menambahkan 8 kategori biaya yang umum digunakan.',
+                confirmText: 'Tambahkan',
+                variant: 'default'
+            })
+            
+            if (!confirmed) { return }
+
             const response = await fetch('/api/operational-costs/quick-setup', {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             })
 
-            if (!response.ok) { throw new Error('Failed to setup') }
+            if (!response.ok) { 
+                const errorData = await response.json()
+                throw new Error(errorData.error || 'Failed to setup') 
+            }
+
+            const result = await response.json()
 
             toast({
                 title: 'Template ditambahkan',
-                description: 'Template biaya operasional berhasil ditambahkan',
+                description: `${result.count || 8} template biaya operasional berhasil ditambahkan`,
             })
 
-            // Refresh data
-            void refetch?.()
+            // Force refresh page to show new data
+            window.location.reload()
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Gagal menambahkan template'
             toast({

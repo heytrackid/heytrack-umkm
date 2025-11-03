@@ -58,14 +58,14 @@ export const EnhancedEmptyState = ({ onAdd, onQuickSetup }: EnhancedEmptyStatePr
             </div>
 
             {/* Quick Tip */}
-            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 text-left w-full max-w-md">
+            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-300 dark:border-gray-800 text-left w-full max-w-md">
                 <div className="flex items-start gap-2">
-                    <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <Lightbulb className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
                     <div className="text-sm">
-                        <p className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                             💡 Tips: Catat Semua Biaya
                         </p>
-                        <p className="text-blue-800 dark:text-blue-200">
+                        <p className="text-gray-800 dark:text-gray-200">
                             Catat biaya tetap (sewa, gaji) dan variabel (listrik, transport) untuk perhitungan HPP yang lebih akurat.
                         </p>
                     </div>

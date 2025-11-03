@@ -74,12 +74,12 @@ const TemplatePreview = ({
                         </div>
 
                         {/* WhatsApp Preview */}
-                        <div className="bg-gradient-to-b from-green-50 to-green-100 border-2 border-green-300 rounded-xl p-3 shadow-md">
+                        <div className="bg-gradient-to-b from-gray-50 to-green-100 border-2 border-gray-400 rounded-xl p-3 shadow-md">
                             <div className="bg-white rounded-lg shadow-sm">
                                 {/* WhatsApp Header */}
                                 <div className="flex items-center gap-2 p-2 border-b bg-green-600 text-white rounded-t-lg">
                                     <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center flex-shrink-0">
-                                        <MessageCircle className="h-4 w-4 text-green-600" />
+                                        <MessageCircle className="h-4 w-4 text-gray-600" />
                                     </div>
                                     <div className="min-w-0">
                                         <p className="font-semibold text-xs truncate">
@@ -97,7 +97,7 @@ const TemplatePreview = ({
                                         </pre>
                                         <div className="flex items-center justify-end gap-1 mt-1.5 text-xs text-gray-500">
                                             <span>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
-                                            <svg className="h-3 w-3 text-blue-500" fill="currentColor" viewBox="0 0 16 16">
+                                            <svg className="h-3 w-3 text-gray-500" fill="currentColor" viewBox="0 0 16 16">
                                                 <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
                                                 <path d="M10.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
                                             </svg>
@@ -119,7 +119,7 @@ const TemplatePreview = ({
                             <div>
                                 <Label className="text-xs text-muted-foreground">Status</Label>
                                 <div className="mt-1 flex gap-1">
-                                    <Badge className={`text-xs ${template.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                                    <Badge className={`text-xs ${template.is_active ? 'bg-gray-100 text-gray-800' : 'bg-gray-100 text-gray-800'}`}>
                                         {template.is_active ? 'Aktif' : 'Nonaktif'}
                                     </Badge>
                                     {template.is_default && (
@@ -165,8 +165,8 @@ const TemplatePreview = ({
                         </div>
 
                         {showExampleData && (
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
-                                <p className="text-xs text-blue-800">
+                            <div className="bg-gray-50 border border-gray-300 rounded-lg p-2.5">
+                                <p className="text-xs text-gray-800">
                                     💡 <strong>Tips:</strong> Preview ini menggunakan data contoh. Saat digunakan, variabel akan diganti dengan data pesanan yang sebenarnya.
                                 </p>
                             </div>

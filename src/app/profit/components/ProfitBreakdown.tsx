@@ -19,7 +19,7 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
         <div className="space-y-3">
           <div className="flex justify-between py-2">
             <span className="font-medium">Total Pendapatan</span>
-            <span className="font-semibold text-blue-600">
+            <span className="font-semibold text-gray-600">
               {formatCurrency(summary.total_revenue)}
             </span>
           </div>
@@ -31,7 +31,7 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
           </div>
           <div className="flex justify-between py-2 border-t">
             <span className="font-semibold">Laba Kotor</span>
-            <span className="font-semibold text-green-600">
+            <span className="font-semibold text-gray-600">
               {formatCurrency(summary.gross_profit)} ({summary.gross_profit_margin.toFixed(1)}%)
             </span>
           </div>
@@ -44,7 +44,7 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
           <div className="flex justify-between py-3 border-t-2 border-primary">
             <span className="text-lg font-bold">Laba Bersih</span>
             <span className={`text-xl font-bold ${
-              summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'
+              summary.net_profit >= 0 ? 'text-gray-600' : 'text-red-600'
             }`}>
               {formatCurrency(summary.net_profit)} ({summary.net_profit_margin.toFixed(1)}%)
             </span>

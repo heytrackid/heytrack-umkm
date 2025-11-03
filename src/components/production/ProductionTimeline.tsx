@@ -51,8 +51,8 @@ const _RESOURCE_COLORS: Record<ResourceType, string> = {
 
 const STATUS_COLORS: Record<ProductionStatus | 'blocked', string> = {
   PLANNED: 'bg-gray-400',
-  IN_PROGRESS: 'bg-blue-500',
-  COMPLETED: 'bg-green-500',
+  IN_PROGRESS: 'bg-gray-500',
+  COMPLETED: 'bg-gray-500',
   CANCELLED: 'bg-gray-400',
   blocked: 'bg-red-300'
 }
@@ -414,11 +414,11 @@ const ProductionTimeline = ({
                   <span>Planned</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded" />
+                  <div className="w-3 h-3 bg-gray-500 rounded" />
                   <span>In Progress</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded" />
+                  <div className="w-3 h-3 bg-gray-500 rounded" />
                   <span>Completed</span>
                 </div>
                 <div className="flex items-center gap-2">

@@ -13,7 +13,7 @@ export const DataCard = ({ title, data, type }: DataCardProps): JSX.Element | nu
   if (type === 'orders' && 'total' in data && typeof data.total === 'number') {
     const ordersData = data as { total: number; pending?: number; revenue?: number }
     return (
-      <Card className="mt-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+      <Card className="mt-3 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-900">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
@@ -77,7 +77,7 @@ export const DataCard = ({ title, data, type }: DataCardProps): JSX.Element | nu
     const profitData = data as { margin: number; total_profit?: number }
     const isPositive = profitData.margin > 0
     return (
-      <Card className="mt-3 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950 dark:to-emerald-900">
+      <Card className="mt-3 bg-gradient-to-br from-gray-50 to-emerald-100 dark:from-gray-900 dark:to-gray-900">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <DollarSign className="h-4 w-4" />
@@ -109,7 +109,7 @@ export const DataCard = ({ title, data, type }: DataCardProps): JSX.Element | nu
   if (type === 'recipes' && 'top_recipes' in data) {
     const recipes = data.top_recipes as Array<{ name: string; orders: number }>
     return (
-      <Card className="mt-3 bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-950 dark:to-pink-900">
+      <Card className="mt-3 bg-gradient-to-br from-gray-50 to-pink-100 dark:from-gray-900 dark:to-pink-900">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <Package className="h-4 w-4" />

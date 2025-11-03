@@ -422,7 +422,7 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
                                                                 <DropdownMenuItem
                                                                     onClick={() => handleQuickBuy(item)}
                                                                     disabled={currentStock > minStock}
-                                                                    className={currentStock <= minStock ? 'bg-green-50 text-green-700 focus:bg-green-100 focus:text-green-800' : ''}
+                                                                    className={currentStock <= minStock ? 'bg-gray-50 text-gray-700 focus:bg-gray-100 focus:text-gray-800' : ''}
                                                                 >
                                                                     <ShoppingCart className="h-4 w-4 mr-2" />
                                                                     {currentStock <= minStock ? 'Quick Reorder' : 'Stok Cukup'}

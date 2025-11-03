@@ -38,10 +38,10 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Toolti
                 <div className="space-y-1.5 text-sm">
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
-                            <div className="h-3 w-3 rounded-full bg-green-500" />
+                            <div className="h-3 w-3 rounded-full bg-gray-500" />
                             <span>Pemasukan</span>
                         </div>
-                        <span className="font-semibold text-green-600">
+                        <span className="font-semibold text-gray-600">
                             Rp {data.income.toLocaleString('id-ID')}
                         </span>
                     </div>
@@ -56,10 +56,10 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Toolti
                     </div>
                     <div className="flex items-center justify-between gap-4 pt-1 border-t">
                         <div className="flex items-center gap-2">
-                            <div className="h-3 w-3 rounded-full bg-blue-500" />
+                            <div className="h-3 w-3 rounded-full bg-gray-500" />
                             <span>Net</span>
                         </div>
-                        <span className={`font-semibold ${data.net >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                        <span className={`font-semibold ${data.net >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
                             Rp {data.net.toLocaleString('id-ID')}
                         </span>
                     </div>
@@ -403,13 +403,13 @@ const EnhancedCashFlowChart = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div>
                                     <p className="text-xs text-muted-foreground mb-1">Rata-rata Net</p>
-                                    <p className={`text-sm font-semibold ${stats.avgNet >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    <p className={`text-sm font-semibold ${stats.avgNet >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
                                         Rp {stats.avgNet.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground mb-1">Net Tertinggi</p>
-                                    <p className="text-sm font-semibold text-green-600">
+                                    <p className="text-sm font-semibold text-gray-600">
                                         Rp {stats.highestNet.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
                                     </p>
                                 </div>
@@ -421,7 +421,7 @@ const EnhancedCashFlowChart = ({
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground mb-1">Saldo Akhir</p>
-                                    <p className={`text-sm font-semibold ${(chartData[chartData.length - 1]?.net || 0) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                                    <p className={`text-sm font-semibold ${(chartData[chartData.length - 1]?.net || 0) >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
                                         Rp {(chartData[chartData.length - 1]?.net || 0).toLocaleString('id-ID', { maximumFractionDigits: 0 })}
                                     </p>
                                 </div>

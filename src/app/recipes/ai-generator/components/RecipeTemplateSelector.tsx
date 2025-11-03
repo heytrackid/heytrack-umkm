@@ -32,7 +32,7 @@ export const RecipeTemplateSelector = ({ onSelectTemplate, selectedTemplateId }:
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-purple-500" />
+                    <Sparkles className="h-5 w-5 text-gray-500" />
                     Template Resep Siap Pakai
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
@@ -87,7 +87,7 @@ export const RecipeTemplateSelector = ({ onSelectTemplate, selectedTemplateId }:
                                                 <Clock className="h-3 w-3" />
                                                 {formatTime(template.prepTime + template.cookTime)}
                                             </div>
-                                            <div className="flex items-center gap-1 font-semibold text-green-600">
+                                            <div className="flex items-center gap-1 font-semibold text-gray-600">
                                                 <TrendingUp className="h-3 w-3" />
                                                 ~{formatCurrency(template.estimatedHPP)}
                                             </div>
@@ -101,7 +101,7 @@ export const RecipeTemplateSelector = ({ onSelectTemplate, selectedTemplateId }:
 
                 <div className="mt-4 p-3 bg-muted/50 rounded-lg text-sm">
                     <div className="flex items-start gap-2">
-                        <Sparkles className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <Sparkles className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
                         <div>
                             <div className="font-medium">Tips:</div>
                             <div className="text-muted-foreground text-xs">

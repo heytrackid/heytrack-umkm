@@ -27,8 +27,8 @@ export const EnhancedEmptyState = ({
         <Card className="border-dashed border-2">
             <CardContent className="flex flex-col items-center justify-center py-12 px-6">
                 {/* Icon */}
-                <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-6">
-                    <Package className="w-10 h-10 text-blue-600" />
+                <div className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center mb-6">
+                    <Package className="w-10 h-10 text-gray-600" />
                 </div>
 
                 {/* Title */}
@@ -94,11 +94,11 @@ export const EnhancedEmptyState = ({
                 )}
 
                 {/* Quick Start Steps */}
-                <div className="mt-8 p-4 bg-blue-50 rounded-lg w-full max-w-md">
-                    <h4 className="font-semibold text-sm text-blue-900 mb-3">
+                <div className="mt-8 p-4 bg-gray-50 rounded-lg w-full max-w-md">
+                    <h4 className="font-semibold text-sm text-gray-900 mb-3">
                         🚀 Quick Start
                     </h4>
-                    <ol className="text-sm text-blue-800 space-y-2">
+                    <ol className="text-sm text-gray-800 space-y-2">
                         <li className="flex items-start">
                             <span className="font-semibold mr-2">1.</span>
                             <span>Klik tombol "Tambah Bahan Baku"</span>

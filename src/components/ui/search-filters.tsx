@@ -226,7 +226,7 @@ export const BulkActionsBar = ({ selectedCount, totalCount, actions, onClearSele
   if (selectedCount === 0) { return null }
 
   return (
-    <Card className="border-blue-200 bg-blue-50">
+    <Card className="border-gray-300 bg-gray-50">
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

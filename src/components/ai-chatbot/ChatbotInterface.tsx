@@ -255,7 +255,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
       <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         {/* Avatar */}
         <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-          isUser ? 'bg-blue-500' : (isSystem ? 'bg-green-500' : 'bg-gray-500')
+          isUser ? 'bg-gray-500' : (isSystem ? 'bg-gray-500' : 'bg-gray-500')
           }`}>
           {(() => {
             if (isUser) {return <User className="h-4 w-4 text-white" />}
@@ -268,7 +268,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
         <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} flex-1 min-w-0 overflow-hidden`}>
           <div className={`px-4 py-3 rounded-2xl w-full break-words overflow-hidden shadow-sm ${
             isUser
-              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
+              ? 'bg-gradient-to-br from-gray-500 to-gray-600 text-white'
               : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
             }`}>
             <div className="whitespace-pre-wrap text-sm leading-relaxed break-words overflow-wrap-anywhere word-break-break-word prose prose-sm max-w-none">
@@ -332,7 +332,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
   // Quick action buttons with smart suggestions
   // eslint-disable-next-line react/no-unstable-nested-components
   const QuickActions = () => (
-    <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 border-t">
+    <div className="p-3 bg-gradient-to-r from-gray-50 to-gray-100 border-t">
       <p className="text-xs font-medium text-gray-700 mb-2">💡 Coba tanyakan:</p>
       <div className="flex flex-wrap gap-2">
         <Button
@@ -340,7 +340,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
           size="sm"
           onClick={() => handleSendMessage('Resep apa yang paling menguntungkan?')}
           disabled={isLoading}
-          className="text-xs h-8 bg-white hover:bg-blue-50"
+          className="text-xs h-8 bg-white hover:bg-gray-50"
         >
           <BarChart3 className="h-3 w-3 mr-1" />
           Analisis Profit
@@ -350,7 +350,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
           size="sm"
           onClick={() => handleSendMessage('Gimana cara ningkatin penjualan?')}
           disabled={isLoading}
-          className="text-xs h-8 bg-white hover:bg-purple-50"
+          className="text-xs h-8 bg-white hover:bg-gray-50"
         >
           <Users className="h-3 w-3 mr-1" />
           Strategi Marketing
@@ -360,7 +360,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
           size="sm"
           onClick={() => handleSendMessage('Stok bahan apa yang harus direstock?')}
           disabled={isLoading}
-          className="text-xs h-8 bg-white hover:bg-green-50"
+          className="text-xs h-8 bg-white hover:bg-gray-50"
         >
           <Package className="h-3 w-3 mr-1" />
           Cek Stok
@@ -382,7 +382,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
   if (isMinimized) {
     return (
       <Card className={`fixed bottom-4 right-4 w-80  border-2 ${className}`}>
-        <CardHeader className="p-4 bg-blue-500 text-white rounded-t-lg flex flex-row items-center justify-between">
+        <CardHeader className="p-4 bg-gray-500 text-white rounded-t-lg flex flex-row items-center justify-between">
           <div className="flex items-center space-x-2">
             <Bot className="h-5 w-5" />
             <h3 className="font-semibold text-sm">Asisten UMKM AI</h3>
@@ -393,7 +393,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
               variant="ghost"
               size="sm"
               onClick={onToggleMinimize}
-              className="text-white hover:bg-blue-600 h-8 w-8 p-0"
+              className="text-white hover:bg-gray-600 h-8 w-8 p-0"
             >
               <Maximize2 className="h-4 w-4" />
             </Button>
@@ -441,15 +441,15 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
             {isLoading && (
               <div className="flex justify-start mb-4">
                 <div className="flex items-start space-x-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center animate-pulse">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center animate-pulse">
                     <Bot className="h-4 w-4 text-white" />
                   </div>
                   <div className="bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-3 rounded-2xl border border-gray-200 shadow-sm">
                     <div className="flex items-center space-x-2">
                       <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
-                        <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
+                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
                       </div>
                       <span className="text-xs text-gray-600 ml-2">AI sedang berpikir...</span>
                     </div>

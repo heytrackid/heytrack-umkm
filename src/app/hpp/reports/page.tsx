@@ -310,7 +310,7 @@ const HppReportsPage = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
                         <span className="text-sm font-medium">High Margin (30%+)</span>
                         <Badge variant="secondary">{analytics.marginAnalysis.high} recipes</Badge>
                       </div>

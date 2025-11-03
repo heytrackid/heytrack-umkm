@@ -177,7 +177,7 @@ export const SharedStatsCards = ({
           {stat.trend && (
             <div className="mt-4 flex items-center text-xs">
               <span
-                className={`font-medium ${stat.trend.isPositive ? 'text-green-600' : 'text-red-600'
+                className={`font-medium ${stat.trend.isPositive ? 'text-gray-600' : 'text-red-600'
                   }`}
               >
                 {stat.trend.isPositive ? '+' : ''}{stat.trend.value}%

@@ -350,10 +350,10 @@ const CustomersLayout = () => {
         )}
 
         {/* Info Card */}
-        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+        <Card className="bg-gray-50 dark:bg-gray-900/20 border-gray-300 dark:border-gray-800">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <div className="bg-blue-100 dark:bg-blue-800/50 p-2 rounded-lg">
+              <div className="bg-gray-100 dark:bg-blue-800/50 p-2 rounded-lg">
                 <Users className="h-5 w-5 text-gray-600" />
               </div>
               <div className="flex-1">

@@ -20,13 +20,13 @@ export interface EnhancedToastOptions {
 const getIcon = (type: string) => {
   switch (type) {
     case 'success':
-      return <CheckCircle2 className="h-5 w-5 text-green-600" />
+      return <CheckCircle2 className="h-5 w-5 text-gray-600" />
     case 'error':
       return <XCircle className="h-5 w-5 text-red-600" />
     case 'warning':
       return <AlertCircle className="h-5 w-5 text-orange-600" />
     case 'info':
-      return <Info className="h-5 w-5 text-blue-600" />
+      return <Info className="h-5 w-5 text-gray-600" />
     default:
       return null
   }
@@ -134,7 +134,7 @@ export function undoableToast({
     (t) => (
       <div className="bg-background border rounded-lg shadow-lg p-4 min-w-[350px] animate-in slide-in-from-bottom-5">
         <div className="flex items-start gap-3">
-          <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+          <CheckCircle2 className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1 space-y-2">
             <div>
               <p className="font-semibold text-sm">{title}</p>

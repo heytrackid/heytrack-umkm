@@ -167,7 +167,7 @@ const CashFlowPage = () => {
                       setIsAddDialogOpen(true)
                     }}
                   >
-                    <ArrowUpCircle className="h-6 w-6 text-green-600" />
+                    <ArrowUpCircle className="h-6 w-6 text-gray-600" />
                     <span className="text-sm">Pemasukan</span>
                   </Button>
                   <Button
