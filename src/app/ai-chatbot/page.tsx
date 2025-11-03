@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/shared'
 import { ChatHeader, ChatInput, MessageList } from './components'
@@ -16,6 +16,12 @@ const AIChatbotPage = () => {
   const { messages, isLoading, scrollAreaRef, addMessage, setLoading } = useChatMessages()
   const { processAIQuery } = useAIService()
   const [input, setInput] = useState('')
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = (messageText ?? input).trim()
@@ -64,27 +70,45 @@ const AIChatbotPage = () => {
 
   return (
     <AppLayout pageTitle="AI Chatbot">
-      <div className="flex h-full flex-col gap-6">
-        <PageHeader
-          title="AI Chatbot"
-          description="Interaksi cepat dengan asisten AI HeyTrack untuk tugas operasional harian"
-          breadcrumbs={chatbotBreadcrumbs}
-        />
-
-        <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-          <ChatHeader />
-
-          <MessageList
-            messages={messages}
-            isLoading={isLoading}
-            scrollAreaRef={scrollAreaRef}
-            onSuggestionClick={handleSuggestionClick}
+      {/* Container utama - full height minus navbar */}
+      <div className="flex flex-col h-[calc(100vh-4rem)]">
+        {/* Header - fixed */}
+        <div className="flex-shrink-0 p-6 pb-0">
+          <PageHeader
+            title="AI Chatbot"
+            description="Asisten AI yang paham bisnis Anda - terhubung langsung dengan data real-time"
+            breadcrumbs={chatbotBreadcrumbs}
           />
+        </div>
 
-          <ChatInput
-            onSendMessage={handleSendMessage}
-            isLoading={isLoading}
-          />
+        {/* Chat Container - flex-1 untuk take remaining space */}
+        <div className="flex-1 p-6 min-h-0">
+          <div className="flex flex-col rounded-xl border border-border bg-card shadow-sm h-full">
+            {/* Chat Header - fixed */}
+            <div className="flex-shrink-0">
+              <ChatHeader />
+            </div>
+
+            {/* Messages area - SCROLLABLE dengan fixed height */}
+            <div className="flex-1 overflow-hidden relative">
+              <MessageList
+                messages={messages}
+                isLoading={isLoading}
+                scrollAreaRef={scrollAreaRef}
+                onSuggestionClick={handleSuggestionClick}
+              />
+            </div>
+
+            {/* Input area - fixed at bottom */}
+            <div className="flex-shrink-0 border-t">
+              <ChatInput
+                input={input}
+                setInput={setInput}
+                onSendMessage={handleSendMessage}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </AppLayout>

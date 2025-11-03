@@ -33,7 +33,6 @@ const AppLayout = memo(({
 }: AppLayoutProps) => {
   const { isMobile } = useMobile()
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -69,10 +68,7 @@ const AppLayout = memo(({
 
   useEffect(() => {
     setSidebarOpen(!isMobile)
-    // Reset collapsed state on mobile
-    if (isMobile) {
-      setSidebarCollapsed(false)
-    }
+
   }, [isMobile])
 
   // Prevent body scroll when mobile menu is open
@@ -89,17 +85,11 @@ const AppLayout = memo(({
   }, [isMobile, mobileMenuOpen])
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev)
-  const toggleSidebarCollapse = () => setSidebarCollapsed((prev) => !prev)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
   // Keyboard shortcuts for sidebar
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl/Cmd + B to toggle sidebar collapse (desktop only)
-      if ((e.ctrlKey || e.metaKey) && e.key === 'b' && !isMobile) {
-        e.preventDefault()
-        toggleSidebarCollapse()
-      }
       // Escape to close mobile menu
       if (e.key === 'Escape' && isMobile && mobileMenuOpen) {
         toggleMobileMenu()
@@ -120,8 +110,6 @@ const AppLayout = memo(({
         <Sidebar
           isOpen={sidebarOpen}
           onToggle={toggleSidebar}
-          isCollapsed={sidebarCollapsed}
-          onCollapse={toggleSidebarCollapse}
         />
       )}
 
@@ -163,7 +151,7 @@ const AppLayout = memo(({
 
       <div className={cn(
         "flex flex-1 flex-col min-w-0 overflow-hidden transition-all duration-300",
-        !isMobile && (sidebarCollapsed ? "ml-16" : "ml-72")
+        !isMobile && "ml-72"
       )}>
         {/* Desktop Header */}
         {!isMobile && (

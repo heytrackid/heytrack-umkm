@@ -19,7 +19,9 @@ import { MobileOperationalCostCard } from './MobileOperationalCostCard'
 import { OperationalCostStats } from './OperationalCostStats'
 import { DeleteModal } from '@/components/ui'
 import { OperationalCostFormDialog } from './OperationalCostFormDialog'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 import type { OperationalCostsTable } from '@/types/database'
+import type { DateRange } from 'react-day-picker'
 import {
     Select,
     SelectContent,
@@ -95,6 +97,7 @@ export const EnhancedOperationalCostsPage = () => {
     // Filter states
     const [searchTerm, setSearchTerm] = useState('')
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
+    const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
     const [pageSize, setPageSize] = useState(12)
 
     // Filter and sort data
@@ -113,14 +116,30 @@ export const EnhancedOperationalCostsPage = () => {
                 // Category filter
                 const matchesCategory = categoryFilter === 'all' || cost.category === categoryFilter
 
-                return matchesSearch && matchesCategory
+                // Date filter
+                let matchesDate = true
+                if (dateRange?.from && cost.created_at) {
+                    const costDate = new Date(cost.created_at)
+                    const fromDate = new Date(dateRange.from)
+                    fromDate.setHours(0, 0, 0, 0)
+                    
+                    if (dateRange.to) {
+                        const toDate = new Date(dateRange.to)
+                        toDate.setHours(23, 59, 59, 999)
+                        matchesDate = costDate >= fromDate && costDate <= toDate
+                    } else {
+                        matchesDate = costDate >= fromDate
+                    }
+                }
+
+                return matchesSearch && matchesCategory && matchesDate
             })
             .sort((a: OperationalCost, b: OperationalCost) => {
                 const dateA = new Date(a.created_at ?? 0).getTime()
                 const dateB = new Date(b.created_at ?? 0).getTime()
                 return dateB - dateA
             })
-    }, [costs, searchTerm, categoryFilter])
+    }, [costs, searchTerm, categoryFilter, dateRange])
 
     // Pagination
     const pagination = usePagination({
@@ -210,9 +229,10 @@ export const EnhancedOperationalCostsPage = () => {
     const clearFilters = () => {
         setSearchTerm('')
         setCategoryFilter('all')
+        setDateRange(undefined)
     }
 
-    const hasActiveFilters = searchTerm || categoryFilter !== 'all'
+    const hasActiveFilters = searchTerm || categoryFilter !== 'all' || dateRange !== undefined
 
     // Helper functions
     const getCategoryInfo = (categoryId: string) => COST_CATEGORIES.find((c) => c.id === categoryId) ?? COST_CATEGORIES[7]

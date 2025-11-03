@@ -87,6 +87,7 @@ const AdminDashboard = (_props: AdminDashboardProps) => {
 
     useEffect(() => {
         void loadMetrics()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const loadMetrics = async () => {

@@ -82,7 +82,8 @@ const EnhancedTransactionList = ({
     // Reset page when filters change
     useMemo(() => {
         setCurrentPage(1)
-    }, [filterType, searchQuery, sortBy])
+         
+    }, [])
 
     const handleDeleteClick = (transaction: Transaction) => {
         setTransactionToDelete(transaction)

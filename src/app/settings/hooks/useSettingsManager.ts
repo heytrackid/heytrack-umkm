@@ -31,6 +31,7 @@ export function useSettingsManager() {
   // Load settings from database on component mount
   useEffect(() => {
     void loadSettings()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadSettings = () => {

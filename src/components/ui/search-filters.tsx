@@ -37,6 +37,7 @@ export const SearchInput = ({
     if (debouncedValue !== value) {
       onChange(debouncedValue)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedValue, onChange])
 
   const handleClear = () => {

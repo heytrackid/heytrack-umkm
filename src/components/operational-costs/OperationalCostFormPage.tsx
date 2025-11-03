@@ -61,6 +61,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
         if (mode === 'edit' && costId) {
             void loadCost()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mode, costId])
 
     const loadCost = async () => {

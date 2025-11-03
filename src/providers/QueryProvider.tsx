@@ -21,8 +21,10 @@ const createQueryClient = () => new QueryClient({
       refetchOnReconnect: true, // Only refetch when reconnecting to internet
       // Only refetch if data is stale
       refetchInterval: false,
-      // Keep previous data while fetching new data (prevents loading states)
+      // PENTING: Keep previous data while fetching new data (prevents loading states)
       placeholderData: (previousData: unknown) => previousData,
+      // Prevent suspense-like behavior that shows skeleton
+      notifyOnChangeProps: 'all',
     },
     mutations: {
       retry: 2,

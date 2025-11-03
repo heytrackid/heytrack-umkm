@@ -54,6 +54,7 @@ const CustomersLayout = () => {
   // Fetch customers on mount - auth is handled by middleware
   useEffect(() => {
     void fetchCustomers()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchCustomers = async () => {

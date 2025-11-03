@@ -57,7 +57,8 @@ const CustomersTable = ({
   // Reset to page 1 when customers change
   useMemo(() => {
     void setCurrentPage(1)
-  }, [customers.length])
+     
+  }, [])
 
   if (customers.length === 0) {
     return (

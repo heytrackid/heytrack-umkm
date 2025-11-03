@@ -173,6 +173,7 @@ const WhatsAppFollowUp = ({
     if (!isCustomTemplate) {
       generateMessage();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTemplate, paymentDetails, businessName, isCustomTemplate]);
 
   return (

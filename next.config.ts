@@ -53,8 +53,11 @@ const nextConfig: NextConfig = {
     optimisticClientCache: false,
   },
 
-  // Turbopack aktif; tidak ada blok webpack
-  turbopack: {},
+  // Turbopack configuration
+  turbopack: {
+    // Explicitly set workspace root to avoid detection issues
+    root: __dirname,
+  },
 
   images: {
     formats: ['image/webp', 'image/avif'],

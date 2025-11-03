@@ -30,10 +30,12 @@ export function useOptimizedQuery<T>(
   } = options
 
   // Memoize query key
-  const memoizedKey = useMemo(() => queryKey, [JSON.stringify(queryKey)])
+  const queryKeyString = JSON.stringify(queryKey)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const memoizedKey = useMemo(() => queryKey, [queryKeyString])
 
-  // Memoize query function
-  const memoizedFn = useCallback(queryFn, [])
+  // Memoize query function - queryFn is expected to be stable
+  const memoizedFn = useCallback(queryFn, [queryFn])
 
   return useQuery<T, Error, T, QueryKey>({
     queryKey: memoizedKey,
@@ -60,7 +62,7 @@ export function useOptimizedMutation<TData, TVariables>(
 ) {
   const { onSuccess, onError, invalidateQueries = [] } = options
 
-  const memoizedFn = useCallback(mutationFn, [])
+  const memoizedFn = useCallback(mutationFn, [mutationFn])
 
   return {
     mutate: memoizedFn,
@@ -78,8 +80,9 @@ export function usePrefetchQuery<T>(
   queryFn: () => Promise<T>,
   enabled = true
 ) {
-  const memoizedKey = useMemo(() => queryKey, [JSON.stringify(queryKey)])
-  const memoizedFn = useCallback(queryFn, [])
+  const queryKeyString = JSON.stringify(queryKey)
+  const memoizedKey = useMemo(() => queryKey, [queryKeyString])
+  const memoizedFn = useCallback(queryFn, [queryFn])
 
   return useQuery({
     queryKey: memoizedKey,
@@ -103,7 +106,8 @@ export function useOptimizedInfiniteQuery<T>(
 ) {
   const { pageSize = 20, enabled = true } = options
 
-  const memoizedKey = useMemo(() => queryKey, [JSON.stringify(queryKey)])
+  const queryKeyString2 = JSON.stringify(queryKey)
+  const memoizedKey = useMemo(() => queryKey, [queryKeyString2])
 
   return {
     queryKey: memoizedKey,

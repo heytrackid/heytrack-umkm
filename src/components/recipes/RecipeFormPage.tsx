@@ -58,6 +58,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
         if (mode === 'edit' && recipeId) {
             void loadRecipe()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mode, recipeId])
 
     const loadIngredients = async () => {

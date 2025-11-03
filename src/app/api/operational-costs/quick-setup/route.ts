@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-import type { ExpensesInsert } from '@/types/database'
+import type { OperationalCostsInsert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -23,116 +23,92 @@ export async function POST() {
     }
 
     // Template operational costs (common for Indonesian culinary businesses)
-    const templates: ExpensesInsert[] = [
+    const templates: OperationalCostsInsert[] = [
       {
         user_id: user.id,
-        category: 'Utilities',
-        subcategory: 'Listrik',
-        amount: 500000,
+        category: 'utilities',
         description: 'Biaya listrik bulanan',
-        expense_date: new Date().toISOString().split('T')[0],
-        payment_method: 'BANK_TRANSFER',
-        status: 'pending',
-        is_recurring: true,
-        recurring_frequency: 'monthly',
-        tags: ['template']
-      },
-      {
-        user_id: user.id,
-        category: 'Utilities',
-        subcategory: 'Air',
-        amount: 150000,
-        description: 'Biaya air bulanan',
-        expense_date: new Date().toISOString().split('T')[0],
-        payment_method: 'BANK_TRANSFER',
-        status: 'pending',
-        is_recurring: true,
-        recurring_frequency: 'monthly',
-        tags: ['template']
-      },
-      {
-        user_id: user.id,
-        category: 'Utilities',
-        subcategory: 'Gas',
-        amount: 200000,
-        description: 'Biaya gas bulanan',
-        expense_date: new Date().toISOString().split('T')[0],
-        payment_method: 'CASH',
-        status: 'pending',
-        is_recurring: true,
-        recurring_frequency: 'monthly',
-        tags: ['template']
-      },
-      {
-        user_id: user.id,
-        category: 'Labor',
-        subcategory: 'Gaji Karyawan',
-        amount: 3000000,
-        description: 'Gaji karyawan bulanan',
-        expense_date: new Date().toISOString().split('T')[0],
-        payment_method: 'BANK_TRANSFER',
-        status: 'pending',
-        is_recurring: true,
-        recurring_frequency: 'monthly',
-        tags: ['template']
-      },
-      {
-        user_id: user.id,
-        category: 'Rent',
-        subcategory: 'Sewa Tempat',
-        amount: 2000000,
-        description: 'Sewa tempat usaha bulanan',
-        expense_date: new Date().toISOString().split('T')[0],
-        payment_method: 'BANK_TRANSFER',
-        status: 'pending',
-        is_recurring: true,
-        recurring_frequency: 'monthly',
-        tags: ['template']
-      },
-      {
-        user_id: user.id,
-        category: 'Marketing',
-        subcategory: 'Iklan Online',
         amount: 500000,
-        description: 'Biaya iklan dan promosi',
-        expense_date: new Date().toISOString().split('T')[0],
-        payment_method: 'BANK_TRANSFER',
-        status: 'pending',
-        is_recurring: true,
-        recurring_frequency: 'monthly',
-        tags: ['template']
+        frequency: 'monthly',
+        recurring: true,
+        is_active: true,
+        notes: 'Template biaya utilitas - sesuaikan dengan kebutuhan'
       },
       {
         user_id: user.id,
-        category: 'Maintenance',
-        subcategory: 'Perawatan Peralatan',
+        category: 'utilities',
+        description: 'Biaya air bulanan',
+        amount: 150000,
+        frequency: 'monthly',
+        recurring: true,
+        is_active: true,
+        notes: 'Template biaya utilitas'
+      },
+      {
+        user_id: user.id,
+        category: 'utilities',
+        description: 'Biaya gas bulanan',
+        amount: 200000,
+        frequency: 'monthly',
+        recurring: true,
+        is_active: true,
+        notes: 'Template biaya utilitas'
+      },
+      {
+        user_id: user.id,
+        category: 'staff',
+        description: 'Gaji karyawan bulanan',
+        amount: 3000000,
+        frequency: 'monthly',
+        recurring: true,
+        is_active: true,
+        notes: 'Template gaji - sesuaikan dengan jumlah karyawan'
+      },
+      {
+        user_id: user.id,
+        category: 'rent',
+        description: 'Sewa tempat usaha',
+        amount: 2000000,
+        frequency: 'monthly',
+        recurring: true,
+        is_active: true,
+        notes: 'Template sewa tempat'
+      },
+      {
+        user_id: user.id,
+        category: 'communication',
+        description: 'Internet & Telepon',
         amount: 300000,
-        description: 'Perawatan dan perbaikan peralatan',
-        expense_date: new Date().toISOString().split('T')[0],
-        payment_method: 'CASH',
-        status: 'pending',
-        is_recurring: true,
-        recurring_frequency: 'monthly',
-        tags: ['template']
+        frequency: 'monthly',
+        recurring: true,
+        is_active: true,
+        notes: 'Template komunikasi'
       },
       {
         user_id: user.id,
-        category: 'Packaging',
-        subcategory: 'Kemasan',
-        amount: 400000,
-        description: 'Biaya kemasan produk',
-        expense_date: new Date().toISOString().split('T')[0],
-        payment_method: 'CASH',
-        status: 'pending',
-        is_recurring: true,
-        recurring_frequency: 'monthly',
-        tags: ['template']
+        category: 'maintenance',
+        description: 'Perawatan peralatan',
+        amount: 300000,
+        frequency: 'monthly',
+        recurring: true,
+        is_active: true,
+        notes: 'Template perawatan'
+      },
+      {
+        user_id: user.id,
+        category: 'transport',
+        description: 'BBM & Transport',
+        amount: 500000,
+        frequency: 'monthly',
+        recurring: true,
+        is_active: true,
+        notes: 'Template transport & logistik'
       }
     ]
 
     // Insert all templates
     const { data, error } = await supabase
-      .from('expenses')
+      .from('operational_costs')
       .insert(templates)
       .select()
 

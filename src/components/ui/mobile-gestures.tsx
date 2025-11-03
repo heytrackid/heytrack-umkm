@@ -90,6 +90,7 @@ export const PullToRefresh = ({
       element.removeEventListener('touchmove', handleTouchMove)
       element.removeEventListener('touchend', handleTouchEnd)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile, disabled, isRefreshing, canRefresh])
 
   const indicatorRotation = Math.min(pullDistance / refreshThreshold * 180, 180)

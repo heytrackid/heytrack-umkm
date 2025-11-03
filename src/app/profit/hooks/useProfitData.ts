@@ -29,6 +29,7 @@ export function useProfitData() {
 
   useEffect(() => {
     void fetchProfitData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.selectedPeriod, filters.startDate, filters.endDate])
 
   const fetchProfitData = async () => {

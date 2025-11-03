@@ -1,23 +1,21 @@
-import { useState, type FormEvent } from 'react'
+import { type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { Send } from 'lucide-react'
+import { Send, Loader2 } from 'lucide-react'
 import { SuggestionChips } from './SuggestionChips'
 
 interface ChatInputProps {
-  onSendMessage: (message: string) => void
+  input: string
+  setInput: (value: string) => void
+  onSendMessage: (message?: string) => void
   isLoading: boolean
 }
 
-export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
-  const [input, setInput] = useState('')
-
+export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInputProps) => {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (input.trim() && !isLoading) {
-      onSendMessage(input.trim())
-      void setInput('')
+      onSendMessage()
     }
   }
 
@@ -26,15 +24,13 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
   }
 
   return (
-    <div className="border-t border-border p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="p-4 bg-muted/30">
+      <div className="max-w-4xl mx-auto space-y-3">
         {/* Quick Suggestions */}
         <SuggestionChips
           onSuggestionClick={handleSuggestionClick}
           disabled={isLoading}
         />
-
-        <Separator className="mb-3" />
 
         {/* Input Form */}
         <form onSubmit={handleSubmit} className="flex gap-2">
@@ -42,17 +38,31 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Tanyakan apa saja tentang bisnis UMKM kuliner Anda..."
-            className="flex-1"
+            className="flex-1 bg-background"
             disabled={isLoading}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey && input.trim()) {
+                e.preventDefault()
+                onSendMessage()
+              }
+            }}
           />
           <Button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="px-3"
+            size="icon"
           >
-            <Send className="h-4 w-4" />
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
           </Button>
         </form>
+        
+        <p className="text-xs text-center text-muted-foreground">
+          Tekan Enter untuk kirim pesan
+        </p>
       </div>
     </div>
   )

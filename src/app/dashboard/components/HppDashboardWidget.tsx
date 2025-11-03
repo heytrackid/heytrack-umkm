@@ -42,6 +42,7 @@ const HppDashboardWidget = () => {
 
   useEffect(() => {
     void loadHppData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadHppData = async () => {

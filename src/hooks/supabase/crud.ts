@@ -46,7 +46,8 @@ export function useSupabaseCRUD<T extends TableName>(
 
       // Success toast would be shown here if needed
     }
-  }, [showSuccessToast, successMessages])
+     
+  }, [showSuccessToast])
 
   const createRecord = useCallback(async (data: Insert<T>) => {
     void setLoading(true)

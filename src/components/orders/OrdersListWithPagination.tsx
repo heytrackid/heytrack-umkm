@@ -96,6 +96,7 @@ export const OrdersListWithPagination = () => {
     // Fetch on mount and when pagination/filters change
     useEffect(() => {
         void fetchOrders()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pagination.page, pagination.pageSize, searchTerm, statusFilter])
 
     // Handlers

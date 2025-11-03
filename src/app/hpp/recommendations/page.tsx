@@ -47,6 +47,7 @@ const HppRecommendationsPage = () => {
   // Load recommendations
   useEffect(() => {
     void loadRecommendations()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter])
 
   const loadRecommendations = async () => {

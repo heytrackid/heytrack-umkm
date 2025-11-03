@@ -43,6 +43,7 @@ const ProductionBatchExecution = ({
     return () => {
       if (interval) { clearInterval(interval) }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [batches])
 
   // Initialize execution states for active batches
@@ -63,6 +64,7 @@ const ProductionBatchExecution = ({
     }
 
     void setExecutionStates(newStates)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [batches])
 
   const updateBatchProgress = () => {

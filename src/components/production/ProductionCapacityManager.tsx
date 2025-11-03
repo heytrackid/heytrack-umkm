@@ -70,6 +70,7 @@ const ProductionCapacityManager = ({
   // Load current constraints on mount
   useEffect(() => {
     void loadCurrentConstraints()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Track changes

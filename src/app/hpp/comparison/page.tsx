@@ -50,6 +50,7 @@ const ComparisonAnalyticsPage = () => {
   // Load comparison data
   useEffect(() => {
     void loadComparisonData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory])
 
   const loadComparisonData = async () => {

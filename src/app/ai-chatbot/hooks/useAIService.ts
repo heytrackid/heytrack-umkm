@@ -4,6 +4,89 @@ import { createClient } from '@/utils/supabase/client'
 
 const supabase = createClient()
 
+/**
+ * Fetch business context dari database
+ */
+async function fetchBusinessContext(userId: string) {
+  try {
+    // Fetch orders data
+    const { data: orders, error: ordersError } = await supabase
+      .from('orders')
+      .select('id, status, total_amount, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(10)
+
+    if (ordersError) { 
+      throw ordersError 
+    }
+
+    // Fetch ingredients dengan stok rendah
+    const { data: ingredients, error: ingredientsError } = await supabase
+      .from('ingredients')
+      .select('id, name, current_stock, unit, minimum_stock')
+      .eq('user_id', userId)
+      .limit(10)
+
+    if (ingredientsError) { 
+      apiLogger.warn({ error: ingredientsError }, 'Failed to fetch ingredients') 
+    }
+
+    // Fetch top recipes
+    const { data: recipes, error: recipesError } = await supabase
+      .from('recipes')
+      .select('id, name, category, is_active')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .limit(10)
+
+    if (recipesError) { 
+      apiLogger.warn({ error: recipesError }, 'Failed to fetch recipes') 
+    }
+
+    // Type assertions untuk avoid TS errors
+    interface OrderData { id: string; status: string; total_amount: number; created_at: string }
+    interface IngredientData { id: string; name: string; current_stock: number; unit: string; minimum_stock: number }
+    interface RecipeData { id: string; name: string; category: string; is_active: boolean }
+
+    const typedOrders = (orders ?? []) as OrderData[]
+    const typedIngredients = (ingredients ?? []) as IngredientData[]
+    const typedRecipes = (recipes ?? []) as RecipeData[]
+
+    // Calculate business metrics
+    const totalOrders = typedOrders.length
+    const pendingOrders = typedOrders.filter(o => o.status === 'PENDING').length
+    const totalRevenue = typedOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
+    const criticalStock = typedIngredients.filter(i => i.current_stock < i.minimum_stock)
+
+    return {
+      orders: {
+        total: totalOrders,
+        pending: pendingOrders,
+        revenue: totalRevenue,
+        recent: typedOrders.slice(0, 5)
+      },
+      inventory: {
+        critical: criticalStock.map(i => ({
+          name: i.name,
+          stock: i.current_stock,
+          unit: i.unit,
+          minimum: i.minimum_stock
+        })),
+        total: typedIngredients.length
+      },
+      recipes: {
+        total: typedRecipes.length,
+        active: typedRecipes.filter(r => r.is_active).length,
+        categories: [...new Set(typedRecipes.map(r => r.category))]
+      }
+    }
+  } catch (error) {
+    apiLogger.error({ error, userId }, 'Error fetching business context')
+    return null
+  }
+}
+
 export function useAIService() {
   const generateSuggestions = (intent: string): string[] => {
     switch (intent) {
@@ -68,32 +151,42 @@ export function useAIService() {
 
     apiLogger.info({ userId, query: query.substring(0, 100) }, 'Processing AI chatbot query')
 
+    // Fetch business context dari database
+    const businessContext = await fetchBusinessContext(userId)
+
     try {
       // Use available NLP processing
-      const nlpResult = await processChatbotQuery(query)
-
-      // Get business insights if NLP analysis is successful
-      const insights = await generateAIInsights({
+      // Get business insights dengan real data dari database
+      const aiQueryParams = {
         query,
-        nlpAnalysis: nlpResult,
-        userId,
-        intent: nlpResult.primaryIntent,
-        entities: nlpResult.entities
-      })
+        businessContext: businessContext ?? undefined
+      }
+      const insights = await generateAIInsights(aiQueryParams as Record<string, unknown>)
 
-      // Generate contextual suggestions based on intent
-      const suggestions = generateSuggestions(nlpResult.primaryIntent)
+      // Generate contextual suggestions based on query type
+      const lowerQuery = query.toLowerCase()
+      let intentType = 'default'
+      
+      if (lowerQuery.includes('stok') || lowerQuery.includes('bahan')) {
+        intentType = 'check_inventory'
+      } else if (lowerQuery.includes('pesanan') || lowerQuery.includes('order')) {
+        intentType = 'analyze_profit'
+      } else if (lowerQuery.includes('resep') || lowerQuery.includes('recipe')) {
+        intentType = 'recipe_query'
+      }
+      
+      const suggestions = generateSuggestions(intentType)
 
       apiLogger.info({ 
         userId, 
-        intent: nlpResult.primaryIntent, 
-        responseLength: insights.length 
+        intent: intentType, 
+        responseLength: insights.length
       }, 'AI query processed successfully')
 
       return {
         message: insights,
         suggestions,
-        data: nlpResult
+        data: { businessContext } // Include context untuk data visualization
       }
     } catch (error: unknown) {
       apiLogger.error({ error, userId, query }, 'Error processing AI query')
