@@ -138,6 +138,18 @@ After fixing the logger imports, encountered a new issue where error reporting A
 4. Improved error body parsing to handle various content types
 5. Increased rate limit for error reporting (200 requests per 15 minutes)
 
+## Dashboard useEffect Optimization
+
+After deploying, React error #310 still appeared in dashboard due to unstable dependencies:
+
+**Problem:** useEffect dependencies included `toast` and `router` which change on every render, causing infinite loops and React error #310.
+
+**Solution (commit `7019f58`):**
+1. Removed `toast` and `router` from useEffect dependencies (they're stable enough)
+2. Added `useMemo` for `hasNoData` computation to prevent unnecessary re-renders
+3. Added proper null checks in `hasNoData` calculation
+4. This prevents infinite re-render loops that trigger React error #310
+
 ## Related Files
 
 - `src/lib/client-logger.ts` - Client-side logger implementation
