@@ -1,21 +1,22 @@
+ 
 'use client'
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
 import {
     AlertCircle,
-    WifiOff,
-    ServerCrash,
-    ShieldAlert,
-    RefreshCw,
     ArrowLeft,
     ChevronDown,
     ChevronUp,
+    RefreshCw,
+    ServerCrash,
+    ShieldAlert,
+    WifiOff,
     XCircle
 } from 'lucide-react'
+import { useState } from 'react'
 
 interface ErrorMessageProps {
     title?: string
@@ -29,6 +30,7 @@ interface ErrorMessageProps {
 }
 
 // Helper to get user-friendly error messages
+ 
 function getUserFriendlyError(error: unknown): {
     title: string
     message: string

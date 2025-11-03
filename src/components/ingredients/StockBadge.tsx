@@ -101,7 +101,12 @@ export const CompactStockIndicator = ({
     minStock,
     unit
 }: Omit<StockBadgeProps, 'showIcon' | 'compact' | 'className'>) => {
-    const status = currentStock <= 0 ? 'out' : currentStock <= minStock ? 'low' : 'normal'
+    const getStatus = () => {
+        if (currentStock <= 0) {return 'out'}
+        if (currentStock <= minStock) {return 'low'}
+        return 'normal'
+    }
+    const status = getStatus()
 
     const colors = {
         out: 'bg-red-500',

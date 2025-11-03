@@ -62,17 +62,15 @@ class ClientLogger {
     }
 
     // Use appropriate console method
-     
+    /* eslint-disable no-console */
     const getConsoleMethod = () => {
       if (level === 'error') {return console.error}
-      // eslint-disable-next-line no-console
       if (level === 'warn') {return console.warn}
-      // eslint-disable-next-line no-console
       if (level === 'debug') {return console.debug}
-      // eslint-disable-next-line no-console
       return console.log
     }
     const consoleMethod = getConsoleMethod()
+    /* eslint-enable no-console */
 
     if (isDevelopment()) {
       consoleMethod(

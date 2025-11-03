@@ -268,9 +268,12 @@ Focus on Indonesian food business terminology.`
     if (/hpp|cost/i.test(query)) {contexts.push('hpp')}
     if (contexts.length === 0) {contexts.push('general')}
     
-    const primaryIntent = intents.length > 0 
-      ? intents.sort((a, b) => b.confidence - a.confidence)[0].intent
-      : (questionType ? 'question' : 'statement')
+    let primaryIntent: string
+    if (intents.length > 0) {
+      primaryIntent = intents.sort((a, b) => b.confidence - a.confidence)[0].intent
+    } else {
+      primaryIntent = questionType ? 'question' : 'statement'
+    }
     
     return {
       intents: intents.length > 0 ? intents : [{

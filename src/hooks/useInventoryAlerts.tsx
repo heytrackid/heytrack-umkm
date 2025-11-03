@@ -249,12 +249,17 @@ export const InventoryAlertsList = ({ alerts, maxItems = 5 }: { alerts: Inventor
 
   return (
     <div className="space-y-3">
-      {displayAlerts.map((alert) => (
+      {displayAlerts.map((alert) => {
+        const getBadgeVariant = () => {
+          if (alert.severity === 'critical' || alert.severity === 'high') {return 'destructive'}
+          if (alert.severity === 'medium') {return 'secondary'}
+          return 'outline'
+        }
+        
+        return (
         <div key={alert.id} className="flex items-start gap-3 p-3 rounded-lg border">
           <Badge
-            variant={alert.severity === 'critical' ? 'destructive' :
-              alert.severity === 'high' ? 'destructive' :
-                alert.severity === 'medium' ? 'secondary' : 'outline'}
+            variant={getBadgeVariant()}
             className="shrink-0"
           >
             {alert.severity?.toUpperCase() ?? 'INFO'}
@@ -268,7 +273,8 @@ export const InventoryAlertsList = ({ alerts, maxItems = 5 }: { alerts: Inventor
             </p>
           </div>
         </div>
-      ))}
+        )
+      })}
       {alerts.length > maxItems && (
         <div className="text-center py-2">
           <p className="text-sm text-muted-foreground">

@@ -1,22 +1,23 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { useState, useEffect } from 'react'
-import type { RecipesTable } from '@/types/database'
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useResponsive } from '@/hooks/useResponsive'
-import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react'
-import type { Order, OrderFormData, Priority, OrderFormItem } from './types'
-import { calculateOrderTotal, normalizePriority } from './utils'
-import { validateOrderData } from '@/lib/validations/form-validations'
+import { Textarea } from '@/components/ui/textarea'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useResponsive } from '@/hooks/useResponsive'
 import { apiLogger } from '@/lib/logger'
 import { isRecipe } from '@/lib/type-guards'
+import { validateOrderData } from '@/lib/validations/form-validations'
+import type { RecipesTable } from '@/types/database'
+import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import type { Order, OrderFormData, OrderFormItem, Priority } from './types'
+import { calculateOrderTotal, normalizePriority } from './utils'
 
 
 type Recipe = RecipesTable

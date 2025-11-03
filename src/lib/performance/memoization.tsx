@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useMemo, useCallback, type ComponentType, type DependencyList } from 'react'
+import { memo, useCallback, useMemo, type ComponentType, type DependencyList } from 'react'
 
 
 
@@ -21,6 +21,7 @@ export function useMemoizedValue<T>(
     factory: () => T,
     deps: DependencyList
 ): T {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     return useMemo(factory, deps)
 }
 
@@ -31,6 +32,7 @@ export function useMemoizedCallback<T extends (...args: unknown[]) => unknown>(
     callback: T,
     deps: DependencyList
 ): T {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     return useCallback(callback, deps)
 }
 

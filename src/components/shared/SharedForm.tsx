@@ -1,14 +1,14 @@
-
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { useForm, type Path, type PathValue, type DefaultValues, type Resolver, type FieldValues } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import type { z } from 'zod'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormField } from '@/components/ui/crud-form'
-import { Loader2 } from 'lucide-react'
 import { uiLogger } from '@/lib/logger'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Loader2 } from 'lucide-react'
+import { useForm, type DefaultValues, type FieldValues, type Path, type PathValue, type Resolver } from 'react-hook-form'
+import type { z } from 'zod'
 
 interface FormSection {
   title: string

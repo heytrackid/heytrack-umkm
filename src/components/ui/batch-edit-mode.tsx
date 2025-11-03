@@ -1,11 +1,12 @@
+ 
 'use client'
 
+import { cn } from '@/lib/utils'
+import { CheckSquare, Edit, Trash2, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
+import { Badge } from './badge'
 import { Button } from './button'
 import { Checkbox } from './checkbox'
-import { Badge } from './badge'
-import { X, Trash2, Edit, CheckSquare } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 interface BatchEditModeProps<T> {
   items: T[]
@@ -27,7 +28,7 @@ export interface BatchAction {
   requiresConfirmation?: boolean
 }
 
-export function BatchEditMode<T>({
+export const BatchEditMode = <T,>({
   items,
   selectedItems,
   onSelectionChange,
@@ -37,7 +38,7 @@ export function BatchEditMode<T>({
   actions = [],
   children,
   className
-}: BatchEditModeProps<T>) {
+}: BatchEditModeProps<T>): JSX.Element => {
   const selectedCount = selectedItems.size
   const allSelected = items.length > 0 && selectedItems.size === items.length
 
@@ -66,6 +67,7 @@ export function BatchEditMode<T>({
     const selectedIds = Array.from(selectedItems)
     
     if (action.requiresConfirmation) {
+      // eslint-disable-next-line no-alert
       if (!confirm(`Yakin ingin melakukan aksi ini pada ${selectedCount} item?`)) {
         return
       }
@@ -117,7 +119,7 @@ export function BatchEditMode<T>({
               {actions.map((action, index) => (
                 <Button
                   key={index}
-                  variant={action.variant || 'outline'}
+                  variant={action.variant ?? 'outline'}
                   size="sm"
                   onClick={() => handleAction(action)}
                 >

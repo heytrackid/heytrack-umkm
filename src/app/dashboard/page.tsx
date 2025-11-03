@@ -1,5 +1,5 @@
 'use client'
-/* eslint-disable no-nested-ternary */
+ 
 
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'

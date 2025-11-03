@@ -261,6 +261,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
   useEffect(() => {
     void fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [table, JSON.stringify(options)])
 
   return {

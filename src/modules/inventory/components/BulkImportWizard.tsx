@@ -1,14 +1,15 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { useState, useRef } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { getErrorMessage } from '@/lib/type-guards'
 import { uiLogger } from '@/lib/logger'
-import { Upload, FileText, CheckCircle, AlertTriangle, Download, X, ArrowRight } from 'lucide-react'
+import { getErrorMessage } from '@/lib/type-guards'
+import { AlertTriangle, ArrowRight, CheckCircle, Download, FileText, Upload, X } from 'lucide-react'
+import { useRef, useState } from 'react'
 
 
 
@@ -187,11 +188,11 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
                 {steps.map((step, index) => {
                     const isCompleted = index < currentIndex
                     const isCurrent = index === currentIndex
-                    const circleClasses = isCompleted
-                        ? 'bg-gray-500 text-white'
-                        : isCurrent
-                            ? 'bg-gray-500 text-white'
-                            : 'bg-gray-200 text-gray-500'
+                    const getCircleClasses = () => {
+                        if (isCompleted || isCurrent) {return 'bg-gray-500 text-white'}
+                        return 'bg-gray-200 text-gray-500'
+                    }
+                    const circleClasses = getCircleClasses()
                     const connectorClasses = index < currentIndex
                         ? 'bg-gray-500'
                         : 'bg-gray-200'
@@ -331,7 +332,7 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
                                         className={`p-3 rounded-lg border ${
                                           row.errors.length > 0 
                                             ? 'bg-red-50 border-red-200' 
-                                            : (row.warnings.length > 0 ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-300')
+                                            : row.warnings.length > 0 ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-300'
                                           }`}
                                     >
                                         <div className="flex items-start justify-between mb-2">

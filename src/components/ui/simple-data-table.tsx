@@ -1,36 +1,37 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { type ReactNode, useState, useEffect, useMemo } from 'react'
-import { useMobile } from '@/hooks/useResponsive'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  Search,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  MoreVertical,
-  Download
-} from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select"
+import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { useMobile } from '@/hooks/useResponsive'
+import {
+    Download,
+    Edit,
+    Eye,
+    MoreVertical,
+    Plus,
+    Search,
+    Trash2
+} from 'lucide-react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 
 type SortableValue = string | number | boolean | Date | null | undefined
 
@@ -175,6 +176,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
   useEffect(() => {
     if (!enablePagination) { return }
     void setCurrentPage(1)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, JSON.stringify(filters), sortBy, sortOrder, rowsPerPage, enablePagination])
 
   useEffect(() => {
@@ -323,10 +325,11 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
           <div className="text-center py-12">
             <p className="text-muted-foreground">{emptyMessage ?? "Tidak ada data"}</p>
           </div>
-        ) : isMobile ? (
-          /* Mobile Card Layout */
-          <div className="space-y-4">
-            <div className="space-y-3">
+        ) : (
+          isMobile ? (
+            /* Mobile Card Layout */
+            <div className="space-y-4">
+              <div className="space-y-3">
               {paginatedData.map((item, index: number) => (
                 <Card key={index} className="border border-gray-200">
                   <CardContent className="p-4">
@@ -520,6 +523,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
               />
             )}
           </div>
+          )
         )}
       </CardContent>
     </Card>

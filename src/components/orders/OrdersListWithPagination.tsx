@@ -1,20 +1,12 @@
+/* eslint-disable no-nested-ternary */
 'use client'
-
-'use client'
-import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-import { usePagination } from '@/hooks/usePagination'
-import { SimplePagination } from '@/components/ui/simple-pagination'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Search, Plus, Package, Clock, CheckCircle, XCircle } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { useSettings } from '@/contexts/settings-context'
-import type { OrdersTable, OrderStatus } from '@/types/database'
-import type { PaginatedResponse } from '@/lib/validations/pagination'
 import {
     Select,
     SelectContent,
@@ -22,6 +14,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { SimplePagination } from '@/components/ui/simple-pagination'
+import { useSettings } from '@/contexts/settings-context'
+import { useToast } from '@/hooks/use-toast'
+import { usePagination } from '@/hooks/usePagination'
+import type { PaginatedResponse } from '@/lib/validations/pagination'
+import type { OrdersTable, OrderStatus } from '@/types/database'
+import { CheckCircle, Clock, Package, Plus, Search, XCircle } from 'lucide-react'
 
 type Order = OrdersTable
 

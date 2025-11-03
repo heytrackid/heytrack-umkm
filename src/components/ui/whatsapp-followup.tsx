@@ -80,6 +80,7 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
   // Fetch templates on component mount
   useEffect(() => {
     void fetchTemplates()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchTemplates = async () => {

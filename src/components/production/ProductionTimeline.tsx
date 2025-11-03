@@ -1,19 +1,20 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { format, addHours, startOfDay, endOfDay, differenceInMinutes } from 'date-fns'
-import { Calendar, Clock, ChefHat, Flame, Package, AlertTriangle, CheckCircle, Play, BarChart3 } from 'lucide-react'
 import {
-  type ProductionBatchWithDetails,
-  type TimelineSlot,
-  type SchedulingResult
+    type ProductionBatchWithDetails,
+    type SchedulingResult,
+    type TimelineSlot
 } from '@/services/production/BatchSchedulingService'
+import { addHours, differenceInMinutes, endOfDay, format, startOfDay } from 'date-fns'
+import { AlertTriangle, BarChart3, Calendar, CheckCircle, ChefHat, Clock, Flame, Package, Play } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 
 /**
  * ProductionTimeline
@@ -164,8 +165,14 @@ const ProductionTimeline = ({
   }
 
   const handleStatusToggle = (batch: ProductionBatchWithDetails) => {
-    const nextStatus: ProductionStatus = batch.status === 'PLANNED' ? 'IN_PROGRESS' :
-      batch.status === 'IN_PROGRESS' ? 'COMPLETED' : 'PLANNED'
+    let nextStatus: ProductionStatus
+    if (batch.status === 'PLANNED') {
+      nextStatus = 'IN_PROGRESS'
+    } else if (batch.status === 'IN_PROGRESS') {
+      nextStatus = 'COMPLETED'
+    } else {
+      nextStatus = 'PLANNED'
+    }
     onBatchStatusChange?.(batch.id, nextStatus)
   }
 

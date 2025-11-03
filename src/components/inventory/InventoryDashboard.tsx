@@ -1,13 +1,14 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { AlertTriangle, Package, ShoppingCart, TrendingUp, RefreshCw } from 'lucide-react'
+import { useSettings } from '@/contexts/settings-context'
 import { useInventoryAlerts, useReorderManagement } from '@/hooks'
 import { InventoryAlertsList } from '@/hooks/useInventoryAlerts'
-import { useSettings } from '@/contexts/settings-context'
+import { AlertTriangle, Package, RefreshCw, ShoppingCart, TrendingUp } from 'lucide-react'
 
 
 

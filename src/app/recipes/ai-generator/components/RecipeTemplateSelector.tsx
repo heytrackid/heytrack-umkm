@@ -28,6 +28,12 @@ export const RecipeTemplateSelector = ({ onSelectTemplate, selectedTemplateId }:
     const [selectedCategory, setSelectedCategory] = useState<string>(RECIPE_CATEGORIES[0])
     const { formatCurrency } = useCurrency()
 
+    const getDifficultyLabel = (difficulty: string): string => {
+        if (difficulty === 'easy') {return 'Mudah'}
+        if (difficulty === 'medium') {return 'Sedang'}
+        return 'Sulit'
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -78,7 +84,7 @@ export const RecipeTemplateSelector = ({ onSelectTemplate, selectedTemplateId }:
                                                 variant="secondary"
                                                 className={`text-xs ${getDifficultyColor(template.difficulty)}`}
                                             >
-                                                {template.difficulty === 'easy' ? 'Mudah' : (template.difficulty === 'medium' ? 'Sedang' : 'Sulit')}
+                                                {getDifficultyLabel(template.difficulty)}
                                             </Badge>
                                         </div>
 

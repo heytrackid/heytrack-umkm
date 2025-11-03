@@ -251,12 +251,16 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
     const isUser = message.role === 'user';
     const isSystem = message.role === 'system';
 
+    const getAvatarBgColor = () => {
+      if (isUser) {return 'bg-gray-500'}
+      if (isSystem) {return 'bg-gray-500'}
+      return 'bg-gray-500'
+    }
+
     return (
       <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         {/* Avatar */}
-        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-          isUser ? 'bg-gray-500' : (isSystem ? 'bg-gray-500' : 'bg-gray-500')
-          }`}>
+        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${getAvatarBgColor()}`}>
           {(() => {
             if (isUser) {return <User className="h-4 w-4 text-white" />}
             if (isSystem) {return <MessageCircle className="h-4 w-4 text-white" />}

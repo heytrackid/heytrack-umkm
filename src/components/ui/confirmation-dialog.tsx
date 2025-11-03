@@ -69,16 +69,19 @@ export const ConfirmationDialog = ({
     onOpenChange(false)
   }
 
+  const getBgColor = () => {
+    if (variant === 'destructive') {return 'bg-red-100'}
+    if (variant === 'success') {return 'bg-gray-100'}
+    if (variant === 'warning') {return 'bg-orange-100'}
+    return 'bg-gray-100'
+  }
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
-            <div className={`rounded-full p-2 ${variant === 'destructive' ? 'bg-red-100' :
-              variant === 'success' ? 'bg-gray-100' :
-                variant === 'warning' ? 'bg-orange-100' :
-                  'bg-gray-100'
-              }`}>
+            <div className={`rounded-full p-2 ${getBgColor()}`}>
               <IconComponent className={`h-5 w-5 ${config.iconColor}`} />
             </div>
             <AlertDialogTitle className="text-left">{title}</AlertDialogTitle>

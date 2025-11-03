@@ -1,6 +1,6 @@
- 
+/* eslint-disable no-nested-ternary */
+import { AlertCircle, Check, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { useState, type ChangeEvent, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react';
-import { Eye, EyeOff, ChevronDown, AlertCircle, Check } from 'lucide-react';
 
 interface FormFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onBlur'> {
   label: string;
@@ -165,32 +165,34 @@ export const FormField = (props: FormFieldProps) => {
           <textarea
             {...textareaSpecificProps}
           />
-        ) : type === 'select' ? (
-          <div className="relative">
-            <select
-              {...selectSpecificProps}
-            >
-              <option value="" disabled>
-                {placeholder ?? "Pilih opsi"}
-              </option>
-              {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <ChevronDown className="h-4 w-4 text-gray-400" />
-            </div>
-          </div>
         ) : (
-          <input
-            {...inputSpecificProps}
-            type={isPassword && showPassword ? 'text' : type}
-            min={min}
-            max={max}
-            step={step}
-          />
+          type === 'select' ? (
+            <div className="relative">
+              <select
+                {...selectSpecificProps}
+              >
+                <option value="" disabled>
+                  {placeholder ?? "Pilih opsi"}
+                </option>
+                {options.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              </div>
+            </div>
+          ) : (
+            <input
+              {...inputSpecificProps}
+              type={isPassword && showPassword ? 'text' : type}
+              min={min}
+              max={max}
+              step={step}
+            />
+          )
         )}
 
         {/* Password Toggle */}

@@ -30,7 +30,12 @@ export const MiniChart = memo(({
   className,
   height = 60
 }: MiniChartProps) => {
-  const ChartComponent = type === 'line' ? LineChart : type === 'area' ? AreaChart : BarChart
+  const getChartComponent = () => {
+    if (type === 'line') {return LineChart}
+    if (type === 'area') {return AreaChart}
+    return BarChart
+  }
+  const ChartComponent = getChartComponent()
 
   return (
     <div className={cn("w-full", className)} style={{ height }}>

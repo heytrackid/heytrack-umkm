@@ -260,9 +260,11 @@ const MobileHeader = ({
           )}
 
           {/* User Authentication */}
-          {loading ? (
+          {loading && (
             <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
-          ) : user ? (
+          )}
+          
+          {!loading && user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="p-2">
@@ -287,7 +289,9 @@ const MobileHeader = ({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
+          )}
+          
+          {!loading && !user && (
             <div className="flex items-center space-x-2">
               <Button
                 variant="ghost"

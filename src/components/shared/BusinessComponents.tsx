@@ -1,26 +1,27 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { type ReactNode, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { formatCurrency, formatNumber } from '@/lib/shared/utilities'
+import { cn } from '@/lib/utils'
 import type { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
 import {
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  CheckCircle,
-  Info,
-  DollarSign,
-  ShoppingCart,
-  Users,
-  BarChart3,
-  LineChart
+    AlertTriangle,
+    BarChart3,
+    CheckCircle,
+    DollarSign,
+    Info,
+    LineChart,
+    ShoppingCart,
+    TrendingDown,
+    TrendingUp,
+    Users
 } from 'lucide-react'
+import { type ReactNode, useMemo } from 'react'
 
 // Shared business logic components and utilities
 

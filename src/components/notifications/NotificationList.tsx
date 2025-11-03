@@ -146,19 +146,23 @@ export const NotificationList = ({
 
             {/* Notification List */}
             <ScrollArea className="flex-1">
-                {isLoading && filteredNotifications.length === 0 ? (
+                {isLoading && filteredNotifications.length === 0 && (
                     <div className="flex items-center justify-center h-32 text-muted-foreground">
                         <RefreshCw className="h-5 w-5 animate-spin mr-2" />
                         Memuat...
                     </div>
-                ) : filteredNotifications.length === 0 ? (
+                )}
+                
+                {!isLoading && filteredNotifications.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
                         <Bell className="h-8 w-8 mb-2 opacity-50" />
                         <p className="text-sm">
                             {filter === 'unread' ? 'Tidak ada notifikasi baru' : 'Tidak ada notifikasi'}
                         </p>
                     </div>
-                ) : (
+                )}
+                
+                {filteredNotifications.length > 0 && (
                     <div className="divide-y">
                         {filteredNotifications.map((notification) => {
                             const TypeIcon = typeIcons[notification.type as keyof typeof typeIcons] || Info

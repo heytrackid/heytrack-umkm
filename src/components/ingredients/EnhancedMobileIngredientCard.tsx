@@ -112,7 +112,7 @@ export const EnhancedMobileIngredientCard = ({
                             <div className="grid grid-cols-2 gap-3 text-sm">
                                 <div>
                                     <p className="text-muted-foreground">Stok Minimum</p>
-                                    <p className="font-medium">{ingredient.min_stock || 0} {ingredient.unit}</p>
+                                    <p className="font-medium">{ingredient.min_stock ?? 0} {ingredient.unit}</p>
                                 </div>
                                 <div>
                                     <p className="text-muted-foreground">Total Nilai</p>

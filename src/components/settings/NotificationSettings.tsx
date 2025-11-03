@@ -7,8 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Bell, Volume2, Mail, Monitor, Smartphone } from 'lucide-react'
-import type { NotificationPreferences, NotificationType } from '@/lib/notifications/notification-types'
-import { NOTIFICATION_CONFIGS } from '@/lib/notifications/notification-types'
+import { toast } from 'sonner'
+import { 
+  type NotificationPreferences, 
+  type NotificationType,
+  NOTIFICATION_CONFIGS 
+} from '@/lib/notifications/notification-types'
 
 interface NotificationSettingsProps {
   preferences: NotificationPreferences
@@ -244,7 +248,7 @@ export const NotificationSettings = ({ preferences, onUpdate }: NotificationSett
             variant="outline"
             onClick={() => {
               // This would trigger test notification
-              alert('Test notification feature coming soon!')
+              toast.info('Test notification feature coming soon!')
             }}
             disabled={!preferences.enabled}
           >

@@ -1,16 +1,10 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react'
-import type { RecipesTable, IngredientsTable, Database } from '@/types/database'
-import { uiLogger } from '@/lib/logger'
 import {
     Select,
     SelectContent,
@@ -18,6 +12,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { useToast } from '@/hooks/use-toast'
+import { uiLogger } from '@/lib/logger'
+import type { Database, IngredientsTable, RecipesTable } from '@/types/database'
+import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 type RecipeInsert = RecipesTable
 type Ingredient = IngredientsTable

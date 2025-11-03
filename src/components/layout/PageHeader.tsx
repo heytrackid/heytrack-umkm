@@ -21,9 +21,9 @@ export const PageHeader = ({ title, description, action, actions }: PageHeaderPr
                         </p>
                     )}
                 </div>
-                {(action || actions) && (
+                {(action ?? actions) && (
                     <div className="flex-shrink-0 w-full sm:w-auto">
-                        {actions || action}
+                        {actions ?? action}
                     </div>
                 )}
             </div>

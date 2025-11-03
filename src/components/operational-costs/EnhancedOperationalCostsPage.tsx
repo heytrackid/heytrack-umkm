@@ -213,14 +213,14 @@ export const EnhancedOperationalCostsPage = () => {
 
             if (!response.ok) { 
                 const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to setup') 
+                throw new Error(errorData.error ?? 'Failed to setup') 
             }
 
             const result = await response.json()
 
             toast({
                 title: 'Template ditambahkan',
-                description: `${result.count || 8} template biaya operasional berhasil ditambahkan`,
+                description: `${result.count ?? 8} template biaya operasional berhasil ditambahkan`,
             })
 
             // Force refresh page to show new data
@@ -394,7 +394,7 @@ export const EnhancedOperationalCostsPage = () => {
             </div>
 
             {/* Cost List */}
-            {loading ? (
+            {loading && (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {[...Array(6)].map((_, i) => (
                         <Card key={i}>
@@ -411,35 +411,36 @@ export const EnhancedOperationalCostsPage = () => {
                         </Card>
                     ))}
                 </div>
-            ) : filteredData.length === 0 ? (
-                <>
-                    {/* Empty state - no data at all */}
-                    {!costs || costs.length === 0 ? (
-                        <EnhancedEmptyState onAdd={handleAdd} onQuickSetup={handleQuickSetup} />
-                    ) : (
-                        /* Empty state - filtered results */
-                        <Card className="border-dashed">
-                            <CardContent className="p-8">
-                                <div className="text-center">
-                                    <div className="rounded-full bg-muted flex items-center justify-center mb-4 w-16 h-16 mx-auto">
-                                        <Search className="w-8 h-8 text-muted-foreground" />
-                                    </div>
-                                    <h3 className="font-semibold text-foreground mb-2 text-lg">
-                                        Tidak Ada Hasil
-                                    </h3>
-                                    <p className="text-muted-foreground mb-6 text-sm">
-                                        Coba gunakan kata kunci yang berbeda atau filter lain.
-                                    </p>
-                                    <Button variant="outline" onClick={clearFilters}>
-                                        <X className="h-4 w-4 mr-2" />
-                                        Hapus Filter
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                </>
-            ) : isMobile ? (
+            )}
+            
+            {!loading && filteredData.length === 0 && (!costs || costs.length === 0) && (
+                <EnhancedEmptyState onAdd={handleAdd} onQuickSetup={handleQuickSetup} />
+            )}
+            
+            {!loading && filteredData.length === 0 && costs && costs.length > 0 && (
+                /* Empty state - filtered results */
+                <Card className="border-dashed">
+                    <CardContent className="p-8">
+                        <div className="text-center">
+                            <div className="rounded-full bg-muted flex items-center justify-center mb-4 w-16 h-16 mx-auto">
+                                <Search className="w-8 h-8 text-muted-foreground" />
+                            </div>
+                            <h3 className="font-semibold text-foreground mb-2 text-lg">
+                                Tidak Ada Hasil
+                            </h3>
+                            <p className="text-muted-foreground mb-6 text-sm">
+                                Coba gunakan kata kunci yang berbeda atau filter lain.
+                            </p>
+                            <Button variant="outline" onClick={clearFilters}>
+                                <X className="h-4 w-4 mr-2" />
+                                Hapus Filter
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+            
+            {!loading && filteredData.length > 0 && isMobile && (
                 <div className="space-y-3">
                     {paginatedData.map((cost: OperationalCost) => (
                         <MobileOperationalCostCard
@@ -454,7 +455,9 @@ export const EnhancedOperationalCostsPage = () => {
                         />
                     ))}
                 </div>
-            ) : (
+            )}
+            
+            {!loading && filteredData.length > 0 && !isMobile && (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {paginatedData.map((cost: OperationalCost) => {
                         const category = getCategoryInfo(cost.category || 'other')

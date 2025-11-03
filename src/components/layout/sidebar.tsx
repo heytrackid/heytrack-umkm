@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useMemo, useState, useCallback, useEffect, type ComponentType, type SVGProps } from 'react'
 import { cn } from '@/lib/utils'
+import { useSidebar } from '@/hooks/useSidebar'
 
 import { ExportButton } from './ExportButton'
 import { LogoutButton } from './LogoutButton'
@@ -17,7 +18,9 @@ import {
   ChevronDown,
   ChevronRight,
   DollarSign,
-  FileText
+  FileText,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react'
 
 
@@ -127,6 +130,7 @@ const Sidebar = ({
   const pathname = usePathname()
   const router = useRouter()
   const sections = useMemo(() => NAV_SECTIONS, [])
+  const { isCollapsed, toggle: toggleCollapse, setHovered } = useSidebar()
 
   // Initialize expanded sections - use function to ensure consistent initial state
   const [expandedSections, setExpandedSections] = useState<Set<string>>(() =>
@@ -139,6 +143,14 @@ const Sidebar = ({
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // Auto-expand sections when hovering collapsed sidebar
+  useEffect(() => {
+    if (isCollapsed && !isMobile) {
+      // When collapsed, auto-expand all sections for easier access
+      setExpandedSections(new Set(sections.map(s => s.title)))
+    }
+  }, [isCollapsed, isMobile, sections])
 
   // Prefetch route on hover for faster navigation
   const handlePrefetch = useCallback((href: string) => {
@@ -162,22 +174,49 @@ const Sidebar = ({
     return pathname === href || pathname.startsWith(`${href}/`)
   }
 
+  // Determine if sidebar should show expanded view
+  const showExpanded = !isCollapsed || isMobile
+
   const content = (
-    <nav className="flex h-full flex-col bg-card">
+    <nav 
+      className="flex h-full flex-col bg-card"
+      onMouseEnter={() => !isMobile && setHovered(true)}
+      onMouseLeave={() => !isMobile && setHovered(false)}
+    >
       {/* Header */}
       <div className="border-b border-border px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="transition-opacity duration-200">
-            <h2 className="text-lg font-bold text-foreground">HeyTrack</h2>
-            <p className="text-xs text-muted-foreground">UMKM Management</p>
+          <div className={cn(
+            "transition-all duration-300",
+            !showExpanded && "opacity-0 w-0 overflow-hidden"
+          )}>
+            <h2 className="text-lg font-bold text-foreground whitespace-nowrap">HeyTrack</h2>
+            <p className="text-xs text-muted-foreground whitespace-nowrap">UMKM Management</p>
           </div>
+          
+          {/* Toggle buttons */}
           {isMobile && onToggle && isMounted && (
             <button
               onClick={onToggle}
-              className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted"
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted"
               aria-label="Tutup menu"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
+            </button>
+          )}
+          
+          {!isMobile && isMounted && (
+            <button
+              onClick={toggleCollapse}
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {isCollapsed ? (
+                <PanelLeftOpen className="h-5 w-5" />
+              ) : (
+                <PanelLeftClose className="h-5 w-5" />
+              )}
             </button>
           )}
         </div>
@@ -198,24 +237,34 @@ const Sidebar = ({
                   <button
                     onClick={() => toggleSection(section.title)}
                     className={cn(
-                      'w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-                      'hover:bg-muted',
-                      hasActiveItem && 'text-primary'
+                      'w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200',
+                      'hover:bg-muted hover:scale-105',
+                      hasActiveItem && 'text-primary',
+                      !showExpanded && 'justify-center'
                     )}
+                    title={!showExpanded ? section.title : undefined}
                   >
-                    <div className="flex items-center gap-2">
-                      <SectionIcon className="h-4 w-4 flex-shrink-0" />
-                      <span>{section.title}</span>
+                    <div className={cn(
+                      "flex items-center gap-2",
+                      !showExpanded && "justify-center"
+                    )}>
+                      <SectionIcon className="h-5 w-5 flex-shrink-0" />
+                      {showExpanded && <span className="whitespace-nowrap">{section.title}</span>}
                     </div>
-                    {isExpanded ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
+                    {showExpanded && (
+                      isExpanded ? (
+                        <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 transition-transform duration-200" />
+                      )
                     )}
                   </button>
                 ) : (
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {section.title}
+                  <div className={cn(
+                    "px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider transition-all duration-200",
+                    !showExpanded && "text-center"
+                  )}>
+                    {showExpanded ? section.title : <SectionIcon className="h-5 w-5 mx-auto" />}
                   </div>
                 )}
 
@@ -223,7 +272,7 @@ const Sidebar = ({
                 {(isExpanded || !section.collapsible) && (
                   <div className={cn(
                     'space-y-0.5 transition-all duration-200',
-                    section.collapsible && 'ml-2 pl-4 border-l-2 border-muted'
+                    section.collapsible && showExpanded && 'ml-2 pl-4 border-l-2 border-muted'
                    )}>
                      {section.items.map((item) => {
                        const active = isActive(item.href)
@@ -237,17 +286,20 @@ const Sidebar = ({
                            onFocus={() => handlePrefetch(item.href)}
                            prefetch
                            className={cn(
-                             'relative flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200',
-                             'hover:bg-muted hover:text-foreground',
+                             'relative flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200',
+                             'hover:bg-muted hover:text-foreground hover:scale-105 hover:shadow-sm',
                              active
                                ? 'bg-primary text-primary-foreground font-medium shadow-sm'
-                               : 'text-muted-foreground'
+                               : 'text-muted-foreground',
+                             !showExpanded && 'justify-center'
                            )}
+                           title={!showExpanded ? item.label : undefined}
                          >
-                           <span className="flex-1">{item.label}</span>
+                           {!showExpanded && <SectionIcon className="h-5 w-5 flex-shrink-0" />}
+                           {showExpanded && <span className="flex-1 whitespace-nowrap">{item.label}</span>}
                            {/* Active indicator */}
-                           {active && (
-                             <span className="h-2 w-2 rounded-full bg-primary-foreground" />
+                           {active && showExpanded && (
+                             <span className="h-2 w-2 rounded-full bg-primary-foreground animate-pulse" />
                            )}
                          </Link>
                        )
@@ -266,15 +318,18 @@ const Sidebar = ({
       <div className="border-t border-border p-4 space-y-2">
         {/* Export & Logout */}
         {isMounted && (
-          <>
-            <ExportButton />
-            <LogoutButton />
-          </>
+          <div className={cn(
+            "space-y-2 transition-all duration-300",
+            !showExpanded && "flex flex-col items-center"
+          )}>
+            <ExportButton collapsed={!showExpanded} />
+            <LogoutButton collapsed={!showExpanded} />
+          </div>
         )}
 
         {/* Footer text */}
-        {isMounted && (
-          <div className="text-xs text-muted-foreground text-center transition-opacity duration-200">
+        {isMounted && showExpanded && (
+          <div className="text-xs text-muted-foreground text-center transition-all duration-300 opacity-100">
             <p>© 2025 HeyTrack</p>
             <p className="mt-1">v1.0.0</p>
           </div>
@@ -294,8 +349,9 @@ const Sidebar = ({
   return (
     <aside
       className={cn(
-        'fixed inset-y-0 left-0 z-40 border-r border-border bg-card shadow-sm',
-        'transition-all duration-300 ease-in-out w-72'
+        'fixed inset-y-0 left-0 z-40 border-r border-border bg-card shadow-lg',
+        'transition-all duration-300 ease-in-out',
+        isCollapsed ? 'w-20' : 'w-72'
       )}
     >
       {content}

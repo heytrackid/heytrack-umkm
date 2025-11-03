@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
  * Redirect page for backward compatibility
  * /inventory -> /ingredients
  */
-export default function InventoryRedirect() {
+const InventoryRedirect = () => {
   const router = useRouter()
 
   useEffect(() => {
@@ -17,9 +17,11 @@ export default function InventoryRedirect() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4" />
         <p className="text-muted-foreground">Redirecting to Ingredients...</p>
       </div>
     </div>
   )
 }
+
+export default InventoryRedirect

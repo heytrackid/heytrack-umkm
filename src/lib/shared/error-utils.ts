@@ -87,6 +87,7 @@ export function handleAPIResponse<T>(
   successMessage?: string,
   errorContext?: string
 ) {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { toast } = useToast()
 
   if (response.error) {

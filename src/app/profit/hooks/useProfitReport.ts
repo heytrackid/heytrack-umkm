@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
-import { apiLogger } from '@/lib/logger'
 import { useToast } from '@/hooks/use-toast'
+import { apiLogger } from '@/lib/logger'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type {
-  ProfitData,
-  ProfitPeriodType,
-  ChartDataPoint
+    ChartDataPoint,
+    ProfitData,
+    ProfitPeriodType
 } from '../constants'
-import { calculateProfitDateRange, prepareProductChartData, validateProfitData, exportProfitReport } from '../utils' 
+import { calculateProfitDateRange, exportProfitReport, prepareProductChartData, validateProfitData } from '../utils'
 
 interface UseProfitReportReturn {
   // State
@@ -86,12 +86,13 @@ export function useProfitReport(): UseProfitReportReturn {
   }, [selectedPeriod, startDate, endDate])
 
   // Handle export report
-  const exportReport = async (format: 'csv' | 'pdf' | 'xlsx') => {
-    if (!profitData) {return}
+  const exportReport = (format: 'csv' | 'pdf' | 'xlsx') => {
+    if (!profitData) {return Promise.resolve()}
 
     try {
       const filename = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
       exportProfitReport(profitData, format, filename)
+      return Promise.resolve()
     } catch (err: unknown) {
       const error = err as Error
       apiLogger.error({ error: error.message }, 'Error exporting report:')
@@ -100,6 +101,7 @@ export function useProfitReport(): UseProfitReportReturn {
         description: 'Gagal mengekspor laporan',
         variant: 'destructive',
       })
+      return Promise.reject(error)
     }
   }
 

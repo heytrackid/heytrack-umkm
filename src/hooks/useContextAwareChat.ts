@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
 import { logger } from '@/lib/logger';
 import { getErrorMessage } from '@/lib/type-guards';
 import type { ChatMessage, ChatSuggestion, SessionListItem } from '@/types/features/chat';
+import { usePathname } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * React Hook for Context-Aware AI Chat with Session Persistence
@@ -187,10 +187,11 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
     }
   }, []);
 
-  const createNewSession = useCallback(async () => {
+  const createNewSession = useCallback(() => {
     setSessionId(null);
     setMessages([]);
     setError(null);
+    return Promise.resolve();
   }, []);
 
   const deleteSession = useCallback(

@@ -59,11 +59,15 @@ const OptimizedTableRowComponent = <T extends { id: string | number }>({
       {columns.map((column) => {
         const {key} = column
         const value = key in item ? item[key as keyof T] : undefined
-        const displayValue = column.render
-          ? column.render(value, item)
-          : formatValue
-            ? formatValue(String(key), value, item)
-            : String(value ?? '')
+        
+        let displayValue: React.ReactNode
+        if (column.render) {
+          displayValue = column.render(value, item)
+        } else if (formatValue) {
+          displayValue = formatValue(String(key), value, item)
+        } else {
+          displayValue = String(value ?? '')
+        }
 
         return (
           <TableCell key={String(key)}>

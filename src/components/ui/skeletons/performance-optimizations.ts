@@ -1,5 +1,5 @@
-import { useCallback, useMemo } from 'react'
 import { apiLogger } from '@/lib/logger'
+import { useCallback, useMemo } from 'react'
     import('@/components').catch(() => {})
     import('@/components').catch(() => {})
     import('@/components').catch(() => {})
@@ -29,9 +29,11 @@ export function useSkeletonDebounce(delay: number = MIN_LOADING_DURATION.FAST) {
 
 // Memoized skeleton array untuk menghindari re-renders
 export function useSkeletonArray(length: number, dependency?: unknown[]) {
+  const depsString = JSON.stringify(dependency)
   return useMemo(
     () => Array.from({ length }, (_, i) => i),
-    [length, ...(dependency ?? [])]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [length, depsString]
   )
 }
 

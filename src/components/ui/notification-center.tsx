@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from './button'
 import { Badge } from './badge'
 import { ScrollArea } from './scroll-area'
