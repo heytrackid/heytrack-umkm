@@ -173,6 +173,17 @@ const Dashboard = () => {
       dashboardData.stats.totalCustomers === 0
   }, [dashboardData])
 
+  // Show onboarding for new users - MUST be before any conditional returns
+  useEffect(() => {
+    if (hasNoData && !isLoading) {
+      const hasSkipped = localStorage.getItem('heytrack_onboarding_skipped')
+      const hasCompleted = localStorage.getItem('heytrack_onboarding_completed')
+      if (!hasSkipped && !hasCompleted) {
+        setShowOnboarding(true)
+      }
+    }
+  }, [hasNoData, isLoading])
+
   // Show loading state while initializing
   if (isLoading && !dashboardData) {
     return (
@@ -209,17 +220,6 @@ const Dashboard = () => {
       </AppLayout>
     )
   }
-
-  // Show onboarding for new users
-  useEffect(() => {
-    if (hasNoData && !isLoading) {
-      const hasSkipped = localStorage.getItem('heytrack_onboarding_skipped')
-      const hasCompleted = localStorage.getItem('heytrack_onboarding_completed')
-      if (!hasSkipped && !hasCompleted) {
-        setShowOnboarding(true)
-      }
-    }
-  }, [hasNoData, isLoading])
 
   return (
     <AppLayout>
