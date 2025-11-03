@@ -164,6 +164,15 @@ const Dashboard = () => {
   // ✅ FIX: Combine loading states to prevent double skeleton
   const isLoading = isAuthLoading || isDataLoading
 
+  // Check if user has no data yet (empty state) - memoized to prevent unnecessary re-renders
+  // MUST be called before any conditional returns to follow Rules of Hooks
+  const hasNoData = useMemo(() => {
+    if (!dashboardData) return false
+    return dashboardData.stats.totalOrders === 0 &&
+      dashboardData.stats.totalIngredients === 0 &&
+      dashboardData.stats.totalCustomers === 0
+  }, [dashboardData])
+
   // Show loading state while initializing
   if (isLoading && !dashboardData) {
     return (
@@ -200,14 +209,6 @@ const Dashboard = () => {
       </AppLayout>
     )
   }
-
-  // Check if user has no data yet (empty state) - memoized to prevent unnecessary re-renders
-  const hasNoData = useMemo(() => {
-    if (!dashboardData) return false
-    return dashboardData.stats.totalOrders === 0 &&
-      dashboardData.stats.totalIngredients === 0 &&
-      dashboardData.stats.totalCustomers === 0
-  }, [dashboardData])
 
   // Show onboarding for new users
   useEffect(() => {
