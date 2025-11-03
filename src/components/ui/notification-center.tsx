@@ -5,7 +5,7 @@ import { Button } from './button'
 import { Badge } from './badge'
 import { ScrollArea } from './scroll-area'
 import { cn } from '@/lib/utils'
-import { Bell, X, Check, ExternalLink, Filter } from 'lucide-react'
+import { Bell, X, Check, ExternalLink } from 'lucide-react'
 import type { Notification, NotificationPriority } from '@/lib/notifications/notification-types'
 import { animations } from '@/lib/animations'
 import {
