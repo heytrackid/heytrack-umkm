@@ -384,13 +384,13 @@ const AutoSyncFinancialDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="flex gap-4 flex-wrap">
-            <Button variant="outline" onClick={() => window.open('/finance', '_blank')}>
+            <Button variant="outline" onClick={() => window.open('/cash-flow', '_blank')}>
               <DollarSign className="h-4 w-4 mr-2" />
               Lihat Catatan Keuangan
             </Button>
-            <Button variant="outline" onClick={() => window.open('/inventory', '_blank')}>
+            <Button variant="outline" onClick={() => window.open('/ingredients', '_blank')}>
               <ArrowRight className="h-4 w-4 mr-2" />
-              Kelola Inventory
+              Kelola Bahan
             </Button>
             {data.recommendations.missingSync > 0 && (
               <Button variant="secondary">

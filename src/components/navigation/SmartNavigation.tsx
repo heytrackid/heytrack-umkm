@@ -110,7 +110,7 @@ const navigationItems = [
     title: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
-    preloadTargets: ['/orders', '/finance', '/inventory']
+    preloadTargets: ['/orders', '/cash-flow', '/ingredients']
   },
   {
     title: 'Orders',
@@ -122,35 +122,35 @@ const navigationItems = [
     title: 'Customers',
     href: '/customers',
     icon: Users,
-    preloadTargets: ['/orders', '/finance']
-  },
-  {
-    title: 'Inventory',
-    href: '/inventory',
-    icon: Package,
-    preloadTargets: ['/ingredients', '/orders']
+    preloadTargets: ['/orders', '/cash-flow']
   },
   {
     title: 'Ingredients',
     href: '/ingredients',
+    icon: Package,
+    preloadTargets: ['/recipes', '/orders']
+  },
+  {
+    title: 'Recipes',
+    href: '/recipes',
     icon: Utensils,
-    preloadTargets: ['/inventory', '/recipes']
+    preloadTargets: ['/ingredients', '/hpp']
   },
   {
     title: 'Suppliers',
     href: '/suppliers',
     icon: Truck,
-    preloadTargets: ['/ingredients', '/inventory']
+    preloadTargets: ['/ingredients', '/recipes']
   },
   {
-    title: 'Recipes',
-    href: '/recipes',
+    title: 'HPP',
+    href: '/hpp',
     icon: BarChart3,
-    preloadTargets: ['/ingredients', '/hpp']
+    preloadTargets: ['/recipes', '/hpp']
   },
   {
-    title: 'Finance',
-    href: '/finance',
+    title: 'Cash Flow',
+    href: '/cash-flow',
     icon: DollarSign,
     preloadTargets: ['/orders', '/dashboard']
   },
