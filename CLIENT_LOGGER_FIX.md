@@ -125,6 +125,19 @@ After initial fix, found additional components in dashboard causing the same err
 
 These were fixed in commit `37d04b2`.
 
+## Content-Type Issue Fix
+
+After fixing the logger imports, encountered a new issue where error reporting API was rejecting requests:
+
+**Problem:** `navigator.sendBeacon()` was sending data with `text/plain` Content-Type, but the API security middleware only accepted `application/json`.
+
+**Solution (commit `82668dd`):**
+1. Updated client logger to use `Blob` with proper `application/json` Content-Type
+2. Added fallback to `fetch()` with `keepalive: true` for browsers without sendBeacon
+3. Updated `/api/errors` endpoint to accept both `application/json` and `text/plain`
+4. Improved error body parsing to handle various content types
+5. Increased rate limit for error reporting (200 requests per 15 minutes)
+
 ## Related Files
 
 - `src/lib/client-logger.ts` - Client-side logger implementation
