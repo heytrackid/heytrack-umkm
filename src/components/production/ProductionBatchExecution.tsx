@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react'
 import { differenceInMinutes, format } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ProductionBatchExecution')
 
 import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
 import ProductionOverview from './components/ProductionOverview'
@@ -180,7 +182,7 @@ const ProductionBatchExecution = ({
 
       // Update production progress in the system
       // Note: UpdateProductionProgress is not defined in the service, so we'll just log for now
-      apiLogger.info({ batchId, status: 'COMPLETED' }, 'Production completed, updating system')
+      logger.info({ batchId, status: 'COMPLETED' }, 'Production completed, updating system')
 
       onBatchUpdate?.(batchId, { status: 'COMPLETED', completed_at: completedAt.toISOString() })
       toast({
@@ -188,7 +190,7 @@ const ProductionBatchExecution = ({
         description: `Completed production of ${state.batch.recipe_id || 'Batch'}`,
       })
     } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error completing batch:')
+      logger.error({ error: err }, 'Error completing batch:')
       toast({
         title: 'Error',
         description: 'Failed to complete batch',

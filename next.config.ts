@@ -3,6 +3,13 @@ import type { NextConfig } from 'next'
 const isProd = process.env.NODE_ENV === 'production'
 const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN // contoh: app.heytrack.id
 
+// Add bundle analyzer if ANALYZE env var is set
+const withBundleAnalyzer = process.env.ANALYZE === 'true' 
+  ? require('@next/bundle-analyzer')({
+      enabled: true,
+    })
+  : (config: NextConfig) => config
+
 const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false, // aman untuk prod
@@ -110,4 +117,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default withBundleAnalyzer(nextConfig)

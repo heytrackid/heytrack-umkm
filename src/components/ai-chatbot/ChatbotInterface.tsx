@@ -8,7 +8,9 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 import DataVisualization from './DataVisualization';
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ChatbotInterface')
 
 
 
@@ -147,7 +149,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
       }
 
     } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error sending message:');
+      logger.error({ error: err }, 'Error sending message:');
       const errorMessage: ExtendedChatMessage = {
         id: `error_${Date.now()}`,
         role: 'assistant' as const,
@@ -218,7 +220,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
       }
 
     } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error executing action:');
+      logger.error({ error: err }, 'Error executing action:');
       const errorMessage: ExtendedChatMessage = {
         id: `error_${Date.now()}`,
         role: 'assistant' as const,

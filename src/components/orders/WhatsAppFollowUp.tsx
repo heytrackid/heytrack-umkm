@@ -13,7 +13,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useSettings } from '@/contexts/settings-context';
 import type { OrderData } from '@/lib/communications/types';
 import { WhatsAppService } from '@/lib/communications/whatsapp';
-import { apiLogger } from '@/lib/logger';
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('WhatsAppFollowUp');
 import { Check, Copy, MessageCircle, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -123,7 +125,7 @@ const WhatsAppFollowUp = ({
 
       setGeneratedMessage(message);
     } catch (err: unknown) {
-      apiLogger.error({ err }, 'Error generating message:');
+      logger.error({ err }, 'Error generating message:');
       toast.error('Gagal generate pesan. Coba template lain.');
     }
   };

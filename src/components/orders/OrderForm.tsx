@@ -10,7 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('OrderForm')
 import { isRecipe } from '@/lib/type-guards'
 import { validateOrderData } from '@/lib/validations/form-validations'
 import type { RecipesTable } from '@/types/database'
@@ -93,7 +95,7 @@ const OrderForm = ({
 
       void setRecipes(recipeList)
     } catch (err: unknown) {
-      apiLogger.error({ err }, 'Error fetching recipes')
+      logger.error({ err }, 'Error fetching recipes')
     }
   }
 

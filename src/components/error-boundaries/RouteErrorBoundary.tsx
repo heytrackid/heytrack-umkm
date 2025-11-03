@@ -4,7 +4,9 @@ import { Component, type ComponentType, type ErrorInfo, type ReactNode } from 'r
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('RouteErrorBoundary')
 
 // Route-level Error Boundary
 // Wraps individual routes/pages to isolate errors
@@ -42,7 +44,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const routeName = this.props.routeName ?? 'Unknown Route'
 
-    apiLogger.error({
+    logger.error({
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,

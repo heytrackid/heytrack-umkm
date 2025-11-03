@@ -1,11 +1,13 @@
 'use client'
 
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { createClient } from '@/utils/supabase/client'
 import type { Session, User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+
+const authLogger = createClientLogger('Auth')
 
 interface AuthContextType {
   user: User | null
@@ -43,7 +45,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
         if (sessionError) {
-          apiLogger.error({ error: sessionError }, 'Session error:')
+          authLogger.error({ error: sessionError }, 'Session error:')
           setAuthState(prev => ({
             ...prev,
             user: null,
@@ -57,7 +59,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const { data: { user }, error: userError } = await supabase.auth.getUser()
 
         if (userError) {
-          apiLogger.error({ error: userError }, 'User error:')
+          authLogger.error({ error: userError }, 'User error:')
         }
 
         setAuthState(prev => ({
@@ -69,7 +71,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }))
       } catch (error: unknown) {
         const message = getErrorMessage(error)
-        apiLogger.error({ error: message }, 'Auth initialization error:')
+        authLogger.error({ error: message }, 'Auth initialization error:')
         setAuthState(prev => ({
           ...prev,
           user: null,
@@ -85,7 +87,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        apiLogger.info({ event }, 'Auth state changed')
+        authLogger.info({ event }, 'Auth state changed')
 
         setAuthState(prev => ({
           ...prev,
@@ -126,7 +128,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       void router.push('/auth/login')
     } catch (error: unknown) {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Sign out error:')
+      authLogger.error({ error: message }, 'Sign out error:')
     }
   }
 
@@ -147,7 +149,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }))
     } catch (error: unknown) {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Session refresh error:')
+      authLogger.error({ error: message }, 'Session refresh error:')
     }
   }
 

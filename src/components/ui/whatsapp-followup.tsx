@@ -9,7 +9,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('WhatsAppFollowup')
 import {
   MessageCircle,
   Send,
@@ -99,7 +101,7 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
         }
       }
     } catch (err) {
-      apiLogger.error({ error: err }, 'Error fetching templates:')
+      logger.error({ error: err }, 'Error fetching templates:')
     } finally {
       void setLoading(false)
     }

@@ -11,7 +11,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { LabelWithTooltip } from '@/components/ui/tooltip-helper'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('EnhancedOrderForm')
 import { isRecipe } from '@/lib/type-guards'
 import { validateOrderData } from '@/lib/validations/form-validations'
 import type { RecipesTable } from '@/types/database'
@@ -122,7 +124,7 @@ const EnhancedOrderForm = ({
             setRecipes(recipeList)
             setFilteredRecipes(recipeList)
         } catch (err: unknown) {
-            apiLogger.error({ err }, 'Error fetching recipes')
+            logger.error({ err }, 'Error fetching recipes')
         }
     }
 

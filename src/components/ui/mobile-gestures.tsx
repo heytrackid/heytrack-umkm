@@ -4,7 +4,9 @@ import { type ReactNode, type TouchEvent as ReactTouchEvent, useState, useEffect
 import { cn } from '@/lib/utils'
 import { Loader2, RefreshCw } from 'lucide-react'
 import { isTouchDevice } from '@/utils/responsive'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('MobileGestures')
 
 
 
@@ -63,7 +65,7 @@ export const PullToRefresh = ({
       try {
         await onRefresh()
       } catch (_error: unknown) {
-        apiLogger.error({ error: _error }, 'Refresh failed:')
+        logger.error({ error: _error }, 'Refresh failed:')
       } finally {
         setIsRefreshing(false)
       }

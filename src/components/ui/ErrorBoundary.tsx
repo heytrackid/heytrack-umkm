@@ -3,7 +3,9 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('UIErrorBoundary')
 
 /**
  * Error Boundary Component
@@ -40,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
     })
 
     // Log error
-    apiLogger.error({
+    logger.error({
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack

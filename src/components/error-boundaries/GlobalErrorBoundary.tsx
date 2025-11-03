@@ -4,7 +4,9 @@ import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('GlobalErrorBoundary')
 
 // Global Error Boundary Component
 // Catches React errors and provides graceful fallback UI
@@ -43,7 +45,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
     // Log the error
     const errorId = this.state.errorId ?? `error_${Date.now()}`
 
-    apiLogger.error({
+    logger.error({
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
