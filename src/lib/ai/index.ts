@@ -43,6 +43,6 @@ export function parseNaturalLanguage(text: string) {
   return NLPProcessor.parseNaturalLanguage(text)
 }
 
-export function generateAIInsights(data: Record<string, unknown>): string {
+export function generateAIInsights(data: Record<string, unknown>): Promise<string> {
   return BusinessAI.getBusinessInsights(data)
 }

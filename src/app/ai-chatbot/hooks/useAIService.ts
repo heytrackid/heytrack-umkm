@@ -161,7 +161,7 @@ export function useAIService() {
         query,
         businessContext: businessContext ?? undefined
       }
-      const insights = generateAIInsights(aiQueryParams as Record<string, unknown>)
+      const insights = await generateAIInsights(aiQueryParams as Record<string, unknown>)
 
       // Generate contextual suggestions based on query type
       const lowerQuery = query.toLowerCase()
