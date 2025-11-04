@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { authLogger } from '@/lib/logger'
 
 /**
  * Authentication Error Handling Utilities
@@ -26,6 +27,27 @@ export const AUTH_ERROR_MESSAGES = {
   'user_banned': 'Akun Anda telah dinonaktifkan. Silakan hubungi admin.',
   'too_many_requests': 'Terlalu banyak permintaan. Silakan coba lagi nanti.',
   'email_locked': 'Akun Anda sedang dikunci karena aktivitas mencurigakan. Silakan coba beberapa saat lagi.',
+  
+  // Network and connection errors
+  'Network request failed': 'Koneksi jaringan gagal. Silakan coba lagi.',
+  'Connection timeout': 'Waktu koneksi habis. Silakan coba lagi.',
+  'Request timeout': 'Permintaan habis waktu. Silakan coba lagi.',
+  'Network connection lost': 'Koneksi jaringan terputus. Silakan coba lagi.',
+
+  // More specific Supabase errors
+  'Auth session missing': 'Sesi otentikasi tidak ditemukan. Silakan login kembali.',
+  'Auth session invalid': 'Sesi otentikasi tidak valid. Silakan login kembali.',
+  'Auth api error': 'Terjadi kesalahan pada API otentikasi.',
+  'Auth unknown error': 'Terjadi kesalahan otentikasi yang tidak dikenal.',
+  'User not found': 'Akun dengan email tersebut tidak ditemukan.',
+  'User not authorized': 'Pengguna tidak diotorisasi.',
+  'Invalid session': 'Sesi tidak valid. Silakan login kembali.',
+  'Verification required': 'Verifikasi diperlukan. Silakan verifikasi akun Anda.',
+  'Phone not confirmed': 'Nomor telepon belum dikonfirmasi.',
+  'Email not verified': 'Email belum diverifikasi. Silakan cek email Anda.',
+  'Account deleted': 'Akun telah dihapus.',
+  'Account disabled': 'Akun telah dinonaktifkan.',
+  'Invalid password': 'Password tidak valid.',
 
   // Password reset errors
   'user_not_found': 'Akun dengan email tersebut tidak ditemukan.',
@@ -53,12 +75,26 @@ export const AUTH_ERROR_MESSAGES = {
 // ============================================================================
 
 /**
+ * Extract error message from error object
+ */
+function extractErrorMessage(error: string | Error | { message?: string }): string {
+  if (typeof error === 'string') {
+    return error
+  }
+  if (error instanceof Error) {
+    return error.message
+  }
+  if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string') {
+    return error.message
+  }
+  return 'Terjadi kesalahan autentikasi'
+}
+
+/**
  * Get user-friendly error message for authentication errors
  */
 export function getAuthErrorMessage(error: string | Error | { message?: string }): string {
-  const errorMessage = typeof error === 'string'
-    ? error
-    : error?.message ?? 'Terjadi kesalahan autentikasi'
+  const errorMessage = extractErrorMessage(error)
 
   // Check for exact matches in our error messages
   if (AUTH_ERROR_MESSAGES[errorMessage as keyof typeof AUTH_ERROR_MESSAGES]) {
@@ -67,11 +103,34 @@ export function getAuthErrorMessage(error: string | Error | { message?: string }
 
   // Check for partial matches
   for (const [key, message] of Object.entries(AUTH_ERROR_MESSAGES)) {
-    if (errorMessage.includes(key)) {
+    if (errorMessage.toLowerCase().includes(key.toLowerCase())) {
       return message
     }
   }
 
+  // Additional specific checks for common patterns that might be missed
+  if (errorMessage.toLowerCase().includes('invalid identifier or password')) {
+    return 'Email atau password salah. Silakan coba lagi.'
+  } else if (errorMessage.toLowerCase().includes('email not confirmed')) {
+    return 'Email belum dikonfirmasi. Silakan periksa inbox Anda untuk email konfirmasi.'
+  } else if (errorMessage.toLowerCase().includes('rate limit exceeded')) {
+    return 'Terlalu banyak percobaan login. Silakan coba lagi nanti.'
+  } else if (errorMessage.toLowerCase().includes('network')) {
+    return 'Koneksi jaringan gagal. Silakan periksa koneksi internet Anda.'
+  } else if (errorMessage.toLowerCase().includes('user not found')) {
+    return 'Akun dengan email tersebut tidak ditemukan.'
+  } else if (errorMessage.toLowerCase().includes('invalid session')) {
+    return 'Sesi tidak valid. Silakan login kembali.'
+  } else if (errorMessage.toLowerCase().includes('jwt')) {
+    return 'Terjadi kesalahan pada sesi otentikasi. Silakan login kembali.'
+  }
+
+  // Log the unknown error for debugging
+  authLogger.warn({ 
+    originalError: typeof error === 'string' ? error : error?.message || 'Unknown auth error',
+    errorType: typeof error
+  }, 'Unknown authentication error received')
+  
   // Fallback for unknown errors
   return 'Terjadi kesalahan. Silakan coba lagi.'
 }
