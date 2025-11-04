@@ -12,7 +12,7 @@ export const usePerformance = () => {
   return { isPerformanceReady };
 };
 
-export const useRenderPerformance = (componentName: string) => {
+export const useRenderPerformance = (_componentName: string) => {
   const renderCountRef = useRef(0);
 
   // Increment render count on each render using a layout effect to avoid causing additional renders

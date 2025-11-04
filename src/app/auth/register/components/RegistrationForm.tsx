@@ -1,6 +1,6 @@
 'use client'
 
-import { type FormEvent, useEffect } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator'
 import { PasswordRequirements } from './PasswordRequirements'
 import { useRegistration } from '@/app/auth/register/hooks/useRegistration'
+import HCaptchaField from '@/components/forms/shared/HCaptchaField'
 
 interface RegistrationFormProps {
   password: string
@@ -44,6 +45,9 @@ export const RegistrationForm = ({
     clearFieldError,
     handleSubmit
   } = useRegistration()
+  
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaError, setCaptchaError] = useState<string | null>(null)
 
   // Notify parent of success
   useEffect(() => {
@@ -54,7 +58,14 @@ export const RegistrationForm = ({
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    
+    if (!captchaToken) {
+      setCaptchaError('Please complete the hCaptcha verification')
+      return
+    }
+    
     const formData = new FormData(e.currentTarget)
+    formData.append('hcaptcha-token', captchaToken)
     handleSubmit(formData)
   }
 
@@ -212,10 +223,28 @@ export const RegistrationForm = ({
             )}
           </div>
 
+          <HCaptchaField
+            sitekey="611e889c-9904-477e-aaa0-ff685616f536"
+            onVerify={(token) => {
+              setCaptchaToken(token)
+              setCaptchaError(null) // Clear any previous error
+            }}
+            onError={(err) => {
+              setCaptchaError(`hCaptcha verification failed: ${err}`)
+              setCaptchaToken(null)
+            }}
+            onExpire={() => {
+              setCaptchaError('hCaptcha verification expired')
+              setCaptchaToken(null)
+            }}
+            required
+            error={captchaError ?? undefined}
+          />
+
           <Button
             type="submit"
             className="w-full h-11 text-base font-medium bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
-            disabled={isPending}
+            disabled={isPending || !captchaToken}
           >
             {isPending ? (
               <span className="flex items-center justify-center">

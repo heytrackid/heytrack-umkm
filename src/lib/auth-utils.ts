@@ -8,14 +8,14 @@ import { handleAuthError } from '@/lib/auth-errors'
 /**
  * Clear authentication session and redirect to login
  */
-export function clearAuthSession(redirectTo: string = '/auth/login'): void {
+export function clearAuthSession(redirectTo = '/auth/login'): void {
   // Clear local storage
   if (typeof window !== 'undefined') {
     try {
       localStorage.clear()
       sessionStorage.clear()
-    } catch (error) {
-      console.warn('Failed to clear browser storage:', error)
+    } catch (_error) {
+      // Failed to clear browser storage
     }
   }
 
@@ -26,7 +26,7 @@ export function clearAuthSession(redirectTo: string = '/auth/login'): void {
 /**
  * Handle Supabase auth errors with appropriate actions
  */
-export function handleSupabaseAuthError(error: any): {
+export function handleSupabaseAuthError(error: unknown): {
   message: string
   shouldClearSession: boolean
   shouldRedirect: boolean
@@ -39,23 +39,20 @@ export function handleSupabaseAuthError(error: any): {
  */
 export async function withAuthErrorHandling<T>(
   operation: () => Promise<T>,
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 ): Promise<T | null> {
   try {
     return await operation()
   } catch (error) {
-    const { shouldClearSession, message } = handleSupabaseAuthError(error)
+    const { shouldClearSession } = handleSupabaseAuthError(error)
 
     if (shouldClearSession) {
-      console.warn('Auth session expired, clearing session:', message)
       clearAuthSession()
       return null
     }
 
     if (onError) {
       onError(error)
-    } else {
-      console.error('Auth operation failed:', error)
     }
 
     throw error
