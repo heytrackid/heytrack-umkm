@@ -170,3 +170,15 @@ const result = await typed(supabase)
 ## Full Documentation
 
 Lihat [GUIDE_REMOVE_AS_ANY.md](/GUIDE_REMOVE_AS_ANY.md) untuk contoh lengkap dan migrasi guide.
+
+## Environment Configuration
+
+For hCaptcha integration, you need to configure the following environment variables:
+
+```bash
+# hCaptcha (required for production, optional for development)
+NEXT_PUBLIC_HCAPTCHA_SITE_KEY=your_public_site_key_here
+HCAPTCHA_SECRET_KEY=your_secret_key_here
+```
+
+See [HCAPTCHA_SETUP.md](../../HCAPTCHA_SETUP.md) for complete instructions on setting up hCaptcha.

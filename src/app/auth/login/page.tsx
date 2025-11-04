@@ -1,25 +1,31 @@
 'use client'
 
-import TurnstileWidget from '@/components/TurnstileWidget'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import HCaptchaField from '@/components/forms/shared/HCaptchaField'
+import { useRenderPerformance } from '@/hooks/usePerformance'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
+import { HCAPTCHA_CONFIG } from '@/lib/config/hcaptcha'
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import Link from 'next/link'
 import { type FormEvent, useState, useTransition } from 'react'
 import { login } from './actions'
 
 const LoginPage = () => {
+  useRenderPerformance('LoginPage')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
-  const [turnstileToken, setTurnstileToken] = useState<string>('')
-  const [turnstileError, setTurnstileError] = useState<string>('')
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaError, setCaptchaError] = useState<string | null>(null)
+  const isCaptchaEnabled = !!HCAPTCHA_CONFIG.siteKey
+
   const [isPending, startTransition] = useTransition()
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -27,7 +33,13 @@ const LoginPage = () => {
     void setError('')
     void setErrorAction(null)
     void setFieldErrors({})
-    void setTurnstileError('')
+    setCaptchaError(null)
+
+    // Only check captcha if it's enabled
+    if (isCaptchaEnabled && !captchaToken) {
+      setCaptchaError('Silakan selesaikan verifikasi hCaptcha')
+      return
+    }
 
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
@@ -50,14 +62,10 @@ const LoginPage = () => {
       return
     }
 
-    // Check if turnstile token exists
-    if (!turnstileToken) {
-      void setTurnstileError('Silakan verifikasi bahwa Anda bukan robot')
-      return
+    // Add captcha token to form data if captcha is enabled
+    if (isCaptchaEnabled && captchaToken) {
+      formData.append('hcaptcha-token', captchaToken)
     }
-
-    // Add turnstile token to form data
-    formData.append('turnstileToken', turnstileToken)
 
     startTransition(async () => {
       const result = await login(formData)
@@ -203,37 +211,30 @@ const LoginPage = () => {
                 )}
               </div>
 
-              <div className="space-y-2">
-                <TurnstileWidget 
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''} 
+              {isCaptchaEnabled && (
+                <HCaptchaField
+                  sitekey={HCAPTCHA_CONFIG.siteKey}
                   onVerify={(token) => {
-                    setTurnstileToken(token)
-                    void setTurnstileError('')
+                    setCaptchaToken(token)
+                    setCaptchaError(null) // Clear any previous error
                   }}
-                  onError={() => {
-                    setTurnstileToken('')
-                    void setTurnstileError('Verifikasi turnstile gagal, silakan coba lagi')
+                  onError={(err) => {
+                    setCaptchaError(`Verifikasi hCaptcha gagal: ${err}`)
+                    setCaptchaToken(null)
                   }}
                   onExpire={() => {
-                    setTurnstileToken('')
-                    void setTurnstileError('Verifikasi turnstile kadaluarsa, silakan coba lagi')
+                    setCaptchaError('Verifikasi hCaptcha telah kedaluwarsa')
+                    setCaptchaToken(null)
                   }}
-                  options={{
-                    theme: 'auto',
-                    size: 'normal'
-                  }}
+                  required
+                  error={captchaError ?? undefined}
                 />
-                {turnstileError && (
-                  <p className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
-                    {turnstileError}
-                  </p>
-                )}
-              </div>
+              )}
 
               <Button
                 type="submit"
                 className="w-full h-11 text-base font-medium bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
-                disabled={isPending}
+                disabled={isPending || (isCaptchaEnabled && !captchaToken)}
               >
                 {isPending ? (
                   <span className="flex items-center justify-center">

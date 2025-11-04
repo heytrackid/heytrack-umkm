@@ -3,6 +3,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { verifyHCaptcha } from '@/lib/hcaptcha-verification'
+import { HCAPTCHA_CONFIG } from '@/lib/config/hcaptcha'
 
 export async function signup(formData: FormData) {
     const supabase = await createClient()
@@ -10,6 +12,19 @@ export async function signup(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const confirmPassword = formData.get('confirmPassword') as string
+    const captchaToken = formData.get('hcaptcha-token') as string
+
+    // Verify hCaptcha token if it's enabled
+    if (HCAPTCHA_CONFIG.secretKey) {
+        if (!captchaToken) {
+            return { error: 'Verifikasi hCaptcha diperlukan' };
+        }
+
+        const captchaResult = await verifyHCaptcha(captchaToken);
+        if (!captchaResult.success) {
+            return { error: captchaResult.error ?? 'Verifikasi hCaptcha gagal' };
+        }
+    }
 
     // Validate password match
     if (password !== confirmPassword) {
@@ -43,7 +58,7 @@ export async function signupWithGoogle() {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: `${process.env['NEXT_PUBLIC_SITE_URL'] ?? 'http://localhost:3000'}/auth/callback`,
+            redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/auth/callback`,
         },
     })
 

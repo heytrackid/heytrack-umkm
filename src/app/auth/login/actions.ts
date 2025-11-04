@@ -1,31 +1,33 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
-import { verifyTurnstileToken } from '@/utils/turnstile'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { authLogger, logError } from '@/lib/logger'
+import { verifyHCaptcha } from '@/lib/hcaptcha-verification'
+import { HCAPTCHA_CONFIG } from '@/lib/config/hcaptcha'
 
 export async function login(formData: FormData) {
     const supabase = await createClient()
 
-    // Get the turnstile token from form data
-    const turnstileToken = formData.get('turnstileToken') as string
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+    const captchaToken = formData.get('hcaptcha-token') as string
 
-    // Verify the turnstile token before proceeding with login
-    if (!turnstileToken) {
-        return { error: 'Captcha verification is required' }
-    }
-
-    const turnstileResult = await verifyTurnstileToken(turnstileToken)
-    if (!turnstileResult.success) {
-        logError(authLogger, turnstileResult.error, 'Turnstile verification failed')
-        return { error: 'Captcha verification failed. Please try again.' }
+    // Verify hCaptcha token if it's enabled
+    if (HCAPTCHA_CONFIG.secretKey) {
+        if (!captchaToken) {
+            return { error: 'Token hCaptcha diperlukan' }
+        }
+        
+        const captchaResult = await verifyHCaptcha(captchaToken)
+        if (!captchaResult.success) {
+            return { error: captchaResult.error ?? 'Verifikasi hCaptcha gagal' }
+        }
     }
 
     const data = {
-        email: formData.get('email') as string,
-        password: formData.get('password') as string,
+        email,
+        password,
     }
 
     const { error } = await supabase.auth.signInWithPassword(data)

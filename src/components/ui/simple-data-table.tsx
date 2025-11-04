@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select"
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 import { VirtualizedTable } from '@/components/ui/virtualized-table'
-import { useMobile } from '@/hooks/useResponsive'
+import { useMobile } from '@/hooks/responsive'
 import {
     Download,
     Edit,

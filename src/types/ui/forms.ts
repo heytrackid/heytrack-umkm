@@ -1,77 +1,61 @@
+export interface FormFieldProps {
+  name: string;
+  label?: string;
+  required?: boolean;
+  placeholder?: string;
+  disabled?: boolean;
+}
 
+export interface FormProps {
+  onSubmit: (data: Record<string, unknown>) => void;
+  validationSchema?: unknown;
+  children?: React.ReactNode;
+  className?: string;
+}
 
-// Form-related types for type-safe form handling
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+}
 
-/**
- * Generic form field update type
- * Ensures type safety when updating form fields
- */
+export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label?: string;
+  error?: string;
+  options: Array<{ value: string; label: string }>;
+}
+
 export interface FormFieldUpdate<T> {
-  field: keyof T
-  value: T[keyof T]
+  name: keyof T;
+  value: T[keyof T];
 }
 
-/**
- * Type-safe form field updater function
- */
-export type FormFieldUpdater<T> = <K extends keyof T>(
-  field: K,
-  value: T[K]
-) => void
+export type FormFieldUpdater<T> = (update: FormFieldUpdate<T>) => void;
 
-/**
- * Order item update for array-based form items
- */
-export interface OrderItemUpdate {
-  index: number
-  field: string
-  value: string | number | boolean | null
-}
-
-/**
- * Generic array item update
- */
 export interface ArrayItemUpdate<T> {
-  index: number
-  field: keyof T
-  value: T[keyof T]
+  index: number;
+  item: T;
 }
 
-/**
- * Form validation result
- */
 export interface FormValidationResult {
-  isValid: boolean
-  errors: FormValidationError[]
+  isValid: boolean;
+  errors: Record<string, string>;
 }
 
-/**
- * Individual field validation error
- */
 export interface FormValidationError {
-  field: string
-  message: string
-  value?: unknown
+  field: string;
+  message: string;
 }
 
-/**
- * Form state for complex forms
- */
 export interface FormState<T> {
-  data: T
-  errors: Record<keyof T, string | undefined>
-  touched: Record<keyof T, boolean>
-  isSubmitting: boolean
-  isValid: boolean
+  values: T;
+  errors: Record<string, string>;
+  isSubmitting: boolean;
+  isValid: boolean;
 }
 
-/**
- * Form actions for reducer pattern
- */
 export type FormAction<T> =
-  | { type: 'SET_FIELD'; field: keyof T; value: T[keyof T] }
-  | { type: 'SET_ERROR'; field: keyof T; error: string }
-  | { type: 'SET_TOUCHED'; field: keyof T }
-  | { type: 'SET_SUBMITTING'; isSubmitting: boolean }
-  | { type: 'RESET' }
-  | { type: 'SET_DATA'; data: T }
+  | { type: 'UPDATE_FIELD'; payload: FormFieldUpdate<T> }
+  | { type: 'SET_ERRORS'; payload: Record<string, string> }
+  | { type: 'SET_SUBMITTING'; payload: boolean }
+  | { type: 'RESET_FORM' };

@@ -39,34 +39,20 @@ const DEFAULT_SECURITY_CONFIG: SecurityConfig = {
 
 // Rate limiter class for API routes
 class InMemoryRateLimiter {
-  private static requests = new Map<string, number[]>()
-  private static cleanupInterval: NodeJS.Timeout
-
-  static {
-    // Clean up old entries every hour
-    this.cleanupInterval = setInterval(() => {
-      const now = Date.now()
-      const windowMs = 60 * 60 * 1000 // 1 hour
-      for (const [key, timestamps] of this.requests.entries()) {
-        const validTimestamps = timestamps.filter(ts => now - ts < windowMs)
-        if (validTimestamps.length === 0) {
-          this.requests.delete(key)
-        } else {
-          this.requests.set(key, validTimestamps)
-        }
-      }
-    }, 60 * 60 * 1000)
-  }
+  private static requests = new Map<string, { timestamps: number[]; windowMs: number }>()
+  private static cleanupTimer: ReturnType<typeof setTimeout> | null = null
+  private static readonly CLEANUP_INTERVAL = 60 * 60 * 1000 // 1 hour
 
   static checkLimit(identifier: string, maxRequests: number, windowMs: number): boolean {
     const now = Date.now()
     const windowStart = now - windowMs
 
     // Get existing requests for this identifier
-    const requests = this.requests.get(identifier) || []
+    const requestEntry = this.requests.get(identifier) ?? { timestamps: [], windowMs }
+    const timestamps = requestEntry.timestamps
 
     // Remove old requests outside the window
-    const validRequests = requests.filter(time => time > windowStart)
+    const validRequests = timestamps.filter(time => time > windowStart)
 
     // Check if limit exceeded
     if (validRequests.length >= maxRequests) {
@@ -75,13 +61,61 @@ class InMemoryRateLimiter {
 
     // Add current request
     validRequests.push(now)
-    this.requests.set(identifier, validRequests)
+    this.requests.set(identifier, {
+      timestamps: validRequests,
+      windowMs
+    })
+    this.scheduleCleanup(windowMs)
 
     return true
   }
 
   static cleanup(): void {
-    clearInterval(this.cleanupInterval)
+    const now = Date.now()
+
+    for (const [key, entry] of this.requests.entries()) {
+      const { windowMs, timestamps } = entry
+      const next = timestamps.filter(ts => now - ts < windowMs)
+      if (next.length === 0) {
+        this.requests.delete(key)
+      } else {
+        this.requests.set(key, {
+          timestamps: next,
+          windowMs
+        })
+      }
+    }
+
+    if (this.requests.size === 0) {
+      this.clearCleanupTimer()
+    } else {
+      this.scheduleCleanup(this.CLEANUP_INTERVAL)
+    }
+  }
+
+  private static scheduleCleanup(windowMs: number) {
+    if (this.cleanupTimer || this.requests.size === 0 || typeof setTimeout === 'undefined') {
+      return
+    }
+
+    const smallestWindow = Math.min(
+      windowMs,
+      ...Array.from(this.requests.values()).map(entry => entry.windowMs)
+    )
+    const delay = Math.min(smallestWindow, this.CLEANUP_INTERVAL)
+
+    this.cleanupTimer = setTimeout(() => {
+      this.cleanupTimer = null
+      this.cleanup()
+    }, delay)
+  }
+
+  private static clearCleanupTimer() {
+    if (!this.cleanupTimer) {
+      return
+    }
+    clearTimeout(this.cleanupTimer)
+    this.cleanupTimer = null
   }
 }
 

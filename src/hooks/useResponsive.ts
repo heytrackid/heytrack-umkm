@@ -1,3 +1,45 @@
+import { useState, useEffect } from 'react';
 
-// Re-export from modular structure for backward compatibility
-export * from './responsive'
+export const useResponsive = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const checkResponsive = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      setIsDesktop(width >= 1024);
+    };
+
+    checkResponsive();
+    window.addEventListener('resize', checkResponsive);
+
+    return () => {
+      window.removeEventListener('resize', checkResponsive);
+    };
+  }, []);
+
+  return { isMobile, isTablet, isDesktop };
+};
+
+// Convenience hook for mobile detection specifically
+export const useMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+
+  return isMobile;
+};

@@ -172,11 +172,34 @@ export function useNotifications() {
   }
 }
 
+let notificationAudioContext: AudioContext | null = null
+
 // Play notification sound (simple beep)
 function playNotificationSound() {
   try {
     // Create simple beep sound using Web Audio API
-    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+    const AudioContextCtor =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+
+    if (!AudioContextCtor) {
+      return
+    }
+
+    if (!notificationAudioContext || notificationAudioContext.state === 'closed') {
+      notificationAudioContext = new AudioContextCtor()
+    }
+
+    const audioContext = notificationAudioContext
+
+    if (!audioContext) {
+      return
+    }
+
+    if (audioContext.state === 'suspended') {
+      void audioContext.resume()
+    }
+
     const oscillator = audioContext.createOscillator()
     const gainNode = audioContext.createGain()
 
@@ -191,6 +214,11 @@ function playNotificationSound() {
 
     oscillator.start(audioContext.currentTime)
     oscillator.stop(audioContext.currentTime + 0.3)
+
+    oscillator.onended = () => {
+      oscillator.disconnect()
+      gainNode.disconnect()
+    }
   } catch (_e) {
     // Browser doesn't support Web Audio API
   }

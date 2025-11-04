@@ -19,8 +19,8 @@ export async function calculateHash(content: string): Promise<string> {
 
 export function getStrictCSP(nonce: string, isDev = false): string {
   const scriptSrc = isDev
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://vercel.live;`
-    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com;`
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://vercel.live https://hcaptcha.com https://*.hcaptcha.com;`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://hcaptcha.com https://*.hcaptcha.com;`
 
   // Catatan: kamu pakai inline style => 'unsafe-inline' tetap diperlukan
   const policies = [
@@ -29,10 +29,10 @@ export function getStrictCSP(nonce: string, isDev = false): string {
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;`,
     `img-src 'self' https: data: blob: https://*.supabase.co https://*.vercel.app;`,
     `font-src 'self' https://fonts.gstatic.com data:;`,
-    `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai https://fonts.googleapis.com https://vitals.vercel-insights.com https://vercel.live;`,
+    `connect-src 'self' https://*.supabase.co https://vrrjoswzmlhkmmcfhicw.supabase.co wss://*.supabase.co https://api.openrouter.ai https://fonts.googleapis.com https://vitals.vercel-insights.com https://vercel.live https://hcaptcha.com https://*.hcaptcha.com;`,
     `worker-src 'self' blob:;`,
     `media-src 'self' https://*.supabase.co;`,
-    `frame-src 'none';`,
+    `frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com;`,
     `object-src 'none';`,
     `base-uri 'self';`,
     `form-action 'self';`,
@@ -57,10 +57,10 @@ export function getHashBasedCSP(hashes: { scripts?: string[]; styles?: string[] 
     `style-src 'self' ${styleHashes} 'unsafe-inline' https://fonts.googleapis.com;`,
     `img-src 'self' https: data: blob: https://*.supabase.co https://*.vercel.app;`,
     `font-src 'self' https://fonts.gstatic.com data:;`,
-    `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai https://fonts.googleapis.com https://vitals.vercel-insights.com https://vercel.live;`,
+    `connect-src 'self' https://*.supabase.co https://vrrjoswzmlhkmmcfhicw.supabase.co wss://*.supabase.co https://api.openrouter.ai https://fonts.googleapis.com https://vitals.vercel-insights.com https://vercel.live https://hcaptcha.com https://*.hcaptcha.com;`,
     `worker-src 'self' blob:;`,
     `media-src 'self' https://*.supabase.co;`,
-    `frame-src 'none';`,
+    `frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com;`,
     `object-src 'none';`,
     `base-uri 'self';`,
     `form-action 'self';`,

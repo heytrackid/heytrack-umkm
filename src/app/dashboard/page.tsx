@@ -16,12 +16,64 @@ import { useQuery } from '@tanstack/react-query'
 import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Plus, Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
+import dynamic from 'next/dynamic'
 
-// Import lightweight components normally - no need for lazy loading
-import HppDashboardWidget from './components/HppDashboardWidget'
-import RecentOrdersSection from './components/RecentOrdersSection'
-import StatsCardsSection from './components/StatsCardsSection'
-import StockAlertsSection from './components/StockAlertsSection'
+// Dynamically import heavy dashboard components to improve initial page load
+const HppDashboardWidget = dynamic(
+  () => import('./components/HppDashboardWidget'),
+  { 
+    loading: () => <div className="h-80 bg-gray-100 animate-pulse rounded-lg" />,
+    ssr: false
+  }
+)
+
+const RecentOrdersSection = dynamic(
+  () => import('./components/RecentOrdersSection'),
+  { 
+    loading: () => (
+      <div className="space-y-4">
+        <div className="h-12 bg-gray-100 animate-pulse rounded" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
+          ))}
+        </div>
+      </div>
+    ),
+    ssr: false
+  }
+)
+
+const StatsCardsSection = dynamic(
+  () => import('./components/StatsCardsSection'),
+  { 
+    loading: () => (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {Array.from({ length: 4 }, (_, i) => (
+          <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
+        ))}
+      </div>
+    ),
+    ssr: false
+  }
+)
+
+const StockAlertsSection = dynamic(
+  () => import('./components/StockAlertsSection'),
+  { 
+    loading: () => (
+      <div className="space-y-4">
+        <div className="h-12 bg-gray-100 animate-pulse rounded" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
+          ))}
+        </div>
+      </div>
+    ),
+    ssr: false
+  }
+)
 
 // Dashboard data structure
 interface DashboardData {
@@ -86,34 +138,13 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
   }
 }
 
-// Dashboard Skeleton Component
-const DashboardSkeleton = () => (
-  <div className="space-y-6">
-    {/* Stats Cards Loading */}
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      {Array.from({ length: 4 }, (_, i) => (
-        <StatsCardSkeleton key={i} />
-      ))}
-    </div>
 
-    {/* Recent Orders & Stock Alerts Loading */}
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <RecentOrdersSkeleton />
-      <StockAlertSkeleton />
-    </div>
 
-    {/* HPP Widget Loading */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="h-5 w-5" />
-          Analisis HPP
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
-      </CardContent>
-    </Card>
+const StatsCardsGridSkeleton = () => (
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    {Array.from({ length: 4 }, (_, i) => (
+      <StatsCardSkeleton key={i} />
+    ))}
   </div>
 )
 
@@ -157,8 +188,47 @@ const Dashboard = () => {
   }, [isAuthLoading, isAuthenticated])
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000)
-    return () => clearInterval(timer)
+    if (typeof document === 'undefined') {
+      return undefined
+    }
+
+    let timer: ReturnType<typeof setInterval> | null = null
+
+    const tick = () => {
+      void setCurrentTime(new Date())
+    }
+
+    const start = () => {
+      if (timer || document.hidden) {
+        return
+      }
+      tick()
+      timer = setInterval(tick, 1000)
+    }
+
+    const stop = () => {
+      if (!timer) {
+        return
+      }
+      clearInterval(timer)
+      timer = null
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stop()
+      } else {
+        start()
+      }
+    }
+
+    start()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      stop()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   // ✅ FIX: Combine loading states to prevent double skeleton
@@ -347,43 +417,81 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {/* Main Dashboard Content - Single Suspense boundary to prevent cascading loading */}
-        <Suspense fallback={<DashboardSkeleton />}>
+        {/* Main Dashboard Content - Individual Suspense boundaries for each section */}
+        <div className="space-y-6">
           {/* Stats Cards */}
-          <StatsCardsSection
-            stats={dashboardData?.stats ? {
-              revenue: {
-                total: dashboardData.stats.totalSales,
-                growth: dashboardData.stats.salesGrowth.toString(),
-                trend: dashboardData.stats.salesGrowth >= 0 ? 'up' : 'down'
-              },
-              orders: {
-                total: dashboardData.stats.totalOrders,
-                active: dashboardData.stats.totalOrders // Placeholder - need to determine active orders
-              },
-              customers: {
-                total: dashboardData.stats.totalCustomers,
-                vip: 0 // Placeholder - need to determine VIP customers
-              },
-              inventory: {
-                total: dashboardData.stats.totalIngredients,
-                lowStock: dashboardData.stats.ingredientsLow
-              }
-            } : undefined}
-            formatCurrency={formatCurrency}
-          />
+          <Suspense fallback={<StatsCardsGridSkeleton />}>
+            <StatsCardsSection
+              stats={dashboardData?.stats ? {
+                revenue: {
+                  total: dashboardData.stats.totalSales,
+                  growth: dashboardData.stats.salesGrowth.toString(),
+                  trend: dashboardData.stats.salesGrowth >= 0 ? 'up' : 'down'
+                },
+                orders: {
+                  total: dashboardData.stats.totalOrders,
+                  active: dashboardData.stats.totalOrders // Placeholder - need to determine active orders
+                },
+                customers: {
+                  total: dashboardData.stats.totalCustomers,
+                  vip: 0 // Placeholder - need to determine VIP customers
+                },
+                inventory: {
+                  total: dashboardData.stats.totalIngredients,
+                  lowStock: dashboardData.stats.ingredientsLow
+                }
+              } : undefined}
+              formatCurrency={formatCurrency}
+            />
+          </Suspense>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Orders */}
-            <RecentOrdersSection orders={dashboardData?.orders?.recent} />
+            <Suspense fallback={
+              <div className="space-y-4">
+                <div className="h-12 bg-gray-100 animate-pulse rounded" />
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
+                  ))}
+                </div>
+              </div>
+            }>
+              <RecentOrdersSection orders={dashboardData?.orders?.recent} />
+            </Suspense>
 
             {/* Low Stock Alert */}
-            <StockAlertsSection lowStockItems={dashboardData?.inventory?.lowStockAlerts} />
+            <Suspense fallback={
+              <div className="space-y-4">
+                <div className="h-12 bg-gray-100 animate-pulse rounded" />
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
+                  ))}
+                </div>
+              </div>
+            }>
+              <StockAlertsSection lowStockItems={dashboardData?.inventory?.lowStockAlerts} />
+            </Suspense>
           </div>
 
           {/* HPP Dashboard Widget */}
-          <HppDashboardWidget />
-        </Suspense>
+          <Suspense fallback={
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Analisis HPP
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+              </CardContent>
+            </Card>
+          }>
+            <HppDashboardWidget />
+          </Suspense>
+        </div>
 
         {/* Enhanced Quick Actions */}
         <Card>

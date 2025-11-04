@@ -14,7 +14,29 @@ import { useResponsive } from '@/hooks/useResponsive'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { apiLogger } from '@/lib/logger'
-import { ProductionFormDialog } from './ProductionFormDialog'
+import dynamic from 'next/dynamic'
+
+// Lazy load the ProductionFormDialog component as it's heavy
+const LazyProductionFormDialog = dynamic(
+  () => import('./ProductionFormDialog').then(mod => mod.ProductionFormDialog),
+  {
+    loading: () => (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4">
+          <div className="animate-pulse space-y-4">
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mx-auto" />
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded mt-4" />
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    ssr: false
+  }
+)
 import { Factory, Plus, Search, Calendar, Clock, CheckCircle, XCircle, TrendingUp, Package, Play, BarChart3, Filter, Download, RefreshCw } from 'lucide-react'
 
 // Extended type for production page display
@@ -531,9 +553,9 @@ export const EnhancedProductionPage = () => {
                     </CardContent>
                 </Card>
             )}
-            <ProductionFormDialog
+            <LazyProductionFormDialog
                 open={isFormOpen}
-                onOpenChange={setIsFormOpen}
+                onOpenChange={(open) => setIsFormOpen(open)}
                 onSuccess={fetchProductions}
             />
         </div>

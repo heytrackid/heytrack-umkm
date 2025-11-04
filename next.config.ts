@@ -92,7 +92,29 @@ const nextConfig: NextConfig = {
               'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()',
           },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          { 
+            key: 'Content-Security-Policy', 
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://hcaptcha.com https://*.hcaptcha.com",
+              "frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com",
+              "style-src 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com",
+              "img-src 'self' data: https://*.hcaptcha.com",
+              "connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com",
+              "font-src 'self' https://*.hcaptcha.com",
+              "media-src 'self'",
+              "object-src 'none'",
+              "child-src 'self'",
+              "worker-src 'self'",
+              "manifest-src 'self'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'none'",
+              "upgrade-insecure-requests"
+            ].join('; ')
+          },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
       {
@@ -107,6 +129,66 @@ const nextConfig: NextConfig = {
         ],
       },
     ]
+  },
+
+  // Webpack optimization
+  webpack: (config, { isServer, dev }) => {
+    // Optimize bundle splitting
+    if (!dev && !isServer) {
+      config.optimization = config.optimization || {}
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            priority: 10,
+            maxSize: 244000, // ~244KB max per chunk
+          },
+          // Recharts chunk
+          recharts: {
+            test: /[\\/]node_modules[\\/]recharts[\\/]/,
+            name: 'recharts',
+            chunks: 'all',
+            priority: 20,
+          },
+          // UI components chunk
+          ui: {
+            test: /[\\/]node_modules[\\/](@radix-ui|lucide-react)[\\/]/,
+            name: 'ui',
+            chunks: 'all',
+            priority: 15,
+          },
+          // Supabase chunk
+          supabase: {
+            test: /[\\/]node_modules[\\/](@supabase)[\\/]/,
+            name: 'supabase',
+            chunks: 'all',
+            priority: 18,
+          },
+          // Large libraries
+          largeLibs: {
+            test: /[\\/]node_modules[\\/](zod|react-hook-form|exceljs)[\\/]/,
+            name: 'large-libs',
+            chunks: 'all',
+            priority: 12,
+          },
+        },
+      }
+    }
+
+    // Add asset optimization for images
+    config.module = config.module || {}
+    config.module.rules = config.module.rules || []
+
+    // Optimize SVG handling
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    })
+
+    return config
   },
 
   // jangan masukkan jsdom/dompurify di sini
