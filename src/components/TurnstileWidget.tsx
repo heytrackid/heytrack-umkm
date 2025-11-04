@@ -44,9 +44,11 @@ const TurnstileWidget = ({
   options = {} 
 }: TurnstileWidgetProps) => {
   const [loaded, setLoaded] = useState(false)
-  const [widgetId, setWidgetId] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const widgetRef = useRef<string | null>(null)
+  const theme = options?.theme ?? 'auto'
+  const size = options?.size ?? 'normal'
+  const language = options?.language ?? 'auto'
 
   useEffect(() => {
     // Check if Turnstile script is already loaded
@@ -82,7 +84,7 @@ const TurnstileWidget = ({
   }, [])
 
   useEffect(() => {
-    if (loaded && containerRef.current && !widgetId) {
+    if (loaded && containerRef.current && !widgetRef.current) {
       // Render the widget only once
       try {
         const id = window.turnstile.render(containerRef.current, {
@@ -96,12 +98,11 @@ const TurnstileWidget = ({
           'expired-callback': () => {
             onExpire?.()
           },
-          theme: options.theme ?? 'auto',
-          size: options.size ?? 'normal',
-          language: options.language ?? 'auto',
+          theme,
+          size,
+          language,
         })
         widgetRef.current = id
-        setWidgetId(id)
       } catch (error) {
         logger.error({ error }, 'Error rendering Turnstile widget')
       }
@@ -112,13 +113,12 @@ const TurnstileWidget = ({
         try {
           window.turnstile?.reset?.(widgetRef.current)
           widgetRef.current = null
-          setWidgetId(null)
         } catch (_e) {
           // Widget may have already been destroyed
         }
       }
     }
-  }, [loaded, siteKey, onVerify, onError, onExpire, options, widgetId])
+  }, [loaded, siteKey, onVerify, onError, onExpire, theme, size, language])
 
   // Function is kept for potential future use
   const _reset = () => {
