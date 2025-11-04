@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { verifyHCaptcha } from '@/lib/hcaptcha-verification'
+import { HCAPTCHA_CONFIG } from '@/lib/config/hcaptcha'
 
 export async function signup(formData: FormData) {
     const supabase = await createClient()
@@ -13,14 +14,16 @@ export async function signup(formData: FormData) {
     const confirmPassword = formData.get('confirmPassword') as string
     const captchaToken = formData.get('hcaptcha-token') as string
 
-    // Verify hCaptcha token
-    if (!captchaToken) {
-        return { error: 'hCaptcha verification required' };
-    }
+    // Verify hCaptcha token if it's enabled
+    if (HCAPTCHA_CONFIG.secretKey) {
+        if (!captchaToken) {
+            return { error: 'Verifikasi hCaptcha diperlukan' };
+        }
 
-    const captchaResult = await verifyHCaptcha(captchaToken);
-    if (!captchaResult.success) {
-        return { error: captchaResult.error || 'hCaptcha verification failed' };
+        const captchaResult = await verifyHCaptcha(captchaToken);
+        if (!captchaResult.success) {
+            return { error: captchaResult.error || 'Verifikasi hCaptcha gagal' };
+        }
     }
 
     // Validate password match

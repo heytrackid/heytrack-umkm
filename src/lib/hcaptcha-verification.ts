@@ -1,6 +1,7 @@
 'use server'
 
 import { apiLogger } from '@/lib/logger'
+import { HCAPTCHA_CONFIG } from '@/lib/config/hcaptcha'
 
 interface HCaptchaVerificationResponse {
   success: boolean
@@ -18,40 +19,67 @@ export async function verifyHCaptcha(token: string): Promise<{ success: boolean;
   }
 
   try {
-    // Dalam implementasi sebenarnya, Anda akan mengirim token ke API verifikasi hCaptcha
-    // Untuk saat ini, kita implementasikan verifikasi mock untuk keperluan development
-    // Di production, Anda harus menggunakan: https://docs.hcaptcha.com/#verify-the-user-response-server-side
+    // Validasi konfigurasi
+    const configValidation = HCAPTCHA_CONFIG.secretKey 
+      ? { isValid: true } 
+      : { isValid: false, error: 'HCAPTCHA_SECRET_KEY tidak diatur untuk lingkungan produksi' }
     
-    const secret = process.env.HCAPTCHA_SECRET_KEY
-    if (!secret) {
-      apiLogger.warn('Variabel lingkungan HCAPTCHA_SECRET_KEY tidak diatur')
-      // Di development, kita bisa melewati pemeriksaan, tetapi di production harus diperlukan
+    if (!configValidation.isValid) {
       if (process.env.NODE_ENV === 'production') {
-        return { success: false, error: 'Konfigurasi hCaptcha bermasalah' }
+        apiLogger.error({ configValidation }, 'Konfigurasi hCaptcha tidak valid untuk lingkungan produksi')
+        return { success: false, error: configValidation.error }
       } else {
-        // Untuk development, terima semua token
+        // Di development, jika tidak ada secret key, skip verifikasi hCaptcha
+        apiLogger.warn('HCAPTCHA_SECRET_KEY tidak diatur. Verifikasi hCaptcha dilewati dalam lingkungan development.')
         return { success: true }
       }
     }
 
     const formData = new FormData()
-    formData.append('secret', secret)
+    formData.append('secret', HCAPTCHA_CONFIG.secretKey!)
     formData.append('response', token)
 
-    const response = await fetch('https://api.hcaptcha.com/siteverify', {
-      method: 'POST',
-      body: formData
-    })
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), HCAPTCHA_CONFIG.timeout)
 
-    const result: HCaptchaVerificationResponse = await response.json()
+    try {
+      const response = await fetch(HCAPTCHA_CONFIG.verifyEndpoint, {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal,
+      })
 
-    if (result.success) {
-      apiLogger.info('Verifikasi hCaptcha berhasil')
-      return { success: true }
-    } else {
-      const errorCodes = result['error-codes']?.join(', ') || 'error tidak diketahui'
-      apiLogger.error({ errorCodes }, 'Verifikasi hCaptcha gagal')
-      return { success: false, error: `Verifikasi hCaptcha gagal: ${errorCodes}` }
+      clearTimeout(timeoutId)
+
+      if (!response.ok) {
+        const statusText = response.statusText
+        apiLogger.error({ status: response.status, statusText }, 'Respons tidak berhasil dari endpoint verifikasi hCaptcha')
+        return { success: false, error: `Respons tidak berhasil dari server hCaptcha: ${statusText}` }
+      }
+
+      const result: HCaptchaVerificationResponse = await response.json()
+
+      if (result.success) {
+        apiLogger.info('Verifikasi hCaptcha berhasil')
+        return { success: true }
+      } else {
+        const errorCodes = result['error-codes']?.join(', ') || 'error tidak diketahui'
+        apiLogger.error({ errorCodes }, 'Verifikasi hCaptcha gagal')
+        return { success: false, error: `Verifikasi hCaptcha gagal: ${errorCodes}` }
+      }
+    } catch (fetchError: unknown) {
+      clearTimeout(timeoutId)
+      
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        apiLogger.error('Verifikasi hCaptcha timeout')
+        return { success: false, error: 'Verifikasi hCaptcha timeout' }
+      }
+      
+      apiLogger.error({ error: fetchError }, 'Error saat mengirim permintaan verifikasi hCaptcha')
+      return { 
+        success: false, 
+        error: fetchError instanceof Error ? fetchError.message : 'Terjadi kesalahan jaringan saat verifikasi hCaptcha' 
+      }
     }
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Terjadi kesalahan saat verifikasi hCaptcha')
