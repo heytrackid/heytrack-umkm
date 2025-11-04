@@ -16,38 +16,14 @@
 - **UI mode**: `npx vitest --ui`
 - **Coverage**: `npx vitest --coverage`
 
-## Security & Safety Guidelines
-
-### Input Validation & Sanitization
-- **ALWAYS sanitize user inputs** using `@/utils/security/InputSanitizer`
-- **Validate all API inputs** with Zod schemas from `@/lib/validations`
-- **Use rate limiting** with `@/utils/security/RateLimiter` for API endpoints
-- **Sanitize HTML content** to prevent XSS attacks
-- **Validate file uploads** and prevent directory traversal
-- **Use parameterized queries** for database operations
-
-### Authentication & Authorization
-- **Validate user sessions** on all protected routes
-- **Use Supabase auth** for user management
-- **Implement proper role-based access control**
-- **Never expose sensitive data** in client-side code
-- **Use secure headers** from `@/utils/security/SecurityHeaders`
-
-### Error Handling & Logging
-- **Use `useErrorHandler` hook** for component error management
-- **Log errors properly** with `@/lib/logger` (never use console)
-- **Handle API errors** with `handleAPIError` from `@/lib/errors/api-error-handler`
-- **Provide user-friendly error messages** without exposing sensitive information
-- **Implement proper error boundaries** for React components
-
-### Database & API Safety
-- **Use typed database queries** with generated Supabase types
-- **Validate all database inputs** before insertion/update
-- **Implement proper transaction handling** for complex operations
-- **Use database constraints** and validation at the schema level
-- **Sanitize all user-generated content** before storage
-
 ## Code Style Guidelines
+- **TypeScript**: Strict mode enabled, no `any` types, absolute imports with `@/`
+- **React**: Functional components, arrow functions, hooks with `use` prefix
+- **Naming**: camelCase for functions/variables, PascalCase for components/types, SCREAMING_SNAKE_CASE for constants
+- **Imports**: Absolute imports only, group external/internal/types, no default exports
+- **Error Handling**: Use `useErrorHandler` hook, log with `@/lib/logger`, no `console`
+- **Formatting**: No semicolons, single quotes, 100 char width, trailing commas
+- **Security**: Sanitize inputs with `@/utils/security/InputSanitizer`, validate with Zod
 
 ### TypeScript
 - **Strict mode enabled**: All strict TypeScript checks active

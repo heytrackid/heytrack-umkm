@@ -16,23 +16,36 @@ export const AUTH_ERROR_MESSAGES = {
   'Signup disabled': 'Pendaftaran akun baru sedang dinonaktifkan.',
 
   // Sign in errors
-  'Invalid login credentials': 'Email atau password salah.',
-  'Email not confirmed': 'Email belum dikonfirmasi. Silakan periksa inbox Anda.',
-  'Invalid email': 'Format email tidak valid.',
+  'Invalid login credentials': 'Email atau password salah. Silakan coba lagi.',
+  'email_not_confirmed': 'Email belum dikonfirmasi. Silakan periksa inbox Anda untuk email konfirmasi.',
+  'invalid_email': 'Format email tidak valid.',
+  'email_rate_limit_exceeded': 'Terlalu banyak percobaan login. Silakan coba lagi nanti.',
+  'invalid_otp': 'Kode verifikasi tidak valid. Silakan coba lagi.',
+  'session_expired': 'Sesi Anda telah berakhir. Silakan login kembali.',
+  'session_not_found': 'Sesi tidak ditemukan. Silakan login kembali.',
+  'user_banned': 'Akun Anda telah dinonaktifkan. Silakan hubungi admin.',
+  'too_many_requests': 'Terlalu banyak permintaan. Silakan coba lagi nanti.',
+  'email_locked': 'Akun Anda sedang dikunci karena aktivitas mencurigakan. Silakan coba beberapa saat lagi.',
 
   // Password reset errors
-  'User not found': 'Akun dengan email tersebut tidak ditemukan.',
-  'Email rate limit exceeded': 'Terlalu banyak permintaan reset password. Coba lagi nanti.',
+  'user_not_found': 'Akun dengan email tersebut tidak ditemukan.',
 
    // Session errors
-   'JWT expired': 'Sesi telah berakhir. Silakan login kembali.',
-   'Refresh token not found': 'Token refresh tidak ditemukan.',
-   'Invalid refresh token': 'Token refresh tidak valid.',
-   'refresh_token_not_found': 'Sesi telah berakhir. Silakan login kembali.',
+   'jwt_expired': 'Sesi telah berakhir. Silakan login kembali.',
+   'refresh_token_not_found': 'Token refresh tidak ditemukan.',
+   'invalid_refresh_token': 'Token refresh tidak valid.',
 
   // Generic auth errors
-  'Weak password': 'Password terlalu lemah. Gunakan minimal 6 karakter.',
-  'Invalid credentials': 'Kredensial tidak valid.',
+  'weak_password': 'Password terlalu lemah. Gunakan minimal 6 karakter dengan kombinasi huruf besar, kecil, dan angka.',
+
+  // Network/server errors
+  'Network request failed': 'Koneksi jaringan gagal. Silakan coba lagi.',
+  'Server error': 'Terjadi kesalahan server. Silakan coba lagi nanti.',
+  'Internal server error': 'Terjadi kesalahan internal. Silakan coba lagi nanti.',
+
+  // Captcha errors
+  'captcha verification failed': 'Verifikasi captcha gagal. Silakan coba lagi.',
+  'invalid captcha token': 'Token captcha tidak valid. Silakan coba lagi.',
 } as const
 
 // ============================================================================

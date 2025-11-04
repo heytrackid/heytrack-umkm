@@ -7,13 +7,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import HCaptchaField from '@/components/forms/shared/HCaptchaField'
+import dynamic from 'next/dynamic'
+
+const HCaptchaField = dynamic(() => import('@/components/forms/shared/HCaptchaField'), {
+  ssr: false,
+  loading: () => <div className="flex justify-center"><div className="h-20 w-full bg-gray-100 dark:bg-gray-800 rounded animate-pulse" /></div>
+})
 import { useRenderPerformance } from '@/hooks/usePerformance'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 import { HCAPTCHA_CONFIG } from '@/lib/config/hcaptcha'
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import Link from 'next/link'
-import { type FormEvent, useState, useTransition } from 'react'
+import React, { type FormEvent, useState, useTransition } from 'react'
 import { login } from './actions'
 
 const LoginPage = () => {
@@ -120,7 +125,7 @@ const LoginPage = () => {
                 <AlertDescription className="text-sm">
                   {error}
                   {errorAction && (
-                    <>
+                    <React.Fragment>
                       {' '}
                       <Link
                         href={errorAction.href}
@@ -128,7 +133,7 @@ const LoginPage = () => {
                       >
                         {errorAction.label}
                       </Link>
-                    </>
+                    </React.Fragment>
                   )}
                 </AlertDescription>
               </Alert>
