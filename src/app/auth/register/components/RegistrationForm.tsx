@@ -60,7 +60,7 @@ export const RegistrationForm = ({
     e.preventDefault()
     
     if (!captchaToken) {
-      setCaptchaError('Please complete the hCaptcha verification')
+      setCaptchaError('Silakan selesaikan verifikasi hCaptcha')
       return
     }
     
@@ -230,11 +230,11 @@ export const RegistrationForm = ({
               setCaptchaError(null) // Clear any previous error
             }}
             onError={(err) => {
-              setCaptchaError(`hCaptcha verification failed: ${err}`)
+              setCaptchaError(`Verifikasi hCaptcha gagal: ${err}`)
               setCaptchaToken(null)
             }}
             onExpire={() => {
-              setCaptchaError('hCaptcha verification expired')
+              setCaptchaError('Verifikasi hCaptcha telah kedaluwarsa')
               setCaptchaToken(null)
             }}
             required

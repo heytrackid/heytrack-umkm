@@ -3,39 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-
-// Server-side hCaptcha verification function
-async function verifyHCaptcha(token: string) {
-  const secretKey = process.env.HCAPTCHA_SECRET_KEY;
-  
-  if (!secretKey) {
-    // In a real application, you might want to log this differently
-    // since console.error is not allowed by linting rules
-    return { success: false, message: 'Server configuration error' };
-  }
-
-  const formData = new FormData();
-  formData.append('secret', secretKey);
-  formData.append('response', token);
-
-  try {
-    const response = await fetch('https://api.hcaptcha.com/siteverify', {
-      method: 'POST',
-      body: formData
-    });
-
-    const data = await response.json();
-    
-    return {
-      success: data.success,
-      message: data['error-codes'] ? data['error-codes'].join(', ') : null
-    };
-  } catch (_error) {
-    // In a real application, you might want to log this differently
-    // since console.error is not allowed by linting rules
-    return { success: false, message: 'Verification service error' };
-  }
-}
+import { verifyHCaptcha } from '@/lib/hcaptcha-verification'
 
 export async function signup(formData: FormData) {
     const supabase = await createClient()
@@ -52,7 +20,7 @@ export async function signup(formData: FormData) {
 
     const captchaResult = await verifyHCaptcha(captchaToken);
     if (!captchaResult.success) {
-        return { error: `hCaptcha verification failed: ${captchaResult.message ?? 'Invalid challenge'}` };
+        return { error: captchaResult.error || 'hCaptcha verification failed' };
     }
 
     // Validate password match

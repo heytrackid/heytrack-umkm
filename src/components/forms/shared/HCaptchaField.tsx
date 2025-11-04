@@ -36,7 +36,7 @@ export const HCaptchaField: React.FC<HCaptchaFieldProps> = ({
   required = false
 }) => (
   <FormField 
-    label="hCaptcha Verification" 
+    label="Verifikasi hCaptcha" 
     error={error} 
     required={required}
   >

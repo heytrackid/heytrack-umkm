@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import HCaptchaField from '@/components/forms/shared/HCaptchaField'
 import { useRenderPerformance } from '@/hooks/usePerformance'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
@@ -20,6 +21,8 @@ const LoginPage = () => {
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaError, setCaptchaError] = useState<string | null>(null)
 
   const [isPending, startTransition] = useTransition()
 
@@ -28,6 +31,12 @@ const LoginPage = () => {
     void setError('')
     void setErrorAction(null)
     void setFieldErrors({})
+    setCaptchaError(null)
+
+    if (!captchaToken) {
+      setCaptchaError('Silakan selesaikan verifikasi hCaptcha')
+      return
+    }
 
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
@@ -49,6 +58,9 @@ const LoginPage = () => {
       void setFieldErrors(errors)
       return
     }
+
+    // Add captcha token to form data
+    formData.append('hcaptcha-token', captchaToken)
 
     startTransition(async () => {
       const result = await login(formData)
@@ -194,10 +206,28 @@ const LoginPage = () => {
                 )}
               </div>
 
+              <HCaptchaField
+                sitekey="611e889c-9904-477e-aaa0-ff685616f536"
+                onVerify={(token) => {
+                  setCaptchaToken(token)
+                  setCaptchaError(null) // Clear any previous error
+                }}
+                onError={(err) => {
+                  setCaptchaError(`Verifikasi hCaptcha gagal: ${err}`)
+                  setCaptchaToken(null)
+                }}
+                onExpire={() => {
+                  setCaptchaError('Verifikasi hCaptcha telah kedaluwarsa')
+                  setCaptchaToken(null)
+                }}
+                required
+                error={captchaError ?? undefined}
+              />
+
               <Button
                 type="submit"
                 className="w-full h-11 text-base font-medium bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
-                disabled={isPending}
+                disabled={isPending || !captchaToken}
               >
                 {isPending ? (
                   <span className="flex items-center justify-center">
