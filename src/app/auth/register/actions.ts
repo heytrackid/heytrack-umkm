@@ -22,7 +22,7 @@ export async function signup(formData: FormData) {
 
         const captchaResult = await verifyHCaptcha(captchaToken);
         if (!captchaResult.success) {
-            return { error: captchaResult.error || 'Verifikasi hCaptcha gagal' };
+            return { error: captchaResult.error ?? 'Verifikasi hCaptcha gagal' };
         }
     }
 

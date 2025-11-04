@@ -28,15 +28,14 @@ export async function verifyHCaptcha(token: string): Promise<{ success: boolean;
       if (process.env.NODE_ENV === 'production') {
         apiLogger.error({ configValidation }, 'Konfigurasi hCaptcha tidak valid untuk lingkungan produksi')
         return { success: false, error: configValidation.error }
-      } else {
-        // Di development, jika tidak ada secret key, skip verifikasi hCaptcha
-        apiLogger.warn('HCAPTCHA_SECRET_KEY tidak diatur. Verifikasi hCaptcha dilewati dalam lingkungan development.')
-        return { success: true }
       }
+      // Di development, jika tidak ada secret key, skip verifikasi hCaptcha
+      apiLogger.warn('HCAPTCHA_SECRET_KEY tidak diatur. Verifikasi hCaptcha dilewati dalam lingkungan development.')
+      return { success: true }
     }
 
     const formData = new FormData()
-    formData.append('secret', HCAPTCHA_CONFIG.secretKey!)
+    formData.append('secret', HCAPTCHA_CONFIG.secretKey ?? '')
     formData.append('response', token)
 
     const controller = new AbortController()
@@ -52,21 +51,21 @@ export async function verifyHCaptcha(token: string): Promise<{ success: boolean;
       clearTimeout(timeoutId)
 
       if (!response.ok) {
-        const statusText = response.statusText
+        const { statusText } = response
         apiLogger.error({ status: response.status, statusText }, 'Respons tidak berhasil dari endpoint verifikasi hCaptcha')
         return { success: false, error: `Respons tidak berhasil dari server hCaptcha: ${statusText}` }
       }
 
       const result: HCaptchaVerificationResponse = await response.json()
+      const errorCodes = result['error-codes']
 
       if (result.success) {
         apiLogger.info('Verifikasi hCaptcha berhasil')
         return { success: true }
-      } else {
-        const errorCodes = result['error-codes']?.join(', ') || 'error tidak diketahui'
-        apiLogger.error({ errorCodes }, 'Verifikasi hCaptcha gagal')
-        return { success: false, error: `Verifikasi hCaptcha gagal: ${errorCodes}` }
       }
+      const joinedErrorCodes = errorCodes?.join(', ') ?? 'error tidak diketahui'
+      apiLogger.error({ errorCodes: joinedErrorCodes }, 'Verifikasi hCaptcha gagal')
+      return { success: false, error: `Verifikasi hCaptcha gagal: ${joinedErrorCodes}` }
     } catch (fetchError: unknown) {
       clearTimeout(timeoutId)
       
