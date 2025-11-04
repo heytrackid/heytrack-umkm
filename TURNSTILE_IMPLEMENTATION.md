@@ -32,9 +32,10 @@ TURNSTILE_SECRET_KEY=your_secret_key_here
 ### Server-Side
 
 1. The login action in `src/app/auth/login/actions.ts` extracts the Turnstile token from the form data
-2. The token is verified against Cloudflare's API using the secret key
-3. If verification fails, the login attempt is rejected
-4. Only after successful verification does the system proceed with Supabase authentication
+2. The token is verified against Cloudflare's API using the secret key via `src/utils/turnstile.ts`
+3. Client IP is included in the verification request for enhanced security
+4. If verification fails, the login attempt is rejected
+5. Only after successful verification does the system proceed with Supabase authentication
 
 ## Files Modified
 
@@ -66,3 +67,5 @@ To test the integration:
 - The secret key (TURNSTILE_SECRET_KEY) must never be exposed in client-side code
 - The verification happens server-side to prevent bypassing the check
 - The widget supports dark/light theme matching the application's theme
+- Client IP is included in verification requests for enhanced security
+- Additional custom data and action parameters can be passed for analytics
