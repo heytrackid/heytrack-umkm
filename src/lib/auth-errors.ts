@@ -24,10 +24,11 @@ export const AUTH_ERROR_MESSAGES = {
   'User not found': 'Akun dengan email tersebut tidak ditemukan.',
   'Email rate limit exceeded': 'Terlalu banyak permintaan reset password. Coba lagi nanti.',
 
-  // Session errors
-  'JWT expired': 'Sesi telah berakhir. Silakan login kembali.',
-  'Refresh token not found': 'Token refresh tidak ditemukan.',
-  'Invalid refresh token': 'Token refresh tidak valid.',
+   // Session errors
+   'JWT expired': 'Sesi telah berakhir. Silakan login kembali.',
+   'Refresh token not found': 'Token refresh tidak ditemukan.',
+   'Invalid refresh token': 'Token refresh tidak valid.',
+   'refresh_token_not_found': 'Sesi telah berakhir. Silakan login kembali.',
 
   // Generic auth errors
   'Weak password': 'Password terlalu lemah. Gunakan minimal 6 karakter.',
@@ -212,5 +213,37 @@ export function isAuthError(error: unknown): boolean {
          message.includes('login') ||
          message.includes('password') ||
          message.includes('email') ||
-         message.includes('credential')
+         message.includes('credential') ||
+         message.includes('refresh_token') ||
+         message.includes('jwt')
+}
+
+/**
+ * Check if error requires session clearing (refresh token issues)
+ */
+export function requiresSessionClear(error: unknown): boolean {
+  const message = extractAuthError(error).toLowerCase()
+  return message.includes('refresh_token_not_found') ||
+         message.includes('invalid refresh token') ||
+         message.includes('jwt expired') ||
+         message.includes('session not found')
+}
+
+/**
+ * Handle authentication errors with appropriate actions
+ */
+export function handleAuthError(error: unknown): {
+  message: string
+  shouldClearSession: boolean
+  shouldRedirect: boolean
+} {
+  const errorString = extractAuthError(error)
+  const message = getAuthErrorMessage(errorString)
+  const shouldClearSession = requiresSessionClear(errorString)
+
+  return {
+    message,
+    shouldClearSession,
+    shouldRedirect: shouldClearSession
+  }
 }

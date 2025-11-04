@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { createClientLogger } from '@/lib/client-logger'
 
 interface TurnstileWidgetProps {
@@ -19,123 +19,87 @@ const logger = createClientLogger('TurnstileWidget')
 
 declare global {
   interface Window {
-    turnstile: {
-      render: (container: string | HTMLElement, options: { 
-        sitekey: string; 
-        callback: (token: string) => void; 
-        'error-callback'?: () => void; 
-        'expired-callback'?: () => void; 
-        theme?: string; 
-        size?: string; 
-        language?: string;
-      }) => string
-      reset: (widgetId: string) => void
-      getResponse: (widgetId: string) => string | null
-    }
     onloadTurnstileCallback?: () => void
+    onTurnstileSuccess?: (token: string) => void
+    onTurnstileError?: () => void
+    onTurnstileExpired?: () => void
   }
 }
 
-const TurnstileWidget = ({ 
-  onVerify, 
-  onError, 
-  onExpire, 
-  siteKey, 
-  options = {} 
+const TurnstileWidget = ({
+  onVerify,
+  onError,
+  onExpire,
+  siteKey,
+  options = {}
 }: TurnstileWidgetProps) => {
-  const [loaded, setLoaded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const widgetRef = useRef<string | null>(null)
-  const theme = options?.theme ?? 'auto'
-  const size = options?.size ?? 'normal'
-  const language = options?.language ?? 'auto'
+  const callbacksRef = useRef({ onVerify, onError, onExpire })
+
+  // Update callbacks ref when props change
+  useEffect(() => {
+    callbacksRef.current = { onVerify, onError, onExpire }
+  }, [onVerify, onError, onExpire])
 
   useEffect(() => {
-    // Check if Turnstile script is already loaded
-    if (typeof window !== 'undefined' && window.turnstile) {
-      setLoaded(true)
+    // Check if script is already loaded
+    const existingScript = document.querySelector('script[src*="challenges.cloudflare.com"]')
+    if (existingScript) {
       return
     }
 
-    // Load the Turnstile script
+    // Load the Turnstile script for implicit rendering
     const script = document.createElement('script')
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback'
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
     script.async = true
     script.defer = true
-
-    // Create a global callback function for when Turnstile loads
-    window.onloadTurnstileCallback = () => {
-      setLoaded(true)
-    }
 
     document.head.appendChild(script)
 
     return () => {
-      document.head.removeChild(script)
-      if (widgetRef.current) {
-        try {
-          window.turnstile?.reset?.(widgetRef.current)
-        } catch (_e) {
-          // Widget may have already been destroyed
-        }
-      }
-      delete window.onloadTurnstileCallback
+      // Don't remove script on cleanup to allow reuse
     }
   }, [])
 
+  // Set up global callbacks for implicit rendering
   useEffect(() => {
-    if (loaded && containerRef.current && !widgetRef.current) {
-      // Render the widget only once
-      try {
-        const id = window.turnstile.render(containerRef.current, {
-          sitekey: siteKey,
-          callback: (token: string) => {
-            onVerify(token)
-          },
-          'error-callback': () => {
-            onError?.()
-          },
-          'expired-callback': () => {
-            onExpire?.()
-          },
-          theme,
-          size,
-          language,
-        })
-        widgetRef.current = id
-      } catch (error) {
-        logger.error({ error }, 'Error rendering Turnstile widget')
-      }
+    // Define global callback functions for implicit rendering
+    window.onTurnstileSuccess = (token: string) => {
+      logger.debug('Turnstile verification successful')
+      callbacksRef.current.onVerify(token)
+    }
+
+    window.onTurnstileError = () => {
+      logger.error('Turnstile verification error')
+      callbacksRef.current.onError?.()
+    }
+
+    window.onTurnstileExpired = () => {
+      logger.warn('Turnstile token expired')
+      callbacksRef.current.onExpire?.()
     }
 
     return () => {
-      if (widgetRef.current) {
-        try {
-          window.turnstile?.reset?.(widgetRef.current)
-          widgetRef.current = null
-        } catch (_e) {
-          // Widget may have already been destroyed
-        }
-      }
+      // Clean up global callbacks
+      delete window.onTurnstileSuccess
+      delete window.onTurnstileError
+      delete window.onTurnstileExpired
     }
-  }, [loaded, siteKey, onVerify, onError, onExpire, theme, size, language])
+  }, [])
 
-  // Function is kept for potential future use
-  const _reset = () => {
-    if (widgetRef.current) {
-      try {
-        window.turnstile?.reset?.(widgetRef.current)
-      } catch (error) {
-        logger.error({ error }, 'Error resetting Turnstile widget')
-      }
-    }
-  }
+  const theme = options?.theme ?? 'auto'
+  const size = options?.size ?? 'normal'
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className="cf-turnstile"
       data-sitekey={siteKey}
+      data-theme={theme}
+      data-size={size}
+      data-callback="onTurnstileSuccess"
+      data-error-callback="onTurnstileError"
+      data-expired-callback="onTurnstileExpired"
     />
   )
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 
 export const usePerformance = () => {
   const [isPerformanceReady, setIsPerformanceReady] = useState(false);
@@ -13,11 +13,12 @@ export const usePerformance = () => {
 };
 
 export const useRenderPerformance = (componentName: string) => {
-  const [renderCount, setRenderCount] = useState(0);
+  const renderCountRef = useRef(0);
 
-  useEffect(() => {
-    setRenderCount(prev => prev + 1);
-  }, [componentName, renderCount]);
+  // Increment render count on each render using a layout effect to avoid causing additional renders
+  useLayoutEffect(() => {
+    renderCountRef.current += 1;
+  });
 
-  return { renderCount };
+  return { renderCount: renderCountRef.current };
 };
