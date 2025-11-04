@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ProfitData } from './types'
-import { TrendingUp, TrendingDown, DollarSign, Package, ArrowUpRight, ArrowDownRight } from 'lucide-react' 
+import { TrendingUp, TrendingDown, DollarSign, Package, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react' 
 
 interface ProfitSummaryCardsProps {
   summary: ProfitData['summary']
@@ -11,109 +11,150 @@ interface ProfitSummaryCardsProps {
   isMobile: boolean
 }
 
-export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }: ProfitSummaryCardsProps) => (
-  <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
-    {/* Total Revenue */}
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          Total Pendapatan
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between">
+export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }: ProfitSummaryCardsProps) => {
+  // Calculate growth percentages (would be derived from previous period data in real implementation)
+  const revenueGrowth = trends?.revenue_trend ?? 0;
+  const cogsGrowth = 0; // COGS trend not available in current data structure
+  const grossProfitGrowth = trends?.profit_trend ?? 0;
+  const netProfitGrowth = trends?.profit_trend ?? 0;
+
+  // Function to get trend icon and color
+  const getTrendElement = (value: number) => {
+    if (value > 0) {
+      return <ArrowUpRight className="h-4 w-4 text-green-600" />;
+    }
+    if (value < 0) {
+      return <ArrowDownRight className="h-4 w-4 text-red-600" />;
+    }
+    return <Minus className="h-4 w-4 text-gray-400" />;
+  };
+
+  // Function to get trend color
+  const getTrendColor = (value: number) => {
+    if (value > 0) {
+      return 'text-green-600';
+    }
+    if (value < 0) {
+      return 'text-red-600';
+    }
+    return 'text-gray-400';
+  };
+
+  return (
+    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
+      {/* Total Revenue */}
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Total Pendapatan
+          </CardTitle>
+          <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-950 flex items-center justify-center">
+            <DollarSign className="h-5 w-5 text-green-600" />
+          </div>
+        </CardHeader>
+        <CardContent>
           <div>
-            <p className="text-2xl font-bold">{formatCurrency(summary.total_revenue)}</p>
-            {trends?.revenue_trend && trends.revenue_trend !== 0 && (
-              <p className={`text-xs flex items-center gap-1 mt-1 ${trends.revenue_trend > 0 ? 'text-gray-600' : 'text-red-600'
-                }`}>
-                {trends.revenue_trend > 0 ? (
-                  <ArrowUpRight className="h-3 w-3" />
-                ) : (
-                  <ArrowDownRight className="h-3 w-3" />
-                )}
-                {Math.abs(trends.revenue_trend).toFixed(1)}%
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(summary.total_revenue)}</p>
+            {revenueGrowth !== 0 && (
+              <p className={`text-xs flex items-center gap-1 mt-1 ${getTrendColor(revenueGrowth)}`}>
+                {getTrendElement(revenueGrowth)}
+                <span className="font-medium">{Math.abs(revenueGrowth).toFixed(1)}%</span>
+                <span className="text-muted-foreground">dari periode sebelumnya</span>
               </p>
             )}
           </div>
-          <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-            <DollarSign className="h-6 w-6 text-muted-foreground" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
 
-    {/* Gross Profit */}
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          Laba Kotor
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between">
+      {/* Gross Profit */}
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Laba Kotor
+          </CardTitle>
+          <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-950 flex items-center justify-center">
+            <TrendingUp className="h-5 w-5 text-blue-600" />
+          </div>
+        </CardHeader>
+        <CardContent>
           <div>
-            <p className="text-2xl font-bold">{formatCurrency(summary.gross_profit)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Margin: {summary.gross_profit_margin.toFixed(1)}%
-            </p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(summary.gross_profit)}</p>
+            <div className="flex items-center gap-1 mt-1">
+              <p className="text-xs text-muted-foreground">
+                Margin: {summary.gross_profit_margin.toFixed(1)}%
+              </p>
+              {grossProfitGrowth !== 0 && (
+                <p className={`text-xs flex items-center gap-1 ${getTrendColor(grossProfitGrowth)}`}>
+                  {getTrendElement(grossProfitGrowth)}
+                  <span className="font-medium">{Math.abs(grossProfitGrowth).toFixed(1)}%</span>
+                </p>
+              )}
+            </div>
           </div>
-          <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-            <TrendingUp className="h-6 w-6 text-muted-foreground" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
 
-    {/* Net Profit */}
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          Laba Bersih
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className={`text-2xl font-bold ${summary.net_profit >= 0 ? 'text-gray-600' : 'text-red-600'
-              }`}>
-              {formatCurrency(summary.net_profit)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Margin: {summary.net_profit_margin.toFixed(1)}%
-            </p>
-          </div>
-          <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+      {/* Net Profit */}
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Laba Bersih
+          </CardTitle>
+          <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-950 flex items-center justify-center">
             {summary.net_profit >= 0 ? (
-              <TrendingUp className="h-6 w-6 text-muted-foreground" />
+              <TrendingUp className="h-5 w-5 text-green-600" />
             ) : (
-              <TrendingDown className="h-6 w-6 text-muted-foreground" />
+              <TrendingDown className="h-5 w-5 text-red-600" />
             )}
           </div>
-        </div>
-      </CardContent>
-    </Card>
-
-    {/* COGS */}
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          Harga Pokok Penjualan
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between">
+        </CardHeader>
+        <CardContent>
           <div>
-            <p className="text-2xl font-bold">{formatCurrency(summary.total_cogs)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Metode: WAC
+            <p className={`text-2xl font-bold ${summary.net_profit >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'}`}>
+              {formatCurrency(summary.net_profit)}
             </p>
+            <div className="flex items-center gap-1 mt-1">
+              <p className="text-xs text-muted-foreground">
+                Margin: {summary.net_profit_margin.toFixed(1)}%
+              </p>
+              {netProfitGrowth !== 0 && (
+                <p className={`text-xs flex items-center gap-1 ${getTrendColor(netProfitGrowth)}`}>
+                  {getTrendElement(netProfitGrowth)}
+                  <span className="font-medium">{Math.abs(netProfitGrowth).toFixed(1)}%</span>
+                </p>
+              )}
+            </div>
           </div>
-          <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-            <Package className="h-6 w-6 text-muted-foreground" />
+        </CardContent>
+      </Card>
+
+      {/* COGS */}
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Harga Pokok Penjualan
+          </CardTitle>
+          <div className="h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-950 flex items-center justify-center">
+            <Package className="h-5 w-5 text-orange-600" />
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-)
+        </CardHeader>
+        <CardContent>
+          <div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(summary.total_cogs)}</p>
+            <div className="flex items-center gap-1 mt-1">
+              <p className="text-xs text-muted-foreground">
+                Metode: WAC
+              </p>
+              {cogsGrowth !== 0 && (
+                <p className={`text-xs flex items-center gap-1 ${getTrendColor(cogsGrowth)}`}>
+                  {getTrendElement(cogsGrowth)}
+                  <span className="font-medium">{Math.abs(cogsGrowth).toFixed(1)}%</span>
+                </p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

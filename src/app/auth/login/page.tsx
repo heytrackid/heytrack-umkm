@@ -1,5 +1,6 @@
 'use client'
 
+import TurnstileWidget from '@/components/TurnstileWidget'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,6 +18,8 @@ const LoginPage = () => {
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
+  const [turnstileToken, setTurnstileToken] = useState<string>('')
+  const [turnstileError, setTurnstileError] = useState<string>('')
   const [isPending, startTransition] = useTransition()
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -24,6 +27,7 @@ const LoginPage = () => {
     void setError('')
     void setErrorAction(null)
     void setFieldErrors({})
+    void setTurnstileError('')
 
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
@@ -45,6 +49,15 @@ const LoginPage = () => {
       void setFieldErrors(errors)
       return
     }
+
+    // Check if turnstile token exists
+    if (!turnstileToken) {
+      void setTurnstileError('Silakan verifikasi bahwa Anda bukan robot')
+      return
+    }
+
+    // Add turnstile token to form data
+    formData.append('turnstileToken', turnstileToken)
 
     startTransition(async () => {
       const result = await login(formData)
@@ -186,6 +199,33 @@ const LoginPage = () => {
                 {fieldErrors.password && (
                   <p id="password-error" className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
                     {fieldErrors.password}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <TurnstileWidget 
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''} 
+                  onVerify={(token) => {
+                    setTurnstileToken(token)
+                    void setTurnstileError('')
+                  }}
+                  onError={() => {
+                    setTurnstileToken('')
+                    void setTurnstileError('Verifikasi turnstile gagal, silakan coba lagi')
+                  }}
+                  onExpire={() => {
+                    setTurnstileToken('')
+                    void setTurnstileError('Verifikasi turnstile kadaluarsa, silakan coba lagi')
+                  }}
+                  options={{
+                    theme: 'auto',
+                    size: 'normal'
+                  }}
+                />
+                {turnstileError && (
+                  <p className="text-sm text-red-600 dark:text-red-400 animate-fade-in" role="alert">
+                    {turnstileError}
                   </p>
                 )}
               </div>

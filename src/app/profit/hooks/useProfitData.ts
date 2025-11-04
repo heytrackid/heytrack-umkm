@@ -1,93 +1,90 @@
-import { useState, useEffect } from 'react'
+import useSWR from 'swr'
+import { useState } from 'react'
 import { apiLogger } from '@/lib/logger'
 import { useToast } from '@/hooks/use-toast'
 import type { ProfitData, ProfitFilters, ExportFormat } from '@/app/profit/components/types'
 
 /**
- * Profit Data Hook
- * Custom hook for managing profit report data fetching and state
+ * Profit Data Hook with SWR Caching
+ * Custom hook for managing profit report data fetching and state with caching
  */
 
 
 export function useProfitData() {
   const { toast } = useToast()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [profitData, setProfitData] = useState<ProfitData | null>(null)
-
+  
   const [filters, setFilters] = useState<ProfitFilters>({
     selectedPeriod: 'month',
     startDate: '',
     endDate: ''
   })
 
+  // Calculate date range for SWR key
+  const getCalculatedDates = () => {
+    const today = new Date()
+    const toISODate = (date: Date): string => date.toISOString().split('T')[0]
+    const subtractDays = (date: Date, days: number) => {
+      const clone = new Date(date.getTime())
+      clone.setDate(clone.getDate() - days)
+      return clone
+    }
+
+    let calculatedStartDate: string = filters.startDate || ''
+    const calculatedEndDate: string = filters.endDate || toISODate(today)
+
+    if (!filters.startDate) {
+      switch (filters.selectedPeriod) {
+        case 'week':
+          calculatedStartDate = toISODate(subtractDays(today, 7))
+          break
+        case 'month':
+          calculatedStartDate = toISODate(new Date(today.getFullYear(), today.getMonth(), 1))
+          break
+        case 'quarter': {
+          const quarter = Math.floor(today.getMonth() / 3)
+          calculatedStartDate = toISODate(new Date(today.getFullYear(), quarter * 3, 1))
+          break
+        }
+        case 'year':
+          calculatedStartDate = toISODate(new Date(today.getFullYear(), 0, 1))
+          break
+        default:
+          calculatedStartDate = toISODate(subtractDays(today, 30))
+      }
+    }
+
+    return { calculatedStartDate, calculatedEndDate }
+  }
+
+  // Get dates for the SWR key
+  const { calculatedStartDate, calculatedEndDate } = getCalculatedDates()
+
+  // SWR key and fetcher
+  const swrKey = calculatedStartDate && calculatedEndDate 
+    ? [`/api/reports/profit?start_date=${calculatedStartDate}&end_date=${calculatedEndDate}`]
+    : null
+
+  const { data: profitData, error, mutate, isLoading } = useSWR<ProfitData>(
+    swrKey,
+    async (url: string) => {
+      const response = await fetch(url)
+      if (!response.ok) {
+        throw new Error('Gagal mengambil data laporan laba')
+      }
+      return response.json()
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      errorRetryCount: 3,
+      refreshInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+    }
+  )
+
   const updateFilters = (newFilters: Partial<ProfitFilters>) => {
     const sanitizedEntries = Object.entries(newFilters).filter(([, value]) => value !== undefined)
     const sanitizedFilters = Object.fromEntries(sanitizedEntries) as Partial<ProfitFilters>
     setFilters(prev => ({ ...prev, ...sanitizedFilters }))
-  }
-
-  useEffect(() => {
-    void fetchProfitData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.selectedPeriod, filters.startDate, filters.endDate])
-
-  const fetchProfitData = async () => {
-    void setLoading(true)
-    void setError(null)
-
-    try {
-      // Calculate date range based on period
-      const today = new Date()
-      const toISODate = (date: Date): string => date.toISOString().split('T')[0]
-      const subtractDays = (date: Date, days: number) => {
-        const clone = new Date(date.getTime())
-        clone.setDate(clone.getDate() - days)
-        return clone
-      }
-
-      let calculatedStartDate: string = filters.startDate || ''
-      const calculatedEndDate: string = filters.endDate || toISODate(today)
-
-      if (!filters.startDate) {
-        switch (filters.selectedPeriod) {
-          case 'week':
-            calculatedStartDate = toISODate(subtractDays(today, 7))
-            break
-          case 'month':
-            calculatedStartDate = toISODate(new Date(today.getFullYear(), today.getMonth(), 1))
-            break
-          case 'quarter': {
-            const quarter = Math.floor(today.getMonth() / 3)
-            calculatedStartDate = toISODate(new Date(today.getFullYear(), quarter * 3, 1))
-            break
-          }
-          case 'year':
-            calculatedStartDate = toISODate(new Date(today.getFullYear(), 0, 1))
-            break
-          default:
-            calculatedStartDate = toISODate(subtractDays(today, 30))
-        }
-      }
-
-      const params = new URLSearchParams()
-      if (calculatedStartDate) {params.append('start_date', calculatedStartDate)}
-      if (calculatedEndDate) {params.append('end_date', calculatedEndDate)}
-
-      const response = await fetch(`/api/reports/profit?${params.toString()}`)
-
-      if (!response.ok) {
-        throw new Error('Gagal mengambil data laporan laba')
-      }
-
-      const data = await response.json()
-      void setProfitData(data)
-    } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error fetching profit data:')
-      void setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
-    } finally {
-      void setLoading(false)
-    }
   }
 
   const exportReport = async (format: ExportFormat) => {
@@ -120,12 +117,12 @@ export function useProfitData() {
   }
 
   return {
-    loading,
-    error,
+    loading: isLoading,
+    error: error ? error.message : null,
     profitData,
     filters,
     updateFilters,
-    refetch: fetchProfitData,
+    refetch: () => mutate(),
     exportReport
   }
 }

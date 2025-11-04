@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
@@ -48,7 +48,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       void setLoading(true)
       void setError(null)
@@ -107,7 +107,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
     } finally {
       void setLoading(false)
     }
-  }
+  }, [table, options?.select, options?.filter, options?.orderBy])
 
   const read = async (id: string): Promise<TableRow<TTable> | null> => {
     try {
@@ -265,8 +265,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
   useEffect(() => {
     void fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [table, JSON.stringify(options)])
+  }, [fetchData])
 
   return {
     data,

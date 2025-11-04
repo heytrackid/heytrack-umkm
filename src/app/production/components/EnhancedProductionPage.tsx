@@ -441,7 +441,7 @@ export const EnhancedProductionPage = () => {
                             actions={[
                                 {
                                     label: 'Buat Batch Produksi',
-                                    onClick: () => { },
+                                    onClick: () => setIsFormOpen(true),
                                     icon: Plus
                                 }
                             ]}

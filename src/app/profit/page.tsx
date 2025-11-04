@@ -59,7 +59,7 @@ const ProfitReportPage = () => {
     exportReport
   } = useProfitData()
 
-  const productChartData = useProductChartData(profitData)
+  const productChartData = useProductChartData(profitData ?? null)
 
   // Loading skeleton helper functions to avoid unstable nested components
   const renderProfitInfoSkeleton = () => (

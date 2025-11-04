@@ -2,7 +2,6 @@
 
 import { createClientLogger } from '@/lib/client-logger'
 
-const logger = createClientLogger('ClientFile')
 import { useCallback, useEffect, useMemo, useRef, useState, type DependencyList } from 'react'
 
 
@@ -134,15 +133,15 @@ export function useStableCallback<T extends (...args: Parameters<T>) => ReturnTy
  */
 export function useDeepMemo<T>(value: T): T {
   const ref = useRef<T>(value)
-  const signalRef = useRef<number>(0)
+  const [signal, setSignal] = useState<number>(0)
 
   if (JSON.stringify(value) !== JSON.stringify(ref.current)) {
     ref.current = value
-    signalRef.current += 1
+    setSignal(prev => prev + 1)
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => ref.current, [signalRef.current])
+  return useMemo(() => ref.current, [signal])
 }
 
 /**

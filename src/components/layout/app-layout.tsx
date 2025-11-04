@@ -1,27 +1,27 @@
 'use client'
 
-import { useState, useEffect, useCallback, memo, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 import { Input } from '@/components/ui/input'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { NotificationCenter } from '@/components/ui/notification-center'
-import { useMobile } from '@/hooks/useResponsive'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useMobile } from '@/hooks/useResponsive'
 import { useSidebar } from '@/hooks/useSidebar'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/utils/supabase/client'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { Search, User } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { memo, useCallback, useEffect, useState, type ReactNode } from 'react'
 import MobileHeader from './mobile-header'
 import Sidebar from './sidebar'
-import type { User as SupabaseUser } from '@supabase/supabase-js'
-import { createClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/navigation'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
 
 interface AppLayoutProps {
   children: ReactNode
@@ -160,11 +160,11 @@ const AppLayout = memo(({
 
       <div className={cn(
         "flex flex-1 flex-col min-w-0 overflow-hidden transition-all duration-300 ease-in-out",
-        !isMobile && (isCollapsed ? "ml-20" : "ml-72")
+        !isMobile && (isCollapsed ? "pl-20" : "pl-72")
       )}>
         {/* Desktop Header */}
         {!isMobile && (
-          <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6 flex-shrink-0 transition-all duration-300">
+          <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6 flex-shrink-0">
             <div className="flex items-center space-x-4">
               <div className="relative hidden sm:block">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

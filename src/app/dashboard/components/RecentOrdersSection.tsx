@@ -1,11 +1,14 @@
 'use client'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { ShoppingCart } from 'lucide-react'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { useCurrency } from '@/hooks/useCurrency'
+import { Calendar, Filter, ShoppingCart, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import type { DateRange } from 'react-day-picker'
 
 interface RecentOrdersSectionProps {
   orders?: Array<{
@@ -14,12 +17,34 @@ interface RecentOrdersSectionProps {
     amount: number | null
     status: string | null
     time: string | null
+    created_at?: string
   }>
+  onDateRangeChange?: (dateRange: DateRange | undefined) => void
+  showDateFilter?: boolean
 }
 
-const RecentOrdersSection = ({ orders = [] }: RecentOrdersSectionProps) => {
+const RecentOrdersSection = ({ 
+  orders = [], 
+  onDateRangeChange,
+  showDateFilter = false 
+}: RecentOrdersSectionProps) => {
   const { formatCurrency } = useCurrency()
   const router = useRouter()
+  
+  // Date range filter state
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+
+  const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
+    setDateRange(newDateRange)
+    onDateRangeChange?.(newDateRange)
+  }
+
+  const clearDateFilter = () => {
+    setDateRange(undefined)
+    onDateRangeChange?.(undefined)
+    setShowDatePicker(false)
+  }
 
   const getStatusBadge = (status: string | null) => {
     const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
@@ -33,6 +58,20 @@ const RecentOrdersSection = ({ orders = [] }: RecentOrdersSectionProps) => {
     const statusInfo = statusMap[status ?? 'PENDING'] ?? statusMap.PENDING
     return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
   }
+
+  // Filter orders based on date range
+  const filteredOrders = orders.filter((order) => {
+    if (!dateRange?.from || !order.created_at) {return true}
+    
+    const orderDate = new Date(order.created_at)
+    const fromDate = new Date(dateRange.from)
+    const toDate = dateRange.to ? new Date(dateRange.to) : new Date()
+    
+    fromDate.setHours(0, 0, 0, 0)
+    toDate.setHours(23, 59, 59, 999)
+    
+    return orderDate >= fromDate && orderDate <= toDate
+  })
 
   // Show skeleton if orders is undefined
   if (orders === undefined) {
@@ -58,39 +97,137 @@ const RecentOrdersSection = ({ orders = [] }: RecentOrdersSectionProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ShoppingCart className="h-5 w-5" />
-          Pesanan Terbaru
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {orders.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <ShoppingCart className="h-8 w-8 mx-auto mb-2" />
-            <p>Belum ada pesanan terbaru</p>
-            <p className="text-sm">Pesanan akan muncul di sini ketika ada data</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted cursor-pointer transition-colors"
-                onClick={() => router.push(`/orders/${order.id}`)}
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5" />
+            Pesanan Terbaru
+            {showDateFilter && dateRange?.from && (
+              <Badge variant="outline" className="ml-2">
+                {dateRange.from.toLocaleDateString('id-ID')} - {dateRange.to?.toLocaleDateString('id-ID') ?? 'Sekarang'}
+              </Badge>
+            )}
+          </CardTitle>
+          
+          {showDateFilter && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className="flex items-center gap-1"
               >
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-wrap-mobile">{order.customer}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {formatCurrency(order.amount ?? 0)}
-                  </div>
-                </div>
-                <div className="flex-shrink-0">
-                  {getStatusBadge(order.status)}
-                </div>
-              </div>
-            ))}
+                <Calendar className="h-4 w-4" />
+                Filter Tanggal
+              </Button>
+              
+              {dateRange?.from && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearDateFilter}
+                  className="flex items-center gap-1"
+                >
+                  <X className="h-4 w-4" />
+                  Clear
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+        
+        {/* Date Range Picker */}
+        {showDateFilter && showDatePicker && (
+          <div className="mt-4 p-4 border rounded-lg bg-muted/20">
+            <DateRangePicker
+              value={dateRange}
+              onChange={handleDateRangeChange}
+            />
           </div>
         )}
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        {/* Filter info */}
+        {showDateFilter && dateRange?.from && (
+          <div className="flex items-center justify-between text-sm bg-muted/50 p-3 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">
+                Menampilkan {filteredOrders.length} dari {orders.length} pesanan
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearDateFilter}
+              className="h-6 px-2 text-xs"
+            >
+              <X className="h-3 w-3 mr-1" />
+              Hapus Filter
+            </Button>
+          </div>
+        )}
+        
+        {(() => {
+          if (filteredOrders.length === 0 && orders.length === 0) {
+            return (
+              <div className="text-center py-8 text-muted-foreground">
+                <ShoppingCart className="h-8 w-8 mx-auto mb-2" />
+                <p>Belum ada pesanan terbaru</p>
+                <p className="text-sm">Pesanan akan muncul di sini ketika ada data</p>
+              </div>
+            )
+          }
+          if (filteredOrders.length === 0 && orders.length > 0) {
+            return (
+              <div className="text-center py-8 text-muted-foreground">
+                <Calendar className="h-8 w-8 mx-auto mb-2" />
+                <p>Tidak ada pesanan pada periode ini</p>
+                <p className="text-sm">Coba ubah rentang tanggal atau hapus filter</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearDateFilter}
+                  className="mt-3"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Hapus Filter Tanggal
+                </Button>
+              </div>
+            )
+          }
+          return (
+            <div className="space-y-3">
+              {filteredOrders.map((order) => (
+                <div
+                  key={order.id}
+                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted cursor-pointer transition-colors"
+                  onClick={() => router.push(`/orders/${order.id}`)}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-wrap-mobile">{order.customer}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {formatCurrency(order.amount ?? 0)}
+                      {order.created_at && (
+                        <span className="ml-2">
+                          • {new Date(order.created_at).toLocaleDateString('id-ID', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    {getStatusBadge(order.status)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        })()}
+        
         <Button variant="outline" className="w-full" onClick={() => router.push('/orders')}>
           <ShoppingCart className="h-4 w-4 mr-2" />
           Lihat Semua Pesanan

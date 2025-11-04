@@ -38,6 +38,7 @@ const NewOrderPage = () => {
     addOrderItem,
     updateOrderItem,
     removeOrderItem,
+    reorderOrderItems,
     selectCustomer,
     handleSubmit,
     setActiveTab,
@@ -164,6 +165,7 @@ const NewOrderPage = () => {
                         onAddItem={addOrderItem}
                         onUpdateItem={updateOrderItem}
                         onRemoveItem={removeOrderItem}
+                        onReorderItems={reorderOrderItems}
                       />
                     </SwipeableTabsContent>
 

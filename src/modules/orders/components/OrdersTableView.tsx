@@ -141,6 +141,18 @@ export const OrdersTableView = () => {
           await handleUpdateStatus(orderId, 'CONFIRMED')
         }
         break
+      case 'ready':
+        // Bulk mark as ready for shipping
+        for (const orderId of orderIds) {
+          await handleUpdateStatus(orderId, 'READY')
+        }
+        break
+      case 'shipped':
+        // Bulk mark as shipped
+        for (const orderId of orderIds) {
+          await handleUpdateStatus(orderId, 'SHIPPED')
+        }
+        break
       case 'export':
         // Export selected orders
         logger.debug({ orderIds }, 'Exporting orders')

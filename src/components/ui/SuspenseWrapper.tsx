@@ -3,24 +3,10 @@
 import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from 'react'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import {
-  OrdersTableSkeleton,
-  CustomersTableSkeleton,
-  InventoryTableSkeleton,
-  RecipesTableSkeleton,
-  RecipeTableSkeleton,
-  RecipeFormSkeleton,
-  OrderFormSkeleton,
-  SettingsFormSkeleton,
-  AuthFormSkeleton,
-  ModalFormSkeleton,
-  SearchFormSkeleton,
-  StatsCardSkeleton,
-  QuickActionsSkeleton,
-  RecentOrdersSkeleton,
-  StockAlertSkeleton,
-  HPPResultsSkeleton,
-  DashboardHeaderSkeleton,
-  ChartCardSkeleton
+  DataTableSkeleton,
+  ChartSkeleton,
+  DashboardCardSkeleton,
+  AvatarSkeleton
 } from '@/components/ui/skeletons'
 import { globalLazyLoadingUtils } from '../lazy'
 
@@ -46,43 +32,73 @@ interface SkeletonProps {
 const loadingComponents: Record<string, ComponentType<Record<string, unknown>>> = {
   // Page-level skeletons
   page: () => <div className="p-6 space-y-6">
-    <DashboardHeaderSkeleton />
+    <DashboardCardSkeleton />
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {Array.from({ length: 4 }).map((_, i) => <StatsCardSkeleton key={i} />)}
+      {Array.from({ length: 4 }).map((_, i) => <DashboardCardSkeleton key={i} />)}
     </div>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <RecentOrdersSkeleton />
-      <StockAlertSkeleton />
+      <DataTableSkeleton />
+      <ChartSkeleton />
     </div>
   </div>,
 
   // Table skeletons
-  table: OrdersTableSkeleton,
-  ordersTable: OrdersTableSkeleton,
-  customersTable: CustomersTableSkeleton,
-  inventoryTable: InventoryTableSkeleton,
-  recipesTable: RecipesTableSkeleton,
-  recipeTable: RecipeTableSkeleton,
+  table: DataTableSkeleton,
+  ordersTable: DataTableSkeleton,
+  customersTable: DataTableSkeleton,
+  inventoryTable: DataTableSkeleton,
+  recipesTable: DataTableSkeleton,
+  recipeTable: DataTableSkeleton,
 
   // Form skeletons
-  form: RecipeFormSkeleton,
-  recipeForm: RecipeFormSkeleton,
-  orderForm: OrderFormSkeleton,
-  settingsForm: SettingsFormSkeleton,
-  authForm: ({ type = 'login' }: SkeletonProps) => <AuthFormSkeleton type={type} />,
-  modalForm: ModalFormSkeleton,
-  searchForm: SearchFormSkeleton,
+  form: () => <div className="space-y-4 p-4">
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+  </div>,
+  recipeForm: () => <div className="space-y-4 p-4">
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+  </div>,
+  orderForm: () => <div className="space-y-4 p-4">
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+  </div>,
+  settingsForm: () => <div className="space-y-4 p-4">
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+  </div>,
+  authForm: ({ type = 'login' }: SkeletonProps) => <div className="space-y-4 p-4">
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+    {type === 'register' && <DashboardCardSkeleton />}
+  </div>,
+  modalForm: () => <div className="space-y-4 p-4">
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+  </div>,
+  searchForm: () => <div className="flex gap-2 p-4">
+    <DashboardCardSkeleton />
+    <AvatarSkeleton />
+  </div>,
 
   // Chart skeletons
-  chart: ChartCardSkeleton,
+  chart: ChartSkeleton,
 
   // Dashboard components
-  statsCard: StatsCardSkeleton,
-  quickActions: QuickActionsSkeleton,
-  recentOrders: RecentOrdersSkeleton,
-  stockAlert: StockAlertSkeleton,
-  hppResults: HPPResultsSkeleton,
-  dashboardHeader: DashboardHeaderSkeleton,
+  statsCard: DashboardCardSkeleton,
+  quickActions: () => <div className="flex gap-2">
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+    <DashboardCardSkeleton />
+  </div>,
+  recentOrders: DataTableSkeleton,
+  stockAlert: ChartSkeleton,
+  hppResults: ChartSkeleton,
+  dashboardHeader: DashboardCardSkeleton,
 
   // Default fallback
   default: () => <div className="flex items-center justify-center p-4"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" /></div>

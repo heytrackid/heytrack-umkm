@@ -1,6 +1,6 @@
 import { apiLogger } from '@/lib/logger'
-import { AIService } from './service'
 import { PromptBuilder } from './prompt-builder'
+import { AIService } from './service'
 
 /**
  * Business AI Module
@@ -95,38 +95,140 @@ export class BusinessAI {
    */
   static async getBusinessInsights(data: Record<string, unknown>): Promise<string> {
     try {
-      const { query, intent } = data
-      
+      const { query, intent, businessContext } = data
+
+      // Extract real business data dari context
+      const context = businessContext as {
+        orders?: {
+          total: number
+          pending: number
+          revenue: number
+          recent: Array<{ id: string; status: string; total_amount: number; created_at: string }>
+        }
+        inventory?: {
+          critical: Array<{ name: string; stock: number; unit: string; minimum: number }>
+          total: number
+        }
+        recipes?: {
+          total: number
+          active: number
+          categories: string[]
+        }
+      } | undefined
+
+      // Build contextual information
+      let businessData = ''
+      if (context) {
+        businessData = `
+DATA BISNIS REAL-TIME:
+- Total Pesanan: ${context.orders?.total ?? 0}
+- Pesanan Pending: ${context.orders?.pending ?? 0}
+- Total Revenue: Rp ${context.orders?.revenue?.toLocaleString('id-ID') ?? 0}
+- Stok Kritis: ${context.inventory?.critical?.length ?? 0} bahan
+- Total Bahan: ${context.inventory?.total ?? 0}
+- Total Resep: ${context.recipes?.total ?? 0}
+- Kategori Resep: ${context.recipes?.categories?.join(', ') ?? 'N/A'}
+
+${context.inventory?.critical?.length ? `STOK KRITIS DETAIL:
+${context.inventory.critical.map(item =>
+  `- ${item.name}: ${item.stock} ${item.unit} (min: ${item.minimum} ${item.unit})`
+).join('\n')}` : ''}
+
+${context.orders?.recent?.length ? `PESANAN TERBARU:
+${context.orders.recent.slice(0, 3).map(order =>
+  `- ${order.status}: Rp ${order.total_amount?.toLocaleString('id-ID') || 0} (${new Date(order.created_at).toLocaleDateString('id-ID')})`
+).join('\n')}` : ''}`
+      }
+
       let contextualPrompt = ''
-      
+
       if (typeof intent === 'string') {
         switch (intent) {
           case 'check_inventory':
-            contextualPrompt = `User bertanya tentang stok inventory: "${query}". Berikan informasi tentang cara mengecek stok, tips manajemen inventory, dan saran untuk optimasi stok bahan baku.`
+            contextualPrompt = `User bertanya tentang stok inventory: "${query}".
+
+${businessData}
+
+Berdasarkan data bisnis real-time di atas, berikan analisis yang akurat tentang:
+- Status stok bahan baku saat ini
+- Bahan yang perlu direstock segera
+- Tips manajemen inventory berdasarkan kondisi aktual
+- Saran optimasi stok bahan baku`
             break
           case 'analyze_hpp':
-            contextualPrompt = `User bertanya tentang HPP (Harga Pokok Produksi): "${query}". Jelaskan cara menghitung HPP, faktor-faktor yang mempengaruhi, dan tips untuk mengoptimalkan biaya produksi.`
+            contextualPrompt = `User bertanya tentang HPP (Harga Pokok Produksi): "${query}".
+
+${businessData}
+
+Berdasarkan data bisnis real-time, jelaskan:
+- Cara menghitung HPP akurat berdasarkan data aktual
+- Faktor-faktor yang mempengaruhi berdasarkan kondisi bisnis saat ini
+- Tips optimasi biaya produksi yang realistis`
             break
           case 'analyze_profit':
-            contextualPrompt = `User bertanya tentang profit/keuntungan: "${query}". Berikan analisis tentang cara meningkatkan profit margin, strategi pricing, dan tips bisnis kuliner.`
+            contextualPrompt = `User bertanya tentang profit/keuntungan: "${query}".
+
+${businessData}
+
+Berdasarkan data revenue dan pesanan aktual, berikan analisis:
+- Status profit saat ini berdasarkan data real
+- Cara meningkatkan profit margin dengan data konkret
+- Strategi pricing berdasarkan kondisi bisnis saat ini
+- Tips bisnis kuliner yang actionable`
             break
           case 'recipe_query':
-            contextualPrompt = `User bertanya tentang resep: "${query}". Berikan saran tentang manajemen resep, optimasi bahan, dan tips produksi yang efisien.`
+            contextualPrompt = `User bertanya tentang resep: "${query}".
+
+${businessData}
+
+Berdasarkan data resep dan inventory saat ini, berikan saran:
+- Manajemen resep yang efisien
+- Optimasi bahan berdasarkan stok tersedia
+- Tips produksi yang sesuai dengan kapasitas saat ini`
             break
           case 'pricing_strategy':
-            contextualPrompt = `User bertanya tentang strategi harga: "${query}". Berikan saran tentang penetapan harga yang kompetitif, analisis margin, dan strategi pricing untuk UMKM kuliner.`
+            contextualPrompt = `User bertanya tentang strategi harga: "${query}".
+
+${businessData}
+
+Berdasarkan data revenue dan biaya aktual, berikan saran:
+- Penetapan harga yang kompetitif berdasarkan data real
+- Analisis margin berdasarkan kondisi bisnis saat ini
+- Strategi pricing untuk UMKM kuliner yang realistis`
             break
           case 'marketing_strategy':
-            contextualPrompt = `User bertanya tentang marketing: "${query}". Berikan tips marketing untuk UMKM kuliner, strategi promosi, dan cara meningkatkan penjualan.`
+            contextualPrompt = `User bertanya tentang marketing: "${query}".
+
+${businessData}
+
+Berdasarkan data pesanan dan revenue saat ini, berikan tips:
+- Marketing untuk UMKM kuliner berdasarkan performa aktual
+- Strategi promosi yang sesuai dengan kondisi bisnis
+- Cara meningkatkan penjualan dengan data konkret`
             break
           case 'order_management':
-            contextualPrompt = `User bertanya tentang manajemen pesanan: "${query}". Berikan tips untuk mengelola pesanan, optimasi workflow, dan meningkatkan efisiensi operasional.`
+            contextualPrompt = `User bertanya tentang manajemen pesanan: "${query}".
+
+${businessData}
+
+Berdasarkan data pesanan pending dan status saat ini, berikan tips:
+- Mengelola pesanan berdasarkan kondisi real-time
+- Optimasi workflow berdasarkan volume pesanan saat ini
+- Meningkatkan efisiensi operasional dengan data aktual`
             break
           default:
-            contextualPrompt = `User bertanya: "${query}". Berikan jawaban yang membantu terkait bisnis kuliner UMKM di Indonesia.`
+            contextualPrompt = `User bertanya: "${query}".
+
+${businessData}
+
+Berikan jawaban yang membantu terkait bisnis kuliner UMKM di Indonesia, menggunakan data bisnis real-time di atas jika relevan.`
         }
       } else {
-        contextualPrompt = `User bertanya: "${query}". Berikan jawaban yang membantu terkait bisnis kuliner UMKM di Indonesia.`
+        contextualPrompt = `User bertanya: "${query}".
+
+${businessData}
+
+Berikan jawaban yang membantu terkait bisnis kuliner UMKM di Indonesia, menggunakan data bisnis real-time di atas jika relevan.`
       }
 
       const systemPrompt = `Anda adalah asisten AI HeyTrack yang ahli dalam bisnis kuliner UMKM Indonesia. 

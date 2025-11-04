@@ -1,34 +1,25 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useSettings } from '@/contexts/settings-context'
-import { useToast } from '@/hooks/use-toast'
-import { useResponsive } from '@/hooks/useResponsive'
-import { useConfirm } from '@/components/ui/confirm-dialog'
-import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/supabase'
-import { usePagination } from '@/hooks/usePagination'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { DeleteModal } from '@/components/ui'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { SimplePagination } from '@/components/ui/simple-pagination'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { EnhancedEmptyState } from './EnhancedEmptyState'
+import { useSettings } from '@/contexts/settings-context'
+import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/supabase'
+import { useToast } from '@/hooks/use-toast'
+import { usePagination } from '@/hooks/usePagination'
+import { useResponsive } from '@/hooks/useResponsive'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { MobileOperationalCostCard } from './MobileOperationalCostCard'
-import { OperationalCostStats } from './OperationalCostStats'
-import { DeleteModal } from '@/components/ui'
 import { OperationalCostFormDialog } from './OperationalCostFormDialog'
+import { OperationalCostStats } from './OperationalCostStats'
 // import { DateRangePicker } from '@/components/ui/date-range-picker' // TODO: Implement date range filter
-import type { OperationalCostsTable } from '@/types/database'
-import type { DateRange } from 'react-day-picker'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -38,15 +29,24 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
-    Search,
-    Plus,
-    Zap,
-    MoreVertical,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import type { OperationalCostsTable } from '@/types/database'
+import {
     Edit,
+    MoreVertical,
+    Plus,
+    Receipt,
+    Search,
     Trash2,
     X,
-    Receipt,
+    Zap,
 } from 'lucide-react'
+import type { DateRange } from 'react-day-picker'
 
 // Feature Components
 
@@ -80,7 +80,7 @@ export const EnhancedOperationalCostsPage = () => {
     const { delete: deleteCost } = useSupabaseCRUD('operational_costs')
     const { toast } = useToast()
     const { isMobile } = useResponsive()
-    const { confirm } = useConfirm()
+    const { confirm, ConfirmDialog } = useConfirm()
 
     // Hydration fix - prevent SSR/client mismatch
     const [isMounted, setIsMounted] = useState(false)
@@ -414,7 +414,22 @@ export const EnhancedOperationalCostsPage = () => {
             )}
             
             {!loading && filteredData.length === 0 && (!costs || costs.length === 0) && (
-                <EnhancedEmptyState onAdd={handleAdd} onQuickSetup={handleQuickSetup} />
+                <EmptyState
+                    {...EmptyStatePresets.operationalCosts}
+                    actions={[
+                        {
+                            label: 'Setup Cepat (8 Template)',
+                            onClick: handleQuickSetup,
+                            icon: Zap
+                        },
+                        {
+                            label: 'Tambah Manual',
+                            onClick: handleAdd,
+                            variant: 'outline',
+                            icon: Plus
+                        }
+                    ]}
+                />
             )}
             
             {!loading && filteredData.length === 0 && costs && costs.length > 0 && (
@@ -568,6 +583,9 @@ export const EnhancedOperationalCostsPage = () => {
                 cost={editingCost}
                 onSuccess={() => refetch?.()}
             />
+
+            {/* Confirm Dialog */}
+            <ConfirmDialog />
         </div>
     )
 }

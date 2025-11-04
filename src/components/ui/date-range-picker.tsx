@@ -75,12 +75,12 @@ export const DateRangePicker = ({
   const [selectedPreset, setSelectedPreset] = useState<string>('')
 
   useEffect(() => {
-    void setDate(value)
+    setDate(value)
   }, [value])
 
   const handleDateChange = (newDate: DateRange | undefined) => {
-    void setDate(newDate)
-    void setSelectedPreset('')
+    setDate(newDate)
+    setSelectedPreset('')
     onChange?.(newDate)
   }
 
@@ -88,8 +88,8 @@ export const DateRangePicker = ({
     const preset = presets.find((p) => p.label === presetLabel)
     if (preset) {
       const newDate = preset.getValue()
-      void setDate(newDate)
-      void setSelectedPreset(presetLabel)
+      setDate(newDate)
+      setSelectedPreset(presetLabel)
       onChange?.(newDate)
     }
   }
