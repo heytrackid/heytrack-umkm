@@ -1,41 +1,23 @@
-'use client'
+import { useState, useEffect } from 'react';
 
-import { useEffect, useState, useCallback, useRef } from 'react'
-
-
-
-interface PerformanceMetrics {
-  // Core Web Vitals
-  lcp: number | null // Largest Contentful Paint
-  fid: number | null // First Input Delay
-  cls: number | null // Cumulative Layout Shift
-
-  // Additional metrics
-  fcp: number | null // First Contentful Paint
-  ttfb: number | null // Time to First Byte
-  domContentLoaded: number | null
-  loadComplete: number | null
-
-  // Custom metrics
-  timeToInteractive: number | null
-  firstMeaningfulPaint: number | null
-  bundleSize: number | null
-
-  // Memory usage (if available)
+export interface PerformanceMetrics {
+  lcp: number | null;
+  fid: number | null;
+  cls: number | null;
+  fcp: number | null;
+  ttfb: number | null;
+  domContentLoaded: number | null;
+  loadComplete: number | null;
   memoryUsage: {
-    used: number | null
-    total: number | null
-    limit: number | null
-  }
+    used: number | null;
+    total: number | null;
+  };
 }
 
-// PerformanceLayoutShift interface for CLS tracking
-interface PerformanceLayoutShift extends PerformanceEntry {
-  value: number
-  hadRecentInput: boolean
-}
-
-export function usePerformanceMonitoring() {
+export const usePerformanceMonitoring = () => {
+  const [isSupported, setIsSupported] = useState(true);
+  const [performanceScore, setPerformanceScore] = useState<number | null>(null);
+  const [performanceRating, setPerformanceRating] = useState<string>('unknown');
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
     lcp: null,
     fid: null,
@@ -44,253 +26,159 @@ export function usePerformanceMonitoring() {
     ttfb: null,
     domContentLoaded: null,
     loadComplete: null,
-    timeToInteractive: null,
-    firstMeaningfulPaint: null,
-    bundleSize: null,
     memoryUsage: {
       used: null,
-      total: null,
-      limit: null
+      total: null
     }
-  })
+  });
 
-  const [isSupported, setIsSupported] = useState(false)
-  const observersRef = useRef<PerformanceObserver[]>([])
-  const startTimeRef = useRef<number>(performance.now())
-
-  // Initialize performance monitoring
   useEffect(() => {
-    if (typeof window === 'undefined' || !('PerformanceObserver' in window)) {
-      void setIsSupported(false)
-      return
+    // Check if performance API is supported
+    if (typeof window === 'undefined' || !('performance' in window)) {
+      setIsSupported(false);
+      return;
     }
 
-    void setIsSupported(true)
+    // Initial metrics setup
+    const initialMetrics: PerformanceMetrics = {
+      lcp: null,
+      fid: null,
+      cls: null,
+      fcp: null,
+      ttfb: null,
+      domContentLoaded: null,
+      loadComplete: null,
+      memoryUsage: {
+        used: null,
+        total: null
+      }
+    };
 
-    // Observe Core Web Vitals
-    observeCoreWebVitals()
-
-    // Observe navigation timing
-    observeNavigationTiming()
-
-    // Observe resource loading
-    observeResourceTiming()
-
-    // Monitor memory usage (Chrome only)
+    // Try to get memory info if available
     if ('memory' in performance) {
-      const memoryInterval = setInterval(() => {
-        void updateMemoryUsage()
-      }, 5000) // Update every 5 seconds
-
-      return () => {
-        clearInterval(memoryInterval)
-        cleanupObservers()
+      const perfMemory = performance as Performance & { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } };
+      if (perfMemory.memory) {
+        initialMetrics.memoryUsage = {
+          used: perfMemory.memory.usedJSHeapSize,
+          total: perfMemory.memory.totalJSHeapSize
+        };
       }
     }
 
-    return cleanupObservers
-  }, [])
+    setMetrics(initialMetrics);
 
-  const observeCoreWebVitals = () => {
-    // Largest Contentful Paint (LCP)
-    try {
-      const lcpObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries()
-        const lastEntry = entries[entries.length - 1] as PerformanceEntry & { size?: number }
-
-        setMetrics(prev => ({
-          ...prev,
-          lcp: lastEntry.startTime
-        }))
-      })
-      lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
-      observersRef.current.push(lcpObserver)
-    } catch (_e) {
-      // LCP observation not supported
-    }
-
-    // First Input Delay (FID)
-    try {
-      const fidObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries()
-        entries.forEach((entry: PerformanceEntry) => {
-          const firstInputEntry = entry as PerformanceEventTiming
-          setMetrics(prev => ({
-            ...prev,
-            fid: firstInputEntry.processingStart - firstInputEntry.startTime
-          }))
-        })
-      })
-      fidObserver.observe({ entryTypes: ['first-input'] })
-      observersRef.current.push(fidObserver)
-    } catch (_e) {
-      // FID observation not supported
-    }
-
-    // Cumulative Layout Shift (CLS)
-    try {
-      let clsValue = 0
-      const clsObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries()
-        entries.forEach((entry: PerformanceEntry) => {
-          const layoutShiftEntry = entry as PerformanceLayoutShift
-          if (!layoutShiftEntry.hadRecentInput) {
-            clsValue += layoutShiftEntry.value
-          }
-        })
-        setMetrics(prev => ({
-          ...prev,
-          cls: clsValue
-        }))
-      })
-      clsObserver.observe({ entryTypes: ['layout-shift'] })
-      observersRef.current.push(clsObserver)
-    } catch (_e) {
-      // CLS observation not supported
-    }
-
-    // First Contentful Paint (FCP)
-    try {
-      const fcpObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries()
-        entries.forEach((entry) => {
-          setMetrics(prev => ({
-            ...prev,
-            fcp: entry.startTime
-          }))
-        })
-      })
-      fcpObserver.observe({ entryTypes: ['paint'] })
-      observersRef.current.push(fcpObserver)
-    } catch (_e) {
-      // FCP observation not supported
-    }
-  }
-
-  const observeNavigationTiming = () => {
-    // Use Navigation Timing API
-    const navigation = performance.getEntriesByType('navigation')[0]
-
-    if (navigation) {
-      setMetrics(prev => ({
-        ...prev,
-        ttfb: navigation.responseStart - navigation.requestStart,
-        domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
-        loadComplete: navigation.loadEventEnd - navigation.loadEventStart
-      }))
-    }
-
-    // Monitor page load
-    window.addEventListener('load', () => {
-      const loadTime = performance.now() - startTimeRef.current
-      setMetrics(prev => ({
-        ...prev,
-        loadComplete: loadTime
-      }))
-    })
-
-    // Monitor DOM Content Loaded
-    document.addEventListener('DOMContentLoaded', () => {
-      const domTime = performance.now() - startTimeRef.current
-      setMetrics(prev => ({
-        ...prev,
-        domContentLoaded: domTime
-      }))
-    })
-  }
-
-  const observeResourceTiming = () => {
-    // Monitor resource loading performance
-    const resourceObserver = new PerformanceObserver(() => {
-      // Could analyze resource loading times here
-      // Silently track resource timing
-    })
-    resourceObserver.observe({ entryTypes: ['resource'] })
-    observersRef.current.push(resourceObserver)
-  }
-
-  const updateMemoryUsage = () => {
-    if ('memory' in performance) {
-      type PerformanceWithMemory = Performance & {
-        memory: {
-          usedJSHeapSize?: number
-          totalJSHeapSize?: number
-          jsHeapSizeLimit?: number
-        }
+    // Calculate performance score based on available metrics
+    const calculateScore = () => {
+      // This is a simplified calculation for demonstration
+      // In a real implementation, use more sophisticated scoring methods
+      const score = Math.min(100, Math.max(0, 100 - (
+        (initialMetrics.lcp ?? 0) / 40 +
+        (initialMetrics.fid ?? 0) / 3 +
+        (initialMetrics.cls ?? 0) * 100
+      )));
+      
+      setPerformanceScore(score);
+      
+      let rating: string;
+      if (score >= 90) {
+        rating = 'excellent';
+      } else if (score >= 70) {
+        rating = 'good';
+      } else if (score >= 50) {
+        rating = 'needs-improvement';
+      } else {
+        rating = 'poor';
       }
       
-      const perfWithMemory = performance as PerformanceWithMemory
-      const {memory} = perfWithMemory
-      setMetrics(prev => ({
-        ...prev,
-        memoryUsage: {
-          used: memory.usedJSHeapSize ?? null,
-          total: memory.totalJSHeapSize ?? null,
-          limit: memory.jsHeapSizeLimit ?? null
-        }
-      }))
+      setPerformanceRating(rating);
+    };
+
+    calculateScore();
+
+    // Listen for performance metrics if available
+    if ('getEntriesByType' in performance) {
+      // Process existing entries
+      const processEntries = () => {
+        const navigationEntries = performance.getEntriesByType('navigation');
+        const paintEntries = performance.getEntriesByType('paint');
+        const measureEntries = performance.getEntriesByType('measure');
+        
+        // Process navigation entries for metrics
+        navigationEntries.forEach((entry: PerformanceEntry) => {
+          if (entry.name === 'navigationStart') {
+            const navEntry = entry as PerformanceNavigationTiming;
+            setMetrics(prev => ({
+              ...prev,
+              ttfb: navEntry.responseStart - navEntry.requestStart,
+              domContentLoaded: navEntry.domContentLoadedEventEnd - navEntry.startTime,
+              loadComplete: navEntry.loadEventEnd - navEntry.startTime,
+            }));
+          }
+        });
+
+        // Process paint entries
+        paintEntries.forEach((entry: PerformanceEntry) => {
+          if (entry.name === 'first-paint') {
+            setMetrics(prev => ({
+              ...prev,
+              fcp: entry.startTime
+            }));
+          }
+        });
+
+        // Process measure entries if any
+        measureEntries.forEach((_entry: PerformanceEntry) => {
+          // Process custom measures as needed
+        });
+      };
+
+      // Process immediately
+      processEntries();
+
+      // Set up observer for future entries if PerformanceObserver is available
+      if ('PerformanceObserver' in window) {
+        const observer = new PerformanceObserver((list) => {
+          list.getEntries().forEach((entry: PerformanceEntry) => {
+            if (entry.entryType === 'navigation') {
+              const navEntry = entry as PerformanceNavigationTiming;
+              setMetrics(prev => ({
+                ...prev,
+                ttfb: navEntry.responseStart - navEntry.requestStart,
+                domContentLoaded: navEntry.domContentLoadedEventEnd - navEntry.startTime,
+                loadComplete: navEntry.loadEventEnd - navEntry.startTime,
+              }));
+            } else if (entry.name === 'first-paint') {
+              setMetrics(prev => ({
+                ...prev,
+                fcp: entry.startTime
+              }));
+            }
+          });
+        });
+
+        observer.observe({ entryTypes: ['navigation', 'paint', 'measure'] });
+
+        return () => {
+          observer.disconnect();
+        };
+      }
     }
-  }
 
-  const cleanupObservers = () => {
-    observersRef.current.forEach(observer => {
-      observer.disconnect()
-    })
-    observersRef.current = []
-  }
+    return undefined;
+  }, []);
 
-  // Get performance score based on Core Web Vitals
-  const getPerformanceScore = useCallback(() => {
-    const { lcp, fid, cls } = metrics
-
-    if (lcp === null || fid === null || cls === null) {
-      return null
-    }
-
-    // Score based on Google's thresholds
-    let score = 100
-
-    // LCP scoring
-    if (lcp > 4000) {score -= 30} // Poor
-    else if (lcp > 2500) {score -= 15} // Needs improvement
-
-    // FID scoring
-    if (fid > 300) {score -= 30} // Poor
-    else if (fid > 100) {score -= 15} // Needs improvement
-
-    // CLS scoring
-    if (cls > 0.25) {score -= 30} // Poor
-    else if (cls > 0.1) {score -= 15} // Needs improvement
-
-    return Math.max(0, Math.min(100, score))
-  }, [metrics])
-
-  // Get performance rating
-  const getPerformanceRating = useCallback(() => {
-    const score = getPerformanceScore()
-    if (score === null) {return 'unknown'}
-    if (score >= 90) {return 'excellent'}
-    if (score >= 70) {return 'good'}
-    if (score >= 50) {return 'needs-improvement'}
-    return 'poor'
-  }, [getPerformanceScore])
-
-  // Export metrics for analytics
-  const exportMetrics = useCallback(() => ({
-      ...metrics,
-      timestamp: Date.now(),
-      url: window.location.href,
-      userAgent: navigator.userAgent,
-      score: getPerformanceScore(),
-      rating: getPerformanceRating()
-    }), [metrics, getPerformanceScore, getPerformanceRating])
-
-  return {
+  const exportMetrics = () => ({
     metrics,
-    isSupported,
-    performanceScore: getPerformanceScore(),
-    performanceRating: getPerformanceRating(),
-    exportMetrics,
-    updateMemoryUsage
-  }
-}
+    performanceScore,
+    performanceRating,
+    timestamp: Date.now()
+  });
+
+  return { 
+    metrics, 
+    isSupported, 
+    performanceScore, 
+    performanceRating, 
+    exportMetrics 
+  };
+};

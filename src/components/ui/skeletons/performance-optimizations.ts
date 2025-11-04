@@ -1,8 +1,5 @@
 import { apiLogger } from '@/lib/logger'
 import { useCallback, useMemo } from 'react'
-    import('@/components').catch(() => {})
-    import('@/components').catch(() => {})
-    import('@/components').catch(() => {})
 
 /**
  * Performance Optimizations untuk Skeleton Loading System

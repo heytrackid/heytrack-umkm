@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
 import { cn } from '@/lib/utils'
-import { useLinkPreloading, useButtonPreloading } from '@/hooks/useSimplePreloading'
+import { useAdvancedLinkPreloading, useAdvancedButtonPreloading } from '@/hooks/usePreloading'
 import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search, Truck } from 'lucide-react'
 
 // Smart Link component with preloading
@@ -28,7 +28,7 @@ export const SmartLink = ({
   preloadDelay = 100
 }: SmartLinkProps) => {
   const pathname = usePathname()
-  const linkPreloading = useLinkPreloading()
+  const linkPreloading = useAdvancedLinkPreloading()
   const [isHovered, setIsHovered] = useState(false)
 
   const isActive = pathname === href || (href !== '/' && pathname.startsWith(href))
@@ -37,7 +37,7 @@ export const SmartLink = ({
     void setIsHovered(true)
     if (preloadOnHover) {
       setTimeout(() => {
-        linkPreloading.handleMouseEnter(href)
+        linkPreloading.onMouseEnter(href)
       }, preloadDelay)
     }
   }
@@ -56,7 +56,7 @@ export const SmartLink = ({
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onFocus={() => linkPreloading.handleMouseEnter(href)}
+      onFocus={() => linkPreloading.onFocus(href)}
     >
       {children}
     </Link>
@@ -83,7 +83,7 @@ export const SmartButton = ({
   variant = "default",
   size = "default"
 }: SmartButtonProps) => {
-  const { preload: preloadModalOnHover } = useButtonPreloading()
+  const { preloadModalOnHover } = useAdvancedButtonPreloading()
 
   const handleMouseEnter = () => {
     if (preloadOnHover && modalType) {
@@ -230,13 +230,13 @@ export const SmartActionButton = ({
 
 // Smart Search Component (preloads search results)
 export const SmartSearchButton = () => {
-  const { preload: preloadTableOnHover } = useButtonPreloading()
+  const { preloadChartOnHover } = useAdvancedButtonPreloading()
 
   return (
     <Button
       variant="outline"
       size="sm"
-      onMouseEnter={() => preloadTableOnHover('/tables')}
+      onMouseEnter={() => preloadChartOnHover()}
     >
       <Search className="h-4 w-4 mr-2" />
       Search

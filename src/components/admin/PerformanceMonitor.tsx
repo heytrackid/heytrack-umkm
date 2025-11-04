@@ -13,7 +13,7 @@ import {
   CheckCircle,
   TrendingUp
 } from 'lucide-react'
-import { usePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring'
+import { usePerformanceMonitoring } from '@/utils/performance/usePerformanceMonitoring'
 
 /**
  * Performance Monitor Component

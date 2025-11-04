@@ -14,15 +14,7 @@ interface RateLimitEntry {
 export class RateLimiter {
   private static limits = new Map<string, RateLimitEntry>()
   private static readonly CLEANUP_INTERVAL = 60 * 1000 // 1 minute
-
-  static {
-    // Cleanup expired entries periodically
-    if (typeof setInterval !== 'undefined') {
-      setInterval(() => {
-        this.cleanup()
-      }, this.CLEANUP_INTERVAL)
-    }
-  }
+  private static cleanupTimer: ReturnType<typeof setTimeout> | null = null
 
   /**
    * Check if request is allowed
@@ -41,6 +33,7 @@ export class RateLimiter {
         count: 1,
         resetAt: now + windowMs,
       })
+      this.scheduleCleanup()
       return true
     }
 
@@ -54,6 +47,7 @@ export class RateLimiter {
 
     // Increment count
     entry.count++
+    this.scheduleCleanup()
     return true
   }
 
@@ -84,6 +78,9 @@ export class RateLimiter {
    */
   static reset(key: string): void {
     this.limits.delete(key)
+    if (this.limits.size === 0) {
+      this.clearCleanupTimer()
+    }
   }
 
   /**
@@ -102,6 +99,12 @@ export class RateLimiter {
 
     if (cleaned > 0) {
       logger.debug({ cleaned }, 'Rate limiter cleanup completed')
+    }
+
+    if (this.limits.size === 0) {
+      this.clearCleanupTimer()
+    } else {
+      this.scheduleCleanup()
     }
   }
 
@@ -125,6 +128,25 @@ export class RateLimiter {
       totalKeys: this.limits.size,
       activeKeys,
     }
+  }
+
+  private static scheduleCleanup() {
+    if (this.cleanupTimer || this.limits.size === 0 || typeof setTimeout === 'undefined') {
+      return
+    }
+
+    this.cleanupTimer = setTimeout(() => {
+      this.cleanupTimer = null
+      this.cleanup()
+    }, this.CLEANUP_INTERVAL)
+  }
+
+  private static clearCleanupTimer() {
+    if (!this.cleanupTimer) {
+      return
+    }
+    clearTimeout(this.cleanupTimer)
+    this.cleanupTimer = null
   }
 }
 
