@@ -1,96 +1,33 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import React, { useState, useEffect, useCallback } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
 import { apiLogger } from '@/lib/logger'
-import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Package, AlertCircle, Download, RefreshCw, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
-// ✅ OPTIMIZED: Lazy load charts to reduce initial bundle
-import {
-    LazyLineChart,
-    LazyBarChart,
-    LazyPieChart,
-    Line,
-    Bar,
-    Pie,
-    Cell,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ChartLegend as Legend,
-    ResponsiveContainer
-} from '@/components/charts/LazyCharts'
+import { TrendingUp, AlertCircle, Download, RefreshCw, FileText, Printer, BarChart3 } from 'lucide-react'
 
-interface ProfitReportProps {
-    dateRange: {
-        start: string
-        end: string
-    }
-}
+// Import our separated components
+import type { ProfitReportProps, ProfitData, PeriodType, ChartType, SelectedDataPoint } from './ProfitReportTypes'
+import { ProfitMetrics, ProfitBreakdown } from './ProfitReportMetrics'
+import { ProfitReportTabs } from './ProfitReportTabs'
+import { exportToCSV, exportToPDF, printReport } from './ProfitReportExport'
 
-interface ProfitData {
-    summary: {
-        period: {
-            start: string
-            end: string
-            type: string
-        }
-        total_revenue: number
-        total_cogs: number
-        gross_profit: number
-        gross_profit_margin: number
-        total_operating_expenses: number
-        net_profit: number
-        net_profit_margin: number
-        orders_count: number
-    }
-    profit_by_period: Array<{
-        period: string
-        revenue: number
-        cogs: number
-        gross_profit: number
-        gross_margin: number
-        orders_count: number
-    }>
-    product_profitability: Array<{
-        product_name: string
-        total_revenue: number
-        total_cogs: number
-        gross_profit: number
-        gross_margin: number
-        total_quantity: number
-    }>
-    top_profitable_products: Array<{
-        product_name: string
-        gross_profit: number
-        gross_margin: number
-    }>
-    least_profitable_products: Array<{
-        product_name: string
-        gross_profit: number
-        gross_margin: number
-    }>
-    operating_expenses_breakdown: Array<{
-        category: string
-        total: number
-        percentage: number
-    }>
-}
-
-const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
-
+// Main component
 const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
     const { formatCurrency } = useCurrency()
     const { isMobile } = useResponsive()
     const [loading, setLoading] = useState(true)
     const [profitData, setProfitData] = useState<ProfitData | null>(null)
-    const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly')
+    const [period, setPeriod] = useState<PeriodType>('monthly')
+    const [chartType, setChartType] = useState<ChartType>('line')
+    const [selectedDataPoint, setSelectedDataPoint] = useState<SelectedDataPoint | null>(null)
+    const [compareMode, setCompareMode] = useState(false)
+    const [comparisonData, setComparisonData] = useState<ProfitData | null>(null)
 
+    // Data fetching logic
     const fetchProfitData = useCallback(async () => {
         try {
             setLoading(true)
@@ -115,11 +52,54 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
         }
     }, [dateRange, period])
 
+    const fetchComparisonData = useCallback(async () => {
+        if (!compareMode) {
+            return
+        }
+
+        try {
+            // Calculate previous period dates
+            const startDate = new Date(dateRange.start)
+            const endDate = new Date(dateRange.end)
+            const diffTime = Math.abs(endDate.getTime() - startDate.getTime())
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+            const prevEndDate = new Date(startDate)
+            prevEndDate.setDate(prevEndDate.getDate() - 1)
+            const prevStartDate = new Date(prevEndDate)
+            prevStartDate.setDate(prevStartDate.getDate() - diffDays + 1)
+
+            const params = new URLSearchParams({
+                start_date: prevStartDate.toISOString().split('T')[0],
+                end_date: prevEndDate.toISOString().split('T')[0],
+                period,
+                include_breakdown: 'true'
+            })
+
+            const response = await fetch(`/api/reports/profit?${params.toString()}`)
+            if (!response.ok) {
+                throw new Error('Failed to fetch comparison data')
+            }
+
+            const data = await response.json()
+            setComparisonData(data)
+        } catch (err) {
+            apiLogger.error({ err }, 'Error fetching comparison data')
+            setComparisonData(null)
+        }
+    }, [dateRange, period, compareMode])
+
     // Load data on mount and when dependencies change
     useEffect(() => {
         void fetchProfitData()
     }, [fetchProfitData])
 
+    // Load comparison data when compare mode changes
+    useEffect(() => {
+        void fetchComparisonData()
+    }, [fetchComparisonData])
+
+    // Loading state
     if (loading) {
         return (
             <div className="space-y-4">
@@ -132,6 +112,7 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
         )
     }
 
+    // Error state
     if (!profitData) {
         return (
             <Card>
@@ -149,361 +130,125 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
 
     const { summary } = profitData
 
-    const getTrendIcon = (value: number) => {
-        if (value > 0) { return <ArrowUpRight className="h-4 w-4 text-gray-600" /> }
-        if (value < 0) { return <ArrowDownRight className="h-4 w-4 text-red-600" /> }
-        return <Minus className="h-4 w-4 text-gray-400" />
-    }
-
-    const getTrendColor = (value: number) => {
-        if (value > 0) { return 'text-gray-600' }
-        if (value < 0) { return 'text-red-600' }
-        return 'text-gray-600'
-    }
-
     return (
         <div className="space-y-6">
             {/* Header Actions */}
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold">Laporan Profit & Loss</h2>
-                    <p className="text-sm text-muted-foreground">
+                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                        <TrendingUp className="h-6 w-6 text-blue-600" />
+                        Laporan Profit & Loss
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
                         {new Date(summary.period.start).toLocaleDateString('id-ID')} - {new Date(summary.period.end).toLocaleDateString('id-ID')}
                     </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" onClick={fetchProfitData}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Refresh
                     </Button>
-                    <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Export
+                    <Button
+                        variant={compareMode ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCompareMode(!compareMode)}
+                    >
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        Bandingkan
+                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                                <Download className="h-4 w-4 mr-2" />
+                                Ekspor
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => exportToCSV({ profitData, dateRange })}>
+                                <FileText className="h-4 w-4 mr-2" />
+                                Ekspor CSV
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => exportToPDF({ profitData, dateRange, formatCurrency })}>
+                                <FileText className="h-4 w-4 mr-2" />
+                                Ekspor PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={printReport}>
+                                <Printer className="h-4 w-4 mr-2" />
+                                Cetak
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            </div>
+
+            {/* Period and Chart Type Selectors */}
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex gap-2">
+                    <span className="text-sm font-medium self-center mr-2">Periode:</span>
+                    <Button
+                        variant={period === 'daily' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setPeriod('daily')}
+                    >
+                        Harian
+                    </Button>
+                    <Button
+                        variant={period === 'weekly' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setPeriod('weekly')}
+                    >
+                        Mingguan
+                    </Button>
+                    <Button
+                        variant={period === 'monthly' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setPeriod('monthly')}
+                    >
+                        Bulanan
+                    </Button>
+                </div>
+
+                <div className="flex gap-2">
+                    <span className="text-sm font-medium self-center mr-2">Tipe Chart:</span>
+                    <Button
+                        variant={chartType === 'line' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setChartType('line')}
+                    >
+                        Line
+                    </Button>
+                    <Button
+                        variant={chartType === 'bar' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setChartType('bar')}
+                    >
+                        Bar
+                    </Button>
+                    <Button
+                        variant={chartType === 'area' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setChartType('area')}
+                    >
+                        Area
                     </Button>
                 </div>
             </div>
 
-            {/* Period Selector */}
-            <div className="flex gap-2">
-                <Button
-                    variant={period === 'daily' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setPeriod('daily')}
-                >
-                    Harian
-                </Button>
-                <Button
-                    variant={period === 'weekly' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setPeriod('weekly')}
-                >
-                    Mingguan
-                </Button>
-                <Button
-                    variant={period === 'monthly' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setPeriod('monthly')}
-                >
-                    Bulanan
-                </Button>
-            </div>
-
             {/* Key Metrics Cards */}
-            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-4'}`}>
-                <Card>
-                    <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Total Revenue
-                            </CardTitle>
-                            <DollarSign className="h-5 w-5 text-gray-600" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-1">
-                            <p className="text-2xl font-bold">
-                                {formatCurrency(summary.total_revenue)}
-                            </p>
-                            <div className="flex items-center gap-1 text-sm">
-                                {getTrendIcon(summary.total_revenue)}
-                                <span className={getTrendColor(summary.total_revenue)}>
-                                    {summary.orders_count} pesanan
-                                </span>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                COGS (Biaya Produksi)
-                            </CardTitle>
-                            <Package className="h-5 w-5 text-orange-600" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-1">
-                            <p className="text-2xl font-bold text-orange-600">
-                                {formatCurrency(summary.total_cogs)}
-                            </p>
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                <span>
-                                    {summary.total_revenue > 0
-                                        ? ((summary.total_cogs / summary.total_revenue) * 100).toFixed(1)
-                                        : 0}% dari revenue
-                                </span>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Gross Profit
-                            </CardTitle>
-                            <TrendingUp className="h-5 w-5 text-gray-600" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-1">
-                            <p className={`text-2xl font-bold ${summary.gross_profit >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
-                                {formatCurrency(summary.gross_profit)}
-                            </p>
-                            <div className="flex items-center gap-1">
-                                <Badge variant={summary.gross_profit_margin >= 30 ? 'default' : 'secondary'}>
-                                    Margin: {summary.gross_profit_margin.toFixed(1)}%
-                                </Badge>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Net Profit
-                            </CardTitle>
-                            <ShoppingCart className="h-5 w-5 text-gray-600" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-1">
-                            <p className={`text-2xl font-bold ${summary.net_profit >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
-                                {formatCurrency(summary.net_profit)}
-                            </p>
-                            <div className="flex items-center gap-1">
-                                <Badge variant={summary.net_profit >= 0 ? 'default' : 'destructive'}>
-                                    Margin: {summary.net_profit_margin.toFixed(1)}%
-                                </Badge>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            <ProfitMetrics summary={summary} isMobile={isMobile} />
 
             {/* Profit Breakdown */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Breakdown Profit</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-950 rounded-lg">
-                            <span className="font-medium">Total Revenue</span>
-                            <span className="text-lg font-bold">{formatCurrency(summary.total_revenue)}</span>
-                        </div>
-                        <div className="flex justify-between items-center p-4 bg-orange-50 dark:bg-orange-950 rounded-lg">
-                            <span className="font-medium">- COGS (Cost of Goods Sold)</span>
-                            <span className="text-lg font-bold text-orange-600">
-                                ({formatCurrency(summary.total_cogs)})
-                            </span>
-                        </div>
-                        <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-green-950 rounded-lg border-2 border-gray-300">
-                            <span className="font-medium">= Gross Profit</span>
-                            <span className="text-lg font-bold text-gray-600">
-                                {formatCurrency(summary.gross_profit)}
-                            </span>
-                        </div>
-                        <div className="flex justify-between items-center p-4 bg-red-50 dark:bg-red-950 rounded-lg">
-                            <span className="font-medium">- Operating Expenses</span>
-                            <span className="text-lg font-bold text-red-600">
-                                ({formatCurrency(summary.total_operating_expenses)})
-                            </span>
-                        </div>
-                        <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-950 rounded-lg border-2 border-gray-300">
-                            <span className="font-bold">= Net Profit</span>
-                            <span className={`text-xl font-bold ${summary.net_profit >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
-                                {formatCurrency(summary.net_profit)}
-                            </span>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+            <ProfitBreakdown summary={summary} formatCurrency={formatCurrency} />
 
-            {/* Charts and Details */}
-            <SwipeableTabs defaultValue="trend" className="space-y-4">
-                <SwipeableTabsList>
-                    <SwipeableTabsTrigger value="trend">Trend</SwipeableTabsTrigger>
-                    <SwipeableTabsTrigger value="products">Produk</SwipeableTabsTrigger>
-                    <SwipeableTabsTrigger value="expenses">Biaya</SwipeableTabsTrigger>
-                    <SwipeableTabsTrigger value="comparison">Perbandingan</SwipeableTabsTrigger>
-                </SwipeableTabsList>
-
-                <SwipeableTabsContent value="trend">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Trend Profit</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <LazyLineChart data={profitData.profit_by_period}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="period" />
-                                    <YAxis />
-                                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                                    <Legend />
-                                    <Line type="monotone" dataKey="revenue" stroke="#3b82f6" name="Revenue" />
-                                    <Line type="monotone" dataKey="cogs" stroke="#f59e0b" name="COGS" />
-                                    <Line type="monotone" dataKey="gross_profit" stroke="#10b981" name="Gross Profit" strokeWidth={2} />
-                                </LazyLineChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                </SwipeableTabsContent>
-
-                <SwipeableTabsContent value="products">
-                    <div className="grid gap-4 md:grid-cols-2">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <TrendingUp className="h-5 w-5 text-gray-600" />
-                                    Top 5 Produk Paling Menguntungkan
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-3">
-                                    {profitData.top_profitable_products.map((product, index) => (
-                                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-green-950 rounded-lg">
-                                            <div>
-                                                <p className="font-medium">{product.product_name}</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Margin: {product.gross_margin.toFixed(1)}%
-                                                </p>
-                                            </div>
-                                            <p className="font-bold text-gray-600">
-                                                {formatCurrency(product.gross_profit)}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <TrendingDown className="h-5 w-5 text-red-600" />
-                                    5 Produk Kurang Menguntungkan
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-3">
-                                    {profitData.least_profitable_products.map((product, index) => (
-                                        <div key={index} className="flex justify-between items-center p-3 bg-red-50 dark:bg-red-950 rounded-lg">
-                                            <div>
-                                                <p className="font-medium">{product.product_name}</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Margin: {product.gross_margin.toFixed(1)}%
-                                                </p>
-                                            </div>
-                                            <p className="font-bold text-red-600">
-                                                {formatCurrency(product.gross_profit)}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </SwipeableTabsContent>
-
-                <SwipeableTabsContent value="expenses">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Breakdown Biaya Operasional</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <LazyPieChart>
-                                        <Pie
-                                            data={profitData.operating_expenses_breakdown}
-                                            dataKey="total"
-                                            nameKey="category"
-                                            cx="50%"
-                                            cy="50%"
-                                            outerRadius={100}
-                                            label={(entry) => `${entry.category}: ${(entry.percentage as number).toFixed(1)}%`}
-                                        >
-                                            {profitData.operating_expenses_breakdown.map((_, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                                    </LazyPieChart>
-                                </ResponsiveContainer>
-
-                                <div className="space-y-3">
-                                    {profitData.operating_expenses_breakdown.map((expense, index) => (
-                                        <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
-                                            <div className="flex items-center gap-3">
-                                                <div
-                                                    className="w-4 h-4 rounded-full"
-                                                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                                                />
-                                                <span className="font-medium">{expense.category}</span>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-bold">{formatCurrency(expense.total)}</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {expense.percentage.toFixed(1)}%
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </SwipeableTabsContent>
-
-                <SwipeableTabsContent value="comparison">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Perbandingan Revenue vs COGS vs Profit</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <LazyBarChart data={profitData.profit_by_period}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="period" />
-                                    <YAxis />
-                                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                                    <Legend />
-                                    <Bar dataKey="revenue" fill="#3b82f6" name="Revenue" />
-                                    <Bar dataKey="cogs" fill="#f59e0b" name="COGS" />
-                                    <Bar dataKey="gross_profit" fill="#10b981" name="Gross Profit" />
-                                </LazyBarChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                </SwipeableTabsContent>
-            </SwipeableTabs>
+            {/* Tabbed Content */}
+            <ProfitReportTabs
+                profitData={profitData}
+                chartType={chartType}
+                selectedDataPoint={selectedDataPoint}
+                setSelectedDataPoint={setSelectedDataPoint}
+                compareMode={compareMode}
+                comparisonData={comparisonData}
+            />
         </div>
     )
 }

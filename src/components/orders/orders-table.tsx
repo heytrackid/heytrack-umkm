@@ -38,12 +38,11 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
-  Package,
-  Truck,
-  Download,
-  Printer,
-  RefreshCw,
-  Archive
+   Package,
+   Truck,
+   Download,
+   RefreshCw,
+   Archive
 } from 'lucide-react'
 import type { OrderItem, Order } from './types'
 
@@ -220,33 +219,43 @@ const OrdersTable = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleBulkAction('confirm')}
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Konfirmasi
-            </Button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => handleBulkAction('confirm')}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Konfirmasi ({selectedOrders.length})
+              </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleBulkAction('export')}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkAction('ready')}
+              >
+                <Package className="h-4 w-4 mr-2" />
+                Siap Kirim
+              </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleBulkAction('print')}
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              Print
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkAction('shipped')}
+              >
+                <Truck className="h-4 w-4 mr-2" />
+                Dikirim
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkAction('export')}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -349,12 +358,49 @@ const OrdersTable = ({
                     </div>
                   </TableCell>
 
-                  <TableCell>
-                    <div className="space-y-2">
-                      {getStatusBadge(order.status)}
-                      {order.priority !== 'normal' && getPriorityBadge(order.priority)}
-                    </div>
-                  </TableCell>
+                   <TableCell>
+                     <div className="space-y-2">
+                       <div className="flex items-center gap-2">
+                         {getStatusBadge(order.status)}
+                         <div className="flex gap-1">
+                           {order.status === 'PENDING' && (
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                               onClick={() => onUpdateStatus?.(order.id, 'CONFIRMED')}
+                               title="Konfirmasi pesanan"
+                             >
+                               <CheckCircle className="h-3 w-3" />
+                             </Button>
+                           )}
+                           {order.status === 'CONFIRMED' && (
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                               onClick={() => onUpdateStatus?.(order.id, 'READY')}
+                               title="Tandai siap kirim"
+                             >
+                               <Package className="h-3 w-3" />
+                             </Button>
+                           )}
+                           {order.status === 'READY' && (
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               className="h-6 w-6 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                               onClick={() => onUpdateStatus?.(order.id, 'SHIPPED')}
+                               title="Tandai dikirim"
+                             >
+                               <Truck className="h-3 w-3" />
+                             </Button>
+                           )}
+                         </div>
+                       </div>
+                       {order.priority !== 'normal' && getPriorityBadge(order.priority)}
+                     </div>
+                   </TableCell>
 
                   <TableCell>
                     <div className="space-y-1 text-sm">

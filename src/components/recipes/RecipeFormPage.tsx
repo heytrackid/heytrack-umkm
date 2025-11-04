@@ -67,7 +67,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
             const response = await fetch('/api/ingredients')
             if (response.ok) {
                 const data = await response.json()
-                setIngredients(data)
+                setIngredients(data.ingredients ?? [])
             }
         } catch (error: unknown) {
             // Silent fail - will show empty ingredients list

@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, useEffect } from 'react'
+import { type ReactNode, useEffect, useDeferredValue } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -33,14 +33,15 @@ export const SearchInput = ({
   showClear = true
 }: SearchInputProps) => {
   const debouncedValue = useDebounce(value, debounceMs)
+  const deferredValue = useDeferredValue(debouncedValue)
 
-  // Update parent when debounced value changes
+  // Update parent when deferred value changes (better UX than debounced alone)
   useEffect(() => {
-    if (debouncedValue !== value) {
-      onChange(debouncedValue)
+    if (deferredValue !== value) {
+      onChange(deferredValue)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedValue, onChange])
+  }, [deferredValue, onChange])
 
   const handleClear = () => {
     onChange('')

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { VirtualizedTable } from '@/components/ui/virtualized-table'
 import { EmptyState } from '@/components/ui/empty-state'
 import {
   DropdownMenu,
@@ -116,8 +117,6 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
   // State management
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
-  const [sortBy, setSortBy] = useState<string>('')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [rowsPerPage, setRowsPerPage] = useState<number>(
     initialPageSize || pageSizeOptions?.[0] || 10
   )
@@ -138,9 +137,9 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
     return sanitizedPageSizeOptions[0]
   }, [enablePagination, initialPageSize, sanitizedPageSizeOptions, data.length])
 
-  // Filter and sort data
+  // Filter data (sorting not supported in VirtualizedTable)
   const processedData = useMemo(() => {
-    let filtered = data.filter(item => {
+    return data.filter(item => {
       // Search filter
       const matchesSearch = !searchTerm || columns.some(col => {
         const value = getValue(item, col.key)
@@ -156,29 +155,7 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
 
       return matchesSearch && matchesFilters
     })
-
-    // Sort data
-    if (sortBy) {
-      filtered = filtered.sort((a, b) => {
-        const aVal = getValue(a, sortBy)
-        const bVal = getValue(b, sortBy)
-
-        if (typeof aVal === 'number' && typeof bVal === 'number') {
-          if (aVal < bVal) { return sortOrder === 'asc' ? -1 : 1 }
-          if (aVal > bVal) { return sortOrder === 'asc' ? 1 : -1 }
-          return 0
-        }
-
-        const aText = String(aVal || '')
-        const bText = String(bVal || '')
-        if (aText < bText) { return sortOrder === 'asc' ? -1 : 1 }
-        if (aText > bText) { return sortOrder === 'asc' ? 1 : -1 }
-        return 0
-      })
-    }
-
-    return filtered
-  }, [data, searchTerm, filters, sortBy, sortOrder, columns])
+  }, [data, searchTerm, filters, columns])
 
   // Pagination
   const totalItems = processedData.length
@@ -206,14 +183,7 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
     return item[key as keyof T]
   }
 
-  function handleSort(columnKey: string) {
-    if (sortBy === columnKey) {
-      void setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-    } else {
-      void setSortBy(columnKey)
-      void setSortOrder('asc')
-    }
-  }
+
 
   function handleFilterChange(columnKey: string, value: string) {
     setFilters(prev => ({
@@ -251,7 +221,7 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
     if (enablePagination) {
       void setCurrentPage(1)
     }
-  }, [searchTerm, JSON.stringify(filters), sortBy, sortOrder, rowsPerPage, enablePagination])
+  }, [searchTerm, JSON.stringify(filters), rowsPerPage, enablePagination])
 
   // Reset to valid page when data changes
   useEffect(() => {
@@ -355,7 +325,7 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
           )}
         </div>
 
-        {/* Table */}
+        {/* Virtualized Table */}
         {processedData.length === 0 ? (
           <EmptyState
             title={emptyMessage}
@@ -364,166 +334,74 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
           />
         ) : (
           <div className="space-y-4">
-            {/* Desktop Table */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    {columns.map(col => (
-                      <th
-                        key={String(col.key)}
-                        className={`text-left p-3 font-medium text-muted-foreground ${col.hideOnMobile ? 'hidden lg:table-cell' : ''
-                          } ${col.className || ''}`}
-                      >
-                        {col.sortable ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-auto p-0 font-medium hover:bg-transparent"
-                            onClick={() => handleSort(String(col.key))}
-                          >
-                            {col.header}
-                            {sortBy === String(col.key) && (
-                              <span className="ml-1">
-                                {sortOrder === 'asc' ? '↑' : '↓'}
-                              </span>
-                            )}
-                          </Button>
-                        ) : (
-                          col.header
-                        )}
-                      </th>
-                    ))}
-                    {(onView || onEdit || onDelete) && (
-                      <th className="text-right p-3 font-medium text-muted-foreground">
-                        Actions
-                      </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedData.map((item, index) => (
-                    <tr key={index} className="border-b hover:bg-muted/50">
-                      {columns.map(col => (
-                        <td
-                          key={String(col.key)}
-                          className={`p-3 ${col.hideOnMobile ? 'hidden lg:table-cell' : ''} ${col.className || ''}`}
+            <VirtualizedTable
+              data={paginatedData}
+              columns={columns.map(col => ({
+                header: col.header,
+                accessor: col.key,
+                cell: col.render ? (item: T) => {
+                  const value = getValue(item, col.key)
+                  return col.render ? col.render(value, item) : String(value)
+                } : undefined
+              })).concat(onView || onEdit || onDelete ? [{
+                header: 'Actions',
+                accessor: 'actions' as keyof T,
+                cell: (item: T) => (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {onView && (
+                        <DropdownMenuItem onClick={() => onView(item)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
+                        </DropdownMenuItem>
+                      )}
+                      {onEdit && (
+                        <DropdownMenuItem onClick={() => onEdit(item)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                      )}
+                      {onDelete && (
+                        <DropdownMenuItem
+                          onClick={() => onDelete(item)}
+                          className="text-red-600"
                         >
-                          {col.render
-                            ? col.render(getValue(item, col.key), item)
-                            : String(getValue(item, col.key) || '-')
-                          }
-                        </td>
-                      ))}
-                      {(onView || onEdit || onDelete) && (
-                        <td className="text-right p-3">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              {onView && (
-                                <DropdownMenuItem onClick={() => onView(item)}>
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View
-                                </DropdownMenuItem>
-                              )}
-                              {onEdit && (
-                                <DropdownMenuItem onClick={() => onEdit(item)}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Edit
-                                </DropdownMenuItem>
-                              )}
-                              {onDelete && (
-                                <DropdownMenuItem
-                                  onClick={() => onDelete(item)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </td>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
                       )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile Cards */}
-            <div className="md:hidden space-y-3">
-              {paginatedData.map((item, index) => (
-                <Card key={index} className="border border-gray-200">
-                  <CardContent className="p-4">
-                    <div className="space-y-2">
-                      {columns
-                        .filter(col => !col.hideOnMobile)
-                        .map(col => (
-                          <div key={String(col.key)} className="flex justify-between items-start">
-                            <span className="text-sm font-medium text-muted-foreground w-1/3">
-                              {col.header}:
-                            </span>
-                            <div className="text-sm flex-1 text-right">
-                              {col.render
-                                ? col.render(getValue(item, col.key), item)
-                                : String(getValue(item, col.key) || '-')
-                              }
-                            </div>
-                          </div>
-                        ))}
-
-                      {(onView || onEdit || onDelete) && (
-                        <div className="flex gap-2 pt-3 border-t">
-                          {onView && (
-                            <Button variant="outline" size="sm" onClick={() => onView(item)} className="flex-1">
-                              <Eye className="h-4 w-4 mr-2" />
-                              View
-                            </Button>
-                          )}
-                          {onEdit && (
-                            <Button variant="outline" size="sm" onClick={() => onEdit(item)} className="flex-1">
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </Button>
-                          )}
-                          {onDelete && (
-                            <Button variant="outline" size="sm" onClick={() => onDelete(item)} className="flex-1 text-red-600">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )
+              }] : [])}
+              className="border rounded-lg"
+            />
 
             {/* Pagination */}
             {enablePagination && totalItems > 0 && (
-              <TablePaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                pageSize={rowsPerPage}
-                onPageSizeChange={(size) => {
-                  void setRowsPerPage(size)
-                  void setCurrentPage(1)
-                }}
-                totalItems={totalItems}
-                pageStart={pageStart}
-                pageEnd={pageEnd}
-                pageSizeOptions={sanitizedPageSizeOptions}
-                className="border-t"
-              />
+              <div className="border-t pt-4">
+                <TablePaginationControls
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  pageSize={rowsPerPage}
+                  onPageSizeChange={(size) => {
+                    void setRowsPerPage(size)
+                    void setCurrentPage(1)
+                  }}
+                  totalItems={totalItems}
+                  pageStart={pageStart}
+                  pageEnd={pageEnd}
+                  pageSizeOptions={sanitizedPageSizeOptions}
+                />
+              </div>
             )}
           </div>
         )}

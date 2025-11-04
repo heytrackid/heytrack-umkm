@@ -45,6 +45,8 @@ export class WorkflowAutomation extends BaseWorkflowAutomation {
         return OrderWorkflowHandlers.handleOrderCompleted(context)
       case 'order.cancelled':
         return OrderWorkflowHandlers.handleOrderCancelled(context)
+      case 'order.status_changed':
+        return OrderWorkflowHandlers.handleOrderStatusChanged(context)
 
       // Inventory events
       case 'inventory.low_stock':

@@ -208,6 +208,15 @@ export const useOrderLogic = () => {
     setOrderItems(prev => prev.filter((_, i) => i !== index))
   }
 
+  const reorderOrderItems = (fromIndex: number, toIndex: number) => {
+    setOrderItems(prev => {
+      const newItems = [...prev]
+      const [movedItem] = newItems.splice(fromIndex, 1)
+      newItems.splice(toIndex, 0, movedItem)
+      return newItems
+    })
+  }
+
   const selectCustomer = (customer: Customer) => {
     setFormData(prev => ({
       ...prev,
@@ -225,11 +234,56 @@ export const useOrderLogic = () => {
     return `ORD-${dateStr}-${timeStr}`
   }
 
+  // Enhanced validation with detailed feedback
+  const validateForm = () => {
+    const errors: string[] = []
+
+    // Customer validation
+    if (!formData.customer_name.trim()) {
+      errors.push('Nama pelanggan harus diisi')
+    }
+    if (!formData.customer_phone.trim()) {
+      errors.push('Nomor telepon pelanggan harus diisi')
+    }
+    if (formData.delivery_method === 'delivery' && !formData.delivery_address.trim()) {
+      errors.push('Alamat pengiriman harus diisi untuk metode delivery')
+    }
+
+    // Order items validation
+    if (orderItems.length === 0) {
+      errors.push('Minimal 1 item pesanan harus ditambahkan')
+    }
+
+    // Validate each order item
+    orderItems.forEach((item, index) => {
+      if (!item.recipe_id) {
+        errors.push(`Item ${index + 1}: Pilih resep`)
+      }
+      if (item.quantity <= 0) {
+        errors.push(`Item ${index + 1}: Jumlah harus lebih dari 0`)
+      }
+      if (item.unit_price <= 0) {
+        errors.push(`Item ${index + 1}: Harga harus lebih dari 0`)
+      }
+    })
+
+    // Date validation
+    if (!formData.order_date) {
+      errors.push('Tanggal pesanan harus diisi')
+    }
+    if (formData.delivery_method === 'delivery' && !formData.delivery_date) {
+      errors.push('Tanggal pengiriman harus diisi')
+    }
+
+    return errors
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    
-    if (!formData.customer_name || orderItems.length === 0) {
-      void setError('Nama pelanggan dan minimal 1 item pesanan harus diisi')
+
+    const validationErrors = validateForm()
+    if (validationErrors.length > 0) {
+      void setError(validationErrors.join('\n'))
       return
     }
     
@@ -336,6 +390,7 @@ export const useOrderLogic = () => {
     addOrderItem,
     updateOrderItem,
     removeOrderItem,
+    reorderOrderItems,
     selectCustomer,
     handleSubmit,
     setActiveTab,

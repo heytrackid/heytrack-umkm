@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, ChefHat, Loader2, Sparkles } from 'lucide-react'
+import { AlertCircle, ChefHat, Loader2, Sparkles, CheckCircle, XCircle } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -50,6 +50,13 @@ const RecipeGeneratorForm = ({
   loading,
   onGenerate
 }: RecipeGeneratorFormProps) => {
+  // Form validation
+  const isProductNameValid = productName.trim().length >= 3
+  const isProductTypeValid = productType !== ''
+  const isServingsValid = servings >= 1 && servings <= 100
+  const isTargetPriceValid = targetPrice === '' || (!isNaN(parseFloat(targetPrice)) && parseFloat(targetPrice) > 0)
+  const isFormValid = isProductNameValid && isProductTypeValid && isServingsValid && isTargetPriceValid && selectedIngredients.length > 0
+
   const toggleDietaryRestriction = (restriction: string) => {
     setDietaryRestrictions(
       dietaryRestrictions.includes(restriction)
@@ -72,13 +79,26 @@ const RecipeGeneratorForm = ({
       <CardContent className="space-y-4">
         {/* Product Name */}
         <div className="space-y-2">
-          <Label htmlFor="productName">Nama Produk *</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="productName">Nama Produk *</Label>
+            {productName && (
+              isProductNameValid ? (
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              ) : (
+                <XCircle className="h-4 w-4 text-red-500" />
+              )
+            )}
+          </div>
           <Input
             id="productName"
             placeholder="Contoh: Roti Tawar Premium"
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
+            className={productName && !isProductNameValid ? "border-red-500 focus:border-red-500" : ""}
           />
+          {productName && !isProductNameValid && (
+            <p className="text-sm text-red-500">Nama produk minimal 3 karakter</p>
+          )}
         </div>
 
         {/* Product Type */}
@@ -107,32 +127,56 @@ const RecipeGeneratorForm = ({
 
         {/* Servings */}
         <div className="space-y-2">
-          <Label htmlFor="servings">Jumlah Hasil (Servings) *</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="servings">Jumlah Porsi *</Label>
+            {servings > 0 && (
+              isServingsValid ? (
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              ) : (
+                <XCircle className="h-4 w-4 text-red-500" />
+              )
+            )}
+          </div>
           <Input
             id="servings"
             type="number"
             min="1"
+            max="100"
+            placeholder="Contoh: 12"
             value={servings}
             onChange={(e) => setServings(parseInt(e.target.value) || 1)}
+            className={servings > 0 && !isServingsValid ? "border-red-500 focus:border-red-500" : ""}
           />
-          <p className="text-xs text-muted-foreground">
-            Berapa banyak unit yang dihasilkan dari resep ini
-          </p>
+          {servings > 0 && !isServingsValid && (
+            <p className="text-sm text-red-500">Jumlah porsi harus antara 1-100</p>
+          )}
         </div>
 
         {/* Target Price */}
         <div className="space-y-2">
-          <Label htmlFor="targetPrice">Target Harga Jual (Optional)</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="targetPrice">Harga Jual Target (Opsional)</Label>
+            {targetPrice && (
+              isTargetPriceValid ? (
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              ) : (
+                <XCircle className="h-4 w-4 text-red-500" />
+              )
+            )}
+          </div>
           <Input
             id="targetPrice"
-            type="number"
-            placeholder="85000"
+            placeholder="Contoh: 15000"
             value={targetPrice}
             onChange={(e) => setTargetPrice(e.target.value)}
+            className={targetPrice && !isTargetPriceValid ? "border-red-500 focus:border-red-500" : ""}
           />
           <p className="text-xs text-muted-foreground">
-            AI akan optimize resep untuk mencapai margin yang sehat
+            Harga jual per porsi yang diinginkan (dalam Rupiah)
           </p>
+          {targetPrice && !isTargetPriceValid && (
+            <p className="text-sm text-red-500">Masukkan angka yang valid (contoh: 15000)</p>
+          )}
         </div>
 
         {/* Dietary Restrictions */}
@@ -161,7 +205,19 @@ const RecipeGeneratorForm = ({
 
         {/* Preferred Ingredients */}
         <div className="space-y-2">
-          <Label>Bahan yang Ingin Digunakan (Optional)</Label>
+          <div className="flex items-center justify-between">
+            <Label>Bahan yang Ingin Digunakan *</Label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {selectedIngredients.length} bahan dipilih
+              </span>
+              {selectedIngredients.length > 0 ? (
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              ) : (
+                <XCircle className="h-4 w-4 text-red-500" />
+              )}
+            </div>
+          </div>
           <Textarea
             placeholder="Contoh: coklat premium, keju cheddar, kismis"
             value={selectedIngredients.join(', ')}
@@ -169,31 +225,47 @@ const RecipeGeneratorForm = ({
               e.target.value.split(',').map(s => s.trim()).filter(Boolean)
             )}
             rows={3}
+            className={selectedIngredients.length === 0 ? "border-red-500 focus:border-red-500" : ""}
           />
           <p className="text-xs text-muted-foreground">
             Pisahkan dengan koma. AI akan prioritaskan bahan ini.
           </p>
+          {selectedIngredients.length === 0 && (
+            <p className="text-sm text-red-500">Pilih minimal 1 bahan untuk generate resep</p>
+          )}
         </div>
 
         {/* Generate Button */}
-        <Button
-          onClick={onGenerate}
-          disabled={loading || !productName}
-          className="w-full"
-          size="lg"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Generating Magic...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4 mr-2" />
-              Generate Resep dengan AI
-            </>
+        <div className="space-y-2">
+          <Button
+            onClick={onGenerate}
+            disabled={loading || !isFormValid}
+            className="w-full"
+            size="lg"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Generating Magic...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Generate Resep dengan AI
+              </>
+            )}
+          </Button>
+
+          {!isFormValid && !loading && (
+            <div className="text-sm text-muted-foreground space-y-1">
+              {!isProductNameValid && <p>• Nama produk minimal 3 karakter</p>}
+              {!isProductTypeValid && <p>• Pilih jenis produk</p>}
+              {!isServingsValid && <p>• Jumlah porsi harus 1-100</p>}
+              {targetPrice && !isTargetPriceValid && <p>• Harga target harus angka valid</p>}
+              {selectedIngredients.length === 0 && <p>• Pilih minimal 1 bahan</p>}
+            </div>
           )}
-        </Button>
+        </div>
 
         {availableIngredients.length === 0 && (
           <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">

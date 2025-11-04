@@ -27,7 +27,7 @@ async function POST(request: NextRequest) {
 
     // Parse body - handle both JSON and text/plain
     let body: Record<string, unknown>
-    const contentType = request.headers.get('content-type') || ''
+    const contentType = request.headers.get('content-type') ?? ''
     
     try {
       if (contentType.includes('application/json')) {
@@ -56,7 +56,7 @@ async function POST(request: NextRequest) {
     }
 
     // Sanitize error data with proper type casting
-    const message = String(body.message || body.msg || 'Unknown error')
+    const message = String(body.message ?? body.msg ?? 'Unknown error')
     const stack = body.stack ? String(body.stack) : null
     const url = body.url ? String(body.url) : null
     const userAgent = body.userAgent ? String(body.userAgent) : null

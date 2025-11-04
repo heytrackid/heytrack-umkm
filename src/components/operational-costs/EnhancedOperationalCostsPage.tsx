@@ -15,7 +15,7 @@ import { usePagination } from '@/hooks/usePagination'
 import { useResponsive } from '@/hooks/useResponsive'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
-import { EnhancedEmptyState } from './EnhancedEmptyState'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { MobileOperationalCostCard } from './MobileOperationalCostCard'
 import { OperationalCostFormDialog } from './OperationalCostFormDialog'
 import { OperationalCostStats } from './OperationalCostStats'
@@ -305,12 +305,12 @@ export const EnhancedOperationalCostsPage = () => {
                 title="Biaya Operasional"
                 description="Kelola semua biaya operasional bisnis Anda"
                 action={
-                    <div className="flex gap-2 relative z-10">
-                        <Button onClick={handleAdd} className="pointer-events-auto">
+                    <div className="flex gap-2">
+                        <Button onClick={handleAdd}>
                             <Plus className="h-4 w-4 mr-2" />
                             Tambah Biaya
                         </Button>
-                        <Button variant="outline" onClick={handleQuickSetup} className="pointer-events-auto">
+                        <Button variant="outline" onClick={handleQuickSetup}>
                             <Zap className="h-4 w-4 mr-2" />
                             Setup Cepat
                         </Button>
@@ -414,7 +414,22 @@ export const EnhancedOperationalCostsPage = () => {
             )}
             
             {!loading && filteredData.length === 0 && (!costs || costs.length === 0) && (
-                <EnhancedEmptyState onAdd={handleAdd} onQuickSetup={handleQuickSetup} />
+                <EmptyState
+                    {...EmptyStatePresets.operationalCosts}
+                    actions={[
+                        {
+                            label: 'Setup Cepat (8 Template)',
+                            onClick: handleQuickSetup,
+                            icon: Zap
+                        },
+                        {
+                            label: 'Tambah Manual',
+                            onClick: handleAdd,
+                            variant: 'outline',
+                            icon: Plus
+                        }
+                    ]}
+                />
             )}
             
             {!loading && filteredData.length === 0 && costs && costs.length > 0 && (

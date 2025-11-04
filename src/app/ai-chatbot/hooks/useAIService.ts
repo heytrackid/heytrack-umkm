@@ -193,7 +193,10 @@ export function useAIService() {
 
       // Enhanced fallback responses with better error handling
       const lowerQuery = query.toLowerCase()
-      
+
+      // Get business context for fallback responses
+      const businessContext = await fetchBusinessContext(userId)
+
       // Check if it's an API configuration issue
       if (error instanceof Error && error.message.includes('API key')) {
         return {
@@ -202,21 +205,46 @@ export function useAIService() {
             'Refresh halaman dan coba lagi',
             'Gunakan fitur manual di dashboard'
           ]
-        }
       }
-
-      // Provide intelligent fallback based on query
+    }
       if (lowerQuery.includes('stok') || lowerQuery.includes('bahan') || lowerQuery.includes('inventory')) {
+        const criticalStock = businessContext?.inventory?.critical ?? []
+        const totalStock = businessContext?.inventory?.total ?? 0
+
+        let stockMessage = '📦 **Manajemen Stok Bahan Baku**\n\n'
+
+        if (criticalStock.length > 0) {
+          stockMessage += `⚠️ **PERINGATAN STOK KRITIS!**\n\nAda ${criticalStock.length} bahan yang stoknya di bawah minimum:\n\n`
+          criticalStock.forEach(item => {
+            stockMessage += `• ${item.name}: ${item.stock} ${item.unit} (minimum: ${item.minimum} ${item.unit})\n`
+          })
+          stockMessage += '\n**Rekomendasi Segera:**\n• Buat purchase order untuk bahan kritikal\n• Hubungi supplier untuk pengiriman darurat\n• Pertimbangkan alternatif bahan sementara\n\n'
+        }
+
+        stockMessage += `**Status Stok Saat Ini:**\n• Total bahan terdaftar: ${totalStock}\n• Bahan stok kritikal: ${criticalStock.length}\n\n**Tips Manajemen Stok:**\n• **Monitoring Real-time** - Pantau stok di halaman Inventory\n• **Alert Otomatis** - Set minimum stock untuk notifikasi\n• **Tracking Penggunaan** - Catat konsumsi per produksi\n• **Supplier Management** - Kelola data supplier dan lead time\n\n💡 **Tips**: Gunakan fitur reorder point untuk menghindari stockout.`
+
         return {
-          message: '📦 **Manajemen Stok Bahan Baku**\n\nUntuk mengelola stok dengan optimal:\n\n• **Monitoring Real-time** - Pantau stok di halaman Inventory\n• **Alert Otomatis** - Set minimum stock untuk notifikasi\n• **Tracking Penggunaan** - Catat konsumsi per produksi\n• **Supplier Management** - Kelola data supplier dan lead time\n\n💡 **Tips**: Gunakan fitur reorder point untuk menghindari stockout.',
-          suggestions: generateSuggestions('check_inventory')
+          message: stockMessage,
+          suggestions: generateSuggestions('check_inventory'),
+          data: { businessContext }
         }
       }
 
       if (lowerQuery.includes('resep') || lowerQuery.includes('recipe') || lowerQuery.includes('produksi')) {
+        const totalRecipes = businessContext?.recipes?.total ?? 0
+        const activeRecipes = businessContext?.recipes?.active ?? 0
+        const categories = businessContext?.recipes?.categories ?? []
+
+        let recipeMessage = '🍳 **Manajemen Resep & Produksi**\n\n'
+
+        recipeMessage += `**Status Resep Saat Ini:**\n• Total resep: ${totalRecipes}\n• Resep aktif: ${activeRecipes}\n• Kategori: ${categories.length > 0 ? categories.join(', ') : 'Belum dikategorikan'}\n\n`
+
+        recipeMessage += '**Optimasi Resep untuk Profit Maksimal:**\n\n• **Cost Analysis** - Hitung HPP setiap resep\n• **Ingredient Optimization** - Sesuaikan komposisi bahan\n• **Batch Planning** - Rencanakan produksi efisien\n• **Quality Control** - Standardisasi proses produksi\n\n💡 **Tips**: Fokus pada resep dengan margin tertinggi dan sesuaikan dengan stok bahan yang tersedia.'
+
         return {
-          message: '🍳 **Manajemen Resep & Produksi**\n\nOptimalkan resep untuk profit maksimal:\n\n• **Cost Analysis** - Hitung HPP setiap resep\n• **Ingredient Optimization** - Sesuaikan komposisi bahan\n• **Batch Planning** - Rencanakan produksi efisien\n• **Quality Control** - Standardisasi proses produksi\n\n💡 **Tips**: Fokus pada resep dengan margin tertinggi.',
-          suggestions: generateSuggestions('recipe_query')
+          message: recipeMessage,
+          suggestions: generateSuggestions('recipe_query'),
+          data: { businessContext }
         }
       }
 
@@ -228,35 +256,121 @@ export function useAIService() {
       }
 
       if (lowerQuery.includes('profit') || lowerQuery.includes('untung') || lowerQuery.includes('laba')) {
+        const totalOrders = businessContext?.orders?.total ?? 0
+        const pendingOrders = businessContext?.orders?.pending ?? 0
+        const totalRevenue = businessContext?.orders?.revenue ?? 0
+
+        let profitMessage = '📈 **Analisis Profitabilitas**\n\n'
+
+        profitMessage += `**Status Bisnis Saat Ini:**\n• Total pesanan: ${totalOrders}\n• Pesanan pending: ${pendingOrders}\n• Total revenue: Rp ${totalRevenue.toLocaleString('id-ID')}\n• Rata-rata per pesanan: Rp ${totalOrders > 0 ? (totalRevenue / totalOrders).toLocaleString('id-ID') : 0}\n\n`
+
+        profitMessage += '**Strategi Maximalkan Keuntungan:**\n\n• **Margin Tracking** - Monitor profit per produk\n• **Cost Efficiency** - Identifikasi area penghematan\n• **Revenue Optimization** - Fokus produk high-margin\n• **Trend Analysis** - Analisis performa bulanan\n\n💡 **Target**: Margin 35-50% untuk sustainability.'
+
         return {
-          message: '📈 **Analisis Profitabilitas**\n\nMaximalkan keuntungan bisnis:\n\n• **Margin Tracking** - Monitor profit per produk\n• **Cost Efficiency** - Identifikasi area penghematan\n• **Revenue Optimization** - Fokus produk high-margin\n• **Trend Analysis** - Analisis performa bulanan\n\n💡 **Target**: Margin 35-50% untuk sustainability.',
-          suggestions: generateSuggestions('analyze_profit')
+          message: profitMessage,
+          suggestions: generateSuggestions('analyze_profit'),
+          data: { businessContext }
         }
       }
 
       if (lowerQuery.includes('harga') || lowerQuery.includes('pricing') || lowerQuery.includes('price')) {
+        const totalRevenue = businessContext?.orders?.revenue ?? 0
+        const totalOrders = businessContext?.orders?.total ?? 0
+        const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
+
+        let pricingMessage = '🏷️ **Strategi Pricing**\n\n'
+
+        pricingMessage += `**Data Pricing Saat Ini:**\n• Rata-rata nilai pesanan: Rp ${avgOrderValue.toLocaleString('id-ID')}\n• Total revenue: Rp ${totalRevenue.toLocaleString('id-ID')}\n\n`
+
+        pricingMessage += '**Tentukan Harga yang Kompetitif:**\n\n• **Market Research** - Analisis harga kompetitor\n• **Cost-Plus Pricing** - HPP + margin target\n• **Value-Based Pricing** - Sesuai perceived value\n• **Dynamic Pricing** - Sesuaikan dengan demand\n\n💡 **Tips**: Review harga secara berkala sesuai market dan sesuaikan dengan rata-rata nilai pesanan saat ini.'
+
         return {
-          message: '🏷️ **Strategi Pricing**\n\nTentukan harga yang kompetitif:\n\n• **Market Research** - Analisis harga kompetitor\n• **Cost-Plus Pricing** - HPP + margin target\n• **Value-Based Pricing** - Sesuai perceived value\n• **Dynamic Pricing** - Sesuaikan dengan demand\n\n💡 **Tips**: Review harga secara berkala sesuai market.',
-          suggestions: generateSuggestions('pricing_strategy')
+          message: pricingMessage,
+          suggestions: generateSuggestions('pricing_strategy'),
+          data: { businessContext }
+        }
+      }
+
+      if (lowerQuery.includes('pesanan') || lowerQuery.includes('order') || lowerQuery.includes('customer')) {
+        const totalOrders = businessContext?.orders?.total ?? 0
+        const pendingOrders = businessContext?.orders?.pending ?? 0
+        const totalRevenue = businessContext?.orders?.revenue ?? 0
+
+        let orderMessage = '📋 **Manajemen Pesanan**\n\n'
+
+        if (pendingOrders > 0) {
+          orderMessage += `⚠️ **PERHATIAN**: Ada ${pendingOrders} pesanan yang masih pending!\n\n`
+        }
+
+        orderMessage += `**Status Pesanan Saat Ini:**\n• Total pesanan: ${totalOrders}\n• Pesanan pending: ${pendingOrders}\n• Pesanan selesai: ${totalOrders - pendingOrders}\n• Total revenue: Rp ${totalRevenue.toLocaleString('id-ID')}\n\n`
+
+        orderMessage += '**Optimasi Manajemen Pesanan:**\n\n• **Order Tracking** - Monitor status pesanan real-time\n• **Priority Management** - Prioritaskan pesanan urgent\n• **Customer Communication** - Update status ke customer\n• **Workflow Optimization** - Streamline proses produksi\n\n💡 **Tips**: Fokus pada pesanan pending untuk meningkatkan customer satisfaction.'
+
+        return {
+          message: orderMessage,
+          suggestions: generateSuggestions('analyze_profit'),
+          data: { businessContext }
         }
       }
 
       if (lowerQuery.includes('marketing') || lowerQuery.includes('promosi') || lowerQuery.includes('jualan')) {
+        const totalOrders = businessContext?.orders?.total ?? 0
+        const totalRevenue = businessContext?.orders?.revenue ?? 0
+
+        let marketingMessage = '📢 **Strategi Marketing UMKM**\n\n'
+
+        marketingMessage += `**Data Penjualan Saat Ini:**\n• Total pesanan: ${totalOrders}\n• Total revenue: Rp ${totalRevenue.toLocaleString('id-ID')}\n\n`
+
+        marketingMessage += '**Tingkatkan Penjualan dengan:**\n\n• **Digital Marketing** - Social media & online presence\n• **Customer Retention** - Program loyalitas pelanggan\n• **Product Positioning** - Highlight unique selling point\n• **Seasonal Campaigns** - Promo sesuai momen\n\n💡 **Focus**: Build brand awareness & customer loyalty berdasarkan performa penjualan saat ini.'
+
         return {
-          message: '📢 **Strategi Marketing UMKM**\n\nTingkatkan penjualan dengan:\n\n• **Digital Marketing** - Social media & online presence\n• **Customer Retention** - Program loyalitas pelanggan\n• **Product Positioning** - Highlight unique selling point\n• **Seasonal Campaigns** - Promo sesuai momen\n\n💡 **Focus**: Build brand awareness & customer loyalty.',
-          suggestions: generateSuggestions('marketing_strategy')
+          message: marketingMessage,
+          suggestions: generateSuggestions('marketing_strategy'),
+          data: { businessContext }
         }
       }
 
-      // Default comprehensive fallback
+      // Default comprehensive fallback with real business data
+      const totalOrders = businessContext?.orders?.total ?? 0
+      const pendingOrders = businessContext?.orders?.pending ?? 0
+      const totalRevenue = businessContext?.orders?.revenue ?? 0
+      const criticalStock = businessContext?.inventory?.critical?.length ?? 0
+      const totalRecipes = businessContext?.recipes?.total ?? 0
+
+      let defaultMessage = '🤖 **Asisten AI HeyTrack**\n\n'
+
+      // Add business overview if data available
+      if (totalOrders > 0 || totalRevenue > 0 || criticalStock > 0) {
+        defaultMessage += '**📊 Quick Business Overview:**\n'
+        if (totalOrders > 0) {
+          defaultMessage += `• Total Pesanan: ${totalOrders}\n`
+        }
+        if (pendingOrders > 0) {
+          defaultMessage += `• Pending Orders: ${pendingOrders}\n`
+        }
+        if (totalRevenue > 0) {
+          defaultMessage += `• Total Revenue: Rp ${totalRevenue.toLocaleString('id-ID')}\n`
+        }
+        if (criticalStock > 0) {
+          defaultMessage += `• ⚠️ Stok Kritis: ${criticalStock} bahan\n`
+        }
+        if (totalRecipes > 0) {
+          defaultMessage += `• Total Resep: ${totalRecipes}\n`
+        }
+        defaultMessage += '\n'
+      }
+
+      defaultMessage += 'Saya siap membantu mengelola bisnis kuliner Anda!\n\n**Layanan yang tersedia:**\n• 📦 Manajemen Inventory & Stok\n• 💰 Analisis HPP & Costing\n• 📊 Profit & Financial Analysis\n• 🍳 Manajemen Resep & Produksi\n• 📋 Tracking Pesanan\n• 🏷️ Strategi Pricing\n• 📢 Marketing & Sales\n\n**Contoh pertanyaan:**\n• "Berapa stok bahan baku yang tersedia?"\n• "Bagaimana cara menghitung HPP brownies?"\n• "Tips mengoptimalkan stok bahan baku"\n• "Strategi pricing untuk produk baru"'
+
       return {
-        message: '🤖 **Asisten AI HeyTrack**\n\nSaya siap membantu mengelola bisnis kuliner Anda!\n\n**Layanan yang tersedia:**\n• 📦 Manajemen Inventory & Stok\n• 💰 Analisis HPP & Costing\n• 📊 Profit & Financial Analysis\n• 🍳 Optimasi Resep & Produksi\n• 🏷️ Strategi Pricing\n• 📢 Marketing & Sales\n\n**Contoh pertanyaan:**\n• "Bagaimana cara menghitung HPP brownies?"\n• "Tips mengoptimalkan stok bahan baku"\n• "Strategi pricing untuk produk baru"',
+        message: defaultMessage,
         suggestions: [
+          "Berapa stok bahan baku yang tersedia?",
+          "Status pesanan terbaru",
           "Bagaimana cara menghitung HPP?",
-          "Tips mengoptimalkan stok bahan",
-          "Strategi pricing yang efektif",
-          "Cara meningkatkan profit margin"
-        ]
+          "Tips mengoptimalkan stok bahan"
+        ],
+        data: { businessContext }
       }
     }
   }

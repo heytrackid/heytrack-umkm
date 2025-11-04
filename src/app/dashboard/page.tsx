@@ -13,7 +13,7 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { queryLogger } from '@/lib/client-logger'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
 import { useQuery } from '@tanstack/react-query'
-import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Target } from 'lucide-react'
+import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Plus, Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
 
@@ -167,7 +167,7 @@ const Dashboard = () => {
   // Check if user has no data yet (empty state) - memoized to prevent unnecessary re-renders
   // MUST be called before any conditional returns to follow Rules of Hooks
   const hasNoData = useMemo(() => {
-    if (!dashboardData) return false
+    if (!dashboardData) {return false}
     return dashboardData.stats.totalOrders === 0 &&
       dashboardData.stats.totalIngredients === 0 &&
       dashboardData.stats.totalCustomers === 0
@@ -385,45 +385,81 @@ const Dashboard = () => {
           <HppDashboardWidget />
         </Suspense>
 
-        {/* Quick Actions */}
+        {/* Enhanced Quick Actions */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
-              Menu Cepat
+              <Sparkles className="h-5 w-5 text-primary" />
+              Aksi Cepat
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/orders">
-                  <ShoppingCart className="h-6 w-6" />
-                  <span className="text-sm font-medium">Pesanan</span>
-                </a>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              <Button
+                variant="default"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center bg-primary hover:bg-primary/90"
+                onClick={() => router.push('/orders/new')}
+              >
+                <Plus className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Buat Order Baru</div>
+                  <div className="text-xs opacity-80">Tambah pesanan</div>
+                </div>
               </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/recipes">
-                  <ChefHat className="h-6 w-6" />
-                  <span className="text-sm font-medium">Resep</span>
-                </a>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center"
+                onClick={() => router.push('/recipes/ai-generator')}
+              >
+                <ChefHat className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Generate Resep</div>
+                  <div className="text-xs opacity-80">Buat resep AI</div>
+                </div>
               </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/ingredients">
-                  <Package className="h-6 w-6" />
-                  <span className="text-sm font-medium">Bahan Baku</span>
-                </a>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center"
+                onClick={() => router.push('/inventory')}
+              >
+                <Package className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Tambah Bahan</div>
+                  <div className="text-xs opacity-80">Update inventory</div>
+                </div>
               </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/hpp">
-                  <Calculator className="h-6 w-6" />
-                  <span className="text-sm font-medium">Biaya Produksi</span>
-                </a>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center"
+                onClick={() => router.push('/reports')}
+              >
+                <BarChart3 className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Lihat Laporan</div>
+                  <div className="text-xs opacity-80">Analisis performa</div>
+                </div>
               </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/reports">
-                  <BarChart3 className="h-6 w-6" />
-                  <span className="text-sm font-medium">Laporan</span>
-                </a>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center"
+                onClick={() => router.push('/suppliers')}
+              >
+                <Users className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Kelola Supplier</div>
+                  <div className="text-xs opacity-80">Data vendor</div>
+                </div>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center"
+                onClick={() => router.push('/hpp/calculator')}
+              >
+                <Calculator className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Kalkulator HPP</div>
+                  <div className="text-xs opacity-80">Biaya produksi</div>
+                </div>
               </Button>
             </div>
           </CardContent>

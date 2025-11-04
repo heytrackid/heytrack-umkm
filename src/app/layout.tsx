@@ -4,6 +4,7 @@ import { SettingsProvider } from '@/contexts/settings-context';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 import QueryProvider from '@/providers/QueryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
+import { SWRProvider } from '@/providers/SWRProvider';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -63,22 +64,24 @@ const RootLayout = async ({
           >
             <QueryProvider>
               <SettingsProvider>
-                <PreloadingProvider
-                  enableSmartPreloading
-                  enableIdlePreloading
-                  enableNetworkAware
-                  debug={false}
-                >
-                  <GlobalErrorBoundary>
-                    {/* Header temporarily disabled during development */}
-                    {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
-                    <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
-                      🚧 Development Mode - Auth Disabled
-                    </div>
-                  </header> */}
-                    {children}
-                  </GlobalErrorBoundary>
-                </PreloadingProvider>
+                <SWRProvider>
+                  <PreloadingProvider
+                    enableSmartPreloading
+                    enableIdlePreloading
+                    enableNetworkAware
+                    debug={false}
+                  >
+                    <GlobalErrorBoundary>
+                      {/* Header temporarily disabled during development */}
+                      {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
+                      <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
+                        🚧 Development Mode - Auth Disabled
+                      </div>
+                    </header> */}
+                      {children}
+                    </GlobalErrorBoundary>
+                  </PreloadingProvider>
+                </SWRProvider>
                 <Toaster
                   position="bottom-right"
                   toastOptions={{

@@ -3,21 +3,22 @@
 import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
-import { ChefHat, Sparkles, Zap } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
+import { ChefHat, Sparkles, Zap, ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { Button } from '@/components/ui/button'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import { typedInsert } from '@/lib/supabase-client'
 import type { RecipesInsert, RecipeIngredientsInsert, IngredientsTable } from '@/types/database'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
-import { RecipeTemplateSelector } from './RecipeTemplateSelector'
+
 import { HppEstimator } from './HppEstimator'
 import { SmartIngredientSelector } from './SmartIngredientSelector'
-import { matchIngredientsWithTemplate, saveDraft, loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
-import type { RecipeTemplate } from '@/lib/constants/recipe-templates'
+import { saveDraft, loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
+
 import GeneratedRecipeDisplay from './GeneratedRecipeDisplay'
 import RecipePreviewCard from './RecipePreviewCard'
 import RecipeGeneratorForm from './RecipeGeneratorForm'
@@ -50,8 +51,17 @@ const AIRecipeGeneratorPage = () => {
   // Mode state (quick vs complete)
   const [mode, setMode] = useState<'quick' | 'complete'>('quick')
 
-  // Sprint 1: Template state
-  const [selectedTemplate, setSelectedTemplate] = useState<RecipeTemplate | null>(null)
+  // Wizard state
+  const [currentStep, setCurrentStep] = useState(1)
+  const totalSteps = 3
+
+  const wizardSteps = [
+    { id: 1, title: 'Detail Produk', description: 'Informasi dasar produk' },
+    { id: 2, title: 'Pilih Bahan', description: 'Bahan yang akan digunakan' },
+    { id: 3, title: 'Review & Generate', description: 'Periksa dan buat resep' }
+  ]
+
+
 
   // Handle auth errors
   useEffect(() => {
@@ -126,25 +136,7 @@ const AIRecipeGeneratorPage = () => {
     }
   }
 
-  // Sprint 1: Handle template selection
-  const handleTemplateSelect = (template: RecipeTemplate) => {
-    setSelectedTemplate(template)
-    setProductName(template.name)
-    setProductType(template.type)
-    setServings(template.servings)
 
-    // Auto-match ingredients
-    const matchedIds = matchIngredientsWithTemplate(
-      availableIngredients,
-      template.ingredients
-    )
-    setSelectedIngredients(matchedIds)
-
-    toast({
-      title: '✨ Template dimuat!',
-      description: `${template.name} siap untuk di-generate`,
-    })
-  }
 
   const handleGenerate = async () => {
     if (!productName || !productType || !servings) {
@@ -277,7 +269,7 @@ const AIRecipeGeneratorPage = () => {
       void setServings(2)
       void setTargetPrice('')
       void setSelectedIngredients([])
-      void setSelectedTemplate(null)
+
       clearDraft() // Sprint 1: Clear saved draft
 
     } catch (error: unknown) {
@@ -292,6 +284,49 @@ const AIRecipeGeneratorPage = () => {
 
   const handleGenerateAgain = () => {
     void setGeneratedRecipe(null)
+  }
+
+  // Wizard navigation
+  const canProceedToNextStep = () => {
+    switch (currentStep) {
+      case 1:
+        return productName.trim().length >= 3 && productType !== '' && servings >= 1 && servings <= 100
+      case 2:
+        return selectedIngredients.length >= 3
+      case 3:
+        return true
+      default:
+        return false
+    }
+  }
+
+  const handleNextStep = () => {
+    if (canProceedToNextStep() && currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1)
+    }
+  }
+
+  const handlePrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  const handleStepClick = (stepId: number) => {
+    // Allow going back to previous steps
+    if (stepId < currentStep) {
+      setCurrentStep(stepId)
+    }
+    // Allow going to next step only if current step is valid
+    else if (stepId === currentStep + 1 && canProceedToNextStep()) {
+      setCurrentStep(stepId)
+    }
+  }
+
+  const getStepClassName = (stepId: number) => {
+    if (stepId < currentStep) {return 'bg-primary border-primary text-primary-foreground'}
+    if (stepId === currentStep) {return 'border-primary text-primary bg-primary/10'}
+    return 'border-muted-foreground/30 text-muted-foreground'
   }
 
   // Show loading state while auth is initializing
@@ -357,39 +392,71 @@ const AIRecipeGeneratorPage = () => {
           </div>
         </div>
 
-        {/* Sprint 1: Template Selector */}
-        {!generatedRecipe && (
-          <RecipeTemplateSelector
-            onSelectTemplate={handleTemplateSelect}
-            selectedTemplateId={selectedTemplate?.id}
-          />
-        )}
+        {/* Wizard Progress Indicator */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-4">
+              {wizardSteps.map((step, index) => (
+                <div key={step.id} className="flex items-center flex-1">
+                  <div
+                    className={`flex items-center justify-center w-10 h-10 rounded-full border-2 cursor-pointer transition-all ${getStepClassName(step.id)}`}
+                    onClick={() => handleStepClick(step.id)}
+                  >
+                    {step.id < currentStep ? (
+                      <CheckCircle className="h-5 w-5" />
+                    ) : (
+                      <span className="text-sm font-medium">{step.id}</span>
+                    )}
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <div className={`text-sm font-medium ${
+                      step.id <= currentStep ? 'text-foreground' : 'text-muted-foreground'
+                    }`}>
+                      {step.title}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {step.description}
+                    </div>
+                  </div>
+                  {index < wizardSteps.length - 1 && (
+                    <div className={`flex-1 h-px mx-4 ${
+                      step.id < currentStep ? 'bg-primary' : 'bg-muted-foreground/30'
+                    }`} />
+                  )}
+                </div>
+              ))}
+            </div>
+            <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
+          </CardContent>
+        </Card>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Left Column: Form & Ingredients */}
+          {/* Left Column: Step Content */}
           <div className="space-y-6">
-            {/* Input Form - Enhanced */}
-            <RecipeGeneratorForm
-              productName={productName}
-              setProductName={setProductName}
-              productType={productType}
-              setProductType={setProductType}
-              servings={servings}
-              setServings={setServings}
-              targetPrice={targetPrice}
-              setTargetPrice={setTargetPrice}
-              dietaryRestrictions={dietaryRestrictions}
-              setDietaryRestrictions={setDietaryRestrictions}
-              selectedIngredients={selectedIngredients}
-              setSelectedIngredients={setSelectedIngredients}
-              availableIngredients={availableIngredients}
-              loading={loading}
-              onGenerate={handleGenerate}
-              mode={mode}
-            />
+            {/* Step 1: Product Details */}
+            {currentStep === 1 && (
+              <RecipeGeneratorForm
+                productName={productName}
+                setProductName={setProductName}
+                productType={productType}
+                setProductType={setProductType}
+                servings={servings}
+                setServings={setServings}
+                targetPrice={targetPrice}
+                setTargetPrice={setTargetPrice}
+                dietaryRestrictions={dietaryRestrictions}
+                setDietaryRestrictions={setDietaryRestrictions}
+                selectedIngredients={selectedIngredients}
+                setSelectedIngredients={setSelectedIngredients}
+                availableIngredients={availableIngredients}
+                loading={loading}
+                onGenerate={handleGenerate}
+                mode={mode}
+              />
+            )}
 
-            {/* Sprint 1: Smart Ingredient Selector */}
-            {!generatedRecipe && (
+            {/* Step 2: Ingredient Selection */}
+            {currentStep === 2 && !generatedRecipe && (
               <SmartIngredientSelector
                 availableIngredients={availableIngredients.map(ing => ({
                   id: ing.id,
@@ -403,6 +470,43 @@ const AIRecipeGeneratorPage = () => {
                 onSelectionChange={setSelectedIngredients}
                 productType={productType}
               />
+            )}
+
+            {/* Step 3: Review & Generate */}
+            {currentStep === 3 && !generatedRecipe && (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center space-y-4">
+                    <div className="h-16 w-16 mx-auto bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center">
+                      <Sparkles className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">Siap Generate Resep!</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        AI akan membuat resep profesional berdasarkan input Anda
+                      </p>
+                    </div>
+                    <Button
+                      onClick={handleGenerate}
+                      disabled={loading}
+                      size="lg"
+                      className="w-full"
+                    >
+                      {loading ? (
+                        <>
+                          <Zap className="h-4 w-4 mr-2 animate-spin" />
+                          Generating Magic...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Generate Resep dengan AI
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </div>
 
@@ -425,47 +529,94 @@ const AIRecipeGeneratorPage = () => {
               />
             )}
             {loading && (
-              <Card className="border-2 border-gray-300 dark:border-gray-800">
+              <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
                 <CardContent className="py-16">
-                  <div className="text-center space-y-6">
+                  <div className="text-center space-y-8">
+                    {/* Animated Chef Icon */}
                     <div className="relative">
-                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center mx-auto shadow-xl">
-                        <ChefHat className="h-10 w-10 text-white animate-bounce" />
+                      <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto shadow-2xl">
+                        <ChefHat className="h-12 w-12 text-white animate-pulse" />
                       </div>
-                      <div className="absolute inset-0 h-20 w-20 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 mx-auto animate-ping opacity-20" />
+                      <div className="absolute inset-0 h-24 w-24 rounded-full bg-gradient-to-br from-primary to-primary/80 mx-auto animate-ping opacity-30" />
+                      <div className="absolute inset-2 h-20 w-20 rounded-full bg-white/20 mx-auto animate-pulse" style={{ animationDelay: '0.5s' }} />
                     </div>
-                    <div>
-                      <p className="font-semibold text-xl mb-2">🧑‍🍳 AI sedang meracik resep...</p>
-                      <p className="text-sm text-muted-foreground">
-                        Tunggu sebentar ya, proses ini membutuhkan waktu 10-30 detik
+
+                    {/* Main Message */}
+                    <div className="space-y-3">
+                      <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                        ✨ AI sedang meracik resep...
+                      </h3>
+                      <p className="text-muted-foreground max-w-md mx-auto">
+                        Kami sedang membuat resep profesional yang disesuaikan dengan kebutuhan bisnis Anda
                       </p>
-                      <div className="mt-6 flex justify-center gap-2">
-                        <div className="h-3 w-3 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="h-3 w-3 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="h-3 w-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+
+                    {/* Progress Indicator */}
+                    <div className="max-w-md mx-auto">
+                      <div className="flex justify-between text-xs text-muted-foreground mb-2">
+                        <span>Progress</span>
+                        <span>Memproses...</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full animate-pulse" style={{ width: '60%' }} />
                       </div>
                     </div>
 
-                    {/* Progress Steps */}
-                    <div className="mt-8 space-y-3 max-w-sm mx-auto">
-                      <div className="flex items-center gap-3 text-sm">
-                        <div className="h-6 w-6 rounded-full bg-gray-500 flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-xs">✓</span>
+                    {/* Detailed Progress Steps */}
+                    <div className="space-y-4 max-w-lg mx-auto">
+                      <div className="flex items-center gap-4 p-4 bg-white/50 dark:bg-black/20 rounded-xl border border-primary/20">
+                        <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                          <CheckCircle className="h-4 w-4 text-white" />
                         </div>
-                        <span className="text-muted-foreground">Menganalisis input Anda</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm">
-                        <div className="h-6 w-6 rounded-full bg-gray-500 flex items-center justify-center flex-shrink-0 animate-pulse">
-                          <span className="text-white text-xs">⚡</span>
+                        <div className="text-left">
+                          <div className="font-medium text-sm">✅ Input Tervalidasi</div>
+                          <div className="text-xs text-muted-foreground">Semua data produk telah diperiksa</div>
                         </div>
-                        <span className="font-medium">Meracik komposisi bahan</span>
                       </div>
-                      <div className="flex items-center gap-3 text-sm">
-                        <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                          <span className="text-muted-foreground text-xs">3</span>
+
+                      <div className="flex items-center gap-4 p-4 bg-primary/10 rounded-xl border-2 border-primary/30">
+                        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 animate-spin">
+                          <Sparkles className="h-4 w-4 text-white" />
                         </div>
-                        <span className="text-muted-foreground">Menyusun instruksi</span>
+                        <div className="text-left">
+                          <div className="font-medium text-sm">⚡ AI Sedang Berpikir</div>
+                          <div className="text-xs text-muted-foreground">Menganalisis bahan dan komposisi optimal</div>
+                        </div>
                       </div>
+
+                      <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl border border-muted">
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <span className="text-muted-foreground text-xs font-bold">3</span>
+                        </div>
+                        <div className="text-left">
+                          <div className="font-medium text-sm text-muted-foreground">Menghitung HPP</div>
+                          <div className="text-xs text-muted-foreground">Menentukan biaya produksi akurat</div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl border border-muted">
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <span className="text-muted-foreground text-xs font-bold">4</span>
+                        </div>
+                        <div className="text-left">
+                          <div className="font-medium text-sm text-muted-foreground">Finalisasi Resep</div>
+                          <div className="text-xs text-muted-foreground">Menyusun instruksi lengkap</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Fun Loading Animation */}
+                    <div className="flex justify-center gap-1">
+                      <div className="h-2 w-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="h-2 w-2 bg-primary/80 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="h-2 w-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <div className="h-2 w-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '450ms' }} />
+                      <div className="h-2 w-2 bg-primary/20 rounded-full animate-bounce" style={{ animationDelay: '600ms' }} />
+                    </div>
+
+                    {/* Estimated Time */}
+                    <div className="text-xs text-muted-foreground bg-muted/30 px-4 py-2 rounded-full inline-block">
+                      ⏱️ Estimasi selesai dalam 15-30 detik
                     </div>
                   </div>
                 </CardContent>
@@ -493,6 +644,34 @@ const AIRecipeGeneratorPage = () => {
             )}
           </div>
         </div>
+
+        {/* Wizard Navigation */}
+        {!generatedRecipe && (
+          <div className="flex items-center justify-between pt-6 border-t">
+            <Button
+              variant="outline"
+              onClick={handlePrevStep}
+              disabled={currentStep === 1}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Kembali
+            </Button>
+
+            <div className="text-sm text-muted-foreground">
+              Langkah {currentStep} dari {totalSteps}
+            </div>
+
+            <Button
+              onClick={handleNextStep}
+              disabled={currentStep >= totalSteps || !canProceedToNextStep()}
+              className="flex items-center gap-2"
+            >
+              Selanjutnya
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
     </AppLayout>
   )

@@ -13,15 +13,17 @@ const Error = ({
     reset: () => void
 }) => {
     useEffect(() => {
-        // Log error to monitoring service
-        uiLogger.error({ 
-            error: {
-                message: error.message,
-                name: error.name,
-                stack: error.stack,
-                digest: error.digest
-            }
-        }, 'Error boundary caught')
+        // Log error to monitoring service, but avoid logging HMR errors
+        if (error.message && !error.message.includes('Module was instantiated because it was required from')) {
+            uiLogger.error({ 
+                error: {
+                    message: error.message,
+                    name: error.name,
+                    stack: error.stack,
+                    digest: error.digest
+                }
+            }, 'Error boundary caught')
+        }
     }, [error])
 
     return (
