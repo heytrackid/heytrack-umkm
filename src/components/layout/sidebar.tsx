@@ -1,27 +1,27 @@
 'use client'
 
+import { useSidebar } from '@/hooks/useSidebar'
+import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useMemo, useState, useCallback, useEffect, type ComponentType, type SVGProps } from 'react'
-import { cn } from '@/lib/utils'
-import { useSidebar } from '@/hooks/useSidebar'
+import { useCallback, useEffect, useMemo, useState, type ComponentType, type SVGProps } from 'react'
 
+import {
+    Bot,
+    ChevronDown,
+    ChevronRight,
+    DollarSign,
+    FileText,
+    LayoutDashboard,
+    Package,
+    PanelLeftClose,
+    PanelLeftOpen,
+    Settings,
+    ShoppingCart,
+    X
+} from 'lucide-react'
 import { ExportButton } from './ExportButton'
 import { LogoutButton } from './LogoutButton'
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
-  Bot,
-  Settings,
-  X,
-  ChevronDown,
-  ChevronRight,
-  DollarSign,
-  FileText,
-  PanelLeftClose,
-  PanelLeftOpen
-} from 'lucide-react'
 
 
 interface SidebarItem {
@@ -295,7 +295,6 @@ const Sidebar = ({
                            )}
                            title={!showExpanded ? item.label : undefined}
                          >
-                           {!showExpanded && <SectionIcon className="h-5 w-5 flex-shrink-0" />}
                            {showExpanded && <span className="flex-1 whitespace-nowrap">{item.label}</span>}
                            {/* Active indicator */}
                            {active && showExpanded && (
@@ -349,7 +348,7 @@ const Sidebar = ({
   return (
     <aside
       className={cn(
-        'fixed inset-y-0 left-0 z-40 border-r border-border bg-card shadow-lg',
+        'fixed inset-y-0 left-0 z-50 border-r border-border bg-card shadow-lg',
         'transition-all duration-300 ease-in-out',
         isCollapsed ? 'w-20' : 'w-72'
       )}
