@@ -1,6 +1,0 @@
-export { ChatHeader } from './ChatHeader'
-export { ChatInput } from './ChatInput'
-export { MessageBubble } from './MessageBubble'
-export { MessageList } from './MessageList'
-export { SuggestionChips } from './SuggestionChips'
-export { TypingIndicator } from './TypingIndicator'
