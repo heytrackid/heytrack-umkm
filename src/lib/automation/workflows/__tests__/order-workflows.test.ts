@@ -19,7 +19,12 @@ const mockSupabase = {
     update: vi.fn(() => ({
       eq: vi.fn(() => Promise.resolve({ error: null }))
     })),
-    insert: vi.fn(() => Promise.resolve({ error: null })),
+    insert: vi.fn(() => ({
+      select: vi.fn(() => ({
+        single: vi.fn(() => Promise.resolve({ data: { id: 'mock-id' }, error: null }))
+      })),
+      then: vi.fn(() => Promise.resolve({ error: null }))
+    })),
     delete: vi.fn(() => ({
       eq: vi.fn(() => Promise.resolve({ error: null }))
     }))

@@ -39,10 +39,10 @@ const EnhancedSummaryCards = ({
             ? (summary.total_expenses / summary.total_income) * 100
             : 0
 
-        if (ratio < 50) { return { status: 'excellent', color: 'text-gray-600', label: 'Sangat Baik' } }
-        if (ratio < 70) { return { status: 'good', color: 'text-gray-600', label: 'Baik' } }
-        if (ratio < 90) { return { status: 'warning', color: 'text-yellow-600', label: 'Perhatian' } }
-        return { status: 'danger', color: 'text-red-600', label: 'Bahaya' }
+        if (ratio < 50) { return { status: 'excellent', color: 'text-muted-foreground', label: 'Sangat Baik' } }
+        if (ratio < 70) { return { status: 'good', color: 'text-muted-foreground', label: 'Baik' } }
+        if (ratio < 90) { return { status: 'warning', color: 'text-amber-600', label: 'Perhatian' } }
+        return { status: 'danger', color: 'text-destructive', label: 'Bahaya' }
     }
 
     const health = getHealthStatus()
@@ -58,8 +58,8 @@ const EnhancedSummaryCards = ({
             <Badge
                 variant="secondary"
                 className={`${isPositive
-                    ? 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
-                    : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                    ? 'bg-muted text-muted-foreground'
+                    : 'bg-destructive/10 text-destructive'
                     }`}
             >
                 {isPositive ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
@@ -73,12 +73,12 @@ const EnhancedSummaryCards = ({
             {/* Main Summary Cards */}
             <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
                 {/* Total Income */}
-                <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
+                <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary/50">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
                             <span className="flex items-center gap-2">
-                                <div className="p-2 bg-gray-100 dark:bg-gray-900 rounded-lg">
-                                    <ArrowUpCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                                <div className="p-2 bg-muted rounded-lg">
+                                    <ArrowUpCircle className="h-4 w-4 text-muted-foreground" />
                                 </div>
                                 Total Pemasukan
                             </span>
@@ -86,7 +86,7 @@ const EnhancedSummaryCards = ({
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-3xl font-bold text-gray-600 mb-2">
+                        <p className="text-3xl font-bold text-foreground mb-2">
                             {formatCurrency(summary.total_income)}
                         </p>
                         <div className="flex items-center justify-between text-xs">
@@ -106,12 +106,12 @@ const EnhancedSummaryCards = ({
                 </Card>
 
                 {/* Total Expenses */}
-                <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-red-500">
+                <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-destructive/50">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
                             <span className="flex items-center gap-2">
-                                <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
-                                    <ArrowDownCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                <div className="p-2 bg-muted rounded-lg">
+                                    <ArrowDownCircle className="h-4 w-4 text-muted-foreground" />
                                 </div>
                                 Total Pengeluaran
                             </span>
@@ -119,7 +119,7 @@ const EnhancedSummaryCards = ({
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-3xl font-bold text-red-600 mb-2">
+                        <p className="text-3xl font-bold text-foreground mb-2">
                             {formatCurrency(summary.total_expenses)}
                         </p>
                         <div className="flex items-center justify-between text-xs">
@@ -139,19 +139,12 @@ const EnhancedSummaryCards = ({
                 </Card>
 
                 {/* Net Cash Flow */}
-                <Card className={`hover:shadow-lg transition-all duration-200 border-l-4 ${summary.net_cash_flow >= 0 ? 'border-l-blue-500' : 'border-l-orange-500'
-                    }`}>
+                <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-secondary/50">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
                             <span className="flex items-center gap-2">
-                                <div className={`p-2 rounded-lg ${summary.net_cash_flow >= 0
-                                    ? 'bg-gray-100 dark:bg-gray-900'
-                                    : 'bg-orange-100 dark:bg-orange-900'
-                                    }`}>
-                                    <DollarSign className={`h-4 w-4 ${summary.net_cash_flow >= 0
-                                        ? 'text-gray-600 dark:text-gray-400'
-                                        : 'text-orange-600 dark:text-orange-400'
-                                        }`} />
+                                <div className="p-2 bg-muted rounded-lg">
+                                    <DollarSign className="h-4 w-4 text-muted-foreground" />
                                 </div>
                                 Arus Kas Bersih
                             </span>
@@ -159,8 +152,7 @@ const EnhancedSummaryCards = ({
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className={`text-3xl font-bold mb-2 ${summary.net_cash_flow >= 0 ? 'text-gray-600' : 'text-orange-600'
-                            }`}>
+                        <p className="text-3xl font-bold text-foreground mb-2">
                             {formatCurrency(summary.net_cash_flow)}
                         </p>
                         <div className="flex items-center gap-2 text-xs">
@@ -174,21 +166,14 @@ const EnhancedSummaryCards = ({
             </div>
 
             {/* Health Indicator */}
-            <Card className="bg-gradient-to-r from-background to-muted/20">
+            <Card className="bg-muted/10 border-muted">
                 <CardContent className="pt-6">
                     <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-full ${
-                            (() => {
-                                if (health.status === 'excellent') {return 'bg-gray-100 dark:bg-gray-900'}
-                                if (health.status === 'good') {return 'bg-gray-100 dark:bg-gray-900'}
-                                if (health.status === 'warning') {return 'bg-yellow-100 dark:bg-yellow-900'}
-                                return 'bg-red-100 dark:bg-red-900'
-                            })()
-                        }`}>
+                        <div className="p-3 bg-muted rounded-full">
                             {health.status === 'danger' || health.status === 'warning' ? (
-                                <AlertCircle className={`h-6 w-6 ${health.color}`} />
+                                <AlertCircle className="h-6 w-6 text-muted-foreground" />
                             ) : (
-                                <TrendingUp className={`h-6 w-6 ${health.color}`} />
+                                <TrendingUp className="h-6 w-6 text-muted-foreground" />
                             )}
                         </div>
                         <div className="flex-1 space-y-3">
@@ -230,13 +215,13 @@ const EnhancedSummaryCards = ({
                                 />
                             </div>
                             {health.status === 'danger' && (
-                                <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                                <p className="text-xs text-destructive flex items-center gap-1">
                                     <AlertCircle className="h-3 w-3" />
                                     Pengeluaran mendekati atau melebihi pemasukan. Pertimbangkan untuk mengurangi biaya.
                                 </p>
                             )}
                             {health.status === 'warning' && (
-                                <p className="text-xs text-yellow-600 dark:text-yellow-400 flex items-center gap-1">
+                                <p className="text-xs text-amber-600 flex items-center gap-1">
                                     <AlertCircle className="h-3 w-3" />
                                     Pengeluaran cukup tinggi. Monitor cashflow dengan cermat.
                                 </p>

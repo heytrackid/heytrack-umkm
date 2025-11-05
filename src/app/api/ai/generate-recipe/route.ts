@@ -578,7 +578,7 @@ function findBestIngredientMatch(
     const searchWords = search.split(' ')
     match = ingredients.find(i => {
         const nameWords = i.name.toLowerCase().split(' ')
-        return searchWords.some(sw => nameWords.some(nw => nw.includes(sw) || sw.includes(nw)))
+        return searchWords.some((sw: string) => nameWords.some((nw: string) => nw.includes(sw) || sw.includes(nw)))
     })
     
     return match ?? null

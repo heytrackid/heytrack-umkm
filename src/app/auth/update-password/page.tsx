@@ -94,7 +94,7 @@ const UpdatePasswordPage = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen mobile-min-vh flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 sm:p-6 md:p-8 relative">
+      <div className="min-h-screen mobile-min-vh flex items-center justify-center bg-background p-4 sm:p-6 md:p-8 relative">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
@@ -125,7 +125,7 @@ const UpdatePasswordPage = () => {
   }
 
   return (
-    <div className="min-h-screen mobile-min-vh flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 sm:p-6 md:p-8 relative">
+    <div className="min-h-screen mobile-min-vh flex items-center justify-center bg-background p-4 sm:p-6 md:p-8 relative">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>

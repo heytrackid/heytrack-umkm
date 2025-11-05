@@ -36,6 +36,23 @@ const UrlValidationSchema = z.object({
   search: z.string().max(2048).optional(),
 })
 
+/**
+ * Add security headers to response
+ */
+function addSecurityHeaders(response: NextResponse, nonce: string, isDev: boolean): void {
+  response.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
+  response.headers.set('x-nonce', nonce)
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('X-XSS-Protection', '1; mode=block')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  
+  if (!isDev) {
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const isDev = process.env.NODE_ENV === 'development'
   const nonce = generateNonce()
@@ -82,9 +99,8 @@ export async function middleware(request: NextRequest) {
       response = NextResponse.next()
     }
 
-    // Add CSP headers to response
-    response.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
-    response.headers.set('x-nonce', nonce)
+    // Add security headers
+    addSecurityHeaders(response, nonce, isDev)
 
     const { pathname } = request.nextUrl
 
@@ -102,8 +118,7 @@ export async function middleware(request: NextRequest) {
       url.pathname = '/auth/login'
       url.searchParams.set('redirectTo', pathname)
       const redirectResponse = NextResponse.redirect(url)
-      redirectResponse.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
-      redirectResponse.headers.set('x-nonce', nonce)
+      addSecurityHeaders(redirectResponse, nonce, isDev)
       return redirectResponse
     }
 
@@ -120,8 +135,7 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
       const redirectResponse = NextResponse.redirect(url)
-      redirectResponse.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
-      redirectResponse.headers.set('x-nonce', nonce)
+      addSecurityHeaders(redirectResponse, nonce, isDev)
       return redirectResponse
     }
 
@@ -130,18 +144,16 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = user ? '/dashboard' : '/auth/login'
       const redirectResponse = NextResponse.redirect(url)
-      redirectResponse.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
-      redirectResponse.headers.set('x-nonce', nonce)
+      addSecurityHeaders(redirectResponse, nonce, isDev)
       return redirectResponse
     }
 
     return response
   } catch (error) {
     middlewareLogger.error({ error }, 'Middleware error')
-    // Return basic response with CSP on error
+    // Return basic response with security headers on error
     const errorResponse = NextResponse.next()
-    errorResponse.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
-    errorResponse.headers.set('x-nonce', nonce)
+    addSecurityHeaders(errorResponse, nonce, isDev)
     return errorResponse
   }
 }

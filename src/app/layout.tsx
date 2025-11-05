@@ -1,16 +1,16 @@
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
+import { getNonce } from '@/lib/nonce';
+import { AuthProvider } from '@/providers/AuthProvider';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 import QueryProvider from '@/providers/QueryProvider';
-import { AuthProvider } from '@/providers/AuthProvider';
 import { SWRProvider } from '@/providers/SWRProvider';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { getNonce } from '@/lib/nonce';
 import "./globals.css";
 
 // import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
@@ -39,7 +39,7 @@ const RootLayout = async ({
   const nonce = await getNonce()
 
   return (
-    <html lang="id" suppressHydrationWarning className="h-full">
+    <html lang="id" suppressHydrationWarning className="dark h-full">
       <head>
         {/* Performance resource hints */}
         <link rel="preconnect" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} crossOrigin="anonymous" />
@@ -58,8 +58,8 @@ const RootLayout = async ({
         <AuthProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="dark"
+            enableSystem={false}
             disableTransitionOnChange
           >
             <QueryProvider>

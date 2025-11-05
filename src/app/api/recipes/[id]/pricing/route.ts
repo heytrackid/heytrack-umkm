@@ -1,9 +1,9 @@
-import { type NextRequest, NextResponse } from 'next/server'
 import { PricingAutomation, UMKM_CONFIG } from '@/lib/automation'
 import { apiLogger } from '@/lib/logger'
+import type { IngredientsTable, RecipeIngredientsTable, RecipesTable } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 import { checkBotId } from 'botid/server'
-import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import { type NextRequest, NextResponse } from 'next/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
       // Transform the data structure to match RecipeWithIngredients
       // Supabase returns joined data as arrays, so we need to extract the first element
-      const transformedIngredients = (data.recipe_ingredients || []).map((ri) => {
+      const transformedIngredients = (data.recipe_ingredients || []).map((ri: Record<string, unknown>) => {
         // Type guard to handle the ingredients property which might be an array or object
         const ingredientArray = Array.isArray(ri.ingredients) ? ri.ingredients : [];
         const ingredient = ingredientArray.length > 0 ? ingredientArray[0] : null;
@@ -84,8 +84,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           id: '',
           recipe_id: data.id,
           ingredient_id: ingredient?.id ?? '',
-          quantity: ri.quantity || 0,
-          unit: ri.unit || '',
+          quantity: ri.quantity ?? 0,
+          unit: ri.unit ?? '',
           user_id: user.id,
           ingredient: ingredient ?? null
         } as RecipeIngredient & { ingredient: Ingredient | null }

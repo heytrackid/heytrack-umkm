@@ -1,8 +1,9 @@
 'use client'
 
-import { Fragment } from 'react'
+import { Fragment, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { useResponsive } from '@/hooks/useResponsive'
+import { useSearchParams } from 'next/navigation'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 
@@ -27,6 +28,8 @@ const getBreadcrumbItems = (currentView: string) => [
 
 const CategoriesPage = () => {
   const { isMobile } = useResponsive()
+  const searchParams = useSearchParams()
+  const isAddView = searchParams.get('tambah') !== null
 
   // Use the custom hook for all categories logic
   const {
@@ -56,6 +59,13 @@ const CategoriesPage = () => {
     resetForm,
     handleViewCategory
   } = useCategories()
+
+  // Set view to 'add' when query parameter exists
+  useEffect(() => {
+    if (isAddView && currentView === 'list') {
+      setCurrentView('add')
+    }
+  }, [isAddView, currentView, setCurrentView])
 
   return (
     <AppLayout>

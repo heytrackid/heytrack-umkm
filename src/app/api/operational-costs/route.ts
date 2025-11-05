@@ -5,19 +5,20 @@ import type { ExpensesInsert } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
 import { checkBotId } from 'botid/server'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 /**
  * GET /api/operational-costs
- * 
+ *
  * Fetch all operational costs (expenses where category != 'Revenue')
- * 
+ *
  * Query Parameters:
  * - start_date: Filter by start date (optional)
  * - end_date: Filter by end date (optional)
  */
-export async function GET(request: NextRequest) {
+async function POST(request: NextRequest) {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -99,5 +100,10 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+// Apply security middleware
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+export { securedPOST as POST }
 
 // PUT and DELETE moved to /api/operational-costs/[id]/route.ts

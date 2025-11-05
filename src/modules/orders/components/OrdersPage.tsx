@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { useCurrency } from '@/hooks/useCurrency'
 import { createClientLogger } from '@/lib/client-logger'
 import { arrayCalculations } from '@/lib/performance-optimized'
@@ -19,6 +20,7 @@ import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
+import type { DateRange } from 'react-day-picker'
 import dynamic from 'next/dynamic'
 import { useMemo, useState } from 'react'
 
@@ -150,6 +152,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
   const [showOrderForm, setShowOrderForm] = useState(false)
   const [showOrderDetail, setShowOrderDetail] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
 
   const handleCreateOrder = () => {
     setSelectedOrder(null)
@@ -244,8 +247,8 @@ const OrdersPage = (_props: OrdersPageProps) => {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Pesanan</p>
                 <p className="text-2xl font-bold">{stats.total_orders}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  {stats.order_growth}% dari periode sebelumnya
+                <p className="text-xs text-muted-foreground mt-1">
+                  Rata-rata nilai per pesanan
                 </p>
               </div>
               <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
@@ -259,11 +262,11 @@ const OrdersPage = (_props: OrdersPageProps) => {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Pendapatan</p>
                 <p className="text-2xl font-bold">{formatCurrency(stats.total_revenue)}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {stats.revenue_growth}% dari periode sebelumnya
                 </p>
               </div>
-              <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+              <DollarSign className="h-8 w-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
@@ -276,7 +279,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                 <p className="text-2xl font-bold">{formatCurrency(stats.average_order_value)}</p>
                 <p className="text-xs text-muted-foreground mt-1">per pesanan</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+              <BarChart3 className="h-8 w-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
@@ -320,27 +323,27 @@ const OrdersPage = (_props: OrdersPageProps) => {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.pending_orders}</div>
+              <div className="text-2xl font-bold text-foreground">{stats.pending_orders}</div>
               <div className="text-xs text-muted-foreground">Pending</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.confirmed_orders}</div>
+              <div className="text-2xl font-bold text-foreground">{stats.confirmed_orders}</div>
               <div className="text-xs text-muted-foreground">Confirmed</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.in_production_orders}</div>
+              <div className="text-2xl font-bold text-foreground">{stats.in_production_orders}</div>
               <div className="text-xs text-muted-foreground">Produksi</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.completed_orders}</div>
+              <div className="text-2xl font-bold text-foreground">{stats.completed_orders}</div>
               <div className="text-xs text-muted-foreground">Selesai</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.cancelled_orders}</div>
+              <div className="text-2xl font-bold text-foreground">{stats.cancelled_orders}</div>
               <div className="text-xs text-muted-foreground">Batal</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600">{stats.total_customers}</div>
+              <div className="text-2xl font-bold text-foreground">{stats.total_customers}</div>
               <div className="text-xs text-muted-foreground">Pelanggan</div>
             </div>
           </div>
@@ -479,10 +482,23 @@ const OrdersPage = (_props: OrdersPageProps) => {
                     </SelectContent>
                   </Select>
 
-                  <Button variant="outline">
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filter Lainnya
-                  </Button>
+                   <DateRangePicker
+                     value={dateRange}
+                     onChange={(newDateRange) => {
+                       setDateRange(newDateRange)
+                       setFilters(prev => ({
+                         ...prev,
+                         date_from: newDateRange?.from ? newDateRange.from.toISOString().split('T')[0] : '',
+                         date_to: newDateRange?.to ? newDateRange.to.toISOString().split('T')[0] : ''
+                       }))
+                     }}
+                     className="w-full sm:w-[240px]"
+                   />
+
+                   <Button variant="outline">
+                     <Filter className="h-4 w-4 mr-2" />
+                     Filter Lainnya
+                   </Button>
                 </div>
 
                 {/* Search Results Info */}

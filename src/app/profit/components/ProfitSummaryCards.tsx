@@ -21,24 +21,16 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
   // Function to get trend icon and color
   const getTrendElement = (value: number) => {
     if (value > 0) {
-      return <ArrowUpRight className="h-4 w-4 text-green-600" />;
+      return <ArrowUpRight className="h-4 w-4 text-muted-foreground" />;
     }
     if (value < 0) {
-      return <ArrowDownRight className="h-4 w-4 text-red-600" />;
+      return <ArrowDownRight className="h-4 w-4 text-muted-foreground" />;
     }
-    return <Minus className="h-4 w-4 text-gray-400" />;
+    return <Minus className="h-4 w-4 text-muted-foreground" />;
   };
 
   // Function to get trend color
-  const getTrendColor = (value: number) => {
-    if (value > 0) {
-      return 'text-green-600';
-    }
-    if (value < 0) {
-      return 'text-red-600';
-    }
-    return 'text-gray-400';
-  };
+  const getTrendColor = (_value: number) => 'text-muted-foreground';
 
   return (
     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
@@ -48,13 +40,13 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Total Pendapatan
           </CardTitle>
-          <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-950 flex items-center justify-center">
-            <DollarSign className="h-5 w-5 text-green-600" />
+           <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+             <DollarSign className="h-5 w-5 text-muted-foreground" />
           </div>
         </CardHeader>
         <CardContent>
           <div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(summary.total_revenue)}</p>
+            <p className="text-2xl font-bold text-foreground">{formatCurrency(summary.total_revenue)}</p>
             {revenueGrowth !== 0 && (
               <p className={`text-xs flex items-center gap-1 mt-1 ${getTrendColor(revenueGrowth)}`}>
                 {getTrendElement(revenueGrowth)}
@@ -72,13 +64,13 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Laba Kotor
           </CardTitle>
-          <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-950 flex items-center justify-center">
-            <TrendingUp className="h-5 w-5 text-blue-600" />
+           <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+             <TrendingUp className="h-5 w-5 text-muted-foreground" />
           </div>
         </CardHeader>
         <CardContent>
           <div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(summary.gross_profit)}</p>
+            <p className="text-2xl font-bold text-foreground">{formatCurrency(summary.gross_profit)}</p>
             <div className="flex items-center gap-1 mt-1">
               <p className="text-xs text-muted-foreground">
                 Margin: {summary.gross_profit_margin.toFixed(1)}%
@@ -100,18 +92,18 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Laba Bersih
           </CardTitle>
-          <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-950 flex items-center justify-center">
-            {summary.net_profit >= 0 ? (
-              <TrendingUp className="h-5 w-5 text-green-600" />
-            ) : (
-              <TrendingDown className="h-5 w-5 text-red-600" />
-            )}
+           <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+             {summary.net_profit >= 0 ? (
+               <TrendingUp className="h-5 w-5 text-muted-foreground" />
+             ) : (
+               <TrendingDown className="h-5 w-5 text-muted-foreground" />
+             )}
           </div>
         </CardHeader>
         <CardContent>
           <div>
-            <p className={`text-2xl font-bold ${summary.net_profit >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'}`}>
-              {formatCurrency(summary.net_profit)}
+             <p className="text-2xl font-bold text-foreground">
+               {formatCurrency(summary.net_profit)}
             </p>
             <div className="flex items-center gap-1 mt-1">
               <p className="text-xs text-muted-foreground">
@@ -134,13 +126,13 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Harga Pokok Penjualan
           </CardTitle>
-          <div className="h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-950 flex items-center justify-center">
-            <Package className="h-5 w-5 text-orange-600" />
+           <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+             <Package className="h-5 w-5 text-muted-foreground" />
           </div>
         </CardHeader>
         <CardContent>
           <div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(summary.total_cogs)}</p>
+            <p className="text-2xl font-bold text-foreground">{formatCurrency(summary.total_cogs)}</p>
             <div className="flex items-center gap-1 mt-1">
               <p className="text-xs text-muted-foreground">
                 Metode: WAC

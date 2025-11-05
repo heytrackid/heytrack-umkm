@@ -7,13 +7,14 @@ import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { checkBotId } from 'botid/server'
 import type { WhatsappTemplatesInsert } from '@/types/database'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
 type WhatsAppTemplateInsert = WhatsappTemplatesInsert
 
-export async function GET(request: NextRequest) {
+async function GET(request: NextRequest) {
   try {
     // 1. Authentication
     const supabase = await createClient()
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function POST(request: NextRequest) {
   try {
     // 1. Authentication
     const supabase = await createClient()
@@ -130,3 +131,9 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+export { securedGET as GET, securedPOST as POST }

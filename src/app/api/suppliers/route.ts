@@ -5,13 +5,12 @@ import { checkBotId } from 'botid/server'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { SuppliersInsert } from '@/types/database'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
-
-export async function GET(request: NextRequest) {
+async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
   // Validate query parameters
@@ -85,7 +84,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: Request) {
+async function POST(request: Request) {
   try {
     const supabase = await createClient()
     
@@ -141,3 +140,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+export { securedGET as GET, securedPOST as POST }

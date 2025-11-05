@@ -116,7 +116,7 @@ const HppDashboardWidget = () => {
         {/* Key Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-600 flex items-center justify-center">
+            <div className="text-2xl font-bold text-foreground flex items-center justify-center">
               <Target className="h-4 w-4 mr-1" />
               {data.recipesWithHpp}/{data.totalRecipes}
             </div>
@@ -124,7 +124,7 @@ const HppDashboardWidget = () => {
           </div>
 
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-600 flex items-center justify-center">
+            <div className="text-2xl font-bold text-foreground flex items-center justify-center">
               <DollarSign className="h-4 w-4 mr-1" />
               {formatCurrency(data.averageHpp)}
             </div>
@@ -132,14 +132,14 @@ const HppDashboardWidget = () => {
           </div>
 
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-600">
+            <div className="text-2xl font-bold text-foreground">
               {data.averageMargin}%
             </div>
             <div className="text-sm text-muted-foreground">Avg Margin</div>
           </div>
 
           <div className="text-center">
-            <div className={`text-2xl font-bold ${data.unreadAlerts > 0 ? 'text-red-600' : 'text-gray-600'}`}>
+            <div className={`text-2xl font-bold ${data.unreadAlerts > 0 ? 'text-destructive' : 'text-foreground'}`}>
               {data.totalAlerts}
             </div>
             <div className="text-sm text-muted-foreground">Total Alerts</div>

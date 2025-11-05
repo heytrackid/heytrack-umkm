@@ -114,51 +114,52 @@ export const ContextAwareChatbot = () => {
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
-        {/* Sessions Sidebar */}
-        {showSessions && (
-          <div className="flex-shrink-0 border-b p-4 bg-muted/30">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold flex items-center gap-2">
-                <History className="h-4 w-4" />
-                Riwayat Percakapan
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSessions(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-1 max-h-48 overflow-y-auto">
-              {sessions.length === 0 ? (
-                <div className="text-center py-8">
-                  <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                  <p className="text-sm text-muted-foreground">Belum ada percakapan</p>
-                </div>
-              ) : (
-                sessions.map((session) => (
-                  <Button
-                    key={session.id}
-                    variant={sessionId === session.id ? 'secondary' : 'ghost'}
-                    size="sm"
-                    className="w-full justify-start text-left hover:bg-secondary/80"
-                    onClick={() => {
-                      void loadSession(session.id)
-                      setShowSessions(false)
-                    }}
-                  >
-                    <MessageCircle className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
-                    <span className="truncate-desktop-only text-xs">{session.title}</span>
-                  </Button>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Messages Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-4 scroll-smooth" ref={scrollRef}>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Sessions List at top of messages area */}
+          {showSessions && (
+            <div className="flex-shrink-0 border-b p-4 bg-muted/30">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  Riwayat Percakapan
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSessions(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="space-y-1 max-h-48 overflow-y-auto">
+                {sessions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                    <p className="text-sm text-muted-foreground">Belum ada percakapan</p>
+                  </div>
+                ) : (
+                  sessions.map((session) => (
+                    <Button
+                      key={session.id}
+                      variant={sessionId === session.id ? 'secondary' : 'ghost'}
+                      size="sm"
+                      className="w-full justify-start text-left hover:bg-secondary/80"
+                      onClick={() => {
+                        void loadSession(session.id)
+                        setShowSessions(false)
+                      }}
+                    >
+                      <MessageCircle className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                      <span className="truncate-desktop-only text-xs">{session.title}</span>
+                    </Button>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+          
+          <div className="flex-1 overflow-y-auto p-4 scroll-smooth" ref={scrollRef}>
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-full text-center p-8">
               <div className="h-20 w-20 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center mb-4">
@@ -299,6 +300,7 @@ export const ContextAwareChatbot = () => {
               )}
             </div>
           )}
+        </div>
         </div>
 
         {/* Error Display */}

@@ -1,28 +1,38 @@
 'use client'
 
-import { AppSidebar } from '@/components/app-sidebar'
+import { TabNavigation } from '@/components/layout/TabNavigation'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
-import { Input } from '@/components/ui/input'
+} from '@/components/ui/dropdown-menu'
 import { NotificationCenter } from '@/components/ui/notification-center'
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger
-} from '@/components/ui/sidebar'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useNotifications } from '@/hooks/useNotifications'
-import { useResponsive } from '@/hooks/useResponsive'
 import { uiLogger } from '@/lib/logger'
-import { cn } from '@/lib/utils'
 import { createClient } from '@/utils/supabase/client'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
-import { Search, User } from 'lucide-react'
+import {
+  BarChart3,
+  Calculator,
+  CircleDollarSign,
+  Download,
+  Factory,
+  FileText,
+  LayoutDashboard,
+  MessageSquare,
+  Package,
+  Receipt,
+  ShoppingCart,
+  TrendingUp,
+  Truck,
+  User,
+  Users,
+  Utensils,
+  Wallet
+} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { memo, useEffect, useState, type ReactNode } from 'react'
 
@@ -31,11 +41,56 @@ interface AppLayoutProps {
   pageTitle?: string
 }
 
+const mainTabs = [
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  {
+    label: 'Inventori',
+    icon: Package,
+    items: [
+      { label: 'Bahan Baku', href: '/ingredients', icon: Package },
+      { label: 'Resep', href: '/recipes', icon: Utensils },
+      { label: 'Pemasok', href: '/suppliers', icon: Truck },
+      { label: 'HPP', href: '/hpp', icon: Calculator }
+    ]
+  },
+  {
+    label: 'Manajemen',
+    icon: Users,
+    items: [
+      { label: 'Kategori Produk', href: '/categories', icon: Package },
+      { label: 'Pelanggan', href: '/customers', icon: Users }
+    ]
+  },
+  {
+    label: 'Operasional',
+    icon: Factory,
+    items: [
+      { label: 'Produksi', href: '/production', icon: Factory },
+      { label: 'Pesanan', href: '/orders', icon: ShoppingCart },
+      { label: 'Biaya Operasional', href: '/operational-costs', icon: Receipt }
+    ]
+  },
+  {
+    label: 'Keuangan',
+    icon: Wallet,
+    items: [
+      { label: 'Arus Kas', href: '/cash-flow', icon: CircleDollarSign },
+      { label: 'Profit', href: '/profit', icon: TrendingUp }
+    ]
+  },
+  { label: 'AI Chatbot', href: '/ai-chatbot', icon: MessageSquare, badge: '✨' },
+  {
+    label: 'Analitik',
+    icon: BarChart3,
+    items: [
+      { label: 'Laporan', href: '/reports', icon: FileText }
+    ]
+  }
+]
+
 const AppLayout = memo(({
-  children,
-  pageTitle
+  children
 }: AppLayoutProps) => {
-  const { isMobile } = useResponsive()
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
@@ -87,97 +142,110 @@ const AppLayout = memo(({
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <div className="flex flex-1 items-center gap-2 px-3">
-            {isMobile && pageTitle && (
-              <h1 className="font-semibold text-lg">{pageTitle}</h1>
-            )}
-            {!isMobile && (
-              <div className="relative w-full max-w-md">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Cari..."
-                  className="w-full pl-8"
-                />
-              </div>
-            )}
+    <div className="flex h-screen flex-col">
+      {/* Top Header */}
+      <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4 md:px-6">
+        <div className="flex items-center gap-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <span className="font-bold text-sm">HT</span>
           </div>
-          <div className="flex items-center gap-2">
-            <NotificationCenter
-              notifications={notifications.notifications}
-              onMarkAsRead={notifications.markAsRead}
-              onMarkAllAsRead={notifications.markAllAsRead}
-              onClearAll={notifications.clearAll}
-            />
-            <ThemeToggle />
-            
-            {/* User Authentication */}
-            {loading && (
-              <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
-            )}
-            
-            {!loading && user && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <User className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">{user.email?.split('@')[0]}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-2 py-1.5 text-sm font-medium">
-                    {user.email}
-                  </div>
-                  <DropdownMenuItem onClick={() => router.push('/settings')}>
-                    Pengaturan
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={async () => {
-                      await supabase.auth.signOut()
-                      void router.push('/auth/login')
-                    }}
-                    className="text-red-600 focus:text-red-600"
-                  >
-                    Keluar
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            
-            {!loading && !user && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => router.push('/auth/login')}
-                >
-                  Masuk
+          <span className="hidden font-semibold md:inline">HeyTrack</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <NotificationCenter
+            notifications={notifications.notifications}
+            onMarkAsRead={notifications.markAsRead}
+            onMarkAllAsRead={notifications.markAllAsRead}
+            onClearAll={notifications.clearAll}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={async () => {
+              try {
+                const response = await fetch('/api/export/global')
+                if (response.ok) {
+                  const blob = await response.blob()
+                  const url = window.URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `heytrack-export-${new Date().toISOString().split('T')[0]}.xlsx`
+                  document.body.appendChild(a)
+                  a.click()
+                  document.body.removeChild(a)
+                  window.URL.revokeObjectURL(url)
+                } else {
+                  uiLogger.error('Failed to export data')
+                }
+              } catch (error) {
+                uiLogger.error({ error }, 'Error exporting data')
+              }
+            }}
+            title="Export Data"
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+          <ThemeToggle />
+
+          {/* User Authentication */}
+          {loading && (
+            <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
+          )}
+
+          {!loading && user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <User className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">{user.email?.split('@')[0]}</span>
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={() => router.push('/auth/register')}
-                  className="hidden sm:inline-flex"
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-2 py-1.5 text-sm font-medium">{user.email}</div>
+                <DropdownMenuItem onClick={() => router.push('/settings')}>
+                  Pengaturan
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await supabase.auth.signOut()
+                    void router.push('/auth/login')
+                  }}
+                  className="text-red-600 focus:text-red-600"
                 >
-                  Daftar
-                </Button>
-              </div>
-            )}
-          </div>
-        </header>
-        <main className={cn(
-          "flex-1 overflow-auto p-4 md:p-6"
-        )}>
-          <div className="mx-auto max-w-7xl">
-            {children}
-          </div>
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+                  Keluar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          {!loading && !user && (
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={() => router.push('/auth/login')}>
+                Masuk
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => router.push('/auth/register')}
+                className="hidden sm:inline-flex"
+              >
+                Daftar
+              </Button>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Tab Navigation */}
+      <TabNavigation tabs={mainTabs} />
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto bg-background">
+        <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-8">
+          {children}
+        </div>
+      </main>
+    </div>
   )
 })
 

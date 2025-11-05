@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { safeNumber, getErrorMessage } from '@/lib/type-guards'
 import { checkBotId } from 'botid/server'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -13,7 +14,7 @@ export const runtime = 'nodejs'
  * POST /api/financial/records
  * Create a new financial record (manual entry)
  */
-export async function POST(request: NextRequest) {
+async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
 
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
  * GET /api/financial/records
  * Get financial records for the current user
  */
-export async function GET(request: NextRequest) {
+async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
 
@@ -162,3 +163,9 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+export { securedGET as GET, securedPOST as POST }

@@ -99,97 +99,95 @@ const NewOrderPage = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="space-y-6">
             {/* Main Form */}
-            <div className="lg:col-span-2">
-              <Card>
-                <CardContent className="p-6">
-                  <SwipeableTabs value={activeTab} onValueChange={setActiveTab}>
-                    <SwipeableTabsList className="grid w-full grid-cols-4">
-                      <SwipeableTabsTrigger
-                        value="customer"
-                        className="flex items-center gap-2"
-                      >
-                        <User className="h-4 w-4" />
-                        <span className="hidden sm:inline">Pelanggan</span>
-                      </SwipeableTabsTrigger>
-                      <SwipeableTabsTrigger
-                        value="items"
-                        className="flex items-center gap-2"
-                      >
-                        <Package className="h-4 w-4" />
-                        <span className="hidden sm:inline">Items</span>
-                        {orderItems.length > 0 && (
-                          <Badge variant="secondary" className="ml-1">
-                            {orderItems.length}
-                          </Badge>
-                        )}
-                      </SwipeableTabsTrigger>
-                      <SwipeableTabsTrigger
-                        value="delivery"
-                        className="flex items-center gap-2"
-                      >
-                        <Truck className="h-4 w-4" />
-                        <span className="hidden sm:inline">Pengiriman</span>
-                      </SwipeableTabsTrigger>
-                      <SwipeableTabsTrigger
-                        value="payment"
-                        className="flex items-center gap-2"
-                      >
-                        <CreditCard className="h-4 w-4" />
-                        <span className="hidden sm:inline">Pembayaran</span>
-                      </SwipeableTabsTrigger>
-                    </SwipeableTabsList>
+            <Card>
+              <CardContent className="p-6">
+                <SwipeableTabs value={activeTab} onValueChange={setActiveTab}>
+                  <SwipeableTabsList className="grid w-full grid-cols-4">
+                    <SwipeableTabsTrigger
+                      value="customer"
+                      className="flex items-center gap-2"
+                    >
+                      <User className="h-4 w-4" />
+                      <span className="hidden sm:inline">Pelanggan</span>
+                    </SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger
+                      value="items"
+                      className="flex items-center gap-2"
+                    >
+                      <Package className="h-4 w-4" />
+                      <span className="hidden sm:inline">Items</span>
+                      {orderItems.length > 0 && (
+                        <Badge variant="secondary" className="ml-1">
+                          {orderItems.length}
+                        </Badge>
+                      )}
+                    </SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger
+                      value="delivery"
+                      className="flex items-center gap-2"
+                    >
+                      <Truck className="h-4 w-4" />
+                      <span className="hidden sm:inline">Pengiriman</span>
+                    </SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger
+                      value="payment"
+                      className="flex items-center gap-2"
+                    >
+                      <CreditCard className="h-4 w-4" />
+                      <span className="hidden sm:inline">Pembayaran</span>
+                    </SwipeableTabsTrigger>
+                  </SwipeableTabsList>
 
-                    {error && (
-                      <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4" />
-                        {error}
-                      </div>
-                    )}
+                  {error && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4" />
+                      {error}
+                    </div>
+                  )}
 
-                    <SwipeableTabsContent value="customer" className="mt-6">
-                      <OrderCustomerStep
-                        formData={formData}
-                        customers={customers}
-                        onInputChange={handleInputChange}
-                        onSelectCustomer={selectCustomer}
-                      />
-                    </SwipeableTabsContent>
+                  <SwipeableTabsContent value="customer" className="mt-6">
+                    <OrderCustomerStep
+                      formData={formData}
+                      customers={customers}
+                      onInputChange={handleInputChange}
+                      onSelectCustomer={selectCustomer}
+                    />
+                  </SwipeableTabsContent>
 
-                    <SwipeableTabsContent value="items" className="mt-6">
-                      <OrderItemsStep
-                        orderItems={orderItems}
-                        availableRecipes={availableRecipes}
-                        subtotal={subtotal}
-                        onAddItem={addOrderItem}
-                        onUpdateItem={updateOrderItem}
-                        onRemoveItem={removeOrderItem}
-                        onReorderItems={reorderOrderItems}
-                      />
-                    </SwipeableTabsContent>
+                  <SwipeableTabsContent value="items" className="mt-6">
+                    <OrderItemsStep
+                      orderItems={orderItems}
+                      availableRecipes={availableRecipes}
+                      subtotal={subtotal}
+                      onAddItem={addOrderItem}
+                      onUpdateItem={updateOrderItem}
+                      onRemoveItem={removeOrderItem}
+                      onReorderItems={reorderOrderItems}
+                    />
+                  </SwipeableTabsContent>
 
-                    <SwipeableTabsContent value="delivery" className="mt-6">
-                      <OrderDeliveryStep
-                        formData={formData}
-                        onInputChange={handleInputChange}
-                      />
-                    </SwipeableTabsContent>
+                  <SwipeableTabsContent value="delivery" className="mt-6">
+                    <OrderDeliveryStep
+                      formData={formData}
+                      onInputChange={handleInputChange}
+                    />
+                  </SwipeableTabsContent>
 
-                    <SwipeableTabsContent value="payment" className="mt-6">
-                      <OrderPaymentStep
-                        formData={formData}
-                        onInputChange={handleInputChange}
-                      />
-                    </SwipeableTabsContent>
-                  </SwipeableTabs>
-                </CardContent>
-              </Card>
-            </div>
+                  <SwipeableTabsContent value="payment" className="mt-6">
+                    <OrderPaymentStep
+                      formData={formData}
+                      onInputChange={handleInputChange}
+                    />
+                  </SwipeableTabsContent>
+                </SwipeableTabs>
+              </CardContent>
+            </Card>
 
-            {/* Order Summary Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-6">
+            {/* Order Summary - No longer sidebar */}
+            <Card>
+              <CardContent className="p-6">
                 <OrderSummary
                   formData={formData}
                   orderItems={orderItems}
@@ -200,8 +198,8 @@ const NewOrderPage = () => {
                   onSubmit={handleSubmit}
                   onCancel={() => router.back()}
                 />
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </form>
       </div>

@@ -146,81 +146,81 @@ export const ProductProfitabilityChart = ({
                       return (
                         <LazyBarChart {...commonProps}>
                           {commonProps.children}
-                          <Bar
-                            dataKey="revenue"
-                            fill="#3b82f6"
-                            radius={[4, 4, 0, 0]}
-                          />
-                          <Bar
-                            dataKey="cogs"
-                            fill="#f97316"
-                            radius={[4, 4, 0, 0]}
-                          />
-                          <Bar
-                            dataKey="profit"
-                            fill="#22c55e"
-                            radius={[4, 4, 0, 0]}
-                          />
+                           <Bar
+                             dataKey="revenue"
+                             fill="hsl(var(--muted))"
+                             radius={[4, 4, 0, 0]}
+                           />
+                           <Bar
+                             dataKey="cogs"
+                             fill="hsl(var(--muted-foreground))"
+                             radius={[4, 4, 0, 0]}
+                           />
+                           <Bar
+                             dataKey="profit"
+                             fill="hsl(var(--primary))"
+                             radius={[4, 4, 0, 0]}
+                           />
                         </LazyBarChart>
                       )
                     case 'line':
                       return (
                         <LazyLineChart {...commonProps}>
                           {commonProps.children}
-                          <Line
-                            type="monotone"
-                            dataKey="revenue"
-                            stroke="#3b82f6"
-                            strokeWidth={2}
-                            dot={{ r: 4 }}
-                            activeDot={{ r: 6 }}
-                          />
-                          <Line
-                            type="monotone"
-                            dataKey="cogs"
-                            stroke="#f97316"
-                            strokeWidth={2}
-                            dot={{ r: 4 }}
-                            activeDot={{ r: 6 }}
-                          />
-                          <Line
-                            type="monotone"
-                            dataKey="profit"
-                            stroke="#22c55e"
-                            strokeWidth={2}
-                            dot={{ r: 4 }}
-                            activeDot={{ r: 6 }}
-                          />
+                           <Line
+                             type="monotone"
+                             dataKey="revenue"
+                             stroke="hsl(var(--muted))"
+                             strokeWidth={2}
+                             dot={{ r: 4 }}
+                             activeDot={{ r: 6 }}
+                           />
+                           <Line
+                             type="monotone"
+                             dataKey="cogs"
+                             stroke="hsl(var(--muted-foreground))"
+                             strokeWidth={2}
+                             dot={{ r: 4 }}
+                             activeDot={{ r: 6 }}
+                           />
+                           <Line
+                             type="monotone"
+                             dataKey="profit"
+                             stroke="hsl(var(--primary))"
+                             strokeWidth={2}
+                             dot={{ r: 4 }}
+                             activeDot={{ r: 6 }}
+                           />
                         </LazyLineChart>
                       )
                     default:
                       return (
                         <LazyAreaChart {...commonProps}>
                           {commonProps.children}
-                          <Area
-                            type="monotone"
-                            dataKey="revenue"
-                            stackId="1"
-                            stroke="#3b82f6"
-                            fill="#3b82f6"
-                            fillOpacity={0.6}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="cogs"
-                            stackId="2"
-                            stroke="#f97316"
-                            fill="#f97316"
-                            fillOpacity={0.6}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="profit"
-                            stackId="3"
-                            stroke="#22c55e"
-                            fill="#22c55e"
-                            fillOpacity={0.8}
-                          />
+                           <Area
+                             type="monotone"
+                             dataKey="revenue"
+                             stackId="1"
+                             stroke="hsl(var(--muted))"
+                             fill="hsl(var(--muted))"
+                             fillOpacity={0.6}
+                           />
+                           <Area
+                             type="monotone"
+                             dataKey="cogs"
+                             stackId="2"
+                             stroke="hsl(var(--muted-foreground))"
+                             fill="hsl(var(--muted-foreground))"
+                             fillOpacity={0.6}
+                           />
+                           <Area
+                             type="monotone"
+                             dataKey="profit"
+                             stackId="3"
+                             stroke="hsl(var(--primary))"
+                             fill="hsl(var(--primary))"
+                             fillOpacity={0.8}
+                           />
                         </LazyAreaChart>
                       )
                   }

@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { DateRangeQuerySchema } from '@/lib/validations/domains/common'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -42,7 +43,7 @@ interface ExpenseStats {
   amount: number
 }
 
-export async function GET(request: Request) {
+async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
 
@@ -232,7 +233,7 @@ export async function GET(request: Request) {
       const category = safeString(ingredient.category, 'General')
       acc[category] = (acc[category] || 0) + 1
       return acc
-    }, {} as Record<string, number>) || {}
+    }, {} as Record<string, number>) || {} as Record<string, number>
 
     // ✅ Low stock alerts with ingredient details
     interface IngredientWithName extends IngredientStats {
@@ -398,3 +399,8 @@ export async function POST() {
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+
+export { securedGET as GET }
