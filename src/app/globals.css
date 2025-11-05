@@ -1,5 +1,4 @@
 @import "tailwindcss";
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -7,14 +6,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
+
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -67,14 +59,7 @@
   --chart-3: oklch(0.5 0 0);
   --chart-4: oklch(0.6 0 0);
   --chart-5: oklch(0.7 0 0);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
 }
 
 .dark {
@@ -101,14 +86,7 @@
   --chart-3: oklch(0.6 0 0);
   --chart-4: oklch(0.3 0 0);
   --chart-5: oklch(0.7 0 0);
-  --sidebar: oklch(0.05 0 0);
-  --sidebar-foreground: oklch(0.95 0 0);
-  --sidebar-primary: oklch(0.6 0 0);
-  --sidebar-primary-foreground: oklch(0.95 0 0);
-  --sidebar-accent: oklch(0.15 0 0);
-  --sidebar-accent-foreground: oklch(0.9 0 0);
-  --sidebar-border: oklch(0.25 0 0);
-  --sidebar-ring: oklch(0.5 0 0);
+
 }
 
 @layer base {
@@ -121,18 +99,18 @@
   body {
     @apply bg-background text-foreground h-full m-0 p-0;
   }
-  
+
   /* Full screen layout fixes */
   #__next {
     @apply h-full;
   }
-  
+
   /* Mobile viewport fixes */
   .mobile-min-vh {
     min-height: 100vh;
     min-height: 100dvh; /* Dynamic viewport height */
   }
-  
+
   /* Prevent zoom on input focus for iOS */
   @supports (-webkit-touch-callout: none) {
     input[type="text"],
@@ -145,69 +123,66 @@
       font-size: 16px !important;
     }
   }
-  
+
   /* Touch-friendly tap targets */
   .touch-manipulation {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   /* Smooth scrolling for mobile */
   @media (max-width: 768px) {
     html {
       -webkit-overflow-scrolling: touch;
     }
   }
-  
+
   /* Professional color scheme */
   :root {
     --color-accent-muted: hsl(var(--muted));
   }
-  
+
   /* Container max width fix */
   .container {
     @apply w-full;
   }
-  
+
   /* Desktop layout constraints */
   @media (min-width: 1024px) {
     .desktop-container {
       @apply max-w-7xl mx-auto px-4;
     }
-    
+
     .desktop-content {
       @apply px-6;
     }
   }
-  
-  /* Sidebar layout fixes */
-  .sidebar-layout {
-    @apply h-full w-full;
-  }
-  
+
+
+
   /* Custom scrollbar */
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 4px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background-color: hsl(var(--muted-foreground) / 0.3);
     border-radius: 2px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground) / 0.5);
   }
-  
+
   /* Toast specific positioning */
   [data-radix-toast-viewport] {
     position: fixed !important;
@@ -219,19 +194,19 @@
     width: 100% !important;
     padding: 0 1rem !important;
   }
-  
+
   /* Ensure toast appears above mobile nav and chatbot */
   [data-radix-toast-viewport] [data-radix-toast] {
     z-index: 9999 !important;
   }
-  
+
   /* Word breaking utilities for chat messages */
   .word-break-break-word {
     word-break: break-word;
     overflow-wrap: anywhere;
     hyphens: auto;
   }
-  
+
   /* Prevent horizontal overflow in chat containers */
   .chat-message-container {
     max-width: 100%;
@@ -239,7 +214,7 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
   }
-  
+
   /* Mobile-friendly text wrapping utilities */
   .text-wrap-mobile {
     word-break: break-word;
@@ -247,19 +222,19 @@
     hyphens: auto;
     white-space: normal;
   }
-  
+
   /* For long text that should wrap nicely */
   .text-wrap-balance {
     text-wrap: balance;
     word-break: break-word;
   }
-  
+
   /* For very long words or URLs */
   .text-break-all {
     word-break: break-all;
     overflow-wrap: anywhere;
   }
-  
+
   /* Limit lines with ellipsis (use sparingly) */
   .line-clamp-2-mobile {
     display: -webkit-box;
@@ -267,14 +242,14 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  
+
   .line-clamp-3-mobile {
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  
+
   /* Mobile: show full text, Desktop: can truncate */
   @media (max-width: 768px) {
     .truncate-desktop-only {
@@ -284,7 +259,7 @@
       word-break: break-word;
     }
   }
-  
+
   @media (min-width: 769px) {
     .truncate-desktop-only {
       white-space: nowrap;
@@ -292,34 +267,34 @@
       text-overflow: ellipsis;
     }
   }
-  
+
   /* Enhanced border visibility for dark mode */
   .border-subtle {
     border-color: oklch(0.3 0 0);
   }
-  
+
   .dark .border-subtle {
     border-color: oklch(0.3 0 0);
   }
-  
+
   /* Slightly more visible border for dark mode cards and components */
   .border-enhanced {
     border-color: oklch(0.922 0 0);
   }
-  
+
   .dark .border-enhanced {
     border-color: oklch(0.35 0 0);
   }
-  
+
   /* For elements that need even more visibility in dark mode */
   .border-prominent {
     border-color: oklch(0.8 0 0);
   }
-  
+
   .dark .border-prominent {
     border-color: oklch(0.4 0 0);
   }
-  
+
   /* Consistent vertical spacing between label and control */
   label[data-slot="label"] + * {
     margin-top: 0.375rem; /* mb-1.5 */
@@ -328,7 +303,7 @@
   [data-slot="form-item"] > label[data-slot="label"] + * {
     margin-top: 0rem;
   }
-  
+
   /* Auth page animations */
   @keyframes fadeIn {
     from {
@@ -340,7 +315,7 @@
       transform: translateY(0);
     }
   }
-  
+
   @keyframes fadeInScale {
     from {
       opacity: 0;
@@ -351,7 +326,7 @@
       transform: scale(1);
     }
   }
-  
+
   @keyframes slideInFromTop {
     from {
       opacity: 0;
@@ -362,7 +337,7 @@
       transform: translateY(0);
     }
   }
-  
+
   @keyframes slideInFromBottom {
     from {
       opacity: 0;
@@ -373,7 +348,7 @@
       transform: translateY(0);
     }
   }
-  
+
   @keyframes successPulse {
     0%, 100% {
       transform: scale(1);
@@ -382,7 +357,7 @@
       transform: scale(1.05);
     }
   }
-  
+
   @keyframes shimmer {
     0% {
       background-position: -1000px 0;
@@ -391,7 +366,7 @@
       background-position: 1000px 0;
     }
   }
-  
+
   @keyframes shake {
     0%, 100% {
       transform: translateX(0);
@@ -403,44 +378,44 @@
       transform: translateX(5px);
     }
   }
-  
+
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
   }
-  
+
   .animate-fade-in-scale {
     animation: fadeInScale 0.4s ease-out;
   }
-  
+
   .animate-slide-in-top {
     animation: slideInFromTop 0.3s ease-out;
   }
-  
+
   .animate-slide-in-bottom {
     animation: slideInFromBottom 0.3s ease-out;
   }
-  
+
   .animate-success-pulse {
     animation: successPulse 0.6s ease-in-out;
   }
-  
+
   .animate-shake {
     animation: shake 0.5s ease-in-out;
   }
-  
+
   /* Smooth transitions for all interactive elements */
   button, input, textarea, select {
     transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
   }
-  
+
   /* Loading state styles */
   .loading-overlay {
     position: relative;
     pointer-events: none;
   }
-  
+
   .loading-overlay::after {
     content: '';
     position: absolute;
@@ -453,34 +428,26 @@
     );
     animation: shimmer 2s infinite;
   }
-  
+
   /* Disabled state with smooth transition */
   input:disabled, button:disabled, textarea:disabled, select:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transition: opacity 200ms ease-in-out;
   }
-  
+
   /* Focus states with smooth transitions */
   input:focus, textarea:focus, select:focus {
     outline: none;
     transition: all 200ms ease-in-out;
   }
-  
+
   /* Error state animation */
   .error-shake {
     animation: shake 0.5s ease-in-out;
   }
 
-  /* Sidebar Layout Styles */
-  .sidebar-layout {
-    position: relative;
-  }
 
-  /* Smooth sidebar transitions */
-  .sidebar-transition {
-    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
 
   /* Mobile minimum viewport height */
   .mobile-min-vh {
@@ -488,29 +455,7 @@
     min-height: 100dvh; /* Dynamic viewport height for mobile */
   }
 
-  /* Sidebar overlay for mobile */
-  .sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 30;
-    transition: opacity 200ms ease-in-out;
-  }
 
-  .sidebar-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Prevent body scroll when mobile menu is open */
-  body.sidebar-open {
-    overflow: hidden;
-  }
-
-  /* Smooth content shift when sidebar collapses */
-  .content-shift {
-    transition: margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
 
   /* Custom Scrollbar Styles */
   .scrollbar-thin::-webkit-scrollbar {
@@ -540,7 +485,7 @@
   html {
     scroll-behavior: smooth;
   }
-  
+
 }
 
 /* Toast Custom Styles (CSP-compliant) */

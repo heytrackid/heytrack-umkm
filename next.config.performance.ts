@@ -139,13 +139,7 @@ export const performanceConfig: Partial<NextConfig> = {
             chunks: 'all',
             priority: 30
           },
-          // Sidebar components chunk (for better HMR)
-          sidebar: {
-            name: 'sidebar',
-            test: /[\\/]components[\\/]layout[\\/]sidebar[\\/]/,
-            chunks: 'all',
-            priority: 35
-          },
+
           // Recharts chunk (heavy library)
           recharts: {
             name: 'recharts',

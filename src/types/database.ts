@@ -24,6 +24,11 @@ export type Row<T extends TableName> = DatabaseType['public']['Tables'][T]['Row'
 export type Insert<T extends TableName> = DatabaseType['public']['Tables'][T]['Insert']
 export type Update<T extends TableName> = DatabaseType['public']['Tables'][T]['Update']
 
+// Fallback types for tables that might not exist in generated types
+export type SafeRow<T extends string> = T extends TableName ? Row<T> : Record<string, unknown>
+export type SafeInsert<T extends string> = T extends TableName ? Insert<T> : Record<string, unknown>
+export type SafeUpdate<T extends string> = T extends TableName ? Update<T> : Record<string, unknown>
+
 // Helper type for nested relations
 export type WithNestedRelation<T, K extends string, R> = T & { [P in K]: R }
 

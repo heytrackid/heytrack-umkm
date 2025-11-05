@@ -26,7 +26,20 @@ async function POST(request: NextRequest) {
     }
 
     // Parse body - handle both JSON and text/plain
-    let body: Record<string, unknown>
+    interface ErrorBody {
+      message?: unknown
+      msg?: unknown
+      stack?: unknown
+      url?: unknown
+      userAgent?: unknown
+      componentStack?: unknown
+      timestamp?: unknown
+      errorType?: unknown
+      browser?: unknown
+      os?: unknown
+      device?: unknown
+    }
+    let body: ErrorBody
     const contentType = request.headers.get('content-type') ?? ''
     
     try {

@@ -7,14 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import HCaptchaField from '@/components/forms/shared/HCaptchaField'
 import { useRenderPerformance } from '@/hooks/usePerformance'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
-import { HCAPTCHA_CONFIG } from '@/lib/config/hcaptcha'
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import Link from 'next/link'
-import { type FormEvent, useState, useTransition } from 'react'
-import { login } from './actions'
+import React, { type FormEvent, useState, useTransition } from 'react'
+// import { login } from './actions' // Replaced with API call
 
 const LoginPage = () => {
   useRenderPerformance('LoginPage')
@@ -22,9 +20,6 @@ const LoginPage = () => {
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
-  const [captchaError, setCaptchaError] = useState<string | null>(null)
-  const isCaptchaEnabled = !!HCAPTCHA_CONFIG.siteKey
 
   const [isPending, startTransition] = useTransition()
 
@@ -33,13 +28,6 @@ const LoginPage = () => {
     void setError('')
     void setErrorAction(null)
     void setFieldErrors({})
-    setCaptchaError(null)
-
-    // Only check captcha if it's enabled
-    if (isCaptchaEnabled && !captchaToken) {
-      setCaptchaError('Silakan selesaikan verifikasi hCaptcha')
-      return
-    }
 
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
@@ -62,17 +50,32 @@ const LoginPage = () => {
       return
     }
 
-    // Add captcha token to form data if captcha is enabled
-    if (isCaptchaEnabled && captchaToken) {
-      formData.append('hcaptcha-token', captchaToken)
-    }
-
     startTransition(async () => {
-      const result = await login(formData)
-      if (result?.error) {
-        const authError = getAuthErrorMessage(result.error)
-        void setError(authError)
-        // For now, no specific action - could be extended later
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          const authError = getAuthErrorMessage(data.error ?? 'Login failed')
+          void setError(authError)
+          void setErrorAction(null)
+          return
+        }
+
+        // Success - redirect
+        window.location.href = '/dashboard'
+      } catch (_err) {
+        void setError('Network error. Please try again.')
         void setErrorAction(null)
       }
     })
@@ -89,7 +92,7 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen mobile-min-vh flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 sm:p-6 md:p-8 relative">
+    <div className="min-h-screen mobile-min-vh flex items-center justify-center bg-background p-4 sm:p-6 md:p-8 relative">
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4">
         <ThemeToggle />
@@ -120,7 +123,7 @@ const LoginPage = () => {
                 <AlertDescription className="text-sm">
                   {error}
                   {errorAction && (
-                    <>
+                    <React.Fragment>
                       {' '}
                       <Link
                         href={errorAction.href}
@@ -128,13 +131,13 @@ const LoginPage = () => {
                       >
                         {errorAction.label}
                       </Link>
-                    </>
+                    </React.Fragment>
                   )}
                 </AlertDescription>
               </Alert>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} method="post" className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
                   Email
@@ -211,30 +214,12 @@ const LoginPage = () => {
                 )}
               </div>
 
-              {isCaptchaEnabled && (
-                <HCaptchaField
-                  sitekey={HCAPTCHA_CONFIG.siteKey}
-                  onVerify={(token) => {
-                    setCaptchaToken(token)
-                    setCaptchaError(null) // Clear any previous error
-                  }}
-                  onError={(err) => {
-                    setCaptchaError(`Verifikasi hCaptcha gagal: ${err}`)
-                    setCaptchaToken(null)
-                  }}
-                  onExpire={() => {
-                    setCaptchaError('Verifikasi hCaptcha telah kedaluwarsa')
-                    setCaptchaToken(null)
-                  }}
-                  required
-                  error={captchaError ?? undefined}
-                />
-              )}
+
 
               <Button
                 type="submit"
                 className="w-full h-11 text-base font-medium bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
-                disabled={isPending || (isCaptchaEnabled && !captchaToken)}
+                disabled={isPending}
               >
                 {isPending ? (
                   <span className="flex items-center justify-center">

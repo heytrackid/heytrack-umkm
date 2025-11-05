@@ -9,7 +9,7 @@
 
 // UI Hooks
 export { useResponsive, useMobile, useIsMobile, useMediaQuery, useScreenSize, useOrientation, useTouchDevice } from './responsive'
-// export { useSidebar } from './useSidebar'
+
 // export { useLoading } from './useLoading'
 export { useConfirm } from './useConfirm'
 export { useToast } from './use-toast'

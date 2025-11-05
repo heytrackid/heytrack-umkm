@@ -2,11 +2,12 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { GlobalExportService } from '@/lib/export/global-export'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET(_request: NextRequest) {
+async function GET(_request: NextRequest) {
   try {
     // 1. Authenticate
     const supabase = await createClient()
@@ -41,3 +42,8 @@ export async function GET(_request: NextRequest) {
     )
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+
+export { securedGET as GET }

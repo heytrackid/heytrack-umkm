@@ -6,7 +6,6 @@ export interface ComponentProps {
 
 export interface LayoutProps extends ComponentProps {
   header?: React.ReactNode;
-  sidebar?: React.ReactNode;
   footer?: React.ReactNode;
 }
 

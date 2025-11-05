@@ -46,32 +46,6 @@ export const SingleColumn = ({ children, className }: DataGridLayoutProps) => (
   </div>
 )
 
-/**
- * Sidebar and content layout
- */
-interface SidebarContentLayoutProps {
-  sidebar: ReactNode
-  content: ReactNode
-  sidebarClassName?: string
-  contentClassName?: string
-  className?: string
-}
 
-export const SidebarContentLayout = ({
-  sidebar,
-  content,
-  sidebarClassName,
-  contentClassName,
-  className
-}: SidebarContentLayoutProps) => (
-  <div className={`grid gap-6 lg:grid-cols-4 ${className ?? ''}`}>
-    <div className={`lg:col-span-1 ${sidebarClassName ?? ''}`}>
-      {sidebar}
-    </div>
-    <div className={`lg:col-span-3 ${contentClassName ?? ''}`}>
-      {content}
-    </div>
-  </div>
-)
 
 // Import React for types

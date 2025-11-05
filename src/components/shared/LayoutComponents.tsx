@@ -2,7 +2,7 @@
 
 import { Fragment, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -17,7 +17,6 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import {
-  ChevronRight,
   Menu,
   Grid,
   List,
@@ -41,7 +40,6 @@ interface PageHeaderProps {
 
 interface PageLayoutProps {
   header?: ReactNode
-  sidebar?: ReactNode
   footer?: ReactNode
   children: ReactNode
   className?: string
@@ -163,7 +161,6 @@ export const PageHeader = ({
  */
 export const PageLayout = ({
   header,
-  sidebar,
   footer,
   children,
   className = "",
@@ -187,21 +184,11 @@ export const PageLayout = ({
         </header>
       )}
 
-      <div className="flex">
-        {sidebar && (
-          <aside className="hidden lg:block w-64 border-r bg-muted/10">
-            <div className="p-4">
-              {sidebar}
-            </div>
-          </aside>
-        )}
-
-        <main className="flex-1">
-          <div className={cn("container mx-auto px-4 py-6", maxWidthClasses[maxWidth])}>
-            {children}
-          </div>
-        </main>
-      </div>
+      <main className="flex-1">
+        <div className={cn("container mx-auto px-4 py-6", maxWidthClasses[maxWidth])}>
+          {children}
+        </div>
+      </main>
 
       {footer && (
         <footer className="border-t bg-muted/10 mt-auto">
@@ -469,97 +456,7 @@ export const Container = ({
   )
 }
 
-/**
- * Sidebar Navigation Component
- */
-interface SidebarItem {
-  label: string
-  href?: string
-  icon?: ReactNode
-  badge?: string | number
-  children?: SidebarItem[]
-}
 
-interface SidebarProps {
-  items: SidebarItem[]
-  currentPath?: string
-  onItemClick?: (item: SidebarItem) => void
-  className?: string
-}
-
-export const Sidebar = ({
-  items,
-  currentPath,
-  onItemClick,
-  className = ""
-}: SidebarProps) => {
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
-
-  const toggleExpanded = (itemId: string) => {
-    const newExpanded = new Set(expandedItems)
-    if (newExpanded.has(itemId)) {
-      newExpanded.delete(itemId)
-    } else {
-      newExpanded.add(itemId)
-    }
-    void setExpandedItems(newExpanded)
-  }
-
-  const renderItem = (item: SidebarItem, depth = 0) => {
-    const hasChildren = item.children && item.children.length > 0
-    const isExpanded = expandedItems.has(item.label)
-    const isActive = currentPath === item.href
-
-    return (
-      <div key={item.label}>
-        <button
-          onClick={() => {
-            if (hasChildren) {
-              toggleExpanded(item.label)
-            } else if (item.href) {
-              // Handle navigation
-            } else if (onItemClick) {
-              onItemClick(item)
-            }
-          }}
-          className={cn(
-            "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors",
-            isActive ? "bg-primary text-primary-foreground" : "hover:bg-accent",
-            depth > 0 && "ml-4"
-          )}
-        >
-          {item.icon && <span className="w-4 h-4">{item.icon}</span>}
-          <span className="flex-1 text-left">{item.label}</span>
-          {item.badge && (
-            <Badge variant="secondary" className="text-xs">
-              {item.badge}
-            </Badge>
-          )}
-          {hasChildren && (
-            <ChevronRight
-              className={cn(
-                "w-4 h-4 transition-transform",
-                isExpanded && "rotate-90"
-              )}
-            />
-          )}
-        </button>
-
-        {hasChildren && isExpanded && (
-          <div className="mt-1">
-            {item.children?.map(child => renderItem(child, depth + 1))}
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  return (
-    <nav className={cn("space-y-1", className)}>
-      {items.map(item => renderItem(item))}
-    </nav>
-  )
-}
 
 /**
  * Mobile Navigation Component

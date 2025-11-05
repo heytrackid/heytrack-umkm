@@ -352,19 +352,19 @@ const Dashboard = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/ingredients">
-                      <Package className="h-6 w-6 text-gray-600" />
+                      <Package className="h-6 w-6 text-muted-foreground" />
                       <span className="text-sm font-medium">Bahan Baku</span>
                     </a>
                   </Button>
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/recipes">
-                      <ChefHat className="h-6 w-6 text-gray-600" />
+                      <ChefHat className="h-6 w-6 text-muted-foreground" />
                       <span className="text-sm font-medium">Resep</span>
                     </a>
                   </Button>
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/hpp">
-                      <Calculator className="h-6 w-6 text-gray-600" />
+                      <Calculator className="h-6 w-6 text-muted-foreground" />
                       <span className="text-sm font-medium">Hitung HPP</span>
                     </a>
                   </Button>
