@@ -120,7 +120,7 @@ const AIRecipeGeneratorPage = () => {
       .from('ingredients')
       .select('*')
       .order('name')
-      .returns<Row<'ingredients'>[]>()
+      .returns<Array<Row<'ingredients'>>>()
 
     if (!error && data) {
       const ingredients: AvailableIngredient[] = data.map((item) => ({
@@ -232,7 +232,7 @@ const AIRecipeGeneratorPage = () => {
       }
 
       // Save recipe ingredients
-      const recipeIngredients: Insert<'recipe_ingredients'>[] = generatedRecipe.ingredients
+      const recipeIngredients: Array<Insert<'recipe_ingredients'>> = generatedRecipe.ingredients
         .map((ing) => {
           const ingredient = availableIngredients.find(
             i => i.name.toLowerCase() === ing.name.toLowerCase()

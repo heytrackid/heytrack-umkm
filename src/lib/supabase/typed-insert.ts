@@ -1,4 +1,4 @@
-import type { Row, TablesInsert as SupabaseTablesInsert, TablesUpdate as SupabaseTablesUpdate, Database, Tables } from '@/types/database'
+import type { Database, TablesInsert as SupabaseTablesInsert, TablesUpdate as SupabaseTablesUpdate } from '@/types/database'
 
 
 /**

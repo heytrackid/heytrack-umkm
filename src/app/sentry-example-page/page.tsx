@@ -1,8 +1,8 @@
 "use client";
 
-import Head from "next/head";
 import * as Sentry from "@sentry/nextjs";
-import { useState, useEffect } from "react";
+import Head from "next/head";
+import { useEffect, useState } from "react";
 
 class SentryExampleFrontendError extends Error {
   constructor(message: string | undefined) {
@@ -11,7 +11,7 @@ class SentryExampleFrontendError extends Error {
   }
 }
 
-export default function Page() {
+const Page = () => {
   const [hasSentError, setHasSentError] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
   
@@ -40,9 +40,9 @@ export default function Page() {
         </h1>
 
         <p className="description">
-          Click the button below, and view the sample error on the Sentry <a target="_blank" href="https://heytrack.sentry.io/issues/?project=4510120402550784">Issues Page</a>.
+          Click the button below, and view the sample error on the Sentry <a target="_blank" href="https://heytrack.sentry.io/issues/?project=4510120402550784" rel="noreferrer">Issues Page</a>.
           For more details about setting up Sentry, <a target="_blank"
-           href="https://docs.sentry.io/platforms/javascript/guides/nextjs/">read our docs</a>.
+           href="https://docs.sentry.io/platforms/javascript/guides/nextjs/" rel="noreferrer">read our docs</a>.
         </p>
 
         <button
@@ -66,15 +66,17 @@ export default function Page() {
           </span>
         </button>
 
-        {hasSentError ? (
+        {hasSentError && (
           <p className="success">
             Error sent to Sentry.
           </p>
-        ) : !isConnected ? (
+        )}
+        {!hasSentError && !isConnected && (
           <div className="connectivity-error">
             <p>It looks like network requests to Sentry are being blocked, which will prevent errors from being captured. Try disabling your ad-blocker to complete the test.</p>
           </div>
-        ) : (
+        )}
+        {!hasSentError && isConnected && (
           <div className="success_placeholder" />
         )}
 
@@ -207,3 +209,5 @@ export default function Page() {
     </div>
   );
 }
+
+export default Page

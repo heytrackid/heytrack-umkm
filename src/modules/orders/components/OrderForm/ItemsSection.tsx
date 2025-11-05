@@ -17,7 +17,7 @@ import type { Row } from '@/types/database'
 
 interface ItemsSectionProps {
     orderItems: OrderItemWithRecipe[]
-    availableRecipes: Row<'recipes'>[]
+    availableRecipes: Array<Row<'recipes'>>
     fieldErrors: Record<string, string>
     subtotal: number
     onAddItem: () => void

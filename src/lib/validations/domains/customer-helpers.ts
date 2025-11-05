@@ -118,10 +118,10 @@ export class CustomerValidationHelpers {
    * Validate bulk customer import data
    */
   static validateBulkImport(customers: unknown[]): {
-    valid: Insert<'customers'>[]
+    valid: Array<Insert<'customers'>>
     invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: Insert<'customers'>[] = []
+    const valid: Array<Insert<'customers'>> = []
     const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     customers.forEach((customer, index) => {

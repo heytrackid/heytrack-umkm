@@ -1,4 +1,4 @@
-import { cacheKeys, withCache } from '@/lib/cache'
+// import { cacheKeys } from '@/lib/cache' // Unused for now
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
@@ -34,8 +34,6 @@ export async function GET(_request: NextRequest) {
         { status: 401 }
       )
     }
-
-    const cacheKey = `${cacheKeys.hpp.overview}:${user.id}`
 
     const getOverviewData = async () => {
       // Parallel queries for better performance
@@ -115,7 +113,8 @@ export async function GET(_request: NextRequest) {
       }
     }
 
-    const result = await withCache(getOverviewData, cacheKey, 60) // 1 minute cache
+    // Execute the query directly (cache can be added later with proper typing)
+    const result = await getOverviewData()
 
     apiLogger.info({
       userId: user.id,

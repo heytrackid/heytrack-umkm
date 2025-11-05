@@ -3,12 +3,12 @@
 import * as Sentry from '@sentry/nextjs'
 import { useEffect } from 'react'
 
-type GlobalErrorProps = {
+interface GlobalErrorProps {
   error: Error & { digest?: string }
   reset: () => void
 }
 
-export default function GlobalError({ error, reset }: GlobalErrorProps) {
+const GlobalError = ({ error, reset }: GlobalErrorProps) => {
   useEffect(() => {
     // Kirim error ke Sentry untuk tracking
     Sentry.captureException(error)
@@ -71,3 +71,5 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
     </html>
   )
 }
+
+export default GlobalError

@@ -1,8 +1,8 @@
-import { type NextRequest, NextResponse } from 'next/server'
+import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import { checkBotId } from 'botid/server'
-import { apiLogger } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { type NextRequest, NextResponse } from 'next/server'
+// import { withSecurity, SecurityPresets } from '@/utils/security'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 // POST /api/suppliers/import - Import suppliers from CSV

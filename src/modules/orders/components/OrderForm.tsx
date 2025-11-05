@@ -82,7 +82,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) { throw new Error('Failed to fetch recipes') }
-      const data: Row<'recipes'>[] = await response.json()
+      const data: Array<Row<'recipes'>> = await response.json()
       return data.filter(recipe => recipe.is_active)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

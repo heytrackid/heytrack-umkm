@@ -20,7 +20,7 @@ const WacEnginePage = () => {
 
   // ✅ OPTIMIZED: Use TanStack Query for caching (to be fully implemented)
   // TODO: Import and use useIngredients({ limit: 1000 })
-  const [ingredients, setIngredients] = useState<Row<'ingredients'>[]>([])
+  const [ingredients, setIngredients] = useState<Array<Row<'ingredients'>>>([])
   const [selectedIngredient, setSelectedIngredient] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [calculating, setCalculating] = useState(false)

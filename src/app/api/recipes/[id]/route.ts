@@ -122,7 +122,7 @@ export async function PUT(
           notes?: string
         }
 
-        const ingredientsToInsert: Insert<'recipe_ingredients'>[] = 
+        const ingredientsToInsert: Array<Insert<'recipe_ingredients'>> = 
           recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
             recipe_id: id,
             ingredient_id: ingredient.ingredient_id ?? ingredient.bahan_id ?? '',

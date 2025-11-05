@@ -115,7 +115,7 @@ const SuppliersPage = () => {
                                 success: true,
                                 count: result.count
                             }
-                        } catch (error) {
+                        } catch (_error) {
                             return {
                                 success: false,
                                 error: 'Terjadi kesalahan saat import'

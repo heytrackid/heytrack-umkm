@@ -1,6 +1,6 @@
-import {withSentryConfig} from '@sentry/nextjs';
-import type { NextConfig } from 'next'
-import { withBotId } from 'botid/next/config'
+import { withSentryConfig } from '@sentry/nextjs';
+import { withBotId } from 'botid/next/config';
+import type { NextConfig } from 'next';
 
 const isProd = process.env.NODE_ENV === 'production'
 const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN // contoh: app.heytrack.id
@@ -15,6 +15,10 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true'
 const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false, // aman untuk prod
+    // ⚡ PERFORMANCE: Disable type checking during build for faster builds
+    // Type checking is done separately via `npm run type-check`
+    // Set to true in CI/CD for faster builds (type-check runs separately)
+    // ignoreBuildErrors: process.env.CI === 'true',
   },
 
   compiler: {

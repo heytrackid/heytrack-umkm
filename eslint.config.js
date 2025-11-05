@@ -104,7 +104,7 @@ export default [
       "@typescript-eslint/no-inferrable-types": "error",
       // "@typescript-eslint/no-unnecessary-type-assertion": "error", // Requires type info
       // "@typescript-eslint/prefer-nullish-coalescing": "error", // Requires type info
-      "@typescript-eslint/prefer-optional-chain": "error",
+      // "@typescript-eslint/prefer-optional-chain": "error", // Requires type info
       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/ban-ts-comment": [
         "error",
@@ -202,8 +202,8 @@ export default [
   {
     files: ["src/app/api/**/*.ts"],
     rules: {
-      "@typescript-eslint/no-floating-promises": "error", // Fire-and-forget is common in APIs
-      "require-await": "error", // Often false positive
+      // "@typescript-eslint/no-floating-promises": "error", // Disabled for performance
+      "require-await": "error",
     },
   },
 

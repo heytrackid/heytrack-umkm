@@ -34,7 +34,7 @@ export async function POST() {
     }
 
     // Template operational costs (common for Indonesian culinary businesses)
-    const templates: Insert<'operational_costs'>[] = [
+    const templates: Array<Insert<'operational_costs'>> = [
       {
         user_id: user.id,
         category: 'utilities',

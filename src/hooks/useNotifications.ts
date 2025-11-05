@@ -17,7 +17,7 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFERENCES)
   const { data: ingredients } = useIngredients()
-  const [orders, setOrders] = useState<Row<'orders'>[]>([])
+  const [orders, setOrders] = useState<Array<Row<'orders'>>>([])
 
   // Load saved notifications from localStorage
   useEffect(() => {
