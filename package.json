@@ -34,7 +34,6 @@
     }
   },
   "dependencies": {
-    "@hcaptcha/react-hcaptcha": "^1.14.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -64,6 +63,7 @@
     "@tanstack/react-virtual": "^3.13.12",
     "@types/file-saver": "^2.0.7",
     "@vercel/analytics": "^1.5.0",
+    "botid": "^1.5.10",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

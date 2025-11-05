@@ -1,48 +1,52 @@
 'use client'
 
+import { AppSidebar } from '@/components/app-sidebar'
 import { Button } from '@/components/ui/button'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { Input } from '@/components/ui/input'
 import { NotificationCenter } from '@/components/ui/notification-center'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger
+} from '@/components/ui/sidebar'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useNotifications } from '@/hooks/useNotifications'
-import { useMobile } from '@/hooks/responsive'
-import { useSidebar } from '@/hooks/useSidebar'
+import { useResponsive } from '@/hooks/useResponsive'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/utils/supabase/client'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { Search, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { memo, useCallback, useEffect, useState, type ReactNode } from 'react'
-import MobileHeader from './mobile-header'
-import Sidebar from './sidebar'
+import { memo, useEffect, useState, type ReactNode } from 'react'
 
 interface AppLayoutProps {
   children: ReactNode
   pageTitle?: string
-  showMobileHeader?: boolean
 }
 
 const AppLayout = memo(({
   children,
-  pageTitle,
-  showMobileHeader = true
+  pageTitle
 }: AppLayoutProps) => {
-  const { isMobile } = useMobile()
-  const { isCollapsed } = useSidebar()
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { isMobile } = useResponsive()
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const supabase = createClient()
-  
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Notifications
   const notifications = useNotifications()
 
@@ -73,186 +77,110 @@ const AppLayout = memo(({
     return () => subscription.unsubscribe()
   }, [supabase.auth])
 
-  useEffect(() => {
-    setSidebarOpen(!isMobile)
-
-  }, [isMobile])
-
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (isMobile && mobileMenuOpen) {
-      document.body.classList.add('sidebar-open')
-    } else {
-      document.body.classList.remove('sidebar-open')
-    }
-
-    return () => {
-      document.body.classList.remove('sidebar-open')
-    }
-  }, [isMobile, mobileMenuOpen])
-
-  const toggleSidebar = () => setSidebarOpen((prev) => !prev)
-  const toggleMobileMenu = useCallback(() => {
-    setMobileMenuOpen((prev) => !prev)
-  }, [])
-
-  // Keyboard shortcuts for sidebar
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Escape to close mobile menu
-      if (e.key === 'Escape' && isMobile && mobileMenuOpen) {
-        toggleMobileMenu()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isMobile, mobileMenuOpen, toggleMobileMenu])
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
+  }
 
   return (
-    <div className={cn(
-      "flex bg-background w-full sidebar-layout overflow-hidden",
-      isMobile ? "flex-col mobile-min-vh" : "h-screen"
-    )}>
-      {/* Desktop Sidebar */}
-      {!isMobile && (
-        <Sidebar
-          isOpen={sidebarOpen}
-          onToggle={toggleSidebar}
-        />
-      )}
-
-      {/* Mobile Sidebar Overlay with backdrop blur */}
-      {isMobile && mobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
-          onClick={toggleMobileMenu}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Mobile Sidebar with slide animation */}
-      {isMobile && (
-        <div className={cn(
-          "fixed inset-y-0 left-0 z-40 w-72 bg-background shadow-2xl transition-transform duration-300 ease-out",
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        )}>
-          <Sidebar
-            isOpen={mobileMenuOpen}
-            onToggle={toggleMobileMenu}
-            isMobile
-          />
-        </div>
-      )}
-
-      {/* Mobile Header */}
-      {isMobile && showMobileHeader && (
-        <MobileHeader
-          title={pageTitle}
-          sidebarOpen={mobileMenuOpen}
-          onMenuToggle={toggleMobileMenu}
-          notification={{
-            count: 3,
-            onClick: () => uiLogger.debug('Mobile notifications clicked')
-          }}
-        />
-      )}
-
-      <div className={cn(
-        "flex flex-1 flex-col min-w-0 overflow-hidden transition-all duration-300 ease-in-out",
-        !isMobile && (isCollapsed ? "pl-20" : "pl-72")
-      )}>
-        {/* Desktop Header */}
-        {!isMobile && (
-          <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6 flex-shrink-0">
-            <div className="flex items-center space-x-4">
-              <div className="relative hidden sm:block">
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <div className="flex flex-1 items-center gap-2 px-3">
+            {isMobile && pageTitle && (
+              <h1 className="font-semibold text-lg">{pageTitle}</h1>
+            )}
+            {!isMobile && (
+              <div className="relative w-full max-w-md">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  className="w-64 pl-8"
+                  placeholder="Cari..."
+                  className="w-full pl-8"
                 />
               </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {/* Notifications */}
-              <NotificationCenter
-                notifications={notifications.notifications}
-                onMarkAsRead={notifications.markAsRead}
-                onMarkAllAsRead={notifications.markAllAsRead}
-                onClearAll={notifications.clearAll}
-              />
-              
-              <ThemeToggle />
-              {/* User Authentication */}
-              {loading && (
-                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
-              )}
-              
-              {!loading && user && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <User className="h-4 w-4 mr-2" />
-                      {user.email?.split('@')[0]}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <div className="px-2 py-1.5 text-sm font-medium">
-                      {user.email}
-                    </div>
-                    <DropdownMenuItem onClick={() => router.push('/settings')}>
-                      Pengaturan
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={async () => {
-                        await supabase.auth.signOut()
-                        void router.push('/auth/login')
-                      }}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      Keluar
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-              
-              {!loading && !user && (
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push('/auth/login')}
-                  >
-                    Masuk
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <NotificationCenter
+              notifications={notifications.notifications}
+              onMarkAsRead={notifications.markAsRead}
+              onMarkAllAsRead={notifications.markAllAsRead}
+              onClearAll={notifications.clearAll}
+            />
+            <ThemeToggle />
+            
+            {/* User Authentication */}
+            {loading && (
+              <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+            )}
+            
+            {!loading && user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <User className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">{user.email?.split('@')[0]}</span>
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => router.push('/auth/register')}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5 text-sm font-medium">
+                    {user.email}
+                  </div>
+                  <DropdownMenuItem onClick={() => router.push('/settings')}>
+                    Pengaturan
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await supabase.auth.signOut()
+                      void router.push('/auth/login')
+                    }}
+                    className="text-red-600 focus:text-red-600"
                   >
-                    Daftar
-                  </Button>
-                </div>
-              )}
-            </div>
-          </header>
-        )}
-
-        {/* Main Content */}
+                    Keluar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            
+            {!loading && !user && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push('/auth/login')}
+                >
+                  Masuk
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => router.push('/auth/register')}
+                  className="hidden sm:inline-flex"
+                >
+                  Daftar
+                </Button>
+              </div>
+            )}
+          </div>
+        </header>
         <main className={cn(
-          "flex-1 overflow-auto bg-background min-w-0",
-          isMobile ? "pt-0 p-4" : "p-6"
+          "flex-1 overflow-auto p-4 md:p-6"
         )}>
-          <div className={cn(
-            "w-full mx-auto min-w-0",
-            isMobile ? "max-w-none" : "max-w-7xl"
-          )}>
+          <div className="mx-auto max-w-7xl">
             {children}
           </div>
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 })
+
+AppLayout.displayName = 'AppLayout'
 
 export default AppLayout

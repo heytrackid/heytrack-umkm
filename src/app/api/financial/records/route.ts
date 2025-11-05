@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { safeNumber, getErrorMessage } from '@/lib/type-guards'
+import { checkBotId } from 'botid/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -23,6 +24,12 @@ export async function POST(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       )
+    }
+
+    // Check if the request is from a bot
+    const verification = await checkBotId()
+    if (verification.isBot) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
     const body = await request.json()

@@ -1,14 +1,10 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { useCurrency } from '@/hooks/useCurrency'
-import { Calculator, TrendingUp, TrendingDown, AlertTriangle, Sparkles } from 'lucide-react'
-import { useState } from 'react'
-import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
 import {
     Select,
     SelectContent,
@@ -16,6 +12,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { useCurrency } from '@/hooks/useCurrency'
+import { AlertTriangle, Calculator, Sparkles, TrendingDown, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
+import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
 
 interface Scenario {
     id: string

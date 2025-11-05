@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database, FinancialRecordsInsert, FinancialRecordsUpdate, OrdersInsert } from '@/types/database'
+import { checkBotId } from 'botid/server'
 type OrderStatus = Database['public']['Enums']['order_status']
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
@@ -46,30 +47,16 @@ const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: 
     // Batch query for count and data in single operation
     let query = supabase
       .from('orders')
-      .select(`
-        ${ORDER_FIELDS.DETAIL},
-        order_items (
-          id,
-          quantity,
-          unit_price,
-          total_price,
-          product_name,
-          special_requests,
-          recipe_id,
-          recipes!inner (
-            id,
-            name,
-            image_url
-          )
-        )
-      `, { count: 'exact' })
+      .select(ORDER_FIELDS.DETAIL, { count: 'exact' })
       .eq('user_id', user_id)
 
     if (search) {
       query = query.or(`order_no.ilike.%${search}%,customer_name.ilike.%${search}%`)
     }
 
-    query = query.eq('status', (status ?? 'PENDING') as OrderStatus)
+    if (status) {
+      query = query.eq('status', status as OrderStatus)
+    }
 
     const { data, error, count } = await query
       .order(sort_by ?? 'created_at', { ascending: sort_order === 'asc' })
@@ -158,6 +145,12 @@ async function POST(request: NextRequest) {
     if (authError || !user) {
       logError(apiLogger, authError, 'POST /api/orders - Unauthorized')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if the request is from a bot
+    const verification = await checkBotId()
+    if (verification.isBot) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
     const body = await request.json()

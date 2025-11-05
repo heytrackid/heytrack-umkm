@@ -28,7 +28,6 @@ export {
   Section,
   DataView,
   Container,
-  Sidebar,
   MobileNav
 } from './LayoutComponents'
 

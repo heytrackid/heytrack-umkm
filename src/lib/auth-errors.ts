@@ -29,7 +29,6 @@ export const AUTH_ERROR_MESSAGES = {
   'email_locked': 'Akun Anda sedang dikunci karena aktivitas mencurigakan. Silakan coba beberapa saat lagi.',
   
   // Network and connection errors
-  'Network request failed': 'Koneksi jaringan gagal. Silakan coba lagi.',
   'Connection timeout': 'Waktu koneksi habis. Silakan coba lagi.',
   'Request timeout': 'Permintaan habis waktu. Silakan coba lagi.',
   'Network connection lost': 'Koneksi jaringan terputus. Silakan coba lagi.',
@@ -65,9 +64,7 @@ export const AUTH_ERROR_MESSAGES = {
   'Server error': 'Terjadi kesalahan server. Silakan coba lagi nanti.',
   'Internal server error': 'Terjadi kesalahan internal. Silakan coba lagi nanti.',
 
-  // Captcha errors
-  'captcha verification failed': 'Verifikasi captcha gagal. Silakan coba lagi.',
-  'invalid captcha token': 'Token captcha tidak valid. Silakan coba lagi.',
+
 } as const
 
 // ============================================================================
@@ -111,23 +108,29 @@ export function getAuthErrorMessage(error: string | Error | { message?: string }
   // Additional specific checks for common patterns that might be missed
   if (errorMessage.toLowerCase().includes('invalid identifier or password')) {
     return 'Email atau password salah. Silakan coba lagi.'
-  } else if (errorMessage.toLowerCase().includes('email not confirmed')) {
+  }
+  if (errorMessage.toLowerCase().includes('email not confirmed')) {
     return 'Email belum dikonfirmasi. Silakan periksa inbox Anda untuk email konfirmasi.'
-  } else if (errorMessage.toLowerCase().includes('rate limit exceeded')) {
+  }
+  if (errorMessage.toLowerCase().includes('rate limit exceeded')) {
     return 'Terlalu banyak percobaan login. Silakan coba lagi nanti.'
-  } else if (errorMessage.toLowerCase().includes('network')) {
+  }
+  if (errorMessage.toLowerCase().includes('network')) {
     return 'Koneksi jaringan gagal. Silakan periksa koneksi internet Anda.'
-  } else if (errorMessage.toLowerCase().includes('user not found')) {
+  }
+  if (errorMessage.toLowerCase().includes('user not found')) {
     return 'Akun dengan email tersebut tidak ditemukan.'
-  } else if (errorMessage.toLowerCase().includes('invalid session')) {
+  }
+  if (errorMessage.toLowerCase().includes('invalid session')) {
     return 'Sesi tidak valid. Silakan login kembali.'
-  } else if (errorMessage.toLowerCase().includes('jwt')) {
+  }
+  if (errorMessage.toLowerCase().includes('jwt')) {
     return 'Terjadi kesalahan pada sesi otentikasi. Silakan login kembali.'
   }
 
   // Log the unknown error for debugging
   authLogger.warn({ 
-    originalError: typeof error === 'string' ? error : error?.message || 'Unknown auth error',
+    originalError: typeof error === 'string' ? error : error?.message ?? 'Unknown auth error',
     errorType: typeof error
   }, 'Unknown authentication error received')
   

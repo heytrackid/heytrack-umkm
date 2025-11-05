@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
+import { checkBotId } from 'botid/server'
 import type { OperationalCostsInsert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
@@ -20,6 +21,16 @@ export async function POST() {
     
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if the request is from a bot
+    const verification = await checkBotId({
+      advancedOptions: {
+        checkLevel: 'basic',
+      },
+    })
+    if (verification.isBot) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
     // Template operational costs (common for Indonesian culinary businesses)

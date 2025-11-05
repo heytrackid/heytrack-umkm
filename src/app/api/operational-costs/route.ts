@@ -1,9 +1,10 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
-import type { ExpensesTable, ExpensesInsert } from '@/types/database'
+import type { ExpensesInsert } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
+import { checkBotId } from 'botid/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -32,112 +33,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { searchParams } = new URL(request.url)
-    const startDate = searchParams.get('start_date')
-    const endDate = searchParams.get('end_date')
-
-    // Query expenses table (operational costs)
-    let query = supabase
-      .from('expenses')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('expense_date', { ascending: false })
-
-    if (startDate) {
-      query = query.gte('expense_date', startDate)
-    }
-    if (endDate) {
-      query = query.lte('expense_date', endDate)
-    }
-
-    const { data, error } = await query
-
-    if (error) {
-      apiLogger.error({ error }, 'Error fetching operational costs:')
-      return NextResponse.json(
-        { error: 'Failed to fetch operational costs' },
-        { status: 500 }
-      )
-    }
-
-    interface CostSummary {
-      id: string
-      name: string
-      category: string
-      subcategory: string | null
-      amount: number
-      frequency: string
-      description: string
-      isFixed: boolean
-      expense_date: string | null
-      supplier: string | null
-      payment_method: string | null
-      status: string | null
-      receipt_number: string | null
-      created_at: string | null
-      updated_at: string | null
-    }
-
-    // Transform to match frontend interface
-    const costs: CostSummary[] = data?.map((expense: ExpensesTable) => ({
-      id: expense.id,
-      name: expense.description,
-      category: expense.category,
-      subcategory: expense.subcategory ?? null,
-      amount: Number(expense.amount),
-      frequency: expense.recurring_frequency ?? 'monthly',
-      description: expense.description,
-      isFixed: expense.is_recurring ?? false,
-      expense_date: expense.expense_date ?? null,
-      supplier: expense.supplier ?? null,
-      payment_method: expense.payment_method ?? null,
-      status: expense.status ?? null,
-      receipt_number: expense.receipt_number ?? null,
-      created_at: expense.created_at ?? null,
-      updated_at: expense.updated_at ?? null
-    })) || []
-
-    return NextResponse.json({
-      costs,
-      total: costs.length,
-      summary: {
-        total_amount: costs.reduce((sum: number, c: CostSummary) => sum + c.amount, 0),
-        total_monthly: costs
-          .filter((c: CostSummary) => c.frequency === 'monthly')
-          .reduce((sum: number, c: CostSummary) => sum + c.amount, 0),
-        fixed_costs: costs.filter((c: CostSummary) => c.isFixed).length,
-        variable_costs: costs.filter((c: CostSummary) => !c.isFixed).length
-      }
+    // Check if the request is from a bot
+    const verification = await checkBotId({
+      advancedOptions: {
+        checkLevel: 'basic',
+      },
     })
-
-  } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in GET /api/operational-costs:')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
-  }
-}
-
-/**
- * POST /api/operational-costs
- * 
- * Create a new operational cost (expense record)
- */
-export async function POST(request: NextRequest) {
-  try {
-    // Create authenticated Supabase client
-    const supabase = await createClient()
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    if (verification.isBot) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
     const body = await request.json()

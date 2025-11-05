@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
+import { checkBotId } from 'botid/server'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { SuppliersInsert } from '@/types/database'
@@ -93,7 +94,17 @@ export async function POST(request: Request) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    
+
+    // Check if the request is from a bot
+    const verification = await checkBotId({
+      advancedOptions: {
+        checkLevel: 'basic',
+      },
+    })
+    if (verification.isBot) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    }
+
     const body = await request.json()
 
     // Validate request body

@@ -162,23 +162,7 @@ const navigationItems = [
   }
 ]
 
-// Smart Sidebar Navigation
-export const SmartSidebar = () => (
-  <nav className="space-y-2">
-    {navigationItems.map((item) => (
-      <SmartLink
-        key={item.href}
-        href={item.href}
-        className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-        activeClassName="bg-accent text-accent-foreground"
-        preloadDelay={50} // Fast preload for sidebar
-      >
-        <item.icon className="h-4 w-4" />
-        <span>{item.title}</span>
-      </SmartLink>
-    ))}
-  </nav>
-)
+
 
 // Smart Mobile Bottom Navigation
 export const SmartBottomNav = () => {

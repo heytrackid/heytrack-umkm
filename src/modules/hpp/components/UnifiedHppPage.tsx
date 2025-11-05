@@ -1,19 +1,19 @@
 'use client'
 
-import { useState, useEffect, useCallback, memo } from 'react'
-import { TooltipProvider } from '@/components/ui/tooltip'
+import { Card, CardContent } from '@/components/ui/card'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { BarChart3, Calculator, TrendingUp } from 'lucide-react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import { useUnifiedHpp } from '../hooks/useUnifiedHpp'
-import { HppOverviewCard } from './HppOverviewCard'
-import { RecipeSelector } from './RecipeSelector'
-import { HppEmptyState } from './HppEmptyState'
 import { CostCalculationCard } from './CostCalculationCard'
+import { HppBreakdownVisual } from './HppBreakdownVisual'
+import { HppEmptyState } from './HppEmptyState'
+import { HppOverviewCard } from './HppOverviewCard'
+import { HppScenarioPlanner } from './HppScenarioPlanner'
 import { PricingCalculatorCard } from './PricingCalculatorCard'
 import { ProductComparisonCard } from './ProductComparisonCard'
-import { HppBreakdownVisual } from './HppBreakdownVisual'
-import { HppScenarioPlanner } from './HppScenarioPlanner'
-import { Card, CardContent } from '@/components/ui/card'
-import {Calculator, TrendingUp, BarChart3 } from 'lucide-react'
+import { RecipeSelector } from './RecipeSelector'
 
 
 

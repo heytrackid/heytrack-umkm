@@ -12,9 +12,6 @@ importers:
 
   .:
     dependencies:
-      '@hcaptcha/react-hcaptcha':
-        specifier: ^1.14.0
-        version: 1.14.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.66.0(react@18.3.1))
@@ -102,6 +99,9 @@ importers:
       '@vercel/analytics':
         specifier: ^1.5.0
         version: 1.5.0(next@16.0.1(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      botid:
+        specifier: ^1.5.10
+        version: 1.5.10(next@16.0.1(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -580,15 +580,6 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
-
-  '@hcaptcha/loader@2.2.0':
-    resolution: {integrity: sha512-LAd0XRt1Mu0hLpUpWAx5OS9FS0d6V+V0aCSYUKFAz0a6tTDHeAuwm5iO81mp2HIEhXFOSSB8AwCCOU9zq695lg==}
-
-  '@hcaptcha/react-hcaptcha@1.14.0':
-    resolution: {integrity: sha512-XHFhmRjw4L6spgRfTEUj/uW4cN4iWTp7BxLHyheF5zEle6g65fIHUCmqKMrIA/6OKLzBSElUKyc1IuDU+V8RaQ==}
-    peerDependencies:
-      react: ^18.3.1
-      react-dom: ^18.3.1
 
   '@hookform/resolvers@5.2.2':
     resolution: {integrity: sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==}
@@ -2140,6 +2131,17 @@ packages:
 
   bluebird@3.4.7:
     resolution: {integrity: sha512-iD3898SR7sWVRHbiQv+sHUtHnMvC1o3nW5rAcqnq3uOn07DSAppZYUkIGslDz6gXC7HfunPe7YVBgoEJASPcHA==}
+
+  botid@1.5.10:
+    resolution: {integrity: sha512-hhgty1u0CxozqTqLbTQMtYBwmWdzWZTAsBCvN7/qhkN3fM7MlXacmmcMoyc0f+vV+U6RRoLYdlo32td+PhJyew==}
+    peerDependencies:
+      next: '*'
+      react: ^18.3.1
+    peerDependenciesMeta:
+      next:
+        optional: true
+      react:
+        optional: true
 
   brace-expansion@1.1.12:
     resolution: {integrity: sha512-9T9UjW3r0UW5c1Q7GTwllptXwhvYmEzFhzMfZ9H7FQWt+uZePjZPjBP/W1ZEyZ1twGWom5/56TF4lPcqjnDHcg==}
@@ -4663,15 +4665,6 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@hcaptcha/loader@2.2.0': {}
-
-  '@hcaptcha/react-hcaptcha@1.14.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@babel/runtime': 7.28.4
-      '@hcaptcha/loader': 2.2.0
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
   '@hookform/resolvers@5.2.2(react-hook-form@7.66.0(react@18.3.1))':
     dependencies:
       '@standard-schema/utils': 0.3.0
@@ -6178,6 +6171,11 @@ snapshots:
       readable-stream: 3.6.2
 
   bluebird@3.4.7: {}
+
+  botid@1.5.10(next@16.0.1(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+    optionalDependencies:
+      next: 16.0.1(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react: 18.3.1
 
   brace-expansion@1.1.12:
     dependencies:

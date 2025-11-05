@@ -7,7 +7,7 @@ import { QuickActionsSkeleton, StatsCardSkeleton } from '@/components/ui/skeleto
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { createClientLogger } from '@/lib/client-logger'
-import { AlertTriangle, BarChart3, Calculator, DollarSign, Target, TrendingDown, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Calculator, DollarSign, Target, TrendingDown, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -205,13 +205,9 @@ const HppDashboardWidget = () => {
 
         {/* Quick Actions */}
         <div className="flex gap-2 pt-2">
-          <Button size="sm" className="flex-1" onClick={() => router.push('/hpp/calculator')}>
+          <Button size="sm" className="w-full" onClick={() => router.push('/hpp/calculator')}>
             <Calculator className="h-4 w-4 mr-2" />
             Calculate HPP
-          </Button>
-          <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push('/hpp/snapshots')}>
-            <BarChart3 className="h-4 w-4 mr-2" />
-            View Trends
           </Button>
         </div>
       </CardContent>
