@@ -2,16 +2,16 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
-import type { OrderStatus, CustomersInsert, OrdersInsert, OrderItemsInsert } from '@/types/database'
+import type { Insert, OrderStatus } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { checkBotId } from 'botid/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type CustomerInsert = CustomersInsert
-type OrderInsert = OrdersInsert
-type OrderItemInsert = Omit<OrderItemsInsert, 'order_id'>
+type CustomerInsert = Insert<'customers'>
+type OrderInsert = Insert<'orders'>
+type OrderItemInsert = Omit<Insert<'order_items'>, 'order_id'>
 
 const sanitizeOptionalString = (value?: string | null) => {
   const trimmed = value?.trim()

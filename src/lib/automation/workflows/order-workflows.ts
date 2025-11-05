@@ -1,20 +1,7 @@
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type {
-
-  Database,
-  CustomersTable,
-  OrdersTable,
-  OrderItemsTable,
-  RecipesTable,
-  RecipeIngredientsTable,
-  IngredientsTable,
-  StockTransactionsInsert,
-  FinancialRecordsInsert,
-  IngredientsUpdate,
-  CustomersUpdate
-} from '@/types/database'
+import type { Row, Insert, Update, Database } from '@/types/database'
 import type { WorkflowContext, WorkflowResult } from '@/types/features/automation'
 
 /**
@@ -29,16 +16,16 @@ const triggerWorkflow = (_workflow: string, _context: unknown) => {
   automationLogger.warn('triggerWorkflow stub called')
 }
 
-type CustomerRow = CustomersTable
-type OrderRow = OrdersTable
-type OrderItemRow = OrderItemsTable
-type RecipeRow = RecipesTable
-type RecipeIngredientRow = RecipeIngredientsTable
-type IngredientRow = IngredientsTable
-type StockTransactionInsert = StockTransactionsInsert
-type FinancialRecordInsert = FinancialRecordsInsert
-type _IngredientUpdate = IngredientsUpdate
-type CustomerUpdate = CustomersUpdate
+type CustomerRow = Row<'customers'>
+type OrderRow = Row<'orders'>
+type OrderItemRow = Row<'order_items'>
+type RecipeRow = Row<'recipes'>
+type RecipeIngredientRow = Row<'recipe_ingredients'>
+type IngredientRow = Row<'ingredients'>
+type StockTransactionInsert = Insert<'stock_transactions'>
+type FinancialRecordInsert = Insert<'financial_records'>
+type _IngredientUpdate = Update<'ingredients'>
+type CustomerUpdate = Update<'customers'>
 
 type RecipeIngredientWithIngredient = RecipeIngredientRow & {
   ingredient: IngredientRow | null

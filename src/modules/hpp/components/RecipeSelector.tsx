@@ -1,13 +1,13 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Package } from 'lucide-react'
 
 
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 interface RecipeSelectorProps {
     recipes: Array<Pick<Recipe, 'id' | 'name'>>

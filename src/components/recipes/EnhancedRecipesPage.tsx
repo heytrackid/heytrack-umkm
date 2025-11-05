@@ -18,7 +18,7 @@ import { useRecipes } from '@/hooks/supabase/entities'
 import { useSupabaseCRUD } from '@/hooks/supabase'
 import { usePagination } from '@/hooks/usePagination'
 import { SimplePagination } from '@/components/ui/simple-pagination'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 // import { useSettings } from '@/contexts/settings-context'
@@ -65,7 +65,7 @@ import { undoableToast } from '@/components/ui/enhanced-toast'
 
 // Types
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 type CategoryFilter = 'all' | 'bread' | 'pastry' | 'cake' | 'cookie' | 'other'
 type DifficultyFilter = 'all' | 'easy' | 'medium' | 'hard'
 

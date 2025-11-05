@@ -46,7 +46,9 @@ export function useDashboardSchedule() {
   return useQuery({
     queryKey: ['dashboard-schedule'],
     queryFn: async () => {
-      const response = await fetch('/api/dashboard/production-schedule')
+      const response = await fetch('/api/dashboard/production-schedule', {
+        credentials: 'include', // Include cookies for authentication
+      })
       
       if (!response.ok) {
         throw new Error('Failed to fetch dashboard schedule')

@@ -1,4 +1,4 @@
-import type { RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 /**
@@ -7,8 +7,8 @@ import type { RecipeIngredientsTable, IngredientsTable } from '@/types/database'
  */
 
 
-type RecipeIngredient = RecipeIngredientsTable
-type Ingredient = IngredientsTable
+type RecipeIngredient = Row<'recipe_ingredients'>
+type Ingredient = Row<'ingredients'>
 
 /**
  * Worker input type based on generated types

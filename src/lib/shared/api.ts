@@ -272,6 +272,7 @@ export const apiRequest = <T>(
         ...options,
         headers,
         signal: controller.signal,
+        credentials: 'include', // Include cookies for authentication
       })
 
       clearTimeout(timeoutId)

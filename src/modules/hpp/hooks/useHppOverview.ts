@@ -1,8 +1,8 @@
 'use client'
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 const logger = createClientLogger('ClientFile')
 
@@ -43,7 +43,9 @@ export function useHppOverview() {
   const query = useQuery<HppOverviewData>({
     queryKey: ['hpp-overview'],
     queryFn: async () => {
-      const response = await fetch('/api/hpp/overview')
+      const response = await fetch('/api/hpp/overview', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch HPP overview')
       }
@@ -56,7 +58,8 @@ export function useHppOverview() {
   const markAlertAsRead = useMutation({
     mutationFn: async (alertId: string) => {
       const response = await fetch(`/api/hpp/alerts/${alertId}/read`, {
-        method: 'PUT'
+        method: 'PUT',
+        credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {
         throw new Error('Failed to mark alert as read')
@@ -103,7 +106,8 @@ export function useHppOverview() {
   const markAllAlertsAsRead = useMutation({
     mutationFn: async () => {
       const response = await fetch('/api/hpp/alerts/bulk-read', {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {
         throw new Error('Failed to mark all alerts as read')

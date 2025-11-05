@@ -5,7 +5,7 @@ import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, C
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useRouter } from 'next/navigation'
-import type { IngredientsTable, OrdersTable, CustomersTable, RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import {
   BarChart3,
   BookOpen,
@@ -17,10 +17,10 @@ import {
 } from 'lucide-react'
 
 // Extended types for search display
-type IngredientItem = Pick<IngredientsTable, 'id' | 'name' | 'current_stock' | 'unit'>
-type OrderItem = Pick<OrdersTable, 'id' | 'order_no' | 'customer_name'>
-type CustomerItem = Pick<CustomersTable, 'id' | 'name' | 'email' | 'phone'>
-type RecipeItem = Pick<RecipesTable, 'id' | 'name'>
+type IngredientItem = Pick<Row<'ingredients'>, 'id' | 'name' | 'current_stock' | 'unit'>
+type OrderItem = Pick<Row<'orders'>, 'id' | 'order_no' | 'customer_name'>
+type CustomerItem = Pick<Row<'customers'>, 'id' | 'name' | 'email' | 'phone'>
+type RecipeItem = Pick<Row<'recipes'>, 'id' | 'name'>
 
 interface QuickAction {
   label: string

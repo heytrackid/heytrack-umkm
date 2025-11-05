@@ -4,7 +4,7 @@ import { FinancialRecordInsertSchema } from '@/lib/validations/domains/finance'
 import { safeParseAmount, safeString } from '@/lib/api-helpers'
 import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/domains/common'
-import type { FinancialRecordsInsert, NotificationsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 import { formatCurrency } from '@/lib/currency'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage } from '@/lib/type-guards'
@@ -200,7 +200,7 @@ async function POST(request: NextRequest) {
 
     const validatedData = validation.data
 
-    const insertPayload: FinancialRecordsInsert = {
+    const insertPayload: Insert<'financial_records'> = {
       ...validatedData,
       user_id: user.id,
       description: validatedData.description ?? '',
@@ -218,7 +218,7 @@ async function POST(request: NextRequest) {
     // Create notification for large expenses
     const expenseAmount = safeParseAmount(validatedData.amount)
     if (expenseAmount > 1000000 && expense) { // More than 1M IDR
-      const notificationPayload: NotificationsInsert = {
+      const notificationPayload: Insert<'notifications'> = {
         user_id: expense.user_id,
         type: 'warning',
         category: 'finance',

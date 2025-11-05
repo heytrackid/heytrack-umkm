@@ -9,7 +9,7 @@ import { ORDER_CONFIG } from '@/modules/orders/constants'
 import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
 import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
 import { warningToast } from '@/hooks/use-toast'
-import type { RecipesTable, CustomersTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import dynamic from 'next/dynamic'
 
 
@@ -41,7 +41,7 @@ const PaymentSection = dynamic(() => import('./PaymentSection').then(mod => ({ d
     ssr: false
 })
 
-type Customer = CustomersTable
+type Customer = Row<'customers'>
 
 interface FormState {
     customer_name: string
@@ -94,9 +94,11 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     const { data: recipesData = [] } = useQuery({
         queryKey: ['recipes', 'active'],
         queryFn: async () => {
-            const response = await fetch('/api/recipes')
+            const response = await fetch('/api/recipes', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (!response.ok) { throw new Error('Failed to fetch recipes') }
-            const data: RecipesTable[] = await response.json()
+            const data: Row<'recipes'>[] = await response.json()
             return data.filter(recipe => recipe.is_active)
         },
         staleTime: 5 * 60 * 1000,
@@ -106,7 +108,9 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     const { data: customersData = [] } = useQuery({
         queryKey: ['customers', 'all'],
         queryFn: async () => {
-            const response = await fetch('/api/customers')
+            const response = await fetch('/api/customers', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (!response.ok) { throw new Error('Failed to fetch customers') }
             return response.json() as Promise<Customer[]>
         },

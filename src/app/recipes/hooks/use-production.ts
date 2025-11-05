@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks'
 import { PRODUCTION_CONFIG } from '@/app/recipes/config/production.config'
 import { formatCurrency, DEFAULT_CURRENCY, currencies, type Currency } from '@/lib/currency'
-import type { ProductionBatchesTable, AppSettingsTable, StockTransactionsTable, NotificationsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import type {
   ProductionBatch,
   CreateBatchData,
@@ -41,7 +41,7 @@ export function useProductionBatches(filters?: ProductionFilters) {
   // Filter batches based on criteria
   const filteredBatches = useMemo((): ProductionBatch[] | undefined => {
     // Cast data to proper Supabase table type
-    const productionBatches = batchesData as ProductionBatchesTable[] | undefined
+    const productionBatches = batchesData as Row<'production_batches'>[] | undefined
 
     // Transform to the ProductionBatch type with required fields
     const castBatches = productionBatches?.map(batch => ({
@@ -190,7 +190,7 @@ export function useQualityChecks(batchId: string) {
   } = useSupabaseCRUD('app_settings')
 
   // Transform to expected type
-  const checks = (checksData as AppSettingsTable[] | undefined)?.map(setting => ({
+  const checks = (checksData as Row<'app_settings'>[] | undefined)?.map(setting => ({
     id: setting.id,
     batch_id: setting.user_id,
     check_point: 'final', // Placeholder
@@ -243,7 +243,7 @@ export function useProductionEquipment(filters?: { type?: string; status?: strin
   } = useSupabaseCRUD('app_settings')
 
   // Transform to expected type
-  const equipment = (equipmentData as AppSettingsTable[] | undefined)?.map(setting => ({
+  const equipment = (equipmentData as Row<'app_settings'>[] | undefined)?.map(setting => ({
     id: setting.id,
     name: setting.id, // Using id as name
     type: 'oven', // Placeholder
@@ -296,7 +296,7 @@ export function useProductionStaff(filters?: { role?: string; active?: boolean }
   } = useSupabaseCRUD('app_settings')
 
   // Transform to expected type
-  const staff = (staffData as AppSettingsTable[] | undefined)?.map(setting => ({
+  const staff = (staffData as Row<'app_settings'>[] | undefined)?.map(setting => ({
     id: setting.id,
     name: setting.id, // Using id as name
     role: 'operator', // Placeholder
@@ -339,7 +339,7 @@ export function useIngredientAllocations(batchId: string) {
   } = useSupabaseCRUD('stock_transactions')
 
   // Transform to expected type
-  const allocations = (allocationsData as StockTransactionsTable[] | undefined)?.map(transaction => ({
+  const allocations = (allocationsData as Row<'stock_transactions'>[] | undefined)?.map(transaction => ({
     id: transaction.id,
     batch_id: transaction.ingredient_id, // Using ingredient_id as batch_id
     ingredient_id: transaction.ingredient_id,
@@ -642,13 +642,13 @@ export function useProductionNotifications() {
     }
   }
 
-  const unreadCount = (notificationsData as NotificationsTable[] | undefined)?.filter((n) => {
+  const unreadCount = (notificationsData as Row<'notifications'>[] | undefined)?.filter((n) => {
     const notif = n
     return !notif.is_read
   }).length ?? 0
 
   // Transform to expected format
-  const notifications = (notificationsData as NotificationsTable[] | undefined)?.map(notification => ({
+  const notifications = (notificationsData as Row<'notifications'>[] | undefined)?.map(notification => ({
     id: notification.id,
     title: notification.title,
     message: notification.message,
@@ -697,7 +697,7 @@ export function useTemperatureMonitoring(batchId: string) {
   }
 
   // Transform to expected type
-  const temperatureLogs = (logsData as AppSettingsTable[] | undefined)?.map(setting => ({
+  const temperatureLogs = (logsData as Row<'app_settings'>[] | undefined)?.map(setting => ({
     id: setting.id,
     batch_id: batchId, // Use the passed batchId
     stage: setting.settings_data && typeof setting.settings_data === 'object' && 'stage' in setting.settings_data 

@@ -2,14 +2,14 @@
 
 import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import type { RecipesTable, CustomersTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isArrayOf, isRecipe, isCustomer } from '@/lib/type-guards'
 
 
 
-type Recipe = RecipesTable
-type Customer = CustomersTable
+type Recipe = Row<'recipes'>
+type Customer = Row<'customers'>
 
 export interface OrderItem {
   id?: string
@@ -81,7 +81,9 @@ export const useOrderLogic = () => {
 
   const fetchRecipes = async () => {
     try {
-      const response = await fetch('/api/recipes')
+      const response = await fetch('/api/recipes', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (response.ok) {
         const data = await response.json()
         // Validate with type guards
@@ -109,7 +111,9 @@ export const useOrderLogic = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch('/api/customers')
+      const response = await fetch('/api/customers', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (response.ok) {
         const data = await response.json()
         // Validate with type guards
@@ -329,7 +333,8 @@ export const useOrderLogic = () => {
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
+        body: JSON.stringify(orderData),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {

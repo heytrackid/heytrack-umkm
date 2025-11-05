@@ -1,12 +1,12 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Calculator, TrendingUp, Bell, CheckCircle, History, BarChart3, FileSpreadsheet } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
+import { BarChart3, Bell, Calculator, CheckCircle, FileSpreadsheet, History, TrendingUp } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 
 
@@ -28,7 +28,8 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
     const handleCalculateAll = async () => {
         try {
             const response = await fetch('/api/hpp/calculate', {
-                method: 'PUT'
+                method: 'PUT',
+                credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
                 toast({

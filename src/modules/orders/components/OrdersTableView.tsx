@@ -36,7 +36,9 @@ export const OrdersTableView = () => {
   const { data: orders = [], isLoading: loading } = useQuery<Order[]>({
     queryKey: ['orders', 'table'],
     queryFn: async () => {
-      const response = await fetch('/api/orders')
+      const response = await fetch('/api/orders', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         const errorText = await response.text()
         throw new Error(`Failed to fetch orders: ${errorText}`)
@@ -73,7 +75,8 @@ export const OrdersTableView = () => {
   const deleteMutation = useMutation({
     mutationFn: async (orderId: string) => {
       const response = await fetch(`/api/orders/${orderId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {
         const errorText = await response.text()
@@ -101,7 +104,8 @@ export const OrdersTableView = () => {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus }),
+        credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {
         const errorText = await response.text()

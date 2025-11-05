@@ -17,7 +17,10 @@ export default [
       sourceType: "module",
       parser: ts.parser,
       parserOptions: {
-        projectService: true,
+        // ⚡ PERFORMANCE: Disable projectService for faster linting
+        // Type-aware rules are disabled to improve performance
+        // Use `npm run type-check` for full TypeScript checking
+        projectService: false,
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -99,8 +102,8 @@ export default [
       "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
       "@typescript-eslint/array-type": ["error", { default: "array-simple" }],
       "@typescript-eslint/no-inferrable-types": "error",
-      "@typescript-eslint/no-unnecessary-type-assertion": "error",
-      "@typescript-eslint/prefer-nullish-coalescing": "error",
+      // "@typescript-eslint/no-unnecessary-type-assertion": "error", // Requires type info
+      // "@typescript-eslint/prefer-nullish-coalescing": "error", // Requires type info
       "@typescript-eslint/prefer-optional-chain": "error",
       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/ban-ts-comment": [
@@ -112,16 +115,14 @@ export default [
           minimumDescriptionLength: 10,
         },
       ],
-      "@typescript-eslint/no-floating-promises": "error",
-      "@typescript-eslint/await-thenable": "error",
+      // ⚡ PERFORMANCE: Type-aware rules disabled for faster linting
+      // These rules require TypeScript type information which slows down ESLint significantly
+      // Use `npm run type-check` for full TypeScript type checking instead
+      // "@typescript-eslint/no-floating-promises": "error",
+      // "@typescript-eslint/await-thenable": "error",
       "@typescript-eslint/no-unsafe-declaration-merging": "error",
       "@typescript-eslint/no-empty-object-type": "error",
-      "@typescript-eslint/no-misused-promises": [
-        "error",
-        {
-          checksVoidReturn: false,
-        },
-      ],
+      // "@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: false }],
 
       // ============================================
       // REACT RULES

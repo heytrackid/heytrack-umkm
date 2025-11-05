@@ -3,11 +3,11 @@ import { apiLogger } from '@/lib/logger'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
-import type { IngredientsTable, RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 // Use generated types from database.ts (these are already Row types)
-type Ingredient = IngredientsTable
-type _Recipe = RecipesTable
+type Ingredient = Row<'ingredients'>
+type _Recipe = Row<'recipes'>
 
 // AI response structure (not a table type)
 interface RecipeIngredient {
@@ -409,7 +409,7 @@ async function callAIService(prompt: string): Promise<string> {
                 'X-Title': 'HeyTrack AI Recipe Generator'
             },
             body: JSON.stringify({
-                model: 'meta-llama/llama-3.3-8b-instruct:free',
+                model: 'x-ai/grok-4-fast',
                 messages: [
                     {
                         role: 'system',
@@ -460,7 +460,7 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
                     'X-Title': 'HeyTrack AI Recipe Generator'
                 },
                 body: JSON.stringify({
-                    model: 'meta-llama/llama-3.3-8b-instruct:free',
+                    model: 'x-ai/grok-4-fast',
                     messages: [
                         {
                             role: 'system',

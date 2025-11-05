@@ -43,7 +43,9 @@ const IngredientPurchasesLayout = () => {
   // TODO: Replace with useIngredientPurchases() hook
   const fetchPurchases = async () => {
     try {
-      const response = await fetch('/api/ingredient-purchases')
+      const response = await fetch('/api/ingredient-purchases', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (response.ok) {
         const data = await response.json()
         void setPurchases(data)
@@ -56,7 +58,9 @@ const IngredientPurchasesLayout = () => {
   // TODO: Replace with useIngredients() hook
   const fetchIngredients = async () => {
     try {
-      const response = await fetch('/api/ingredients')
+      const response = await fetch('/api/ingredients', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (response.ok) {
         const data = await response.json()
         void setIngredients(data.ingredients ?? [])
@@ -82,7 +86,8 @@ const IngredientPurchasesLayout = () => {
       body: JSON.stringify({
         ...formData,
         total_price: totalPrice
-      })
+      }),
+      credentials: 'include', // Include cookies for authentication
     })
 
     if (!response.ok) {

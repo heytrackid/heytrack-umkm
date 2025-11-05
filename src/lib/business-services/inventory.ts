@@ -1,5 +1,5 @@
 import type { ReorderSummary } from './types'
-import type {IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { inventoryLogger } from '@/lib/logger'
 
 
@@ -11,7 +11,7 @@ import { inventoryLogger } from '@/lib/logger'
 
 
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 export class InventoryServices {
   private static instance: InventoryServices

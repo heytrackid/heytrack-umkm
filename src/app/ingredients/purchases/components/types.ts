@@ -1,11 +1,11 @@
-import type { IngredientPurchasesTable, IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 // Ingredient Purchases Types
 // Type definitions for ingredient purchase management
 
 
-type IngredientPurchaseBase = IngredientPurchasesTable
-type Ingredient = IngredientsTable
+type IngredientPurchaseBase = Row<'ingredient_purchases'>
+type Ingredient = Row<'ingredients'>
 
 // Re-export base type with relations
 export interface IngredientPurchase extends IngredientPurchaseBase {

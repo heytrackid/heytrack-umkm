@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DollarSign, TrendingUp, Package, RefreshCw } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
-import { PageHeader } from '@/components/shared'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
+import { DollarSign, Package, RefreshCw, TrendingUp } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 
 
@@ -20,7 +20,7 @@ const WacEnginePage = () => {
 
   // ✅ OPTIMIZED: Use TanStack Query for caching (to be fully implemented)
   // TODO: Import and use useIngredients({ limit: 1000 })
-  const [ingredients, setIngredients] = useState<IngredientsTable[]>([])
+  const [ingredients, setIngredients] = useState<Row<'ingredients'>[]>([])
   const [selectedIngredient, setSelectedIngredient] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [calculating, setCalculating] = useState(false)
@@ -31,7 +31,9 @@ const WacEnginePage = () => {
     const loadIngredients = async () => {
       try {
         void setLoading(true)
-        const response = await fetch('/api/ingredients?limit=1000')
+        const response = await fetch('/api/ingredients?limit=1000', {
+          credentials: 'include', // Include cookies for authentication
+        })
         if (response.ok) {
           const data = await response.json()
           void setIngredients(data.ingredients ?? [])

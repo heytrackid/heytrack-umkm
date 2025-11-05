@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest } from 'next/server'
-import type { IngredientsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 import { checkBotId } from 'botid/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
@@ -115,7 +115,7 @@ async function POST(request: NextRequest) {
       return createErrorResponse('Access denied', 403)
     }
 
-    const ingredientData: IngredientsInsert = {
+    const ingredientData: Insert<'ingredients'> = {
       ...validatedData,
       user_id: user.id
     }

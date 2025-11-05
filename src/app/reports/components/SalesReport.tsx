@@ -1,14 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
-import type { OrdersTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { ShoppingCart, DollarSign, CheckCircle, Clock } from 'lucide-react'
 
 // Sales Report Component
 // Handles sales data filtering, calculations, and display
 
 
-type Order = OrdersTable
+type Order = Row<'orders'>
 
 interface SalesReportProps {
   dateRange: {

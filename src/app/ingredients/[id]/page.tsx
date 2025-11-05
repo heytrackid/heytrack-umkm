@@ -15,13 +15,13 @@ import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import { ArrowLeft, Package, Loader2 } from 'lucide-react'
-import type { IngredientsTable, IngredientsUpdate } from '@/types/database'
+import type { Row, Update } from '@/types/database'
 
 
 
 
-type Ingredient = IngredientsTable
-type IngredientUpdate = IngredientsUpdate
+type Ingredient = Row<'ingredients'>
+type IngredientUpdate = Update<'ingredients'>
 
 const EditIngredientPage = () => {
     const router = useRouter()

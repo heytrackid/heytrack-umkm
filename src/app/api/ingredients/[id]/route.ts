@@ -6,13 +6,13 @@ import { IdParamSchema, IngredientUpdateSchema } from '@/lib/validations'
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
 import { apiLogger } from '@/lib/logger'
 import type { NextRequest } from 'next/server'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { isValidUUID } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 // GET /api/ingredients/[id] - Get single bahan baku
 export async function GET(

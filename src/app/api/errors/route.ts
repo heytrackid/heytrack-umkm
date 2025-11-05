@@ -1,7 +1,7 @@
 import { checkAdminPrivileges } from '@/lib/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { ErrorLogsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 import { SecurityPresets, withSecurity } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
@@ -27,17 +27,17 @@ async function POST(request: NextRequest) {
 
     // Parse body - handle both JSON and text/plain
     interface ErrorBody {
-      message?: unknown
-      msg?: unknown
-      stack?: unknown
-      url?: unknown
-      userAgent?: unknown
-      componentStack?: unknown
-      timestamp?: unknown
-      errorType?: unknown
-      browser?: unknown
-      os?: unknown
-      device?: unknown
+      message?: string
+      msg?: string
+      stack?: string
+      url?: string
+      userAgent?: string
+      componentStack?: string
+      timestamp?: string | number
+      errorType?: string
+      browser?: string
+      os?: string
+      device?: string
     }
     let body: ErrorBody
     const contentType = request.headers.get('content-type') ?? ''
@@ -90,7 +90,7 @@ async function POST(request: NextRequest) {
     if (userId) {
       try {
         const supabase = await createClient()
-        const errorLogData: ErrorLogsInsert = {
+        const errorLogData: Insert<'error_logs'> = {
           user_id: userId,
           endpoint: sanitizedErrorData.url ?? 'unknown',
           error_message: sanitizedErrorData.message,

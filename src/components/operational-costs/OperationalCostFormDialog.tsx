@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2 } from 'lucide-react'
-import type { OperationalCostsTable, OperationalCostsInsert } from '@/types/database'
+import type { Row, Insert } from '@/types/database'
 import {
     Select,
     SelectContent,
@@ -18,7 +18,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 
-type OperationalCost = OperationalCostsTable
+type OperationalCost = Row<'operational_costs'>
 
 interface OperationalCostFormDialogProps {
     open: boolean
@@ -48,7 +48,7 @@ export const OperationalCostFormDialog = ({
     const [isSubmitting, setIsSubmitting] = useState(false)
     const mode = cost ? 'edit' : 'create'
 
-    const [formData, setFormData] = useState<Partial<OperationalCostsInsert>>({
+    const [formData, setFormData] = useState<Partial<Insert<'operational_costs'>>>({
         description: '',
         category: 'utilities',
         amount: 0,

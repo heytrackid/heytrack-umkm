@@ -1,11 +1,11 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 /**
  * Service for calculating production time estimates for orders

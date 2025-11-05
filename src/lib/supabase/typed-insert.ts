@@ -1,4 +1,4 @@
-import type { Tables, TablesInsert as SupabaseTablesInsert, TablesUpdate as SupabaseTablesUpdate, Database } from '@/types/database'
+import type { Row, TablesInsert as SupabaseTablesInsert, TablesUpdate as SupabaseTablesUpdate, Database, Tables } from '@/types/database'
 
 
 /**
@@ -10,7 +10,7 @@ import type { Tables, TablesInsert as SupabaseTablesInsert, TablesUpdate as Supa
 // Helper type untuk extract Insert types - re-export from database.ts
 export type TablesInsert<T extends keyof Database['public']['Tables']> = SupabaseTablesInsert<T>
 export type TablesUpdate<T extends keyof Database['public']['Tables']> = SupabaseTablesUpdate<T>
-export type TablesRow<T extends keyof Database['public']['Tables']> = Tables<T>
+export type TablesRow<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
 
 /**
  * Type-safe insert helper

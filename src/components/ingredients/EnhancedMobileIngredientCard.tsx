@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useSettings } from '@/contexts/settings-context'
@@ -17,7 +17,7 @@ import {
     Package
 } from 'lucide-react'
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 interface EnhancedMobileIngredientCardProps {
     ingredient: Ingredient

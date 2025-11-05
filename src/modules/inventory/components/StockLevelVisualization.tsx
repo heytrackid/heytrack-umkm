@@ -4,12 +4,12 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { useCurrency } from '@/hooks/useCurrency'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { Package, AlertTriangle, CheckCircle, TrendingDown, TrendingUp, DollarSign } from 'lucide-react'
 
 
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 interface StockLevelVisualizationProps {
     ingredients: Ingredient[]

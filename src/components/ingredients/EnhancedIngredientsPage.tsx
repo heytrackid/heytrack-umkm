@@ -10,7 +10,7 @@ import { useSupabaseCRUD } from '@/hooks/supabase'
 import { usePagination } from '@/hooks/usePagination'
 import { useToast } from '@/hooks/use-toast'
 import { useMobile } from '@/hooks/responsive'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { StockBadge } from './StockBadge'
 import { MobileIngredientList } from './MobileIngredientCard'
 import { IngredientFormDialog } from './IngredientFormDialog'
@@ -45,7 +45,7 @@ import {
     genericErrorToast,
 } from '@/lib/ingredients-toast'
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 type StockFilter = 'all' | 'normal' | 'low' | 'out'
 type CategoryFilter = 'all' | 'Bahan Kering' | 'Bahan Basah' | 'Bumbu' | 'Protein' | 'Sayuran' | 'Buah' | 'Dairy' | 'Kemasan' | 'Lainnya'
 

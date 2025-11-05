@@ -18,7 +18,9 @@ export function useRestockSuggestions() {
   return useQuery({
     queryKey: ['restock-suggestions'],
     queryFn: async () => {
-      const response = await fetch('/api/inventory/restock-suggestions')
+      const response = await fetch('/api/inventory/restock-suggestions', {
+        credentials: 'include', // Include cookies for authentication
+      })
       
       if (!response.ok) {
         throw new Error('Failed to fetch restock suggestions')

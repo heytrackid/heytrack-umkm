@@ -1,5 +1,5 @@
 import type { ProductionBatch } from './types'
-import type {RecipesTable, IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { productionLogger } from '@/lib/logger'
 import { isIngredient } from '@/lib/type-guards'
 
@@ -12,8 +12,8 @@ import { isIngredient } from '@/lib/type-guards'
 
 
 
-type _Recipe = RecipesTable
-type _Ingredient = IngredientsTable
+type _Recipe = Row<'recipes'>
+type _Ingredient = Row<'ingredients'>
 
 export class ProductionServices {
   private static instance: ProductionServices

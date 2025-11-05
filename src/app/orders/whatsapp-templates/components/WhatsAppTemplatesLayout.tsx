@@ -47,7 +47,9 @@ const WhatsAppTemplatesPage = () => {
     const fetchTemplates = useCallback(async () => {
         try {
             setLoading(true)
-            const response = await fetch('/api/whatsapp-templates')
+            const response = await fetch('/api/whatsapp-templates', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const data: WhatsAppTemplate[] = await response.json()
                 setTemplates(data)
@@ -91,7 +93,8 @@ const WhatsAppTemplatesPage = () => {
 
         try {
             const response = await fetch(`/api/whatsapp-templates/${templateToDelete.id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -128,7 +131,8 @@ const WhatsAppTemplatesPage = () => {
                 body: JSON.stringify({
                     ...template,
                     is_default: !template.is_default
-                })
+                }),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -182,7 +186,8 @@ const WhatsAppTemplatesPage = () => {
         try {
             setGeneratingDefaults(true)
             const response = await fetch('/api/whatsapp-templates/generate-defaults', {
-                method: 'POST'
+                method: 'POST',
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {

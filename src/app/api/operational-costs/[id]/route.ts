@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { OperationalCostUpdateSchema } from '@/lib/validations/domains/finance'
-import type { OperationalCostsUpdate } from '@/types/database'
+import type { Update } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
@@ -98,7 +98,7 @@ export async function PUT(
 
 
     // Build update object
-    const updatePayload: OperationalCostsUpdate = {
+    const updatePayload: Update<'operational_costs'> = {
       category: validatedData.category ?? undefined,
       amount: validatedData.amount,
       description: validatedData.description ?? undefined,

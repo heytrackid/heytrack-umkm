@@ -19,10 +19,10 @@ import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
 import type { PaginatedResponse } from '@/lib/validations/pagination'
-import type { OrdersTable, OrderStatus } from '@/types/database'
+import type { Row, OrderStatus } from '@/types/database'
 import { CheckCircle, Clock, Package, Plus, Search, XCircle } from 'lucide-react'
 
-type Order = OrdersTable
+type Order = Row<'orders'>
 
 interface OrderWithItems extends Order {
     items?: Array<{
@@ -71,7 +71,9 @@ export const OrdersListWithPagination = () => {
                 params.append('status', statusFilter)
             }
 
-            const response = await fetch(`/api/orders?${params.toString()}`)
+            const response = await fetch(`/api/orders?${params.toString()}`, {
+                credentials: 'include', // Include cookies for authentication
+            })
 
             if (!response.ok) {
                 throw new Error('Failed to fetch orders')

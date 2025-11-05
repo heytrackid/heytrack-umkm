@@ -35,7 +35,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import type { OperationalCostsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import {
     Edit,
     MoreVertical,
@@ -52,7 +52,7 @@ import type { DateRange } from 'react-day-picker'
 
 // Types
 
-type OperationalCost = OperationalCostsTable
+type OperationalCost = Row<'operational_costs'>
 type CategoryFilter = 'all' | 'utilities' | 'rent' | 'staff' | 'transport' | 'communication' | 'insurance' | 'maintenance' | 'other'
 
 // Constants

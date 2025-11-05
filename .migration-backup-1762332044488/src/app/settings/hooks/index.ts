@@ -1,0 +1,2 @@
+
+export { useSettingsManager } from './useSettingsManager'

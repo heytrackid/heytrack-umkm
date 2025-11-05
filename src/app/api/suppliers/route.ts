@@ -4,7 +4,7 @@ import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import { checkBotId } from 'botid/server'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { SuppliersInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
@@ -120,7 +120,7 @@ async function POST(request: Request) {
 
     const validatedData = validation.data
 
-    const insertPayload: SuppliersInsert = {
+    const insertPayload: Insert<'suppliers'> = {
       ...validatedData,
       user_id: user.id
     }

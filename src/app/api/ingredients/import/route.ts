@@ -2,12 +2,12 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { checkBotId } from 'botid/server'
-import type { IngredientsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type IngredientInsert = IngredientsInsert
+type IngredientInsert = Insert<'ingredients'>
 
 const sanitizeString = (value?: string | null, fallback?: string | null) => {
   const trimmed = value?.trim()

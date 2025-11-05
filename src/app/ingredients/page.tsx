@@ -8,7 +8,7 @@ import { StatsCards, StatCardPatterns, PageBreadcrumb, BreadcrumbPatterns, PageH
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useIngredients } from '@/hooks/useIngredients';
-import type { IngredientsTable } from '@/types/database';
+import type { Row } from '@/types/database';
 import { Button } from '@/components/ui/button';
 import { Plus, ShoppingCart, Upload, AlertTriangle } from 'lucide-react';
 import { ImportDialog } from '@/components/import/ImportDialog';
@@ -50,13 +50,13 @@ const IngredientsPage = () => {
 
   // Calculate stats
   const totalIngredients = ingredients?.length ?? 0;
-  const lowStockCount = ingredients?.filter((i: IngredientsTable) =>
+  const lowStockCount = ingredients?.filter((i: Row<'ingredients'>) =>
     (i.current_stock ?? 0) <= (i.min_stock ?? 0) && (i.current_stock ?? 0) > 0
   ).length ?? 0;
-  const totalValue = ingredients?.reduce((sum: number, i: IngredientsTable) =>
+  const totalValue = ingredients?.reduce((sum: number, i: Row<'ingredients'>) =>
     sum + ((i.current_stock ?? 0) * (i.price_per_unit ?? 0)), 0
   ) ?? 0;
-  const outOfStockCount = ingredients?.filter((i: IngredientsTable) => (i.current_stock ?? 0) <= 0).length ?? 0;
+  const outOfStockCount = ingredients?.filter((i: Row<'ingredients'>) => (i.current_stock ?? 0) <= 0).length ?? 0;
 
   // ✅ FIX: Combine loading states
   const isLoading = isAuthLoading || loading

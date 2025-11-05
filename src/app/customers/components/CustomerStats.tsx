@@ -5,9 +5,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useSettings } from '@/contexts/settings-context'
 import { UserPlus, Users } from 'lucide-react'
-import type { CustomersTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
-type Customer = CustomersTable
+type Customer = Row<'customers'>
 
 interface CustomerStatsProps {
   customers: Customer[]

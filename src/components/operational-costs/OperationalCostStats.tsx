@@ -2,11 +2,11 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Receipt, TrendingUp, DollarSign, BarChart3 } from 'lucide-react'
-import type { OperationalCostsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 
-type OperationalCost = OperationalCostsTable
+type OperationalCost = Row<'operational_costs'>
 
 interface OperationalCostStatsProps {
     costs: OperationalCost[]

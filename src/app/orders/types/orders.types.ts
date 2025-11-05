@@ -1,9 +1,9 @@
-import type { OrdersTable, OrderItemsTable, CustomersTable, OrderStatus, PaymentMethod } from '@/types/database'
+import type { Row, OrderStatus, PaymentMethod } from '@/types/database'
 
 // Orders module types and interfaces with multi-currency support
 // Use generated types from Supabase as base
-export type Order = OrdersTable
-export type OrderItem = OrderItemsTable
+export type Order = Row<'orders'>
+export type OrderItem = Row<'order_items'>
 
 // Re-export enums for external use
 export type { OrderStatus, PaymentMethod }
@@ -12,7 +12,7 @@ export type { OrderStatus, PaymentMethod }
 
 export interface OrderWithRelations extends Order {
   items: OrderItem[]
-  customer?: CustomersTable
+  customer?: Row<'customers'>
   payments?: OrderPayment[]
 }
 

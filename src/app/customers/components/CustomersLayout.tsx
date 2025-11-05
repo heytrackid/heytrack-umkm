@@ -3,32 +3,32 @@
 
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { CustomersTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { useSettings } from '@/contexts/settings-context'
 import { LOADING_KEYS, useLoading } from '@/hooks/loading'
-import { useResponsive } from '@/hooks/useResponsive'
-import { usePagination } from '@/hooks/usePagination'
 import { useToast } from '@/hooks/use-toast'
-import { useRouter } from 'next/navigation'
 import { useDebounce } from '@/hooks/useDebounce'
+import { usePagination } from '@/hooks/usePagination'
+import { useResponsive } from '@/hooks/useResponsive'
 import { apiLogger } from '@/lib/logger'
-import { useConfirm } from '@/components/ui/confirm-dialog'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 
 // Shared components
-import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/page-breadcrumb'
 import { Plus, RefreshCw, Users } from 'lucide-react'
 
 // Import components normally - they're lightweight
+import CustomerForm from './CustomerForm'
+import CustomerSearchFilters from './CustomerSearchFilters'
 import CustomersTable from './CustomersTable'
 import CustomerStats from './CustomerStats'
-import CustomerSearchFilters from './CustomerSearchFilters'
-import CustomerForm from './CustomerForm'
 
 import type { CustomersTable as CustomersTableType } from '@/types/database'
 import type { Customer } from './types'
@@ -59,7 +59,9 @@ const CustomersLayout = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch('/api/customers')
+      const response = await fetch('/api/customers', {
+        credentials: 'include', // Include cookies for authentication
+      })
 
       if (response.status === 401) {
         toast({
@@ -144,7 +146,10 @@ const CustomersLayout = () => {
     if (confirmed) {
       try {
         const deletePromises = selectedItems.map(id =>
-          fetch(`/api/customers/${id}`, { method: 'DELETE' })
+          fetch(`/api/customers/${id}`, {
+            method: 'DELETE',
+            credentials: 'include', // Include cookies for authentication
+          })
         )
         await Promise.all(deletePromises)
         toast({
@@ -195,7 +200,10 @@ const CustomersLayout = () => {
 
     if (confirmed) {
       try {
-        const response = await fetch(`/api/customers/${customer.id}`, { method: 'DELETE' })
+        const response = await fetch(`/api/customers/${customer.id}`, {
+          method: 'DELETE',
+          credentials: 'include', // Include cookies for authentication
+        })
         if (!response.ok) { throw new Error('Failed') }
         toast({
           title: 'Berhasil',

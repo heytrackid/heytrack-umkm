@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import { typedInsert } from '@/lib/supabase-client'
-import type { RecipesInsert, RecipeIngredientsInsert, IngredientsTable } from '@/types/database'
+import type { Insert, Row } from '@/types/database'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
 
 import { HppEstimator } from './HppEstimator'
@@ -120,7 +120,7 @@ const AIRecipeGeneratorPage = () => {
       .from('ingredients')
       .select('*')
       .order('name')
-      .returns<IngredientsTable[]>()
+      .returns<Row<'ingredients'>[]>()
 
     if (!error && data) {
       const ingredients: AvailableIngredient[] = data.map((item) => ({
@@ -211,7 +211,7 @@ const AIRecipeGeneratorPage = () => {
       }
 
       // Save recipe to database
-      const recipeInsert: RecipesInsert = {
+      const recipeInsert: Insert<'recipes'> = {
         user_id: user.id,
         name: generatedRecipe.name,
         category: generatedRecipe.category,
@@ -232,7 +232,7 @@ const AIRecipeGeneratorPage = () => {
       }
 
       // Save recipe ingredients
-      const recipeIngredients: RecipeIngredientsInsert[] = generatedRecipe.ingredients
+      const recipeIngredients: Insert<'recipe_ingredients'>[] = generatedRecipe.ingredients
         .map((ing) => {
           const ingredient = availableIngredients.find(
             i => i.name.toLowerCase() === ing.name.toLowerCase()
@@ -250,7 +250,7 @@ const AIRecipeGeneratorPage = () => {
             user_id: user.id
           }
         })
-        .filter((value): value is RecipeIngredientsInsert => value !== null)
+        .filter((value): value is Insert<'recipe_ingredients'> => value !== null)
 
       if (recipeIngredients.length > 0) {
       const { error: ingredientsError } = await typedInsert(supabase as never, 'recipe_ingredients', recipeIngredients)

@@ -1,26 +1,26 @@
 'use client'
 
-import { useState } from 'react'
-import type { RecipesTable } from '@/types/database'
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
+import { HPP_CONFIG } from '@/lib/constants/hpp-config'
+import type {
+    HppComparison,
+    HppOverview,
+    RecipeIngredientWithPrice,
+    RecipeWithHpp,
+} from '@/modules/hpp/types'
+import type { Row } from '@/types/database'
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+    type UseMutationResult,
+} from '@tanstack/react-query'
+import { useState } from 'react'
 
 const logger = createClientLogger('ClientFile')
-import { HPP_CONFIG } from '@/lib/constants/hpp-config'
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  type UseMutationResult,
-} from '@tanstack/react-query'
-import type {
-  RecipeIngredientWithPrice,
-  RecipeWithHpp,
-  HppOverview,
-  HppComparison,
-} from '@/modules/hpp/types'
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 interface RecipeIngredientRecord {
   ingredient_id: string
@@ -92,7 +92,9 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
   const { data: recipesData, isLoading: recipesLoading } = useQuery<Array<Pick<Recipe, 'id' | 'name'>>>({
     queryKey: ['recipes-list'],
     queryFn: async (): Promise<Array<Pick<Recipe, 'id' | 'name'>>> => {
-      const response = await fetch('/api/recipes?limit=100')
+      const response = await fetch('/api/recipes?limit=100', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {throw new Error('Failed to fetch recipes')}
       const payload = await response.json() as RecipesListResponse | Recipe[] | null
       
@@ -129,7 +131,9 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
   const { data: overviewData, isLoading: overviewLoading } = useQuery<HppOverview>({
     queryKey: ['hpp-overview'],
     queryFn: async (): Promise<HppOverview> => {
-      const response = await fetch('/api/hpp/overview')
+      const response = await fetch('/api/hpp/overview', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {throw new Error('Failed to fetch overview')}
       return response.json() as Promise<HppOverview>
     },
@@ -143,7 +147,9 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
     queryFn: async (): Promise<RecipeWithCosts | null> => {
       if (!selectedRecipeId) {return null}
       
-      const response = await fetch(`/api/recipes/${selectedRecipeId}`)
+      const response = await fetch(`/api/recipes/${selectedRecipeId}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {throw new Error('Failed to fetch recipe')}
       const data: RecipeDetailResponse = await response.json()
       
@@ -197,7 +203,9 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
   const { data: comparisonData } = useQuery<HppComparison[]>({
     queryKey: ['hpp-comparison'],
     queryFn: async (): Promise<HppComparison[]> => {
-      const response = await fetch('/api/hpp/comparison')
+      const response = await fetch('/api/hpp/comparison', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {throw new Error('Failed to fetch comparison')}
       const payload = await response.json() as HppComparisonResponse | HppComparison[] | null
       if (!payload) { return [] }
@@ -217,7 +225,8 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
       const response = await fetch('/api/hpp/calculate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipeId })
+        body: JSON.stringify({ recipeId }),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {throw new Error('Failed to calculate HPP')}
@@ -253,7 +262,8 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         body: JSON.stringify({
           selling_price: price,
           margin_percentage: margin
-        })
+        }),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {throw new Error('Failed to update price')}

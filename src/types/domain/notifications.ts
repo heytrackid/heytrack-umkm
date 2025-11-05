@@ -1,11 +1,11 @@
-import type { NotificationsTable, NotificationsInsert, NotificationsUpdate } from '@/types/database'
+import type { Row, Insert, Update } from '@/types/database'
 
 
 
 // Base types from generated schema
-export type Notification = NotificationsTable
-export type NotificationInsert = NotificationsInsert
-export type NotificationUpdate = NotificationsUpdate
+export type Notification = Row<'notifications'>
+export type NotificationInsert = Insert<'notifications'>
+export type NotificationUpdate = Update<'notifications'>
 
 // Use database field types - these match the actual database schema
 export type NotificationType = Notification['type']

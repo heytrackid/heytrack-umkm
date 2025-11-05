@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
-import type { SuppliersUpdate } from '@/types/database'
+import type { Update } from '@/types/database'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
@@ -75,7 +75,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const updatePayload: SuppliersUpdate = body
+    const updatePayload: Update<'suppliers'> = body
 
     const { data, error } = await supabase
       .from('suppliers')

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DeleteModal } from '@/components/ui'
-import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import {
@@ -21,9 +21,9 @@ import {
     ArrowLeft,
 } from 'lucide-react'
 
-type RecipeRow = RecipesTable
-type RecipeIngredientRow = RecipeIngredientsTable
-type IngredientRow = IngredientsTable
+type RecipeRow = Row<'recipes'>
+type RecipeIngredientRow = Row<'recipe_ingredients'>
+type IngredientRow = Row<'ingredients'>
 
 type RecipeIngredientWithDetails = RecipeIngredientRow & {
     ingredient: Pick<IngredientRow, 'id' | 'name' | 'unit' | 'price_per_unit'> | null

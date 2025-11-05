@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-import type { IngredientPurchasesUpdate, StockTransactionsInsert, InventoryStockLogsInsert } from '@/types/database'
+import type { Update, Insert } from '@/types/database'
 import { getErrorMessage, isValidUUID, isRecord, extractFirst } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
@@ -126,7 +126,7 @@ export async function PUT(
     const quantityDiff = newQuantity - oldQuantity
 
     // Update purchase
-    const updatePayload: IngredientPurchasesUpdate = {
+    const updatePayload: Update<'ingredient_purchases'> = {
       supplier: body.supplier,
       quantity: newQuantity,
       unit_price: body.unit_price,
@@ -171,7 +171,7 @@ export async function PUT(
       const currentStock = ingredient?.current_stock ?? 0
 
       // Create adjustment transaction - trigger will handle stock update
-      const adjustmentTransaction: StockTransactionsInsert = {
+      const adjustmentTransaction: Insert<'stock_transactions'> = {
         ingredient_id: existingPurchase.ingredient_id,
         type: 'ADJUSTMENT',
         quantity: quantityDiff,
@@ -191,7 +191,7 @@ export async function PUT(
       }
 
       // Log the change for audit trail
-      const stockLog: InventoryStockLogsInsert = {
+      const stockLog: Insert<'inventory_stock_logs'> = {
         ingredient_id: existingPurchase.ingredient_id,
         quantity_changed: quantityDiff,
         quantity_before: currentStock,
@@ -261,7 +261,7 @@ export async function DELETE(
 
     // ✅ FIX: Let database trigger handle stock reversal
     // Create reversal transaction - trigger will auto-update current_stock
-    const reversalTransaction: StockTransactionsInsert = {
+    const reversalTransaction: Insert<'stock_transactions'> = {
       ingredient_id: purchase.ingredient_id,
       type: 'ADJUSTMENT',
       quantity: -purchase.quantity, // Negative to reduce stock
@@ -280,7 +280,7 @@ export async function DELETE(
     }
 
     // Log stock reversal for audit trail
-    const reversalLog: InventoryStockLogsInsert = {
+    const reversalLog: Insert<'inventory_stock_logs'> = {
       ingredient_id: purchase.ingredient_id,
       quantity_changed: -purchase.quantity,
       quantity_before: currentStock,

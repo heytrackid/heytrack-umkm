@@ -1,14 +1,14 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
-import type { NotificationsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { checkBotId } from 'botid/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type Notification = NotificationsTable
+type Notification = Row<'notifications'>
 
 async function GET(request: NextRequest) {
   try {

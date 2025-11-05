@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations'
-import type { FinancialRecordsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { checkBotId } from 'botid/server'
 
@@ -168,7 +168,7 @@ async function POST(request: NextRequest) {
     const validatedData = validation.data
 
     // Map sales data to financial_records structure
-    const insertPayload: FinancialRecordsInsert = {
+    const insertPayload: Insert<'financial_records'> = {
       amount: validatedData.total_amount,
       category: 'Sales',
       description: `Sale of recipe ${validatedData.recipe_id}${validatedData.customer_name ? ` to ${validatedData.customer_name}` : ''}`,

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { ProductionStatus, ProductionBatchesTable, RecipesTable } from '@/types/database'
+import type { Row, ProductionStatus } from '@/types/database'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -40,8 +40,8 @@ const LazyProductionFormDialog = dynamic(
 import { Factory, Plus, Search, Calendar, Clock, CheckCircle, XCircle, TrendingUp, Package, Play, BarChart3, Filter, Download, RefreshCw } from 'lucide-react'
 
 // Extended type for production page display
-interface ProductionWithRecipe extends ProductionBatchesTable {
-    recipe?: Pick<RecipesTable, 'name'> | null
+interface ProductionWithRecipe extends Row<'production_batches'> {
+    recipe?: Pick<Row<'recipes'>, 'name'> | null
     // Override status to use the enum type
     status: ProductionStatus
 }

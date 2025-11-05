@@ -109,7 +109,9 @@ interface DashboardData {
 // Optimized data fetching - single API call
 const fetchDashboardData = async (): Promise<DashboardData> => {
   // ✅ FIX: Use single API call instead of 3 parallel calls
-  const response = await fetch('/api/dashboard/stats')
+  const response = await fetch('/api/dashboard/stats', {
+    credentials: 'include', // Include cookies for authentication
+  })
 
   if (!response.ok) {
     throw new Error('Failed to fetch dashboard data')

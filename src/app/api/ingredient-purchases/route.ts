@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { IngredientPurchasesInsert, FinancialRecordsInsert, InventoryStockLogsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 import { checkBotId } from 'botid/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
 
         // 1. Create financial transaction (expense)
         let financialTransactionId: string | null = null
-        const financialRecord: FinancialRecordsInsert = {
+        const financialRecord: Insert<'financial_records'> = {
             user_id: user.id,
             type: 'EXPENSE',
             category: 'Pembelian Bahan Baku',
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Create purchase record
-        const purchaseRecord: IngredientPurchasesInsert = {
+        const purchaseRecord: Insert<'ingredient_purchases'> = {
             user_id: user.id,
             ingredient_id: validatedData.ingredient_id,
             supplier: validatedData.supplier,
@@ -250,7 +250,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 4. Create stock ledger entry
-        const stockLog: InventoryStockLogsInsert = {
+        const stockLog: Insert<'inventory_stock_logs'> = {
             ingredient_id: validatedData.ingredient_id,
             quantity_before: ingredientData.current_stock ?? 0,
             quantity_after: newStock,

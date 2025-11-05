@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
-import type { ExpensesInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
 import { checkBotId } from 'botid/server'
@@ -60,7 +60,7 @@ async function POST(request: NextRequest) {
 
     const validatedData = validation.data
 
-    const insertPayload: ExpensesInsert = {
+    const insertPayload: Insert<'expenses'> = {
       user_id: user.id,
       category: validatedData.category,
       subcategory: validatedData.subcategory,

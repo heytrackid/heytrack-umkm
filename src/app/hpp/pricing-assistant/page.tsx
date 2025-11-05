@@ -1,22 +1,22 @@
 'use client'
  
 
-import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { DollarSign, TrendingUp, Target, AlertTriangle, CheckCircle, Lightbulb, Calculator } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
-import { PageHeader, SharedStatsCards } from '@/components/shared'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
+import { AlertTriangle, Calculator, CheckCircle, DollarSign, Lightbulb, Target, TrendingUp } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 const pricingBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -60,7 +60,9 @@ const PricingAssistantPage = () => {
     const loadRecipes = async () => {
       try {
         void setLoading(true)
-        const response = await fetch('/api/recipes?limit=1000')
+        const response = await fetch('/api/recipes?limit=1000', {
+          credentials: 'include', // Include cookies for authentication
+        })
         if (response.ok) {
           const data = await response.json()
           void setRecipes(data.recipes ?? [])
@@ -98,7 +100,8 @@ const PricingAssistantPage = () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ recipeId: selectedRecipe })
+        body: JSON.stringify({ recipeId: selectedRecipe }),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (response.ok) {

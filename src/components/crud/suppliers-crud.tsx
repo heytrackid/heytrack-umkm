@@ -12,7 +12,7 @@ import { CreateModal, EditModal, DeleteModal } from '@/components/ui';
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('SuppliersCRUD')
-import type { SuppliersTable, SuppliersInsert, SuppliersUpdate } from '@/types/database'
+import type { Row, Insert, Update } from '@/types/database'
 
 
 
@@ -20,7 +20,7 @@ import type { SuppliersTable, SuppliersInsert, SuppliersUpdate } from '@/types/d
 // Shared components
 
 
-type Supplier = SuppliersTable
+type Supplier = Row<'suppliers'>
 
 
 export const SuppliersCRUD = () => {
@@ -115,7 +115,7 @@ export const SuppliersCRUD = () => {
 
   const handleSubmitCreate = async (data: Record<string, unknown>) => {
     try {
-      await createSupplier(data as SuppliersInsert)
+      await createSupplier(data as Insert<'suppliers'>)
       void setIsCreateModalOpen(false)
       createForm.reset({
         name: '',
@@ -134,7 +134,7 @@ export const SuppliersCRUD = () => {
     if (!selectedSupplier) { return }
 
     try {
-      await updateSupplier(selectedSupplier.id, data as SuppliersUpdate)
+      await updateSupplier(selectedSupplier.id, data as Update<'suppliers'>)
       void setIsEditModalOpen(false)
       void setSelectedSupplier(null)
       editForm.reset({

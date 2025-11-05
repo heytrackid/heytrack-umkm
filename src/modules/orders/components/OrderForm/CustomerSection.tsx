@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertCircle } from 'lucide-react'
-import type { CustomersTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { useState } from 'react'
 
 
@@ -14,7 +14,7 @@ import { useState } from 'react'
  * Handles customer selection and input
  */
 
-type Customer = CustomersTable
+type Customer = Row<'customers'>
 
 interface CustomerFormData {
     customer_name: string

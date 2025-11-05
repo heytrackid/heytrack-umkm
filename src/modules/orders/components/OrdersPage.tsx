@@ -93,7 +93,9 @@ const OrdersPage = (_props: OrdersPageProps) => {
   const { data: ordersData, isLoading: loading, error: queryError } = useQuery({
     queryKey: ['orders', 'all'],
     queryFn: async () => {
-      const response = await fetch('/api/orders')
+      const response = await fetch('/api/orders', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) { throw new Error('Failed to fetch orders') }
       const data = await response.json()
       // Ensure we always return an array
@@ -175,7 +177,8 @@ const OrdersPage = (_props: OrdersPageProps) => {
       await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus }),
+        credentials: 'include', // Include cookies for authentication
       })
       // Refetch orders after update
       // Note: TanStack Query will handle cache invalidation

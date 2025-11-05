@@ -32,7 +32,9 @@ export function useExpenses() {
   const fetchExpenses = async () => {
     try {
       void setLoading(true)
-      const response = await fetch('/api/expenses')
+      const response = await fetch('/api/expenses', {
+        credentials: 'include', // Include cookies for authentication
+      })
 
       if (!response.ok) {
         throw new Error('Failed to fetch expenses')
@@ -57,6 +59,7 @@ export function useExpenses() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(expenseData),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -81,6 +84,7 @@ export function useExpenses() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(expenseData),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -105,6 +109,7 @@ export function useExpenses() {
     try {
       const response = await fetch(`/api/expenses/${id}`, {
         method: 'DELETE',
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {

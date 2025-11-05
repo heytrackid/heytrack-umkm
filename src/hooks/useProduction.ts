@@ -18,7 +18,9 @@ export function useProductionBatches() {
   return useQuery({
     queryKey: ['production-batches'],
     queryFn: async () => {
-      const response = await fetch('/api/production-batches')
+      const response = await fetch('/api/production-batches', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch production batches')
       }
@@ -43,6 +45,7 @@ export function useCreateProductionBatch() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {
@@ -86,6 +89,7 @@ export function useUpdateProductionBatch() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {

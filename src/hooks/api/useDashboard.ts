@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/utils/supabase/client'
-import type { OrdersTable, IngredientsTable, CustomersTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
@@ -117,9 +117,9 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
 
     if (inventoryError) {throw inventoryError}
 
-    type Order = OrdersTable
-    type Ingredient = IngredientsTable
-    type Customer = CustomersTable
+    type Order = Row<'orders'>
+    type Ingredient = Row<'ingredients'>
+    type Customer = Row<'customers'>
 
     // Calculate stats
     const todayRevenue = todayOrders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
@@ -219,7 +219,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
 
       if (error) {throw error}
 
-      type Order = OrdersTable
+      type Order = Row<'orders'>
       const revenue = orders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
       
       weekData.push({

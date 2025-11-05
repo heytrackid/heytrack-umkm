@@ -2,7 +2,7 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
-import type { OrdersTable, OrderItemsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
@@ -12,8 +12,8 @@ import { getPriorityInfo, getStatusInfo } from '../utils/helpers'
 
 
 
-type Order = OrdersTable
-type OrderItem = OrderItemsTable
+type Order = Row<'orders'>
+type OrderItem = Row<'order_items'>
 
 interface OrderWithItems extends Order {
   order_items?: OrderItem[]

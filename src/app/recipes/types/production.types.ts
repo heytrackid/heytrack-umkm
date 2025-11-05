@@ -1,9 +1,4 @@
-import type { 
-
-  RecipesTable, 
-  UserProfilesTable,
-  ProductionStatus as DBProductionStatus 
-} from '@/types/database'
+import type { Row, ProductionStatus as DBProductionStatus } from '@/types/database'
 
 // Production module types and interfaces for Indonesian UMKM operations
 
@@ -63,8 +58,8 @@ export interface ProductionBatch {
   updated_at: string
   
   // Relations
-  recipe?: RecipesTable // Recipe data type
-  quality_inspector?: UserProfilesTable // Staff member
+  recipe?: Row<'recipes'> // Recipe data type
+  quality_inspector?: Row<'user_profiles'> // Staff member
   production_logs?: ProductionLog[]
 }
 

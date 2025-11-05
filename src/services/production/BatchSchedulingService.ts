@@ -1,6 +1,6 @@
 import { apiLogger } from '@/lib/logger'
 import { isArrayOf, isProductionBatch, getErrorMessage } from '@/lib/type-guards'
-import type { ProductionsTable, ProductionsInsert, ProductionStatus } from '@/types/database'
+import type { Row, Insert, ProductionStatus } from '@/types/database'
 
 
 /**
@@ -10,8 +10,8 @@ import type { ProductionsTable, ProductionsInsert, ProductionStatus } from '@/ty
 
 
 // Use generated types
-export type ProductionBatch = ProductionsTable
-export type ProductionBatchInsert = ProductionsInsert
+export type ProductionBatch = Row<'productions'>
+export type ProductionBatchInsert = Insert<'productions'>
 
 // Extended type for UI components that need joined data
 export interface ProductionBatchWithDetails extends ProductionBatch {
@@ -80,7 +80,9 @@ export class BatchSchedulingService {
    */
   static async getScheduledBatches(): Promise<ProductionBatchWithDetails[]> {
     try {
-      const response = await fetch('/api/production/batches')
+      const response = await fetch('/api/production/batches', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         const errorText = await response.text()
         throw new Error(`Failed to fetch batches: ${errorText}`)
@@ -121,7 +123,8 @@ export class BatchSchedulingService {
       const response = await fetch('/api/production/batches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(batch)
+        body: JSON.stringify(batch),
+        credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {
         const errorText = await response.text()
@@ -154,7 +157,8 @@ export class BatchSchedulingService {
       const response = await fetch(`/api/production/batches/${batchId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status }),
+        credentials: 'include', // Include cookies for authentication
       })
       return response.ok
     } catch (err) {
@@ -181,7 +185,9 @@ export class BatchSchedulingService {
    */
   static async getProductionCapacity(): Promise<ProductionConstraints> {
     try {
-      const response = await fetch('/api/production/capacity')
+      const response = await fetch('/api/production/capacity', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch production capacity')
       }
@@ -218,7 +224,8 @@ export class BatchSchedulingService {
       const response = await fetch('/api/production/capacity', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(constraints)
+        body: JSON.stringify(constraints),
+        credentials: 'include', // Include cookies for authentication
       })
       return response.ok
     } catch (err) {

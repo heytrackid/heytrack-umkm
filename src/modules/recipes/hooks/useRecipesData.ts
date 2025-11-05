@@ -1,8 +1,8 @@
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 // import { useState, useEffect } from 'react'
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 // import { useSupabaseCRUD } from '@/hooks'
 
 interface UseRecipesDataOptions {

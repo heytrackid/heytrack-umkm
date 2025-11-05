@@ -9,11 +9,11 @@ import { EnhancedIngredientForm } from './EnhancedIngredientForm'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2 } from 'lucide-react'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 interface IngredientFormDialogProps {
     open: boolean

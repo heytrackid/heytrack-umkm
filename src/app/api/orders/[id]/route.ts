@@ -4,7 +4,7 @@ import { OrderUpdateSchema } from '@/lib/validations/domains/order'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-import type { OrdersUpdate, FinancialRecordsUpdate } from '@/types/database'
+import type { Update } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage, isValidUUID, isRecord } from '@/lib/type-guards'
@@ -13,8 +13,8 @@ interface RouteContext {
   params: Promise<{ id: string }>
 }
 
-type OrderUpdate = OrdersUpdate
-type FinancialRecordUpdate = FinancialRecordsUpdate
+type OrderUpdate = Update<'orders'>
+type FinancialRecordUpdate = Update<'financial_records'>
 
 const normalizeDateValue = (value?: string | null) => {
   const trimmed = value?.trim()

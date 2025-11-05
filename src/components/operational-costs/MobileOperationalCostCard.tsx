@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { MoreVertical, Edit, Trash2 } from 'lucide-react'
-import type { OperationalCostsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,7 +14,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-type OperationalCost = OperationalCostsTable
+type OperationalCost = Row<'operational_costs'>
 
 interface MobileOperationalCostCardProps {
     cost: OperationalCost

@@ -10,9 +10,13 @@
 type LogContext = Record<string, unknown>
 
 /**
- * Check if we're in development mode
+ * Check if we're in development mode or if logging is explicitly enabled
  */
 const isDevelopment = (): boolean => {
+  // Check for explicit logging flag
+  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_ENABLE_CLIENT_LOGS === 'true') {
+    return true
+  }
   if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
     return true
   }

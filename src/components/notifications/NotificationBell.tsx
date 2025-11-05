@@ -29,7 +29,9 @@ export const NotificationBell = () => {
     // Fetch user preferences
     const fetchPreferences = useCallback(async () => {
         try {
-            const response = await fetch('/api/notifications/preferences')
+            const response = await fetch('/api/notifications/preferences', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const prefs = await response.json()
                 setPreferences(prefs)
@@ -49,7 +51,9 @@ export const NotificationBell = () => {
     const fetchNotifications = useCallback(async () => {
         try {
             setIsLoading(true)
-            const response = await fetch('/api/notifications?limit=20')
+            const response = await fetch('/api/notifications?limit=20', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const data = await response.json()
                 const newNotifications = data.notifications ?? []
@@ -128,6 +132,7 @@ export const NotificationBell = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({}),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -147,6 +152,7 @@ export const NotificationBell = () => {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updates),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {

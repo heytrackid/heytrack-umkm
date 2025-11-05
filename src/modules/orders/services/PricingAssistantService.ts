@@ -1,10 +1,10 @@
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 interface PricingRecommendation {
   recipeId: string
@@ -55,7 +55,7 @@ export class PricingAssistantService {
         throw new Error(`Recipe not found: ${recipeId}`)
       }
       
-      const recipe = data as RecipesTable
+      const recipe = data as Row<'recipes'>
 
       // Get HPP calculation - simplified for now
       const hppValue = (recipe.selling_price ?? 0) * 0.7 // Estimate 70% cost

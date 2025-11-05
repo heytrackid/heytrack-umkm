@@ -29,7 +29,9 @@ export function useOrders() {
     queryFn: async () => {
       try {
         queryLogger.info('Fetching orders from API...')
-        const response = await fetch('/api/orders?limit=50')
+        const response = await fetch('/api/orders?limit=50', {
+          credentials: 'include', // Include cookies for authentication
+        })
         
         queryLogger.info({ 
           status: response.status, 
@@ -216,7 +218,8 @@ export function useOrders() {
         const response = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newOrder)
+          body: JSON.stringify(newOrder),
+          credentials: 'include', // Include cookies for authentication
         })
 
         queryLogger.info({ 
@@ -295,7 +298,8 @@ export function useOrders() {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedData)
+        body: JSON.stringify(updatedData),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -338,7 +342,8 @@ export function useOrders() {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus }),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -384,7 +389,8 @@ export function useOrders() {
   const deleteOrderMutation = useMutation({
     mutationFn: async (orderId: string) => {
       const response = await fetch(`/api/orders/${orderId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {

@@ -3,23 +3,23 @@
 
 'use client'
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import { Loader2, Save, X, User, Phone, Mail, MapPin, Tag, Percent, FileText } from 'lucide-react'
-import type { CustomersTable } from '@/types/database'
+import type { Row } from '@/types/database'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FileText, Loader2, Mail, MapPin, Percent, Phone, Save, Tag, User, X } from 'lucide-react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
-type Customer = CustomersTable
+type Customer = Row<'customers'>
 
 // Form validation schema (without user_id - will be added on submit)
 const CustomerFormSchema = z.object({
@@ -112,6 +112,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (!response.ok) {

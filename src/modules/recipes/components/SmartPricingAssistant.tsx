@@ -11,16 +11,16 @@ import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTr
 import { useCurrency } from '@/hooks/useCurrency'
 import { uiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { IngredientsTable, RecipeIngredientsTable, RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import type { SmartPricingAnalysis } from '@/types/features/analytics'
 import { AlertTriangle, Calculator, CheckCircle, Lightbulb, Target, Zap } from 'lucide-react'
 import { useCallback, useEffect, useState, type FC } from 'react'
 
 
 
-type Recipe = RecipesTable
-type RecipeIngredient = RecipeIngredientsTable
-type Ingredient = IngredientsTable
+type Recipe = Row<'recipes'>
+type RecipeIngredient = Row<'recipe_ingredients'>
+type Ingredient = Row<'ingredients'>
 
 type PricingTierKey = 'economy' | 'standard' | 'premium'
 
@@ -51,7 +51,8 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ recipe })
+        body: JSON.stringify({ recipe }),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {

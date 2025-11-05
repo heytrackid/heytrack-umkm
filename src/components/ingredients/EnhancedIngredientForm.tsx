@@ -9,11 +9,11 @@ import { FormField, FormGrid } from '@/components/ui/crud-form'
 import { AlertTriangle, Info, TrendingUp } from 'lucide-react'
 import { useSettings } from '@/contexts/settings-context'
 import type { SimpleIngredientFormData } from '@/lib/validations/form-validations'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 interface EnhancedIngredientFormProps {
     form: UseFormReturn<SimpleIngredientFormData>

@@ -5,7 +5,7 @@ import { createPaginationMeta } from '@/lib/validations/pagination'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
-import type { RecipeIngredientsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage } from '@/lib/type-guards'
 import { checkBotId } from 'botid/server'
@@ -208,7 +208,7 @@ async function POST(request: NextRequest) {
         unit?: string
       }
 
-      const recipeIngredientsToInsert: RecipeIngredientsInsert[] = recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
+      const recipeIngredientsToInsert: Insert<'recipe_ingredients'>[] = recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
         recipe_id: createdRecipe.id,
         ingredient_id: ingredient.ingredient_id ?? ingredient.bahan_id ?? '',
         quantity: ingredient.quantity ?? ingredient.qty_per_batch ?? 0,

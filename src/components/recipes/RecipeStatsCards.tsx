@@ -3,11 +3,11 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { ChefHat, TrendingUp, Calculator, BarChart3 } from 'lucide-react'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 interface RecipeStatsCardsProps {
     recipes: Recipe[]
