@@ -20,7 +20,11 @@ interface HppOverviewData {
     recipe_id: string
     recipe_name: string
     alert_type: string
+    title: string
     message: string
+    severity: string
+    is_read: boolean
+    new_value: number | null
     created_at: string
   }>
   recentSnapshots: Array<{

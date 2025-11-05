@@ -89,6 +89,12 @@ export const BreadcrumbPatterns = {
     { label: 'HPP & Pricing', href: '/hpp' }
   ],
 
+  hppAlerts: [
+    { label: 'Dashboard', href: '/' },
+    { label: 'HPP & Pricing', href: '/hpp' },
+    { label: 'Peringatan HPP' }
+  ],
+
   suppliers: [
     { label: 'Dashboard', href: '/' },
     { label: 'Supplier', href: '/suppliers' }

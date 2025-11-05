@@ -1,7 +1,7 @@
+import { cacheKeys, withCache } from '@/lib/cache'
+import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger } from '@/lib/logger'
-import { withCache, cacheKeys } from '@/lib/cache'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -26,7 +26,7 @@ export async function GET(_request: NextRequest) {
 
     const getOverviewData = async () => {
       // Parallel queries for better performance
-      const [recipesResult, calculationsResult] = await Promise.all([
+      const [recipesResult, calculationsResult, alertsResult] = await Promise.all([
         // Get recipes count
         supabase
           .from('recipes')
@@ -40,11 +40,33 @@ export async function GET(_request: NextRequest) {
           .select('id, cost_per_unit, selling_price, margin_percentage')
           .eq('user_id', user.id)
           .eq('is_active', true)
-          .gt('cost_per_unit', 0)
+          .gt('cost_per_unit', 0),
+
+        // Get alerts data
+        supabase
+          .from('hpp_alerts')
+          .select(`
+            id,
+            recipe_id,
+            alert_type,
+            title,
+            message,
+            severity,
+            is_read,
+            new_value,
+            created_at,
+            recipes:recipe_id (
+              name
+            )
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10)
       ])
 
       const totalRecipes = recipesResult.count ?? 0
       const recipesWithCost = calculationsResult.data ?? []
+      const alertsData = alertsResult.data ?? []
 
       // Calculate average HPP
       const averageHpp = recipesWithCost.length > 0
@@ -53,13 +75,30 @@ export async function GET(_request: NextRequest) {
 
       const recipesWithHpp = recipesWithCost.length
 
+      // Process alerts data
+      const totalAlerts = alertsData.length
+      const unreadAlerts = alertsData.filter(alert => !alert.is_read).length
+
+      const recentAlerts = alertsData.map(alert => ({
+        id: alert.id,
+        recipe_id: alert.recipe_id,
+        recipe_name: (alert.recipes as any)?.name ?? 'Unknown Recipe',
+        alert_type: alert.alert_type,
+        title: alert.title,
+        message: alert.message,
+        severity: alert.severity,
+        is_read: alert.is_read,
+        new_value: alert.new_value,
+        created_at: alert.created_at
+      }))
+
       return {
         totalRecipes,
         recipesWithHpp,
         averageHpp,
-        totalAlerts: 0,
-        unreadAlerts: 0,
-        recentAlerts: []
+        totalAlerts,
+        unreadAlerts,
+        recentAlerts
       }
     }
 
