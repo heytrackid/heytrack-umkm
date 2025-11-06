@@ -1,6 +1,5 @@
 // next.config.ts
-import { withSentryConfig } from '@sentry/nextjs'
-import { withBotId } from 'botid/next/config'
+
 import type { NextConfig } from 'next'
 import path from 'path'
 
@@ -179,16 +178,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-const wrapped = withBundleAnalyzer(withBotId(nextConfig))
-
-export default useSentry
-  ? withSentryConfig(wrapped, {
-      org: 'heytrack',
-      project: 'javascript-nextjs',
-      silent: !process.env.CI,
-      widenClientFileUpload: false,
-      tunnelRoute: '/monitoring',
-      disableLogger: true,
-      automaticVercelMonitors: true,
-    })
-  : wrapped
+export default withBundleAnalyzer(nextConfig)

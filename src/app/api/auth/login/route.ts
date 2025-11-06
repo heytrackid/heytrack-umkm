@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import { checkBotId } from 'botid/server'
 import { apiLogger, logError } from '@/lib/logger'
 import { z } from 'zod'
 
@@ -15,18 +14,6 @@ const LoginSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/auth/login - Request received')
-
-    // Check if the request is from a bot
-    const verification = await checkBotId({
-      advancedOptions: {
-        checkLevel: 'deepAnalysis',
-      },
-    })
-
-    if (verification.isBot) {
-      apiLogger.warn('POST /api/auth/login - Bot detected')
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
 
     const body = await request.json()
     const validation = LoginSchema.safeParse(body)
