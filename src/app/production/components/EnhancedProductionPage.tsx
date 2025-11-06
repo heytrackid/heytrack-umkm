@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { ProductionStatus, ProductionBatchesTable, RecipesTable } from '@/types/database'
+import type { Row, ProductionStatus } from '@/types/database'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,12 +14,34 @@ import { useResponsive } from '@/hooks/useResponsive'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { apiLogger } from '@/lib/logger'
-import { ProductionFormDialog } from './ProductionFormDialog'
+import dynamic from 'next/dynamic'
+
+// Lazy load the ProductionFormDialog component as it's heavy
+const LazyProductionFormDialog = dynamic(
+  () => import('./ProductionFormDialog').then(mod => mod.ProductionFormDialog),
+  {
+    loading: () => (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4">
+          <div className="animate-pulse space-y-4">
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mx-auto" />
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded mt-4" />
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    ssr: false
+  }
+)
 import { Factory, Plus, Search, Calendar, Clock, CheckCircle, XCircle, TrendingUp, Package, Play, BarChart3, Filter, Download, RefreshCw } from 'lucide-react'
 
 // Extended type for production page display
-interface ProductionWithRecipe extends ProductionBatchesTable {
-    recipe?: Pick<RecipesTable, 'name'> | null
+interface ProductionWithRecipe extends Row<'production_batches'> {
+    recipe?: Pick<Row<'recipes'>, 'name'> | null
     // Override status to use the enum type
     status: ProductionStatus
 }
@@ -27,7 +49,7 @@ interface ProductionWithRecipe extends ProductionBatchesTable {
 const STATUS_CONFIG = {
     PLANNED: {
         label: 'Direncanakan',
-        color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
+        color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
         icon: Calendar
     },
     IN_PROGRESS: {
@@ -37,7 +59,7 @@ const STATUS_CONFIG = {
     },
     COMPLETED: {
         label: 'Selesai',
-        color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+        color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
         icon: CheckCircle
     },
     CANCELLED: {
@@ -307,7 +329,7 @@ export const EnhancedProductionPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">Direncanakan</p>
                                 <p className="text-2xl font-bold">{stats.planned}</p>
                             </div>
-                            <Calendar className="h-8 w-8 text-blue-600" />
+                            <Calendar className="h-8 w-8 text-gray-600" />
                         </div>
                     </CardContent>
                 </Card>
@@ -331,7 +353,7 @@ export const EnhancedProductionPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">Selesai</p>
                                 <p className="text-2xl font-bold">{stats.completed}</p>
                             </div>
-                            <CheckCircle className="h-8 w-8 text-green-600" />
+                            <CheckCircle className="h-8 w-8 text-gray-600" />
                         </div>
                     </CardContent>
                 </Card>
@@ -343,7 +365,7 @@ export const EnhancedProductionPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">Total Cost</p>
                                 <p className="text-lg font-bold">{formatCurrency(stats.totalCost)}</p>
                             </div>
-                            <TrendingUp className="h-8 w-8 text-purple-600" />
+                            <TrendingUp className="h-8 w-8 text-gray-600" />
                         </div>
                     </CardContent>
                 </Card>
@@ -441,7 +463,7 @@ export const EnhancedProductionPage = () => {
                             actions={[
                                 {
                                     label: 'Buat Batch Produksi',
-                                    onClick: () => { },
+                                    onClick: () => setIsFormOpen(true),
                                     icon: Plus
                                 }
                             ]}
@@ -531,9 +553,9 @@ export const EnhancedProductionPage = () => {
                     </CardContent>
                 </Card>
             )}
-            <ProductionFormDialog
+            <LazyProductionFormDialog
                 open={isFormOpen}
-                onOpenChange={setIsFormOpen}
+                onOpenChange={(open) => setIsFormOpen(open)}
                 onSuccess={fetchProductions}
             />
         </div>
@@ -603,7 +625,7 @@ const ProductionCard = ({
             {production.actual_cost && (
                 <div className="pt-3 border-t">
                     <p className="text-sm text-muted-foreground">Actual Cost</p>
-                    <p className="text-lg font-bold text-green-600">
+                    <p className="text-lg font-bold text-gray-600">
                         {formatCurrency(production.actual_cost)}
                     </p>
                 </div>

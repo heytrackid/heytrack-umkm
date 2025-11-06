@@ -1,6 +1,8 @@
 import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/shared'
-import { logger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 
 
 /**
@@ -81,12 +83,13 @@ export function useErrorHandler() {
 }
 
 // API error handling
-// eslint-disable-next-line react-hooks/rules-of-hooks -- This utility function needs refactoring to not use hooks directly
+ 
 export function handleAPIResponse<T>(
   response: { data?: T; error?: unknown },
   successMessage?: string,
   errorContext?: string
 ) {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { toast } = useToast()
 
   if (response.error) {

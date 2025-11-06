@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { LucideIcon } from 'lucide-react'
+import { Plus, Zap, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 
 
@@ -52,14 +52,15 @@ export const EmptyState = ({
         'rounded-full bg-muted flex items-center justify-center mb-4',
         compact ? 'w-16 h-16' : 'w-20 h-20'
       )}>
-        {Icon ? (
+        {Icon && (
           <Icon className={cn(
             'text-muted-foreground',
             compact ? 'w-8 h-8' : 'w-10 h-10'
           )} />
-        ) : emoji ? (
+        )}
+        {!Icon && emoji && (
           <span className={compact ? 'text-3xl' : 'text-4xl'}>{emoji}</span>
-        ) : null}
+        )}
       </div>
 
       {/* Title */}
@@ -203,6 +204,18 @@ export const EmptyStatePresets = {
       { icon: '💡', text: 'Setup Cepat menambahkan 8 template biaya umum' },
       { icon: '📊', text: 'Biaya operasional digunakan untuk menghitung HPP' },
       { icon: '🔔', text: 'Atur biaya berulang untuk tracking otomatis' }
+    ],
+    actions: [
+      {
+        label: 'Setup Cepat (8 Template)',
+        variant: 'default' as const,
+        icon: Zap
+      },
+      {
+        label: 'Tambah Manual',
+        variant: 'outline' as const,
+        icon: Plus
+      }
     ]
   },
   search: {

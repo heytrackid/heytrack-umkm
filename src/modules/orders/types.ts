@@ -2,35 +2,20 @@
 // Comprehensive type definitions for order management system
 // Uses generated Supabase types as base
 
-import type { 
-  CustomersTable, 
-  OrdersTable, 
-  OrderItemsTable, 
-  PaymentsTable,
-  CustomersInsert,
-  CustomersUpdate,
-  OrdersInsert,
-  OrdersUpdate,
-  OrderItemsInsert,
-  OrderItemsUpdate,
-  PaymentsInsert,
-  PaymentsUpdate,
-  OrderStatus,
-  PaymentMethod
-} from '@/types/database'
+import type { Row, Insert, Update, OrderStatus, PaymentMethod } from '@/types/database'
 
 // Use generated types from Supabase
-export type Customer = CustomersTable
-export type CustomerInsert = CustomersInsert
-export type CustomerUpdate = CustomersUpdate
+export type Customer = Row<'customers'>
+export type CustomerInsert = Insert<'customers'>
+export type CustomerUpdate = Update<'customers'>
 
-export type OrderItem = OrderItemsTable
-export type OrderItemInsert = OrderItemsInsert
-export type OrderItemUpdate = OrderItemsUpdate
+export type OrderItem = Row<'order_items'>
+export type OrderItemInsert = Insert<'order_items'>
+export type OrderItemUpdate = Update<'order_items'>
 
-export type Order = OrdersTable
-export type OrderInsert = OrdersInsert
-export type OrderUpdate = OrdersUpdate
+export type Order = Row<'orders'>
+export type OrderInsert = Insert<'orders'>
+export type OrderUpdate = Update<'orders'>
 
 // Re-export enums from database
 export type { PaymentMethod, OrderStatus } from '@/types/database'
@@ -51,9 +36,9 @@ export interface OrderItemWithRecipe extends OrderItem {
   }
 }
 
-export type Payment = PaymentsTable
-export type PaymentInsert = PaymentsInsert
-export type PaymentUpdate = PaymentsUpdate
+export type Payment = Row<'payments'>
+export type PaymentInsert = Insert<'payments'>
+export type PaymentUpdate = Update<'payments'>
 
 // Extended Order type with relations for UI
 export interface OrderWithRelations extends Order {

@@ -20,9 +20,7 @@ export async function POST() {
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // 2. Check if user already has templates
+    }    // 2. Check if user already has templates
     const { data: existingTemplates, error: checkError } = await supabase
       .from('whatsapp_templates')
       .select('id')
@@ -56,7 +54,7 @@ export async function POST() {
     // 4. Fetch created templates
     const { data: templates, error: fetchError } = await supabase
       .from('whatsapp_templates')
-      .select('*')
+      .select('id, user_id, name, message, is_active, created_at, updated_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
 

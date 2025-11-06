@@ -2,11 +2,11 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Receipt, TrendingUp, DollarSign, BarChart3 } from 'lucide-react'
-import type { OperationalCostsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 
-type OperationalCost = OperationalCostsTable
+type OperationalCost = Row<'operational_costs'>
 
 interface OperationalCostStatsProps {
     costs: OperationalCost[]
@@ -48,7 +48,7 @@ export const OperationalCostStats = ({
                             <p className="text-2xl font-bold">{fixedCosts}</p>
                             <p className="text-xs text-muted-foreground">biaya rutin</p>
                         </div>
-                        <TrendingUp className="h-8 w-8 text-blue-600" />
+                        <TrendingUp className="h-8 w-8 text-gray-600" />
                     </div>
                 </CardContent>
             </Card>
@@ -74,7 +74,7 @@ export const OperationalCostStats = ({
                             <p className="text-2xl font-bold">{formatCurrency(totalMonthly)}</p>
                             <p className="text-xs text-muted-foreground">per bulan</p>
                         </div>
-                        <DollarSign className="h-8 w-8 text-green-600" />
+                        <DollarSign className="h-8 w-8 text-gray-600" />
                     </div>
                 </CardContent>
             </Card>

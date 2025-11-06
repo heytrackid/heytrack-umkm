@@ -1,5 +1,9 @@
+'use client'
+
 import { useCallback, useState } from 'react'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 
 /**
  * useConfirm Hook
@@ -31,7 +35,7 @@ export function useConfirm() {
       await config.onConfirm()
       void setIsOpen(false)
     } catch (err) {
-      apiLogger.error({ err }, 'Confirmation action failed:')
+      logger.error({ err }, 'Confirmation action failed:')
     } finally {
       void setLoading(false)
     }

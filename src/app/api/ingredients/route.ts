@@ -1,9 +1,10 @@
-import { createSuccessResponse, createErrorResponse, handleAPIError, withQueryValidation, PaginationSchema, calculateOffset, createPaginationMeta } from '@/lib/api-core' 
+import { createSuccessResponse, createErrorResponse, handleAPIError, withQueryValidation, PaginationSchema, calculateOffset, createPaginationMeta } from '@/lib/api-core'
 import { z } from 'zod'
-import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient' 
+import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest } from 'next/server'
-import type { IngredientsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
+import { typed } from '@/types/type-utilities'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -31,7 +32,7 @@ async function GET(request: NextRequest) {
     const offset = calculateOffset(page, limit)
 
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -85,9 +86,15 @@ async function GET(request: NextRequest) {
 // POST /api/ingredients - Create new bahan baku
 async function POST(request: NextRequest) {
   try {
-    // The request body is already validated and sanitized by the security middleware
-    const body = await request.json()
-    
+    // Parse and validate request body
+    let body: unknown
+    try {
+      body = await request.json()
+    } catch (parseError) {
+      apiLogger.error({ error: parseError }, 'Failed to parse request body')
+      return createErrorResponse('Invalid JSON in request body', 400)
+    }
+
     // Validate request body
     const validation = IngredientInsertSchema.safeParse(body)
     if (!validation.success) {
@@ -98,7 +105,7 @@ async function POST(request: NextRequest) {
     const validatedData = validation.data
 
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -107,8 +114,7 @@ async function POST(request: NextRequest) {
       apiLogger.error({ error: authError }, 'Auth error:')
       return createErrorResponse('Unauthorized', 401)
     }
-
-    const ingredientData: IngredientsInsert = {
+    const ingredientData: Insert<'ingredients'> = {
       ...validatedData,
       user_id: user.id
     }

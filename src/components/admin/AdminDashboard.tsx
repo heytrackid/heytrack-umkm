@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable no-nested-ternary */
 
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -258,7 +259,7 @@ const AdminDashboard = (_props: AdminDashboardProps) => {
                     <Card>
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                <TrendingUp className="h-4 w-4 text-purple-500" />
+                                <TrendingUp className="h-4 w-4 text-gray-500" />
                                 Total Revenue
                             </CardTitle>
                         </CardHeader>

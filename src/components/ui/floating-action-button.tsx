@@ -18,11 +18,11 @@ interface FloatingActionButtonProps {
   className?: string
 }
 
-export function FloatingActionButton({ 
+export const FloatingActionButton = ({ 
   actions = [], 
   mainAction,
   className 
-}: FloatingActionButtonProps) {
+}: FloatingActionButtonProps) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleMainClick = () => {
@@ -51,7 +51,7 @@ export function FloatingActionButton({
                 size="lg"
                 className={cn(
                   'h-12 w-12 rounded-full shadow-lg',
-                  action.color || 'bg-primary'
+                  action.color ?? 'bg-primary'
                 )}
                 onClick={() => {
                   action.onClick()
@@ -81,7 +81,7 @@ export function FloatingActionButton({
 }
 
 // Simple FAB without menu
-export function SimpleFAB({ 
+export const SimpleFAB = ({ 
   onClick, 
   icon, 
   className 
@@ -89,8 +89,7 @@ export function SimpleFAB({
   onClick: () => void
   icon?: React.ReactNode
   className?: string 
-}) {
-  return (
+}) => (
     <Button
       size="lg"
       onClick={onClick}
@@ -99,7 +98,6 @@ export function SimpleFAB({
         className
       )}
     >
-      {icon || <Plus className="h-6 w-6" />}
+      {icon ?? <Plus className="h-6 w-6" />}
     </Button>
   )
-}

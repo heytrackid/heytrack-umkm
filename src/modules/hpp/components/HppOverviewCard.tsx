@@ -1,12 +1,12 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Calculator, TrendingUp, Bell, CheckCircle, History, BarChart3, FileSpreadsheet } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
+import { BarChart3, Bell, Calculator, CheckCircle, FileSpreadsheet, History, TrendingUp } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 
 
@@ -28,7 +28,8 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
     const handleCalculateAll = async () => {
         try {
             const response = await fetch('/api/hpp/calculate', {
-                method: 'PUT'
+                method: 'PUT',
+                credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
                 toast({
@@ -53,9 +54,9 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
     return (
         <Card>
             <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-lg flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex-1">
+                        <CardTitle className="text-lg flex items-center gap-2 flex-wrap">
                             Ringkasan HPP
                             <Badge variant={completionPercentage === 100 ? "default" : "secondary"}>
                                 {completionPercentage === 100 ? "Lengkap" : "Perlu Perhatian"}
@@ -66,7 +67,7 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
                         </p>
                     </div>
                     {completionPercentage < 100 && (
-                        <Button size="sm" onClick={handleCalculateAll}>
+                        <Button size="sm" onClick={handleCalculateAll} className="w-full sm:w-auto">
                             <Calculator className="h-4 w-4 mr-2" />
                             Hitung Semua
                         </Button>

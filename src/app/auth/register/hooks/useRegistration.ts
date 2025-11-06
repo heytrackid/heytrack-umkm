@@ -1,7 +1,7 @@
-import { useState, useTransition } from 'react'
 import { getAuthErrorMessage, validateEmail, validatePassword, validatePasswordMatch } from '@/app/auth/register/utils/validation'
-import { signup } from '@/app/auth/register/actions'
-import type { FieldErrors, ErrorAction } from '@/app/auth/register/types'
+import { useState, useTransition } from 'react'
+// import { signup } from '@/app/auth/register/actions' // Replaced with API call
+import type { ErrorAction, FieldErrors } from '@/app/auth/register/types'
 
 export function useRegistration() {
   const [error, setError] = useState('')
@@ -59,15 +59,34 @@ export function useRegistration() {
     }
 
     startTransition(async () => {
-      const result = await signup(formData)
-      if (result?.error) {
-        const authError = getAuthErrorMessage(result.error)
-        void setError(authError.message)
-        if (authError.action) {
-          void setErrorAction(authError.action)
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            fullName: email.split('@')[0], // Use email prefix as name
+          }),
+          credentials: 'include', // Include cookies for authentication
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          const authError = getAuthErrorMessage(data.error ?? 'Registration failed')
+          void setError(authError.message)
+          if (authError.action) {
+            void setErrorAction(authError.action)
+          }
+          return
         }
-      } else if (result?.success) {
+
         void setSuccess(true)
+      } catch (_err) {
+        void setError('Network error. Please try again.')
       }
     })
   }

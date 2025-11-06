@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { MoreVertical, Edit, Trash2 } from 'lucide-react'
-import type { OperationalCostsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,7 +14,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-type OperationalCost = OperationalCostsTable
+type OperationalCost = Row<'operational_costs'>
 
 interface MobileOperationalCostCardProps {
     cost: OperationalCost
@@ -84,7 +84,7 @@ export const MobileOperationalCostCard = ({
                     {/* Badges */}
                     <div className="flex flex-wrap gap-2">
                         {cost.recurring && (
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-300">
                                 Tetap
                             </Badge>
                         )}

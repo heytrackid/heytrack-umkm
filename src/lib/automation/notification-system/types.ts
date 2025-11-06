@@ -1,4 +1,4 @@
-import type {IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 /**
  * Notification System Module Types
@@ -34,7 +34,7 @@ export interface FinancialMetrics {
   revenue: number
 }
 
-export type Ingredient = IngredientsTable
+export type Ingredient = Row<'ingredients'>
 
 export interface OrderForNotification {
   delivery_date: string

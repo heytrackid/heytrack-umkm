@@ -1,4 +1,5 @@
 'use client'
+ 
 
 import { Suspense } from 'react'
 import { OperationalCostFormPage } from '@/components/operational-costs/OperationalCostFormPage'

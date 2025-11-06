@@ -13,7 +13,7 @@ import {
   CheckCircle,
   TrendingUp
 } from 'lucide-react'
-import { usePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring'
+import { usePerformanceMonitoring } from '@/utils/performance/usePerformanceMonitoring'
 
 /**
  * Performance Monitor Component
@@ -226,7 +226,7 @@ const MetricRow = ({ label, value, threshold, currentValue, icon: Icon }: Metric
 
   const status = getStatus()
   const icons = {
-    good: <CheckCircle className="h-3 w-3 text-green-500" />,
+    good: <CheckCircle className="h-3 w-3 text-gray-500" />,
     'needs-improvement': <TrendingUp className="h-3 w-3 text-yellow-500" />,
     poor: <AlertTriangle className="h-3 w-3 text-red-500" />,
     unknown: <Icon className="h-3 w-3 text-gray-400" />

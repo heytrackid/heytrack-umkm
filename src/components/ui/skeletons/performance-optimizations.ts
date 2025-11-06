@@ -1,8 +1,5 @@
-import { useCallback, useMemo } from 'react'
 import { apiLogger } from '@/lib/logger'
-    import('@/components').catch(() => {})
-    import('@/components').catch(() => {})
-    import('@/components').catch(() => {})
+import { useCallback, useMemo } from 'react'
 
 /**
  * Performance Optimizations untuk Skeleton Loading System
@@ -29,9 +26,11 @@ export function useSkeletonDebounce(delay: number = MIN_LOADING_DURATION.FAST) {
 
 // Memoized skeleton array untuk menghindari re-renders
 export function useSkeletonArray(length: number, dependency?: unknown[]) {
+  const depsString = JSON.stringify(dependency)
   return useMemo(
     () => Array.from({ length }, (_, i) => i),
-    [length, ...(dependency ?? [])]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [length, depsString]
   )
 }
 
@@ -98,7 +97,16 @@ export const ANIMATION_CONFIG = {
 export function preloadSkeletonComponents() {
   // Preload common skeleton components to avoid loading delays
   if (typeof window !== 'undefined') {
-    // TODO: Implement preload logic for skeleton components
+    // Use dynamic imports to preload skeleton components
+    import('./dashboard-skeletons').catch(() => {
+      // Ignore preload failures
+    })
+    import('./table-skeletons').catch(() => {
+      // Ignore preload failures
+    })
+    import('./form-skeletons').catch(() => {
+      // Ignore preload failures
+    })
   }
 }
 

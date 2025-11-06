@@ -1,5 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 
 
 
@@ -37,7 +39,8 @@ export function useOrderPricing() {
       const response = await fetch('/api/orders/calculate-price', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(request)
+        body: JSON.stringify(request),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -48,7 +51,7 @@ export function useOrderPricing() {
       return response.json() as Promise<OrderPricingResult>
     },
     onError: (error) => {
-      apiLogger.error({ error }, 'Failed to calculate order price:')
+      logger.error({ error }, 'Failed to calculate order price:')
     }
   })
 }

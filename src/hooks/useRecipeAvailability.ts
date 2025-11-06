@@ -1,5 +1,7 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 
 
 
@@ -28,7 +30,10 @@ export function useRecipeAvailability(recipeId: string | null, quantity = 1) {
       if (!recipeId) {return null}
 
       const response = await fetch(
-        `/api/recipes/availability?recipe_id=${recipeId}&quantity=${quantity}`
+        `/api/recipes/availability?recipe_id=${recipeId}&quantity=${quantity}`,
+        {
+          credentials: 'include', // Include cookies for authentication
+        }
       )
 
       if (!response.ok) {
@@ -49,7 +54,8 @@ export function useCheckMultipleRecipes() {
       const response = await fetch('/api/recipes/availability', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipes })
+        body: JSON.stringify({ recipes }),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -66,7 +72,7 @@ export function useCheckMultipleRecipes() {
       }>
     },
     onError: (error) => {
-      apiLogger.error({ error }, 'Failed to check multiple recipes:')
+      logger.error({ error }, 'Failed to check multiple recipes:')
     }
   })
 }

@@ -18,9 +18,7 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       logError(apiLogger, authError, 'Unauthorized')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await request.json()
+    }    const body = await request.json()
     const { customer_id, items, delivery_fee, tax_rate, use_loyalty_points } = body
 
     if (!items || !Array.isArray(items) || items.length === 0) {

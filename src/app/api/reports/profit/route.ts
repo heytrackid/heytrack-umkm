@@ -1,18 +1,19 @@
 /* eslint-disable */
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import type { OrdersTable, OrderItemsTable, FinancialRecordsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
-import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
-import type { RecipeWithIngredients } from '@/types/query-results'
+ import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
+ import type { RecipeWithIngredients } from '@/types/query-results'
+ import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
 
-type Order = OrdersTable
-type OrderItem = OrderItemsTable
-type FinancialRecord = FinancialRecordsTable
+type Order = Row<'orders'>
+type OrderItem = Row<'order_items'>
+type FinancialRecord = Row<'financial_records'>
 /**
  * GET /api/reports/profit
  * 
@@ -24,7 +25,7 @@ type FinancialRecord = FinancialRecordsTable
  * - period: 'daily' | 'weekly' | 'monthly' | 'yearly'
  * - include_breakdown: 'true' | 'false' (include detailed product breakdown)
  */
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -113,7 +114,7 @@ export async function GET(request: NextRequest) {
     // Get all expenses (non-revenue) in the period for operating costs
     const { data: expenses, error: expensesError } = await supabase
       .from('financial_records')
-      .select('*')
+      .select('id, user_id, date, description, category, amount, reference, type, created_at, created_by')
       .eq('user_id', user.id)
       .eq('type', 'EXPENSE')
       .gte('date', startDate)
@@ -167,6 +168,8 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withSecurity(getHandler, SecurityPresets.enhanced())
 
 // Typed interfaces for profit calculation
 interface OrderWithItemsForProfit extends Order {

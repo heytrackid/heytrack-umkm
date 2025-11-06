@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import AppLayout from '@/components/layout/app-layout'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -11,10 +11,12 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { uiLogger } from '@/lib/client-logger'
 import { type WhatsAppTemplate } from './types'
-import TemplatesTable from './TemplatesTable'
-import TemplateForm from './TemplateForm'
-import TemplatePreview from './TemplatePreview'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
+
+// Lazy load heavy components
+const TemplatesTable = lazy(() => import('./TemplatesTable'))
+const TemplateForm = lazy(() => import('./TemplateForm'))
+const TemplatePreview = lazy(() => import('./TemplatePreview'))
 
 
 const WhatsAppTemplatesPage = () => {
@@ -47,7 +49,9 @@ const WhatsAppTemplatesPage = () => {
     const fetchTemplates = useCallback(async () => {
         try {
             setLoading(true)
-            const response = await fetch('/api/whatsapp-templates')
+            const response = await fetch('/api/whatsapp-templates', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const data: WhatsAppTemplate[] = await response.json()
                 setTemplates(data)
@@ -74,15 +78,15 @@ const WhatsAppTemplatesPage = () => {
         void fetchTemplates()
     }, [fetchTemplates])
 
-    const handleEdit = (template: WhatsAppTemplate) => {
+    const handleEdit = useCallback((template: WhatsAppTemplate) => {
         setEditingTemplate(template)
         setShowDialog(true)
-    }
+    }, [])
 
-    const handleDeleteRequest = (template: WhatsAppTemplate) => {
+    const handleDeleteRequest = useCallback((template: WhatsAppTemplate) => {
         setTemplateToDelete(template)
         setIsConfirmOpen(true)
-    }
+    }, [])
 
     const handleDelete = useCallback(async () => {
         if (!templateToDelete) {
@@ -91,7 +95,8 @@ const WhatsAppTemplatesPage = () => {
 
         try {
             const response = await fetch(`/api/whatsapp-templates/${templateToDelete.id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -120,7 +125,7 @@ const WhatsAppTemplatesPage = () => {
         }
     }, [fetchTemplates, templateToDelete, toast])
 
-    const handleToggleDefault = async (template: WhatsAppTemplate) => {
+    const handleToggleDefault = useCallback(async (template: WhatsAppTemplate) => {
         try {
             const response = await fetch(`/api/whatsapp-templates/${template.id}`, {
                 method: 'PUT',
@@ -128,7 +133,8 @@ const WhatsAppTemplatesPage = () => {
                 body: JSON.stringify({
                     ...template,
                     is_default: !template.is_default
-                })
+                }),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -152,14 +158,14 @@ const WhatsAppTemplatesPage = () => {
                 variant: 'destructive',
             })
         }
-    }
+    }, [fetchTemplates, toast])
 
-    const handlePreview = (template: WhatsAppTemplate) => {
+    const handlePreview = useCallback((template: WhatsAppTemplate) => {
         setPreviewTemplate(template)
         setShowPreview(true)
-    }
+    }, [])
 
-    const handleDuplicate = (template: WhatsAppTemplate) => {
+    const handleDuplicate = useCallback((template: WhatsAppTemplate) => {
         setEditingTemplate({
             ...template,
             id: '', // Clear ID for new template
@@ -167,22 +173,23 @@ const WhatsAppTemplatesPage = () => {
             is_default: false
         } as WhatsAppTemplate)
         setShowDialog(true)
-    }
+    }, [])
 
-    const handleSuccess = async () => {
+    const handleSuccess = useCallback(async () => {
         toast({
             title: 'Berhasil',
             description: editingTemplate?.id ? 'Template berhasil diupdate' : 'Template berhasil dibuat',
         })
         await fetchTemplates()
         setEditingTemplate(null)
-    }
+    }, [fetchTemplates, toast, editingTemplate])
 
-    const handleGenerateDefaults = async () => {
+    const handleGenerateDefaults = useCallback(async () => {
         try {
             setGeneratingDefaults(true)
             const response = await fetch('/api/whatsapp-templates/generate-defaults', {
-                method: 'POST'
+                method: 'POST',
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -210,7 +217,7 @@ const WhatsAppTemplatesPage = () => {
         } finally {
             setGeneratingDefaults(false)
         }
-    }
+    }, [fetchTemplates, toast])
 
     // Show loading state while auth is initializing
     if (isAuthLoading) {
@@ -282,18 +289,18 @@ const WhatsAppTemplatesPage = () => {
 
                 {/* Info Card - Show only if no templates */}
                 {templates.length === 0 && !loading && (
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 shadow-sm">
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-xl p-6 shadow-sm">
                         <div className="flex items-start gap-4">
                             <div className="flex-shrink-0">
-                                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                                    <MessageCircle className="h-6 w-6 text-green-600" />
+                                <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                    <MessageCircle className="h-6 w-6 text-gray-600" />
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-bold text-green-900 text-lg mb-2">
+                                <h3 className="font-bold text-gray-900 text-lg mb-2">
                                     🎉 Mulai dengan Template Siap Pakai!
                                 </h3>
-                                <p className="text-green-800 mb-4">
+                                <p className="text-gray-800 mb-4">
                                     Kami sudah siapkan 8 template WhatsApp yang friendly dan profesional untuk kamu.
                                     Tinggal klik tombol di bawah, edit sesuai kebutuhan, dan langsung bisa dipakai!
                                 </p>
@@ -326,9 +333,9 @@ const WhatsAppTemplatesPage = () => {
                                         Atau Buat dari Nol
                                     </Button>
                                 </div>
-                                <div className="mt-4 pt-4 border-t border-green-200">
-                                    <p className="text-sm font-semibold text-green-900 mb-2">Template yang akan dibuat:</p>
-                                    <div className="grid grid-cols-2 gap-2 text-sm text-green-700">
+                                <div className="mt-4 pt-4 border-t border-gray-300">
+                                    <p className="text-sm font-semibold text-gray-900 mb-2">Template yang akan dibuat:</p>
+                                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
                                         <div>✅ Konfirmasi Pesanan</div>
                                         <div>✅ Pesanan Siap</div>
                                         <div>✅ Reminder Pembayaran</div>
@@ -346,10 +353,10 @@ const WhatsAppTemplatesPage = () => {
 
                 {/* Info Card - Show if has templates */}
                 {templates.length > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <h3 className="font-semibold text-blue-900 mb-2">💡 Cara Menggunakan Template</h3>
-                        <ul className="text-sm text-blue-800 space-y-1">
-                            <li>• Buat template dengan variabel dinamis seperti <code className="bg-blue-100 px-1 rounded">{'{customer_name}'}</code></li>
+                    <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
+                        <h3 className="font-semibold text-gray-900 mb-2">💡 Cara Menggunakan Template</h3>
+                        <ul className="text-sm text-gray-800 space-y-1">
+                            <li>• Buat template dengan variabel dinamis seperti <code className="bg-gray-100 px-1 rounded">{'{customer_name}'}</code></li>
                             <li>• Variabel akan otomatis diganti dengan data pesanan saat mengirim pesan</li>
                             <li>• Set template sebagai default untuk digunakan secara otomatis</li>
                             <li>• Gunakan preview untuk melihat hasil akhir dengan data contoh</li>
@@ -358,30 +365,36 @@ const WhatsAppTemplatesPage = () => {
                 )}
 
                 {/* Templates Table */}
-                <TemplatesTable
-                    templates={templates}
-                    loading={loading}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteRequest}
-                    onToggleDefault={handleToggleDefault}
-                    onPreview={handlePreview}
-                    onDuplicate={handleDuplicate}
-                />
+                <Suspense fallback={<div className="h-96 bg-gray-100 rounded animate-pulse" />}>
+                    <TemplatesTable
+                        templates={templates}
+                        loading={loading}
+                        onEdit={handleEdit}
+                        onDelete={handleDeleteRequest}
+                        onToggleDefault={handleToggleDefault}
+                        onPreview={handlePreview}
+                        onDuplicate={handleDuplicate}
+                    />
+                </Suspense>
 
                 {/* Template Form Dialog */}
-                <TemplateForm
-                    showDialog={showDialog}
-                    onOpenChange={setShowDialog}
-                    editingTemplate={editingTemplate}
-                    onSuccess={handleSuccess}
-                />
+                <Suspense fallback={<div />}>
+                    <TemplateForm
+                        showDialog={showDialog}
+                        onOpenChange={setShowDialog}
+                        editingTemplate={editingTemplate}
+                        onSuccess={handleSuccess}
+                    />
+                </Suspense>
 
                 {/* Template Preview Dialog */}
-                <TemplatePreview
-                    showPreview={showPreview}
-                    onOpenChange={setShowPreview}
-                    template={previewTemplate}
-                />
+                <Suspense fallback={<div />}>
+                    <TemplatePreview
+                        showPreview={showPreview}
+                        onOpenChange={setShowPreview}
+                        template={previewTemplate}
+                    />
+                </Suspense>
 
                 <ConfirmDialog
                     open={isConfirmOpen}

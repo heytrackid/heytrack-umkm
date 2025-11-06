@@ -1,5 +1,9 @@
+'use client'
+
 import { useEffect, useState } from 'react'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
 
 
@@ -28,7 +32,9 @@ export function useExpenses() {
   const fetchExpenses = async () => {
     try {
       void setLoading(true)
-      const response = await fetch('/api/expenses')
+      const response = await fetch('/api/expenses', {
+        credentials: 'include', // Include cookies for authentication
+      })
 
       if (!response.ok) {
         throw new Error('Failed to fetch expenses')
@@ -39,7 +45,7 @@ export function useExpenses() {
     } catch (err: unknown) {
       const errorMessage = getErrorMessage(err)
       void setError(errorMessage)
-      apiLogger.error({ error: errorMessage }, 'Error fetching expenses:')
+      logger.error({ error: errorMessage }, 'Error fetching expenses:')
     } finally {
       void setLoading(false)
     }
@@ -53,6 +59,7 @@ export function useExpenses() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(expenseData),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -77,6 +84,7 @@ export function useExpenses() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(expenseData),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -101,6 +109,7 @@ export function useExpenses() {
     try {
       const response = await fetch(`/api/expenses/${id}`, {
         method: 'DELETE',
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {

@@ -2,8 +2,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
-import type { SuppliersUpdate } from '@/types/database'
+import type { Update } from '@/types/database'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -13,7 +14,7 @@ interface RouteContext {
 }
 
 // GET /api/suppliers/[id] - Get single supplier
-export async function GET(
+async function getHandler(
   _request: NextRequest,
   context: RouteContext
 ) {
@@ -55,7 +56,7 @@ export async function GET(
 }
 
 // PUT /api/suppliers/[id] - Update supplier
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   context: RouteContext
 ) {
@@ -75,7 +76,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const updatePayload: SuppliersUpdate = body
+    const updatePayload: Update<'suppliers'> = body
 
     const { data, error } = await supabase
       .from('suppliers')
@@ -105,7 +106,7 @@ export async function PUT(
 }
 
 // DELETE /api/suppliers/[id] - Delete supplier
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
   context: RouteContext
 ) {
@@ -157,3 +158,10 @@ export async function DELETE(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
+const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
+const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
+
+export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }

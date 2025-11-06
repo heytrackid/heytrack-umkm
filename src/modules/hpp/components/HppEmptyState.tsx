@@ -12,10 +12,10 @@ export const HppEmptyState = () => {
     const router = useRouter()
 
     return (
-        <Card className="border-2 border-dashed border-blue-300 dark:border-blue-700 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20">
+        <Card className="border-2 border-dashed border-gray-400 dark:border-gray-700 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
             <CardContent className="py-12">
                 <div className="text-center max-w-2xl mx-auto">
-                    <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-500 to-gray-1000 rounded-full flex items-center justify-center">
                         <Calculator className="h-12 w-12 text-white" />
                     </div>
 

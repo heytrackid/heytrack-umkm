@@ -1,96 +1,20 @@
-import type { ReactNode } from 'react';
-
-
-/**
- * Component Prop Types
- * Provides reusable type definitions for React components
- */
-
-
-/**
- * Base props that most components should accept
- */
-export interface BaseComponentProps {
-    className?: string;
-    children?: ReactNode;
+export interface ComponentProps {
+  className?: string;
+  children?: React.ReactNode;
+  style?: React.CSSProperties;
 }
 
-/**
- * Props for components that can be disabled
- */
-export interface DisableableProps {
-    disabled?: boolean;
+export interface LayoutProps extends ComponentProps {
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
 }
 
-/**
- * Props for components with loading states
- */
-export interface LoadingProps {
-    isLoading?: boolean;
-    loadingText?: string;
+export interface ModalProps extends ComponentProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-/**
- * Column definition for data tables
- * @template T - The type of data in the table rows
- * @template TValue - The type of the value for this column
- */
-export interface ColumnDef<T, TValue = unknown> {
-    id: string;
-    header: string;
-    accessorKey?: keyof T;
-    accessorFn?: (row: T) => TValue;
-    cell?: (value: TValue, row: T) => ReactNode;
-    sortable?: boolean;
-    width?: string | number;
-}
-
-/**
- * Props for data table components
- * @template T - The type of data in the table rows
- */
-export interface DataTableProps<T> extends BaseComponentProps, LoadingProps {
-    data: T[];
-    columns: Array<ColumnDef<T>>;
-    onRowClick?: (row: T) => void;
-    emptyMessage?: string;
-}
-
-/**
- * Props for form field components
- */
-export interface FormFieldProps extends BaseComponentProps, DisableableProps {
-    label?: string;
-    error?: string;
-    required?: boolean;
-    helperText?: string;
-}
-
-/**
- * Props for button components
- */
-export interface ButtonProps extends BaseComponentProps, DisableableProps, LoadingProps {
-    variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
-    size?: 'sm' | 'md' | 'lg';
-    type?: 'button' | 'submit' | 'reset';
-    onClick?: () => void;
-}
-
-/**
- * Props for modal/dialog components
- */
-export interface ModalProps extends BaseComponentProps {
-    isOpen: boolean;
-    onClose: () => void;
-    title?: string;
-    footer?: ReactNode;
-}
-
-/**
- * Props for card components
- */
-export interface CardProps extends BaseComponentProps {
-    title?: string;
-    description?: string;
-    footer?: ReactNode;
+export interface DialogProps extends ModalProps {
+  title?: string;
+  description?: string;
 }

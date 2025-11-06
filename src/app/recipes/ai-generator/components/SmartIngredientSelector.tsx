@@ -38,6 +38,7 @@ export const SmartIngredientSelector = ({
     productType
 }: SmartIngredientSelectorProps) => {
     const [searchQuery, setSearchQuery] = useState('')
+    const [ingredientQuantities, setIngredientQuantities] = useState<Record<string, number>>({})
     const { formatCurrency } = useCurrency()
 
     // Get smart suggestions based on product type
@@ -63,6 +64,7 @@ export const SmartIngredientSelector = ({
                 onSelectionChange(suggestedIds)
             }
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [productType]) // Only run when product type changes
 
     // Filter ingredients based on search
@@ -85,9 +87,38 @@ export const SmartIngredientSelector = ({
     const toggleIngredient = (id: string) => {
         if (selectedIngredients.includes(id)) {
             onSelectionChange(selectedIngredients.filter(i => i !== id))
+            // Remove quantity when deselected
+            const newQuantities = { ...ingredientQuantities }
+            delete newQuantities[id]
+            setIngredientQuantities(newQuantities)
         } else {
             onSelectionChange([...selectedIngredients, id])
+            // Set default quantity when selected
+            const ingredient = availableIngredients.find(ing => ing.id === id)
+            if (ingredient) {
+                setIngredientQuantities(prev => ({
+                    ...prev,
+                    [id]: getDefaultQuantity(ingredient.unit)
+                }))
+            }
         }
+    }
+
+    const updateQuantity = (id: string, quantity: number) => {
+        setIngredientQuantities(prev => ({
+            ...prev,
+            [id]: Math.max(0, quantity)
+        }))
+    }
+
+    const getDefaultQuantity = (unit: string): number => {
+        // Smart defaults based on unit
+        if (unit.toLowerCase().includes('kg')) {return 0.5}
+        if (unit.toLowerCase().includes('gram') || unit.toLowerCase().includes('g')) {return 100}
+        if (unit.toLowerCase().includes('liter') || unit.toLowerCase().includes('l')) {return 0.25}
+        if (unit.toLowerCase().includes('ml')) {return 50}
+        if (unit.toLowerCase().includes('pcs') || unit.toLowerCase().includes('buah')) {return 2}
+        return 1 // fallback
     }
 
     const selectAllSuggested = () => {
@@ -108,7 +139,7 @@ export const SmartIngredientSelector = ({
         if ((ingredient.current_stock || 0) < minimumStock) {
             return { label: 'Menipis', color: 'bg-yellow-500' }
         }
-        return { label: 'Tersedia', color: 'bg-green-500' }
+        return { label: 'Tersedia', color: 'bg-gray-500' }
     }
 
     return (
@@ -168,7 +199,7 @@ export const SmartIngredientSelector = ({
                 {suggestedIngredients.length > 0 && (
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                            <Sparkles className="h-4 w-4 text-purple-500" />
+                            <Sparkles className="h-4 w-4 text-gray-500" />
                             <span className="text-sm font-semibold">Bahan yang Disarankan</span>
                             <Badge variant="secondary" className="text-xs">
                                 Untuk {productType}
@@ -249,6 +280,74 @@ export const SmartIngredientSelector = ({
                                     </div>
                                 )
                             })}
+                        </div>
+                    </div>
+                )}
+
+                {/* Selected Ingredients with Quantities */}
+                {selectedIngredients.length > 0 && (
+                    <div className="space-y-3">
+                        <div className="text-sm font-semibold flex items-center gap-2">
+                            <Package className="h-4 w-4" />
+                            Bahan Terpilih ({selectedIngredients.length})
+                        </div>
+
+                        <div className="space-y-2">
+                            {selectedIngredients.map(ingredientId => {
+                                const ingredient = availableIngredients.find(ing => ing.id === ingredientId)
+                                if (!ingredient) {return null}
+
+                                const quantity = ingredientQuantities[ingredientId] || getDefaultQuantity(ingredient.unit)
+                                const totalCost = quantity * ingredient.price_per_unit
+
+                                return (
+                                    <div key={ingredientId} className="flex items-center gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-medium text-sm">{ingredient.name}</div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {formatCurrency(ingredient.price_per_unit)}/{ingredient.unit}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                step="0.1"
+                                                value={quantity}
+                                                onChange={(e) => updateQuantity(ingredientId, parseFloat(e.target.value) || 0)}
+                                                className="w-20 h-8 text-sm"
+                                                placeholder="Qty"
+                                            />
+                                            <span className="text-sm text-muted-foreground min-w-8">
+                                                {ingredient.unit}
+                                            </span>
+                                        </div>
+
+                                        <div className="text-right min-w-20">
+                                            <div className="font-medium text-sm">
+                                                {formatCurrency(totalCost)}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                Total
+                                            </div>
+                                        </div>
+
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => toggleIngredient(ingredientId)}
+                                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                                        >
+                                            ×
+                                        </Button>
+                                    </div>
+                                )
+                            })}
+                        </div>
+
+                        <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                            💡 Sesuaikan quantity bahan sesuai kebutuhan resep Anda
                         </div>
                     </div>
                 )}

@@ -1,7 +1,7 @@
 import { dbLogger } from '@/lib/logger'
 import { executeTransaction, createOperation, type TransactionOperation } from './transactions'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, OrdersInsert, OrderItemsInsert, FinancialRecordsInsert } from '@/types/database'
+import type { Insert, Database } from '@/types/database'
 
 
 /**
@@ -11,9 +11,9 @@ import type { Database, OrdersInsert, OrderItemsInsert, FinancialRecordsInsert }
  */
 
 
-type OrderInsert = OrdersInsert
-type OrderItemInsert = OrderItemsInsert
-type FinancialRecordInsert = FinancialRecordsInsert
+type OrderInsert = Insert<'orders'>
+type OrderItemInsert = Insert<'order_items'>
+type FinancialRecordInsert = Insert<'financial_records'>
 
 export interface OrderCreationData {
   order: OrderInsert

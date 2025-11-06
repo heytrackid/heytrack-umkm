@@ -1,12 +1,12 @@
 'use client'
 
+import type { OrderItemWithRecipe } from '@/app/orders/types/orders-db.types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCurrency } from '@/hooks/useCurrency'
+import type { Row } from '@/types/database'
 import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
-import type { OrderItemWithRecipe } from '@/app/orders/types/orders-db.types'
-import type { RecipesTable } from '@/types/database'
 
 
 
@@ -17,7 +17,7 @@ import type { RecipesTable } from '@/types/database'
 
 interface ItemsSectionProps {
     orderItems: OrderItemWithRecipe[]
-    availableRecipes: RecipesTable[]
+    availableRecipes: Array<Row<'recipes'>>
     fieldErrors: Record<string, string>
     subtotal: number
     onAddItem: () => void
@@ -66,7 +66,7 @@ export const ItemsSection = ({
 
             {orderItems.length === 0 ? (
                 <div className="text-center py-12">
-                    <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                    <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
                     <h3 className="text-lg font-semibold mb-2">Belum Ada Item Pesanan</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                         Tambahkan produk yang dipesan oleh pelanggan
@@ -125,7 +125,7 @@ export const ItemsSection = ({
                                             <div>
                                                 <Label className="text-xs font-medium text-muted-foreground">Total</Label>
                                                 <Input
-                                                    className="text-sm font-medium mt-1 bg-gray-50"
+                                                    className="text-sm font-medium mt-1 bg-muted"
                                                     value={formatCurrency(item.total_price)}
                                                     readOnly
                                                 />
@@ -187,7 +187,7 @@ export const ItemsSection = ({
                                         <div>
                                             <Label className="text-xs font-medium text-muted-foreground">Total</Label>
                                             <Input
-                                                className="text-sm font-medium mt-1 bg-gray-50"
+                                                className="text-sm font-medium mt-1 bg-muted"
                                                 value={formatCurrency(item.total_price)}
                                                 readOnly
                                             />

@@ -11,28 +11,23 @@ import pino from 'pino'
 
 
 const isDevelopment = process.env.NODE_ENV === 'development'
+const isPreview = process.env.VERCEL_ENV === 'preview'
 const isTest = process.env.NODE_ENV === 'test'
 
 // Configure Pino logger
 const getLogLevel = () => {
-  if (isTest) return 'silent'
-  if (isDevelopment) return 'debug'
+  if (isTest) {return 'silent'}
+  if (isDevelopment || isPreview) {return 'debug'}
   return 'info'
 }
 
 const logger = pino({
   level: getLogLevel(),
-  ...(isDevelopment && {
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-        translateTime: 'HH:MM:ss Z',
-        ignore: 'pid,hostname',
-        singleLine: false,
-      },
-    },
-  }),
+  // Disable pino-pretty transport in development due to Turbopack compatibility issues
+  // Use browser option instead for better compatibility
+  browser: {
+    asObject: isDevelopment || isPreview,
+  },
   // Add more detailed serialization for better debugging
   serializers: {
     error: (err: Error) => ({
@@ -133,6 +128,7 @@ export interface ErrorContext {
   action?: string;
   timestamp?: string;
   stackTrace?: string;
+  digest?: string;
 }
 
 /**

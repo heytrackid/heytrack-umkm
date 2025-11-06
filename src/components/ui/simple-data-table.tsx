@@ -1,36 +1,37 @@
+ 
 'use client'
 
-import { type ReactNode, useState, useEffect, useMemo } from 'react'
-import { useMobile } from '@/hooks/useResponsive'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  Search,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  MoreVertical,
-  Download
-} from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select"
+import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { VirtualizedTable } from '@/components/ui/virtualized-table'
+import { useMobile } from '@/hooks/responsive'
+import {
+    Download,
+    Edit,
+    Eye,
+    MoreVertical,
+    Plus,
+    Search,
+    Trash2
+} from 'lucide-react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 
 type SortableValue = string | number | boolean | Date | null | undefined
 
@@ -66,6 +67,52 @@ interface SimpleDataTableProps<T, TValue = unknown> {
   initialPageSize?: number
 }
 
+// Create actions cell renderer outside component to avoid unstable nested components
+const createActionsCell = <T extends Record<string, unknown>>(
+  onView?: (item: T) => void,
+  onEdit?: (item: T) => void,
+  onDelete?: (item: T) => void
+) => {
+  if (!onView && !onEdit && !onDelete) {
+    return undefined
+  }
+
+  return (item: T) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm">
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {onView && (
+          <DropdownMenuItem onClick={() => onView(item)}>
+            <Eye className="h-4 w-4 mr-2" />
+            View
+          </DropdownMenuItem>
+        )}
+        {onEdit && (
+          <DropdownMenuItem onClick={() => onEdit(item)}>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </DropdownMenuItem>
+        )}
+        {onDelete && (
+          <DropdownMenuItem
+            onClick={() => onDelete(item)}
+            className="text-red-600"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[keyof T]>({
   title,
   description,
@@ -87,8 +134,6 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
   const { isMobile } = useMobile()
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
-  const [sortBy, setSortBy] = useState<string>('')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   const sanitizedPageSizeOptions = useMemo(() => {
     if (!enablePagination) { return [Math.max(data.length, 1)] }
@@ -127,25 +172,8 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
     return matchesSearch && matchesFilters
   })
 
-  // Sort data
-  const sortedData = sortBy ? [...filteredData].sort((a, b) => {
-    const column = columns.find(col => String(col.key) === sortBy)
-    if (!column) { return 0 }
-
-    const rawA = column.sortAccessor ? column.sortAccessor(a) : getColumnValue(a, column)
-    const rawB = column.sortAccessor ? column.sortAccessor(b) : getColumnValue(b, column)
-
-    const aVal = toSortableValue(rawA)
-    const bVal = toSortableValue(rawB)
-
-    if (aVal === bVal) { return 0 }
-    if (aVal === null || aVal === undefined) { return sortOrder === 'asc' ? -1 : 1 }
-    if (bVal === null || bVal === undefined) { return sortOrder === 'asc' ? 1 : -1 }
-
-    if (aVal < bVal) { return sortOrder === 'asc' ? -1 : 1 }
-    if (aVal > bVal) { return sortOrder === 'asc' ? 1 : -1 }
-    return 0
-  }) : filteredData
+  // Note: Sorting is not supported in VirtualizedTable, data is displayed as-is
+  const sortedData = filteredData
 
   const totalItems = sortedData.length
   const totalPages = enablePagination ? Math.max(1, Math.ceil(totalItems / rowsPerPage)) : 1
@@ -164,18 +192,11 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
     return item[column.key] as TValue
   }
 
-  function toSortableValue(value: unknown): SortableValue {
-    if (value instanceof Date) { return value.getTime() }
-    if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean' || value === null) {
-      return value as SortableValue
-    }
-    return String(value)
-  }
-
   useEffect(() => {
     if (!enablePagination) { return }
     void setCurrentPage(1)
-  }, [searchTerm, JSON.stringify(filters), sortBy, sortOrder, rowsPerPage, enablePagination])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, JSON.stringify(filters), rowsPerPage, enablePagination])
 
   useEffect(() => {
     if (!enablePagination) { return }
@@ -191,15 +212,6 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
       void setRowsPerPage(sanitizedInitialPageSize)
     }
   }, [rowsPerPage, sanitizedInitialPageSize, sanitizedPageSizeOptions, enablePagination])
-
-  function handleSort(columnKey: string) {
-    if (sortBy === columnKey) {
-      void setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-    } else {
-      void setSortBy(columnKey)
-      void setSortOrder('asc')
-    }
-  }
 
   function handleFilterChange(columnKey: string, value: string) {
     setFilters(prev => ({
@@ -232,6 +244,36 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
     document.body.removeChild(link)
   }
 
+  // Create cell renderers outside render to avoid component creation during render
+  const createCellRenderer = (col: SimpleColumn<T, TValue>) => {
+    if (col.render) {
+      return (item: T) => {
+        const value = getColumnValue(item, col)
+        return col.render ? col.render(value, item) : String(value)
+      }
+    }
+    return undefined
+  }
+
+
+
+  // Convert columns to VirtualizedTable format
+  const virtualizedColumns = columns.map(col => ({
+    header: col.header,
+    accessor: col.key,
+    cell: createCellRenderer(col)
+  }))
+
+  // Add actions column if needed
+  const actionsCell = createActionsCell(onView, onEdit, onDelete)
+  if (actionsCell) {
+    virtualizedColumns.push({
+      header: 'Actions',
+      accessor: 'actions' as keyof T,
+      cell: actionsCell
+    })
+  }
+
   if (loading) {
     return (
       <Card>
@@ -261,13 +303,13 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
               {exportData && (
                 <Button variant="outline" size={isMobile ? "sm" : "sm"} onClick={handleExport} className={isMobile ? 'flex-1' : ''}>
                   <Download className="h-4 w-4 mr-2" />
-                  Informasi
+                  Export
                 </Button>
               )}
               {onAdd && (
                 <Button onClick={onAdd} size={isMobile ? "sm" : "default"} className={isMobile ? 'flex-1' : ''}>
                   <Plus className="h-4 w-4 mr-2" />
-                  {addButtonText ?? "Tambah Data"}
+                  {addButtonText ?? "Add Data"}
                 </Button>
               )}
             </div>
@@ -282,7 +324,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
           <div className={`relative ${isMobile ? 'w-full' : 'flex-1'}`}>
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={searchPlaceholder ?? "Cari..."}
+              placeholder={searchPlaceholder ?? "Search..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -302,10 +344,10 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
                     onValueChange={(value) => handleFilterChange(String(col.key), value)}
                   >
                     <SelectTrigger className={isMobile ? 'w-full' : 'w-[150px]'}>
-                      <SelectValue placeholder={`_Filter ${col.header}`} />
+                      <SelectValue placeholder={`Filter ${col.header}`} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Informasi {col.header}</SelectItem>
+                      <SelectItem value="all">All {col.header}</SelectItem>
                       {col.filterOptions?.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -318,207 +360,36 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
           )}
         </div>
 
-        {/* Table / Mobile Cards */}
+        {/* Virtualized Table */}
         {sortedData.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">{emptyMessage ?? "Tidak ada data"}</p>
-          </div>
-        ) : isMobile ? (
-          /* Mobile Card Layout */
-          <div className="space-y-4">
-            <div className="space-y-3">
-              {paginatedData.map((item, index: number) => (
-                <Card key={index} className="border border-gray-200">
-                  <CardContent className="p-4">
-                    <div className="space-y-2">
-                      {columns
-                        .filter(col => !col.hideOnMobile)
-                        .map(col => (
-                          <div key={String(col.key)} className="flex justify-between items-start">
-                            <span className="text-sm font-medium text-muted-foreground w-1/3">
-                              {col.header}:
-                            </span>
-                            <div className="text-sm flex-1 text-right">
-                              {(() => {
-                                const value = getColumnValue(item, col)
-                                if (col.render) {
-                                  return col.render(value, item)
-                                }
-                                return value === null ? '-' : String(value)
-                              })()}
-                            </div>
-                          </div>
-                        ))
-                      }
-
-                      {(onView ?? onEdit ?? onDelete) && (
-                        <div className="flex gap-2 pt-3 border-t">
-                          {onView && (
-                            <Button variant="outline" size="sm" onClick={() => onView(item)} className="flex-1">
-                              <Eye className="h-4 w-4 mr-2" />
-                              Informasi
-                            </Button>
-                          )}
-                          {onEdit && (
-                            <Button variant="outline" size="sm" onClick={() => onEdit(item)} className="flex-1">
-                              <Edit className="h-4 w-4 mr-2" />
-                              Informasi
-                            </Button>
-                          )}
-                          {onDelete && (
-                            <Button variant="outline" size="sm" onClick={() => onDelete(item)} className="flex-1 text-red-600">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Informasi
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {enablePagination && totalItems > 0 && (
-              <TablePaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                pageSize={rowsPerPage}
-                onPageSizeChange={(size) => {
-                  void setRowsPerPage(size)
-                  void setCurrentPage(1)
-                }}
-                totalItems={totalItems}
-                pageStart={pageStart}
-                pageEnd={pageEnd}
-                pageSizeOptions={sanitizedPageSizeOptions}
-                className="border-t"
-              />
-            )}
+            <p className="text-muted-foreground">{emptyMessage ?? "No data available"}</p>
           </div>
         ) : (
-          /* Desktop Table Layout */
-          <div className="space-y-4">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    {columns.map(col => (
-                      <th
-                        key={String(col.key)}
-                        className={`text-left p-2 font-medium text-muted-foreground ${col.hideOnMobile ? 'hidden sm:table-cell' : ''
-                          }`}
-                      >
-                        {col.sortable ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-auto p-0 font-medium"
-                            onClick={() => handleSort(String(col.key))}
-                          >
-                            {col.header}
-                            {sortBy === String(col.key) && (
-                              <span className="ml-1">
-                                {sortOrder === 'asc' ? '↑' : '↓'}
-                              </span>
-                            )}
-                          </Button>
-                        ) : (
-                          col.header
-                        )}
-                      </th>
-                    ))}
-                    {(onView ?? onEdit ?? onDelete) && (
-                      <th className="text-right p-2 font-medium text-muted-foreground">
-                        Informasi
-                      </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedData.map((item, index: number) => (
-                    <tr key={index} className="border-b hover:bg-muted/50">
-                      {columns.map(col => (
-                        <td
-                          key={String(col.key)}
-                          className={`p-2 ${col.hideOnMobile ? 'hidden sm:table-cell' : ''}`}
-                        >
-                          {(() => {
-                            const value = getColumnValue(item, col)
-                            if (col.render) {
-                              return col.render(value, item)
-                            }
-                            if (typeof value === 'boolean') {
-                              return (
-                                <Badge variant={value ? "default" : "secondary"}>
-                                  {value ? 'Yes' : 'No'}
-                                </Badge>
-                              )
-                            }
-                            return value === null ? '-' : String(value)
-                          })()}
-                        </td>
-                      ))}
-                      {(onView ?? onEdit ?? onDelete) && (
-                        <td className="text-right p-2">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Informasi</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              {onView && (
-                                <DropdownMenuItem onClick={() => onView(item)}>
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  Informasi
-                                </DropdownMenuItem>
-                              )}
-                              {onEdit && (
-                                <DropdownMenuItem onClick={() => onEdit(item)}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Informasi
-                                </DropdownMenuItem>
-                              )}
-                              {onDelete && (
-                                <DropdownMenuItem
-                                  onClick={() => onDelete(item)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Informasi
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <VirtualizedTable
+            data={paginatedData}
+            columns={virtualizedColumns}
+            className="border rounded-lg"
+          />
+        )}
 
-            {enablePagination && totalItems > 0 && (
-              <TablePaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                pageSize={rowsPerPage}
-                onPageSizeChange={(size) => {
-                  void setRowsPerPage(size)
-                  void setCurrentPage(1)
-                }}
-                totalItems={totalItems}
-                pageStart={pageStart}
-                pageEnd={pageEnd}
-                pageSizeOptions={sanitizedPageSizeOptions}
-                className="border-t"
-              />
-            )}
+        {/* Pagination Controls */}
+        {enablePagination && totalItems > 0 && (
+          <div className="mt-4 border-t pt-4">
+            <TablePaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              pageSize={rowsPerPage}
+              onPageSizeChange={(size) => {
+                void setRowsPerPage(size)
+                void setCurrentPage(1)
+              }}
+              totalItems={totalItems}
+              pageStart={pageStart}
+              pageEnd={pageEnd}
+              pageSizeOptions={sanitizedPageSizeOptions}
+            />
           </div>
         )}
       </CardContent>

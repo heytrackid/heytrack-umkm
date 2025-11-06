@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { AlertTriangle, Package, ShoppingCart, X } from 'lucide-react'
 import { uiLogger } from '@/lib/logger'
-import type { NotificationsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 /**
  * Inventory Notifications Component
@@ -16,7 +16,7 @@ import type { NotificationsTable } from '@/types/database'
 
 
 
-type InventoryNotification = NotificationsTable & {
+type InventoryNotification = Row<'notifications'> & {
   metadata?: {
     ingredient_id?: string
     ingredient_name?: string
@@ -113,7 +113,7 @@ export const InventoryNotifications = () => {
       case 'warning':
         return <Package className="h-4 w-4 text-yellow-500" />
       default:
-        return <ShoppingCart className="h-4 w-4 text-blue-500" />
+        return <ShoppingCart className="h-4 w-4 text-gray-500" />
     }
   }
 
@@ -193,7 +193,7 @@ export const InventoryNotifications = () => {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 border rounded-lg ${!notification.is_read ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-200' : 'bg-card'
+                  className={`p-4 border rounded-lg ${!notification.is_read ? 'bg-gray-50 dark:bg-gray-950/20 border-gray-300' : 'bg-card'
                     }`}
                 >
                   <div className="flex items-start justify-between gap-3">

@@ -19,6 +19,13 @@
       "env": {
         "SUPABASE_ACCESS_TOKEN": "${input:supabase-access-token}"
       }
+    },
+    "Sentry": {
+      "url": "https://mcp.sentry.dev/mcp/heytrack/javascript-nextjs",
+      "type": "http"
+    },
+    "my-mcp-server-5fa7e296": {
+      "url": "https://mcp.vercel.com"
     }
   }
 }

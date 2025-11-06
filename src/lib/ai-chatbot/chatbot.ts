@@ -1,5 +1,7 @@
 import { AIClient, NLPProcessor } from '@/lib/ai'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 import { ContextManager } from './context-manager'
 import { ChatbotPromptBuilder } from './prompt-builder'
 import type { AIResponse } from './types'
@@ -63,7 +65,7 @@ export class ContextAwareAI {
         }
       }
     } catch (error) {
-      apiLogger.error({ error, query }, 'Error processing AI query')
+      logger.error({ error, query }, 'Error processing AI query')
       throw error
     }
   }

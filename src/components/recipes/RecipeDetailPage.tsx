@@ -1,15 +1,15 @@
  
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DeleteModal } from '@/components/ui'
-import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
-import { createClient } from '@/utils/supabase/client'
+import type { Row } from '@/types/database'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { useAuth } from '@/hooks/useAuth'
 import {
     ChefHat,
@@ -21,9 +21,9 @@ import {
     ArrowLeft,
 } from 'lucide-react'
 
-type RecipeRow = RecipesTable
-type RecipeIngredientRow = RecipeIngredientsTable
-type IngredientRow = IngredientsTable
+type RecipeRow = Row<'recipes'>
+type RecipeIngredientRow = Row<'recipe_ingredients'>
+type IngredientRow = Row<'ingredients'>
 
 type RecipeIngredientWithDetails = RecipeIngredientRow & {
     ingredient: Pick<IngredientRow, 'id' | 'name' | 'unit' | 'price_per_unit'> | null
@@ -41,8 +41,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
     const router = useRouter()
     const { toast } = useToast()
     const { user, isLoading: authLoading } = useAuth()
-
-    const supabase = useMemo(() => createClient(), [])
+    const { supabase } = useSupabase()
 
     const [recipe, setRecipe] = useState<RecipeWithIngredients | null>(null)
     const [loading, setLoading] = useState(true)
@@ -149,7 +148,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
 
     const getDifficultyColor = (difficulty: string) => {
         const colors: Record<string, string> = {
-            easy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+            easy: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400',
             medium: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
             hard: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
         }

@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/shared'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Sparkles, Lightbulb, TrendingUp, CheckCircle, AlertTriangle } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
-import { PageHeader } from '@/components/shared'
+import { AlertTriangle, CheckCircle, Lightbulb, Sparkles, TrendingUp } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 const recommendationsBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -60,7 +60,9 @@ const HppRecommendationsPage = () => {
         params.append('is_implemented', 'true')
       }
 
-      const response = await fetch(`/api/hpp/recommendations?${params.toString()}`)
+      const response = await fetch(`/api/hpp/recommendations?${params.toString()}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (response.ok) {
         const data = await response.json()
         void setRecommendations(data.recommendations ?? [])
@@ -190,7 +192,7 @@ const HppRecommendationsPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">
+              <div className="text-3xl font-bold text-gray-600">
                 {formatCurrency(totalPotentialSavings)}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -228,22 +230,31 @@ const HppRecommendationsPage = () => {
 
         {/* Recommendations List */}
         <div className="space-y-4">
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-            </div>
-          ) : recommendations.length === 0 ? (
-            <Card>
-              <CardContent className="py-8">
-                <div className="text-center text-muted-foreground">
-                  <Lightbulb className="h-12 w-12 mx-auto mb-4 text-gray-500" />
-                  <h3 className="text-lg font-semibold mb-2">No Recommendations</h3>
-                  <p>No cost optimization recommendations available at this time.</p>
-                  <p className="text-sm mt-2">Recommendations will be generated based on your HPP analysis.</p>
+          {(() => {
+            if (loading) {
+              return (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
                 </div>
-              </CardContent>
-            </Card>
-          ) : (
+              )
+            }
+            
+            if (recommendations.length === 0) {
+              return (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">
+                      <Lightbulb className="h-12 w-12 mx-auto mb-4 text-gray-500" />
+                      <h3 className="text-lg font-semibold mb-2">No Recommendations</h3>
+                      <p>No cost optimization recommendations available at this time.</p>
+                      <p className="text-sm mt-2">Recommendations will be generated based on your HPP analysis.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            }
+            
+            return (
             recommendations.map((rec) => (
               <Card key={rec.id} className={`transition-all ${rec.is_implemented ? 'opacity-75' : ''}`}>
                 <CardContent className="pt-6">
@@ -306,7 +317,8 @@ const HppRecommendationsPage = () => {
                 </CardContent>
               </Card>
             ))
-          )}
+            )
+          })()}
         </div>
 
         {/* Sample Recommendations */}
@@ -323,7 +335,7 @@ const HppRecommendationsPage = () => {
               <div className="space-y-3">
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    <TrendingUp className="h-4 w-4 text-gray-500" />
                     <span className="font-semibold">Supplier Cost Reduction</span>
                     <Badge variant="default">High</Badge>
                   </div>
@@ -334,7 +346,7 @@ const HppRecommendationsPage = () => {
 
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Lightbulb className="h-4 w-4 text-blue-500" />
+                    <Lightbulb className="h-4 w-4 text-gray-500" />
                     <span className="font-semibold">Recipe Optimization</span>
                     <Badge variant="secondary">Medium</Badge>
                   </div>
@@ -345,7 +357,7 @@ const HppRecommendationsPage = () => {
 
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    <Sparkles className="h-4 w-4 text-gray-500" />
                     <span className="font-semibold">Bulk Purchasing</span>
                     <Badge variant="outline">Low</Badge>
                   </div>

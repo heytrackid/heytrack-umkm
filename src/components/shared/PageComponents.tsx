@@ -1,28 +1,28 @@
 'use client'
 
-import { Fragment, type ReactNode } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { getStatusColor, getStatusText } from '@/lib/shared/utilities'
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import {
-  Plus,
-  RefreshCw,
-  Eye,
-  Edit,
-  Trash2,
-  ArrowLeft,
-  AlertCircle
+    AlertCircle,
+    ArrowLeft,
+    Edit,
+    Eye,
+    Plus,
+    RefreshCw,
+    Trash2
 } from 'lucide-react'
+import { Fragment, type ReactNode } from 'react'
 
 interface BreadcrumbItem {
   label: string
@@ -177,7 +177,7 @@ export const SharedStatsCards = ({
           {stat.trend && (
             <div className="mt-4 flex items-center text-xs">
               <span
-                className={`font-medium ${stat.trend.isPositive ? 'text-green-600' : 'text-red-600'
+                className={`font-medium ${stat.trend.isPositive ? 'text-gray-600' : 'text-red-600'
                   }`}
               >
                 {stat.trend.isPositive ? '+' : ''}{stat.trend.value}%
@@ -308,8 +308,22 @@ export const ActionButtons = ({
   size = "sm",
   variant = "horizontal"
 }: ActionButtonsProps) => {
-  const buttonSize = size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'default'
-  const iconSize = size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'
+  let buttonSize: 'sm' | 'lg' | 'default'
+  let iconSize: string
+
+  switch (size) {
+    case 'sm':
+      buttonSize = 'sm'
+      iconSize = 'h-4 w-4'
+      break
+    case 'lg':
+      buttonSize = 'lg'
+      iconSize = 'h-5 w-5'
+      break
+    default:
+      buttonSize = 'default'
+      iconSize = 'h-4 w-4'
+  }
 
   if (variant === 'dropdown') {
     // Dropdown variant - implement later if needed

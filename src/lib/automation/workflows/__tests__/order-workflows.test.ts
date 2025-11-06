@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { OrderWorkflowHandlers } from '@/lib/automation/workflows/order-workflows'
 import type { WorkflowContext, WorkflowResult } from '@/types/features/automation'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Order Workflow Tests
@@ -19,7 +20,12 @@ const mockSupabase = {
     update: vi.fn(() => ({
       eq: vi.fn(() => Promise.resolve({ error: null }))
     })),
-    insert: vi.fn(() => Promise.resolve({ error: null })),
+    insert: vi.fn(() => ({
+      select: vi.fn(() => ({
+        single: vi.fn(() => Promise.resolve({ data: { id: 'mock-id' }, error: null }))
+      })),
+      then: vi.fn(() => Promise.resolve({ error: null }))
+    })),
     delete: vi.fn(() => ({
       eq: vi.fn(() => Promise.resolve({ error: null }))
     }))

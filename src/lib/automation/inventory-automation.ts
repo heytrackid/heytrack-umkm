@@ -1,10 +1,10 @@
+/* eslint-disable no-nested-ternary */
 import type {
-
-  AutomationConfig,
-  Ingredient,
-  InventoryAnalysis,
-  InventoryStatus,
-  ReorderUrgency
+    AutomationConfig,
+    Ingredient,
+    InventoryAnalysis,
+    InventoryStatus,
+    ReorderUrgency
 } from './types'
 
 export class InventoryAutomation {

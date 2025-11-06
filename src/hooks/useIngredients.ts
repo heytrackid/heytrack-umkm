@@ -1,8 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
-import type { IngredientsTable, IngredientsInsert, IngredientsUpdate } from '@/types/database'
+import type { Row, Insert, Update } from '@/types/database'
 
 /**
  * React Query hooks for Ingredients
@@ -10,9 +12,9 @@ import type { IngredientsTable, IngredientsInsert, IngredientsUpdate } from '@/t
  */
 
 
-type Ingredient = IngredientsTable
-type IngredientInsert = IngredientsInsert
-type IngredientUpdate = IngredientsUpdate
+type Ingredient = Row<'ingredients'>
+type IngredientInsert = Insert<'ingredients'>
+type IngredientUpdate = Update<'ingredients'>
 
 interface UseIngredientsOptions {
   limit?: number
@@ -32,7 +34,9 @@ export function useIngredients(options?: UseIngredientsOptions) {
       if (options?.offset) {params.set('offset', options.offset.toString())}
       if (options?.search) {params.set('search', options.search)}
       
-      const response = await fetch(`/api/ingredients?${params}`)
+      const response = await fetch(`/api/ingredients?${params}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch ingredients')
       }
@@ -55,7 +59,9 @@ export function useIngredient(id: string | null) {
     queryFn: async () => {
       if (!id) {return null}
       
-      const response = await fetch(`/api/ingredients/${id}`)
+      const response = await fetch(`/api/ingredients/${id}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch ingredient')
       }
@@ -80,6 +86,7 @@ export function useCreateIngredient() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {
@@ -99,7 +106,7 @@ export function useCreateIngredient() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Failed to create ingredient')
+      logger.error({ error: message }, 'Failed to create ingredient')
       
       toast({
         title: 'Error',
@@ -123,6 +130,7 @@ export function useUpdateIngredient() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {
@@ -143,7 +151,7 @@ export function useUpdateIngredient() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Failed to update ingredient')
+      logger.error({ error: message }, 'Failed to update ingredient')
       
       toast({
         title: 'Error',
@@ -165,6 +173,7 @@ export function useDeleteIngredient() {
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/ingredients/${id}`, {
         method: 'DELETE',
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {
@@ -184,7 +193,7 @@ export function useDeleteIngredient() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Failed to delete ingredient')
+      logger.error({ error: message }, 'Failed to delete ingredient')
       
       toast({
         title: 'Error',

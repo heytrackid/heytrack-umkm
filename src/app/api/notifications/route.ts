@@ -1,13 +1,13 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
-import type { NotificationsTable } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+import type { Row } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type Notification = NotificationsTable
+type Notification = Row<'notifications'>
 
 async function GET(request: NextRequest) {
   try {
@@ -28,7 +28,7 @@ async function GET(request: NextRequest) {
     // Build query
     let query = supabase
       .from('notifications')
-      .select('*')
+      .select('id, user_id, title, message, type, is_read, created_at, updated_at, metadata')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(limit)
@@ -81,9 +81,7 @@ async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await request.json()
+    }    const body = await request.json()
 
     // Create notification
     const { data, error } = await supabase

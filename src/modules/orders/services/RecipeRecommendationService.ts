@@ -1,7 +1,7 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { OrdersTable, OrderItemsTable, RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import type { RecipeOption } from '../types'
 
 
@@ -55,9 +55,9 @@ export class RecipeRecommendationService {
       if (!orders) {return []}
 
       // Define types for order query result using generated types
-      type Order = OrdersTable
-      type OrderItem = OrderItemsTable
-      type Recipe = RecipesTable
+      type Order = Row<'orders'>
+      type OrderItem = Row<'order_items'>
+      type Recipe = Row<'recipes'>
 
       type OrderQueryResult = Order & {
         order_items: Array<OrderItem & {

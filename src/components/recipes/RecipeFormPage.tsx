@@ -1,16 +1,10 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react'
-import type { RecipesTable, IngredientsTable, Database } from '@/types/database'
-import { uiLogger } from '@/lib/logger'
 import {
     Select,
     SelectContent,
@@ -18,9 +12,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { useToast } from '@/hooks/use-toast'
+import { uiLogger } from '@/lib/logger'
+import type { Row, Database } from '@/types/database'
+import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-type RecipeInsert = RecipesTable
-type Ingredient = IngredientsTable
+type RecipeInsert = Row<'recipes'>
+type Ingredient = Row<'ingredients'>
 
 interface RecipeFormPageProps {
     mode: 'create' | 'edit'
@@ -63,10 +64,12 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
 
     const loadIngredients = async () => {
         try {
-            const response = await fetch('/api/ingredients')
+            const response = await fetch('/api/ingredients', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const data = await response.json()
-                setIngredients(data)
+                setIngredients(data.ingredients ?? [])
             }
         } catch (error: unknown) {
             // Silent fail - will show empty ingredients list
@@ -83,7 +86,9 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
             setLoading(true)
 
             // Fetch recipe with ingredients from API
-            const response = await fetch(`/api/recipes/${recipeId}`)
+            const response = await fetch(`/api/recipes/${recipeId}`, {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (!response.ok) {
                 throw new Error('Gagal memuat resep')
             }
@@ -167,6 +172,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                             notes: ri.notes,
                         })),
                     }),
+                    credentials: 'include', // Include cookies for authentication
                 })
 
                 if (!response.ok) {
@@ -196,6 +202,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                             notes: ri.notes,
                         })),
                     }),
+                    credentials: 'include', // Include cookies for authentication
                 })
 
                 if (!response.ok) {

@@ -1,7 +1,9 @@
 'use client'
 
 import { useCallback } from 'react'
-import { logger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import type { SmartInsightsRequest, AIInsight, PricingAnalysisRequest, InventoryOptimizationRequest } from './types'
 
 

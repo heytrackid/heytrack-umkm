@@ -1,5 +1,7 @@
 import { toast } from '@/hooks/use-toast';
-import { apiLogger } from '@/lib/logger';
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile');
 
 
 /**
@@ -17,7 +19,7 @@ export interface ApiResponse<T = unknown> {
 export class ApiErrorHandler {
   static handle(error: unknown, context?: string, showNotification = true): ApiResponse {
     // Log the error
-    apiLogger.error({
+    logger.error({
       error,
       context,
       timestamp: new Date().toISOString()

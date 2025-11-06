@@ -75,12 +75,12 @@ export const DateRangePicker = ({
   const [selectedPreset, setSelectedPreset] = useState<string>('')
 
   useEffect(() => {
-    void setDate(value)
+    setDate(value)
   }, [value])
 
   const handleDateChange = (newDate: DateRange | undefined) => {
-    void setDate(newDate)
-    void setSelectedPreset('')
+    setDate(newDate)
+    setSelectedPreset('')
     onChange?.(newDate)
   }
 
@@ -88,8 +88,8 @@ export const DateRangePicker = ({
     const preset = presets.find((p) => p.label === presetLabel)
     if (preset) {
       const newDate = preset.getValue()
-      void setDate(newDate)
-      void setSelectedPreset(presetLabel)
+      setDate(newDate)
+      setSelectedPreset(presetLabel)
       onChange?.(newDate)
     }
   }
@@ -107,17 +107,13 @@ export const DateRangePicker = ({
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, 'dd MMM yyyy', { locale: idLocale })} -{' '}
-                  {format(date.to, 'dd MMM yyyy', { locale: idLocale })}
-                </>
-              ) : (
-                format(date.from, 'dd MMM yyyy', { locale: idLocale })
-              )
-            ) : (
-              <span>Pilih periode</span>
+            {!date?.from && <span>Pilih periode</span>}
+            {date?.from && !date.to && format(date.from, 'dd MMM yyyy', { locale: idLocale })}
+            {date?.from && date.to && (
+              <>
+                {format(date.from, 'dd MMM yyyy', { locale: idLocale })} -{' '}
+                {format(date.to, 'dd MMM yyyy', { locale: idLocale })}
+              </>
             )}
           </Button>
         </PopoverTrigger>

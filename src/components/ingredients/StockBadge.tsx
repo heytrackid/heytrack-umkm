@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge'
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { memo } from 'react'
 
 
 
@@ -19,13 +20,13 @@ type StockStatus = 'out' | 'low' | 'normal'
 
 /**
  * Stock Badge Component
- * 
+ *
  * Visual indicator for stock status with color coding:
  * - Red: Out of stock (0)
  * - Yellow: Low stock (<= min)
  * - Green: Normal stock (> min)
  */
-export const StockBadge = ({
+export const StockBadge = memo(({
     currentStock,
     minStock,
     unit,
@@ -56,9 +57,9 @@ export const StockBadge = ({
         },
         normal: {
             label: 'Normal',
-            color: 'bg-green-100 text-green-800 border-green-200',
+            color: 'bg-gray-100 text-gray-800 border-gray-300',
             icon: CheckCircle,
-            iconColor: 'text-green-600'
+            iconColor: 'text-gray-600'
         }
     }
 
@@ -91,22 +92,27 @@ export const StockBadge = ({
             </span>
         </div>
     )
-}
+})
 
 /**
  * Compact Stock Indicator for Mobile
  */
-export const CompactStockIndicator = ({
+export const CompactStockIndicator = memo(({
     currentStock,
     minStock,
     unit
 }: Omit<StockBadgeProps, 'showIcon' | 'compact' | 'className'>) => {
-    const status = currentStock <= 0 ? 'out' : currentStock <= minStock ? 'low' : 'normal'
+    const getStatus = () => {
+        if (currentStock <= 0) {return 'out'}
+        if (currentStock <= minStock) {return 'low'}
+        return 'normal'
+    }
+    const status = getStatus()
 
     const colors = {
         out: 'bg-red-500',
         low: 'bg-yellow-500',
-        normal: 'bg-green-500'
+        normal: 'bg-gray-500'
     }
 
     return (
@@ -117,4 +123,4 @@ export const CompactStockIndicator = ({
             </span>
         </div>
     )
-}
+})

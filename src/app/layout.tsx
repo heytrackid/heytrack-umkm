@@ -1,26 +1,29 @@
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
+import { getNonce } from '@/lib/nonce';
+import { AuthProvider } from '@/providers/AuthProvider';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 import QueryProvider from '@/providers/QueryProvider';
+import { SWRProvider } from '@/providers/SWRProvider';
+import SupabaseProvider from '@/providers/SupabaseProvider';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from 'react';
-import { Toaster } from 'react-hot-toast';
-import { getNonce } from '@/lib/nonce';
-import "./globals.css";
 
-// import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -37,8 +40,11 @@ const RootLayout = async ({
   const nonce = await getNonce()
 
   return (
-    <html lang="id" suppressHydrationWarning className="h-full">
+    <html lang="id" suppressHydrationWarning className="dark h-full">
       <head>
+        {/* Mobile viewport with safe area support */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+
         {/* Performance resource hints */}
         <link rel="preconnect" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} crossOrigin="anonymous" />
         <link rel="dns-prefetch" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} />
@@ -53,41 +59,39 @@ const RootLayout = async ({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <QueryProvider>
-            <SettingsProvider>
-              <PreloadingProvider
-                enableSmartPreloading
-                enableIdlePreloading
-                enableNetworkAware
-                debug={false}
-              >
-                <GlobalErrorBoundary>
-                  {/* Header temporarily disabled during development */}
-                  {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
-                  <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
-                    🚧 Development Mode - Auth Disabled
-                  </div>
-                </header> */}
-                  {children}
-                </GlobalErrorBoundary>
-              </PreloadingProvider>
-              <Toaster
-                position="bottom-right"
-                toastOptions={{
-                  duration: 4000,
-                  className: 'toast-custom',
-                }}
-              />
-              {/* Performance Monitoring - Removed temporarily */}
-            </SettingsProvider>
-          </QueryProvider>
-        </ThemeProvider>
+        <SupabaseProvider>
+          <AuthProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem={false}
+              disableTransitionOnChange
+            >
+              <QueryProvider>
+                <SettingsProvider>
+                  <SWRProvider>
+                    <PreloadingProvider
+                      enableSmartPreloading
+                      enableIdlePreloading
+                      enableNetworkAware
+                      debug={false}
+                      >
+                        <GlobalErrorBoundary>
+                      {/* Header temporarily disabled during development */}
+                      {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
+                      <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
+                        🚧 Development Mode - Auth Disabled
+                      </div>
+                    </header> */}
+                      {children}
+                        </GlobalErrorBoundary>
+                      </PreloadingProvider>
+                    </SWRProvider>
+                  </SettingsProvider>
+                </QueryProvider>
+              </ThemeProvider>
+            </AuthProvider>
+          </SupabaseProvider>
         <Analytics />
       </body>
     </html>

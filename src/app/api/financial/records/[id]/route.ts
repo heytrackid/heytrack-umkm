@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { FinancialRecordUpdateSchema } from '@/lib/validations/domains/finance'
 import { apiLogger } from '@/lib/logger'
-import type { FinancialRecordsUpdate } from '@/types/database'
+import type { Update } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -29,7 +29,7 @@ export async function GET(
     // Fetch financial record
     const { data, error } = await supabase
       .from('financial_records')
-      .select('*')
+      .select('id, user_id, date, description, category, amount, reference, type, created_at, created_by')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
@@ -84,7 +84,7 @@ export async function PUT(
     const validatedData = validation.data
 
     // Build update object (only fields that exist in financial_records table)
-    const updatePayload: FinancialRecordsUpdate = {
+    const updatePayload: Update<'financial_records'> = {
       date: validatedData.date,
       type: validatedData.type,
       category: validatedData.category,

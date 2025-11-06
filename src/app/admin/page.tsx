@@ -6,7 +6,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { isAdmin } from '@/lib/auth/admin-check'
-import AdminDashboard from '@/components/admin/AdminDashboard'
+import { AdminDashboardWrapper } from '@/components/admin/AdminDashboardWrapper'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertTriangle } from 'lucide-react'
 
@@ -52,7 +52,7 @@ const AdminPage = async () => {
                 </div>
             </div>
 
-            <AdminDashboard userId={user.id} />
+            <AdminDashboardWrapper userId={user.id} />
         </div>
     )
 }

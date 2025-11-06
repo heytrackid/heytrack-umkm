@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { BarChart3, TrendingUp, TrendingDown, Target, Package, Users } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
-import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { BarChart3, Package, Target, TrendingDown, TrendingUp, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
 // No imports needed for now
 
 interface RecipeComparison {
@@ -63,7 +63,9 @@ const ComparisonAnalyticsPage = () => {
         params.append('category', selectedCategory)
       }
 
-      const response = await fetch(`/api/hpp/comparison?${params.toString()}`)
+      const response = await fetch(`/api/hpp/comparison?${params.toString()}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (response.ok) {
         const data = await response.json()
         void setRecipes(data.recipes ?? [])
@@ -83,7 +85,7 @@ const ComparisonAnalyticsPage = () => {
 
   const getProfitabilityColor = (profitability: string) => {
     switch (profitability) {
-      case 'high': return 'text-green-600'
+      case 'high': return 'text-gray-600'
       case 'medium': return 'text-yellow-600'
       case 'low': return 'text-red-600'
       default: return 'text-gray-600'
@@ -92,8 +94,8 @@ const ComparisonAnalyticsPage = () => {
 
   const getEfficiencyColor = (efficiency: string) => {
     switch (efficiency) {
-      case 'high': return 'text-blue-600'
-      case 'medium': return 'text-purple-600'
+      case 'high': return 'text-gray-600'
+      case 'medium': return 'text-gray-600'
       case 'low': return 'text-orange-600'
       default: return 'text-gray-600'
     }
@@ -198,7 +200,7 @@ const ComparisonAnalyticsPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-2xl font-bold text-gray-600">
                   {formatCurrency(benchmark.averageHpp)}
                 </div>
                 <p className="text-sm text-muted-foreground">Average HPP</p>
@@ -207,7 +209,7 @@ const ComparisonAnalyticsPage = () => {
 
             <Card>
               <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-green-600">
+                <div className="text-2xl font-bold text-gray-600">
                   {benchmark.averageMargin.toFixed(1)}%
                 </div>
                 <p className="text-sm text-muted-foreground">Average Margin</p>
@@ -216,7 +218,7 @@ const ComparisonAnalyticsPage = () => {
 
             <Card>
               <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-purple-600">
+                <div className="text-2xl font-bold text-gray-600">
                   {formatCurrency(benchmark.averagePrice)}
                 </div>
                 <p className="text-sm text-muted-foreground">Average Price</p>
@@ -320,7 +322,7 @@ const ComparisonAnalyticsPage = () => {
             {benchmark.topPerformer && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-green-600">
+                  <CardTitle className="flex items-center gap-2 text-gray-600">
                     <TrendingUp className="h-5 w-5" />
                     Top Performer
                   </CardTitle>
@@ -333,13 +335,13 @@ const ComparisonAnalyticsPage = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className="text-2xl font-bold text-gray-600">
                         {benchmark.topPerformer.marginPercentage.toFixed(1)}%
                       </div>
                       <div className="text-sm text-muted-foreground">Margin</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">
+                      <div className="text-2xl font-bold text-gray-600">
                         {benchmark.topPerformer.timesMade}
                       </div>
                       <div className="text-sm text-muted-foreground">Sales</div>
@@ -406,7 +408,7 @@ const ComparisonAnalyticsPage = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
-                <BarChart3 className="h-12 w-12 mx-auto mb-4 text-blue-600" />
+                <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-600" />
                 <h4 className="font-semibold mb-2">Margin Distribution</h4>
                 <p className="text-sm text-muted-foreground">
                   Compare profit margins across all recipes to identify optimization opportunities
@@ -414,7 +416,7 @@ const ComparisonAnalyticsPage = () => {
               </div>
 
               <div className="text-center">
-                <Target className="h-12 w-12 mx-auto mb-4 text-green-600" />
+                <Target className="h-12 w-12 mx-auto mb-4 text-gray-600" />
                 <h4 className="font-semibold mb-2">Performance Benchmarking</h4>
                 <p className="text-sm text-muted-foreground">
                   Identify top performers and recipes that need improvement
@@ -422,7 +424,7 @@ const ComparisonAnalyticsPage = () => {
               </div>
 
               <div className="text-center">
-                <TrendingUp className="h-12 w-12 mx-auto mb-4 text-purple-600" />
+                <TrendingUp className="h-12 w-12 mx-auto mb-4 text-gray-600" />
                 <h4 className="font-semibold mb-2">Trend Analysis</h4>
                 <p className="text-sm text-muted-foreground">
                   Track how recipe performance changes over time

@@ -1,9 +1,10 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
+import { checkAdminPrivileges } from '@/lib/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-import type { ErrorLogsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
+import { SecurityPresets, withSecurity } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -24,24 +25,64 @@ async function POST(request: NextRequest) {
       apiLogger.debug({ error: getErrorMessage(authError) }, 'Anonymous error report')
     }
 
-    const body = await request.json()
+    // Parse body - handle both JSON and text/plain
+    interface ErrorBody {
+      message?: string
+      msg?: string
+      stack?: string
+      url?: string
+      userAgent?: string
+      componentStack?: string
+      timestamp?: string | number
+      errorType?: string
+      browser?: string
+      os?: string
+      device?: string
+    }
+    let body: ErrorBody
+    const contentType = request.headers.get('content-type') ?? ''
+    
+    try {
+      if (contentType.includes('application/json')) {
+        body = await request.json()
+      } else if (contentType.includes('text/plain')) {
+        // Try to parse text as JSON (sendBeacon might send JSON as text/plain)
+        const text = await request.text()
+        body = JSON.parse(text)
+      } else {
+        body = await request.json() // Default to JSON
+      }
+    } catch (parseError: unknown) {
+      apiLogger.error({ error: getErrorMessage(parseError), contentType }, 'Failed to parse error report body')
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      )
+    }
     
     // Validate required fields
-    if (!body.message) {
+    if (!body.message && !body.msg) {
       return NextResponse.json(
         { error: 'Message is required' },
         { status: 400 }
       )
     }
 
-    // Sanitize error data
+    // Sanitize error data with proper type casting
+    const message = String(body.message ?? body.msg ?? 'Unknown error')
+    const stack = body.stack ? String(body.stack) : null
+    const url = body.url ? String(body.url) : null
+    const userAgent = body.userAgent ? String(body.userAgent) : null
+    const componentStack = body.componentStack ? String(body.componentStack) : null
+    const timestamp = body.timestamp ? String(body.timestamp) : new Date().toISOString()
+    
     const sanitizedErrorData = {
-      message: body.message.substring(0, 1000), // Limit message length
-      stack: body.stack ? body.stack.substring(0, 5000) : null, // Limit stack trace
-      url: body.url ? body.url.substring(0, 500) : null,
-      userAgent: body.userAgent ? body.userAgent.substring(0, 500) : null,
-      timestamp: body.timestamp ?? new Date().toISOString(),
-      componentStack: body.componentStack ? body.componentStack.substring(0, 2000) : null,
+      message: message.substring(0, 1000), // Limit message length
+      stack: stack ? stack.substring(0, 5000) : null, // Limit stack trace
+      url: url ? url.substring(0, 500) : null,
+      userAgent: userAgent ? userAgent.substring(0, 500) : null,
+      timestamp,
+      componentStack: componentStack ? componentStack.substring(0, 2000) : null,
       // Add any additional fields you want to log
     }
 
@@ -49,20 +90,20 @@ async function POST(request: NextRequest) {
     if (userId) {
       try {
         const supabase = await createClient()
-        const errorLogData: ErrorLogsInsert = {
+        const errorLogData: Insert<'error_logs'> = {
           user_id: userId,
           endpoint: sanitizedErrorData.url ?? 'unknown',
           error_message: sanitizedErrorData.message,
-          error_type: body.errorType ?? 'ClientError',
+          error_type: String(body.errorType ?? 'ClientError'),
           stack_trace: sanitizedErrorData.stack,
           timestamp: sanitizedErrorData.timestamp,
           metadata: {
             url: sanitizedErrorData.url,
             userAgent: sanitizedErrorData.userAgent,
             componentStack: sanitizedErrorData.componentStack,
-            browser: body.browser,
-            os: body.os,
-            device: body.device,
+            browser: body.browser ? String(body.browser) : undefined,
+            os: body.os ? String(body.os) : undefined,
+            device: body.device ? String(body.device) : undefined,
           }
         }
         
@@ -80,11 +121,13 @@ async function POST(request: NextRequest) {
       }
     }
 
-    // Also log to our logger
-    apiLogger.error({
-      ...sanitizedErrorData,
-      userId
-    }, 'Client-side error reported')
+    // In development, log as well
+    if (process.env.NODE_ENV === 'development') {
+      apiLogger.info({
+        ...sanitizedErrorData,
+        userId
+      }, 'Client-side error reported')
+    }
 
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
@@ -111,14 +154,19 @@ async function GET(request: NextRequest) {
       )
     }
 
-    // TODO: Add admin check
-    // const isAdmin = await isAdminUser(user.id)
-    // if (!isAdmin) {
-    //   return NextResponse.json(
-    //     { error: 'Forbidden' },
-    //     { status: 403 }
-    //   )
-    // }
+    // Check if user has admin privileges
+    const adminCheck = await checkAdminPrivileges(user)
+    if (!adminCheck.hasPermission) {
+      apiLogger.warn({ 
+        userId: user.id, 
+        email: user.email 
+      }, 'Unauthorized access attempt to error logs')
+      
+      return NextResponse.json(
+        { error: 'Forbidden - Admin access required' },
+        { status: 403 }
+      )
+    }
 
     const { searchParams } = new URL(request.url)
     const limit = parseInt(searchParams.get('limit') ?? '50', 10)
@@ -127,7 +175,7 @@ async function GET(request: NextRequest) {
     // Fetch recent errors from database
     const { data: errors, error: queryError } = await supabase
       .from('error_logs')
-      .select('*')
+      .select('id, user_id, message, stack, timestamp, url, user_agent, ip_address, metadata')
       .order('timestamp', { ascending: false })
       .range(offset, offset + limit - 1)
 
@@ -150,6 +198,16 @@ async function GET(request: NextRequest) {
 }
 
 const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPOST = withSecurity(POST, SecurityPresets.basic()) // Allow anonymous error reporting
+
+// Custom config for error reporting - more permissive to accept error logs from various sources
+const securedPOST = withSecurity(POST, {
+  sanitizeInputs: true,
+  sanitizeQueryParams: true,
+  validateContentType: true,
+  allowedContentTypes: ['application/json', 'text/plain'], // Allow both JSON and text/plain for sendBeacon
+  rateLimit: { maxRequests: 200, windowMs: 15 * 60 * 1000 }, // Higher limit for error reporting
+  checkForSQLInjection: false, // Error messages might contain SQL-like text
+  checkForXSS: false, // Error messages might contain HTML-like text
+})
 
 export { securedGET as GET, securedPOST as POST }

@@ -1,12 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, NotificationsInsert } from '@/types/database'
+import type { Insert, Database, Json } from '@/types/database'
 import type { CreateNotificationParams } from '@/types/domain/notifications'
-import type { Json } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 
 
 
-type NotificationInsert = NotificationsInsert
+type NotificationInsert = Insert<'notifications'>
 
 export class NotificationService {
   /**
@@ -67,7 +66,7 @@ export class NotificationService {
       priority: 'high',
       entity_type: 'ingredient',
       entity_id: ingredientId,
-      action_url: `/inventory?highlight=${ingredientId}`,
+      action_url: `/ingredients?highlight=${ingredientId}`,
       metadata: {
         ingredient_name: ingredientName,
         current_stock: currentStock,

@@ -59,7 +59,7 @@ const ProfitReportPage = () => {
     exportReport
   } = useProfitData()
 
-  const productChartData = useProductChartData(profitData)
+  const productChartData = useProductChartData(profitData ?? null)
 
   // Loading skeleton helper functions to avoid unstable nested components
   const renderProfitInfoSkeleton = () => (
@@ -315,7 +315,7 @@ const ProfitReportPage = () => {
               </Card>
 
               {/* Info Card Loading */}
-              <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+              <Card className="border-gray-300 bg-gray-50 dark:bg-gray-950 dark:border-gray-800">
                 <CardContent className="pt-6">
                   <div className="animate-pulse space-y-4">
                     <div className="h-4 bg-muted rounded w-1/2" />

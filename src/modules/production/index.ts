@@ -1,18 +1,12 @@
 import { uiLogger } from '@/lib/logger'
-import type {
-
-  ProductionsTable,
-  ProductionsInsert,
-  ProductionsUpdate,
-  ProductionStatus as ProductionStatusEnum
-} from '@/types/database'
+import type { Row, Insert, Update, ProductionStatus as ProductionStatusEnum } from '@/types/database'
 
 // Production module - use generated Supabase types
 
 // Base types from generated schema
-export type Production = ProductionsTable
-export type ProductionInsert = ProductionsInsert
-export type ProductionUpdate = ProductionsUpdate
+export type Production = Row<'productions'>
+export type ProductionInsert = Insert<'productions'>
+export type ProductionUpdate = Update<'productions'>
 export type ProductionStatus = ProductionStatusEnum
 
 // Backward compatibility aliases

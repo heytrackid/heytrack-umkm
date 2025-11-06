@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 

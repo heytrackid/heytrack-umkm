@@ -1,22 +1,25 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import { ShoppingCart } from 'lucide-react'
-import { apiLogger } from '@/lib/logger'
+import { apiLogger as _apiLogger } from '@/lib/logger'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
+import { useIngredients } from '@/hooks/useIngredients'
+import { useIngredientPurchases, useCreateIngredientPurchase } from '@/hooks/useIngredientPurchases'
 import PurchaseStats from './PurchaseStats'
 import PurchaseForm from './PurchaseForm'
 import PurchasesTable from './PurchasesTable'
-import type { IngredientPurchase, AvailableIngredient } from './types'
+import type { IngredientPurchase as _IngredientPurchase, AvailableIngredient as _AvailableIngredient } from './types'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 
 
 const IngredientPurchasesLayout = () => {
-  const [purchases, setPurchases] = useState<IngredientPurchase[]>([])
-  const [ingredients, setIngredients] = useState<AvailableIngredient[]>([])
+  const { data: purchases = [], isLoading: _purchasesLoading } = useIngredientPurchases()
+  const { data: ingredients = [], isLoading: _ingredientsLoading } = useIngredients()
+  const createPurchase = useCreateIngredientPurchase()
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
 
@@ -31,41 +34,6 @@ const IngredientPurchasesLayout = () => {
     }
   }, [isAuthLoading, isAuthenticated, toast])
 
-  // ✅ OPTIMIZED: Use TanStack Query hooks (to be implemented)
-  // For now, keep existing fetch but add TODO comment
-  useEffect(() => {
-    if (!isAuthLoading && isAuthenticated) {
-      void fetchPurchases()
-      void fetchIngredients()
-    }
-  }, [isAuthLoading, isAuthenticated])
-
-  // TODO: Replace with useIngredientPurchases() hook
-  const fetchPurchases = async () => {
-    try {
-      const response = await fetch('/api/ingredient-purchases')
-      if (response.ok) {
-        const data = await response.json()
-        void setPurchases(data)
-      }
-    } catch (err: unknown) {
-      apiLogger.error({ err }, 'Error fetching purchases:')
-    }
-  }
-
-  // TODO: Replace with useIngredients() hook
-  const fetchIngredients = async () => {
-    try {
-      const response = await fetch('/api/ingredients')
-      if (response.ok) {
-        const data = await response.json()
-        void setIngredients(data.ingredients ?? [])
-      }
-    } catch (err: unknown) {
-      apiLogger.error({ err }, 'Error fetching ingredients:')
-    }
-  }
-
   const handlePurchaseSubmit = async (formData: {
     ingredient_id: string;
     quantity: number;
@@ -76,26 +44,12 @@ const IngredientPurchasesLayout = () => {
   }) => {
     const totalPrice = formData.quantity * formData.unit_price;
 
-    const response = await fetch('/api/ingredient-purchases', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...formData,
-        total_price: totalPrice
-      })
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to create purchase')
-    }
-
-    await fetchPurchases()
-    await fetchIngredients() // Refresh untuk update WAC
-    toast({
-      title: 'Berhasil',
-      description: 'Pembelian berhasil ditambahkan! Stock dan WAC telah diperbarui.',
-      variant: 'default',
-    })
+    // Note: user_id will be handled by the API route authentication
+    await createPurchase.mutateAsync({
+      ...formData,
+      total_price: totalPrice,
+      user_id: 'temp' // Will be overridden by API
+    } as typeof formData & { total_price: number; user_id: string })
   }
 
   // Show loading state while auth is initializing

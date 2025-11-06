@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
-import type { IngredientsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type IngredientInsert = IngredientsInsert
+type IngredientInsert = Insert<'ingredients'>
 
 const sanitizeString = (value?: string | null, fallback?: string | null) => {
   const trimmed = value?.trim()
@@ -29,9 +29,7 @@ export async function POST(request: NextRequest) {
     
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // 2. Parse CSV data from request
+    }    // 2. Parse CSV data from request
     const body = await request.json()
     const { ingredients } = body as { ingredients: Array<Partial<IngredientInsert>> }
 

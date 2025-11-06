@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable no-nested-ternary */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -77,16 +78,21 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
                 return (
                   <div
                     key={item.id}
-                    className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all hover:shadow-md ${isGood ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' :
-                      isWarning ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
-                        'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                    className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all hover:shadow-md ${
+                      isGood 
+                        ? 'bg-gray-50 dark:bg-gray-900/20 border-gray-300 dark:border-gray-800' 
+                        : (isWarning 
+                          ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' 
+                          : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800')
                       }`}
                   >
                     {/* Rank Badge */}
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${index === 0 ? 'bg-gray-400 text-gray-900' :
-                      index === 1 ? 'bg-gray-300 text-gray-700' :
-                        index === 2 ? 'bg-gray-400 text-gray-900' :
-                          'bg-gray-200 text-gray-600'
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
+                      index === 0 
+                        ? 'bg-gray-400 text-gray-900' 
+                        : (index === 1 
+                          ? 'bg-gray-300 text-gray-700' 
+                          : (index === 2 ? 'bg-gray-400 text-gray-900' : 'bg-gray-200 text-gray-600'))
                       }`}>
                       {index + 1}
                     </div>
@@ -106,10 +112,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
 
                     {/* Status Badge */}
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                      <Badge className={`${isGood ? 'bg-gray-600' :
-                        isWarning ? 'bg-gray-600' :
-                          'bg-red-600'
-                        } gap-1`}>
+                      <Badge className={`${isGood ? 'bg-gray-600' : (isWarning ? 'bg-gray-600' : 'bg-red-600')} gap-1`}>
                         {isGood ? (
                           <>
                             <TrendingUp className="h-3 w-3" />
@@ -166,7 +169,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
 
         {/* Enhanced Recommendations */}
         {comparison.length > 0 && (
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-5 rounded-lg border-2 border-purple-200 dark:border-purple-800">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-900/20 p-5 rounded-lg border-2 border-gray-300 dark:border-gray-800">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
                 <Lightbulb className="h-5 w-5 text-white" />

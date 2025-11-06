@@ -2,15 +2,17 @@ import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/respo
 import { withValidation } from '@/lib/api-core/middleware'
 import { handleDatabaseError } from '@/lib/errors'
 import { createClient } from '@/utils/supabase/server'
-import { IdParamSchema, IngredientUpdateSchema } from '@/lib/validations' 
+import { IdParamSchema, IngredientUpdateSchema } from '@/lib/validations'
+import { triggerWorkflow } from '@/lib/automation/workflows/index'
+import { apiLogger } from '@/lib/logger'
 import type { NextRequest } from 'next/server'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { isValidUUID } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 // GET /api/ingredients/[id] - Get single bahan baku
 export async function GET(
@@ -96,6 +98,18 @@ export async function PUT(
       return createErrorResponse('Unauthorized', 401)
     }
 
+    // Get current ingredient data before update to check for stock changes
+    const { data: currentIngredient, error: fetchError } = await supabase
+      .from('ingredients')
+      .select('id, name, current_stock, min_stock, unit')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (fetchError) {
+      return handleDatabaseError(fetchError)
+    }
+
     // Update bahan baku
     const { data, error } = await supabase
       .from('ingredients')
@@ -112,7 +126,49 @@ export async function PUT(
       return handleDatabaseError(error)
     }
 
-    return createSuccessResponse(data as Ingredient, 'Bahan baku berhasil diupdate')
+    const updatedIngredient = data as Ingredient
+
+    // TRIGGER AUTOMATION WORKFLOWS based on stock changes
+    try {
+      const oldStock = currentIngredient.current_stock ?? 0
+      const newStock = updatedIngredient.current_stock ?? 0
+      const minStock = updatedIngredient.min_stock ?? 0
+
+      // Check for stock level changes that trigger automation
+      if (newStock <= 0 && oldStock > 0) {
+        // Stock went from positive to zero or negative - OUT OF STOCK
+        apiLogger.info(`🚨 Out of stock alert triggered for ${updatedIngredient.name}`)
+        await triggerWorkflow('inventory.out_of_stock', updatedIngredient.id, {
+          ingredient: {
+            name: updatedIngredient.name,
+            unit: updatedIngredient.unit,
+            min_stock: minStock
+          },
+          previousStock: oldStock,
+          currentStock: newStock,
+          severity: 'critical'
+        })
+      } else if (newStock <= minStock && oldStock > minStock) {
+        // Stock went from above minimum to at/below minimum - LOW STOCK
+        apiLogger.info(`⚠️ Low stock alert triggered for ${updatedIngredient.name}`)
+        await triggerWorkflow('inventory.low_stock', updatedIngredient.id, {
+          ingredient: {
+            name: updatedIngredient.name,
+            unit: updatedIngredient.unit,
+            min_stock: minStock
+          },
+          previousStock: oldStock,
+          currentStock: newStock,
+          severity: newStock <= minStock * 0.5 ? 'critical' : 'warning'
+        })
+      }
+
+    } catch (automationError) {
+      apiLogger.error({ error: automationError }, '⚠️ Inventory automation trigger error (non-blocking):')
+      // Don't fail the ingredient update if automation fails
+    }
+
+    return createSuccessResponse(updatedIngredient, 'Bahan baku berhasil diupdate')
 
   } catch (error: unknown) {
     return handleDatabaseError(error)

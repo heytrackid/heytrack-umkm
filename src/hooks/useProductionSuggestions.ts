@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 
 
 
@@ -22,7 +24,9 @@ export function useProductionSuggestions() {
   return useQuery({
     queryKey: ['production-suggestions'],
     queryFn: async () => {
-      const response = await fetch('/api/production/suggestions')
+      const response = await fetch('/api/production/suggestions', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch production suggestions')
       }
@@ -50,7 +54,8 @@ export function useCreateProductionBatch() {
       const response = await fetch('/api/production/suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(request)
+        body: JSON.stringify(request),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -61,14 +66,14 @@ export function useCreateProductionBatch() {
       return response.json()
     },
     onSuccess: (data) => {
-      apiLogger.info({ batchId: data.batch_id }, 'Production batch created:')
+      logger.info({ batchId: data.batch_id }, 'Production batch created:')
       // Invalidate related queries
       void queryClient.invalidateQueries({ queryKey: ['production-suggestions'] })
       void queryClient.invalidateQueries({ queryKey: ['productions'] })
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
     },
     onError: (error) => {
-      apiLogger.error({ error }, 'Failed to create production batch:')
+      logger.error({ error }, 'Failed to create production batch:')
     }
   })
 }

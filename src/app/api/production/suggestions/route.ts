@@ -71,9 +71,7 @@ export async function POST(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       )
-    }
-
-    const body = await request.json()
+    }    const body = await request.json()
     const { order_ids, planned_date } = body
 
     if (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0) {

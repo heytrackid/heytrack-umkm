@@ -1,5 +1,9 @@
+'use client'
+
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { logger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 
 
 // Performance monitoring and optimization utilities

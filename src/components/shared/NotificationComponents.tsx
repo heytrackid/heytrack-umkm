@@ -66,21 +66,21 @@ export const NotificationCenter = ({
     const iconClass = "h-4 w-4"
     switch (type) {
       case 'success':
-        return <CheckCircle className={cn(iconClass, "text-green-500")} />
+        return <CheckCircle className={cn(iconClass, "text-gray-500")} />
       case 'warning':
         return <AlertTriangle className={cn(iconClass, "text-yellow-500")} />
       case 'error':
         return <XCircle className={cn(iconClass, "text-red-500")} />
       case 'order':
-        return <ShoppingCart className={cn(iconClass, "text-blue-500")} />
+        return <ShoppingCart className={cn(iconClass, "text-gray-500")} />
       case 'inventory':
         return <Package className={cn(iconClass, "text-orange-500")} />
       case 'financial':
-        return <DollarSign className={cn(iconClass, "text-green-500")} />
+        return <DollarSign className={cn(iconClass, "text-gray-500")} />
       case 'system':
         return <Settings className={cn(iconClass, "text-gray-500")} />
       default:
-        return <Info className={cn(iconClass, "text-blue-500")} />
+        return <Info className={cn(iconClass, "text-gray-500")} />
     }
   }
 
@@ -170,7 +170,7 @@ export const NotificationCenter = ({
 
                       <div className="flex items-center gap-1">
                         {!notification.read && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                          <div className="w-2 h-2 bg-gray-500 rounded-full" />
                         )}
                         <Button
                           variant="ghost"
@@ -249,13 +249,13 @@ export const ToastNotification = ({
   const getToastStyles = (): string => {
     switch (type) {
       case 'success':
-        return 'border-green-200 bg-green-50 text-green-800'
+        return 'border-gray-300 bg-gray-50 text-gray-800'
       case 'error':
         return 'border-red-200 bg-red-50 text-red-800'
       case 'warning':
         return 'border-yellow-200 bg-yellow-50 text-yellow-800'
       default:
-        return 'border-blue-200 bg-blue-50 text-blue-800'
+        return 'border-gray-300 bg-gray-50 text-gray-800'
     }
   }
 
@@ -346,13 +346,13 @@ export const ActivityFeed = ({
   const getActivityIcon = (type: ActivityItem['type']) => {
     switch (type) {
       case 'user':
-        return <User className="h-4 w-4 text-blue-500" />
+        return <User className="h-4 w-4 text-gray-500" />
       case 'order':
-        return <ShoppingCart className="h-4 w-4 text-green-500" />
+        return <ShoppingCart className="h-4 w-4 text-gray-500" />
       case 'inventory':
         return <Package className="h-4 w-4 text-orange-500" />
       case 'financial':
-        return <DollarSign className="h-4 w-4 text-purple-500" />
+        return <DollarSign className="h-4 w-4 text-gray-500" />
       default:
         return <Settings className="h-4 w-4 text-gray-500" />
     }
@@ -475,13 +475,13 @@ export const AlertBanner = ({
   const getAlertStyles = () => {
     switch (type) {
       case 'success':
-        return 'border-green-200 bg-green-50 text-green-800'
+        return 'border-gray-300 bg-gray-50 text-gray-800'
       case 'warning':
         return 'border-yellow-200 bg-yellow-50 text-yellow-800'
       case 'error':
         return 'border-red-200 bg-red-50 text-red-800'
       default:
-        return 'border-blue-200 bg-blue-50 text-blue-800'
+        return 'border-gray-300 bg-gray-50 text-gray-800'
     }
   }
 

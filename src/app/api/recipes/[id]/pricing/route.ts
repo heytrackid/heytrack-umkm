@@ -1,20 +1,34 @@
-import { type NextRequest, NextResponse } from 'next/server'
 import { PricingAutomation, UMKM_CONFIG } from '@/lib/automation'
 import { apiLogger } from '@/lib/logger'
+import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
-import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import { type NextRequest, NextResponse } from 'next/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type Recipe = RecipesTable
-type RecipeIngredient = RecipeIngredientsTable
-type Ingredient = IngredientsTable
+type RecipeIngredient = Row<'recipe_ingredients'>
+type Ingredient = Row<'ingredients'>
 
-interface RecipeWithIngredients extends Recipe {
+interface RecipeWithIngredients {
+  id: string
+  name: string
+  servings?: number | null
   recipe_ingredients?: Array<RecipeIngredient & {
     ingredient?: Ingredient | null
   }>
+  [key: string]: unknown // Allow other properties
+}
+
+// Type for recipe ingredient with nested ingredient as returned by the query
+interface RecipeIngredientWithIngredient {
+  quantity: number
+  unit: string
+  ingredients: {
+    id: string
+    name: string
+    price_per_unit: number | null
+  } | null
 }
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
@@ -26,9 +40,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get the recipe data from the request
+    }    // Get the recipe data from the request
     let recipeData: RecipeWithIngredients | null = await request.json()
 
     // If recipe data wasn't provided in the request body, fetch it from the database
@@ -64,26 +76,33 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
       // Transform the data structure to match RecipeWithIngredients
       // Supabase returns joined data as arrays, so we need to extract the first element
-      const transformedIngredients = (data.recipe_ingredients || []).map((ri) => {
-        // Type guard to handle the ingredients property which might be an array or object
-        const ingredientArray = Array.isArray(ri.ingredients) ? ri.ingredients : [];
-        const ingredient = ingredientArray.length > 0 ? ingredientArray[0] : null;
-        
-        return {
-          id: '',
-          recipe_id: data.id,
-          ingredient_id: ingredient?.id ?? '',
-          quantity: ri.quantity || 0,
-          unit: ri.unit || '',
-          user_id: user.id,
-          ingredient: ingredient ?? null
-        } as RecipeIngredient & { ingredient: Ingredient | null }
-      })
+      const transformedIngredients = (data.recipe_ingredients || []).map((ri: RecipeIngredientWithIngredient) => ({
+        id: '',
+        recipe_id: data.id,
+        ingredient_id: ri.ingredients?.id ?? '',
+        quantity: ri.quantity,
+        unit: ri.unit,
+        user_id: user.id,
+        ingredient: ri.ingredients
+          ? {
+              id: ri.ingredients.id,
+              name: ri.ingredients.name,
+              unit: '',
+              price_per_unit: ri.ingredients.price_per_unit,
+              weighted_average_cost: null,
+              current_stock: 0,
+              category: null,
+              created_at: null,
+              updated_at: null,
+              user_id: user.id
+            }
+          : null
+      } as RecipeIngredient & { ingredient: Row<'ingredients'> | null }))
 
       recipeData = {
         ...data,
         recipe_ingredients: transformedIngredients
-      } as RecipeWithIngredients
+      }
     }
 
     // Create a pricing automation instance and calculate pricing
@@ -92,7 +111,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     // Transform recipeData to match expected type with proper null handling
     const recipeForPricing: RecipeWithIngredients = {
       ...recipeData,
-      servings: recipeData?.servings ?? 1,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      servings: (recipeData as any)?.servings ?? 1,
       recipe_ingredients: (recipeData?.recipe_ingredients ?? []).map((ri) => ({
         id: ri?.id || '',
         recipe_id: ri?.recipe_id || '',
@@ -107,12 +127,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     // Calculate pricing using the original recipeData which should have the right structure
     const sanitizedIngredients = (recipeForPricing.recipe_ingredients ?? [])
         .filter((ri): ri is RecipeIngredient & { ingredient: Ingredient } => ri.ingredient !== null && ri.ingredient !== undefined)
-        .map((ri) => ({
-          ...ri,
-          ingredient: ri.ingredient
-        }))
+
+    // Cast to expected type for PricingAutomation
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pricingRecipe = recipeForPricing as any
+
     const pricingAnalysis = pricingAutomation.calculateSmartPricing({
-      ...recipeForPricing,
+      ...pricingRecipe,
       recipe_ingredients: sanitizedIngredients
     })
 

@@ -9,11 +9,11 @@ import { EnhancedIngredientForm } from './EnhancedIngredientForm'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2 } from 'lucide-react'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 interface IngredientFormDialogProps {
     open: boolean
@@ -89,7 +89,7 @@ export const IngredientFormDialog = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-[calc(100%-2rem)] max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
                         {mode === 'create' ? 'Tambah Bahan Baku Baru' : `Edit ${ingredient?.name}`}

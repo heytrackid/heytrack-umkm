@@ -1,8 +1,10 @@
 'use client'
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+const logger = createClientLogger('ClientFile')
 
 
 
@@ -18,7 +20,11 @@ interface HppOverviewData {
     recipe_id: string
     recipe_name: string
     alert_type: string
+    title: string
     message: string
+    severity: string
+    is_read: boolean
+    new_value: number | null
     created_at: string
   }>
   recentSnapshots: Array<{
@@ -37,7 +43,9 @@ export function useHppOverview() {
   const query = useQuery<HppOverviewData>({
     queryKey: ['hpp-overview'],
     queryFn: async () => {
-      const response = await fetch('/api/hpp/overview')
+      const response = await fetch('/api/hpp/overview', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch HPP overview')
       }
@@ -50,7 +58,8 @@ export function useHppOverview() {
   const markAlertAsRead = useMutation({
     mutationFn: async (alertId: string) => {
       const response = await fetch(`/api/hpp/alerts/${alertId}/read`, {
-        method: 'PUT'
+        method: 'PUT',
+        credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {
         throw new Error('Failed to mark alert as read')
@@ -79,7 +88,7 @@ export function useHppOverview() {
         queryClient.setQueryData(['hpp-overview'], context.previousData)
       }
       
-      apiLogger.error({ err: error, alertId }, 'Failed to mark alert as read')
+      logger.error({ err: error, alertId }, 'Failed to mark alert as read')
       toast({
         title: 'Error',
         description: 'Failed to mark alert as read',
@@ -97,7 +106,8 @@ export function useHppOverview() {
   const markAllAlertsAsRead = useMutation({
     mutationFn: async () => {
       const response = await fetch('/api/hpp/alerts/bulk-read', {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {
         throw new Error('Failed to mark all alerts as read')
@@ -113,7 +123,7 @@ export function useHppOverview() {
       })
     },
     onError: (error) => {
-      apiLogger.error({ err: error }, 'Failed to mark all alerts as read')
+      logger.error({ err: error }, 'Failed to mark all alerts as read')
       toast({
         title: 'Error',
         description: 'Failed to mark all alerts as read',

@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { logger } from '@/lib/logger'
-import type { Json } from '@/types/supabase-generated'
+import type { Json } from '@/types/database'
 import type {
 
   BusinessContext,

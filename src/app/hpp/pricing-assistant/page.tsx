@@ -1,21 +1,22 @@
 'use client'
+ 
 
-import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { DollarSign, TrendingUp, Target, AlertTriangle, CheckCircle, Lightbulb, Calculator } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
-import { PageHeader, SharedStatsCards } from '@/components/shared'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
+import { AlertTriangle, Calculator, CheckCircle, DollarSign, Lightbulb, Target, TrendingUp } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 const pricingBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -59,7 +60,9 @@ const PricingAssistantPage = () => {
     const loadRecipes = async () => {
       try {
         void setLoading(true)
-        const response = await fetch('/api/recipes?limit=1000')
+        const response = await fetch('/api/recipes?limit=1000', {
+          credentials: 'include', // Include cookies for authentication
+        })
         if (response.ok) {
           const data = await response.json()
           void setRecipes(data.recipes ?? [])
@@ -97,7 +100,8 @@ const PricingAssistantPage = () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ recipeId: selectedRecipe })
+        body: JSON.stringify({ recipeId: selectedRecipe }),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (response.ok) {
@@ -133,7 +137,7 @@ const PricingAssistantPage = () => {
   }
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) { return 'text-green-600' }
+    if (confidence >= 0.8) { return 'text-gray-600' }
     if (confidence >= 0.6) { return 'text-yellow-600' }
     return 'text-red-600'
   }
@@ -243,7 +247,7 @@ const PricingAssistantPage = () => {
                 <Separator />
 
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-2xl font-bold text-gray-600">
                     +{formatCurrency(recommendation.recommendedPrice - recommendation.currentPrice)}
                   </div>
                   <div className="text-sm text-muted-foreground">Potential Revenue Increase</div>
@@ -362,7 +366,7 @@ const PricingAssistantPage = () => {
               <div className="space-y-3">
                 {recommendation.reasoning.map((reason, index) => (
                   <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-gray-600 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">{reason}</span>
                   </div>
                 ))}
@@ -400,7 +404,7 @@ const PricingAssistantPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-4 border rounded-lg">
-                  <DollarSign className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                  <DollarSign className="h-8 w-8 mx-auto mb-2 text-gray-600" />
                   <h4 className="font-semibold">Cost-Based</h4>
                   <p className="text-sm text-muted-foreground">
                     Margin optimal berdasarkan HPP dan biaya produksi
@@ -408,7 +412,7 @@ const PricingAssistantPage = () => {
                 </div>
 
                 <div className="text-center p-4 border rounded-lg">
-                  <TrendingUp className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                  <TrendingUp className="h-8 w-8 mx-auto mb-2 text-gray-600" />
                   <h4 className="font-semibold">Market-Driven</h4>
                   <p className="text-sm text-muted-foreground">
                     Penyesuaian harga berdasarkan kondisi pasar dan kompetitor
@@ -416,7 +420,7 @@ const PricingAssistantPage = () => {
                 </div>
 
                 <div className="text-center p-4 border rounded-lg">
-                  <Target className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+                  <Target className="h-8 w-8 mx-auto mb-2 text-gray-600" />
                   <h4 className="font-semibold">Risk-Aware</h4>
                   <p className="text-sm text-muted-foreground">
                     Analisis risiko dan confidence level untuk setiap rekomendasi

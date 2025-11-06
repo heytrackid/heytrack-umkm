@@ -1,4 +1,6 @@
-import { uiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 
 
 // Reports module - basic exports for now
@@ -22,7 +24,7 @@ export interface Report<T = unknown> {
 
 export const ReportsModule = {
   generateReport: (config: ReportConfig) => {
-    uiLogger.debug({ config }, 'Report generation not implemented yet')
+    logger.debug({ config }, 'Report generation not implemented yet')
     return null
   }
 }

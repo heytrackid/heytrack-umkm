@@ -2,7 +2,7 @@ import { apiLogger } from '@/lib/logger'
 
 /**
  * AI Client Module
- * Handles API calls to OpenRouter and OpenAI
+ * Handles API calls to OpenRouter
  */
 
 
@@ -13,7 +13,7 @@ export class AIClient {
   static callAI(
     prompt: string,
     systemPrompt: string,
-    model = 'meta-llama/llama-3.1-8b-instruct:free'
+    model = 'x-ai/grok-4-fast'
   ): Promise<string> {
     return this.callOpenRouter(prompt, systemPrompt, model)
   }
@@ -24,7 +24,7 @@ export class AIClient {
   static async callOpenRouter(
     prompt: string,
     systemPrompt: string,
-    model = 'meta-llama/llama-3.1-8b-instruct:free'
+    model = 'x-ai/grok-4-fast'
   ): Promise<string> {
     const apiKey = process.env['OPENROUTER_API_KEY']
 
@@ -93,24 +93,26 @@ export class AIClient {
   }
 
   /**
-   * Call OpenAI API as fallback
+   * Call OpenRouter API with different error handling (alternative to callOpenRouter)
    */
-  static async callOpenAI(
+  static async callOpenRouterAlt(
     prompt: string,
     systemPrompt: string,
-    model = 'gpt-3.5-turbo'
+    model = 'x-ai/grok-4-fast'
   ): Promise<string> {
-    const apiKey = process.env['OPENAI_API_KEY']
+    const apiKey = process.env['OPENROUTER_API_KEY']
 
     if (!apiKey) {
-      throw new Error('OpenAI API key not configured')
+      throw new Error('OpenRouter API key not configured. Please set OPENROUTER_API_KEY in your .env file')
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+        'X-Title': 'HeyTrack AI Assistant'
       },
       body: JSON.stringify({
         model,
@@ -131,7 +133,7 @@ export class AIClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message ?? 'Unknown error'}`)
+      throw new Error(`OpenRouter API error: ${response.status} - ${errorData.error?.message ?? 'Unknown error'}`)
     }
 
     const data = await response.json()

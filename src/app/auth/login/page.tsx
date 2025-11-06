@@ -1,22 +1,26 @@
 'use client'
 
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { useRenderPerformance } from '@/hooks/usePerformance'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import Link from 'next/link'
-import { type FormEvent, useState, useTransition } from 'react'
-import { login } from './actions'
+import React, { type FormEvent, useState, useTransition } from 'react'
+// import { login } from './actions' // Replaced with API call
 
 const LoginPage = () => {
+  useRenderPerformance('LoginPage')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
+
   const [isPending, startTransition] = useTransition()
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -47,11 +51,32 @@ const LoginPage = () => {
     }
 
     startTransition(async () => {
-      const result = await login(formData)
-      if (result?.error) {
-        const authError = getAuthErrorMessage(result.error)
-        void setError(authError)
-        // For now, no specific action - could be extended later
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+          credentials: 'include', // Include cookies for authentication
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          const authError = getAuthErrorMessage(data.error ?? 'Login failed')
+          void setError(authError)
+          void setErrorAction(null)
+          return
+        }
+
+        // Success - redirect
+        window.location.href = '/dashboard'
+      } catch (_err) {
+        void setError('Network error. Please try again.')
         void setErrorAction(null)
       }
     })
@@ -68,7 +93,7 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen mobile-min-vh flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 sm:p-6 md:p-8 relative">
+    <div className="min-h-screen mobile-min-vh flex items-center justify-center bg-background p-4 sm:p-6 md:p-8 relative">
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4">
         <ThemeToggle />
@@ -99,7 +124,7 @@ const LoginPage = () => {
                 <AlertDescription className="text-sm">
                   {error}
                   {errorAction && (
-                    <>
+                    <React.Fragment>
                       {' '}
                       <Link
                         href={errorAction.href}
@@ -107,13 +132,13 @@ const LoginPage = () => {
                       >
                         {errorAction.label}
                       </Link>
-                    </>
+                    </React.Fragment>
                   )}
                 </AlertDescription>
               </Alert>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} method="post" className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
                   Email
@@ -189,6 +214,8 @@ const LoginPage = () => {
                   </p>
                 )}
               </div>
+
+
 
               <Button
                 type="submit"

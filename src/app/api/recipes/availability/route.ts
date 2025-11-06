@@ -53,9 +53,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await request.json()
+    }    const body = await request.json()
     const { recipes } = body
 
     if (!recipes || !Array.isArray(recipes)) {

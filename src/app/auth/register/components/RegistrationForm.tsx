@@ -12,6 +12,7 @@ import { PasswordStrengthIndicator } from './PasswordStrengthIndicator'
 import { PasswordRequirements } from './PasswordRequirements'
 import { useRegistration } from '@/app/auth/register/hooks/useRegistration'
 
+
 interface RegistrationFormProps {
   password: string
   confirmPassword: string
@@ -44,6 +45,8 @@ export const RegistrationForm = ({
     clearFieldError,
     handleSubmit
   } = useRegistration()
+  
+
 
   // Notify parent of success
   useEffect(() => {
@@ -54,7 +57,9 @@ export const RegistrationForm = ({
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
     const formData = new FormData(e.currentTarget)
+
     handleSubmit(formData)
   }
 
@@ -211,6 +216,8 @@ export const RegistrationForm = ({
               </p>
             )}
           </div>
+
+
 
           <Button
             type="submit"

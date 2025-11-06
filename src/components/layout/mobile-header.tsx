@@ -1,38 +1,30 @@
 'use client'
 
-import { type ReactNode, type FormEvent, useState, useEffect } from 'react'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { Button } from '@/components/ui/button'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { useMobile } from '@/hooks/responsive'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
-import { useMobile } from '@/hooks/useResponsive'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
-import { createClient } from '@/utils/supabase/client'
-import Sidebar from './sidebar'
-import { NotificationBell } from '@/components/notifications/NotificationBell'
 import {
-  ArrowLeft,
-  Menu,
-  MoreVertical,
-  Search,
-  User,
-  X
+    ArrowLeft,
+    Menu,
+    MoreVertical,
+    Search,
+    User,
+    X
 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger
-} from "@/components/ui/sheet"
+import { useRouter } from 'next/navigation'
+import { type FormEvent, type ReactNode, useCallback, useEffect, useState } from 'react'
 
 interface MobileHeaderProps {
   title?: string
@@ -48,7 +40,7 @@ interface MobileHeaderProps {
   }
   className?: string
   onMenuToggle?: () => void
-  sidebarOpen?: boolean
+
 }
 
 const MobileHeader = ({
@@ -62,7 +54,7 @@ const MobileHeader = ({
   notification: _notification,
   className,
   onMenuToggle,
-  sidebarOpen
+
 }: MobileHeaderProps) => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -70,7 +62,7 @@ const MobileHeader = ({
   const [loading, setLoading] = useState(true)
   const { isMobile } = useMobile()
   const router = useRouter()
-  const supabase = createClient()
+  const { supabase } = useSupabase()
 
   // Check auth state on mount
   useEffect(() => {
@@ -99,19 +91,19 @@ const MobileHeader = ({
     return () => subscription.unsubscribe()
   }, [supabase.auth])
 
-  const handleSearchSubmit = (e: FormEvent) => {
+  const handleSearchSubmit = useCallback((e: FormEvent) => {
     e.preventDefault()
     if (onSearch) {
       onSearch(searchQuery)
     }
-  }
+  }, [onSearch, searchQuery])
 
-  const handleSearchToggle = () => {
+  const handleSearchToggle = useCallback(() => {
     void setIsSearchExpanded(!isSearchExpanded)
     if (isSearchExpanded) {
       void setSearchQuery('')
     }
-  }
+  }, [isSearchExpanded])
 
   // Auto-collapse search on outside click
   useEffect(() => {
@@ -157,21 +149,14 @@ const MobileHeader = ({
               <ArrowLeft className="h-5 w-5" />
             </Button>
           ) : (
-            <Sheet open={sidebarOpen} onOpenChange={onMenuToggle}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2 h-10 w-10">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-80 p-0">
-                <SheetHeader className="sr-only">
-                  <SheetTitle>Menu Navigasi</SheetTitle>
-                </SheetHeader>
-                <div className="h-full">
-                  <Sidebar isMobile />
-                </div>
-              </SheetContent>
-            </Sheet>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="p-2 h-10 w-10"
+              onClick={onMenuToggle}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
           )}
 
           {/* Title - Hidden when search is expanded */}
@@ -260,9 +245,11 @@ const MobileHeader = ({
           )}
 
           {/* User Authentication */}
-          {loading ? (
+          {loading && (
             <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
-          ) : user ? (
+          )}
+          
+          {!loading && user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="p-2">
@@ -287,7 +274,9 @@ const MobileHeader = ({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
+          )}
+          
+          {!loading && !user && (
             <div className="flex items-center space-x-2">
               <Button
                 variant="ghost"

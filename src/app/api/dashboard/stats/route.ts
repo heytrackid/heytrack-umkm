@@ -1,7 +1,8 @@
-/* eslint-disable */
+ 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { DateRangeQuerySchema } from '@/lib/validations/domains/common'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -42,7 +43,7 @@ interface ExpenseStats {
   amount: number
 }
 
-export async function GET(request: Request) {
+async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
 
@@ -199,40 +200,40 @@ export async function GET(request: Request) {
     
     // Calculate metrics
     const totalRevenue = orders?.reduce((sum: number, order: OrderStats) =>
-      sum + safeParseAmount(order.total_amount), 0) || 0
+      sum + safeParseAmount(order.total_amount), 0) ?? 0
 
     const currentPeriodRevenue = currentPeriodOrders?.reduce((sum: number, order: OrderStats) =>
-      sum + safeParseAmount(order.total_amount), 0) || 0
+      sum + safeParseAmount(order.total_amount), 0) ?? 0
 
     const validStatuses = ['PENDING', 'CONFIRMED', 'IN_PROGRESS'] as const
     const activeOrders = orders?.filter((order: OrderStats) =>
-      isInArray(order.status, validStatuses)).length || 0
+      isInArray(order.status, validStatuses)).length ?? 0
 
-    const totalCustomers = customers?.length || 0
+    const totalCustomers = customers?.length ?? 0
     const vipCustomers = customers?.filter((customer: CustomerStats) =>
-      safeString(customer.customer_type) === 'vip').length || 0
+      safeString(customer.customer_type) === 'vip').length ?? 0
 
     const lowStockItems = ingredients?.filter((ingredient: IngredientStats) => {
       const currentStock = safeParseAmount(ingredient.current_stock)
       const minStock = safeParseAmount(ingredient.min_stock)
       return currentStock <= minStock
-    }).length || 0
-    
-    const totalIngredients = ingredients?.length || 0
-    const totalRecipes = recipes?.length || 0
-    
+    }).length ?? 0
+
+    const totalIngredients = ingredients?.length ?? 0
+    const totalRecipes = recipes?.length ?? 0
+
     const expensesTotal = expenses?.reduce((sum: number, expense: ExpenseStats) =>
-      sum + safeParseAmount(expense.amount), 0) || 0
+      sum + safeParseAmount(expense.amount), 0) ?? 0
 
     const comparisonRevenue = comparisonOrders?.reduce((sum: number, order: { total_amount: number | null }) =>
-      sum + safeParseAmount(order.total_amount), 0) || 0
+      sum + safeParseAmount(order.total_amount), 0) ?? 0
     
     // Category breakdown for ingredients
     const categoryBreakdown = ingredients?.reduce((acc: Record<string, number>, ingredient: IngredientStats) => {
       const category = safeString(ingredient.category, 'General')
-      acc[category] = (acc[category] || 0) + 1
+      acc[category] = (acc[category] ?? 0) + 1
       return acc
-    }, {} as Record<string, number>) || {}
+    }, {} as Record<string, number>) ?? {} as Record<string, number>
 
     // ✅ Low stock alerts with ingredient details
     interface IngredientWithName extends IngredientStats {
@@ -241,14 +242,14 @@ export async function GET(request: Request) {
     }
     const lowStockAlerts = ingredients?.filter((ingredient: IngredientWithName) => {
       const currentStock = safeParseAmount(ingredient.current_stock)
-      const reorderPoint = safeParseAmount(ingredient.reorder_point || ingredient.min_stock)
+      const reorderPoint = safeParseAmount(ingredient.reorder_point ?? ingredient.min_stock)
       return currentStock <= reorderPoint
     }).map((ingredient: IngredientWithName) => ({
       id: ingredient.id,
       name: safeString(ingredient.name, 'Unknown'),
       currentStock: safeParseAmount(ingredient.current_stock),
-      reorderPoint: safeParseAmount(ingredient.reorder_point || ingredient.min_stock)
-    })) || []
+      reorderPoint: safeParseAmount(ingredient.reorder_point ?? ingredient.min_stock)
+    })) ?? []
 
     // Recent orders for activity feed
     const recentOrders = orders
@@ -257,7 +258,7 @@ export async function GET(request: Request) {
         const bTime = safeTimestamp(b.created_at)
         return bTime - aTime
       })
-      ?.slice(0, 5) || []
+      ?.slice(0, 5) ?? []
 
     // Calculate growth percentage
     const revenueGrowth = comparisonRevenue > 0 ?
@@ -272,8 +273,8 @@ export async function GET(request: Request) {
       },
       orders: {
         active: activeOrders,
-        total: orders?.length || 0,
-        today: currentPeriodOrders?.length || 0,
+        total: orders?.length ?? 0,
+        today: currentPeriodOrders?.length ?? 0,
         recent: recentOrders.map((order: OrderStats) => ({
           id: order.id,
           customer: safeString(order.customer_name, 'Walk-in customer'),
@@ -302,7 +303,7 @@ export async function GET(request: Request) {
             const bUsage = safeParseInt(b.times_made)
             return bUsage - aUsage
           })
-          ?.slice(0, 3) || []
+          ?.slice(0, 3) ?? []
       },
       expenses: {
         today: expensesTotal,
@@ -355,21 +356,21 @@ export async function POST() {
     interface OrderIdOnly { id: string; total_amount: number | null }
     interface OrderItemPartial { order_id: string; quantity: number }
     
-    const todayOrderIds = todayOrders?.map((order: OrderIdOnly) => order.id) || []
-    
+    const todayOrderIds = todayOrders?.map((order: OrderIdOnly) => order.id) ?? []
+
     const todayItems = todayOrderItems?.filter((item: OrderItemPartial) =>
-      todayOrderIds.includes(item.order_id)) || []
+      todayOrderIds.includes(item.order_id)) ?? []
 
     const totalRevenue = todayOrders?.reduce((sum: number, order: OrderIdOnly) =>
-      sum + safeParseAmount(order.total_amount), 0) || 0
+      sum + safeParseAmount(order.total_amount), 0) ?? 0
 
     const totalItemsSold = todayItems.reduce((sum: number, item: OrderItemPartial) =>
-      sum + safeParseInt(item.quantity), 0) || 0
+      sum + safeParseInt(item.quantity), 0) ?? 0
 
     const averageOrderValue = todayOrders?.length ? totalRevenue / todayOrders.length : 0
 
     const totalExpenses = todayExpenses?.reduce((sum: number, expense: { amount: number }) =>
-      sum + safeParseAmount(expense.amount), 0) || 0
+      sum + safeParseAmount(expense.amount), 0) ?? 0
 
     const profitEstimate = totalRevenue - totalExpenses
 
@@ -377,7 +378,7 @@ export async function POST() {
     const summaryData = {
       sales_date: today,
       user_id: user.id,
-      total_orders: todayOrders?.length || 0,
+      total_orders: todayOrders?.length ?? 0,
       total_revenue: totalRevenue,
       total_items_sold: totalItemsSold,
       average_order_value: averageOrderValue,
@@ -398,3 +399,8 @@ export async function POST() {
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+
+export { securedGET as GET }

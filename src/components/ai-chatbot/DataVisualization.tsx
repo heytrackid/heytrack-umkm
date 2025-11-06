@@ -1,14 +1,14 @@
 'use client'
 
-import type { CustomersTable, RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DollarSign } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useMemo } from 'react'
 
-type Customer = CustomersTable
-type Recipe = RecipesTable
+type Customer = Row<'customers'>
+type Recipe = Row<'recipes'>
 
 // Dynamically import Recharts components to reduce bundle size
 const BarChart = dynamic(

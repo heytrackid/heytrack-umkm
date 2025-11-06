@@ -2,14 +2,14 @@
 
 import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import type { RecipesTable, CustomersTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isArrayOf, isRecipe, isCustomer } from '@/lib/type-guards'
 
 
 
-type Recipe = RecipesTable
-type Customer = CustomersTable
+type Recipe = Row<'recipes'>
+type Customer = Row<'customers'>
 
 export interface OrderItem {
   id?: string
@@ -81,7 +81,9 @@ export const useOrderLogic = () => {
 
   const fetchRecipes = async () => {
     try {
-      const response = await fetch('/api/recipes')
+      const response = await fetch('/api/recipes', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (response.ok) {
         const data = await response.json()
         // Validate with type guards
@@ -109,7 +111,9 @@ export const useOrderLogic = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch('/api/customers')
+      const response = await fetch('/api/customers', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (response.ok) {
         const data = await response.json()
         // Validate with type guards
@@ -139,7 +143,7 @@ export const useOrderLogic = () => {
   const totalAmount = subtotal - formData.discount_amount + taxAmount + formData.delivery_fee
 
   // Form handlers
-  const handleInputChange = (field: keyof OrderFormData, value: unknown) => {
+  const handleInputChange = (field: keyof OrderFormData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -163,7 +167,7 @@ export const useOrderLogic = () => {
     void setOrderItems(prev => [...prev, newItem])
   }
 
-  const updateOrderItem = (index: number, field: keyof OrderItem, value: unknown) => {
+  const updateOrderItem = (index: number, field: keyof OrderItem, value: OrderItem[keyof OrderItem]) => {
     setOrderItems(prev => {
       const updated = [...prev]
       if (index < 0 || index >= updated.length || !updated[index]) {return updated}
@@ -208,6 +212,15 @@ export const useOrderLogic = () => {
     setOrderItems(prev => prev.filter((_, i) => i !== index))
   }
 
+  const reorderOrderItems = (fromIndex: number, toIndex: number) => {
+    setOrderItems(prev => {
+      const newItems = [...prev]
+      const [movedItem] = newItems.splice(fromIndex, 1)
+      newItems.splice(toIndex, 0, movedItem)
+      return newItems
+    })
+  }
+
   const selectCustomer = (customer: Customer) => {
     setFormData(prev => ({
       ...prev,
@@ -225,11 +238,56 @@ export const useOrderLogic = () => {
     return `ORD-${dateStr}-${timeStr}`
   }
 
+  // Enhanced validation with detailed feedback
+  const validateForm = () => {
+    const errors: string[] = []
+
+    // Customer validation
+    if (!formData.customer_name.trim()) {
+      errors.push('Nama pelanggan harus diisi')
+    }
+    if (!formData.customer_phone.trim()) {
+      errors.push('Nomor telepon pelanggan harus diisi')
+    }
+    if (formData.delivery_method === 'delivery' && !formData.delivery_address.trim()) {
+      errors.push('Alamat pengiriman harus diisi untuk metode delivery')
+    }
+
+    // Order items validation
+    if (orderItems.length === 0) {
+      errors.push('Minimal 1 item pesanan harus ditambahkan')
+    }
+
+    // Validate each order item
+    orderItems.forEach((item, index) => {
+      if (!item.recipe_id) {
+        errors.push(`Item ${index + 1}: Pilih resep`)
+      }
+      if (item.quantity <= 0) {
+        errors.push(`Item ${index + 1}: Jumlah harus lebih dari 0`)
+      }
+      if (item.unit_price <= 0) {
+        errors.push(`Item ${index + 1}: Harga harus lebih dari 0`)
+      }
+    })
+
+    // Date validation
+    if (!formData.order_date) {
+      errors.push('Tanggal pesanan harus diisi')
+    }
+    if (formData.delivery_method === 'delivery' && !formData.delivery_date) {
+      errors.push('Tanggal pengiriman harus diisi')
+    }
+
+    return errors
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    
-    if (!formData.customer_name || orderItems.length === 0) {
-      void setError('Nama pelanggan dan minimal 1 item pesanan harus diisi')
+
+    const validationErrors = validateForm()
+    if (validationErrors.length > 0) {
+      void setError(validationErrors.join('\n'))
       return
     }
     
@@ -275,7 +333,8 @@ export const useOrderLogic = () => {
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
+        body: JSON.stringify(orderData),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {
@@ -336,6 +395,7 @@ export const useOrderLogic = () => {
     addOrderItem,
     updateOrderItem,
     removeOrderItem,
+    reorderOrderItems,
     selectCustomer,
     handleSubmit,
     setActiveTab,

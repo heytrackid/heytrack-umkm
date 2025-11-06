@@ -153,8 +153,8 @@ const EnhancedTransactionForm = ({
                     <DialogTitle className="flex items-center gap-2 text-wrap-mobile">
                         {transactionType === 'income' ? (
                             <>
-                                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg flex-shrink-0">
-                                    <ArrowUpCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                <div className="p-2 bg-gray-100 dark:bg-gray-900 rounded-lg flex-shrink-0">
+                                    <ArrowUpCircle className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                                 </div>
                                 Tambah Pemasukan
                             </>

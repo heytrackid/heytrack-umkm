@@ -1,16 +1,39 @@
 'use client'
 
-import { Fragment } from 'react'
+import { Fragment, useEffect, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
 import { useResponsive } from '@/hooks/useResponsive'
+import { useSearchParams } from 'next/navigation'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-
-// Import components directly for better parallel loading
-import CategoryList from './components/CategoryList'
-import { CategoryForm } from './components/CategoryForm'
+import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
 import { useCategories } from './hooks/useCategories'
+
+// Lazy load heavy category components
+const CategoryList = dynamic(() => import('./components/CategoryList'), {
+  loading: () => <DataGridSkeleton rows={8} />,
+  ssr: false
+})
+
+const CategoryForm = dynamic(() => import('./components/CategoryForm').then(mod => ({ default: mod.CategoryForm })), {
+  loading: () => (
+    <div className="space-y-4">
+      <div className="h-16 bg-muted animate-pulse rounded" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="h-10 bg-muted animate-pulse rounded" />
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <div className="h-10 bg-muted animate-pulse rounded w-20" />
+        <div className="h-10 bg-muted animate-pulse rounded w-20" />
+      </div>
+    </div>
+  ),
+  ssr: false
+})
 
 // Breadcrumb helper
 const getBreadcrumbItems = (currentView: string) => [
@@ -27,6 +50,8 @@ const getBreadcrumbItems = (currentView: string) => [
 
 const CategoriesPage = () => {
   const { isMobile } = useResponsive()
+  const searchParams = useSearchParams()
+  const isAddView = searchParams.get('tambah') !== null
 
   // Use the custom hook for all categories logic
   const {
@@ -57,6 +82,13 @@ const CategoriesPage = () => {
     handleViewCategory
   } = useCategories()
 
+  // Set view to 'add' when query parameter exists
+  useEffect(() => {
+    if (isAddView && currentView === 'list') {
+      setCurrentView('add')
+    }
+  }, [isAddView, currentView, setCurrentView])
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -82,49 +114,64 @@ const CategoriesPage = () => {
         </Breadcrumb>
 
         {currentView === 'list' ? (
-          // No Suspense - CategoryList handles its own loading state
-          <CategoryList
-            categories={categories}
-            filteredCategories={filteredCategories}
-            paginatedCategories={paginatedCategories}
-            selectedItems={selectedItems}
-            searchTerm={searchTerm}
-            isMobile={isMobile}
-            isLoading={isLoading}
-            currentPage={currentPage}
-            totalPages={paginationInfo.totalPages}
-            pageSize={pageSize}
-            paginationInfo={{
-              startItem: paginationInfo.startItem,
-              endItem: paginationInfo.endItem,
-              totalItems: paginationInfo.totalItems
-            }}
-            onAddNew={() => setCurrentView('add')}
-            onSearchChange={setSearchTerm}
-            onSelectAll={handleSelectAll}
-            onSelectItem={handleSelectItem}
-            onEdit={handleEditCategory}
-            onDelete={handleDeleteCategory}
-            onView={handleViewCategory}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={setPageSize}
-            onBulkEdit={handleBulkEdit}
-            onBulkDelete={handleBulkDelete}
-            onClearSelection={() => handleSelectAll()}
-          />
+          <Suspense fallback={<DataGridSkeleton rows={8} />}>
+            <CategoryList
+              categories={categories}
+              filteredCategories={filteredCategories}
+              paginatedCategories={paginatedCategories}
+              selectedItems={selectedItems}
+              searchTerm={searchTerm}
+              isMobile={isMobile}
+              isLoading={isLoading}
+              currentPage={currentPage}
+              totalPages={paginationInfo.totalPages}
+              pageSize={pageSize}
+              paginationInfo={{
+                startItem: paginationInfo.startItem,
+                endItem: paginationInfo.endItem,
+                totalItems: paginationInfo.totalItems
+              }}
+              onAddNew={() => setCurrentView('add')}
+              onSearchChange={setSearchTerm}
+              onSelectAll={handleSelectAll}
+              onSelectItem={handleSelectItem}
+              onEdit={handleEditCategory}
+              onDelete={handleDeleteCategory}
+              onView={handleViewCategory}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              onBulkEdit={handleBulkEdit}
+              onBulkDelete={handleBulkDelete}
+              onClearSelection={() => handleSelectAll()}
+            />
+          </Suspense>
         ) : (
-          // No Suspense - CategoryForm handles its own loading state
-          <CategoryForm
-            category={formData}
-            currentView={currentView}
-            isMobile={isMobile}
-            onCategoryChange={setFormData}
-            onSave={handleSaveCategory}
-            onCancel={() => {
-              resetForm()
-              void setCurrentView('list')
-            }}
-          />
+          <Suspense fallback={
+            <div className="space-y-4">
+              <div className="h-16 bg-muted animate-pulse rounded" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-10 bg-muted animate-pulse rounded" />
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <div className="h-10 bg-muted animate-pulse rounded w-20" />
+                <div className="h-10 bg-muted animate-pulse rounded w-20" />
+              </div>
+            </div>
+          }>
+            <CategoryForm
+              category={formData}
+              currentView={currentView}
+              isMobile={isMobile}
+              onCategoryChange={setFormData}
+              onSave={handleSaveCategory}
+              onCancel={() => {
+                resetForm()
+                void setCurrentView('list')
+              }}
+            />
+          </Suspense>
         )}
       </div>
     </AppLayout >

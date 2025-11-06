@@ -27,7 +27,7 @@ const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) =
           <p className="font-medium mb-2">{payload[0].payload.name}</p>
           <div className="space-y-1 text-sm">
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-blue-500" />
+              <div className="h-3 w-3 rounded-full bg-gray-500" />
               <span>Pendapatan: {formatCurrency(payload[0].value)}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -35,7 +35,7 @@ const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) =
               <span>HPP (COGS): {formatCurrency(payload[1].value)}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-green-500" />
+              <div className="h-3 w-3 rounded-full bg-gray-500" />
               <span>Laba: {formatCurrency(payload[2].value)}</span>
             </div>
           </div>

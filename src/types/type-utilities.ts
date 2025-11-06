@@ -1,4 +1,4 @@
-import type { Database, Row, TableName } from './database'
+import type { Database, Row, TableName, OrderStatus, ProductionStatus } from './database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 
@@ -11,12 +11,15 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  * Untuk menghilangkan `as any` dengan type-safe helpers
  */
 
-
-type Enums = Database['public']['Enums']
-
 /* -------------------------------------------------------------------------- */
 /*  🔗 SUPABASE JOIN HELPERS                                                  */
 /* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/*  📊 ENUM TYPE ALIASES (imported from database.ts)                         */
+/* -------------------------------------------------------------------------- */
+
+// OrderStatus and ProductionStatus are now imported from database.ts above
 
 /* -------------------------------------------------------------------------- */
 /*  🔧 COMMON TYPES                                                          */
@@ -467,8 +470,7 @@ export type Recipe = Row<'recipes'>
 export type Ingredient = Row<'ingredients'>
 export type Order = Row<'orders'>
 export type Customer = Row<'customers'>
-export type OrderStatus = Enums['order_status']
-export type ProductionStatus = Enums['production_status']
+// OrderStatus and ProductionStatus are imported from database.ts
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid'
 
 /**

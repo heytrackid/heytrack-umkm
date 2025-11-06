@@ -1,8 +1,12 @@
-import { useState, useCallback, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import { logger } from '@/lib/logger';
+'use client'
+
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook');
 import { getErrorMessage } from '@/lib/type-guards';
 import type { ChatMessage, ChatSuggestion, SessionListItem } from '@/types/features/chat';
+import { usePathname } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * React Hook for Context-Aware AI Chat with Session Persistence
@@ -46,7 +50,9 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
 
   const loadSessions = useCallback(async () => {
     try {
-      const response = await fetch('/api/ai/sessions');
+      const response = await fetch('/api/ai/sessions', {
+        credentials: 'include', // Include cookies for authentication
+      });
 
       if (!response.ok) {
         throw new Error('Failed to load sessions');
@@ -63,7 +69,10 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
   const loadSuggestions = useCallback(async () => {
     try {
       const response = await fetch(
-        `/api/ai/suggestions?page=${encodeURIComponent(pathname)}`
+        `/api/ai/suggestions?page=${encodeURIComponent(pathname)}`,
+        {
+          credentials: 'include', // Include cookies for authentication
+        }
       );
 
       if (!response.ok) {
@@ -108,6 +117,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
             session_id: sessionId,
             currentPage: pathname,
           }),
+          credentials: 'include', // Include cookies for authentication
         });
 
         if (!response.ok) {
@@ -141,7 +151,9 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
 
         // Reload sessions to update list (without triggering re-render loop)
         try {
-          const sessionsResponse = await fetch('/api/ai/sessions');
+          const sessionsResponse = await fetch('/api/ai/sessions', {
+            credentials: 'include', // Include cookies for authentication
+          });
           if (sessionsResponse.ok) {
             const sessionsData = await sessionsResponse.json();
             setSessions(sessionsData.sessions ?? []);
@@ -169,7 +181,9 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
     setError(null);
 
     try {
-      const response = await fetch(`/api/ai/sessions/${newSessionId}`);
+      const response = await fetch(`/api/ai/sessions/${newSessionId}`, {
+        credentials: 'include', // Include cookies for authentication
+      });
 
       if (!response.ok) {
         throw new Error('Failed to load session');
@@ -187,10 +201,11 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
     }
   }, []);
 
-  const createNewSession = useCallback(async () => {
+  const createNewSession = useCallback(() => {
     setSessionId(null);
     setMessages([]);
     setError(null);
+    return Promise.resolve();
   }, []);
 
   const deleteSession = useCallback(
@@ -198,6 +213,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
       try {
         const response = await fetch(`/api/ai/sessions/${sessionIdToDelete}`, {
           method: 'DELETE',
+          credentials: 'include', // Include cookies for authentication
         });
 
         if (!response.ok) {
@@ -213,7 +229,9 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
 
         // Reload sessions inline to avoid dependency loop
         try {
-          const sessionsResponse = await fetch('/api/ai/sessions');
+          const sessionsResponse = await fetch('/api/ai/sessions', {
+            credentials: 'include', // Include cookies for authentication
+          });
           if (sessionsResponse.ok) {
             const sessionsData = await sessionsResponse.json();
             setSessions(sessionsData.sessions ?? []);

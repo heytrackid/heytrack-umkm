@@ -161,7 +161,7 @@ const TemplateForm = ({
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Template Defaults */}
                     {!editingTemplate && (
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
                             <Label className="flex items-center gap-2 mb-2">
                                 <Info className="h-4 w-4" />
                                 Mulai dengan Template Default
@@ -283,7 +283,7 @@ const TemplateForm = ({
                                                                 onClick={() => copyVariable(variable.name)}
                                                             >
                                                                 {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-green-600" />
+                                                                    <Check className="h-3 w-3 text-gray-600" />
                                                                 ) : (
                                                                     <Copy className="h-3 w-3" />
                                                                 )}
@@ -319,7 +319,7 @@ const TemplateForm = ({
                                                                 onClick={() => copyVariable(variable.name)}
                                                             >
                                                                 {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-green-600" />
+                                                                    <Check className="h-3 w-3 text-gray-600" />
                                                                 ) : (
                                                                     <Copy className="h-3 w-3" />
                                                                 )}
@@ -355,7 +355,7 @@ const TemplateForm = ({
                                                                 onClick={() => copyVariable(variable.name)}
                                                             >
                                                                 {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-green-600" />
+                                                                    <Check className="h-3 w-3 text-gray-600" />
                                                                 ) : (
                                                                     <Copy className="h-3 w-3" />
                                                                 )}
@@ -391,7 +391,7 @@ const TemplateForm = ({
                                                                 onClick={() => copyVariable(variable.name)}
                                                             >
                                                                 {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-green-600" />
+                                                                    <Check className="h-3 w-3 text-gray-600" />
                                                                 ) : (
                                                                     <Copy className="h-3 w-3" />
                                                                 )}
@@ -427,7 +427,7 @@ const TemplateForm = ({
                                                                 onClick={() => copyVariable(variable.name)}
                                                             >
                                                                 {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-green-600" />
+                                                                    <Check className="h-3 w-3 text-gray-600" />
                                                                 ) : (
                                                                     <Copy className="h-3 w-3" />
                                                                 )}

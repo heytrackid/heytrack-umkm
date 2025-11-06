@@ -5,8 +5,9 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
 import { apiLogger } from '@/lib/logger'
-import type { CustomersUpdate } from '@/types/database'
+import type { Update } from '@/types/database'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -16,7 +17,7 @@ interface RouteContext {
 }
 
 // GET /api/customers/[id] - Get single customer
-export async function GET(
+async function getHandler(
   _request: NextRequest,
   context: RouteContext
 ) {
@@ -39,7 +40,7 @@ export async function GET(
     // Fetch customer with RLS
     const { data, error } = await supabase
       .from('customers')
-      .select('*')
+      .select('id, user_id, name, email, phone, address, created_at, updated_at')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
@@ -63,7 +64,7 @@ export async function GET(
 }
 
 // PUT /api/customers/[id] - Update customer
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   context: RouteContext
 ) {
@@ -102,7 +103,7 @@ export async function PUT(
     }
 
     // Prepare update data
-    const updateData: CustomersUpdate = {
+    const updateData: Update<'customers'> = {
       name: validation.data.name,
       phone: validation.data.phone,
       email: validation.data.email,
@@ -145,7 +146,7 @@ export async function PUT(
 }
 
 // DELETE /api/customers/[id] - Delete customer
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
   context: RouteContext
 ) {
@@ -209,3 +210,10 @@ export async function DELETE(
     )
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
+const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
+const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
+
+export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }

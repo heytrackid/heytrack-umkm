@@ -1,4 +1,7 @@
-import { useQuery, type UseQueryOptions, type QueryKey } from '@tanstack/react-query'
+'use client'
+
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useQuery, type QueryKey, type UseQueryOptions } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
 /**
@@ -31,7 +34,7 @@ export function useOptimizedQuery<T>(
 
   // Memoize query key
   const queryKeyString = JSON.stringify(queryKey)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   const memoizedKey = useMemo(() => queryKey, [queryKeyString])
 
   // Memoize query function - queryFn is expected to be stable

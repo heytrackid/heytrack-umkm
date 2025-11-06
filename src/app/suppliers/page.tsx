@@ -1,26 +1,28 @@
 'use client'
 
-import { useState } from 'react'
-import AppLayout from '@/components/layout/app-layout'
-import { PageBreadcrumb, BreadcrumbPatterns, PageHeader, StatsCards } from '@/components/ui'
-import { Button } from '@/components/ui/button'
-import { Plus, Upload, TrendingUp, Users, DollarSign, Package } from 'lucide-react'
 import { SuppliersCRUD } from '@/components/crud/suppliers-crud'
+import { ImportDialog } from '@/components/import/ImportDialog'
+import { generateSuppliersTemplate, parseSuppliersCSV } from '@/components/import/csv-helpers'
+import AppLayout from '@/components/layout/app-layout'
+import { BreadcrumbPatterns, PageBreadcrumb, PageHeader, StatsCards } from '@/components/ui'
+import { Button } from '@/components/ui/button'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
-import type { SuppliersTable } from '@/types/database'
+import type { Row } from '@/types/database'
+import { DollarSign, Package, TrendingUp, Upload, Users } from 'lucide-react'
+import { useState } from 'react'
 
 const SuppliersPage = () => {
     const { data: suppliers } = useSupabaseCRUD('suppliers')
-    const [_showAddDialog, _setShowAddDialog] = useState(false)
+    const [importDialogOpen, setImportDialogOpen] = useState(false)
 
     // Calculate stats
     const totalSuppliers = suppliers?.length ?? 0
-    const activeSuppliers = suppliers?.filter((s: SuppliersTable) => s.is_active).length ?? 0
-    const totalSpent = suppliers?.reduce((sum: number, s: SuppliersTable) =>
+    const activeSuppliers = suppliers?.filter((s: Row<'suppliers'>) => s.is_active).length ?? 0
+    const totalSpent = suppliers?.reduce((sum: number, s: Row<'suppliers'>) =>
         sum + (Number(s.total_spent) || 0), 0
     ) ?? 0
     const avgRating = suppliers && suppliers.length > 0
-        ? suppliers.reduce((sum: number, s: SuppliersTable) =>
+        ? suppliers.reduce((sum: number, s: Row<'suppliers'>) =>
             sum + (Number(s.rating) || 0), 0
         ) / suppliers.length
         : 0
@@ -34,25 +36,16 @@ const SuppliersPage = () => {
                 <PageHeader
                     title="Supplier"
                     description="Kelola data supplier dan vendor bahan baku"
-                    actions={
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                onClick={() => {/* TODO: Import dialog */ }}
-                                className="flex-1 sm:flex-none"
-                            >
-                                <Upload className="h-4 w-4 mr-2" />
-                                Import
-                            </Button>
-                            <Button
-                                onClick={() => _setShowAddDialog(true)}
-                                className="flex-1 sm:flex-none"
-                            >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Tambah Supplier
-                            </Button>
-                        </div>
-                    }
+                      actions={
+                          <Button
+                              variant="outline"
+                              onClick={() => setImportDialogOpen(true)}
+                              className="flex-1 sm:flex-none"
+                          >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Import
+                          </Button>
+                      }
                 />
 
                 {/* Stats Cards */}
@@ -89,6 +82,47 @@ const SuppliersPage = () => {
 
                 {/* Main Content */}
                 <SuppliersCRUD />
+
+                {/* Import Dialog */}
+                <ImportDialog
+                    open={importDialogOpen}
+                    onOpenChange={setImportDialogOpen}
+                    title="Import Supplier"
+                    description="Upload file CSV untuk import data supplier secara massal"
+                    templateUrl={`data:text/csv;charset=utf-8,${encodeURIComponent(generateSuppliersTemplate())}`}
+                    templateFilename="template-supplier.csv"
+                    parseCSV={parseSuppliersCSV}
+                    onImport={async (data) => {
+                        try {
+                            const response = await fetch('/api/suppliers/import', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ suppliers: data }),
+                                credentials: 'include', // Include cookies for authentication
+                            })
+
+                            const result = await response.json()
+
+                            if (!response.ok) {
+                                return {
+                                    success: false,
+                                    error: result.error ?? 'Import gagal',
+                                    details: result.details
+                                }
+                            }
+
+                            return {
+                                success: true,
+                                count: result.count
+                            }
+                        } catch (_error) {
+                            return {
+                                success: false,
+                                error: 'Terjadi kesalahan saat import'
+                            }
+                        }
+                    }}
+                />
             </div>
         </AppLayout>
     )

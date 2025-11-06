@@ -1,7 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('ClientFile')
 
 
 /**
@@ -51,7 +53,7 @@ export async function typedInsert<T extends TableName>(
 
   // Log error if there's one, but don't crash the function
   if (result.error) {
-    apiLogger.error({
+    logger.error({
       table,
       operation: 'insert',
       error: result.error,
@@ -82,7 +84,7 @@ export async function typedUpdate<T extends TableName>(
 
   // Log error if there's one, but don't crash the function
   if (result.error) {
-    apiLogger.error({
+    logger.error({
       table,
       operation: 'update',
       id,
@@ -113,7 +115,7 @@ export async function typedDelete<T extends TableName>(
 
   // Log error if there's one, but don't crash the function
   if (result.error) {
-    apiLogger.error({
+    logger.error({
       table,
       operation: 'delete',
       id,
@@ -174,7 +176,7 @@ export async function typedSelect<T extends TableName>(
 
   // Log error if there's one, but don't crash the function
   if ('error' in result && result.error) {
-    apiLogger.error({
+    logger.error({
       table,
       operation: 'select',
       query,

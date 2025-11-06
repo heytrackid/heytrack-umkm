@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo } from 'react'
-import { apiLogger } from '@/lib/logger'
 import { useToast } from '@/hooks/use-toast'
+import { apiLogger } from '@/lib/logger'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type {
-  ProfitData,
-  ProfitPeriodType,
-  ChartDataPoint
+    ChartDataPoint,
+    ProfitData,
+    ProfitPeriodType
 } from '../constants'
-import { calculateProfitDateRange, prepareProductChartData, validateProfitData, exportProfitReport } from '../utils' 
+import { calculateProfitDateRange, exportProfitReport, prepareProductChartData, validateProfitData } from '../utils'
 
 interface UseProfitReportReturn {
   // State
@@ -49,7 +49,7 @@ export function useProfitReport(): UseProfitReportReturn {
   const [endDate, setEndDate] = useState('')
 
   // Fetch profit data
-  const fetchProfitData = async () => {
+  const fetchProfitData = useCallback(async () => {
     void setLoading(true)
     void setError(null)
 
@@ -83,15 +83,16 @@ export function useProfitReport(): UseProfitReportReturn {
     } finally {
       void setLoading(false)
     }
-  }
+  }, [selectedPeriod, startDate, endDate])
 
   // Handle export report
-  const exportReport = async (format: 'csv' | 'pdf' | 'xlsx') => {
-    if (!profitData) {return}
+  const exportReport = (format: 'csv' | 'pdf' | 'xlsx') => {
+    if (!profitData) {return Promise.resolve()}
 
     try {
       const filename = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
       exportProfitReport(profitData, format, filename)
+      return Promise.resolve()
     } catch (err: unknown) {
       const error = err as Error
       apiLogger.error({ error: error.message }, 'Error exporting report:')
@@ -100,21 +101,22 @@ export function useProfitReport(): UseProfitReportReturn {
         description: 'Gagal mengekspor laporan',
         variant: 'destructive',
       })
+      return Promise.reject(error)
     }
   }
 
   // Computed values
-  const products = profitData?.products ?? []
-  const ingredients = profitData?.ingredients ?? []
-  const operatingExpenses = profitData?.operating_expenses ?? []
-  const summary = profitData?.summary ?? null
-  const trends = profitData?.trends ?? null
+  const products = useMemo(() => profitData?.products ?? [], [profitData])
+  const ingredients = useMemo(() => profitData?.ingredients ?? [], [profitData])
+  const operatingExpenses = useMemo(() => profitData?.operating_expenses ?? [], [profitData])
+  const summary = useMemo(() => profitData?.summary ?? null, [profitData])
+  const trends = useMemo(() => profitData?.trends ?? null, [profitData])
   const productChartData = useMemo(() => prepareProductChartData(products), [products])
 
   // Load data on mount and when filters change
   useEffect(() => {
     void fetchProfitData()
-  }, [selectedPeriod, startDate, endDate])
+  }, [selectedPeriod, startDate, endDate, fetchProfitData])
 
   return {
     // State

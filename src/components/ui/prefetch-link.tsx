@@ -3,7 +3,9 @@
 import { type ComponentProps, type MouseEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('PrefetchLink')
 
 
 
@@ -45,7 +47,7 @@ export const PrefetchLink = ({
         void router.prefetch(href)
       } catch (_err) {
         // Silently fail - prefetch is enhancement, not critical
-        apiLogger.debug(`Prefetch failed for: ${href}`)
+        logger.debug(`Prefetch failed for: ${href}`)
       }
     }
   }

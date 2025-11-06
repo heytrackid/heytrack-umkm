@@ -1,20 +1,22 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { Bell } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { NotificationList } from './NotificationList'
-import { createClient } from '@/utils/supabase/client'
-import type { Notification } from '@/types/domain/notifications'
-import type { NotificationPreferences } from '@/types/domain/notification-preferences'
-import { playNotificationSound, playUrgentNotificationSound, setSoundEnabled, setSoundVolume } from '@/lib/notifications/sound'
-import { apiLogger } from '@/lib/logger'
+import { Button } from '@/components/ui/button'
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
+import { createClientLogger } from '@/lib/client-logger'
+import { playNotificationSound, playUrgentNotificationSound, setSoundEnabled, setSoundVolume } from '@/lib/notifications/sound'
+import type { NotificationPreferences } from '@/types/domain/notification-preferences'
+import type { Notification } from '@/types/domain/notifications'
+import { useSupabase } from '@/providers/SupabaseProvider'
+import { Bell } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { NotificationList } from './NotificationList'
+
+const logger = createClientLogger('NotificationBell')
 
 export const NotificationBell = () => {
     const [notifications, setNotifications] = useState<Notification[]>([])
@@ -23,11 +25,14 @@ export const NotificationBell = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
     const lastNotificationIdRef = useRef<string | null>(null)
+    const { supabase } = useSupabase()
 
     // Fetch user preferences
     const fetchPreferences = useCallback(async () => {
         try {
-            const response = await fetch('/api/notifications/preferences')
+            const response = await fetch('/api/notifications/preferences', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const prefs = await response.json()
                 setPreferences(prefs)
@@ -39,7 +44,7 @@ export const NotificationBell = () => {
         } catch (error: unknown) {
             // Silent fail - preferences are non-critical
             if (process.env.NODE_ENV === 'development') {
-                apiLogger.error({ error }, 'Failed to fetch preferences')
+                logger.error({ error }, 'Failed to fetch preferences')
             }
         }
     }, [])
@@ -47,7 +52,9 @@ export const NotificationBell = () => {
     const fetchNotifications = useCallback(async () => {
         try {
             setIsLoading(true)
-            const response = await fetch('/api/notifications?limit=20')
+            const response = await fetch('/api/notifications?limit=20', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const data = await response.json()
                 const newNotifications = data.notifications ?? []
@@ -81,7 +88,7 @@ export const NotificationBell = () => {
         } catch (error: unknown) {
             // Silent fail - will retry on next fetch
             if (process.env.NODE_ENV === 'development') {
-                apiLogger.error({ error }, 'Failed to fetch notifications')
+                logger.error({ error }, 'Failed to fetch notifications')
             }
         } finally {
             setIsLoading(false)
@@ -98,8 +105,6 @@ export const NotificationBell = () => {
         void fetchNotifications()
 
         // Set up real-time subscription
-        const supabase = createClient()
-
         const channel = supabase
             .channel('notifications')
             .on(
@@ -113,12 +118,18 @@ export const NotificationBell = () => {
                     void fetchNotifications()
                 }
             )
-            .subscribe()
+            .subscribe((status) => {
+                // Suppress WebSocket errors in console - they're handled by Supabase internally
+                if (status === 'CHANNEL_ERROR') {
+                    // Silently handle channel errors without logging to console
+                    // The subscription will automatically retry
+                }
+            })
 
         return () => {
             void supabase.removeChannel(channel)
         }
-    }, [preferences, fetchNotifications])
+    }, [preferences, fetchNotifications, supabase])
 
     const handleMarkAllRead = async () => {
         try {
@@ -126,6 +137,7 @@ export const NotificationBell = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({}),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -134,7 +146,7 @@ export const NotificationBell = () => {
         } catch (error: unknown) {
             // Silent fail - user can retry
             if (process.env.NODE_ENV === 'development') {
-                apiLogger.error({ error }, 'Failed to mark all as read')
+                logger.error({ error }, 'Failed to mark all as read')
             }
         }
     }
@@ -145,6 +157,7 @@ export const NotificationBell = () => {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updates),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -153,7 +166,7 @@ export const NotificationBell = () => {
         } catch (error: unknown) {
             // Silent fail - user can retry
             if (process.env.NODE_ENV === 'development') {
-                apiLogger.error({ error }, 'Failed to update notification')
+                logger.error({ error }, 'Failed to update notification')
             }
         }
     }

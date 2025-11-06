@@ -1,4 +1,4 @@
-import type { RecipesTable, IngredientsTable, OrdersTable, CustomersTable, OrderStatus, ProductionStatus } from '@/types/database'
+import type { Row, OrderStatus, ProductionStatus } from '@/types/database'
 
 
 /**
@@ -44,10 +44,10 @@ export function isError(value: unknown): value is Error {
 // Database Type Guards
 // ============================================================================
 
-type Recipe = RecipesTable
-type Ingredient = IngredientsTable
-type Order = OrdersTable
-type Customer = CustomersTable
+type Recipe = Row<'recipes'>
+type Ingredient = Row<'ingredients'>
+type Order = Row<'orders'>
+type Customer = Row<'customers'>
 
 /**
  * Check if value is a valid Recipe

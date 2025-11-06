@@ -1,16 +1,18 @@
  
 'use client'
 
+import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
 import OrdersTableComponent from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { useState, useEffect } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { OrderDetailView } from './OrderDetailView'
-import { OrderForm } from './OrderForm'
-import { uiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'
 import type { OrdersTable as OrdersTableRow } from '@/types/database'
-import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState, useCallback } from 'react'
+import { OrderDetailView } from './OrderDetailView'
+import { OrderForm } from './OrderForm'
+
+const logger = createClientLogger('OrdersTableView')
 
 
 
@@ -34,7 +36,9 @@ export const OrdersTableView = () => {
   const { data: orders = [], isLoading: loading } = useQuery<Order[]>({
     queryKey: ['orders', 'table'],
     queryFn: async () => {
-      const response = await fetch('/api/orders')
+      const response = await fetch('/api/orders', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         const errorText = await response.text()
         throw new Error(`Failed to fetch orders: ${errorText}`)
@@ -46,18 +50,18 @@ export const OrdersTableView = () => {
         return data
       }
 
-      uiLogger.warn({ data }, 'API returned unexpected format for orders')
+      logger.warn({ data }, 'API returned unexpected format for orders')
       return []
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
 
-  const handleViewOrder = (order: Order) => {
+  const handleViewOrder = useCallback((order: Order) => {
     setSelectedOrder(order)
     setShowOrderDetail(true)
-  }
+  }, [])
 
-  const handleEditOrder = (order: Order) => {
+  const handleEditOrder = useCallback((order: Order) => {
     // Convert Order to OrderWithItems
     const orderWithItems: OrderWithItems = {
       ...order,
@@ -65,13 +69,14 @@ export const OrdersTableView = () => {
     }
     setEditingOrder(orderWithItems)
     setShowOrderForm(true)
-  }
+  }, [])
 
   // ✅ Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (orderId: string) => {
       const response = await fetch(`/api/orders/${orderId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {
         const errorText = await response.text()
@@ -81,17 +86,17 @@ export const OrdersTableView = () => {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
-      uiLogger.info('Order deleted successfully')
+      logger.info('Order deleted successfully')
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      uiLogger.error({ error: message }, 'Error deleting order')
+      logger.error({ error: message }, 'Error deleting order')
     }
   })
 
-  const handleDeleteOrder = async (order: Order) => {
+  const handleDeleteOrder = useCallback(async (order: Order) => {
     await deleteMutation.mutateAsync(order.id)
-  }
+  }, [deleteMutation])
 
   // ✅ Update status mutation
   const updateStatusMutation = useMutation({
@@ -99,7 +104,8 @@ export const OrdersTableView = () => {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus }),
+        credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {
         const errorText = await response.text()
@@ -112,25 +118,25 @@ export const OrdersTableView = () => {
         return data
       }
 
-      uiLogger.warn({ data }, 'API returned unexpected format for updated order')
+      logger.warn({ data }, 'API returned unexpected format for updated order')
       return data
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
-      uiLogger.info('Order status updated')
+      logger.info('Order status updated')
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      uiLogger.error({ error: message }, 'Error updating status')
+      logger.error({ error: message }, 'Error updating status')
     }
   })
 
-  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+  const handleUpdateStatus = useCallback(async (orderId: string, newStatus: string) => {
     await updateStatusMutation.mutateAsync({ orderId, newStatus })
-  }
+  }, [updateStatusMutation])
 
-  const handleBulkAction = async (action: string, orderIds: string[]) => {
-    uiLogger.info({ action, orderCount: orderIds.length }, 'Bulk action triggered')
+  const handleBulkAction = useCallback(async (action: string, orderIds: string[]) => {
+    logger.info({ action, orderCount: orderIds.length }, 'Bulk action triggered')
 
     switch (action) {
       case 'confirm':
@@ -139,17 +145,29 @@ export const OrdersTableView = () => {
           await handleUpdateStatus(orderId, 'CONFIRMED')
         }
         break
+      case 'ready':
+        // Bulk mark as ready for shipping
+        for (const orderId of orderIds) {
+          await handleUpdateStatus(orderId, 'READY')
+        }
+        break
+      case 'shipped':
+        // Bulk mark as shipped
+        for (const orderId of orderIds) {
+          await handleUpdateStatus(orderId, 'SHIPPED')
+        }
+        break
       case 'export':
         // Export selected orders
-        uiLogger.debug({ orderIds }, 'Exporting orders')
+        logger.debug({ orderIds }, 'Exporting orders')
         break
       case 'print':
         // Print selected orders
-        uiLogger.debug({ orderIds }, 'Printing orders')
+        logger.debug({ orderIds }, 'Printing orders')
         break
       case 'archive':
         // Archive selected orders
-        uiLogger.debug({ orderIds }, 'Archiving orders')
+        logger.debug({ orderIds }, 'Archiving orders')
         break
       case 'cancel':
         // Cancel selected orders
@@ -167,9 +185,9 @@ export const OrdersTableView = () => {
         }
         break
       default:
-        uiLogger.warn({ action }, 'Unknown bulk action')
+        logger.warn({ action }, 'Unknown bulk action')
     }
-  }
+  }, [handleUpdateStatus, handleDeleteOrder, orders])
 
   // Prevent hydration mismatch
   if (!isMounted) {
@@ -217,7 +235,7 @@ export const OrdersTableView = () => {
             order={editingOrder}
             onSubmit={async (data) => {
               // Handle form submission
-              uiLogger.info({ orderNo: data.order_no }, 'Order submitted')
+              logger.info({ orderNo: data.order_no }, 'Order submitted')
               await queryClient.invalidateQueries({ queryKey: ['orders'] })
               setShowOrderForm(false)
               setEditingOrder(undefined)

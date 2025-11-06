@@ -8,8 +8,8 @@
  */
 
 // UI Hooks
-export { useResponsive, useMobile, useIsMobile, useMediaQuery, useScreenSize, useOrientation, useTouchDevice } from './useResponsive'
-// export { useSidebar } from './useSidebar'
+export { useResponsive, useMobile, useIsMobile, useMediaQuery, useScreenSize, useOrientation, useTouchDevice } from './responsive'
+
 // export { useLoading } from './useLoading'
 export { useConfirm } from './useConfirm'
 export { useToast } from './use-toast'
@@ -39,7 +39,7 @@ export { useCurrency } from './useCurrency'
 // export { default as useAIPowered } from './useAIPowered'
 
 // Performance Hooks
-export { useRoutePreloading } from './useRoutePreloading'
+export { useSimplePreload, useAdvancedLinkPreloading, useAdvancedButtonPreloading } from './usePreloading'
 
 // API Hooks
 export { useDashboardStats, useWeeklySales, useTopProducts } from './api/useDashboard'
@@ -60,4 +60,4 @@ export { useReorderManagement, usePurchaseOrderGenerator } from './useReorderMan
 // export { useHPPAutomation, useRecipeHPPAnalysis } from './useHPPAutomation'
 
 // Performance Hooks
-export { usePerformanceMonitoring } from './usePerformanceMonitoring'
+export { usePerformanceMonitoring } from '../utils/performance/usePerformanceMonitoring'

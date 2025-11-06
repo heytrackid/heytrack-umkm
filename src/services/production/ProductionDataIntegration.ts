@@ -1,5 +1,5 @@
 import { apiLogger } from '@/lib/logger'
-import { getErrorMessage, isRecord, hasKeys } from '@/lib/type-guards'
+import { getErrorMessage, hasKeys, isRecord } from '@/lib/type-guards'
 
 
 /**
@@ -30,7 +30,9 @@ export class ProductionDataIntegration {
       if (startDate) {params.append('start_date', startDate)}
       if (endDate) {params.append('end_date', endDate)}
 
-      const response = await fetch(`/api/production/metrics?${params}`)
+      const response = await fetch(`/api/production/metrics?${params}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         const errorText = await response.text()
         throw new Error(`Failed to fetch metrics: ${errorText}`)
@@ -82,7 +84,8 @@ export class ProductionDataIntegration {
   static async syncWithInventory(batchId: string): Promise<boolean> {
     try {
       const response = await fetch(`/api/production/batches/${batchId}/sync-inventory`, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include', // Include cookies for authentication
       })
       return response.ok
     } catch (err) {
@@ -100,7 +103,8 @@ export class ProductionDataIntegration {
       const response = await fetch(`/api/production/batches/${batchId}/link-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id: orderId })
+        body: JSON.stringify({ order_id: orderId }),
+        credentials: 'include', // Include cookies for authentication
       })
       return response.ok
     } catch (err) {

@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
 
 /**
@@ -16,7 +18,9 @@ export function useProductionBatches() {
   return useQuery({
     queryKey: ['production-batches'],
     queryFn: async () => {
-      const response = await fetch('/api/production-batches')
+      const response = await fetch('/api/production-batches', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch production batches')
       }
@@ -41,6 +45,7 @@ export function useCreateProductionBatch() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {
@@ -60,7 +65,7 @@ export function useCreateProductionBatch() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Failed to create production batch')
+      logger.error({ error: message }, 'Failed to create production batch')
       
       toast({
         title: 'Error',
@@ -84,6 +89,7 @@ export function useUpdateProductionBatch() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {
@@ -103,7 +109,7 @@ export function useUpdateProductionBatch() {
     },
     onError: (error: unknown) => {
       const message = getErrorMessage(error)
-      apiLogger.error({ error: message }, 'Failed to update production batch')
+      logger.error({ error: message }, 'Failed to update production batch')
       
       toast({
         title: 'Error',

@@ -89,17 +89,17 @@ const CategoryList = ({
       </div>
 
       {/* Info Card */}
-      <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+      <Card className="bg-muted/30 border-muted">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <div className="bg-blue-100 dark:bg-blue-800/50 p-2 rounded-lg">
-              <Tags className="h-5 w-5 text-blue-600" />
+            <div className="bg-muted p-2 rounded-lg">
+              <Tags className="h-5 w-5 text-muted-foreground" />
             </div>
             <div className="flex-1">
-              <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+              <h3 className="font-medium text-foreground mb-1">
                 💡 Tentang Kategori Produk
               </h3>
-              <p className="text-sm text-blue-800 dark:text-blue-200">
+              <p className="text-sm text-muted-foreground">
                 Kategori digunakan untuk auto-populate bahan baku saat membuat resep.
                 Setiap kategori memiliki daftar bahan baku umum yang akan otomatis ditambahkan.
               </p>

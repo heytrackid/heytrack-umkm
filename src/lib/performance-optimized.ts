@@ -1,5 +1,8 @@
+'use client'
+
+import { createClientLogger } from '@/lib/client-logger'
+
 import { useCallback, useEffect, useMemo, useRef, useState, type DependencyList } from 'react'
-import { createLogger } from '@/lib/logger'
 
 
 /**
@@ -8,7 +11,7 @@ import { createLogger } from '@/lib/logger'
  */
 
 
-const perfLogger = createLogger('PerformanceOptimized')
+const perfLogger = createClientLogger('Component')
 
 /**
  * Memoize array operations to prevent unnecessary recalculations
@@ -53,7 +56,8 @@ export function useExpensiveCalculation<T, R>(
   calculator: (data: T) => R,
   deps: DependencyList = []
 ): R {
-  return useMemo(() => calculator(data), [data, ...deps])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => calculator(data), [data, calculator, ...deps])
 }
 
 /**
@@ -129,15 +133,15 @@ export function useStableCallback<T extends (...args: Parameters<T>) => ReturnTy
  */
 export function useDeepMemo<T>(value: T): T {
   const ref = useRef<T>(value)
-  const signalRef = useRef<number>(0)
+  const [signal, setSignal] = useState<number>(0)
 
   if (JSON.stringify(value) !== JSON.stringify(ref.current)) {
     ref.current = value
-    signalRef.current += 1
+    setSignal(prev => prev + 1)
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => ref.current, [signalRef.current])
+  return useMemo(() => ref.current, [signal])
 }
 
 /**
@@ -259,14 +263,15 @@ export function usePerformanceMonitor(componentName: string, enabled = false) {
 
     renderCount.current += 1
     const startTime = performance.now()
+    const currentRenderTimes = renderTimes.current
 
     return () => {
       const endTime = performance.now()
       const renderTime = endTime - startTime
-      renderTimes.current.push(renderTime)
+      currentRenderTimes.push(renderTime)
 
       if (renderCount.current % 10 === 0) {
-        const avg = renderTimes.current.reduce((a, b) => a + b, 0) / renderTimes.current.length
+        const avg = currentRenderTimes.reduce((a, b) => a + b, 0) / currentRenderTimes.length
         perfLogger.info({
           componentName,
           renders: renderCount.current,

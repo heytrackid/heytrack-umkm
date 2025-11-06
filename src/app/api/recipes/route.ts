@@ -5,9 +5,10 @@ import { createPaginationMeta } from '@/lib/validations/pagination'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
-import type { RecipeIngredientsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage } from '@/lib/type-guards'
+import { typed } from '@/types/type-utilities'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -16,7 +17,7 @@ export const runtime = 'nodejs'
 async function GET(request: NextRequest) {
   try {
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -146,7 +147,7 @@ async function GET(request: NextRequest) {
 async function POST(request: NextRequest) {
   try {
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -157,9 +158,7 @@ async function POST(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       )
-    }
-
-    // The request body is already sanitized by the security middleware
+    }    // The request body is already sanitized by the security middleware
     const body = await request.json()
     const { recipe_ingredients, ...recipeData } = body
 
@@ -201,7 +200,7 @@ async function POST(request: NextRequest) {
         unit?: string
       }
 
-      const recipeIngredientsToInsert: RecipeIngredientsInsert[] = recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
+      const recipeIngredientsToInsert: Array<Insert<'recipe_ingredients'>> = recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
         recipe_id: createdRecipe.id,
         ingredient_id: ingredient.ingredient_id ?? ingredient.bahan_id ?? '',
         quantity: ingredient.quantity ?? ingredient.qty_per_batch ?? 0,

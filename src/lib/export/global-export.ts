@@ -1,17 +1,17 @@
 import 'server-only'
 import ExcelJS from 'exceljs'
 import { createClient } from '@/utils/supabase/server'
-import type { RecipesTable, OrdersTable, IngredientsTable, CustomersTable, StockTransactionsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
 
 
 
-type Recipe = RecipesTable
-type Order = OrdersTable
-type Ingredient = IngredientsTable
-type Customer = CustomersTable
-type StockTransaction = StockTransactionsTable
+type Recipe = Row<'recipes'>
+type Order = Row<'orders'>
+type Ingredient = Row<'ingredients'>
+type Customer = Row<'customers'>
+type StockTransaction = Row<'stock_transactions'>
 
 export class GlobalExportService {
   static async generateExport(userId: string): Promise<Buffer> {

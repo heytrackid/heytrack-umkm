@@ -4,10 +4,11 @@ import { FinancialRecordInsertSchema } from '@/lib/validations/domains/finance'
 import { safeParseAmount, safeString } from '@/lib/api-helpers'
 import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/domains/common'
-import type { FinancialRecordsInsert, NotificationsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 import { formatCurrency } from '@/lib/currency'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage } from '@/lib/type-guards'
+import { typed } from '@/types/type-utilities'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -50,8 +51,8 @@ async function GET(request: NextRequest) {
   const category = searchParams.get('category')
 
   try {
-    const supabase = await createClient()
-    
+    const supabase = typed(await createClient())
+
     // Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -168,8 +169,8 @@ async function GET(request: NextRequest) {
 // Define the original POST function
 async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    
+    const supabase = typed(await createClient())
+
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -193,7 +194,7 @@ async function POST(request: NextRequest) {
 
     const validatedData = validation.data
 
-    const insertPayload: FinancialRecordsInsert = {
+    const insertPayload: Insert<'financial_records'> = {
       ...validatedData,
       user_id: user.id,
       description: validatedData.description ?? '',
@@ -211,7 +212,7 @@ async function POST(request: NextRequest) {
     // Create notification for large expenses
     const expenseAmount = safeParseAmount(validatedData.amount)
     if (expenseAmount > 1000000 && expense) { // More than 1M IDR
-      const notificationPayload: NotificationsInsert = {
+      const notificationPayload: Insert<'notifications'> = {
         user_id: expense.user_id,
         type: 'warning',
         category: 'finance',

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { CustomerInsertSchema } from './customer'
-import type { CustomersInsert, CustomersUpdate } from '@/types/database'
+import type { Insert, Update } from '@/types/database'
 
 
 /**
@@ -65,10 +65,10 @@ export class CustomerValidationHelpers {
   /**
    * Validate customer data with enhanced business rules
    */
-  static validateInsert(data: unknown): { success: boolean; data?: CustomersInsert; errors?: string[] } {
+  static validateInsert(data: unknown): { success: boolean; data?: Insert<'customers'>; errors?: string[] } {
     try {
       const validatedData = EnhancedCustomerInsertSchema.parse(data)
-      return { success: true, data: validatedData as CustomersInsert }
+      return { success: true, data: validatedData as Insert<'customers'> }
     } catch (err) {
       if (err instanceof z.ZodError) {
         const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
@@ -81,7 +81,7 @@ export class CustomerValidationHelpers {
   /**
    * Validate customer update data
    */
-  static validateUpdate(data: unknown): { success: boolean; data?: CustomersUpdate; errors?: string[] } {
+  static validateUpdate(data: unknown): { success: boolean; data?: Update<'customers'>; errors?: string[] } {
     try {
       const validatedData = EnhancedCustomerUpdateSchema.parse(data)
       return { success: true, data: validatedData }
@@ -118,10 +118,10 @@ export class CustomerValidationHelpers {
    * Validate bulk customer import data
    */
   static validateBulkImport(customers: unknown[]): {
-    valid: CustomersInsert[]
+    valid: Array<Insert<'customers'>>
     invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: CustomersInsert[] = []
+    const valid: Array<Insert<'customers'>> = []
     const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     customers.forEach((customer, index) => {

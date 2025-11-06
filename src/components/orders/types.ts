@@ -1,9 +1,9 @@
-import type { OrdersTable, OrderItemsTable, OrderStatus as OrderStatusEnum } from '@/types/database'
+import type { Row, OrderStatus as OrderStatusEnum } from '@/types/database'
 
 // Use generated types from Supabase
 
-export type Order = OrdersTable
-export type OrderItem = OrderItemsTable
+export type Order = Row<'orders'>
+export type OrderItem = Row<'order_items'>
 export type OrderStatus = OrderStatusEnum
 
 // Order with items for display

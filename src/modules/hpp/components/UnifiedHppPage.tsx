@@ -1,19 +1,20 @@
 'use client'
 
-import { useState, useEffect, useCallback, memo } from 'react'
-import { TooltipProvider } from '@/components/ui/tooltip'
+import { Card, CardContent } from '@/components/ui/card'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { BarChart3, Calculator, TrendingUp, Bell } from 'lucide-react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import { useUnifiedHpp } from '../hooks/useUnifiedHpp'
-import { HppOverviewCard } from './HppOverviewCard'
-import { RecipeSelector } from './RecipeSelector'
-import { HppEmptyState } from './HppEmptyState'
 import { CostCalculationCard } from './CostCalculationCard'
+import { HppAlertsTab } from './HppAlertsTab'
+import { HppBreakdownVisual } from './HppBreakdownVisual'
+import { HppEmptyState } from './HppEmptyState'
+import { HppOverviewCard } from './HppOverviewCard'
+import { HppScenarioPlanner } from './HppScenarioPlanner'
 import { PricingCalculatorCard } from './PricingCalculatorCard'
 import { ProductComparisonCard } from './ProductComparisonCard'
-import { HppBreakdownVisual } from './HppBreakdownVisual'
-import { HppScenarioPlanner } from './HppScenarioPlanner'
-import { Card, CardContent } from '@/components/ui/card'
-import {Calculator, TrendingUp, BarChart3 } from 'lucide-react'
+import { RecipeSelector } from './RecipeSelector'
 
 
 
@@ -125,20 +126,24 @@ export const UnifiedHppPage = memo(() => {
               <Card>
                 <CardContent className="p-6">
                   <SwipeableTabs defaultValue="breakdown" className="w-full">
-                    <SwipeableTabsList className="grid w-full grid-cols-3 mb-6">
-                      <SwipeableTabsTrigger value="breakdown" className="gap-2">
-                        <BarChart3 className="h-4 w-4" />
-                        <span className="hidden sm:inline">Detail</span> Breakdown
-                      </SwipeableTabsTrigger>
-                      <SwipeableTabsTrigger value="comparison" className="gap-2">
-                        <TrendingUp className="h-4 w-4" />
-                        <span className="hidden sm:inline">Bandingkan</span> Produk
-                      </SwipeableTabsTrigger>
-                      <SwipeableTabsTrigger value="scenario" className="gap-2">
-                        <Calculator className="h-4 w-4" />
-                        <span className="hidden sm:inline">Simulasi</span> Skenario
-                      </SwipeableTabsTrigger>
-                    </SwipeableTabsList>
+                    <SwipeableTabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-6">
+                       <SwipeableTabsTrigger value="breakdown" className="gap-2">
+                         <BarChart3 className="h-4 w-4" />
+                         <span className="hidden sm:inline">Detail</span> Breakdown
+                       </SwipeableTabsTrigger>
+                       <SwipeableTabsTrigger value="comparison" className="gap-2">
+                         <TrendingUp className="h-4 w-4" />
+                         <span className="hidden sm:inline">Bandingkan</span> Produk
+                       </SwipeableTabsTrigger>
+                       <SwipeableTabsTrigger value="scenario" className="gap-2">
+                         <Calculator className="h-4 w-4" />
+                         <span className="hidden sm:inline">Simulasi</span> Skenario
+                       </SwipeableTabsTrigger>
+                       <SwipeableTabsTrigger value="alerts" className="gap-2">
+                         <Bell className="h-4 w-4" />
+                         <span className="hidden sm:inline">Peringatan</span> Alerts
+                       </SwipeableTabsTrigger>
+                     </SwipeableTabsList>
 
                     <SwipeableTabsContent value="breakdown" className="mt-0">
                       <HppBreakdownVisual recipe={recipe} />
@@ -155,10 +160,14 @@ export const UnifiedHppPage = memo(() => {
                       )}
                     </SwipeableTabsContent>
 
-                    <SwipeableTabsContent value="scenario" className="mt-0">
-                      <HppScenarioPlanner recipe={recipe} />
-                    </SwipeableTabsContent>
-                  </SwipeableTabs>
+                     <SwipeableTabsContent value="scenario" className="mt-0">
+                       <HppScenarioPlanner recipe={recipe} />
+                     </SwipeableTabsContent>
+
+                     <SwipeableTabsContent value="alerts" className="mt-0">
+                       <HppAlertsTab />
+                     </SwipeableTabsContent>
+                   </SwipeableTabs>
                 </CardContent>
               </Card>
             )}

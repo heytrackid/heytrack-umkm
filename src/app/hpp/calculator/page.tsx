@@ -1,19 +1,19 @@
 'use client'
 
-import { useState } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Calculator, TrendingUp, DollarSign, Package } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
+import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
 import { useRecipes } from '@/hooks/useRecipes'
 import { dbLogger } from '@/lib/logger'
-import { PageHeader, SharedStatsCards } from '@/components/shared'
-import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { Calculator, DollarSign, Package, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
 
 // Force dynamic rendering to avoid SSG issues
 export const dynamic = 'force-dynamic'
@@ -77,7 +77,8 @@ const HppCalculatorPage = () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ recipeId: selectedRecipe })
+        body: JSON.stringify({ recipeId: selectedRecipe }),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (response.ok) {
@@ -195,7 +196,7 @@ const HppCalculatorPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">
+                <div className="text-3xl font-bold text-gray-600">
                   {formatCurrency(calculation.total_cost)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -212,7 +213,7 @@ const HppCalculatorPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-blue-600">
+                <div className="text-3xl font-bold text-gray-600">
                   {formatCurrency(calculation.cost_per_unit)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -229,7 +230,7 @@ const HppCalculatorPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-3xl font-bold ${(calculation.wac_adjustment || 0) >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                <div className={`text-3xl font-bold ${(calculation.wac_adjustment || 0) >= 0 ? 'text-red-600' : 'text-gray-600'}`}>
                   {(calculation.wac_adjustment || 0) >= 0 ? '+' : ''}{formatCurrency(calculation.wac_adjustment || 0)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">

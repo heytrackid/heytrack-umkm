@@ -1,34 +1,25 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useSettings } from '@/contexts/settings-context'
-import { useToast } from '@/hooks/use-toast'
-import { useResponsive } from '@/hooks/useResponsive'
-import { useConfirm } from '@/components/ui/confirm-dialog'
-import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/supabase'
-import { usePagination } from '@/hooks/usePagination'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { DeleteModal } from '@/components/ui'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { SimplePagination } from '@/components/ui/simple-pagination'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { EnhancedEmptyState } from './EnhancedEmptyState'
+import { useSettings } from '@/contexts/settings-context'
+import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/supabase'
+import { useToast } from '@/hooks/use-toast'
+import { usePagination } from '@/hooks/usePagination'
+import { useResponsive } from '@/hooks/useResponsive'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState, useCallback } from 'react'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { MobileOperationalCostCard } from './MobileOperationalCostCard'
-import { OperationalCostStats } from './OperationalCostStats'
-import { DeleteModal } from '@/components/ui'
 import { OperationalCostFormDialog } from './OperationalCostFormDialog'
-// import { DateRangePicker } from '@/components/ui/date-range-picker' // TODO: Implement date range filter
-import type { OperationalCostsTable } from '@/types/database'
-import type { DateRange } from 'react-day-picker'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
+import { OperationalCostStats } from './OperationalCostStats'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -38,21 +29,30 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
-    Search,
-    Plus,
-    Zap,
-    MoreVertical,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import type { Row } from '@/types/database'
+import {
     Edit,
+    MoreVertical,
+    Plus,
+    Receipt,
+    Search,
     Trash2,
     X,
-    Receipt,
+    Zap,
 } from 'lucide-react'
+import type { DateRange } from 'react-day-picker'
 
 // Feature Components
 
 // Types
 
-type OperationalCost = OperationalCostsTable
+type OperationalCost = Row<'operational_costs'>
 type CategoryFilter = 'all' | 'utilities' | 'rent' | 'staff' | 'transport' | 'communication' | 'insurance' | 'maintenance' | 'other'
 
 // Constants
@@ -80,7 +80,7 @@ export const EnhancedOperationalCostsPage = () => {
     const { delete: deleteCost } = useSupabaseCRUD('operational_costs')
     const { toast } = useToast()
     const { isMobile } = useResponsive()
-    const { confirm } = useConfirm()
+    const { confirm, ConfirmDialog } = useConfirm()
 
     // Hydration fix - prevent SSR/client mismatch
     const [isMounted, setIsMounted] = useState(false)
@@ -151,28 +151,28 @@ export const EnhancedOperationalCostsPage = () => {
     const paginatedData = useMemo(() => filteredData.slice(pagination.startIndex, pagination.endIndex), [filteredData, pagination.startIndex, pagination.endIndex])
 
     // Update page size
-    const handlePageSizeChange = (newSize: number) => {
+    const handlePageSizeChange = useCallback((newSize: number) => {
         setPageSize(newSize)
         pagination.setPageSize(newSize)
-    }
+    }, [pagination])
 
     // Handlers
-    const handleEdit = (cost: OperationalCost) => {
+    const handleEdit = useCallback((cost: OperationalCost) => {
         setEditingCost(cost)
         setShowFormDialog(true)
-    }
+    }, [])
 
-    const handleAdd = () => {
+    const handleAdd = useCallback(() => {
         setEditingCost(undefined)
         setShowFormDialog(true)
-    }
+    }, [])
 
-    const handleDelete = (cost: OperationalCost) => {
+    const handleDelete = useCallback((cost: OperationalCost) => {
         setSelectedCost(cost)
         setIsDeleteDialogOpen(true)
-    }
+    }, [])
 
-    const handleConfirmDelete = async () => {
+    const handleConfirmDelete = useCallback(async () => {
         if (!selectedCost) { return }
 
         try {
@@ -191,31 +191,40 @@ export const EnhancedOperationalCostsPage = () => {
                 variant: 'destructive',
             })
         }
-    }
+    }, [selectedCost, deleteCost, toast])
 
-    const handleQuickSetup = async () => {
-        const confirmed = await confirm({
-            title: 'Tambahkan Template Biaya Operasional?',
-            description: 'Ini akan menambahkan 8 kategori biaya yang umum digunakan.',
-            confirmText: 'Tambahkan',
-            variant: 'default'
-        })
-        if (!confirmed) { return }
-
+    const handleQuickSetup = useCallback(async () => {
         try {
-            const response = await fetch('/api/operational-costs/quick-setup', {
-                method: 'POST',
+            const confirmed = await confirm({
+                title: 'Tambahkan Template Biaya Operasional?',
+                description: 'Ini akan menambahkan 8 kategori biaya yang umum digunakan.',
+                confirmText: 'Tambahkan',
+                variant: 'default'
             })
 
-            if (!response.ok) { throw new Error('Failed to setup') }
+            if (!confirmed) { return }
+
+            const response = await fetch('/api/operational-costs/quick-setup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error ?? 'Failed to setup')
+            }
+
+            const result = await response.json()
 
             toast({
                 title: 'Template ditambahkan',
-                description: 'Template biaya operasional berhasil ditambahkan',
+                description: `${result.count ?? 8} template biaya operasional berhasil ditambahkan`,
             })
 
-            // Refresh data
-            void refetch?.()
+            // Force refresh page to show new data
+            window.location.reload()
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Gagal menambahkan template'
             toast({
@@ -224,7 +233,7 @@ export const EnhancedOperationalCostsPage = () => {
                 variant: 'destructive',
             })
         }
-    }
+    }, [confirm, toast])
 
     const clearFilters = () => {
         setSearchTerm('')
@@ -366,6 +375,12 @@ export const EnhancedOperationalCostsPage = () => {
                                 </SelectContent>
                             </Select>
 
+                            <DateRangePicker
+                                value={dateRange}
+                                onChange={setDateRange}
+                                className="w-full sm:w-[280px]"
+                            />
+
                             {hasActiveFilters && (
                                 <Button variant="ghost" size="sm" onClick={clearFilters}>
                                     <X className="h-4 w-4 mr-2" />
@@ -385,7 +400,7 @@ export const EnhancedOperationalCostsPage = () => {
             </div>
 
             {/* Cost List */}
-            {loading ? (
+            {loading && (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {[...Array(6)].map((_, i) => (
                         <Card key={i}>
@@ -402,35 +417,51 @@ export const EnhancedOperationalCostsPage = () => {
                         </Card>
                     ))}
                 </div>
-            ) : filteredData.length === 0 ? (
-                <>
-                    {/* Empty state - no data at all */}
-                    {!costs || costs.length === 0 ? (
-                        <EnhancedEmptyState onAdd={handleAdd} onQuickSetup={handleQuickSetup} />
-                    ) : (
-                        /* Empty state - filtered results */
-                        <Card className="border-dashed">
-                            <CardContent className="p-8">
-                                <div className="text-center">
-                                    <div className="rounded-full bg-muted flex items-center justify-center mb-4 w-16 h-16 mx-auto">
-                                        <Search className="w-8 h-8 text-muted-foreground" />
-                                    </div>
-                                    <h3 className="font-semibold text-foreground mb-2 text-lg">
-                                        Tidak Ada Hasil
-                                    </h3>
-                                    <p className="text-muted-foreground mb-6 text-sm">
-                                        Coba gunakan kata kunci yang berbeda atau filter lain.
-                                    </p>
-                                    <Button variant="outline" onClick={clearFilters}>
-                                        <X className="h-4 w-4 mr-2" />
-                                        Hapus Filter
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                </>
-            ) : isMobile ? (
+            )}
+            
+            {!loading && filteredData.length === 0 && (!costs || costs.length === 0) && (
+                <EmptyState
+                    {...EmptyStatePresets.operationalCosts}
+                    actions={[
+                        {
+                            label: 'Setup Cepat (8 Template)',
+                            onClick: handleQuickSetup,
+                            icon: Zap
+                        },
+                        {
+                            label: 'Tambah Manual',
+                            onClick: handleAdd,
+                            variant: 'outline',
+                            icon: Plus
+                        }
+                    ]}
+                />
+            )}
+            
+            {!loading && filteredData.length === 0 && costs && costs.length > 0 && (
+                /* Empty state - filtered results */
+                <Card className="border-dashed">
+                    <CardContent className="p-8">
+                        <div className="text-center">
+                            <div className="rounded-full bg-muted flex items-center justify-center mb-4 w-16 h-16 mx-auto">
+                                <Search className="w-8 h-8 text-muted-foreground" />
+                            </div>
+                            <h3 className="font-semibold text-foreground mb-2 text-lg">
+                                Tidak Ada Hasil
+                            </h3>
+                            <p className="text-muted-foreground mb-6 text-sm">
+                                Coba gunakan kata kunci yang berbeda atau filter lain.
+                            </p>
+                            <Button variant="outline" onClick={clearFilters}>
+                                <X className="h-4 w-4 mr-2" />
+                                Hapus Filter
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+            
+            {!loading && filteredData.length > 0 && isMobile && (
                 <div className="space-y-3">
                     {paginatedData.map((cost: OperationalCost) => (
                         <MobileOperationalCostCard
@@ -445,7 +476,9 @@ export const EnhancedOperationalCostsPage = () => {
                         />
                     ))}
                 </div>
-            ) : (
+            )}
+            
+            {!loading && filteredData.length > 0 && !isMobile && (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {paginatedData.map((cost: OperationalCost) => {
                         const category = getCategoryInfo(cost.category || 'other')
@@ -556,6 +589,9 @@ export const EnhancedOperationalCostsPage = () => {
                 cost={editingCost}
                 onSuccess={() => refetch?.()}
             />
+
+            {/* Confirm Dialog */}
+            <ConfirmDialog />
         </div>
     )
 }

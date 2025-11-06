@@ -13,6 +13,7 @@ import {
     XCircle,
     Truck
 } from 'lucide-react'
+import { memo } from 'react'
 
 // Map the database enum values to component-friendly values
 type OrderStatus = 'pending' | 'confirmed' | 'in_production' | 'completed' | 'cancelled' | 'delivered'
@@ -57,7 +58,7 @@ const statusConfig = {
     confirmed: {
         label: 'Siap Produksi',
         icon: CheckCircle,
-        color: 'bg-blue-100 text-blue-800 border-blue-300',
+        color: 'bg-gray-100 text-gray-800 border-gray-400',
         nextAction: 'Mulai Produksi',
         nextActionVariant: 'default' as const,
         description: 'Order sudah dikonfirmasi, siap diproduksi'
@@ -65,7 +66,7 @@ const statusConfig = {
     in_production: {
         label: 'Sedang Diproduksi',
         icon: Loader2,
-        color: 'bg-purple-100 text-purple-800 border-purple-300',
+        color: 'bg-gray-100 text-gray-800 border-gray-400',
         nextAction: 'Tandai Selesai',
         nextActionVariant: 'default' as const,
         description: 'Sedang dalam proses produksi',
@@ -74,7 +75,7 @@ const statusConfig = {
     completed: {
         label: 'Selesai',
         icon: Package,
-        color: 'bg-green-100 text-green-800 border-green-300',
+        color: 'bg-gray-100 text-gray-800 border-gray-400',
         nextAction: 'Kirim ke Customer',
         nextActionVariant: 'outline' as const,
         description: 'Produksi selesai, siap dikirim'
@@ -82,7 +83,7 @@ const statusConfig = {
     delivered: {
         label: 'Terkirim',
         icon: Truck,
-        color: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+        color: 'bg-gray-100 text-emerald-800 border-emerald-300',
         nextAction: null,
         description: 'Order sudah diterima customer'
     },
@@ -95,7 +96,7 @@ const statusConfig = {
     }
 }
 
-export const OrderStatusBadge = ({
+export const OrderStatusBadge = memo(({
     status,
     showNextAction = false,
     onNextAction,
@@ -163,7 +164,7 @@ export const OrderStatusBadge = ({
             )}
         </div>
     )
-}
+})
 
 // Progress indicator component
 interface OrderProgressProps {
@@ -171,7 +172,7 @@ interface OrderProgressProps {
     className?: string
 }
 
-export const OrderProgress = ({ currentStatus, className }: OrderProgressProps) => {
+export const OrderProgress = memo(({ currentStatus, className }: OrderProgressProps) => {
     // Normalize the status to UI format
     let normalizedStatus: OrderStatus;
     if (typeof currentStatus === 'string' && Object.values(uiToDbStatusMap).includes(currentStatus as DatabaseOrderStatus)) {
@@ -213,7 +214,7 @@ export const OrderProgress = ({ currentStatus, className }: OrderProgressProps) 
                             <div className={cn(
                                 'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors',
                                 isCompleted
-                                    ? 'bg-green-500 border-green-500 text-white'
+                                    ? 'bg-gray-500 border-green-500 text-white'
                                     : 'bg-gray-100 border-gray-300 text-gray-400',
                                 isCurrent && 'ring-2 ring-green-200'
                             )}>
@@ -225,7 +226,7 @@ export const OrderProgress = ({ currentStatus, className }: OrderProgressProps) 
                             </div>
                             <span className={cn(
                                 'text-xs mt-1 font-medium',
-                                isCompleted ? 'text-green-600' : 'text-gray-400'
+                                isCompleted ? 'text-gray-600' : 'text-gray-400'
                             )}>
                                 {step.label}
                             </span>
@@ -234,7 +235,7 @@ export const OrderProgress = ({ currentStatus, className }: OrderProgressProps) 
                         {index < steps.length - 1 && (
                             <div className={cn(
                                 'w-12 h-0.5 mx-2 transition-colors',
-                                index < currentIndex ? 'bg-green-500' : 'bg-gray-300'
+                                index < currentIndex ? 'bg-gray-500' : 'bg-gray-300'
                             )} />
                         )}
                     </div>
@@ -242,7 +243,7 @@ export const OrderProgress = ({ currentStatus, className }: OrderProgressProps) 
             })}
         </div>
     )
-}
+})
 
 // Status change confirmation dialog helper
 export function getStatusChangeConfirmation(fromStatus: OrderStatus | DatabaseOrderStatus, toStatus: OrderStatus | DatabaseOrderStatus) {

@@ -3,16 +3,17 @@
 // POST: Create new template
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
-import type { WhatsappTemplatesInsert } from '@/types/database'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+import type { Insert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type WhatsAppTemplateInsert = WhatsappTemplatesInsert
+type WhatsAppTemplateInsert = Insert<'whatsapp_templates'>
 
-export async function GET(request: NextRequest) {
+async function GET(request: NextRequest) {
   try {
     // 1. Authentication
     const supabase = await createClient()
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     // 3. Query templates
     let query = supabase
       .from('whatsapp_templates')
-      .select('*')
+      .select('id, user_id, name, message, is_active, created_at, updated_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function POST(request: NextRequest) {
   try {
     // 1. Authentication
     const supabase = await createClient()
@@ -64,9 +65,7 @@ export async function POST(request: NextRequest) {
     
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // 2. Parse and validate body
+    }    // 2. Parse and validate body
     const body = await request.json()
     
     if (!body.name || !body.template_content || !body.category) {
@@ -119,3 +118,9 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+export { securedGET as GET, securedPOST as POST }

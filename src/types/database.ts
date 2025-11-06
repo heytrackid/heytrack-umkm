@@ -1,31 +1,35 @@
 import type {
-  Database as DatabaseType,
-  Tables as SupabaseTables, 
-  TablesInsert as SupabaseTablesInsert, 
-  TablesUpdate as SupabaseTablesUpdate,
-  Enums as SupabaseEnums
+    Database as DatabaseType,
+    Enums as SupabaseEnums,
+    Tables as SupabaseTables,
+    TablesInsert as SupabaseTablesInsert,
+    TablesUpdate as SupabaseTablesUpdate,
 } from './supabase-generated'
 
 // Core Supabase-generated helpers
 export type {
-  Database,
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-  Enums,
-  CompositeTypes,
+    CompositeTypes,
+    Database,
+    Enums, Json, Tables,
+    TablesInsert,
+    TablesUpdate
 } from './supabase-generated'
-
-// Re-export Json type from supabase-generated
-export type { Json } from './supabase-generated'
-
-// Import Database type for generic helpers
 
 // Generic type helpers for table operations
 export type TableName = keyof DatabaseType['public']['Tables']
+export type ViewName = keyof DatabaseType['public']['Views']
 export type Row<T extends TableName> = DatabaseType['public']['Tables'][T]['Row']
 export type Insert<T extends TableName> = DatabaseType['public']['Tables'][T]['Insert']
 export type Update<T extends TableName> = DatabaseType['public']['Tables'][T]['Update']
+
+// Fallback types for tables that might not exist in generated types
+export type SafeRow<T extends string> = T extends TableName ? Row<T> : Record<string, unknown>
+export type SafeInsert<T extends string> = T extends TableName
+  ? Insert<T>
+  : Record<string, unknown>
+export type SafeUpdate<T extends string> = T extends TableName
+  ? Update<T>
+  : Record<string, unknown>
 
 // Helper type for nested relations
 export type WithNestedRelation<T, K extends string, R> = T & { [P in K]: R }
@@ -66,11 +70,13 @@ export type RecipesTable = SupabaseTables<'recipes'>
 export type StockTransactionsTable = SupabaseTables<'stock_transactions'>
 export type SupplierIngredientsTable = SupabaseTables<'supplier_ingredients'>
 export type SuppliersTable = SupabaseTables<'suppliers'>
+export type StockReservationsTable = SupabaseTables<'stock_reservations'>
 export type UsageAnalyticsTable = SupabaseTables<'usage_analytics'>
 export type UserProfilesTable = SupabaseTables<'user_profiles'>
 export type WhatsappTemplatesTable = SupabaseTables<'whatsapp_templates'>
 
 // View types - using Tables helper (works for both tables and views)
+export type InventoryAvailabilityView = SupabaseTables<'inventory_availability'>
 export type InventoryStatusView = SupabaseTables<'inventory_status'>
 export type OrderSummaryView = SupabaseTables<'order_summary'>
 export type RecipeAvailabilityView = SupabaseTables<'recipe_availability'>
@@ -111,6 +117,7 @@ export type RecipesInsert = SupabaseTablesInsert<'recipes'>
 export type StockTransactionsInsert = SupabaseTablesInsert<'stock_transactions'>
 export type SupplierIngredientsInsert = SupabaseTablesInsert<'supplier_ingredients'>
 export type SuppliersInsert = SupabaseTablesInsert<'suppliers'>
+export type StockReservationsInsert = SupabaseTablesInsert<'stock_reservations'>
 export type UsageAnalyticsInsert = SupabaseTablesInsert<'usage_analytics'>
 export type UserProfilesInsert = SupabaseTablesInsert<'user_profiles'>
 export type WhatsappTemplatesInsert = SupabaseTablesInsert<'whatsapp_templates'>
@@ -151,6 +158,7 @@ export type RecipesUpdate = SupabaseTablesUpdate<'recipes'>
 export type StockTransactionsUpdate = SupabaseTablesUpdate<'stock_transactions'>
 export type SupplierIngredientsUpdate = SupabaseTablesUpdate<'supplier_ingredients'>
 export type SuppliersUpdate = SupabaseTablesUpdate<'suppliers'>
+export type StockReservationsUpdate = SupabaseTablesUpdate<'stock_reservations'>
 export type UsageAnalyticsUpdate = SupabaseTablesUpdate<'usage_analytics'>
 export type UserProfilesUpdate = SupabaseTablesUpdate<'user_profiles'>
 export type WhatsappTemplatesUpdate = SupabaseTablesUpdate<'whatsapp_templates'>
@@ -166,7 +174,13 @@ export type UserRole = SupabaseEnums<'user_role'>
 
 // Note: payment_status is stored as string in the database, not an enum
 // This is just for type consistency in our code
-export type PaymentStatus = string
+export type PaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID' | 'REFUNDED' | 'CANCELLED'
+
+// Stock reservation status (stored as string in database)
+export type StockReservationStatus = 'ACTIVE' | 'CONSUMED' | 'RELEASED' | 'EXPIRED'
+
+// Batch status (stored as string in database)
+export type BatchStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
 
 // ============================================
 // EXTENDED TYPES WITH RELATIONS
@@ -253,27 +267,8 @@ export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse
 // DOMAIN-SPECIFIC TYPES
 // ============================================
 
-// Stock Reservation Status
-export type StockReservationStatus = 'ACTIVE' | 'CONSUMED' | 'RELEASED' | 'EXPIRED'
-
-// Stock Reservation with relations
-export interface StockReservation {
-  id: string
-  ingredient_id: string
-  order_id: string
-  reserved_quantity: number
-  status: StockReservationStatus
-  reserved_at: string | null
-  consumed_at: string | null
-  released_at: string | null
-  notes: string | null
-  user_id: string
-  created_at: string | null
-  updated_at: string | null
-}
-
-export type StockReservationInsert = Omit<StockReservation, 'id' | 'created_at' | 'updated_at'>
-export type StockReservationUpdate = Partial<StockReservationInsert>
+// Stock Reservation - using generated types
+export type StockReservation = StockReservationsTable
 
 // Order Item with calculated fields
 export type OrderItemWithProfit = OrderItemsTable & {
@@ -294,8 +289,8 @@ export interface FinancialSummary {
   }
 }
 
-// Inventory Status
-export interface InventoryStatus {
+// Inventory Status (custom type for business logic)
+export interface InventoryStatusCustom {
   ingredient_id: string
   ingredient_name: string
   current_stock: number
@@ -305,9 +300,6 @@ export interface InventoryStatus {
   reorder_point: number
   status: 'OK' | 'LOW' | 'OUT_OF_STOCK' | 'REORDER_NEEDED'
 }
-
-// Production Batch Status
-export type BatchStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
 
 // ============================================
 // FORM TYPES
@@ -350,17 +342,53 @@ export interface SearchParams {
 
 // Table names as const for type safety
 export const TABLE_NAMES = {
-  INGREDIENTS: 'ingredients',
-  RECIPES: 'recipes',
-  ORDERS: 'orders',
-  ORDER_ITEMS: 'order_items',
+  APP_SETTINGS: 'app_settings',
+  CHAT_CONTEXT_CACHE: 'chat_context_cache',
+  CHAT_MESSAGES: 'chat_messages',
+  CHAT_SESSIONS: 'chat_sessions',
+  CONVERSATION_HISTORY: 'conversation_history',
+  CONVERSATION_SESSIONS: 'conversation_sessions',
   CUSTOMERS: 'customers',
-  SUPPLIERS: 'suppliers',
-  PRODUCTIONS: 'productions',
-  FINANCIAL_RECORDS: 'financial_records',
+  DAILY_SALES_SUMMARY: 'daily_sales_summary',
+  ERROR_LOGS: 'error_logs',
   EXPENSES: 'expenses',
-  STOCK_TRANSACTIONS: 'stock_transactions',
+  FINANCIAL_RECORDS: 'financial_records',
+  HPP_ALERTS: 'hpp_alerts',
+  HPP_CALCULATIONS: 'hpp_calculations',
+  HPP_HISTORY: 'hpp_history',
+  HPP_RECOMMENDATIONS: 'hpp_recommendations',
+  INGREDIENT_PURCHASES: 'ingredient_purchases',
+  INGREDIENTS: 'ingredients',
+  INVENTORY_ALERTS: 'inventory_alerts',
+  INVENTORY_REORDER_RULES: 'inventory_reorder_rules',
+  INVENTORY_STOCK_LOGS: 'inventory_stock_logs',
+  NOTIFICATION_PREFERENCES: 'notification_preferences',
   NOTIFICATIONS: 'notifications',
+  OPERATIONAL_COSTS: 'operational_costs',
+  ORDER_ITEMS: 'order_items',
+  ORDERS: 'orders',
+  PAYMENTS: 'payments',
+  PERFORMANCE_LOGS: 'performance_logs',
+  PRODUCTION_BATCHES: 'production_batches',
+  PRODUCTION_SCHEDULES: 'production_schedules',
+  PRODUCTIONS: 'productions',
+  RECIPE_INGREDIENTS: 'recipe_ingredients',
+  RECIPES: 'recipes',
+  STOCK_RESERVATIONS: 'stock_reservations',
+  STOCK_TRANSACTIONS: 'stock_transactions',
+  SUPPLIER_INGREDIENTS: 'supplier_ingredients',
+  SUPPLIERS: 'suppliers',
+  USAGE_ANALYTICS: 'usage_analytics',
+  USER_PROFILES: 'user_profiles',
+  WHATSAPP_TEMPLATES: 'whatsapp_templates',
 } as const
 
-export type TableNameConstant = typeof TABLE_NAMES[keyof typeof TABLE_NAMES]
+export const VIEW_NAMES = {
+  INVENTORY_AVAILABILITY: 'inventory_availability',
+  INVENTORY_STATUS: 'inventory_status',
+  ORDER_SUMMARY: 'order_summary',
+  RECIPE_AVAILABILITY: 'recipe_availability',
+} as const
+
+export type TableNameConstant = (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES]
+export type ViewNameConstant = (typeof VIEW_NAMES)[keyof typeof VIEW_NAMES]

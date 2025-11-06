@@ -94,7 +94,7 @@ const RecipeGeneratorFormEnhanced = ({
     <Card>
       <CardHeader className="bg-card">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
             <ChefHat className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -258,14 +258,14 @@ const RecipeGeneratorFormEnhanced = ({
         {/* AI Logic Indicator */}
         <div className="bg-muted/50 border rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center flex-shrink-0">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
             <div>
-              <p className="text-xs font-medium text-purple-900 dark:text-purple-100 mb-1">
+              <p className="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">
                 💡 Cara Kerja AI
               </p>
-              <p className="text-xs text-purple-800 dark:text-purple-200">
+              <p className="text-xs text-gray-800 dark:text-gray-200">
                 AI akan menyesuaikan resep berdasarkan {mode === 'quick' ? 'jenis produk & jumlah hasil' : 'target harga jual & bahan yang Anda pilih'}.
                 Setiap hasil bisa berbeda untuk memberikan variasi terbaik.
               </p>

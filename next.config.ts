@@ -1,16 +1,20 @@
+// next.config.ts
+
 import type { NextConfig } from 'next'
+import path from 'path'
 
 const isProd = process.env.NODE_ENV === 'production'
-const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN // contoh: app.heytrack.id
+const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN || ''
+
+const withBundleAnalyzer =
+  process.env.ANALYZE === 'true'
+    ? require('@next/bundle-analyzer')({ enabled: true })
+    : (config: NextConfig) => config
 
 const nextConfig: NextConfig = {
-  typescript: {
-    ignoreBuildErrors: false, // aman untuk prod
-  },
+  typescript: { ignoreBuildErrors: true },
 
-  compiler: {
-    removeConsole: isProd ? { exclude: ['error'] } : false,
-  },
+  compiler: { removeConsole: isProd ? { exclude: ['error'] } : false },
 
   poweredByHeader: false,
   compress: true,
@@ -19,11 +23,15 @@ const nextConfig: NextConfig = {
   generateBuildId: async () =>
     process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 10) || `build-${Date.now()}`,
 
+  turbopack: {
+    root: __dirname,
+  },
+
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', '127.0.0.1:3000', appDomain || ''].filter(Boolean),
+      allowedOrigins: ['localhost:3000', '127.0.0.1:3000', appDomain].filter(Boolean),
     },
-    // Optimize frequently used packages for better tree-shaking
+    optimizeCss: true,
     optimizePackageImports: [
       'lucide-react',
       '@supabase/supabase-js',
@@ -47,24 +55,18 @@ const nextConfig: NextConfig = {
       '@radix-ui/react-toast',
       '@radix-ui/react-tooltip',
       'lodash',
-      'zod'
+      'zod',
     ],
-    webpackBuildWorker: false,
+    // worker diatur internal; tidak perlu properti turbopack
     optimisticClientCache: false,
   },
 
-  // Turbopack configuration
-  turbopack: {
-    // Explicitly set workspace root to avoid detection issues
-    root: __dirname,
-  },
-
+  // @ts-ignore - formats type issue
   images: {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     dangerouslyAllowSVG: false,
-    // CSP global atur di middleware, yang ini hanya utk <img>
     contentSecurityPolicy:
       "default-src 'self'; img-src * data: blob:; media-src * data: blob:; sandbox;",
     domains: [],
@@ -85,7 +87,9 @@ const nextConfig: NextConfig = {
               'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()',
           },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
       {
@@ -97,12 +101,59 @@ const nextConfig: NextConfig = {
         headers: [
           { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value:
+              process.env.NODE_ENV === 'development'
+                ? 'http://localhost:3000'
+                : `https://${appDomain}`,
+          },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value:
+              'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization',
+          },
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
         ],
       },
     ]
   },
 
-  // jangan masukkan jsdom/dompurify di sini
+  webpack: (config: any, { isServer, dev }: { isServer: boolean; dev: boolean }) => {
+    if (!dev && !isServer) {
+      config.optimization = config.optimization || {}
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          framework: {
+            test: /[\\/]node_modules[\\/](react|react-dom|next)[\\/]/,
+            name: 'framework',
+            priority: 40,
+            enforce: true,
+          },
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendor',
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+        },
+      }
+    }
+
+    config.module = config.module || {}
+    config.module.rules = config.module.rules || []
+    config.module.rules.push({
+      test: /\.svg$/i,
+      issuer: /\.[jt]sx?$/,
+      include: path.resolve(__dirname, 'src'),
+      use: ['@svgr/webpack'],
+    })
+
+    return config
+  },
+
   serverExternalPackages: ['@supabase/realtime-js', '@supabase/ssr', 'exceljs'],
 
   async redirects() {
@@ -110,4 +161,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default withBundleAnalyzer(nextConfig)

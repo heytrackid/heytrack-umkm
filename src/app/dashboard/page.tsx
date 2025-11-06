@@ -1,26 +1,85 @@
 'use client'
+ 
 
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
+// Lazy load OnboardingWizard - only needed for new users
+const OnboardingWizard = dynamic(
+  () => import('@/components/onboarding/OnboardingWizard').then(mod => ({ default: mod.OnboardingWizard })),
+  {
+    loading: () => <div className="animate-pulse bg-muted rounded-lg h-96" />
+  }
+)
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
-import { usePagePreloading } from '@/providers/PreloadingProvider'
-import { BarChart3, ChefHat, Package, ShoppingCart, Target, Calculator, Sparkles } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { Suspense, useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { queryLogger } from '@/lib/client-logger'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
+import { usePagePreloading } from '@/providers/PreloadingProvider'
+import { useQuery } from '@tanstack/react-query'
+import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Plus, Users } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import dynamic from 'next/dynamic'
 
-// Import lightweight components normally - no need for lazy loading
-import StatsCardsSection from './components/StatsCardsSection'
-import RecentOrdersSection from './components/RecentOrdersSection'
-import StockAlertsSection from './components/StockAlertsSection'
-import HppDashboardWidget from './components/HppDashboardWidget'
+// Dynamically import heavy dashboard components to improve initial page load
+const HppDashboardWidget = dynamic(
+  () => import('./components/HppDashboardWidget'),
+  { 
+    loading: () => <div className="h-80 bg-gray-100 animate-pulse rounded-lg" />,
+    ssr: false
+  }
+)
+
+const RecentOrdersSection = dynamic(
+  () => import('./components/RecentOrdersSection'),
+  { 
+    loading: () => (
+      <div className="space-y-4">
+        <div className="h-12 bg-gray-100 animate-pulse rounded" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
+          ))}
+        </div>
+      </div>
+    ),
+    ssr: false
+  }
+)
+
+const StatsCardsSection = dynamic(
+  () => import('./components/StatsCardsSection'),
+  { 
+    loading: () => (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {Array.from({ length: 4 }, (_, i) => (
+          <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
+        ))}
+      </div>
+    ),
+    ssr: false
+  }
+)
+
+const StockAlertsSection = dynamic(
+  () => import('./components/StockAlertsSection'),
+  { 
+    loading: () => (
+      <div className="space-y-4">
+        <div className="h-12 bg-gray-100 animate-pulse rounded" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
+          ))}
+        </div>
+      </div>
+    ),
+    ssr: false
+  }
+)
 
 // Dashboard data structure
 interface DashboardData {
@@ -56,7 +115,9 @@ interface DashboardData {
 // Optimized data fetching - single API call
 const fetchDashboardData = async (): Promise<DashboardData> => {
   // ✅ FIX: Use single API call instead of 3 parallel calls
-  const response = await fetch('/api/dashboard/stats')
+  const response = await fetch('/api/dashboard/stats', {
+    credentials: 'include', // Include cookies for authentication
+  })
 
   if (!response.ok) {
     throw new Error('Failed to fetch dashboard data')
@@ -85,34 +146,13 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
   }
 }
 
-// Dashboard Skeleton Component
-const DashboardSkeleton = () => (
-  <div className="space-y-6">
-    {/* Stats Cards Loading */}
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      {Array.from({ length: 4 }, (_, i) => (
-        <StatsCardSkeleton key={i} />
-      ))}
-    </div>
 
-    {/* Recent Orders & Stock Alerts Loading */}
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <RecentOrdersSkeleton />
-      <StockAlertSkeleton />
-    </div>
 
-    {/* HPP Widget Loading */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="h-5 w-5" />
-          Analisis HPP
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
-      </CardContent>
-    </Card>
+const StatsCardsGridSkeleton = () => (
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    {Array.from({ length: 4 }, (_, i) => (
+      <StatsCardSkeleton key={i} />
+    ))}
   </div>
 )
 
@@ -152,15 +192,75 @@ const Dashboard = () => {
       })
       void router.push('/auth/login')
     }
-  }, [isAuthLoading, isAuthenticated, router, toast])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthLoading, isAuthenticated])
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000)
-    return () => clearInterval(timer)
+    if (typeof document === 'undefined') {
+      return undefined
+    }
+
+    let timer: ReturnType<typeof setInterval> | null = null
+
+    const tick = () => {
+      void setCurrentTime(new Date())
+    }
+
+    const start = () => {
+      if (timer || document.hidden) {
+        return
+      }
+      tick()
+      timer = setInterval(tick, 1000)
+    }
+
+    const stop = () => {
+      if (!timer) {
+        return
+      }
+      clearInterval(timer)
+      timer = null
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stop()
+      } else {
+        start()
+      }
+    }
+
+    start()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      stop()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   // ✅ FIX: Combine loading states to prevent double skeleton
   const isLoading = isAuthLoading || isDataLoading
+
+  // Check if user has no data yet (empty state) - memoized to prevent unnecessary re-renders
+  // MUST be called before any conditional returns to follow Rules of Hooks
+  const hasNoData = useMemo(() => {
+    if (!dashboardData) {return false}
+    return dashboardData.stats.totalOrders === 0 &&
+      dashboardData.stats.totalIngredients === 0 &&
+      dashboardData.stats.totalCustomers === 0
+  }, [dashboardData])
+
+  // Show onboarding for new users - MUST be before any conditional returns
+  useEffect(() => {
+    if (hasNoData && !isLoading) {
+      const hasSkipped = localStorage.getItem('heytrack_onboarding_skipped')
+      const hasCompleted = localStorage.getItem('heytrack_onboarding_completed')
+      if (!hasSkipped && !hasCompleted) {
+        setShowOnboarding(true)
+      }
+    }
+  }, [hasNoData, isLoading])
 
   // Show loading state while initializing
   if (isLoading && !dashboardData) {
@@ -198,22 +298,6 @@ const Dashboard = () => {
       </AppLayout>
     )
   }
-
-  // Check if user has no data yet (empty state)
-  const hasNoData = dashboardData?.stats.totalOrders === 0 &&
-    dashboardData.stats.totalIngredients === 0 &&
-    dashboardData.stats.totalCustomers === 0
-
-  // Show onboarding for new users
-  useEffect(() => {
-    if (hasNoData && !isLoading) {
-      const hasSkipped = localStorage.getItem('heytrack_onboarding_skipped')
-      const hasCompleted = localStorage.getItem('heytrack_onboarding_completed')
-      if (!hasSkipped && !hasCompleted) {
-        setShowOnboarding(true)
-      }
-    }
-  }, [hasNoData, isLoading])
 
   return (
     <AppLayout>
@@ -276,19 +360,19 @@ const Dashboard = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/ingredients">
-                      <Package className="h-6 w-6 text-blue-600" />
+                      <Package className="h-6 w-6 text-muted-foreground" />
                       <span className="text-sm font-medium">Bahan Baku</span>
                     </a>
                   </Button>
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/recipes">
-                      <ChefHat className="h-6 w-6 text-purple-600" />
+                      <ChefHat className="h-6 w-6 text-muted-foreground" />
                       <span className="text-sm font-medium">Resep</span>
                     </a>
                   </Button>
                   <Button variant="outline" asChild className="h-24 flex-col gap-2">
                     <a href="/hpp">
-                      <Calculator className="h-6 w-6 text-green-600" />
+                      <Calculator className="h-6 w-6 text-muted-foreground" />
                       <span className="text-sm font-medium">Hitung HPP</span>
                     </a>
                   </Button>
@@ -303,8 +387,8 @@ const Dashboard = () => {
                 {/* Feature Highlights */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto pt-6 text-left">
                   <div className="flex gap-3 items-start">
-                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
-                      <Calculator className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
+                      <Calculator className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <h4 className="font-medium text-sm mb-1">HPP Otomatis</h4>
@@ -314,8 +398,8 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex gap-3 items-start">
-                    <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center flex-shrink-0">
-                      <BarChart3 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
+                      <BarChart3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <h4 className="font-medium text-sm mb-1">Analisis Profit</h4>
@@ -325,8 +409,8 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex gap-3 items-start">
-                    <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
-                      <Package className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
+                      <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
                       <h4 className="font-medium text-sm mb-1">Kelola Stok</h4>
@@ -341,83 +425,157 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {/* Main Dashboard Content - Single Suspense boundary to prevent cascading loading */}
-        <Suspense fallback={<DashboardSkeleton />}>
+        {/* Main Dashboard Content - Individual Suspense boundaries for each section */}
+        <div className="space-y-6">
           {/* Stats Cards */}
-          <StatsCardsSection
-            stats={dashboardData?.stats ? {
-              revenue: {
-                total: dashboardData.stats.totalSales,
-                growth: dashboardData.stats.salesGrowth.toString(),
-                trend: dashboardData.stats.salesGrowth >= 0 ? 'up' : 'down'
-              },
-              orders: {
-                total: dashboardData.stats.totalOrders,
-                active: dashboardData.stats.totalOrders // Placeholder - need to determine active orders
-              },
-              customers: {
-                total: dashboardData.stats.totalCustomers,
-                vip: 0 // Placeholder - need to determine VIP customers
-              },
-              inventory: {
-                total: dashboardData.stats.totalIngredients,
-                lowStock: dashboardData.stats.ingredientsLow
-              }
-            } : undefined}
-            formatCurrency={formatCurrency}
-          />
+          <Suspense fallback={<StatsCardsGridSkeleton />}>
+            <StatsCardsSection
+              stats={dashboardData?.stats ? {
+                revenue: {
+                  total: dashboardData.stats.totalSales,
+                  growth: dashboardData.stats.salesGrowth.toString(),
+                  trend: dashboardData.stats.salesGrowth >= 0 ? 'up' : 'down'
+                },
+                orders: {
+                  total: dashboardData.stats.totalOrders,
+                  active: dashboardData.stats.totalOrders // Placeholder - need to determine active orders
+                },
+                customers: {
+                  total: dashboardData.stats.totalCustomers,
+                  vip: 0 // Placeholder - need to determine VIP customers
+                },
+                inventory: {
+                  total: dashboardData.stats.totalIngredients,
+                  lowStock: dashboardData.stats.ingredientsLow
+                }
+              } : undefined}
+              formatCurrency={formatCurrency}
+            />
+          </Suspense>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Orders */}
-            <RecentOrdersSection orders={dashboardData?.orders?.recent} />
+            <Suspense fallback={
+              <div className="space-y-4">
+                <div className="h-12 bg-gray-100 animate-pulse rounded" />
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
+                  ))}
+                </div>
+              </div>
+            }>
+              <RecentOrdersSection orders={dashboardData?.orders?.recent} />
+            </Suspense>
 
             {/* Low Stock Alert */}
-            <StockAlertsSection lowStockItems={dashboardData?.inventory?.lowStockAlerts} />
+            <Suspense fallback={
+              <div className="space-y-4">
+                <div className="h-12 bg-gray-100 animate-pulse rounded" />
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
+                  ))}
+                </div>
+              </div>
+            }>
+              <StockAlertsSection lowStockItems={dashboardData?.inventory?.lowStockAlerts} />
+            </Suspense>
           </div>
 
           {/* HPP Dashboard Widget */}
-          <HppDashboardWidget />
-        </Suspense>
+          <Suspense fallback={
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Analisis HPP
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+              </CardContent>
+            </Card>
+          }>
+            <HppDashboardWidget />
+          </Suspense>
+        </div>
 
-        {/* Quick Actions */}
+        {/* Enhanced Quick Actions */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
-              Menu Cepat
+              <Sparkles className="h-5 w-5 text-primary" />
+              Aksi Cepat
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/orders">
-                  <ShoppingCart className="h-6 w-6" />
-                  <span className="text-sm font-medium">Pesanan</span>
-                </a>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              <Button
+                variant="default"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center bg-primary hover:bg-primary/90"
+                onClick={() => router.push('/orders/new')}
+              >
+                <Plus className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Buat Order Baru</div>
+                  <div className="text-xs opacity-80">Tambah pesanan</div>
+                </div>
               </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/recipes">
-                  <ChefHat className="h-6 w-6" />
-                  <span className="text-sm font-medium">Resep</span>
-                </a>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center"
+                onClick={() => router.push('/recipes/ai-generator')}
+              >
+                <ChefHat className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Generate Resep</div>
+                  <div className="text-xs opacity-80">Buat resep AI</div>
+                </div>
               </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/ingredients">
-                  <Package className="h-6 w-6" />
-                  <span className="text-sm font-medium">Bahan Baku</span>
-                </a>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center"
+                onClick={() => router.push('/inventory')}
+              >
+                <Package className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Tambah Bahan</div>
+                  <div className="text-xs opacity-80">Update inventory</div>
+                </div>
               </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/hpp">
-                  <Calculator className="h-6 w-6" />
-                  <span className="text-sm font-medium">Biaya Produksi</span>
-                </a>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center"
+                onClick={() => router.push('/reports')}
+              >
+                <BarChart3 className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Lihat Laporan</div>
+                  <div className="text-xs opacity-80">Analisis performa</div>
+                </div>
               </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/reports">
-                  <BarChart3 className="h-6 w-6" />
-                  <span className="text-sm font-medium">Laporan</span>
-                </a>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center"
+                onClick={() => router.push('/suppliers')}
+              >
+                <Users className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Kelola Supplier</div>
+                  <div className="text-xs opacity-80">Data vendor</div>
+                </div>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center gap-2 text-center"
+                onClick={() => router.push('/hpp/calculator')}
+              >
+                <Calculator className="h-6 w-6" />
+                <div>
+                  <div className="font-medium text-sm">Kalkulator HPP</div>
+                  <div className="text-xs opacity-80">Biaya produksi</div>
+                </div>
               </Button>
             </div>
           </CardContent>

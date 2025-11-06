@@ -1,12 +1,12 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 const getProfitabilityLevel = (marginPercentage: number): 'high' | 'medium' | 'low' => {
   if (marginPercentage >= 30) {

@@ -1,7 +1,6 @@
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { Database, NotificationsInsert } from '@/types/database'
-import type { Json } from '@/types/supabase-generated'
+import type { Insert, Database, Json } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type {WorkflowResult,
   WorkflowContext
@@ -14,8 +13,102 @@ import type {WorkflowResult,
 
 export class InventoryWorkflowHandlers {
   /**
-   * Handle low stock event
-   */
+    * Handle out of stock event
+    */
+  static async handleOutOfStock(context: WorkflowContext): Promise<WorkflowResult> {
+    const { event, logger } = context
+
+    if (!event.data || typeof event.data !== 'object') {
+      return {
+        success: false,
+        message: 'Invalid out of stock event data',
+        error: 'Missing or invalid event data'
+      }
+    }
+
+    const data = event.data as {
+      ingredient: { name: string; unit: string; min_stock?: number }
+      previousStock: number
+      currentStock: number
+      severity: string
+    }
+
+    const { ingredient, currentStock, severity } = data
+
+    logger.error({
+      ingredientName: ingredient.name,
+      currentStock,
+      unit: ingredient.unit,
+      severity
+    }, 'Out of stock alert triggered - CRITICAL')
+
+    try {
+      // Generate reorder recommendation
+      const recommendation = this.calculateReorderRecommendation(ingredient, currentStock)
+
+      logger.info({
+        ingredientName: ingredient.name,
+        shouldReorder: recommendation.shouldReorder,
+        quantity: recommendation.recommendedQuantity,
+        priority: recommendation.priority
+      }, 'Urgent reorder recommendation generated')
+
+      // Create critical notification in database
+      await this.createInventoryNotification(context.supabase as SupabaseClient<Database>, {
+        type: 'error',
+        category: 'inventory',
+        title: 'STOK HABIS - TINDAKAN DARURAT!',
+        message: `${ingredient.name}: STOK HABIS (${currentStock} ${ingredient.unit}). ${recommendation.reason}. SEGERA LAKUKAN PEMESANAN!`,
+        priority: 'urgent',
+        entity_id: event.entityId,
+        entity_type: 'ingredient',
+        action_url: '/ingredients',
+        metadata: {
+          ingredient_id: event.entityId,
+          ingredient_name: ingredient.name,
+          current_stock: currentStock,
+          min_stock: ingredient.min_stock,
+          recommended_quantity: recommendation.recommendedQuantity,
+          severity: 'critical',
+          out_of_stock: true
+        }
+      })
+
+      logger.error({
+        ingredientName: ingredient.name,
+        recommendedQuantity: recommendation.recommendedQuantity
+      }, 'CRITICAL: Out of stock - immediate reorder required')
+
+      return {
+        success: true,
+        message: `CRITICAL: Out of stock alert processed for ${ingredient.name}`,
+        data: {
+          ingredient: ingredient.name,
+          currentStock,
+          recommendation,
+          severity: 'critical',
+          notificationCreated: true,
+          outOfStock: true
+        }
+      }
+
+    } catch (error: unknown) {
+      logger.error({
+        ingredientName: ingredient.name,
+        error: getErrorMessage(error)
+      }, 'CRITICAL: Failed to process out of stock alert')
+
+      return {
+        success: false,
+        message: 'Failed to process out of stock alert',
+        error: getErrorMessage(error)
+      }
+    }
+  }
+
+  /**
+    * Handle low stock event
+    */
   static async handleLowStock(context: WorkflowContext): Promise<WorkflowResult> {
     const { event, logger } = context
 
@@ -105,45 +198,7 @@ export class InventoryWorkflowHandlers {
     }
   }
 
-  /**
-   * Handle out of stock event
-   */
-  static handleOutOfStock(context: WorkflowContext): WorkflowResult {
-    const { event, logger } = context
 
-    logger.error({
-      ingredientId: event.entityId
-    }, 'Out of stock alert triggered')
-
-    try {
-      // TODO: Implement emergency reorder logic
-      // - Immediate purchase order creation
-      // - Critical notifications to management
-      // - Alternative ingredient suggestions
-
-      logger.info({
-        ingredientId: event.entityId
-      }, 'Emergency reorder initiated for out of stock item')
-
-      return {
-        success: true,
-        message: `Emergency reorder initiated for ${event.entityId}`,
-        data: { ingredientId: event.entityId, action: 'emergency_reorder' }
-      }
-
-    } catch (error: unknown) {
-      logger.error({
-        ingredientId: event.entityId,
-        error: getErrorMessage(error)
-      }, 'Failed to process out of stock alert')
-
-      return {
-        success: false,
-        message: 'Failed to process out of stock alert',
-        error: getErrorMessage(error)
-      }
-    }
-  }
 
   /**
    * Calculate reorder recommendation
@@ -212,7 +267,7 @@ export class InventoryWorkflowHandlers {
         ? JSON.parse(JSON.stringify(notificationData.metadata)) as Json
         : undefined
 
-      const notification: NotificationsInsert = {
+      const notification: Insert<'notifications'> = {
         type: notificationData.type,
         category: notificationData.category,
         title: notificationData.title,

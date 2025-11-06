@@ -114,6 +114,43 @@ export function generateIngredientsTemplate(): string {
 }
 
 /**
+ * Generate CSV template for suppliers
+ */
+export function generateSuppliersTemplate(): string {
+  const headers = [
+    'name',
+    'contact_person',
+    'phone',
+    'email',
+    'address',
+    'company_type',
+    'payment_terms',
+    'notes'
+  ]
+
+  const examples = [
+    ['PT. Bahan Kue Indonesia', 'Ahmad Rahman', '+6281234567890', 'ahmad@bahan-kue.com', 'Jl. Industri No. 123, Jakarta', 'PT', '30 hari', 'Supplier bahan baku terpercaya'],
+    ['CV. Sembako Makmur', 'Siti Nurhaliza', '+6289876543210', 'siti@sembako-makmur.com', 'Jl. Perdagangan No. 45, Bandung', 'CV', '14 hari', 'Spesialis gula dan tepung'],
+    ['Toko Bahan Kue Lokal', 'Budi Santoso', '+6281122334455', 'budi@tokobahan.com', 'Jl. Raya No. 67, Surabaya', 'Toko', 'Cash', 'Supplier lokal dengan harga kompetitif']
+  ]
+
+  // Wrap fields with commas or quotes in double quotes
+  const escapeCSV = (field: string) => {
+    if (field.includes(',') || field.includes('"') || field.includes('\n')) {
+      return `"${field.replace(/"/g, '""')}"`
+    }
+    return field
+  }
+
+  const rows = [
+    headers.join(','),
+    ...examples.map(row => row.map(escapeCSV).join(','))
+  ]
+
+  return rows.join('\n')
+}
+
+/**
  * Generate CSV template for orders
  */
 export function generateOrdersTemplate(): string {
@@ -168,6 +205,24 @@ export function parseIngredientsCSV(text: string) {
     category: (row.category || row.Category || row.KATEGORI) || 'General',
     supplier: (row.supplier || row.Supplier || row.SUPPLIER) || '',
     description: (row.description || row.Description || row.DESKRIPSI) || ''
+  }))
+}
+
+/**
+ * Parse suppliers from CSV data
+ */
+export function parseSuppliersCSV(text: string) {
+  const data = parseCSV(text)
+
+  return data.map(row => ({
+    name: (row.name || row.Name || row.NAMA) || '',
+    contact_person: (row.contact_person || row['Contact Person'] || row.KONTAK) || '',
+    phone: (row.phone || row.Phone || row.TELEPON) || '',
+    email: (row.email || row.Email || row.EMAIL) || '',
+    address: (row.address || row.Address || row.ALAMAT) || '',
+    company_type: (row.company_type || row['Company Type'] || row.TIPE_PERUSAHAAN) || '',
+    payment_terms: (row.payment_terms || row['Payment Terms'] || row.SYARAT_PEMBAYARAN) || '',
+    notes: (row.notes || row.Notes || row.CATATAN) || ''
   }))
 }
 

@@ -6,13 +6,13 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { ShoppingCart, TrendingUp, Calendar, Package, Sparkles, AlertCircle } from 'lucide-react'
 
 
 
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 interface ReorderSuggestion {
     ingredient: Ingredient
@@ -121,7 +121,7 @@ export const SmartReorderSuggestions = ({
             case 'critical': return 'bg-red-100 text-red-700 border-red-300'
             case 'high': return 'bg-orange-100 text-orange-700 border-orange-300'
             case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-300'
-            case 'low': return 'bg-blue-100 text-blue-700 border-blue-300'
+            case 'low': return 'bg-gray-100 text-gray-700 border-gray-400'
         }
     }
 
@@ -136,15 +136,15 @@ export const SmartReorderSuggestions = ({
 
     if (suggestions.length === 0) {
         return (
-            <Card className="border-2 border-green-200 bg-green-50/50">
+            <Card className="border-2 border-gray-300 bg-gray-50/50">
                 <CardContent className="p-8">
                     <div className="text-center space-y-3">
-                        <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-                            <Package className="h-8 w-8 text-green-600" />
+                        <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
+                            <Package className="h-8 w-8 text-gray-600" />
                         </div>
                         <div>
-                            <p className="font-semibold text-green-900">✅ Semua Stok Aman!</p>
-                            <p className="text-sm text-green-700 mt-1">
+                            <p className="font-semibold text-gray-900">✅ Semua Stok Aman!</p>
+                            <p className="text-sm text-gray-700 mt-1">
                                 Tidak ada bahan yang perlu di-reorder saat ini
                             </p>
                         </div>
@@ -157,11 +157,11 @@ export const SmartReorderSuggestions = ({
     return (
         <div className="space-y-4">
             {/* Header */}
-            <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50/50 to-pink-50/50">
+            <Card className="border-2 border-gray-300 bg-gradient-to-br from-gray-50/50 to-gray-100/50">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
                                 <Sparkles className="h-5 w-5 text-white" />
                             </div>
                             <div>
@@ -176,7 +176,7 @@ export const SmartReorderSuggestions = ({
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-2xl font-bold text-purple-600">{suggestions.length}</div>
+                            <div className="text-2xl font-bold text-gray-600">{suggestions.length}</div>
                             <div className="text-xs text-muted-foreground mt-1">Items to Reorder</div>
                         </div>
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
@@ -186,11 +186,11 @@ export const SmartReorderSuggestions = ({
                             <div className="text-xs text-muted-foreground mt-1">Critical</div>
                         </div>
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-2xl font-bold text-green-600">{selectedSuggestions.size}</div>
+                            <div className="text-2xl font-bold text-gray-600">{selectedSuggestions.size}</div>
                             <div className="text-xs text-muted-foreground mt-1">Selected</div>
                         </div>
                         <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-blue-600">{formatCurrency(selectedTotal)}</div>
+                            <div className="text-lg font-bold text-gray-600">{formatCurrency(selectedTotal)}</div>
                             <div className="text-xs text-muted-foreground mt-1">Est. Cost</div>
                         </div>
                     </div>
@@ -226,7 +226,7 @@ export const SmartReorderSuggestions = ({
                     return (
                         <Card
                             key={suggestion.ingredient.id}
-                            className={`cursor-pointer transition-all ${isSelected ? 'ring-2 ring-purple-500 border-purple-300' : ''
+                            className={`cursor-pointer transition-all ${isSelected ? 'ring-2 ring-purple-500 border-gray-400' : ''
                                 }`}
                             onClick={() => toggleSelection(suggestion.ingredient.id)}
                         >
@@ -260,7 +260,7 @@ export const SmartReorderSuggestions = ({
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <div className="text-lg font-bold text-purple-600">
+                                                <div className="text-lg font-bold text-gray-600">
                                                     {formatCurrency(suggestion.estimatedCost)}
                                                 </div>
                                                 <div className="text-xs text-muted-foreground">Est. Cost</div>
@@ -283,11 +283,11 @@ export const SmartReorderSuggestions = ({
                                                 </div>
                                             </div>
 
-                                            <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded border border-purple-200">
-                                                <div className="text-xs text-purple-700 dark:text-purple-300 mb-1">
+                                            <div className="p-2 bg-gray-50 dark:bg-gray-900/20 rounded border border-gray-300">
+                                                <div className="text-xs text-gray-700 dark:text-gray-300 mb-1">
                                                     Suggested Order
                                                 </div>
-                                                <div className="font-bold text-purple-600">
+                                                <div className="font-bold text-gray-600">
                                                     {suggestion.suggestedQuantity} {suggestion.ingredient.unit || ''}
                                                 </div>
                                             </div>
@@ -306,10 +306,10 @@ export const SmartReorderSuggestions = ({
                                         </div>
 
                                         {/* AI Insight */}
-                                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200">
+                                        <div className="p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-300">
                                             <div className="flex items-start gap-2 text-sm">
-                                                <TrendingUp className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                                                <div className="text-blue-800 dark:text-blue-200">
+                                                <TrendingUp className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                                                <div className="text-gray-800 dark:text-gray-200">
                                                     <strong>AI Recommendation:</strong> Order {suggestion.suggestedQuantity} {suggestion.ingredient.unit || ''}
                                                     {' '}(2x minimum stock) untuk safety buffer.
                                                     Harga per unit: {formatCurrency(suggestion.ingredient.price_per_unit || 0)}.
@@ -326,7 +326,7 @@ export const SmartReorderSuggestions = ({
 
             {/* Summary Footer */}
             {selectedSuggestions.size > 0 && (
-                <Card className="border-2 border-purple-200 bg-purple-50/50">
+                <Card className="border-2 border-gray-300 bg-gray-50/50">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
@@ -336,7 +336,7 @@ export const SmartReorderSuggestions = ({
                                 </div>
                             </div>
                             <div className="text-right">
-                                <div className="text-2xl font-bold text-purple-600">
+                                <div className="text-2xl font-bold text-gray-600">
                                     {formatCurrency(selectedTotal)}
                                 </div>
                                 <div className="text-xs text-muted-foreground">Total Estimated Cost</div>

@@ -140,9 +140,7 @@ export async function POST(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       )
-    }
-
-    const body = await request.json()
+    }    const body = await request.json()
     const { recipeId, recommendationType, title, description, potentialSavings, priority } = body
 
     if (!recipeId || !recommendationType || !title || !description) {

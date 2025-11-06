@@ -92,7 +92,7 @@ export class InventoryNotificationService {
       priority: 'urgent',
       entity_type: 'ingredient',
       entity_id: ingredientId,
-      action_url: `/inventory?highlight=${ingredientId}`,
+      action_url: `/ingredients?highlight=${ingredientId}`,
       metadata: {
         ingredient_name: ingredientName,
       },
@@ -119,7 +119,7 @@ export class InventoryNotificationService {
       priority: 'high',
       entity_type: 'ingredient',
       entity_id: ingredientId,
-      action_url: `/inventory/purchase?ingredient=${ingredientId}`,
+      action_url: `/ingredients/purchases?ingredient=${ingredientId}`,
       metadata: {
         ingredient_name: ingredientName,
         current_stock: currentStock,
@@ -152,7 +152,7 @@ export class InventoryNotificationService {
       priority: 'normal',
       entity_type: 'ingredient',
       entity_id: ingredientId,
-      action_url: `/inventory?highlight=${ingredientId}`,
+      action_url: `/ingredients?highlight=${ingredientId}`,
       metadata: {
         ingredient_name: ingredientName,
         old_stock: oldStock,

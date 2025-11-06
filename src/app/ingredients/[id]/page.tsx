@@ -13,15 +13,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { ArrowLeft, Package, Loader2 } from 'lucide-react'
-import type { IngredientsTable, IngredientsUpdate } from '@/types/database'
+import type { Row, Update } from '@/types/database'
 
 
 
 
-type Ingredient = IngredientsTable
-type IngredientUpdate = IngredientsUpdate
+type Ingredient = Row<'ingredients'>
+type IngredientUpdate = Update<'ingredients'>
 
 const EditIngredientPage = () => {
     const router = useRouter()
@@ -29,6 +29,7 @@ const EditIngredientPage = () => {
     const id = params.id as string
     const { update: updateIngredient } = useSupabaseCRUD('ingredients')
     const { toast } = useToast()
+    const { supabase } = useSupabase()
 
     const [loading, setLoading] = useState(false)
     const [fetching, setFetching] = useState(true)
@@ -51,7 +52,6 @@ const EditIngredientPage = () => {
         const fetchIngredient = async () => {
             try {
                 setFetching(true)
-                const supabase = createClient()
 
                 const { data, error } = await supabase
                     .from('ingredients')
@@ -88,7 +88,7 @@ const EditIngredientPage = () => {
         if (id) {
             void fetchIngredient()
         }
-    }, [id, form, router, toast])
+    }, [id, form, router, toast, supabase])
 
     const handleSubmit = async (data: SimpleIngredientFormData) => {
         try {

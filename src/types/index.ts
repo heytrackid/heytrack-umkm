@@ -1,5 +1,3 @@
-import type { Tables } from './supabase-generated'
-
 
 /**
  * Main Types Export
@@ -18,13 +16,13 @@ import type { Tables } from './supabase-generated'
 // DATABASE TYPES (Primary Source)
 // ============================================================================
 export type {
-  Database,
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-  Enums,
-  CompositeTypes
+    CompositeTypes, Database, Enums, Tables,
+    TablesInsert,
+    TablesUpdate
 } from './supabase-generated'
+
+// Re-export helper types from database.ts
+export type { Insert, Row, TableName, Update, ViewName } from './database'
 
 // Note: database.ts is a backward compatibility layer that re-exports from this file
 // Do not export from it here to avoid circular dependencies
@@ -33,7 +31,7 @@ export type {
 // DOMAIN TYPES (Business Logic)
 // ============================================================================
 // Domain types removed - use Tables helper from supabase-generated
-// Example: type Recipe = Tables<'recipes'>
+// Example: type Recipe = Row<'recipes'>
 
 // ============================================================================
 // FEATURE TYPES (Application Features)
@@ -42,45 +40,12 @@ export type {
 export * from './features/auth'
 // Note: RateLimitError is also in shared/errors, using that as primary
 export type {
-  ChatSession,
-  ChatMessage,
-  MessageMetadata,
-  ChatContextCache,
-  ContextType,
-  BusinessContext,
-  RecipeSummary,
-  IngredientSummary,
-  OrderSummary,
-  HppSummary,
-  FinancialSummary,
-  ChatError
+    BusinessContext, ChatContextCache, ChatError, ChatMessage, ChatSession, ContextType, FinancialSummary, HppSummary, IngredientSummary, MessageMetadata, OrderSummary, RecipeSummary
 } from './features/chat'
 // Note: InventoryAlert is also in domain/inventory, using that as primary
 export type {
-  SmartPricingAnalysis,
-  PricingTierOption,
-  InventoryAnalysis,
-  InventoryStatus,
-  InventoryMetrics,
-  PricingAnalysis,
-  CostBreakdownAnalysis,
-  PricingTiers,
-  PricingTier,
-  PricingRecommendation,
-  PricingImpact,
-  MarketComparison,
-  CompetitorPrice,
-  SalesAnalytics,
-  TimePeriod,
-  SalesTrend,
-  ProductPerformance,
-  CustomerSegment,
-  DashboardAnalytics,
-  BusinessSummary,
-  FinancialAnalytics,
-  ExpenseCategory,
-  RevenueCategory,
-  SystemAlert
+    BusinessSummary, CompetitorPrice, CostBreakdownAnalysis, CustomerSegment,
+    DashboardAnalytics, ExpenseCategory, FinancialAnalytics, InventoryAnalysis, InventoryMetrics, InventoryStatus, MarketComparison, PricingAnalysis, PricingImpact, PricingRecommendation, PricingTier, PricingTierOption, PricingTiers, ProductPerformance, RevenueCategory, SalesAnalytics, SalesTrend, SmartPricingAnalysis, SystemAlert, TimePeriod
 } from './features/analytics'
 
 export * from './features/notifications'
@@ -90,23 +55,18 @@ export * from './features/notifications'
 // ============================================================================
 export * from './ui/components'
 // Note: OrderItemUpdate is also in domain/orders, using that as primary
-export type {
-  FormFieldUpdate,
-  FormFieldUpdater,
-  ArrayItemUpdate,
-  FormValidationResult,
-  FormValidationError,
-  FormState,
-  FormAction
-} from './ui/forms'
 export * from './ui/charts'
+export type {
+    ArrayItemUpdate, FormAction, FormFieldUpdate,
+    FormFieldUpdater, FormState, FormValidationError, FormValidationResult
+} from './ui/forms'
 export * from './ui/responsive'
 
 // ============================================================================
 // SHARED TYPES (Utilities)
 // ============================================================================
-export * from './shared/common'
 export * from './shared/api'
+export * from './shared/common'
 export * from './shared/errors'
 export * from './shared/guards'
 export * from './shared/utils'
@@ -115,19 +75,24 @@ export * from './shared/utils'
 // CONVENIENCE ALIASES
 // ============================================================================
 
-export type Ingredient = Tables<'ingredients'>
-export type Recipe = Tables<'recipes'>
-export type RecipeIngredient = Tables<'recipe_ingredients'>
-export type Order = Tables<'orders'>
-export type OrderItem = Tables<'order_items'>
-export type Customer = Tables<'customers'>
-export type Supplier = Tables<'suppliers'>
-export type Expense = Tables<'expenses'>
-export type OperationalCost = Tables<'operational_costs'>
+// Import Row type for convenience aliases
+import type { Row } from './database'
+
+export type Ingredient = Row<'ingredients'>
+export type Recipe = Row<'recipes'>
+export type RecipeIngredient = Row<'recipe_ingredients'>
+export type Order = Row<'orders'>
+export type OrderItem = Row<'order_items'>
+export type Customer = Row<'customers'>
+export type Supplier = Row<'suppliers'>
+export type Expense = Row<'expenses'>
+export type OperationalCost = Row<'operational_costs'>
 
 // Complex types
 export type RecipeWithIngredients = Recipe & {
-  recipe_ingredients?: Array<RecipeIngredient & {
-    ingredient?: Ingredient
-  }>
+  recipe_ingredients?: Array<
+    RecipeIngredient & {
+      ingredient?: Ingredient
+    }
+  >
 }

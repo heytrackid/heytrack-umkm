@@ -17,6 +17,8 @@ export default [
       sourceType: "module",
       parser: ts.parser,
       parserOptions: {
+        // 🔒 STRICT MODE: Enable projectService for type-aware rules
+        // Provides stricter type checking at the cost of slower linting
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
@@ -98,11 +100,11 @@ export default [
       ],
       "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
       "@typescript-eslint/array-type": ["error", { default: "array-simple" }],
-      "@typescript-eslint/no-inferrable-types": "error",
-      "@typescript-eslint/no-unnecessary-type-assertion": "error",
-      "@typescript-eslint/prefer-nullish-coalescing": "error",
-      "@typescript-eslint/prefer-optional-chain": "error",
-      "@typescript-eslint/no-non-null-assertion": "error",
+       "@typescript-eslint/no-inferrable-types": "error",
+       "@typescript-eslint/no-unnecessary-type-assertion": "error",
+       "@typescript-eslint/prefer-nullish-coalescing": "error",
+       "@typescript-eslint/prefer-optional-chain": "error",
+       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/ban-ts-comment": [
         "error",
         {
@@ -112,16 +114,13 @@ export default [
           minimumDescriptionLength: 10,
         },
       ],
-      "@typescript-eslint/no-floating-promises": "error",
-      "@typescript-eslint/await-thenable": "error",
-      "@typescript-eslint/no-unsafe-declaration-merging": "error",
-      "@typescript-eslint/no-empty-object-type": "error",
-      "@typescript-eslint/no-misused-promises": [
-        "error",
-        {
-          checksVoidReturn: false,
-        },
-      ],
+       // 🔒 STRICT MODE: Type-aware rules enabled for maximum code quality
+       // These rules provide stricter type checking (linting will be slower)
+       "@typescript-eslint/no-floating-promises": "error",
+       "@typescript-eslint/await-thenable": "error",
+       "@typescript-eslint/no-unsafe-declaration-merging": "error",
+       "@typescript-eslint/no-empty-object-type": "error",
+       "@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: false }],
 
       // ============================================
       // REACT RULES
@@ -147,7 +146,7 @@ export default [
       "react/jsx-boolean-value": ["error", "never"],
       "react/jsx-no-useless-fragment": ["error", { allowExpressions: true }],
       "react/jsx-pascal-case": "error",
-      "react/no-array-index-key": "warn", // Warn instead of error for static/skeleton content
+      "react/no-array-index-key": "off", // Disabled - acceptable for static/skeleton content
       "react/no-danger": "error",
       "react/no-unstable-nested-components": "error",
       "react/function-component-definition": [
@@ -164,10 +163,10 @@ export default [
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "error",
 
-      // ============================================
-      // HEYTRACK CUSTOM RULES
-      // ============================================
-      // "heytrack/consistent-error-handling": "error", // Disabled - needs update for ESLint 9
+       // ============================================
+       // HEYTRACK CUSTOM RULES
+       // ============================================
+       // "heytrack/consistent-error-handling": "error", // Disabled - needs update for ESLint 9 API
 
       // ============================================
       // CODE STYLE & CONSISTENCY
@@ -198,13 +197,13 @@ export default [
   // ============================================
   // API ROUTES SPECIFIC RULES
   // ============================================
-  {
-    files: ["src/app/api/**/*.ts"],
-    rules: {
-      "@typescript-eslint/no-floating-promises": "error", // Fire-and-forget is common in APIs
-      "require-await": "error", // Often false positive
-    },
-  },
+   {
+     files: ["src/app/api/**/*.ts"],
+     rules: {
+       "@typescript-eslint/no-floating-promises": "error",
+       "require-await": "error",
+     },
+   },
 
   // ============================================
   // SERVER COMPONENTS RULES

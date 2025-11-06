@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { OperationalCostUpdateSchema } from '@/lib/validations/domains/finance'
-import type { OperationalCostsUpdate } from '@/types/database'
+import type { Update } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
@@ -36,7 +36,7 @@ export async function GET(
     // Fetch operational cost
     const { data, error } = await supabase
       .from('operational_costs')
-      .select('*')
+      .select('id, user_id, name, amount, frequency, category, created_at, updated_at')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
@@ -98,7 +98,7 @@ export async function PUT(
 
 
     // Build update object
-    const updatePayload: OperationalCostsUpdate = {
+    const updatePayload: Update<'operational_costs'> = {
       category: validatedData.category ?? undefined,
       amount: validatedData.amount,
       description: validatedData.description ?? undefined,

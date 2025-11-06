@@ -1,13 +1,14 @@
+/* eslint-disable no-nested-ternary */
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { AlertTriangle, Package, ShoppingCart, TrendingUp, RefreshCw } from 'lucide-react'
+import { useSettings } from '@/contexts/settings-context'
 import { useInventoryAlerts, useReorderManagement } from '@/hooks'
 import { InventoryAlertsList } from '@/hooks/useInventoryAlerts'
-import { useSettings } from '@/contexts/settings-context'
+import { AlertTriangle, Package, RefreshCw, ShoppingCart, TrendingUp } from 'lucide-react'
 
 
 
@@ -95,7 +96,7 @@ export const InventoryDashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Reorder Suggestions</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-blue-600" />
+            <ShoppingCart className="h-4 w-4 text-gray-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{reorderData.total_suggestions}</div>
@@ -108,7 +109,7 @@ export const InventoryDashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Inventory Value</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
+            <TrendingUp className="h-4 w-4 text-gray-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(inventoryStatus.total_value)}</div>
@@ -140,7 +141,7 @@ export const InventoryDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5 text-blue-600" />
+              <ShoppingCart className="h-5 w-5 text-gray-600" />
               Reorder Suggestions
             </CardTitle>
             <CardDescription>
@@ -225,7 +226,7 @@ export const InventoryDashboard = () => {
                 <Progress value={(reorderData.medium_count / reorderData.total_suggestions) * 100} className="mt-2" />
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{reorderData.low_count}</div>
+                <div className="text-2xl font-bold text-gray-600">{reorderData.low_count}</div>
                 <p className="text-sm text-muted-foreground">Low</p>
                 <Progress value={(reorderData.low_count / reorderData.total_suggestions) * 100} className="mt-2" />
               </div>
