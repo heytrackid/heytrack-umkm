@@ -1,10 +1,12 @@
-import { NextRequest } from "next/server";
-import { 
-  authenticateSentryAPI, 
-  createSentryAPIClient, 
-  SentryAuthResult,
-  SentryAuthMethod 
+import type { NextRequest } from "next/server";
+ 
+import {
+  authenticateSentryAPI,
+  createSentryAPIClient,
+  SentryAuthMethod
 } from "@/lib/sentry-api-auth";
+ 
+import type { SentryAuthResult } from "@/lib/sentry-api-auth"; // eslint-disable-line no-duplicate-imports
 import { createErrorResponse } from "@/lib/api-core/responses";
 import * as Sentry from "@sentry/nextjs";
 
@@ -22,6 +24,7 @@ import * as Sentry from "@sentry/nextjs";
  * - API key: curl -u '{API_KEY}:' http://localhost:3000/api/sentry-protected
  */
 
+// eslint-disable-next-line require-await
 export async function GET(request: NextRequest) {
   return Sentry.startSpan(
     {
@@ -43,7 +46,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Create authenticated API client using the auth result
-        const sentryAPIClient = createSentryAPIClient(authResult);
+        createSentryAPIClient(authResult); // Client created but not used in this example
 
         // Example: Make a request to Sentry API using the authenticated client
         // In a real implementation, you might fetch org data, projects, etc.
@@ -119,6 +122,7 @@ export async function GET(request: NextRequest) {
 /**
  * POST endpoint to demonstrate how to use authentication for creating Sentry resources
  */
+// eslint-disable-next-line require-await
 export async function POST(request: NextRequest) {
   return Sentry.startSpan(
     {
@@ -143,7 +147,7 @@ export async function POST(request: NextRequest) {
         let body;
         try {
           body = await request.json();
-        } catch (error) {
+        } catch (_error) {
           return createErrorResponse("Invalid JSON in request body", 400);
         }
 
@@ -190,17 +194,17 @@ export async function POST(request: NextRequest) {
 /**
  * Handle requests with Bearer token authentication
  */
-async function handleBearerRequest(
-  client: ReturnType<typeof createSentryAPIClient>,
+function handleBearerRequest(
+  _client: ReturnType<typeof createSentryAPIClient>,
   authResult: SentryAuthResult,
-  body: any
+  body: unknown
 ) {
   return Sentry.startSpan(
     {
       op: "auth.handler",
       name: "Handle Bearer Token Request",
     },
-    async (span) => {
+    (span) => {
       span.setAttribute("auth_method", "bearer");
       
       // In a real implementation, you might create an issue, fetch events, etc.
@@ -222,17 +226,17 @@ async function handleBearerRequest(
 /**
  * Handle requests with DSN authentication
  */
-async function handleDSNRequest(
-  client: ReturnType<typeof createSentryAPIClient>,
+function handleDSNRequest(
+  _client: ReturnType<typeof createSentryAPIClient>,
   authResult: SentryAuthResult,
-  body: any
+  body: unknown
 ) {
   return Sentry.startSpan(
     {
       op: "auth.handler",
       name: "Handle DSN Request",
     },
-    async (span) => {
+    (span) => {
       span.setAttribute("auth_method", "dsn");
       
       // DSN auth is typically for limited operations like submitting events
@@ -253,17 +257,17 @@ async function handleDSNRequest(
 /**
  * Handle requests with API key authentication
  */
-async function handleAPIKeyRequest(
-  client: ReturnType<typeof createSentryAPIClient>,
+function handleAPIKeyRequest(
+  _client: ReturnType<typeof createSentryAPIClient>,
   authResult: SentryAuthResult,
-  body: any
+  body: unknown
 ) {
   return Sentry.startSpan(
     {
       op: "auth.handler",
       name: "Handle API Key Request",
     },
-    async (span) => {
+    (span) => {
       span.setAttribute("auth_method", "api_key");
       
       // API key auth (legacy) would typically be used for various API operations

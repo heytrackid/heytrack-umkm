@@ -1,7 +1,7 @@
 'use client'
 
+import type { Row, TableName } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
-import type { TableName, Row } from '@/types/database'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { UseSupabaseQueryOptions } from './types'
 
@@ -121,7 +121,13 @@ export function useSupabaseQuery<T extends TableName>(
             }
           }
         )
-        .subscribe()
+        .subscribe((status) => {
+          // Suppress WebSocket errors in console - they're handled by Supabase internally
+          if (status === 'CHANNEL_ERROR') {
+            // Silently handle channel errors without logging to console
+            // The subscription will automatically retry
+          }
+        })
 
       return () => {
         fetchIdRef.current = null

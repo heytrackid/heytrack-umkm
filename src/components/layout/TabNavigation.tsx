@@ -3,8 +3,10 @@
 import { cn } from '@/lib/utils'
 import { ChevronDown, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { prefetchRoute } from '@/lib/route-loader'
+import { useRoutePreloader } from '@/hooks/use-preloader'
 
 interface TabItem {
   label: string
@@ -25,6 +27,8 @@ interface TabNavigationProps {
 
 export const TabNavigation = ({ tabs }: TabNavigationProps) => {
   const pathname = usePathname()
+  const router = useRouter()
+  const { preloadOnHover } = useRoutePreloader()
   const scrollRef = useRef<HTMLDivElement>(null)
   const tabButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({})
   const [showLeftShadow, setShowLeftShadow] = useState(false)
@@ -33,6 +37,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
   const [isMobile, setIsMobile] = useState(false)
   const [dropdownPositions, setDropdownPositions] = useState<Record<string, { top: number; left: number }>>({})
   const closeTimeoutRef = useRef<NodeJS.Timeout>()
+  const prefetchTimeoutRef = useRef<NodeJS.Timeout>()
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {return pathname === href}
@@ -50,6 +55,23 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
       clearTimeout(closeTimeoutRef.current)
     }
     setOpenDropdown(label)
+
+    // Enhanced prefetching with bundle splitting
+    const heavyRoutes = ['/reports', '/orders', '/recipes', '/ai-chatbot', '/categories', '/ingredients', '/admin']
+    const tab = tabs.find(t => t.label === label)
+    const href = tab?.href
+    if (href && heavyRoutes.includes(href)) {
+      if (prefetchTimeoutRef.current) {
+        clearTimeout(prefetchTimeoutRef.current)
+      }
+      prefetchTimeoutRef.current = setTimeout(() => {
+        router.prefetch(href)
+        prefetchRoute(href)
+        // Use new preloader for enhanced bundle splitting
+        const { preload } = preloadOnHover(href, 50)
+        preload()
+      }, 100) // Small delay to avoid prefetching on quick mouse movements
+    }
   }
 
   const handleMouseLeave = () => {
@@ -141,7 +163,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
   }, [openDropdown])
 
   return (
-    <div className="relative z-[9998] border-b border-border bg-background">
+    <div className="relative z-40 border-b border-border bg-background">
       {/* Left shadow */}
       {showLeftShadow && (
         <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-background" />
@@ -218,7 +240,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
               {/* Dropdown menu */}
               {isOpen && tab.items && (
                 <div
-                  className="fixed z-[9999] mt-0 min-w-[200px] rounded-md border border-border bg-popover p-1 shadow-lg"
+                  className="fixed z-50 mt-0 min-w-[200px] rounded-md border border-border bg-popover p-1 shadow-lg"
                   style={{
                     top: `${dropdownPositions[tab.label]?.top || 0}px`,
                     left: `${dropdownPositions[tab.label]?.left || 0}px`,

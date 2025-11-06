@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
  * Sentry API Authentication Module
@@ -12,6 +12,7 @@ import { NextRequest } from "next/server";
  */
 
 // Define authentication methods enum
+// eslint-disable-next-line no-restricted-syntax
 export enum SentryAuthMethod {
   Bearer = "bearer",
   DSN = "dsn",
@@ -33,15 +34,15 @@ export interface SentryAuthResult {
  * Bearer Token Authentication
  * Supports both user tokens and internal integration tokens
  */
-export async function authenticateWithBearerToken(
+export function authenticateWithBearerToken(
   token: string
-): Promise<SentryAuthResult> {
+): SentryAuthResult {
   return Sentry.startSpan(
     {
       op: "auth",
       name: "Bearer Token Authentication",
     },
-    async (span) => {
+    (span) => {
       try {
         span.setAttribute("auth_method", "bearer");
         span.setAttribute("token_length", token.length);
@@ -82,7 +83,7 @@ export async function authenticateWithBearerToken(
         return {
           isValid: true,
           method: SentryAuthMethod.Bearer,
-          token: token,
+          token,
           scopes: ["event:read", "org:read", "project:read"], // Example scopes
         };
       } catch (error) {
@@ -109,15 +110,15 @@ export async function authenticateWithBearerToken(
  * DSN Authentication
  * Uses DSN (Client Key) for authentication
  */
-export async function authenticateWithDSN(
+export function authenticateWithDSN(
   dsn: string
-): Promise<SentryAuthResult> {
+): SentryAuthResult {
   return Sentry.startSpan(
     {
       op: "auth",
       name: "DSN Authentication",
     },
-    async (span) => {
+    (span) => {
       try {
         span.setAttribute("auth_method", "dsn");
         span.setAttribute("dsn_length", dsn.length);
@@ -175,15 +176,15 @@ export async function authenticateWithDSN(
  * API Key Authentication (Legacy)
  * Uses HTTP Basic auth with API key as username and empty password
  */
-export async function authenticateWithAPIKey(
+export function authenticateWithAPIKey(
   apiKey: string
-): Promise<SentryAuthResult> {
+): SentryAuthResult {
   return Sentry.startSpan(
     {
       op: "auth",
       name: "API Key Authentication",
     },
-    async (span) => {
+    (span) => {
       try {
         span.setAttribute("auth_method", "api_key");
         span.setAttribute("api_key_length", apiKey.length);
@@ -291,15 +292,15 @@ export function extractAuthToken(request: NextRequest): {
 /**
  * Main authentication function that tries all methods
  */
-export async function authenticateSentryAPI(
+export function authenticateSentryAPI(
   request: NextRequest
-): Promise<SentryAuthResult> {
+): SentryAuthResult {
   return Sentry.startSpan(
     {
       op: "auth",
       name: "Sentry API Authentication",
     },
-    async (span) => {
+    (span) => {
       try {
         const { token, method } = extractAuthToken(request);
 
@@ -315,15 +316,15 @@ export async function authenticateSentryAPI(
 
         switch (method) {
           case SentryAuthMethod.Bearer:
-            return await authenticateWithBearerToken(token);
+            return authenticateWithBearerToken(token);
           case SentryAuthMethod.DSN:
-            return await authenticateWithDSN(token);
+            return authenticateWithDSN(token);
           case SentryAuthMethod.APIKey:
-            return await authenticateWithAPIKey(token);
+            return authenticateWithAPIKey(token);
           default:
             return {
               isValid: false,
-              method: method,
+              method,
               error: "Unsupported authentication method",
             };
         }
@@ -351,7 +352,7 @@ export function createSentryAPIClient(authResult: SentryAuthResult) {
   return async (
     endpoint: string,
     options: RequestInit = {}
-  ): Promise<Response> => {
+  ): Promise<Response> => { // eslint-disable-line require-await, arrow-body-style
     return Sentry.startSpan(
       {
         op: "http.client",

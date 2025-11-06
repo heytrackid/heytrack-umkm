@@ -68,18 +68,18 @@ export const FormField = (props: FormFieldProps) => {
     text-sm sm:text-base
     px-3 py-3 sm:px-4 sm:py-3
     focus:outline-none focus:ring-2 focus:ring-offset-1
-    disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-500
+    disabled:bg-muted disabled:cursor-not-allowed disabled:text-muted-foreground
     ${focused ? 'ring-2 ring-offset-1' : ''}
   `;
 
   const getInputClasses = () => {
     if (hasError) {
-      return `${baseInputClasses} border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-gray-300 dark:border-gray-600`;
+      return `${baseInputClasses} border-destructive text-foreground placeholder-muted-foreground focus:ring-destructive focus:border-destructive bg-background`;
     }
     if (hasSuccess) {
-      return `${baseInputClasses} border-gray-400 text-gray-900 placeholder-green-300 focus:ring-green-500 focus:border-gray-300 dark:border-gray-600`;
+      return `${baseInputClasses} border-border text-foreground placeholder-muted-foreground focus:ring-primary focus:border-primary bg-background`;
     }
-    return `${baseInputClasses} border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 hover:border-gray-400`;
+    return `${baseInputClasses} border-input text-foreground placeholder-muted-foreground focus:ring-ring focus:border-ring hover:border-ring bg-background`;
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -143,13 +143,13 @@ export const FormField = (props: FormFieldProps) => {
       <div className="flex items-center justify-between mb-2">
         <label
           htmlFor={name}
-          className="block text-sm font-medium text-gray-700 sm:text-base"
+          className="block text-sm font-medium text-foreground sm:text-base"
         >
           {label}
-          {required && <span className="text-gray-600 dark:text-gray-400 ml-1" aria-label="required">*</span>}
+          {required && <span className="text-muted-foreground ml-1" aria-label="required">*</span>}
         </label>
         {hint && !error && !success && (
-          <span className="text-xs text-gray-500 sm:text-sm">{hint}</span>
+          <span className="text-xs text-muted-foreground sm:text-sm">{hint}</span>
         )}
       </div>
 
@@ -157,7 +157,7 @@ export const FormField = (props: FormFieldProps) => {
       <div className="relative">
         {/* Icon */}
         {icon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
             {icon}
           </div>
         )}
@@ -183,7 +183,7 @@ export const FormField = (props: FormFieldProps) => {
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <ChevronDown className="h-4 w-4 text-gray-400" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </div>
             </div>
           ) : (
@@ -201,7 +201,7 @@ export const FormField = (props: FormFieldProps) => {
         {isPassword && (
           <button
             type="button"
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition-colors"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground focus:outline-none focus:text-foreground transition-colors"
             onClick={() => setShowPassword(!showPassword)}
             tabIndex={-1}
           >
@@ -212,14 +212,14 @@ export const FormField = (props: FormFieldProps) => {
         {/* Success Icon */}
         {hasSuccess && !isPassword && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <Check className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <Check className="h-4 w-4 text-muted-foreground" />
           </div>
         )}
 
         {/* Error Icon */}
         {hasError && !isPassword && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <AlertCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <AlertCircle className="h-4 w-4 text-destructive" />
           </div>
         )}
       </div>
@@ -229,16 +229,16 @@ export const FormField = (props: FormFieldProps) => {
         <div className="mt-2 flex items-start space-x-1">
           {error && (
             <>
-              <AlertCircle className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" />
-              <p id={`${name}-error`} className="text-sm text-gray-600 dark:text-gray-400 flex-1">
+              <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+              <p id={`${name}-error`} className="text-sm text-destructive flex-1">
                 {error}
               </p>
             </>
           )}
           {success && !error && (
             <>
-              <Check className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-gray-600 dark:text-gray-400 flex-1">
+              <Check className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-muted-foreground flex-1">
                 {success}
               </p>
             </>
@@ -248,7 +248,7 @@ export const FormField = (props: FormFieldProps) => {
 
       {/* Hint Text */}
       {hint && !error && !success && (
-        <p id={`${name}-hint`} className="mt-1 text-xs text-gray-500 sm:text-sm">
+        <p id={`${name}-hint`} className="mt-1 text-xs text-muted-foreground sm:text-sm">
           {hint}
         </p>
       )}

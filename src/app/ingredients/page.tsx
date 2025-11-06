@@ -1,19 +1,43 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { EnhancedIngredientsPage as IngredientsCRUD } from '@/components/ingredients/EnhancedIngredientsPage';
-import AppLayout from '@/components/layout/app-layout';
-import { StatsCards, StatCardPatterns, PageBreadcrumb, BreadcrumbPatterns, PageHeader } from '@/components/ui'
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { useIngredients } from '@/hooks/useIngredients';
-import type { Row } from '@/types/database';
-import { Button } from '@/components/ui/button';
-import { Plus, ShoppingCart, Upload, AlertTriangle } from 'lucide-react';
-import { ImportDialog } from '@/components/import/ImportDialog';
-import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog';
-import { parseIngredientsCSV, generateIngredientsTemplate } from '@/components/import/csv-helpers';
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
+import { generateIngredientsTemplate, parseIngredientsCSV } from '@/components/import/csv-helpers'
+import AppLayout from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { BreadcrumbPatterns, PageBreadcrumb, StatCardPatterns, StatsCards } from '@/components/ui'
+import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/hooks/useAuth'
+import { useIngredients } from '@/hooks/useIngredients'
+import type { Row } from '@/types/database'
+import { AlertTriangle, Plus, ShoppingCart, Upload } from 'lucide-react'
+
+// Lazy load heavy components
+const IngredientsCRUD = dynamic(() => import('@/components/ingredients/EnhancedIngredientsPage').then(mod => ({ default: mod.EnhancedIngredientsPage })), {
+  loading: () => (
+    <div className="border rounded-lg p-6">
+      <div className="animate-pulse space-y-4">
+        <div className="h-10 bg-muted rounded" />
+        {[...Array(5)].map((_, i) => (
+          <div key={`row-${i}`} className="h-16 bg-muted rounded" />
+        ))}
+      </div>
+    </div>
+  ),
+  ssr: false
+})
+
+const IngredientFormDialog = dynamic(() => import('@/components/ingredients/IngredientFormDialog').then(mod => ({ default: mod.IngredientFormDialog })), {
+  loading: () => null,
+  ssr: false
+})
+
+const ImportDialog = dynamic(() => import('@/components/import/ImportDialog').then(mod => ({ default: mod.ImportDialog })), {
+  loading: () => null,
+  ssr: false
+})
 
 const IngredientsPage = () => {
   const { data: ingredients, isLoading: loading, error } = useIngredients();
@@ -28,7 +52,7 @@ const IngredientsPage = () => {
     const template = generateIngredientsTemplate()
     const blob = new Blob([template], { type: 'text/csv' })
     return URL.createObjectURL(blob)
-  }, []);
+  }, [])
 
   // Handle auth errors
   useEffect(() => {
@@ -73,16 +97,16 @@ const IngredientsPage = () => {
             title="Bahan Baku"
             description="Kelola stok dan harga bahan baku"
             actions={
-              <div className="flex gap-2">
-                <Button variant="outline" disabled className="flex-1 sm:flex-none">
+              <div className="flex flex-col sm:flex-row gap-2 w-full">
+                <Button variant="outline" disabled className="w-full sm:w-auto">
                   <Upload className="h-4 w-4 mr-2" />
                   Import
                 </Button>
-                <Button variant="outline" disabled className="flex-1 sm:flex-none">
+                <Button variant="outline" disabled className="w-full sm:w-auto">
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Pembelian
                 </Button>
-                <Button disabled className="flex-1 sm:flex-none">
+                <Button disabled className="w-full sm:w-auto">
                   <Plus className="h-4 w-4 mr-2" />
                   Tambah
                 </Button>
@@ -126,11 +150,11 @@ const IngredientsPage = () => {
           title="Bahan Baku"
           description="Kelola stok dan harga bahan baku"
           actions={
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
               <Button
                 variant="outline"
                 onClick={() => setImportDialogOpen(true)}
-                className="flex-1 sm:flex-none"
+                className="w-full sm:w-auto"
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Import
@@ -138,14 +162,14 @@ const IngredientsPage = () => {
               <Button
                 variant="outline"
                 onClick={() => router.push('/ingredients/purchases')}
-                className="flex-1 sm:flex-none"
+                className="w-full sm:w-auto"
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Pembelian
               </Button>
               <Button
                 onClick={() => setShowAddDialog(true)}
-                className="flex-1 sm:flex-none"
+                className="w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Tambah
@@ -183,57 +207,72 @@ const IngredientsPage = () => {
         )}
 
         {/* Main Content */}
-        <IngredientsCRUD onAdd={() => setShowAddDialog(true)} />
+        <Suspense fallback={
+          <div className="border rounded-lg p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-10 bg-muted rounded" />
+              {[...Array(5)].map((_, i) => (
+                <div key={`row-${i}`} className="h-16 bg-muted rounded" />
+              ))}
+            </div>
+          </div>
+        }>
+          <IngredientsCRUD onAdd={() => setShowAddDialog(true)} />
+        </Suspense>
 
         {/* Import Dialog */}
-        <ImportDialog
-          open={importDialogOpen}
-          onOpenChange={setImportDialogOpen}
-          title="Import Bahan Baku"
-          description="Upload file CSV untuk import data bahan baku secara massal"
-          templateUrl={templateUrl}
-          templateFilename="template-bahan-baku.csv"
-          parseCSV={parseIngredientsCSV}
-          onImport={async (data) => {
-            try {
-              const response = await fetch('/api/ingredients/import', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ingredients: data })
-              })
+        <Suspense fallback={null}>
+          <ImportDialog
+            open={importDialogOpen}
+            onOpenChange={setImportDialogOpen}
+            title="Import Bahan Baku"
+            description="Upload file CSV untuk import data bahan baku secara massal"
+            templateUrl={templateUrl}
+            templateFilename="template-bahan-baku.csv"
+            parseCSV={parseIngredientsCSV}
+            onImport={async (data: unknown) => {
+              try {
+                const response = await fetch('/api/ingredients/import', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ ingredients: data })
+                })
 
-              const result = await response.json()
+                const result = await response.json()
 
-              if (!response.ok) {
+                if (!response.ok) {
+                  return {
+                    success: false,
+                    error: result.error ?? 'Import gagal',
+                    details: result.details
+                  }
+                }
+
+                // Refresh data
+                window.location.reload()
+
+                return {
+                  success: true,
+                  count: result.count
+                }
+              } catch (_error) {
                 return {
                   success: false,
-                  error: result.error ?? 'Import gagal',
-                  details: result.details
+                  error: 'Terjadi kesalahan saat import'
                 }
               }
-
-              // Refresh data
-              window.location.reload()
-
-              return {
-                success: true,
-                count: result.count
-              }
-            } catch (_error) {
-              return {
-                success: false,
-                error: 'Terjadi kesalahan saat import'
-              }
-            }
-          }}
-        />
+            }}
+          />
+        </Suspense>
 
         {/* Add/Edit Dialog */}
-        <IngredientFormDialog
-          open={showAddDialog}
-          onOpenChange={setShowAddDialog}
-          onSuccess={() => window.location.reload()}
-        />
+        <Suspense fallback={null}>
+          <IngredientFormDialog
+            open={showAddDialog}
+            onOpenChange={setShowAddDialog}
+            onSuccess={() => window.location.reload()}
+          />
+        </Suspense>
       </div>
     </AppLayout>
   );

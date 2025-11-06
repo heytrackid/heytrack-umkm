@@ -2,6 +2,7 @@ import { withSentryConfig } from '@sentry/nextjs';
 import { withBotId } from 'botid/next/config';
 import type { NextConfig } from 'next';
 
+
 const isProd = process.env.NODE_ENV === 'production'
 const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN // contoh: app.heytrack.id
 
@@ -66,12 +67,9 @@ const nextConfig: NextConfig = {
     optimisticClientCache: false,
   },
 
-  // Turbopack configuration
-  turbopack: {
-    // Explicitly set workspace root to avoid detection issues
-    root: __dirname,
-  },
 
+
+  // @ts-ignore - formats type issue
   images: {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -141,47 +139,78 @@ const nextConfig: NextConfig = {
   },
 
   // Webpack optimization
-  webpack: (config, { isServer, dev }) => {
+  webpack: (config: any, { isServer, dev }: { isServer: boolean; dev: boolean }) => {
     // Optimize bundle splitting
     if (!dev && !isServer) {
       config.optimization = config.optimization || {}
       config.optimization.splitChunks = {
         chunks: 'all',
+        maxInitialRequests: 25, // Allow more parallel requests
+        maxAsyncRequests: 30,   // Allow more async chunks
         cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
+          // Framework chunk (React, Next.js runtime)
+          framework: {
+            test: /[\\/]node_modules[\\/](react|react-dom|next|@next|styled-jsx)[\\/]/,
+            name: 'framework',
             chunks: 'all',
-            priority: 10,
-            maxSize: 244000, // ~244KB max per chunk
+            priority: 40,
+            enforce: true,
+          },
+          // Vendor libraries chunk
+          vendor: {
+            test: /[\\/]node_modules[\\/](?!react|react-dom|next|@next|styled-jsx|@radix-ui|lucide-react|@supabase|recharts|zod|react-hook-form|exceljs|date-fns|lodash)[\\/]/,
+            name: 'vendor',
+            chunks: 'all',
+            priority: 30,
+            maxSize: 200000, // ~200KB max per chunk
           },
           // Recharts chunk
           recharts: {
             test: /[\\/]node_modules[\\/]recharts[\\/]/,
             name: 'recharts',
-            chunks: 'all',
-            priority: 20,
+            chunks: 'async', // Only load when needed
+            priority: 25,
           },
           // UI components chunk
           ui: {
             test: /[\\/]node_modules[\\/](@radix-ui|lucide-react)[\\/]/,
-            name: 'ui',
+            name: 'ui-components',
             chunks: 'all',
-            priority: 15,
+            priority: 20,
           },
           // Supabase chunk
           supabase: {
             test: /[\\/]node_modules[\\/](@supabase)[\\/]/,
             name: 'supabase',
             chunks: 'all',
+            priority: 22,
+          },
+          // Form libraries
+          forms: {
+            test: /[\\/]node_modules[\\/](zod|react-hook-form|@hookform)[\\/]/,
+            name: 'forms',
+            chunks: 'async',
             priority: 18,
           },
-          // Large libraries
-          largeLibs: {
-            test: /[\\/]node_modules[\\/](zod|react-hook-form|exceljs)[\\/]/,
-            name: 'large-libs',
+          // Utility libraries
+          utils: {
+            test: /[\\/]node_modules[\\/](date-fns|lodash|clsx|tailwind-merge)[\\/]/,
+            name: 'utils',
             chunks: 'all',
-            priority: 12,
+            priority: 15,
+          },
+          // Large libraries (async only)
+          heavyLibs: {
+            test: /[\\/]node_modules[\\/](exceljs|react-table|@tanstack)[\\/]/,
+            name: 'heavy-libs',
+            chunks: 'async',
+            priority: 10,
+          },
+          // Default async chunks
+          default: {
+            minChunks: 2,
+            priority: 5,
+            reuseExistingChunk: true,
           },
         },
       }

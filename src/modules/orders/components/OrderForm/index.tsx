@@ -1,16 +1,16 @@
 'use client'
 
+import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
 import { Button } from '@/components/ui/button'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { AlertCircle } from 'lucide-react'
-import { memo, useState, type FormEvent } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { ORDER_CONFIG } from '@/modules/orders/constants'
-import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
-import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
 import { warningToast } from '@/hooks/use-toast'
+import { ORDER_CONFIG } from '@/modules/orders/constants'
+import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
 import type { Row } from '@/types/database'
+import { useQuery } from '@tanstack/react-query'
+import { AlertCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { memo, useState, type FormEvent } from 'react'
 
 
 
@@ -22,22 +22,22 @@ import dynamic from 'next/dynamic'
 
 // ✅ Code Splitting - Lazy load section components
 const CustomerSection = dynamic(() => import('./CustomerSection').then(mod => ({ default: mod.CustomerSection })), {
-    loading: () => <div className="h-64 animate-pulse bg-gray-100 rounded-lg" />,
+    loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
 })
 
 const ItemsSection = dynamic(() => import('./ItemsSection').then(mod => ({ default: mod.ItemsSection })), {
-    loading: () => <div className="h-64 animate-pulse bg-gray-100 rounded-lg" />,
+    loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
 })
 
 const DeliverySection = dynamic(() => import('./DeliverySection').then(mod => ({ default: mod.DeliverySection })), {
-    loading: () => <div className="h-64 animate-pulse bg-gray-100 rounded-lg" />,
+    loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
 })
 
 const PaymentSection = dynamic(() => import('./PaymentSection').then(mod => ({ default: mod.PaymentSection })), {
-    loading: () => <div className="h-64 animate-pulse bg-gray-100 rounded-lg" />,
+    loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
 })
 

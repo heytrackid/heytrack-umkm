@@ -1,9 +1,11 @@
 'use client'
 
-import { Suspense } from 'react'
-import { RecipeFormPage } from '@/components/recipes/RecipeFormPage'
+import { Suspense, lazy } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
+
+// Lazy load the heavy RecipeFormPage component
+const RecipeFormPage = lazy(() => import('@/components/recipes/RecipeFormPage').then(mod => ({ default: mod.RecipeFormPage })))
 
 
 

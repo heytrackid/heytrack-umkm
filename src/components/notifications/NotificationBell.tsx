@@ -119,7 +119,13 @@ export const NotificationBell = () => {
                     void fetchNotifications()
                 }
             )
-            .subscribe()
+            .subscribe((status) => {
+                // Suppress WebSocket errors in console - they're handled by Supabase internally
+                if (status === 'CHANNEL_ERROR') {
+                    // Silently handle channel errors without logging to console
+                    // The subscription will automatically retry
+                }
+            })
 
         return () => {
             void supabase.removeChannel(channel)

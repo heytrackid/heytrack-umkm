@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import AppLayout from '@/components/layout/app-layout'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -11,10 +11,12 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { uiLogger } from '@/lib/client-logger'
 import { type WhatsAppTemplate } from './types'
-import TemplatesTable from './TemplatesTable'
-import TemplateForm from './TemplateForm'
-import TemplatePreview from './TemplatePreview'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
+
+// Lazy load heavy components
+const TemplatesTable = lazy(() => import('./TemplatesTable'))
+const TemplateForm = lazy(() => import('./TemplateForm'))
+const TemplatePreview = lazy(() => import('./TemplatePreview'))
 
 
 const WhatsAppTemplatesPage = () => {
@@ -363,30 +365,36 @@ const WhatsAppTemplatesPage = () => {
                 )}
 
                 {/* Templates Table */}
-                <TemplatesTable
-                    templates={templates}
-                    loading={loading}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteRequest}
-                    onToggleDefault={handleToggleDefault}
-                    onPreview={handlePreview}
-                    onDuplicate={handleDuplicate}
-                />
+                <Suspense fallback={<div className="h-96 bg-gray-100 rounded animate-pulse" />}>
+                    <TemplatesTable
+                        templates={templates}
+                        loading={loading}
+                        onEdit={handleEdit}
+                        onDelete={handleDeleteRequest}
+                        onToggleDefault={handleToggleDefault}
+                        onPreview={handlePreview}
+                        onDuplicate={handleDuplicate}
+                    />
+                </Suspense>
 
                 {/* Template Form Dialog */}
-                <TemplateForm
-                    showDialog={showDialog}
-                    onOpenChange={setShowDialog}
-                    editingTemplate={editingTemplate}
-                    onSuccess={handleSuccess}
-                />
+                <Suspense fallback={<div />}>
+                    <TemplateForm
+                        showDialog={showDialog}
+                        onOpenChange={setShowDialog}
+                        editingTemplate={editingTemplate}
+                        onSuccess={handleSuccess}
+                    />
+                </Suspense>
 
                 {/* Template Preview Dialog */}
-                <TemplatePreview
-                    showPreview={showPreview}
-                    onOpenChange={setShowPreview}
-                    template={previewTemplate}
-                />
+                <Suspense fallback={<div />}>
+                    <TemplatePreview
+                        showPreview={showPreview}
+                        onOpenChange={setShowPreview}
+                        template={previewTemplate}
+                    />
+                </Suspense>
 
                 <ConfirmDialog
                     open={isConfirmOpen}

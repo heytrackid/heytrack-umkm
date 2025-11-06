@@ -1,11 +1,18 @@
 'use client'
 
 import { Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
-import OrdersContent from '@/modules/orders/components/OrdersPage'
 import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
-
+// Lazy load the heavy orders page component
+const OrdersContent = dynamic(
+  () => import('@/modules/orders/components/OrdersPage'),
+  {
+    loading: () => <DataGridSkeleton rows={8} />,
+    ssr: false
+  }
+)
 
 const OrdersPage = () => (
   <AppLayout>

@@ -1,10 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/shared'
-import { ChatHeader, ChatInput, MessageList } from './components'
 import { useChatMessages, useAIService } from './hooks'
+
+// Lazy load heavy chatbot components
+const ChatHeader = dynamic(() => import('./components').then(mod => ({ default: mod.ChatHeader })), {
+  loading: () => <div className="h-16 bg-muted animate-pulse rounded-t-xl" />
+})
+
+const ChatInput = dynamic(() => import('./components').then(mod => ({ default: mod.ChatInput })), {
+  loading: () => <div className="h-20 bg-muted animate-pulse" />
+})
+
+const MessageList = dynamic(() => import('./components').then(mod => ({ default: mod.MessageList })), {
+  loading: () => <div className="flex-1 bg-muted animate-pulse" />
+})
 
 const chatbotBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -81,27 +94,33 @@ const AIChatbotPage = () => {
           <div className="flex flex-col rounded-xl border border-border bg-card shadow-sm h-full">
             {/* Chat Header - fixed */}
             <div className="flex-shrink-0">
-              <ChatHeader />
+              <Suspense fallback={<div className="h-16 bg-muted animate-pulse rounded-t-xl" />}>
+                <ChatHeader />
+              </Suspense>
             </div>
 
             {/* Messages area - SCROLLABLE dengan fixed height */}
             <div className="flex-1 overflow-hidden relative">
-              <MessageList
-                messages={messages}
-                isLoading={isLoading}
-                scrollAreaRef={scrollAreaRef}
-                onSuggestionClick={handleSuggestionClick}
-              />
+              <Suspense fallback={<div className="flex-1 bg-muted animate-pulse" />}>
+                <MessageList
+                  messages={messages}
+                  isLoading={isLoading}
+                  scrollAreaRef={scrollAreaRef}
+                  onSuggestionClick={handleSuggestionClick}
+                />
+              </Suspense>
             </div>
 
             {/* Input area - fixed at bottom */}
             <div className="flex-shrink-0 border-t">
-              <ChatInput
-                input={input}
-                setInput={setInput}
-                onSendMessage={handleSendMessage}
-                isLoading={isLoading}
-              />
+              <Suspense fallback={<div className="h-20 bg-muted animate-pulse" />}>
+                <ChatInput
+                  input={input}
+                  setInput={setInput}
+                  onSendMessage={handleSendMessage}
+                  isLoading={isLoading}
+                />
+              </Suspense>
             </div>
           </div>
         </div>

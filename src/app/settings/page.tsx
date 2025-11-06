@@ -1,9 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { useSettingsManager } from './hooks'
-import { SettingsHeader, SettingsTabs, SettingsLoadingSkeleton, SettingsQuickLinks, UnsavedChangesPrompt } from './components'
+import { SettingsLoadingSkeleton } from './components'
+
+// Lazy load settings components
+const SettingsHeader = lazy(() => import('./components/layout/SettingsHeader').then(mod => ({ default: mod.SettingsHeader })))
+const SettingsTabs = lazy(() => import('./components/tabs/SettingsTabs').then(mod => ({ default: mod.SettingsTabs })))
+const SettingsQuickLinks = lazy(() => import('./components/SettingsQuickLinks').then(mod => ({ default: mod.SettingsQuickLinks })))
+const UnsavedChangesPrompt = lazy(() => import('./components/UnsavedChangesPrompt').then(mod => ({ default: mod.UnsavedChangesPrompt })))
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('general')
@@ -21,34 +27,42 @@ const SettingsPage = () => {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <SettingsHeader
-          isUnsavedChanges={isUnsavedChanges}
-          isSaving={isSaving}
-          onSave={handleSave}
-          onReset={handleReset}
-        />
+        <Suspense fallback={<SettingsLoadingSkeleton />}>
+          <SettingsHeader
+            isUnsavedChanges={isUnsavedChanges}
+            isSaving={isSaving}
+            onSave={handleSave}
+            onReset={handleReset}
+          />
+        </Suspense>
 
         {isSkeletonLoading ? (
           <SettingsLoadingSkeleton />
         ) : (
           <>
-            <SettingsQuickLinks />
+            <Suspense fallback={<SettingsLoadingSkeleton />}>
+              <SettingsQuickLinks />
+            </Suspense>
 
-            <SettingsTabs
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              settings={settings}
-              onSettingChange={handleSettingChange}
-            />
+            <Suspense fallback={<SettingsLoadingSkeleton />}>
+              <SettingsTabs
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                settings={settings}
+                onSettingChange={handleSettingChange}
+              />
+            </Suspense>
           </>
         )}
 
-        <UnsavedChangesPrompt
-          isUnsavedChanges={isUnsavedChanges}
-          onReset={() => handleReset()}
-          onSave={handleSave}
-          isSaving={isSaving}
-        />
+        <Suspense fallback={<SettingsLoadingSkeleton />}>
+          <UnsavedChangesPrompt
+            isUnsavedChanges={isUnsavedChanges}
+            onReset={() => handleReset()}
+            onSave={handleSave}
+            isSaving={isSaving}
+          />
+        </Suspense>
       </div>
     </AppLayout>
   )
