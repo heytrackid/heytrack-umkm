@@ -204,14 +204,15 @@ export const SmartBottomNav = () => {
 
   return (
     <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-      <nav data-mobile-nav className="flex justify-around items-center py-2 bg-background border-t">
-        {mainItems.map((item) => (
+      <nav data-mobile-nav className="flex justify-around items-center py-2 bg-background border-t animate-in fade-in duration-300">
+        {mainItems.map((item, index) => (
           <SmartLink
             key={item.href}
             href={item.href}
-            className="flex flex-col items-center space-y-1 px-2 py-1 text-xs font-medium transition-colors"
+            className="flex flex-col items-center space-y-1 px-2 py-1 text-xs font-medium transition-colors animate-in slide-in-from-bottom-2 duration-200"
             activeClassName="text-primary"
             preloadDelay={100}
+            style={{ animationDelay: `${index * 100}ms` }}
           >
             <item.icon className="h-5 w-5" />
             <span>{item.title}</span>
@@ -220,7 +221,7 @@ export const SmartBottomNav = () => {
 
         {/* More Menu Button */}
         <SheetTrigger asChild>
-          <button className="flex flex-col items-center space-y-1 px-2 py-1 text-xs font-medium transition-colors text-muted-foreground hover:text-foreground">
+          <button className="flex flex-col items-center space-y-1 px-2 py-1 text-xs font-medium transition-colors text-muted-foreground hover:text-foreground animate-in slide-in-from-bottom-2 duration-200" style={{ animationDelay: '400ms' }}>
             <MoreHorizontal className="h-5 w-5" />
             <span>Lainnya</span>
           </button>
@@ -231,13 +232,13 @@ export const SmartBottomNav = () => {
         <SheetHeader>
           <SheetTitle>Lainnya</SheetTitle>
         </SheetHeader>
-        <div className="flex flex-col gap-3 mt-6 animate-in slide-in-from-bottom-4 duration-300">
+        <div className="flex flex-col gap-3 mt-6 px-4 animate-in slide-in-from-bottom-4 duration-300">
           {additionalItems.map((item, index) => (
             <SmartLink
               key={item.href}
               href={item.href}
               className="flex items-center space-x-4 p-4 rounded-xl border shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 bg-card hover:bg-accent/50"
-              activeClassName="border-primary bg-primary/10 shadow-primary/20"
+              activeClassName="border-primary bg-primary/15 shadow-primary/30 ring-2 ring-primary/20 text-primary font-semibold"
               preloadDelay={100}
               onClick={() => setIsMenuOpen(false)}
               style={{ animationDelay: `${index * 50}ms` }}
