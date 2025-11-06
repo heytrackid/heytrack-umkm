@@ -1,8 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Insert, Update, Database } from '@/types/database'
-type OrderStatus = Database['public']['Enums']['order_status']
+import type { Insert, Update, Database, OrderStatus } from '@/types/database'
+import { typed } from '@/types/type-utilities'
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { createPaginationMeta } from '@/lib/validations/pagination'
@@ -85,8 +85,8 @@ const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: 
 async function GET(request: NextRequest) {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/orders - Request received')
-    
-    const supabase = await createClient()
+
+    const supabase = typed(await createClient())
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -142,8 +142,8 @@ async function GET(request: NextRequest) {
 async function POST(request: NextRequest) {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/orders - Request received')
-    
-    const supabase = await createClient()
+
+    const supabase = typed(await createClient())
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

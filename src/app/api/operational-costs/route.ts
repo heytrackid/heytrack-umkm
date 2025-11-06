@@ -27,11 +27,13 @@ async function POST(request: NextRequest) {
 
     if (authError || !user) {
       apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }    const body = await request.json()
+       return NextResponse.json(
+         { error: 'Unauthorized' },
+         { status: 401 }
+       )
+     }
+
+     const body = await request.json()
 
     // Validate request body with Zod
     const validation = OperationalCostInsertSchema.safeParse(body)

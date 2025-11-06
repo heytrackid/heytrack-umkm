@@ -61,8 +61,34 @@ export class ProductionServices {
         notes: batch.notes ?? `Production batch for ${recipe.name}`
       }
 
-      // TODO: Save to production_batches table when it's implemented
-      // For now, we'll just return the batch object and update inventory
+      // Save to production_batches table
+      const { createServerClient: createClientForBatch } = await import('@/utils/supabase/client-safe')
+      const batchSupabase = await createClientForBatch()
+
+      const { data: { user }, error: authError } = await batchSupabase.auth.getUser()
+      if (authError || !user) {
+        throw new Error('User not authenticated')
+      }
+
+      const batchData = {
+        batch_no: batchId,
+        recipe_id: batch.recipe_id,
+        planned_quantity: batch.quantity,
+        produced_quantity: 0,
+        status: 'planned',
+        notes: newBatch.notes,
+        created_by: user.id,
+        user_id: user.id
+      }
+
+      const { error: insertError } = await batchSupabase
+        .from('production_batches')
+        .insert(batchData)
+
+      if (insertError) {
+        productionLogger.error({ insertError, batchData }, 'Failed to save production batch')
+        throw insertError
+      }
 
       // Reserve ingredients for production
       await this.reserveIngredientsForProduction(batch.recipe_id, batch.quantity)

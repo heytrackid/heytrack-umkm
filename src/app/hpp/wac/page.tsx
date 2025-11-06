@@ -7,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useIngredients } from '@/hooks/useIngredients'
 import { dbLogger } from '@/lib/logger'
-import type { Row } from '@/types/database'
+import type { Row as _Row } from '@/types/database'
 import { DollarSign, Package, RefreshCw, TrendingUp } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect as _useEffect, useState } from 'react'
 
 
 
@@ -18,40 +19,11 @@ const WacEnginePage = () => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
 
-  // ✅ OPTIMIZED: Use TanStack Query for caching (to be fully implemented)
-  // TODO: Import and use useIngredients({ limit: 1000 })
-  const [ingredients, setIngredients] = useState<Array<Row<'ingredients'>>>([])
-  const [selectedIngredient, setSelectedIngredient] = useState<string>('')
-  const [loading, setLoading] = useState(false)
-  const [calculating, setCalculating] = useState(false)
-  const [recalculating, setRecalculating] = useState(false)
-
-  // Load ingredients - TODO: Replace with useIngredients hook
-  useEffect(() => {
-    const loadIngredients = async () => {
-      try {
-        void setLoading(true)
-        const response = await fetch('/api/ingredients?limit=1000', {
-          credentials: 'include', // Include cookies for authentication
-        })
-        if (response.ok) {
-          const data = await response.json()
-          void setIngredients(data.ingredients ?? [])
-        }
-      } catch (err: unknown) {
-        dbLogger.error({ err }, 'Failed to load ingredients')
-        toast({
-          title: 'Error',
-          description: 'Failed to load ingredients',
-          variant: 'destructive'
-        })
-      } finally {
-        void setLoading(false)
-      }
-    }
-
-    void loadIngredients()
-  }, [toast])
+   // Use ingredients hook with caching
+   const { data: ingredients = [], isLoading: loading } = useIngredients({ limit: 1000 })
+   const [selectedIngredient, setSelectedIngredient] = useState<string>('')
+   const [calculating, setCalculating] = useState(false)
+   const [recalculating, setRecalculating] = useState(false)
 
   // Calculate WAC for selected ingredient
   const calculateWac = () => {

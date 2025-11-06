@@ -3,7 +3,6 @@
  import { apiLogger, logError } from '@/lib/logger'
  import { z } from 'zod'
  import { withSecurity, SecurityPresets } from '@/utils/security'
- import * as Sentry from "@sentry/nextjs"
 
 // ✅ Force Node.js runtime
 export const runtime = 'nodejs'
@@ -48,11 +47,10 @@ async function loginPOST(request: NextRequest) {
       session: data.session,
     })
 
-   } catch (error: unknown) {
-     Sentry.captureException(error)
-     logError(apiLogger, error, 'POST /api/auth/login - Unexpected error')
-     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-   }
+    } catch (error: unknown) {
+      logError(apiLogger, error, 'POST /api/auth/login - Unexpected error')
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
 }
 
 export const POST = withSecurity(loginPOST, SecurityPresets.enhanced())

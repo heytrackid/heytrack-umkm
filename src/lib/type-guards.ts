@@ -1,13 +1,11 @@
-import type { Row, /**
+/**
  * Type Guards for Runtime Type Validation
- * 
+ *
  * Use these guards to safely validate data from external sources
  * like Supabase queries, API responses, etc.
  */
 
-  Database } from '@/types/database'
-
-type Enums = Database['public']['Enums']
+import type { Row, OrderStatus, ProductionStatus } from '@/types/database'
 
 // ============================================================================
 // GENERIC TYPE GUARDS
@@ -512,7 +510,7 @@ function isOrderItem(value: unknown): value is OrderItem {
 /**
  * Type guard for order status enum
  */
-export type OrderStatus = Enums['order_status']
+// OrderStatus is imported from database.ts
 
 export function isOrderStatus(value: unknown): value is OrderStatus {
   return (
@@ -583,7 +581,7 @@ export function assertOrderItem(value: unknown, message = 'Invalid order item da
 /**
  * Type guard for production status enum
  */
-export type ProductionStatus = Enums['production_status']
+// ProductionStatus is imported from database.ts
 
 export function isProductionStatus(value: unknown): value is ProductionStatus {
   return (

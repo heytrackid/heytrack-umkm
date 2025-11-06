@@ -747,3 +747,67 @@
   --toast-icon-primary: #ef4444;
   --toast-icon-secondary: #ffffff;
 }
+
+/* ============================================================================
+   MOBILE SAFE AREA SUPPORT
+   ============================================================================ */
+
+/* Safe area variables for modern mobile devices */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-right: env(safe-area-inset-right);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+}
+
+/* Apply safe area to body to prevent content from being hidden */
+body {
+  padding-top: var(--safe-area-inset-top);
+  padding-right: var(--safe-area-inset-right);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+}
+
+/* Safe area for fixed positioned elements like dialogs and sheets */
+[data-radix-dialog-content],
+[data-radix-sheet-content] {
+  padding-top: max(1rem, var(--safe-area-inset-top));
+  padding-right: max(1rem, var(--safe-area-inset-right));
+  padding-bottom: max(1rem, var(--safe-area-inset-bottom));
+  padding-left: max(1rem, var(--safe-area-inset-left));
+}
+
+/* Special handling for bottom sheets */
+[data-radix-sheet-content][data-side="bottom"] {
+  padding-bottom: max(2rem, calc(var(--safe-area-inset-bottom) + 1rem));
+  border-radius: 1rem 1rem 0 0;
+  border-bottom: none;
+}
+
+/* Safe area for fixed navigation bars */
+nav[data-mobile-nav] {
+  padding-bottom: max(0.5rem, var(--safe-area-inset-bottom));
+}
+
+/* Ensure dialogs don't get cut off by notches */
+@media (max-width: 768px) {
+  [data-radix-dialog-content] {
+    margin-top: var(--safe-area-inset-top);
+    margin-bottom: var(--safe-area-inset-bottom);
+    max-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom) - 2rem);
+  }
+
+  [data-radix-sheet-content][data-side="bottom"] {
+    max-height: calc(100vh - var(--safe-area-inset-top) - 2rem);
+  }
+}
+
+/* Fallback for browsers that don't support safe-area-inset */
+@supports not (padding: max(0px)) {
+  :root {
+    --safe-area-inset-top: 0px;
+    --safe-area-inset-right: 0px;
+    --safe-area-inset-bottom: 0px;
+    --safe-area-inset-left: 0px;
+  }
+}

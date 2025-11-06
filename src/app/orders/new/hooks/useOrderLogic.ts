@@ -143,7 +143,7 @@ export const useOrderLogic = () => {
   const totalAmount = subtotal - formData.discount_amount + taxAmount + formData.delivery_fee
 
   // Form handlers
-  const handleInputChange = (field: keyof OrderFormData, value: unknown) => {
+  const handleInputChange = (field: keyof OrderFormData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -167,7 +167,7 @@ export const useOrderLogic = () => {
     void setOrderItems(prev => [...prev, newItem])
   }
 
-  const updateOrderItem = (index: number, field: keyof OrderItem, value: unknown) => {
+  const updateOrderItem = (index: number, field: keyof OrderItem, value: OrderItem[keyof OrderItem]) => {
     setOrderItems(prev => {
       const updated = [...prev]
       if (index < 0 || index >= updated.length || !updated[index]) {return updated}

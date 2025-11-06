@@ -5,6 +5,7 @@ import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations'
 import type { Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
+import { typed } from '@/types/type-utilities'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -51,17 +52,17 @@ async function GET(request: NextRequest) {
   const { page, limit, search, sort_by, sort_order } = paginationValidation.data
   const { start_date, end_date, recipe_id } = salesQueryValidation.data
 
-  try {
-    const supabase = await createClient()
-    
-    // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+   try {
+     const supabase = typed(await createClient())
 
-    // Calculate offset for pagination
-    const offset = (page - 1) * limit
+     // Authenticate user
+     const { data: { user }, error: authError } = await supabase.auth.getUser()
+     if (authError || !user) {
+       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+     }
+
+     // Calculate offset for pagination
+     const offset = (page - 1) * limit
 
     let query = supabase
       .from('financial_records')
@@ -135,8 +136,8 @@ async function GET(request: NextRequest) {
 // Define the original POST function
 async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    
+    const supabase = typed(await createClient())
+
     // Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

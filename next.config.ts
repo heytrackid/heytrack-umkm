@@ -5,7 +5,6 @@ import path from 'path'
 
 const isProd = process.env.NODE_ENV === 'production'
 const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN || ''
-const useSentry = process.env.CI === 'true' && isProd
 
 const withBundleAnalyzer =
   process.env.ANALYZE === 'true'

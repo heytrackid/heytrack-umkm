@@ -1,7 +1,7 @@
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-// import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
 // POST /api/suppliers/import - Import suppliers from CSV
@@ -103,4 +103,7 @@ async function POST(request: NextRequest) {
   }
 }
 
-export { POST }
+// Apply security middleware
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+export { securedPOST as POST }

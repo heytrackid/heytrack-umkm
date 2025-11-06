@@ -445,27 +445,37 @@ export class OrderWorkflowHandlers {
         // Check for low stock alerts
         const minStock = Number(ingredient.min_stock ?? 0)
         if (newStock <= minStock && newStock > 0) {
-          await triggerWorkflow('inventory.low_stock', ingredient.id, {
-            ingredient: {
-              id: ingredient.id,
-              name: ingredient.name,
-              unit: ingredient.unit || '',
-              min_stock: minStock
-            },
-            currentStock: newStock,
-            severity: newStock <= minStock * 0.5 ? 'critical' : 'warning'
-          })
+          try {
+            await triggerWorkflow('inventory.low_stock', ingredient.id, {
+              ingredient: {
+                id: ingredient.id,
+                name: ingredient.name,
+                unit: ingredient.unit || '',
+                min_stock: minStock
+              },
+              currentStock: newStock,
+              severity: newStock <= minStock * 0.5 ? 'critical' : 'warning'
+            })
+          } catch (error) {
+            // Log but don't fail the main operation
+            automationLogger.error({ error, ingredientId: ingredient.id }, 'Failed to trigger low stock workflow')
+          }
         }
 
         if (newStock <= 0) {
-          await triggerWorkflow('inventory.out_of_stock', ingredient.id, {
-            ingredient: {
-              id: ingredient.id,
-              name: ingredient.name,
-              unit: ingredient.unit || ''
-            },
-            previousStock: currentStock
-          })
+          try {
+            await triggerWorkflow('inventory.out_of_stock', ingredient.id, {
+              ingredient: {
+                id: ingredient.id,
+                name: ingredient.name,
+                unit: ingredient.unit || ''
+              },
+              previousStock: currentStock
+            })
+          } catch (error) {
+            // Log but don't fail the main operation
+            automationLogger.error({ error, ingredientId: ingredient.id }, 'Failed to trigger out of stock workflow')
+          }
         }
       }
     }

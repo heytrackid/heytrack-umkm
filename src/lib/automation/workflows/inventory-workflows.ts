@@ -1,7 +1,6 @@
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { Insert, Database } from '@/types/database'
-import type { Json } from '@/types/supabase-generated'
+import type { Insert, Database, Json } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type {WorkflowResult,
   WorkflowContext

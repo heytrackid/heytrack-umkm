@@ -8,6 +8,7 @@ import type { Insert } from '@/types/database'
 import { formatCurrency } from '@/lib/currency'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage } from '@/lib/type-guards'
+import { typed } from '@/types/type-utilities'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -50,8 +51,8 @@ async function GET(request: NextRequest) {
   const category = searchParams.get('category')
 
   try {
-    const supabase = await createClient()
-    
+    const supabase = typed(await createClient())
+
     // Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -168,8 +169,8 @@ async function GET(request: NextRequest) {
 // Define the original POST function
 async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    
+    const supabase = typed(await createClient())
+
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

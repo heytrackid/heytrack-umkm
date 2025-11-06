@@ -4,10 +4,17 @@ import { Fragment, type ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 
 import { cn } from '@/lib/utils'
 import { useAdvancedLinkPreloading, useAdvancedButtonPreloading } from '@/hooks/usePreloading'
-import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search, Truck } from 'lucide-react'
+import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search, Truck, MoreHorizontal, Receipt, MessageSquare } from 'lucide-react'
 
 // Smart Link component with preloading
 interface SmartLinkProps {
@@ -17,6 +24,7 @@ interface SmartLinkProps {
   activeClassName?: string
   preloadOnHover?: boolean
   preloadDelay?: number
+  onClick?: () => void
 }
 
 export const SmartLink = ({
@@ -25,7 +33,8 @@ export const SmartLink = ({
   className,
   activeClassName,
   preloadOnHover = true,
-  preloadDelay = 100
+  preloadDelay = 100,
+  onClick
 }: SmartLinkProps) => {
   const pathname = usePathname()
   const linkPreloading = useAdvancedLinkPreloading()
@@ -46,6 +55,12 @@ export const SmartLink = ({
     void setIsHovered(false)
   }
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick()
+    }
+  }
+
   return (
     <Link
       href={href}
@@ -57,6 +72,7 @@ export const SmartLink = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={() => linkPreloading.onFocus(href)}
+      onClick={handleClick}
     >
       {children}
     </Link>
@@ -159,6 +175,19 @@ const navigationItems = [
     href: '/settings',
     icon: Settings,
     preloadTargets: ['/dashboard']
+  },
+  {
+    title: 'Operational Costs',
+    href: '/operational-costs',
+    icon: Receipt,
+    preloadTargets: ['/orders', '/production']
+  },
+  {
+    title: 'AI Chatbot',
+    href: '/ai-chatbot',
+    icon: MessageSquare,
+    badge: '✨',
+    preloadTargets: ['/dashboard']
   }
 ]
 
@@ -166,25 +195,58 @@ const navigationItems = [
 
 // Smart Mobile Bottom Navigation
 export const SmartBottomNav = () => {
-  const mainItems = navigationItems.slice(0, 5) // First 5 items for mobile
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const mainItems = navigationItems.slice(0, 4) // First 4 items for mobile
+  const additionalItems = navigationItems.slice(4) // Remaining items for menu
 
   return (
-    <nav className="flex justify-around items-center py-2 bg-background border-t">
-      {mainItems.map((item) => (
-        <SmartLink
-          key={item.href}
-          href={item.href}
-          className="flex flex-col items-center space-y-1 px-2 py-1 text-xs font-medium transition-colors"
-          activeClassName="text-primary"
-          preloadDelay={100}
-        >
-          <item.icon className="h-5 w-5" />
-          <span>{item.title}</span>
-        </SmartLink>
-      ))}
-    </nav>
-  )
-}
+    <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+      <nav data-mobile-nav className="flex justify-around items-center py-2 bg-background border-t">
+        {mainItems.map((item) => (
+          <SmartLink
+            key={item.href}
+            href={item.href}
+            className="flex flex-col items-center space-y-1 px-2 py-1 text-xs font-medium transition-colors"
+            activeClassName="text-primary"
+            preloadDelay={100}
+          >
+            <item.icon className="h-5 w-5" />
+            <span>{item.title}</span>
+          </SmartLink>
+        ))}
+
+        {/* More Menu Button */}
+        <SheetTrigger asChild>
+          <button className="flex flex-col items-center space-y-1 px-2 py-1 text-xs font-medium transition-colors text-muted-foreground hover:text-foreground">
+            <MoreHorizontal className="h-5 w-5" />
+            <span>More</span>
+          </button>
+        </SheetTrigger>
+      </nav>
+
+      <SheetContent side="bottom" className="h-[80vh] safe-bottom">
+        <SheetHeader>
+          <SheetTitle>Menu</SheetTitle>
+        </SheetHeader>
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          {additionalItems.map((item) => (
+            <SmartLink
+              key={item.href}
+              href={item.href}
+              className="flex flex-col items-center space-y-2 p-4 rounded-lg border hover:bg-accent transition-colors"
+              activeClassName="border-primary bg-primary/5"
+              preloadDelay={100}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <item.icon className="h-6 w-6" />
+              <span className="text-sm font-medium text-center">{item.title}</span>
+            </SmartLink>
+          ))}
+        </div>
+       </SheetContent>
+     </Sheet>
+   )
+ }
 
 // Smart Action Buttons (for forms, modals, etc)
 export const SmartActionButton = ({

@@ -1,7 +1,6 @@
-import type { Database } from '@/types/database'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
-let browserClient: ReturnType<typeof createSupabaseClient<Database>> | null = null
+let browserClient: ReturnType<typeof createSupabaseClient> | null = null
 
 export function createClient() {
   // Return existing client if already created to prevent multiple instances
@@ -16,6 +15,6 @@ export function createClient() {
     throw new Error('Missing Supabase environment variables')
   }
 
-  browserClient = createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey)
+  browserClient = createSupabaseClient(supabaseUrl, supabaseAnonKey)
   return browserClient
 }

@@ -1,19 +1,26 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { apiLogger } from '@/lib/logger'
+import { apiLogger, logError } from '@/lib/logger'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 export const runtime = 'nodejs'
 
-async function PUT(
+async function putHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const alertId = params.id
     const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    apiLogger.info({ alertId }, 'Marking HPP alert as read')
+    if (authError || !user) {
+      logError(apiLogger, authError, 'PUT /api/hpp/alerts/[id]/read - Unauthorized')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    apiLogger.info({ alertId, userId: user.id }, 'Marking HPP alert as read')
 
     // Update the alert to mark it as read
     const { data, error } = await supabase
@@ -24,11 +31,12 @@ async function PUT(
         updated_at: new Date().toISOString()
       })
       .eq('id', alertId)
+      .eq('user_id', user.id)
       .select()
       .single()
 
     if (error) {
-      apiLogger.error({ error, alertId }, 'Failed to mark alert as read')
+      logError(apiLogger, error, 'PUT /api/hpp/alerts/[id]/read - Database error')
       throw error
     }
 
@@ -39,7 +47,7 @@ async function PUT(
       )
     }
 
-    apiLogger.info({ alertId }, 'Alert marked as read successfully')
+    apiLogger.info({ alertId, userId: user.id }, 'Alert marked as read successfully')
 
     return NextResponse.json({
       success: true,
@@ -51,4 +59,7 @@ async function PUT(
   }
 }
 
-export { PUT as securedPUT }
+// Apply security middleware
+const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
+
+export { securedPUT as PUT }

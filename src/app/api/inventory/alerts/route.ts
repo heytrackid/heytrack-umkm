@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
 import { apiLogger } from '@/lib/logger'
 import { withSecurity, SecurityPresets } from '@/utils/security'
+import { typed } from '@/types/type-utilities'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -13,7 +14,7 @@ export const runtime = 'nodejs'
  */
 async function GET(__request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

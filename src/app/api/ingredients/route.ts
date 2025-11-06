@@ -1,9 +1,10 @@
-import { createSuccessResponse, createErrorResponse, handleAPIError, withQueryValidation, PaginationSchema, calculateOffset, createPaginationMeta } from '@/lib/api-core' 
+import { createSuccessResponse, createErrorResponse, handleAPIError, withQueryValidation, PaginationSchema, calculateOffset, createPaginationMeta } from '@/lib/api-core'
 import { z } from 'zod'
 import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest } from 'next/server'
 import type { Insert } from '@/types/database'
+import { typed } from '@/types/type-utilities'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -31,7 +32,7 @@ async function GET(request: NextRequest) {
     const offset = calculateOffset(page, limit)
 
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -104,7 +105,7 @@ async function POST(request: NextRequest) {
     const validatedData = validation.data
 
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()

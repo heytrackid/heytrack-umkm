@@ -2,24 +2,41 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server'
 import { getErrorMessage, isValidUUID, isRecord, extractFirst, safeString } from '@/lib/type-guards';
 import { prepareUpdate } from '@/lib/supabase/insert-helpers';
+import { apiLogger, logError } from '@/lib/logger';
+import { withSecurity, SecurityPresets } from '@/utils/security';
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-export async function GET(
+// Apply security middleware
+const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
+const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
+const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
+
+export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }
+
+async function getHandler(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
-  
+
   // Validate UUID format
   if (!isValidUUID(id)) {
     return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 });
   }
-  
+
   try {
+    apiLogger.info({ expenseId: id }, 'GET /api/expenses/[id] - Request received');
+
     const supabase = await createClient();
-    
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      logError(apiLogger, authError, 'GET /api/expenses/[id] - Unauthorized');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { data: expense, error } = await supabase
       .from('expenses')
       .select(`
@@ -27,6 +44,7 @@ export async function GET(
         supplier:suppliers(name)
       `)
       .eq('id', id)
+      .eq('user_id', user.id)
       .single();
 
     if (error) {
@@ -36,6 +54,7 @@ export async function GET(
           { status: 404 }
         )
       }
+      logError(apiLogger, error, 'GET /api/expenses/[id] - Database error');
       return NextResponse.json(
         { error: error.message || 'Failed to fetch expense' },
         { status: 500 }
@@ -56,34 +75,44 @@ export async function GET(
       const supplier = extractFirst(expense.supplier)
       if (supplier && isRecord(supplier) && 'name' in supplier) {
         // Supplier data safely extracted
-        responseExpense = { 
-          ...expense, 
+        responseExpense = {
+          ...expense,
           supplier_name: safeString(supplier.name, 'Unknown')
         };
       }
     }
 
+    apiLogger.info({ expenseId: id, userId: user.id }, 'GET /api/expenses/[id] - Success');
     return NextResponse.json(responseExpense);
   } catch (error: unknown) {
+    logError(apiLogger, error, 'GET /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
-export async function PUT(
+async function putHandler(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
-  
+
   // Validate UUID format
   if (!isValidUUID(id)) {
     return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 });
   }
-  
-  try {
-    const supabase = await createClient();
-    const body = await request.json();
 
+  try {
+    apiLogger.info({ expenseId: id }, 'PUT /api/expenses/[id] - Request received');
+
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      logError(apiLogger, authError, 'PUT /api/expenses/[id] - Unauthorized');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
     const updatePayload = prepareUpdate('financial_records', body)
 
     // ✅ Use financial_records table
@@ -91,6 +120,7 @@ export async function PUT(
       .from('financial_records')
       .update(updatePayload)
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -101,46 +131,61 @@ export async function PUT(
           { status: 404 }
         )
       }
+      logError(apiLogger, error, 'PUT /api/expenses/[id] - Database error');
       return NextResponse.json(
         { error: error.message || 'Failed to update expense' },
         { status: 500 }
       )
     }
 
+    apiLogger.info({ expenseId: id, userId: user.id }, 'PUT /api/expenses/[id] - Success');
     return NextResponse.json(expense);
   } catch (error: unknown) {
+    logError(apiLogger, error, 'PUT /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
-export async function DELETE(
+async function deleteHandler(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
-  
+
   // Validate UUID format
   if (!isValidUUID(id)) {
     return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 });
   }
-  
+
   try {
+    apiLogger.info({ expenseId: id }, 'DELETE /api/expenses/[id] - Request received');
+
     const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      logError(apiLogger, authError, 'DELETE /api/expenses/[id] - Unauthorized');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const { error } = await supabase
       .from('expenses')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id);
 
     if (error) {
+      logError(apiLogger, error, 'DELETE /api/expenses/[id] - Database error');
       return NextResponse.json(
         { error: error.message || 'Failed to delete expense' },
         { status: 500 }
       )
     }
 
+    apiLogger.info({ expenseId: id, userId: user.id }, 'DELETE /api/expenses/[id] - Success');
     return NextResponse.json({ message: 'Expense deleted successfully' });
   } catch (error: unknown) {
+    logError(apiLogger, error, 'DELETE /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }

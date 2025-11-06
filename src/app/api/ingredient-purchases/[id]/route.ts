@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import type { Update, Insert } from '@/types/database'
 import { getErrorMessage, isValidUUID, isRecord, extractFirst } from '@/lib/type-guards'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -12,7 +13,7 @@ interface RouteContext {
 }
 
 // GET /api/ingredient-purchases/[id] - Get single purchase
-export async function GET(
+async function getHandler(
   _request: NextRequest,
   context: RouteContext
 ) {
@@ -86,7 +87,7 @@ export async function GET(
 }
 
 // PUT /api/ingredient-purchases/[id] - Update purchase
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   context: RouteContext
 ) {
@@ -218,7 +219,7 @@ export async function PUT(
 }
 
 // DELETE /api/ingredient-purchases/[id] - Delete purchase and revert stock
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
   context: RouteContext
 ) {
@@ -316,3 +317,10 @@ export async function DELETE(
     )
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
+const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
+const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
+
+export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }

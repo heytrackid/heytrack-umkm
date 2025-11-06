@@ -17,8 +17,7 @@ interface RecipeWithIngredients {
   recipe_ingredients?: Array<RecipeIngredient & {
     ingredient?: Ingredient | null
   }>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any // Allow other properties
+  [key: string]: unknown // Allow other properties
 }
 
 // Type for recipe ingredient with nested ingredient as returned by the query

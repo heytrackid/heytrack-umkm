@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { logger } from '@/lib/logger'
+import { logError, logger } from '@/lib/logger'
 
 interface GlobalErrorProps {
   error: Error & { digest?: string }
@@ -11,7 +11,7 @@ interface GlobalErrorProps {
 const GlobalError = ({ error, reset }: GlobalErrorProps) => {
   useEffect(() => {
     // Log global error for debugging
-    logger.error({ error: error.message, stack: error.stack, digest: error.digest }, 'Global error occurred')
+    logError(logger, error, 'Global error occurred', { digest: error.digest })
   }, [error])
 
   return (

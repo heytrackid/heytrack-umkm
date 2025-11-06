@@ -112,22 +112,27 @@ export class CacheInvalidator {
   /**
    * Execute cache invalidation (implement based on your cache backend)
    */
-  execute(): void {
+  async execute(): Promise<void> {
     const keys = this.getInvalidatedKeys()
-    
+
     if (keys.length === 0) {
       return
     }
 
     dbLogger.info({ keyCount: keys.length }, 'Executing cache invalidation')
-    
-    // TODO: Implement actual cache invalidation based on your cache backend
-    // For example, if using Redis:
-    // await redis.del(...keys)
-    
-    // For Next.js revalidation:
-    // await Promise.all(keys.map(key => revalidateTag(key)))
-    
+
+    // For Next.js revalidation (tag-based invalidation)
+    try {
+      const { revalidateTag } = await import('next/cache')
+
+      keys.forEach(key => revalidateTag(key, 'page'))
+
+      dbLogger.info({ keys }, 'Cache invalidation completed successfully')
+    } catch (error) {
+      dbLogger.error({ error, keys }, 'Cache invalidation failed')
+      // Fallback: don't throw, just log
+    }
+
     this.clear()
   }
 }

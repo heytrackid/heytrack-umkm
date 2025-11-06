@@ -5,6 +5,7 @@ import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks'
 import { PRODUCTION_CONFIG } from '@/app/recipes/config/production.config'
 import { formatCurrency, DEFAULT_CURRENCY, currencies, type Currency } from '@/lib/currency'
 import type { Row } from '@/types/database'
+import { isRecord } from '@/types/shared/guards'
 import type {
   ProductionBatch,
   CreateBatchData,
@@ -91,8 +92,14 @@ export function useProductionBatches(filters?: ProductionFilters) {
 
     return castBatches.filter((batch: ProductionBatch) => {
       // Status filter - Compare with database enum values directly
-      if (filters.status?.length && !filters.status.includes(batch.status)) {
-        return false
+      if (filters.status?.length) {
+        const batchStatus = isRecord(batch) && 'status' in batch
+          ? batch.status
+          : undefined
+
+        if (batchStatus && !filters.status.includes(batchStatus)) {
+          return false
+        }
       }
 
       // Priority filter - commented out since priority is not in the database type

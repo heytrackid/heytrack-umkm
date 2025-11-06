@@ -97,7 +97,16 @@ export const ANIMATION_CONFIG = {
 export function preloadSkeletonComponents() {
   // Preload common skeleton components to avoid loading delays
   if (typeof window !== 'undefined') {
-    // TODO: Implement preload logic for skeleton components
+    // Use dynamic imports to preload skeleton components
+    import('./dashboard-skeletons').catch(() => {
+      // Ignore preload failures
+    })
+    import('./table-skeletons').catch(() => {
+      // Ignore preload failures
+    })
+    import('./form-skeletons').catch(() => {
+      // Ignore preload failures
+    })
   }
 }
 

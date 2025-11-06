@@ -6,6 +6,7 @@ import { apiLogger } from '@/lib/logger'
 import { typedInsert } from '@/lib/supabase/typed-insert'
 import { getErrorMessage, safeNumber, safeString } from '@/lib/type-guards'
 import { withSecurity, SecurityPresets } from '@/utils/security'
+import { typed } from '@/types/type-utilities'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -14,7 +15,7 @@ export const runtime = 'nodejs'
 async function GET(request: NextRequest) {
   try {
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -80,7 +81,7 @@ async function GET(request: NextRequest) {
 async function POST(request: NextRequest) {
   try {
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()

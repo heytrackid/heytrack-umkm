@@ -1,6 +1,7 @@
 'use client'
 
 import { TabNavigation } from '@/components/layout/TabNavigation'
+import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
 import { Button } from '@/components/ui/button'
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
 import {
@@ -12,6 +13,7 @@ import {
 import { NotificationCenter } from '@/components/ui/notification-center'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useResponsive } from '@/hooks/responsive'
 import { uiLogger } from '@/lib/logger'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
@@ -96,15 +98,20 @@ const AppLayout = memo(({
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
-  const { supabase } = useSupabase()
 
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Responsive detection
+  const { isMobile } = useResponsive()
+
   // Notifications
   const notifications = useNotifications()
+
+  // Supabase client
+  const { supabase } = useSupabase()
 
   // Check auth state on mount
   useEffect(() => {
@@ -238,8 +245,8 @@ const AppLayout = memo(({
         </div>
       </header>
 
-      {/* Tab Navigation */}
-      <TabNavigation tabs={mainTabs} />
+      {/* Conditional Navigation: Tab Navigation for tablet/desktop, Bottom Nav for mobile */}
+      {!isMobile && <TabNavigation tabs={mainTabs} />}
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto bg-background">
@@ -247,6 +254,9 @@ const AppLayout = memo(({
           {children}
         </div>
       </main>
+
+      {/* Bottom Navigation for Mobile */}
+      {isMobile && <SmartBottomNav />}
       </div>
     </GlobalErrorBoundary>
   )

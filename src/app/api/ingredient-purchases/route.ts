@@ -1,10 +1,10 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
 import { apiLogger } from '@/lib/logger'
- import { getErrorMessage } from '@/lib/type-guards'
- import type { Insert } from '@/types/database'
- import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { getErrorMessage } from '@/shared/guards'
+import { IngredientPurchaseInsertSchema } from '@/lib/validations'
+import type { Insert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
