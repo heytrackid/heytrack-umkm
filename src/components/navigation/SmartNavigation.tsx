@@ -25,6 +25,7 @@ interface SmartLinkProps {
   preloadOnHover?: boolean
   preloadDelay?: number
   onClick?: () => void
+  style?: React.CSSProperties
 }
 
 export const SmartLink = ({
@@ -34,7 +35,8 @@ export const SmartLink = ({
   activeClassName,
   preloadOnHover = true,
   preloadDelay = 100,
-  onClick
+  onClick,
+  style
 }: SmartLinkProps) => {
   const pathname = usePathname()
   const linkPreloading = useAdvancedLinkPreloading()
@@ -69,6 +71,7 @@ export const SmartLink = ({
         isActive && activeClassName,
         isHovered && 'opacity-80 transition-opacity'
       )}
+      style={style}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={() => linkPreloading.onFocus(href)}
@@ -123,37 +126,37 @@ export const SmartButton = ({
 // Main navigation items with preloading
 const navigationItems = [
   {
-    title: 'Dashboard',
+    title: 'Dasbor',
     href: '/dashboard',
     icon: LayoutDashboard,
     preloadTargets: ['/orders', '/cash-flow', '/ingredients']
   },
   {
-    title: 'Orders',
+    title: 'Pesanan',
     href: '/orders',
     icon: ShoppingCart,
     preloadTargets: ['/customers', '/orders/new']
   },
   {
-    title: 'Customers',
+    title: 'Pelanggan',
     href: '/customers',
     icon: Users,
     preloadTargets: ['/orders', '/cash-flow']
   },
   {
-    title: 'Ingredients',
+    title: 'Bahan',
     href: '/ingredients',
     icon: Package,
     preloadTargets: ['/recipes', '/orders']
   },
   {
-    title: 'Recipes',
+    title: 'Resep',
     href: '/recipes',
     icon: Utensils,
     preloadTargets: ['/ingredients', '/hpp']
   },
   {
-    title: 'Suppliers',
+    title: 'Pemasok',
     href: '/suppliers',
     icon: Truck,
     preloadTargets: ['/ingredients', '/recipes']
@@ -165,25 +168,25 @@ const navigationItems = [
     preloadTargets: ['/recipes', '/hpp']
   },
   {
-    title: 'Cash Flow',
+    title: 'Arus Kas',
     href: '/cash-flow',
     icon: DollarSign,
     preloadTargets: ['/orders', '/dashboard']
   },
   {
-    title: 'Settings',
+    title: 'Pengaturan',
     href: '/settings',
     icon: Settings,
     preloadTargets: ['/dashboard']
   },
   {
-    title: 'Operational Costs',
+    title: 'Biaya Operasional',
     href: '/operational-costs',
     icon: Receipt,
     preloadTargets: ['/orders', '/production']
   },
   {
-    title: 'AI Chatbot',
+    title: 'Chatbot AI',
     href: '/ai-chatbot',
     icon: MessageSquare,
     badge: '✨',
@@ -219,27 +222,33 @@ export const SmartBottomNav = () => {
         <SheetTrigger asChild>
           <button className="flex flex-col items-center space-y-1 px-2 py-1 text-xs font-medium transition-colors text-muted-foreground hover:text-foreground">
             <MoreHorizontal className="h-5 w-5" />
-            <span>More</span>
+            <span>Lainnya</span>
           </button>
         </SheetTrigger>
       </nav>
 
       <SheetContent side="bottom" className="h-[80vh] safe-bottom">
         <SheetHeader>
-          <SheetTitle>Menu</SheetTitle>
+          <SheetTitle>Lainnya</SheetTitle>
         </SheetHeader>
-        <div className="grid grid-cols-2 gap-4 mt-6">
-          {additionalItems.map((item) => (
+        <div className="flex flex-col gap-3 mt-6 animate-in slide-in-from-bottom-4 duration-300">
+          {additionalItems.map((item, index) => (
             <SmartLink
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center space-y-2 p-4 rounded-lg border hover:bg-accent transition-colors"
-              activeClassName="border-primary bg-primary/5"
+              className="flex items-center space-x-4 p-4 rounded-xl border shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 bg-card hover:bg-accent/50"
+              activeClassName="border-primary bg-primary/10 shadow-primary/20"
               preloadDelay={100}
               onClick={() => setIsMenuOpen(false)}
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <item.icon className="h-6 w-6" />
-              <span className="text-sm font-medium text-center">{item.title}</span>
+              <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10">
+                <item.icon className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <span className="text-sm font-medium">{item.title}</span>
+                {item.badge && <span className="ml-2 text-xs">{item.badge}</span>}
+              </div>
             </SmartLink>
           ))}
         </div>
@@ -285,7 +294,7 @@ export const SmartSearchButton = () => {
       onMouseEnter={() => preloadChartOnHover()}
     >
       <Search className="h-4 w-4 mr-2" />
-      Search
+      Cari
     </Button>
   )
 }
@@ -323,15 +332,15 @@ export const SmartBreadcrumbs = ({ items }: { items: BreadcrumbItem[] }) => (
 export const SmartQuickActions = () => (
   <div className="flex flex-wrap gap-2">
     <SmartActionButton action="add-order">
-      New Order
+      Pesanan Baru
     </SmartActionButton>
 
     <SmartActionButton action="add-customer" variant="outline">
-      Add Customer
+      Tambah Pelanggan
     </SmartActionButton>
 
     <SmartActionButton action="add-ingredient" variant="outline">
-      Add Ingredient
+      Tambah Bahan
     </SmartActionButton>
 
     <SmartSearchButton />

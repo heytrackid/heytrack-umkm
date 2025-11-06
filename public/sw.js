@@ -33,7 +33,16 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(STATIC_CACHE)
-      await cache.addAll(STATIC_ASSETS)
+      // Cache assets individually to handle failures gracefully
+      const cachePromises = STATIC_ASSETS.map(async (asset) => {
+        try {
+          await cache.add(asset)
+        } catch (error) {
+          // Silently fail for individual assets - don't break installation
+          console.warn(`Failed to cache ${asset}:`, error)
+        }
+      })
+      await Promise.all(cachePromises)
       // Force activation of new service worker
       await self.skipWaiting()
     })()
@@ -150,7 +159,7 @@ self.addEventListener('sync', (event) => {
 async function doBackgroundSync() {
   // Implement background sync logic here
   // This would retry failed API calls when connection is restored
-  console.log('Background sync triggered')
+  // Note: console.log removed to avoid CSP violations
 }
 
 // Push notifications (if needed in the future)
