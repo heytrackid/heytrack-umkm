@@ -72,47 +72,69 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  try {
-    // Validasi ringan (log saja saat dev)
-    const headersValidation = RequestHeadersSchema.safeParse({
-      'user-agent': request.headers.get('user-agent'),
-      accept: request.headers.get('accept'),
-      'accept-language': request.headers.get('accept-language'),
-      'content-type': request.headers.get('content-type'),
-      'x-forwarded-for': request.headers.get('x-forwarded-for'),
-    })
-    const urlValidation = UrlValidationSchema.safeParse({
-      pathname: request.nextUrl.pathname,
-      search: request.nextUrl.search,
-    })
-    if (!headersValidation.success && isDev) {
-      middlewareLogger.debug(
-        { url: request.url, issues: headersValidation.error.issues },
-        'Request headers validation failed (non-blocking)'
-      )
-    }
-    if (!urlValidation.success) {
-      middlewareLogger.warn(
-        { url: request.url, issues: urlValidation.error.issues },
-        'Malformed URL detected'
-      )
-      return NextResponse.json({ error: 'Invalid request URL' }, { status: 400 })
-    }
+  // Log environment info in development
+  if (isDev) {
+    middlewareLogger.debug({
+      url: request.url,
+      method: request.method,
+      appDomain: process.env.NEXT_PUBLIC_APP_DOMAIN,
+      nodeEnv: process.env.NODE_ENV
+    }, 'Middleware request')
+  }
 
-    // Update session and get user (this handles cookie refresh)
-    let user = null
-    let response: NextResponse
-    
+  // Skip middleware for static assets and Next.js internals
+  const { pathname } = request.nextUrl
+  if (
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/favicon.ico') ||
+    pathname.includes('.') // Skip files with extensions
+  ) {
+    return NextResponse.next()
+  }
+
     try {
-      const { user: authUser, response: authResponse } = await updateSession(request)
-      user = authUser
-      response = authResponse
-    } catch (error) {
-      // If auth fails, continue without user (they'll be redirected to login if needed)
-      middlewareLogger.debug({ error }, 'Middleware auth error')
-      user = null
-      response = NextResponse.next()
-    }
+      // Validasi ringan (log saja saat dev)
+      const headersValidation = RequestHeadersSchema.safeParse({
+        'user-agent': request.headers.get('user-agent'),
+        accept: request.headers.get('accept'),
+        'accept-language': request.headers.get('accept-language'),
+        'content-type': request.headers.get('content-type'),
+        'x-forwarded-for': request.headers.get('x-forwarded-for'),
+      })
+      const urlValidation = UrlValidationSchema.safeParse({
+        pathname: request.nextUrl.pathname,
+        search: request.nextUrl.search,
+      })
+      if (!headersValidation.success && isDev) {
+        middlewareLogger.debug(
+          { url: request.url, issues: headersValidation.error.issues },
+          'Request headers validation failed (non-blocking)'
+        )
+      }
+      if (!urlValidation.success) {
+        middlewareLogger.warn(
+          { url: request.url, issues: urlValidation.error.issues },
+          'Malformed URL detected'
+        )
+        const errorResponse = NextResponse.json({ error: 'Invalid request URL' }, { status: 400 })
+        addSecurityHeaders(errorResponse, nonce, isDev)
+        return errorResponse
+      }
+
+      // Update session and get user (this handles cookie refresh)
+      let user = null
+      let response: NextResponse
+
+      try {
+        const { user: authUser, response: authResponse } = await updateSession(request)
+        user = authUser
+        response = authResponse
+      } catch (error) {
+        // If auth fails, continue without user (they'll be redirected to login if needed)
+        middlewareLogger.debug({ error }, 'Middleware auth error (non-blocking)')
+        user = null
+        response = NextResponse.next()
+      }
 
     // Add security headers
     addSecurityHeaders(response, nonce, isDev)
