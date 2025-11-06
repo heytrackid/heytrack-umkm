@@ -2,8 +2,9 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
 import { apiLogger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/type-guards'
-import type { Insert } from '@/types/database'
+ import { getErrorMessage } from '@/lib/type-guards'
+ import type { Insert } from '@/types/database'
+ import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -11,7 +12,7 @@ export const runtime = 'nodejs'
  * GET /api/ingredient-purchases
  * List all ingredient purchases with optional filters
  */
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
     try {
         const supabase = await createClient()
 
@@ -98,7 +99,7 @@ export async function GET(request: NextRequest) {
  * POST /api/ingredient-purchases
  * Create new ingredient purchase and update stock
  */
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
     try {
         const supabase = await createClient()
 
@@ -265,5 +266,8 @@ export async function POST(request: NextRequest) {
         )
     }
 }
+
+export const GET = withSecurity(getHandler, SecurityPresets.enhanced())
+export const POST = withSecurity(postHandler, SecurityPresets.enhanced())
 
 // DELETE moved to /api/ingredient-purchases/[id]/route.ts

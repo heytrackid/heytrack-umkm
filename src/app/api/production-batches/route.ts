@@ -3,11 +3,12 @@ import { createClient } from '@/utils/supabase/server'
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-export async function GET() {
+async function getHandler() {
   try {
     const supabase = await createClient();
     
@@ -46,12 +47,16 @@ export async function GET() {
     })) || []
 
     return NextResponse.json(mappedBatches);
-  } catch (error: unknown) {
-    return handleAPIError(error)
-  }
+   } catch (error: unknown) {
+     return handleAPIError(error)
+   }
 }
 
-export async function POST(request: Request) {
+export const POST = withSecurity(postHandler, SecurityPresets.enhanced())
+
+ export const GET = withSecurity(getHandler, SecurityPresets.enhanced())
+
+ async function postHandler(request: Request) {
   try {
     const supabase = await createClient();
     

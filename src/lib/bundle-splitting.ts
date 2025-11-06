@@ -11,11 +11,10 @@ export function lazyLoad<T extends ComponentType<any>>( // eslint-disable-line @
   importFunc: () => Promise<{ default: T }>
 ) {
   return lazy(() =>
-    importFunc().catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to load component:', error)
-      throw error
-    })
+     importFunc().catch((error) => {
+       uiLogger.error('Failed to load component:', error)
+       throw error
+     })
   )
 }
 

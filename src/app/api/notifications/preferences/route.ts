@@ -3,11 +3,12 @@ import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { NotificationPreferencesUpdateSchema } from '@/lib/validations/domains/notification-preferences'
 import { DEFAULT_NOTIFICATION_PREFERENCES } from '@/types/domain/notification-preferences'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-export async function GET(_request: NextRequest) {
+async function getHandler(_request: NextRequest) {
   try {
     const supabase = await createClient()
     
@@ -56,7 +57,7 @@ export async function GET(_request: NextRequest) {
   }
 }
 
-export async function PUT(request: NextRequest) {
+async function putHandler(request: NextRequest) {
   try {
     const supabase = await createClient()
     
@@ -115,8 +116,11 @@ export async function PUT(request: NextRequest) {
     apiLogger.info({ userId: user.id }, 'Notification preferences updated')
     return NextResponse.json(data)
 
-  } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in PUT /api/notifications/preferences')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+   } catch (error: unknown) {
+     apiLogger.error({ error }, 'Error in PUT /api/notifications/preferences')
+     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+   }
 }
+
+export const GET = withSecurity(getHandler, SecurityPresets.enhanced())
+export const PUT = withSecurity(putHandler, SecurityPresets.enhanced())

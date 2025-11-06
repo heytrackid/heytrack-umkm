@@ -1,13 +1,14 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger, logError } from '@/lib/logger'
-import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
+ import { apiLogger, logError } from '@/lib/logger'
+ import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
+ import { withSecurity, SecurityPresets } from '@/utils/security'
 
 
 export const runtime = 'nodejs'
 
 // GET /api/inventory/restock-suggestions
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/inventory/restock-suggestions')
     
@@ -47,3 +48,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const GET = withSecurity(getHandler, SecurityPresets.enhanced())

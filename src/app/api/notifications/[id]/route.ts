@@ -4,13 +4,14 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
-import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+ import { apiLogger } from '@/lib/logger'
+ import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+ import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -85,3 +86,5 @@ export async function PUT(
     )
   }
 }
+
+export const PUT = withSecurity(putHandler, SecurityPresets.enhanced())

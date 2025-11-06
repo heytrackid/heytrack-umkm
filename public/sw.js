@@ -29,19 +29,19 @@ const API_ENDPOINTS = [
 ]
 
 // Install event - cache static assets
-self.addEventListener('install', (event: ExtendableEvent) => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(STATIC_CACHE)
       await cache.addAll(STATIC_ASSETS)
       // Force activation of new service worker
-      await (self as any).skipWaiting()
+      await self.skipWaiting()
     })()
   )
 })
 
 // Activate event - clean up old caches
-self.addEventListener('activate', (event: ExtendableEvent) => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       const cacheNames = await caches.keys()
@@ -51,13 +51,13 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
           .map(name => caches.delete(name))
       )
       // Take control of all clients
-      await (self as any).clients.claim()
+      await self.clients.claim()
     })()
   )
 })
 
 // Fetch event - serve from cache or network
-self.addEventListener('fetch', (event: FetchEvent) => {
+self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
@@ -82,7 +82,7 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   )
 })
 
-async function handleApiRequest(request: Request): Promise<Response> {
+async function handleApiRequest(request) {
   const cache = await caches.open(API_CACHE)
 
   try {
@@ -110,7 +110,7 @@ async function handleApiRequest(request: Request): Promise<Response> {
   }
 }
 
-async function handleStaticRequest(request: Request): Promise<Response> {
+async function handleStaticRequest(request) {
   const cache = await caches.open(STATIC_CACHE)
 
   // Cache-first strategy for static assets
@@ -135,13 +135,13 @@ async function handleStaticRequest(request: Request): Promise<Response> {
   }
 }
 
-function isStaticAsset(url: URL): boolean {
+function isStaticAsset(url) {
   const staticExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2']
   return staticExtensions.some(ext => url.pathname.endsWith(ext))
 }
 
 // Background sync for offline actions
-self.addEventListener('sync', (event: any) => {
+self.addEventListener('sync', (event) => {
   if (event.tag === 'background-sync') {
     event.waitUntil(doBackgroundSync())
   }
@@ -154,7 +154,7 @@ async function doBackgroundSync() {
 }
 
 // Push notifications (if needed in the future)
-self.addEventListener('push', (event: any) => {
+self.addEventListener('push', (event) => {
   if (event.data) {
     const data = event.data.json()
     const options = {
@@ -165,16 +165,16 @@ self.addEventListener('push', (event: any) => {
     }
 
     event.waitUntil(
-      (self as any).registration.showNotification(data.title, options)
+      self.registration.showNotification(data.title, options)
     )
   }
 })
 
 // Handle notification clicks
-self.addEventListener('notificationclick', (event: any) => {
+self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
   event.waitUntil(
-    (self as any).clients.openWindow(event.notification.data || '/')
+    self.clients.openWindow(event.notification.data || '/')
   )
 })

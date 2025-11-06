@@ -1,7 +1,9 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger, logError } from '@/lib/logger'
-import { z } from 'zod'
+ import { createClient } from '@/utils/supabase/server'
+ import { type NextRequest, NextResponse } from 'next/server'
+ import { apiLogger, logError } from '@/lib/logger'
+ import { z } from 'zod'
+ import { withSecurity, SecurityPresets } from '@/utils/security'
+ import * as Sentry from "@sentry/nextjs"
 
 // ✅ Force Node.js runtime
 export const runtime = 'nodejs'
@@ -11,7 +13,7 @@ const LoginSchema = z.object({
   password: z.string().min(6),
 })
 
-export async function POST(request: NextRequest) {
+async function loginPOST(request: NextRequest) {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/auth/login - Request received')
 
@@ -46,8 +48,11 @@ export async function POST(request: NextRequest) {
       session: data.session,
     })
 
-  } catch (error: unknown) {
-    logError(apiLogger, error, 'POST /api/auth/login - Unexpected error')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+   } catch (error: unknown) {
+     Sentry.captureException(error)
+     logError(apiLogger, error, 'POST /api/auth/login - Unexpected error')
+     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+   }
 }
+
+export const POST = withSecurity(loginPOST, SecurityPresets.enhanced())

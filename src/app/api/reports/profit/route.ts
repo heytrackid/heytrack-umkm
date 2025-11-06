@@ -3,8 +3,9 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import type { Row } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
-import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
-import type { RecipeWithIngredients } from '@/types/query-results'
+ import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
+ import type { RecipeWithIngredients } from '@/types/query-results'
+ import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -24,7 +25,7 @@ type FinancialRecord = Row<'financial_records'>
  * - period: 'daily' | 'weekly' | 'monthly' | 'yearly'
  * - include_breakdown: 'true' | 'false' (include detailed product breakdown)
  */
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -167,6 +168,8 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withSecurity(getHandler, SecurityPresets.enhanced())
 
 // Typed interfaces for profit calculation
 interface OrderWithItemsForProfit extends Order {
