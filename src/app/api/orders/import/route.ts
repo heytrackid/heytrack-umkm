@@ -4,7 +4,6 @@ import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 import type { Insert, OrderStatus } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
-import { checkBotId } from 'botid/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -26,15 +25,7 @@ async function POST(request: NextRequest) {
     
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId()
-    if (verification.isBot) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
-
-    // 2. Parse CSV data from request
+    }    // 2. Parse CSV data from request
     const body = await request.json()
     const { orders } = body as { orders: Array<{
       order_no: string

@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger, logError } from '@/lib/logger'
-import { checkBotId } from 'botid/server'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
 
 
@@ -54,19 +53,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId({
-      advancedOptions: {
-        checkLevel: 'basic',
-      },
-    })
-    if (verification.isBot) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
-
-    const body = await request.json()
+    }    const body = await request.json()
     const { recipes } = body
 
     if (!recipes || !Array.isArray(recipes)) {

@@ -1,6 +1,5 @@
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import { checkBotId } from 'botid/server'
 import { type NextRequest, NextResponse } from 'next/server'
 // import { withSecurity, SecurityPresets } from '@/utils/security'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
@@ -16,15 +15,7 @@ async function POST(request: NextRequest) {
     if (authError || !user) {
       apiLogger.error({ error: authError }, 'POST /api/suppliers/import - Unauthorized')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId()
-    if (verification.isBot) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
-
-    const { suppliers } = await request.json()
+    }    const { suppliers } = await request.json()
 
     if (!Array.isArray(suppliers) || suppliers.length === 0) {
       return NextResponse.json({ error: 'Invalid suppliers data' }, { status: 400 })

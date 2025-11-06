@@ -2,7 +2,6 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Insert, Update, Database } from '@/types/database'
-import { checkBotId } from 'botid/server'
 type OrderStatus = Database['public']['Enums']['order_status']
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
@@ -150,15 +149,7 @@ async function POST(request: NextRequest) {
     if (authError || !user) {
       logError(apiLogger, authError, 'POST /api/orders - Unauthorized')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId()
-    if (verification.isBot) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
-
-    const body = await request.json()
+    }    const body = await request.json()
     const validation = OrderInsertSchema.safeParse(body)
 
     if (!validation.success) {

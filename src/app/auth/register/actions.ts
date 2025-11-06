@@ -3,19 +3,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { checkBotId } from 'botid/server'
 
 export async function signup(formData: FormData) {
-    // Check if the request is from a bot
-    const verification = await checkBotId({
-      advancedOptions: {
-        checkLevel: 'deepAnalysis',
-      },
-    })
-    if (verification.isBot) {
-      return { error: 'Access denied' }
-    }
-
     const supabase = await createClient()
 
     const email = formData.get('email') as string

@@ -4,7 +4,6 @@ import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest } from 'next/server'
 import type { Insert } from '@/types/database'
-import { checkBotId } from 'botid/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -108,13 +107,6 @@ async function POST(request: NextRequest) {
       apiLogger.error({ error: authError }, 'Auth error:')
       return createErrorResponse('Unauthorized', 401)
     }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId()
-    if (verification.isBot) {
-      return createErrorResponse('Access denied', 403)
-    }
-
     const ingredientData: Insert<'ingredients'> = {
       ...validatedData,
       user_id: user.id

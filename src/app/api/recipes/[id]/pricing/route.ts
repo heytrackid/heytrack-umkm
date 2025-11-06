@@ -2,7 +2,6 @@ import { PricingAutomation, UMKM_CONFIG } from '@/lib/automation'
 import { apiLogger } from '@/lib/logger'
 import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
-import { checkBotId } from 'botid/server'
 import { type NextRequest, NextResponse } from 'next/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
@@ -42,19 +41,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId({
-      advancedOptions: {
-        checkLevel: 'basic',
-      },
-    })
-    if (verification.isBot) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
-
-    // Get the recipe data from the request
+    }    // Get the recipe data from the request
     let recipeData: RecipeWithIngredients | null = await request.json()
 
     // If recipe data wasn't provided in the request body, fetch it from the database

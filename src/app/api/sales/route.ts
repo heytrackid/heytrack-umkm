@@ -5,7 +5,6 @@ import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations'
 import type { Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
-import { checkBotId } from 'botid/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -142,15 +141,7 @@ async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId()
-    if (verification.isBot) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
-
-    // The request body is already sanitized by the security middleware
+    }    // The request body is already sanitized by the security middleware
     const body = await request.json()
 
     // Validate request body

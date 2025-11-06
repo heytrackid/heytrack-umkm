@@ -3,7 +3,6 @@ import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import type { Row } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
-import { checkBotId } from 'botid/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -82,15 +81,7 @@ async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId()
-    if (verification.isBot) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
-
-    const body = await request.json()
+    }    const body = await request.json()
 
     // Create notification
     const { data, error } = await supabase
