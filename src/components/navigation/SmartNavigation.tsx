@@ -15,6 +15,7 @@ import {
 
 import { cn } from '@/lib/utils'
 import { useAdvancedLinkPreloading, useAdvancedButtonPreloading } from '@/hooks/usePreloading'
+import { useInstantNavigation } from '@/hooks/useInstantNavigation'
 import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search, Truck, MoreHorizontal, Receipt, MessageSquare } from 'lucide-react'
 
 // Haptic feedback utility for mobile devices
@@ -241,6 +242,7 @@ interface NavItemProps {
 export const NavItem = ({ item, index }: NavItemProps) => {
   const pathname = usePathname()
   const linkPreloading = useAdvancedLinkPreloading()
+  const { navigateInstant } = useInstantNavigation()
   const [isHovered, setIsHovered] = useState(false)
 
   // Enhanced active state detection
@@ -264,19 +266,21 @@ export const NavItem = ({ item, index }: NavItemProps) => {
   }
 
   return (
-    <Link
-      href={item.href}
-        className={cn(
-          "flex flex-col items-center space-y-1 px-4 py-3 text-[13px] font-medium transition-all duration-200 rounded-lg min-w-[60px] flex-1 max-w-[80px] relative group touch-manipulation",
-          "min-h-[56px] active:scale-95", // Ensure minimum touch target size (44px is iOS minimum, we use 56px for comfort)
-          isActive && "text-primary bg-primary/10 shadow-sm scale-105",
-          isHovered && !isActive && "hover:opacity-80"
-        )}
+    <button
+      onClick={() => {
+        handleClick()
+        navigateInstant(item.href)
+      }}
+      className={cn(
+        "flex flex-col items-center space-y-1 px-4 py-3 text-[13px] font-medium transition-all duration-200 rounded-lg min-w-[60px] flex-1 max-w-[80px] relative group touch-manipulation",
+        "min-h-[56px] active:scale-95", // Ensure minimum touch target size (44px is iOS minimum, we use 56px for comfort)
+        isActive && "text-primary bg-primary/10 shadow-sm scale-105",
+        isHovered && !isActive && "hover:opacity-80"
+      )}
       style={{ animationDelay: `${index * 100}ms` }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={() => linkPreloading.onFocus(item.href)}
-      onClick={handleClick}
       aria-label={`Navigate to ${item.title}`}
       role="navigation"
     >
@@ -303,7 +307,7 @@ export const NavItem = ({ item, index }: NavItemProps) => {
         "absolute inset-0 bg-primary/5 rounded-lg transition-opacity duration-200 -z-10",
         isActive ? "opacity-100" : "opacity-0"
       )} />
-    </Link>
+    </button>
   )
 }
 
@@ -323,8 +327,7 @@ export const SmartBottomNav = () => {
       <nav
         data-mobile-nav
         data-testid="mobile-nav"
-        className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center h-[60px] px-1 bg-background/95 backdrop-blur-md border-t border-border/50 shadow-lg safe-bottom animate-in fade-in duration-300"
-        style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+        className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center h-[56px] px-1 bg-background/95 backdrop-blur-md border-t border-border/50 shadow-lg safe-bottom animate-in fade-in duration-300 pb-[env(safe-area-inset-bottom)]"
         role="navigation"
         aria-label="Mobile navigation"
       >
@@ -354,7 +357,7 @@ export const SmartBottomNav = () => {
 
       <SheetContent
         side="bottom"
-        className="h-[80vh] safe-bottom"
+        className="max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-32px)] safe-bottom"
         aria-label="Additional navigation menu"
       >
         <SheetHeader>

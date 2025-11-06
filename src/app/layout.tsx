@@ -57,7 +57,7 @@ const RootLayout = async ({
         )}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100svh] m-0 p-0 w-full`}
       >
         <SupabaseProvider>
           <AuthProvider>

@@ -356,10 +356,10 @@ const OrdersPage = (_props: OrdersPageProps) => {
       {/* Navigation Tabs */}
       <SwipeableTabs value={activeView} onValueChange={(value) => setActiveView(value as ActiveView)}>
         <SwipeableTabsList>
-          <SwipeableTabsTrigger value="dashboard">Ringkasan</SwipeableTabsTrigger>
-          <SwipeableTabsTrigger value="list">Daftar Pesanan</SwipeableTabsTrigger>
-          <SwipeableTabsTrigger value="calendar">Kalender</SwipeableTabsTrigger>
-          <SwipeableTabsTrigger value="analytics">Analitik</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="dashboard" className="text-xs sm:text-sm">Ringkasan</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="list" className="text-xs sm:text-sm">Daftar Pesanan</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="calendar" className="text-xs sm:text-sm">Kalender</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="analytics" className="text-xs sm:text-sm">Analitik</SwipeableTabsTrigger>
         </SwipeableTabsList>
 
         <SwipeableTabsContent value="dashboard" className="mt-6">

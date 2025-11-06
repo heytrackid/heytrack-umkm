@@ -14,9 +14,10 @@ import { NotificationCenter } from '@/components/ui/notification-center'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useResponsive } from '@/hooks/responsive'
-import { uiLogger } from '@/lib/logger'
+import { uiLogger } from '@/lib/client-logger'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useAuth } from '@/providers/AuthProvider'
+import { useInstantNavigation } from '@/hooks/useInstantNavigation'
 
 import {
   BarChart3,
@@ -96,6 +97,7 @@ const AppLayout = memo(({
   children
 }: AppLayoutProps) => {
   const { user, isLoading: loading, isAuthenticated } = useAuth()
+  const { prefetchRoute } = useInstantNavigation()
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const mainContentRef = useRef<HTMLDivElement>(null)
@@ -104,6 +106,17 @@ const AppLayout = memo(({
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Prefetch critical routes on mount for faster navigation
+  useEffect(() => {
+    if (mounted && user) {
+      // Prefetch common routes after user loads
+      const criticalRoutes = ['/dashboard', '/orders', '/customers', '/ingredients']
+      criticalRoutes.forEach(route => {
+        void prefetchRoute(route)
+      })
+    }
+  }, [mounted, user, prefetchRoute])
 
   // Responsive detection
   const { isMobile } = useResponsive()
@@ -321,7 +334,7 @@ const AppLayout = memo(({
        {/* Main Content */}
        <main
          ref={mainContentRef}
-         className={`flex-1 overflow-auto bg-background ${isMobile ? 'pb-20' : ''}`}
+          className={`flex-1 overflow-auto bg-background ${isMobile ? 'pb-[calc(56px+env(safe-area-inset-bottom))]' : ''}`}
        >
          <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-8">
            {children}

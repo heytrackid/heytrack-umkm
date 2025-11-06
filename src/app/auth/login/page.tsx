@@ -11,17 +11,26 @@ import { useRenderPerformance } from '@/utils/performance/usePerformance'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import Link from 'next/link'
-import React, { type FormEvent, useState, useTransition } from 'react'
+import React, { type FormEvent, useEffect, useRef, useState, useTransition } from 'react'
 // import { login } from './actions' // Replaced with API call
 
 const LoginPage = () => {
   useRenderPerformance('LoginPage')
+  const mountedRef = useRef(true)
+  const abortControllerRef = useRef<AbortController | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
 
   const [isPending, startTransition] = useTransition()
+
+  useEffect(() => () => {
+    mountedRef.current = false
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+  }, [])
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -51,8 +60,10 @@ const LoginPage = () => {
     }
 
     startTransition(async () => {
+      abortControllerRef.current = new AbortController()
       try {
         const response = await fetch('/api/auth/login', {
+          signal: abortControllerRef.current.signal,
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -67,6 +78,9 @@ const LoginPage = () => {
         const data = await response.json()
 
         if (!response.ok) {
+          if (!mountedRef.current) {
+            return
+          }
           const authError = getAuthErrorMessage(data.error ?? 'Login failed')
           void setError(authError)
           void setErrorAction(null)
@@ -76,6 +90,9 @@ const LoginPage = () => {
         // Success - redirect
         window.location.href = '/dashboard'
       } catch (_err) {
+        if (!mountedRef.current) {
+          return
+        }
         void setError('Network error. Please try again.')
         void setErrorAction(null)
       }
