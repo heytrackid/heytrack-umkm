@@ -31,13 +31,13 @@ export async function GET(_request: NextRequest) {
     // 3. Gather logs data from database
     const { data: perfLogs } = await supabase
       .from('performance_logs')
-      .select('*')
+      .select('id, user_id, action, duration, timestamp, metadata')
       .order('timestamp', { ascending: false })
       .limit(1000)
 
     const { data: errLogs } = await supabase
       .from('error_logs')
-      .select('*')
+      .select('id, user_id, message, stack, timestamp, url, user_agent, ip_address, metadata')
       .order('timestamp', { ascending: false })
       .limit(500)
 

@@ -2,6 +2,7 @@
 
 import { TabNavigation } from '@/components/layout/TabNavigation'
 import { Button } from '@/components/ui/button'
+import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -142,7 +143,8 @@ const AppLayout = memo(({
   }
 
   return (
-    <div className="flex h-screen flex-col">
+    <GlobalErrorBoundary>
+      <div className="flex h-screen flex-col">
       {/* Top Header */}
       <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4 md:px-6">
         <div className="flex items-center gap-4">
@@ -245,7 +247,8 @@ const AppLayout = memo(({
           {children}
         </div>
       </main>
-    </div>
+      </div>
+    </GlobalErrorBoundary>
   )
 })
 

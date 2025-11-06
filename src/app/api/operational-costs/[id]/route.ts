@@ -36,7 +36,7 @@ export async function GET(
     // Fetch operational cost
     const { data, error } = await supabase
       .from('operational_costs')
-      .select('*')
+      .select('id, user_id, name, amount, frequency, category, created_at, updated_at')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()

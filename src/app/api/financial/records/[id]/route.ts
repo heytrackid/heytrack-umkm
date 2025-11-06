@@ -29,7 +29,7 @@ export async function GET(
     // Fetch financial record
     const { data, error } = await supabase
       .from('financial_records')
-      .select('*')
+      .select('id, user_id, date, description, category, amount, reference, type, created_at, created_by')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()

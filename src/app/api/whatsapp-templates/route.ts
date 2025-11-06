@@ -30,7 +30,7 @@ async function GET(request: NextRequest) {
     // 3. Query templates
     let query = supabase
       .from('whatsapp_templates')
-      .select('*')
+      .select('id, user_id, name, message, is_active, created_at, updated_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 

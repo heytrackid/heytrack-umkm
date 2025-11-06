@@ -172,7 +172,7 @@ async function POST(request: NextRequest) {
     const { data: sale, error } = await supabase
       .from('financial_records')
       .insert(insertPayload)
-      .select('*')
+      .select('id, user_id, date, description, category, amount, reference, type, created_at, created_by')
       .single()
 
     if (error) {

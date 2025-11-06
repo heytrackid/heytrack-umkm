@@ -39,7 +39,7 @@ export async function GET(
     // Fetch customer with RLS
     const { data, error } = await supabase
       .from('customers')
-      .select('*')
+      .select('id, user_id, name, email, phone, address, created_at, updated_at')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()

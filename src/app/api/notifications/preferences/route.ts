@@ -21,7 +21,7 @@ async function getHandler(_request: NextRequest) {
     // Get user preferences
     const { data, error } = await supabase
       .from('notification_preferences')
-      .select('*')
+      .select('id, user_id, email_notifications, push_notifications, sms_notifications, created_at, updated_at')
       .eq('user_id', user.id)
       .single()
 

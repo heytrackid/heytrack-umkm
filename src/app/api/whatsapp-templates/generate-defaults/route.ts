@@ -54,7 +54,7 @@ export async function POST() {
     // 4. Fetch created templates
     const { data: templates, error: fetchError } = await supabase
       .from('whatsapp_templates')
-      .select('*')
+      .select('id, user_id, name, message, is_active, created_at, updated_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
 

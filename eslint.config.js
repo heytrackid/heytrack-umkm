@@ -17,10 +17,9 @@ export default [
       sourceType: "module",
       parser: ts.parser,
       parserOptions: {
-        // ⚡ PERFORMANCE: Disable projectService for faster linting
-        // Type-aware rules are disabled to improve performance
-        // Use `npm run type-check` for full TypeScript checking
-        projectService: false,
+        // 🔒 STRICT MODE: Enable projectService for type-aware rules
+        // Provides stricter type checking at the cost of slower linting
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -101,11 +100,11 @@ export default [
       ],
       "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
       "@typescript-eslint/array-type": ["error", { default: "array-simple" }],
-      "@typescript-eslint/no-inferrable-types": "error",
-      // "@typescript-eslint/no-unnecessary-type-assertion": "error", // Requires type info
-      // "@typescript-eslint/prefer-nullish-coalescing": "error", // Requires type info
-      // "@typescript-eslint/prefer-optional-chain": "error", // Requires type info
-      "@typescript-eslint/no-non-null-assertion": "error",
+       "@typescript-eslint/no-inferrable-types": "error",
+       "@typescript-eslint/no-unnecessary-type-assertion": "error",
+       "@typescript-eslint/prefer-nullish-coalescing": "error",
+       "@typescript-eslint/prefer-optional-chain": "error",
+       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/ban-ts-comment": [
         "error",
         {
@@ -115,14 +114,13 @@ export default [
           minimumDescriptionLength: 10,
         },
       ],
-      // ⚡ PERFORMANCE: Type-aware rules disabled for faster linting
-      // These rules require TypeScript type information which slows down ESLint significantly
-      // Use `npm run type-check` for full TypeScript type checking instead
-      // "@typescript-eslint/no-floating-promises": "error",
-      // "@typescript-eslint/await-thenable": "error",
-      "@typescript-eslint/no-unsafe-declaration-merging": "error",
-      "@typescript-eslint/no-empty-object-type": "error",
-      // "@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: false }],
+       // 🔒 STRICT MODE: Type-aware rules enabled for maximum code quality
+       // These rules provide stricter type checking (linting will be slower)
+       "@typescript-eslint/no-floating-promises": "error",
+       "@typescript-eslint/await-thenable": "error",
+       "@typescript-eslint/no-unsafe-declaration-merging": "error",
+       "@typescript-eslint/no-empty-object-type": "error",
+       "@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: false }],
 
       // ============================================
       // REACT RULES
@@ -165,10 +163,10 @@ export default [
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "error",
 
-      // ============================================
-      // HEYTRACK CUSTOM RULES
-      // ============================================
-      // "heytrack/consistent-error-handling": "error", // Disabled - needs update for ESLint 9
+       // ============================================
+       // HEYTRACK CUSTOM RULES
+       // ============================================
+       // "heytrack/consistent-error-handling": "error", // Disabled - needs update for ESLint 9 API
 
       // ============================================
       // CODE STYLE & CONSISTENCY
@@ -199,13 +197,13 @@ export default [
   // ============================================
   // API ROUTES SPECIFIC RULES
   // ============================================
-  {
-    files: ["src/app/api/**/*.ts"],
-    rules: {
-      // "@typescript-eslint/no-floating-promises": "error", // Disabled for performance
-      "require-await": "error",
-    },
-  },
+   {
+     files: ["src/app/api/**/*.ts"],
+     rules: {
+       "@typescript-eslint/no-floating-promises": "error",
+       "require-await": "error",
+     },
+   },
 
   // ============================================
   // SERVER COMPONENTS RULES

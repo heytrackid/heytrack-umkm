@@ -28,7 +28,7 @@ async function GET(request: NextRequest) {
     // Build query
     let query = supabase
       .from('notifications')
-      .select('*')
+      .select('id, user_id, title, message, type, is_read, created_at, updated_at, metadata')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(limit)

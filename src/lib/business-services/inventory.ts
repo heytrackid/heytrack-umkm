@@ -34,7 +34,7 @@ export class InventoryServices {
       // Get all ingredients with stock information
       const { data: ingredients, error } = await supabase
         .from('ingredients')
-        .select('*')
+        .select('id, user_id, name, unit, current_stock, reorder_point, is_active, created_at, updated_at')
         .eq('is_active', true)
 
       if (error) {
@@ -103,7 +103,7 @@ export class InventoryServices {
 
       const { data: allIngredients, error } = await supabase
         .from('ingredients')
-        .select('*')
+        .select('id, user_id, name, unit, current_stock, reorder_point, is_active, created_at, updated_at')
         .eq('is_active', true)
       
       if (error) {
@@ -177,7 +177,7 @@ export class InventoryServices {
 
       const { data: ingredients, error } = await supabase
         .from('ingredients')
-        .select('*')
+        .select('id, user_id, name, unit, current_stock, reorder_point, is_active, created_at, updated_at')
         .eq('is_active', true)
 
       if (error) {

@@ -2,7 +2,7 @@
  
 
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, memo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSettings } from '@/contexts/settings-context'
 import { useIngredients } from '@/hooks'
@@ -53,7 +53,7 @@ interface EnhancedIngredientsPageProps {
     onAdd?: () => void
 }
 
-export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps = {}) => {
+const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProps = {}) => {
     const router = useRouter()
     const { formatCurrency } = useSettings()
     const { data: ingredients, loading, refetch } = useIngredients({ realtime: true })
@@ -149,19 +149,19 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
     }
 
     // Handlers
-    const handleEdit = (ingredient: Ingredient) => {
+    const handleEdit = useCallback((ingredient: Ingredient) => {
         setEditingIngredient(ingredient)
         setShowFormDialog(true)
-    }
+    }, [])
 
-    const handleAdd = () => {
+    const handleAdd = useCallback(() => {
         if (onAdd) {
             onAdd()
         } else {
             setEditingIngredient(undefined)
             setShowFormDialog(true)
         }
-    }
+    }, [onAdd])
 
     const handleDelete = (ingredient: Ingredient) => {
         setSelectedIngredient(ingredient)
@@ -512,3 +512,5 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
         </div>
     )
 }
+
+export const EnhancedIngredientsPage = memo(EnhancedIngredientsPageComponent)

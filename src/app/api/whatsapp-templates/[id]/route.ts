@@ -35,7 +35,7 @@ export async function GET(
     // 2. Query template with ownership check
     const { data, error } = await supabase
       .from('whatsapp_templates')
-      .select('*')
+      .select('id, user_id, name, message, is_active, created_at, updated_at')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()

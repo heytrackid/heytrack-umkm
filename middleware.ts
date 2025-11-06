@@ -1,6 +1,5 @@
 import { generateNonce, getStrictCSP } from '@/lib/csp'
 import { middlewareLogger } from '@/lib/logger'
-import { apiRatelimit, authRatelimit } from '@/lib/rate-limit'
 import { updateSession } from '@/utils/supabase/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
@@ -117,64 +116,15 @@ export async function middleware(request: NextRequest) {
     // Add security headers
     addSecurityHeaders(response, nonce, isDev)
 
-    // Rate limiting for API routes
+    // API routes (relying on Supabase rate limits)
     if (request.nextUrl.pathname.startsWith('/api/')) {
-      const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? '127.0.0.1'
-
-      try {
-        const { success } = await apiRatelimit.limit(ip)
-        if (!success) {
-          middlewareLogger.warn({ ip, pathname: request.nextUrl.pathname }, 'API rate limit exceeded')
-          return NextResponse.json(
-            { error: 'Too many requests. Please try again later.' },
-            {
-              status: 429,
-              headers: {
-                'Retry-After': '60',
-                'X-RateLimit-Limit': '100',
-                'X-RateLimit-Remaining': '0',
-                'X-RateLimit-Reset': new Date(Date.now() + 60000).toISOString(),
-              }
-            }
-          )
-        }
-      } catch (error) {
-        middlewareLogger.error({ error, ip }, 'Rate limiting error')
-        // Continue without rate limiting if Redis fails
-      }
-
       response.headers.set('Access-Control-Allow-Origin', isDev ? 'http://localhost:3000' : `https://${process.env.NEXT_PUBLIC_APP_DOMAIN}`);
       response.headers.set('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
       response.headers.set('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
       response.headers.set('Access-Control-Allow-Credentials', 'true');
     }
 
-    // Rate limiting for auth routes
-    if (request.nextUrl.pathname.startsWith('/auth/') || request.nextUrl.pathname.includes('/api/auth/')) {
-      const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? '127.0.0.1'
 
-      try {
-        const { success } = await authRatelimit.limit(ip)
-        if (!success) {
-          middlewareLogger.warn({ ip, pathname: request.nextUrl.pathname }, 'Auth rate limit exceeded')
-          return NextResponse.json(
-            { error: 'Too many authentication attempts. Please try again later.' },
-            {
-              status: 429,
-              headers: {
-                'Retry-After': '60',
-                'X-RateLimit-Limit': '5',
-                'X-RateLimit-Remaining': '0',
-                'X-RateLimit-Reset': new Date(Date.now() + 60000).toISOString(),
-              }
-            }
-          )
-        }
-      } catch (error) {
-        middlewareLogger.error({ error, ip }, 'Auth rate limiting error')
-        // Continue without rate limiting if Redis fails
-      }
-    }
 
     const { pathname } = request.nextUrl
 

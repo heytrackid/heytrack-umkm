@@ -32,6 +32,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       allowedOrigins: ['localhost:3000', '127.0.0.1:3000', appDomain].filter(Boolean),
     },
+    optimizeCss: true,
     optimizePackageImports: [
       'lucide-react',
       '@supabase/supabase-js',

@@ -175,7 +175,7 @@ async function GET(request: NextRequest) {
     // Fetch recent errors from database
     const { data: errors, error: queryError } = await supabase
       .from('error_logs')
-      .select('*')
+      .select('id, user_id, message, stack, timestamp, url, user_agent, ip_address, metadata')
       .order('timestamp', { ascending: false })
       .range(offset, offset + limit - 1)
 

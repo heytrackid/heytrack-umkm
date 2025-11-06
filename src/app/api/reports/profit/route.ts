@@ -114,7 +114,7 @@ async function getHandler(request: NextRequest) {
     // Get all expenses (non-revenue) in the period for operating costs
     const { data: expenses, error: expensesError } = await supabase
       .from('financial_records')
-      .select('*')
+      .select('id, user_id, date, description, category, amount, reference, type, created_at, created_by')
       .eq('user_id', user.id)
       .eq('type', 'EXPENSE')
       .gte('date', startDate)
