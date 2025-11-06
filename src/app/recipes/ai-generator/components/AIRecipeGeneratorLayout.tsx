@@ -17,7 +17,7 @@ import type { GeneratedRecipe, AvailableIngredient } from './types'
 
 import { HppEstimator } from './HppEstimator'
 import { SmartIngredientSelector } from './SmartIngredientSelector'
-import { saveDraft, loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
+import { loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
 
 import GeneratedRecipeDisplay from './GeneratedRecipeDisplay'
 import RecipePreviewCard from './RecipePreviewCard'
@@ -76,40 +76,27 @@ const AIRecipeGeneratorPage = () => {
     }
   }, [isAuthLoading, isAuthenticated, router, toast])
 
-  // Sprint 1: Load draft on mount
-  useEffect(() => {
-    const draft = loadDraft()
-    if (draft) {
-      toast({
-        title: '📝 Draft ditemukan!',
-        description: 'Mau lanjutin draft sebelumnya?',
-        action: (
-          <Button size="sm" onClick={() => {
-            setProductName(draft.productName)
-            setProductType(draft.productType)
-            setServings(draft.servings)
-            setSelectedIngredients(draft.selectedIngredients)
-            if (draft.targetPrice) { setTargetPrice(draft.targetPrice) }
-          }}>
-            Restore
-          </Button>
-        )
-      })
-    }
-  }, [toast])
-
-  // Sprint 1: Auto-save draft
-  useEffect(() => {
-    if (productName || selectedIngredients.length > 0) {
-      saveDraft({
-        productName,
-        productType,
-        servings,
-        selectedIngredients,
-        targetPrice
-      })
-    }
-   }, [productName, productType, servings, selectedIngredients, targetPrice])
+   // Sprint 1: Load draft on mount
+   useEffect(() => {
+     const draft = loadDraft()
+     if (draft) {
+       toast({
+         title: '📝 Draft ditemukan!',
+         description: 'Mau lanjutin draft sebelumnya?',
+         action: (
+           <Button size="sm" onClick={() => {
+             setProductName(draft.productName)
+             setProductType(draft.productType)
+             setServings(draft.servings)
+             setSelectedIngredients(draft.selectedIngredients)
+             if (draft.targetPrice) { setTargetPrice(draft.targetPrice) }
+           }}>
+             Restore
+           </Button>
+         )
+       })
+     }
+   }, [toast])
 
    const fetchIngredients = useCallback(async () => {
      const { data, error } = await supabase
@@ -140,7 +127,7 @@ const AIRecipeGeneratorPage = () => {
 
 
 
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     if (!productName || !productType || !servings) {
       toast({
         title: 'Data belum lengkap',
@@ -198,9 +185,9 @@ const AIRecipeGeneratorPage = () => {
     } finally {
       void setLoading(false)
     }
-  }
+  }, [productName, productType, servings, targetPrice, dietaryRestrictions, selectedIngredients, toast, supabase])
 
-  const handleSaveRecipe = async () => {
+  const handleSaveRecipe = useCallback(async () => {
     if (!generatedRecipe) { return }
 
     try {
@@ -278,16 +265,16 @@ const AIRecipeGeneratorPage = () => {
         title: 'Gagal menyimpan resep',
         description: (error as Error).message || 'Terjadi kesalahan',
         variant: 'destructive',
-      })
-    }
-  }
+       })
+     }
+   }, [generatedRecipe, availableIngredients, toast, supabase])
 
-  const handleGenerateAgain = () => {
+  const handleGenerateAgain = useCallback(() => {
     void setGeneratedRecipe(null)
-  }
+  }, [])
 
   // Wizard navigation
-  const canProceedToNextStep = () => {
+  const canProceedToNextStep = useCallback(() => {
     switch (currentStep) {
       case 1:
         return productName.trim().length >= 3 && productType !== '' && servings >= 1 && servings <= 100
@@ -298,21 +285,21 @@ const AIRecipeGeneratorPage = () => {
       default:
         return false
     }
-  }
+  }, [currentStep, productName, productType, servings, selectedIngredients])
 
-  const handleNextStep = () => {
+  const handleNextStep = useCallback(() => {
     if (canProceedToNextStep() && currentStep < totalSteps) {
       setCurrentStep(currentStep + 1)
     }
-  }
+  }, [canProceedToNextStep, currentStep, totalSteps])
 
-  const handlePrevStep = () => {
+  const handlePrevStep = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
     }
-  }
+  }, [currentStep])
 
-  const handleStepClick = (stepId: number) => {
+  const handleStepClick = useCallback((stepId: number) => {
     // Allow going back to previous steps
     if (stepId < currentStep) {
       setCurrentStep(stepId)
@@ -321,9 +308,9 @@ const AIRecipeGeneratorPage = () => {
     else if (stepId === currentStep + 1 && canProceedToNextStep()) {
       setCurrentStep(stepId)
     }
-  }
+   }, [currentStep, canProceedToNextStep])
 
-  const getStepClassName = (stepId: number) => {
+   const getStepClassName = (stepId: number) => {
     if (stepId < currentStep) {return 'bg-primary border-primary text-primary-foreground'}
     if (stepId === currentStep) {return 'border-primary text-primary bg-primary/10'}
     return 'border-muted-foreground/30 text-muted-foreground'

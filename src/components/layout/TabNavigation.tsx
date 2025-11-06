@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { ChevronDown, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { prefetchRoute } from '@/lib/route-loader'
 import { useRoutePreloader } from '@/hooks/use-preloader'
 
@@ -49,7 +49,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
     return items.some((item) => isActive(item.href))
   }
 
-  const handleMouseEnter = (label: string) => {
+  const handleMouseEnter = useCallback((label: string) => {
     if (isMobile) {return}
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current)
@@ -72,16 +72,16 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
         preload()
       }, 100) // Small delay to avoid prefetching on quick mouse movements
     }
-  }
+  }, [isMobile, tabs, router, preloadOnHover])
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     if (isMobile) {return}
     closeTimeoutRef.current = setTimeout(() => {
       setOpenDropdown(null)
     }, 150)
-  }
+  }, [isMobile])
 
-  const handleClick = (label: string) => {
+  const handleClick = useCallback((label: string) => {
     if (isMobile) {
       // On mobile, toggle the dropdown
       setOpenDropdown(openDropdown === label ? null : label)
@@ -89,7 +89,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
       // On desktop, if dropdown is closed, open it. If it's open, navigation happens via links in dropdown
       setOpenDropdown(openDropdown === label ? null : label)
     }
-  }
+  }, [isMobile, openDropdown])
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -98,19 +98,19 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (!scrollRef.current) {return}
     const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
     setShowLeftShadow(scrollLeft > 0)
     setShowRightShadow(scrollLeft < scrollWidth - clientWidth - 1)
-  }
+  }, [])
 
   useEffect(() => {
     handleScroll()
     const ref = scrollRef.current
     ref?.addEventListener('scroll', handleScroll)
     return () => ref?.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [handleScroll])
 
   // Update dropdown positions when they open or when the window is resized
   useEffect(() => {

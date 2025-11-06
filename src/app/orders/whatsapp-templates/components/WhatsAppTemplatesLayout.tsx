@@ -78,15 +78,15 @@ const WhatsAppTemplatesPage = () => {
         void fetchTemplates()
     }, [fetchTemplates])
 
-    const handleEdit = (template: WhatsAppTemplate) => {
+    const handleEdit = useCallback((template: WhatsAppTemplate) => {
         setEditingTemplate(template)
         setShowDialog(true)
-    }
+    }, [])
 
-    const handleDeleteRequest = (template: WhatsAppTemplate) => {
+    const handleDeleteRequest = useCallback((template: WhatsAppTemplate) => {
         setTemplateToDelete(template)
         setIsConfirmOpen(true)
-    }
+    }, [])
 
     const handleDelete = useCallback(async () => {
         if (!templateToDelete) {
@@ -125,7 +125,7 @@ const WhatsAppTemplatesPage = () => {
         }
     }, [fetchTemplates, templateToDelete, toast])
 
-    const handleToggleDefault = async (template: WhatsAppTemplate) => {
+    const handleToggleDefault = useCallback(async (template: WhatsAppTemplate) => {
         try {
             const response = await fetch(`/api/whatsapp-templates/${template.id}`, {
                 method: 'PUT',
@@ -158,14 +158,14 @@ const WhatsAppTemplatesPage = () => {
                 variant: 'destructive',
             })
         }
-    }
+    }, [fetchTemplates, toast])
 
-    const handlePreview = (template: WhatsAppTemplate) => {
+    const handlePreview = useCallback((template: WhatsAppTemplate) => {
         setPreviewTemplate(template)
         setShowPreview(true)
-    }
+    }, [])
 
-    const handleDuplicate = (template: WhatsAppTemplate) => {
+    const handleDuplicate = useCallback((template: WhatsAppTemplate) => {
         setEditingTemplate({
             ...template,
             id: '', // Clear ID for new template
@@ -173,18 +173,18 @@ const WhatsAppTemplatesPage = () => {
             is_default: false
         } as WhatsAppTemplate)
         setShowDialog(true)
-    }
+    }, [])
 
-    const handleSuccess = async () => {
+    const handleSuccess = useCallback(async () => {
         toast({
             title: 'Berhasil',
             description: editingTemplate?.id ? 'Template berhasil diupdate' : 'Template berhasil dibuat',
         })
         await fetchTemplates()
         setEditingTemplate(null)
-    }
+    }, [fetchTemplates, toast, editingTemplate])
 
-    const handleGenerateDefaults = async () => {
+    const handleGenerateDefaults = useCallback(async () => {
         try {
             setGeneratingDefaults(true)
             const response = await fetch('/api/whatsapp-templates/generate-defaults', {
@@ -217,7 +217,7 @@ const WhatsAppTemplatesPage = () => {
         } finally {
             setGeneratingDefaults(false)
         }
-    }
+    }, [fetchTemplates, toast])
 
     // Show loading state while auth is initializing
     if (isAuthLoading) {

@@ -85,9 +85,15 @@ async function GET(request: NextRequest) {
 // POST /api/ingredients - Create new bahan baku
 async function POST(request: NextRequest) {
   try {
-    // The request body is already validated and sanitized by the security middleware
-    const body = await request.json()
-    
+    // Parse and validate request body
+    let body: unknown
+    try {
+      body = await request.json()
+    } catch (parseError) {
+      apiLogger.error({ error: parseError }, 'Failed to parse request body')
+      return createErrorResponse('Invalid JSON in request body', 400)
+    }
+
     // Validate request body
     const validation = IngredientInsertSchema.safeParse(body)
     if (!validation.success) {

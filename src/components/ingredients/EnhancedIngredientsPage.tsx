@@ -112,10 +112,10 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
     const paginatedData = useMemo(() => filteredData.slice(pagination.startIndex, pagination.endIndex), [filteredData, pagination.startIndex, pagination.endIndex])
 
     // Update page size
-    const handlePageSizeChange = (newSize: number) => {
+    const handlePageSizeChange = useCallback((newSize: number) => {
         setPageSize(newSize)
         pagination.setPageSize(newSize)
-    }
+    }, [pagination])
 
     // Create filter badges
     const activeFilters = createFilterBadges(
@@ -142,11 +142,11 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
         }
     )
 
-    const handleClearAllFilters = () => {
+    const handleClearAllFilters = useCallback(() => {
         setSearchTerm('')
         setStockFilter('all')
         setCategoryFilter('all')
-    }
+    }, [])
 
     // Handlers
     const handleEdit = useCallback((ingredient: Ingredient) => {
@@ -163,22 +163,22 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
         }
     }, [onAdd])
 
-    const handleDelete = (ingredient: Ingredient) => {
+    const handleDelete = useCallback((ingredient: Ingredient) => {
         setSelectedIngredient(ingredient)
         setIsDeleteDialogOpen(true)
-    }
+    }, [])
 
-    const handleQuickBuy = (ingredient: Ingredient) => {
+    const handleQuickBuy = useCallback((ingredient: Ingredient) => {
         router.push(`/ingredients/purchases?ingredient=${ingredient.id}`)
-    }
+    }, [router])
 
-    const handleConfirmDelete = async () => {
+    const handleConfirmDelete = useCallback(async () => {
         if (!selectedIngredient) { return }
 
         try {
             const deletedItem = selectedIngredient
             await deleteIngredient(selectedIngredient.id)
-            
+
             // Enhanced toast with undo functionality
             undoableToast({
                 title: `${deletedItem.name} dihapus`,
@@ -192,14 +192,14 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                 },
                 duration: 6000
             })
-            
+
             setIsDeleteDialogOpen(false)
             setSelectedIngredient(null)
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Gagal menghapus bahan baku'
             toast(genericErrorToast('menghapus bahan baku', message))
         }
-    }
+    }, [selectedIngredient, deleteIngredient, toast])
 
     const clearFilters = () => {
         setSearchTerm('')

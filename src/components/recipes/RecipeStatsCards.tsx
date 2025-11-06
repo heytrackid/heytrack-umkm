@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 'use client'
 
 import { Card, CardContent } from '@/components/ui/card'
@@ -36,7 +35,14 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
             : 0
 
     // Convert average to difficulty label
-    const avgDifficulty = avgDifficultyNum <= 1.5 ? 'EASY' : avgDifficultyNum <= 2.5 ? 'MEDIUM' : 'HARD'
+    let avgDifficulty: string
+    if (avgDifficultyNum <= 1.5) {
+      avgDifficulty = 'EASY'
+    } else if (avgDifficultyNum <= 2.5) {
+      avgDifficulty = 'MEDIUM'
+    } else {
+      avgDifficulty = 'HARD'
+    }
 
     // Find most common category
     const categoryCount = recipes.reduce(

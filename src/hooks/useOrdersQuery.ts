@@ -139,9 +139,9 @@ export function useOrderStats(enabled = true) {
         completed: data.filter(order => order.status === 'READY').length,
         delivered: data.filter(order => order.status === 'DELIVERED').length,
         cancelled: data.filter(order => order.status === 'CANCELLED').length,
-        totalRevenue: data.reduce((sum, order) => sum + (order.total_amount || 0), 0),
+        totalRevenue: data.reduce((sum, order) => sum + (order.total_amount ?? 0), 0),
         recentOrders: data
-          .sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime())
+          .sort((a, b) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime())
           .slice(0, 5)
       }
 

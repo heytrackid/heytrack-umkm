@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -102,15 +102,15 @@ export const OrdersListWithPagination = () => {
     }, [pagination.page, pagination.pageSize, searchTerm, statusFilter])
 
     // Handlers
-    const handleSearch = (value: string) => {
+    const handleSearch = useCallback((value: string) => {
         setSearchTerm(value)
         pagination.setPage(1) // Reset to first page on search
-    }
+    }, [pagination])
 
-    const handleStatusFilter = (value: string) => {
+    const handleStatusFilter = useCallback((value: string) => {
         setStatusFilter(value as OrderStatus | 'all')
         pagination.setPage(1) // Reset to first page on filter
-    }
+    }, [pagination])
 
     const getStatusBadge = (status: OrderStatus) => {
         const statusConfig: Record<OrderStatus, { label: string; icon: React.ComponentType<{ className?: string }>; className: string }> = {

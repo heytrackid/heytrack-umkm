@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 'use client'
 
 import { Badge } from '@/components/ui/badge'
@@ -309,8 +308,22 @@ export const ActionButtons = ({
   size = "sm",
   variant = "horizontal"
 }: ActionButtonsProps) => {
-  const buttonSize = size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'default'
-  const iconSize = size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'
+  let buttonSize: 'sm' | 'lg' | 'default'
+  let iconSize: string
+
+  switch (size) {
+    case 'sm':
+      buttonSize = 'sm'
+      iconSize = 'h-4 w-4'
+      break
+    case 'lg':
+      buttonSize = 'lg'
+      iconSize = 'h-5 w-5'
+      break
+    default:
+      buttonSize = 'default'
+      iconSize = 'h-4 w-4'
+  }
 
   if (variant === 'dropdown') {
     // Dropdown variant - implement later if needed

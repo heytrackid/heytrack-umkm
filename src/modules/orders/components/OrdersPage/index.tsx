@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { uiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { Calendar, MessageCircle, Plus, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { arrayCalculations } from '@/lib/performance-optimized'
 import dynamic from 'next/dynamic'
@@ -141,22 +141,22 @@ const OrdersPage = (_props: OrdersPageProps) => {
     const [showOrderDetail, setShowOrderDetail] = useState(false)
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
 
-    const handleCreateOrder = () => {
+    const handleCreateOrder = useCallback(() => {
         setSelectedOrder(null)
         setShowOrderForm(true)
-    }
+    }, [])
 
-    const handleEditOrder = (order: Order) => {
+    const handleEditOrder = useCallback((order: Order) => {
         setSelectedOrder(order)
         setShowOrderForm(true)
-    }
+    }, [])
 
-    const handleViewOrder = (order: Order) => {
+    const handleViewOrder = useCallback((order: Order) => {
         setSelectedOrder(order)
         setShowOrderDetail(true)
-    }
+    }, [])
 
-    const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
+    const handleUpdateStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
         try {
             await fetch(`/api/orders/${orderId}`, {
                 method: 'PUT',
@@ -169,11 +169,11 @@ const OrdersPage = (_props: OrdersPageProps) => {
             const message = getErrorMessage(error)
             uiLogger.error({ error: message }, 'Failed to update status')
         }
-    }
+    }, [queryClient])
 
-    const handleClearFilters = () => {
+    const handleClearFilters = useCallback(() => {
         setFilters({ status: [], payment_status: [], date_from: '', date_to: '', customer_search: '' })
-    }
+    }, [])
 
     // Loading state
     if (loading && orders.length === 0) {

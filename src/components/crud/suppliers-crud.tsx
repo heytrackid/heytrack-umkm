@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSuppliers } from '@/hooks';
@@ -83,7 +83,7 @@ export const SuppliersCRUD = () => {
     },
   ];
 
-  const handleCreate = () => {
+  const handleCreate = useCallback(() => {
     createForm.reset({
       name: '',
       contact_person: '',
@@ -93,9 +93,9 @@ export const SuppliersCRUD = () => {
       notes: '',
     })
     void setIsCreateModalOpen(true)
-  }
+  }, [createForm])
 
-  const handleEdit = (supplier: Supplier) => {
+  const handleEdit = useCallback((supplier: Supplier) => {
     void setSelectedSupplier(supplier)
     editForm.reset({
       name: supplier.name,
@@ -106,14 +106,14 @@ export const SuppliersCRUD = () => {
       notes: supplier.notes ?? '',
     })
     void setIsEditModalOpen(true)
-  }
+  }, [editForm])
 
-  const handleDelete = (supplier: Supplier) => {
+  const handleDelete = useCallback((supplier: Supplier) => {
     void setSelectedSupplier(supplier)
     void setIsDeleteDialogOpen(true)
-  }
+  }, [])
 
-  const handleSubmitCreate = async (data: Record<string, unknown>) => {
+  const handleSubmitCreate = useCallback(async (data: Record<string, unknown>) => {
     try {
       await createSupplier(data as Insert<'suppliers'>)
       void setIsCreateModalOpen(false)
@@ -128,9 +128,9 @@ export const SuppliersCRUD = () => {
     } catch (err: unknown) {
       logger.error({ err }, 'Failed to create supplier:')
     }
-  }
+  }, [createSupplier, createForm])
 
-  const handleSubmitEdit = async (data: Record<string, unknown>) => {
+  const handleSubmitEdit = useCallback(async (data: Record<string, unknown>) => {
     if (!selectedSupplier) { return }
 
     try {
@@ -148,9 +148,9 @@ export const SuppliersCRUD = () => {
     } catch (err: unknown) {
       logger.error({ err }, 'Failed to update supplier:')
     }
-  }
+  }, [selectedSupplier, updateSupplier, editForm])
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!selectedSupplier) { return }
 
     try {
@@ -160,7 +160,7 @@ export const SuppliersCRUD = () => {
     } catch (err: unknown) {
       logger.error({ err }, 'Failed to delete supplier:');
     }
-  }
+  }, [selectedSupplier, deleteSupplier])
 
 
 

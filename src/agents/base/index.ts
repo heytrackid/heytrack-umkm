@@ -98,7 +98,11 @@ export function createAgentContext(
     correlationId,
     userId,
     sessionId,
-    featureFlags: {}, // TODO: Load from feature flags service
+    featureFlags: {
+      aiChatbot: process.env.NEXT_PUBLIC_ENABLE_AI_CHATBOT === 'true',
+      advancedAnalytics: process.env.NEXT_PUBLIC_ENABLE_ADVANCED_ANALYTICS === 'true',
+      automation: process.env.NEXT_PUBLIC_ENABLE_AUTOMATION === 'true',
+    },
     cache: new Map<string, unknown>(),
     telemetry: {
       startTime: new Date(),

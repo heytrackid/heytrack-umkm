@@ -1,9 +1,7 @@
 import type { Row } from '@/types/database'
 
-
-// import { useState, useEffect } from 'react'
+import { useSupabaseQuery } from '@/hooks/supabase'
 type Recipe = Row<'recipes'>
-// import { useSupabaseCRUD } from '@/hooks'
 
 interface UseRecipesDataOptions {
   category?: string
@@ -27,11 +25,11 @@ export function useRecipesData(options: UseRecipesDataOptions = {}) {
     filters.is_active = true
   }
 
-  // TODO: Implement proper data fetching
-  const recipes: Recipe[] = []
-  const loading = false
-  const error = null
-  const refetch = () => Promise.resolve()
+  // Implement proper data fetching
+  const { data: recipes, loading, error, refetch } = useSupabaseQuery('recipes', {
+    filter: filters,
+    orderBy: { column: 'created_at', ascending: false },
+  })
 
   // Client-side filtering for search term
   const filteredRecipes = recipes.filter((recipe: Recipe) => {

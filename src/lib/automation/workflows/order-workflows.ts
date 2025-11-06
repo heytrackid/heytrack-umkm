@@ -9,12 +9,7 @@ import type { WorkflowContext, WorkflowResult } from '@/types/features/automatio
  * Workflow automation handlers for order-related events
  */
 
-// import { triggerWorkflow } from '@/lib/automation/workflows' TODO: benerin ini
-
-// Temporary stub for triggerWorkflow
-const triggerWorkflow = (_workflow: string, _context: unknown) => {
-  automationLogger.warn('triggerWorkflow stub called')
-}
+import { triggerWorkflow } from './index'
 
 type CustomerRow = Row<'customers'>
 type OrderRow = Row<'orders'>
@@ -450,7 +445,7 @@ export class OrderWorkflowHandlers {
         // Check for low stock alerts
         const minStock = Number(ingredient.min_stock ?? 0)
         if (newStock <= minStock && newStock > 0) {
-          triggerWorkflow('inventory.low_stock', {
+          await triggerWorkflow('inventory.low_stock', ingredient.id, {
             ingredient: {
               id: ingredient.id,
               name: ingredient.name,
@@ -463,7 +458,7 @@ export class OrderWorkflowHandlers {
         }
 
         if (newStock <= 0) {
-          triggerWorkflow('inventory.out_of_stock', {
+          await triggerWorkflow('inventory.out_of_stock', ingredient.id, {
             ingredient: {
               id: ingredient.id,
               name: ingredient.name,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { useVirtualizer } from '@tanstack/react-virtual'
@@ -92,7 +92,7 @@ export const NotificationList = ({
         overscan: 5,
     })
 
-    const handleNotificationClick = (notification: Notification) => {
+    const handleNotificationClick = useCallback((notification: Notification) => {
         if (!notification.is_read) {
             onNotificationUpdate(notification.id, { is_read: true })
         }
@@ -100,17 +100,17 @@ export const NotificationList = ({
         if (notification.action_url) {
             window.location.href = notification.action_url
         }
-    }
+    }, [onNotificationUpdate])
 
-    const handleDismiss = (e: React.MouseEvent, notificationId: string) => {
+    const handleDismiss = useCallback((e: React.MouseEvent, notificationId: string) => {
         e.stopPropagation()
         onNotificationUpdate(notificationId, { is_dismissed: true })
-    }
+    }, [onNotificationUpdate])
 
-    const handleMarkAsRead = (e: React.MouseEvent, notificationId: string) => {
+    const handleMarkAsRead = useCallback((e: React.MouseEvent, notificationId: string) => {
         e.stopPropagation()
         onNotificationUpdate(notificationId, { is_read: true })
-    }
+    }, [onNotificationUpdate])
 
     return (
         <div className="flex flex-col h-[500px]">
@@ -237,7 +237,7 @@ export const NotificationList = ({
                                                                 </h4>
                                                             </div>
                                                             <span className="text-xs text-muted-foreground flex-shrink-0">
-                                                                {formatDistanceToNow(new Date(notification.created_at || new Date()), {
+                                                                {formatDistanceToNow(new Date(notification.created_at ?? new Date()), {
                                                                     addSuffix: true,
                                                                     locale: idLocale
                                                                 })}

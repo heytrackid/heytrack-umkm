@@ -8,7 +8,7 @@ import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'
 import type { OrdersTable as OrdersTableRow } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { OrderDetailView } from './OrderDetailView'
 import { OrderForm } from './OrderForm'
 
@@ -56,12 +56,12 @@ export const OrdersTableView = () => {
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
 
-  const handleViewOrder = (order: Order) => {
+  const handleViewOrder = useCallback((order: Order) => {
     setSelectedOrder(order)
     setShowOrderDetail(true)
-  }
+  }, [])
 
-  const handleEditOrder = (order: Order) => {
+  const handleEditOrder = useCallback((order: Order) => {
     // Convert Order to OrderWithItems
     const orderWithItems: OrderWithItems = {
       ...order,
@@ -69,7 +69,7 @@ export const OrdersTableView = () => {
     }
     setEditingOrder(orderWithItems)
     setShowOrderForm(true)
-  }
+  }, [])
 
   // ✅ Delete mutation
   const deleteMutation = useMutation({
@@ -94,9 +94,9 @@ export const OrdersTableView = () => {
     }
   })
 
-  const handleDeleteOrder = async (order: Order) => {
+  const handleDeleteOrder = useCallback(async (order: Order) => {
     await deleteMutation.mutateAsync(order.id)
-  }
+  }, [deleteMutation])
 
   // ✅ Update status mutation
   const updateStatusMutation = useMutation({
@@ -131,11 +131,11 @@ export const OrdersTableView = () => {
     }
   })
 
-  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+  const handleUpdateStatus = useCallback(async (orderId: string, newStatus: string) => {
     await updateStatusMutation.mutateAsync({ orderId, newStatus })
-  }
+  }, [updateStatusMutation])
 
-  const handleBulkAction = async (action: string, orderIds: string[]) => {
+  const handleBulkAction = useCallback(async (action: string, orderIds: string[]) => {
     logger.info({ action, orderCount: orderIds.length }, 'Bulk action triggered')
 
     switch (action) {
@@ -187,7 +187,7 @@ export const OrdersTableView = () => {
       default:
         logger.warn({ action }, 'Unknown bulk action')
     }
-  }
+  }, [handleUpdateStatus, handleDeleteOrder, orders])
 
   // Prevent hydration mismatch
   if (!isMounted) {

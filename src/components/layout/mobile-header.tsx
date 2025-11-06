@@ -24,7 +24,7 @@ import {
     X
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { type FormEvent, type ReactNode, useEffect, useState } from 'react'
+import { type FormEvent, type ReactNode, useCallback, useEffect, useState } from 'react'
 
 interface MobileHeaderProps {
   title?: string
@@ -91,19 +91,19 @@ const MobileHeader = ({
     return () => subscription.unsubscribe()
   }, [supabase.auth])
 
-  const handleSearchSubmit = (e: FormEvent) => {
+  const handleSearchSubmit = useCallback((e: FormEvent) => {
     e.preventDefault()
     if (onSearch) {
       onSearch(searchQuery)
     }
-  }
+  }, [onSearch, searchQuery])
 
-  const handleSearchToggle = () => {
+  const handleSearchToggle = useCallback(() => {
     void setIsSearchExpanded(!isSearchExpanded)
     if (isSearchExpanded) {
       void setSearchQuery('')
     }
-  }
+  }, [isSearchExpanded])
 
   // Auto-collapse search on outside click
   useEffect(() => {

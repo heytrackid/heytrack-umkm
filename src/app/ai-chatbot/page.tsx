@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/shared'
@@ -31,7 +31,7 @@ const AIChatbotPage = () => {
   const [input, setInput] = useState('')
   
 
-  const handleSendMessage = async (messageText?: string) => {
+  const handleSendMessage = useCallback(async (messageText?: string) => {
     const textToSend = (messageText ?? input).trim()
     if (textToSend.length === 0 || isLoading) { return }
 
@@ -70,11 +70,11 @@ const AIChatbotPage = () => {
     } finally {
       void setLoading(false)
     }
-  }
+  }, [input, isLoading, addMessage, setInput, setLoading, processAIQuery])
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = useCallback((suggestion: string) => {
     void handleSendMessage(suggestion)
-  }
+  }, [handleSendMessage])
 
   return (
     <AppLayout pageTitle="AI Chatbot">

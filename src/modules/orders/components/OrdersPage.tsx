@@ -22,7 +22,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
 import type { DateRange } from 'react-day-picker'
 import dynamic from 'next/dynamic'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 
 const logger = createClientLogger('OrdersPage')
 
@@ -156,22 +156,22 @@ const OrdersPage = (_props: OrdersPageProps) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
 
-  const handleCreateOrder = () => {
+  const handleCreateOrder = useCallback(() => {
     setSelectedOrder(null)
     setShowOrderForm(true)
-  }
+  }, [])
 
-  const handleEditOrder = (order: Order) => {
+  const handleEditOrder = useCallback((order: Order) => {
     setSelectedOrder(order)
     setShowOrderForm(true)
-  }
+  }, [])
 
-  const handleViewOrder = (order: Order) => {
+  const handleViewOrder = useCallback((order: Order) => {
     setSelectedOrder(order)
     setShowOrderDetail(true)
-  }
+  }, [])
 
-  const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
+  const handleUpdateStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
     try {
       // Update status via API
       await fetch(`/api/orders/${orderId}`, {
@@ -186,7 +186,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
       const message = getErrorMessage(error)
       logger.error({ error: message }, 'Failed to update status')
     }
-  }
+  }, [])
 
   // Only show loading skeleton on initial load (when no data yet)
   if (loading && orders.length === 0) {

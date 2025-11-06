@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -122,10 +122,10 @@ export const EnhancedRecipesPage = () => {
     const paginatedData = useMemo(() => filteredData.slice(pagination.startIndex, pagination.endIndex), [filteredData, pagination.startIndex, pagination.endIndex])
 
     // Update page size
-    const handlePageSizeChange = (newSize: number) => {
+    const handlePageSizeChange = useCallback((newSize: number) => {
         setPageSize(newSize)
         pagination.setPageSize(newSize)
-    }
+    }, [pagination])
 
     // Create filter badges
     const activeFilters = createFilterBadges(
@@ -152,37 +152,37 @@ export const EnhancedRecipesPage = () => {
         }
     )
 
-    const handleClearAllFilters = () => {
+    const handleClearAllFilters = useCallback(() => {
         setSearchTerm('')
         setCategoryFilter('all')
         setDifficultyFilter('all')
-    }
+    }, [])
 
     // Handlers
-    const handleView = (recipe: Recipe) => {
+    const handleView = useCallback((recipe: Recipe) => {
         router.push(`/recipes/${recipe.id}`)
-    }
+    }, [router])
 
-    const handleEdit = (recipe: Recipe) => {
+    const handleEdit = useCallback((recipe: Recipe) => {
         router.push(`/recipes/${recipe.id}/edit`)
-    }
+    }, [router])
 
-    const handleDelete = (recipe: Recipe) => {
+    const handleDelete = useCallback((recipe: Recipe) => {
         setSelectedRecipe(recipe)
         setIsDeleteDialogOpen(true)
-    }
+    }, [])
 
-    const handleCalculateHPP = (recipe: Recipe) => {
+    const handleCalculateHPP = useCallback((recipe: Recipe) => {
         router.push(`/hpp?recipe=${recipe.id}`)
-    }
+    }, [router])
 
-    const handleConfirmDelete = async () => {
+    const handleConfirmDelete = useCallback(async () => {
         if (!selectedRecipe) { return }
 
         try {
             const deletedRecipe = selectedRecipe
             await deleteRecipe(selectedRecipe.id)
-            
+
             // Enhanced toast with undo
             undoableToast({
                 title: `${deletedRecipe.name} dihapus`,
@@ -196,7 +196,7 @@ export const EnhancedRecipesPage = () => {
                 },
                 duration: 6000
             })
-            
+
             setIsDeleteDialogOpen(false)
             setSelectedRecipe(null)
         } catch (err: unknown) {
@@ -207,7 +207,7 @@ export const EnhancedRecipesPage = () => {
                 variant: 'destructive',
             })
         }
-    }
+    }, [selectedRecipe, deleteRecipe, toast])
 
     const clearFilters = () => {
         setSearchTerm('')

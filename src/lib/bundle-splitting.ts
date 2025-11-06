@@ -126,7 +126,7 @@ export class BundleMonitor {
 
       uiLogger.info('📦 Bundle Analysis started')
       scripts.forEach(script => {
-        uiLogger.info(`${script.name}: ${(script as PerformanceResourceTiming).transferSize / 1024}KB`)
+        uiLogger.info(`${script.name}: ${(script).transferSize / 1024}KB`)
       })
       uiLogger.info('📦 Bundle Analysis completed')
     }
@@ -142,7 +142,7 @@ export class BundleMonitor {
 
     return scripts.map(script => ({
       name: script.name.split('/').pop(),
-      size: (script as PerformanceResourceTiming).transferSize || 0,
+      size: (script).transferSize || 0,
       loadTime: script.responseEnd - script.requestStart,
     }))
   }
