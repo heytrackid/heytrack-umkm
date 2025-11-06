@@ -5,20 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { authLogger } from '@/lib/logger'
-import { checkBotId } from 'botid/server'
 
 export async function login(formData: FormData) {
-    // Check if the request is from a bot
-    const verification = await checkBotId({
-      advancedOptions: {
-        checkLevel: 'deepAnalysis',
-      },
-    })
-    if (verification.isBot) {
-      authLogger.warn('Login attempt blocked - bot detected')
-      return { error: 'Access denied' }
-    }
-
     const supabase = await createClient()
 
     const email = formData.get('email') as string

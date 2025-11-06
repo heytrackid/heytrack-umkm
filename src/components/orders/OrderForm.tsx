@@ -15,14 +15,14 @@ import { createClientLogger } from '@/lib/client-logger'
 const logger = createClientLogger('OrderForm')
 import { isRecipe } from '@/lib/type-guards'
 import { validateOrderData } from '@/lib/validations/form-validations'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { Order, OrderFormData, OrderFormItem, Priority } from './types'
 import { calculateOrderTotal, normalizePriority } from './utils'
 
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 
 interface OrderFormProps {

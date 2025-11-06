@@ -1,20 +1,7 @@
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type {
-
-  Database,
-  CustomersTable,
-  OrdersTable,
-  OrderItemsTable,
-  RecipesTable,
-  RecipeIngredientsTable,
-  IngredientsTable,
-  StockTransactionsInsert,
-  FinancialRecordsInsert,
-  IngredientsUpdate,
-  CustomersUpdate
-} from '@/types/database'
+import type { Row, Insert, Update, Database } from '@/types/database'
 import type { WorkflowContext, WorkflowResult } from '@/types/features/automation'
 
 /**
@@ -22,23 +9,18 @@ import type { WorkflowContext, WorkflowResult } from '@/types/features/automatio
  * Workflow automation handlers for order-related events
  */
 
-// import { triggerWorkflow } from '@/lib/automation/workflows' TODO: benerin ini
+import { triggerWorkflow } from './index'
 
-// Temporary stub for triggerWorkflow
-const triggerWorkflow = (_workflow: string, _context: unknown) => {
-  automationLogger.warn('triggerWorkflow stub called')
-}
-
-type CustomerRow = CustomersTable
-type OrderRow = OrdersTable
-type OrderItemRow = OrderItemsTable
-type RecipeRow = RecipesTable
-type RecipeIngredientRow = RecipeIngredientsTable
-type IngredientRow = IngredientsTable
-type StockTransactionInsert = StockTransactionsInsert
-type FinancialRecordInsert = FinancialRecordsInsert
-type _IngredientUpdate = IngredientsUpdate
-type CustomerUpdate = CustomersUpdate
+type CustomerRow = Row<'customers'>
+type OrderRow = Row<'orders'>
+type OrderItemRow = Row<'order_items'>
+type RecipeRow = Row<'recipes'>
+type RecipeIngredientRow = Row<'recipe_ingredients'>
+type IngredientRow = Row<'ingredients'>
+type StockTransactionInsert = Insert<'stock_transactions'>
+type FinancialRecordInsert = Insert<'financial_records'>
+type _IngredientUpdate = Update<'ingredients'>
+type CustomerUpdate = Update<'customers'>
 
 type RecipeIngredientWithIngredient = RecipeIngredientRow & {
   ingredient: IngredientRow | null
@@ -463,27 +445,37 @@ export class OrderWorkflowHandlers {
         // Check for low stock alerts
         const minStock = Number(ingredient.min_stock ?? 0)
         if (newStock <= minStock && newStock > 0) {
-          triggerWorkflow('inventory.low_stock', {
-            ingredient: {
-              id: ingredient.id,
-              name: ingredient.name,
-              unit: ingredient.unit || '',
-              min_stock: minStock
-            },
-            currentStock: newStock,
-            severity: newStock <= minStock * 0.5 ? 'critical' : 'warning'
-          })
+          try {
+            await triggerWorkflow('inventory.low_stock', ingredient.id, {
+              ingredient: {
+                id: ingredient.id,
+                name: ingredient.name,
+                unit: ingredient.unit || '',
+                min_stock: minStock
+              },
+              currentStock: newStock,
+              severity: newStock <= minStock * 0.5 ? 'critical' : 'warning'
+            })
+          } catch (error) {
+            // Log but don't fail the main operation
+            automationLogger.error({ error, ingredientId: ingredient.id }, 'Failed to trigger low stock workflow')
+          }
         }
 
         if (newStock <= 0) {
-          triggerWorkflow('inventory.out_of_stock', {
-            ingredient: {
-              id: ingredient.id,
-              name: ingredient.name,
-              unit: ingredient.unit || ''
-            },
-            previousStock: currentStock
-          })
+          try {
+            await triggerWorkflow('inventory.out_of_stock', ingredient.id, {
+              ingredient: {
+                id: ingredient.id,
+                name: ingredient.name,
+                unit: ingredient.unit || ''
+              },
+              previousStock: currentStock
+            })
+          } catch (error) {
+            // Log but don't fail the main operation
+            automationLogger.error({ error, ingredientId: ingredient.id }, 'Failed to trigger out of stock workflow')
+          }
         }
       }
     }

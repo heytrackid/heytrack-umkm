@@ -1,7 +1,9 @@
 'use client'
 
 import { TabNavigation } from '@/components/layout/TabNavigation'
+import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
 import { Button } from '@/components/ui/button'
+import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +13,9 @@ import {
 import { NotificationCenter } from '@/components/ui/notification-center'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useResponsive } from '@/hooks/responsive'
 import { uiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import {
   BarChart3,
@@ -95,15 +98,20 @@ const AppLayout = memo(({
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
 
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Responsive detection
+  const { isMobile } = useResponsive()
+
   // Notifications
   const notifications = useNotifications()
+
+  // Supabase client
+  const { supabase } = useSupabase()
 
   // Check auth state on mount
   useEffect(() => {
@@ -142,7 +150,8 @@ const AppLayout = memo(({
   }
 
   return (
-    <div className="flex h-screen flex-col">
+    <GlobalErrorBoundary>
+      <div className="flex h-screen flex-col">
       {/* Top Header */}
       <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4 md:px-6">
         <div className="flex items-center gap-4">
@@ -236,8 +245,8 @@ const AppLayout = memo(({
         </div>
       </header>
 
-      {/* Tab Navigation */}
-      <TabNavigation tabs={mainTabs} />
+      {/* Conditional Navigation: Tab Navigation for tablet/desktop, Bottom Nav for mobile */}
+      {!isMobile && <TabNavigation tabs={mainTabs} />}
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto bg-background">
@@ -245,7 +254,11 @@ const AppLayout = memo(({
           {children}
         </div>
       </main>
-    </div>
+
+      {/* Bottom Navigation for Mobile */}
+      {isMobile && <SmartBottomNav />}
+      </div>
+    </GlobalErrorBoundary>
   )
 })
 

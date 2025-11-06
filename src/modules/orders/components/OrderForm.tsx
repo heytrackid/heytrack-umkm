@@ -1,7 +1,7 @@
  
 'use client'
 
-import type { CustomersTable, RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,7 +18,7 @@ import { warningToast } from '@/hooks/use-toast'
 import { safeNumber } from '@/lib/type-guards'
 
 
-type Customer = CustomersTable
+type Customer = Row<'customers'>
 
 interface FormState {
   customer_name: string
@@ -78,9 +78,11 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
   const { data: recipesData = [] } = useQuery({
     queryKey: ['recipes', 'active'],
     queryFn: async () => {
-      const response = await fetch('/api/recipes')
+      const response = await fetch('/api/recipes', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) { throw new Error('Failed to fetch recipes') }
-      const data: RecipesTable[] = await response.json()
+      const data: Array<Row<'recipes'>> = await response.json()
       return data.filter(recipe => recipe.is_active)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -90,7 +92,9 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
   const { data: customersData = [] } = useQuery({
     queryKey: ['customers', 'all'],
     queryFn: async () => {
-      const response = await fetch('/api/customers')
+      const response = await fetch('/api/customers', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) { throw new Error('Failed to fetch customers') }
       return response.json() as Promise<Customer[]>
     },

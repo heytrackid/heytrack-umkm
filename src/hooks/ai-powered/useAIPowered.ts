@@ -53,7 +53,9 @@ export function useAIPowered() {
    */
   const checkAIAvailability = useCallback(async () => {
     try {
-      const response = await fetch('/api/ai/health')
+      const response = await fetch('/api/ai/health', {
+        credentials: 'include', // Include cookies for authentication
+      })
       return response.ok
     } catch (_error: unknown) {
       return false

@@ -2,7 +2,7 @@
  
 
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, memo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSettings } from '@/contexts/settings-context'
 import { useIngredients } from '@/hooks'
@@ -10,7 +10,7 @@ import { useSupabaseCRUD } from '@/hooks/supabase'
 import { usePagination } from '@/hooks/usePagination'
 import { useToast } from '@/hooks/use-toast'
 import { useMobile } from '@/hooks/responsive'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { StockBadge } from './StockBadge'
 import { MobileIngredientList } from './MobileIngredientCard'
 import { IngredientFormDialog } from './IngredientFormDialog'
@@ -45,7 +45,7 @@ import {
     genericErrorToast,
 } from '@/lib/ingredients-toast'
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 type StockFilter = 'all' | 'normal' | 'low' | 'out'
 type CategoryFilter = 'all' | 'Bahan Kering' | 'Bahan Basah' | 'Bumbu' | 'Protein' | 'Sayuran' | 'Buah' | 'Dairy' | 'Kemasan' | 'Lainnya'
 
@@ -53,7 +53,7 @@ interface EnhancedIngredientsPageProps {
     onAdd?: () => void
 }
 
-export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps = {}) => {
+const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProps = {}) => {
     const router = useRouter()
     const { formatCurrency } = useSettings()
     const { data: ingredients, loading, refetch } = useIngredients({ realtime: true })
@@ -112,10 +112,10 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
     const paginatedData = useMemo(() => filteredData.slice(pagination.startIndex, pagination.endIndex), [filteredData, pagination.startIndex, pagination.endIndex])
 
     // Update page size
-    const handlePageSizeChange = (newSize: number) => {
+    const handlePageSizeChange = useCallback((newSize: number) => {
         setPageSize(newSize)
         pagination.setPageSize(newSize)
-    }
+    }, [pagination])
 
     // Create filter badges
     const activeFilters = createFilterBadges(
@@ -142,43 +142,43 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
         }
     )
 
-    const handleClearAllFilters = () => {
+    const handleClearAllFilters = useCallback(() => {
         setSearchTerm('')
         setStockFilter('all')
         setCategoryFilter('all')
-    }
+    }, [])
 
     // Handlers
-    const handleEdit = (ingredient: Ingredient) => {
+    const handleEdit = useCallback((ingredient: Ingredient) => {
         setEditingIngredient(ingredient)
         setShowFormDialog(true)
-    }
+    }, [])
 
-    const handleAdd = () => {
+    const handleAdd = useCallback(() => {
         if (onAdd) {
             onAdd()
         } else {
             setEditingIngredient(undefined)
             setShowFormDialog(true)
         }
-    }
+    }, [onAdd])
 
-    const handleDelete = (ingredient: Ingredient) => {
+    const handleDelete = useCallback((ingredient: Ingredient) => {
         setSelectedIngredient(ingredient)
         setIsDeleteDialogOpen(true)
-    }
+    }, [])
 
-    const handleQuickBuy = (ingredient: Ingredient) => {
+    const handleQuickBuy = useCallback((ingredient: Ingredient) => {
         router.push(`/ingredients/purchases?ingredient=${ingredient.id}`)
-    }
+    }, [router])
 
-    const handleConfirmDelete = async () => {
+    const handleConfirmDelete = useCallback(async () => {
         if (!selectedIngredient) { return }
 
         try {
             const deletedItem = selectedIngredient
             await deleteIngredient(selectedIngredient.id)
-            
+
             // Enhanced toast with undo functionality
             undoableToast({
                 title: `${deletedItem.name} dihapus`,
@@ -192,14 +192,14 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
                 },
                 duration: 6000
             })
-            
+
             setIsDeleteDialogOpen(false)
             setSelectedIngredient(null)
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Gagal menghapus bahan baku'
             toast(genericErrorToast('menghapus bahan baku', message))
         }
-    }
+    }, [selectedIngredient, deleteIngredient, toast])
 
     const clearFilters = () => {
         setSearchTerm('')
@@ -512,3 +512,5 @@ export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps 
         </div>
     )
 }
+
+export const EnhancedIngredientsPage = memo(EnhancedIngredientsPageComponent)

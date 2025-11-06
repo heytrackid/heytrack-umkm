@@ -13,14 +13,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { FormField } from './shared/FormField'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
 import {
   RecipeFormSchema,
   type RecipeForm as RecipeFormData
 } from '@/lib/validations/domains/recipe'
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 interface RecipeFormProps {
   initialData?: Partial<RecipeFormData> & Partial<Recipe>

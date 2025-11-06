@@ -52,7 +52,9 @@ const HppDashboardWidget = () => {
       setLoading(true)
 
       // Fetch real data from API
-      const response = await fetch('/api/dashboard/hpp-summary')
+      const response = await fetch('/api/dashboard/hpp-summary', {
+        credentials: 'include', // Include cookies for authentication
+      })
 
       if (!response.ok) {
         throw new Error('Failed to fetch HPP dashboard data')

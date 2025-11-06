@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import AppLayout from '@/components/layout/app-layout'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -11,10 +11,12 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { uiLogger } from '@/lib/client-logger'
 import { type WhatsAppTemplate } from './types'
-import TemplatesTable from './TemplatesTable'
-import TemplateForm from './TemplateForm'
-import TemplatePreview from './TemplatePreview'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
+
+// Lazy load heavy components
+const TemplatesTable = lazy(() => import('./TemplatesTable'))
+const TemplateForm = lazy(() => import('./TemplateForm'))
+const TemplatePreview = lazy(() => import('./TemplatePreview'))
 
 
 const WhatsAppTemplatesPage = () => {
@@ -47,7 +49,9 @@ const WhatsAppTemplatesPage = () => {
     const fetchTemplates = useCallback(async () => {
         try {
             setLoading(true)
-            const response = await fetch('/api/whatsapp-templates')
+            const response = await fetch('/api/whatsapp-templates', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const data: WhatsAppTemplate[] = await response.json()
                 setTemplates(data)
@@ -74,15 +78,15 @@ const WhatsAppTemplatesPage = () => {
         void fetchTemplates()
     }, [fetchTemplates])
 
-    const handleEdit = (template: WhatsAppTemplate) => {
+    const handleEdit = useCallback((template: WhatsAppTemplate) => {
         setEditingTemplate(template)
         setShowDialog(true)
-    }
+    }, [])
 
-    const handleDeleteRequest = (template: WhatsAppTemplate) => {
+    const handleDeleteRequest = useCallback((template: WhatsAppTemplate) => {
         setTemplateToDelete(template)
         setIsConfirmOpen(true)
-    }
+    }, [])
 
     const handleDelete = useCallback(async () => {
         if (!templateToDelete) {
@@ -91,7 +95,8 @@ const WhatsAppTemplatesPage = () => {
 
         try {
             const response = await fetch(`/api/whatsapp-templates/${templateToDelete.id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -120,7 +125,7 @@ const WhatsAppTemplatesPage = () => {
         }
     }, [fetchTemplates, templateToDelete, toast])
 
-    const handleToggleDefault = async (template: WhatsAppTemplate) => {
+    const handleToggleDefault = useCallback(async (template: WhatsAppTemplate) => {
         try {
             const response = await fetch(`/api/whatsapp-templates/${template.id}`, {
                 method: 'PUT',
@@ -128,7 +133,8 @@ const WhatsAppTemplatesPage = () => {
                 body: JSON.stringify({
                     ...template,
                     is_default: !template.is_default
-                })
+                }),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -152,14 +158,14 @@ const WhatsAppTemplatesPage = () => {
                 variant: 'destructive',
             })
         }
-    }
+    }, [fetchTemplates, toast])
 
-    const handlePreview = (template: WhatsAppTemplate) => {
+    const handlePreview = useCallback((template: WhatsAppTemplate) => {
         setPreviewTemplate(template)
         setShowPreview(true)
-    }
+    }, [])
 
-    const handleDuplicate = (template: WhatsAppTemplate) => {
+    const handleDuplicate = useCallback((template: WhatsAppTemplate) => {
         setEditingTemplate({
             ...template,
             id: '', // Clear ID for new template
@@ -167,22 +173,23 @@ const WhatsAppTemplatesPage = () => {
             is_default: false
         } as WhatsAppTemplate)
         setShowDialog(true)
-    }
+    }, [])
 
-    const handleSuccess = async () => {
+    const handleSuccess = useCallback(async () => {
         toast({
             title: 'Berhasil',
             description: editingTemplate?.id ? 'Template berhasil diupdate' : 'Template berhasil dibuat',
         })
         await fetchTemplates()
         setEditingTemplate(null)
-    }
+    }, [fetchTemplates, toast, editingTemplate])
 
-    const handleGenerateDefaults = async () => {
+    const handleGenerateDefaults = useCallback(async () => {
         try {
             setGeneratingDefaults(true)
             const response = await fetch('/api/whatsapp-templates/generate-defaults', {
-                method: 'POST'
+                method: 'POST',
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -210,7 +217,7 @@ const WhatsAppTemplatesPage = () => {
         } finally {
             setGeneratingDefaults(false)
         }
-    }
+    }, [fetchTemplates, toast])
 
     // Show loading state while auth is initializing
     if (isAuthLoading) {
@@ -358,30 +365,36 @@ const WhatsAppTemplatesPage = () => {
                 )}
 
                 {/* Templates Table */}
-                <TemplatesTable
-                    templates={templates}
-                    loading={loading}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteRequest}
-                    onToggleDefault={handleToggleDefault}
-                    onPreview={handlePreview}
-                    onDuplicate={handleDuplicate}
-                />
+                <Suspense fallback={<div className="h-96 bg-gray-100 rounded animate-pulse" />}>
+                    <TemplatesTable
+                        templates={templates}
+                        loading={loading}
+                        onEdit={handleEdit}
+                        onDelete={handleDeleteRequest}
+                        onToggleDefault={handleToggleDefault}
+                        onPreview={handlePreview}
+                        onDuplicate={handleDuplicate}
+                    />
+                </Suspense>
 
                 {/* Template Form Dialog */}
-                <TemplateForm
-                    showDialog={showDialog}
-                    onOpenChange={setShowDialog}
-                    editingTemplate={editingTemplate}
-                    onSuccess={handleSuccess}
-                />
+                <Suspense fallback={<div />}>
+                    <TemplateForm
+                        showDialog={showDialog}
+                        onOpenChange={setShowDialog}
+                        editingTemplate={editingTemplate}
+                        onSuccess={handleSuccess}
+                    />
+                </Suspense>
 
                 {/* Template Preview Dialog */}
-                <TemplatePreview
-                    showPreview={showPreview}
-                    onOpenChange={setShowPreview}
-                    template={previewTemplate}
-                />
+                <Suspense fallback={<div />}>
+                    <TemplatePreview
+                        showPreview={showPreview}
+                        onOpenChange={setShowPreview}
+                        template={previewTemplate}
+                    />
+                </Suspense>
 
                 <ConfirmDialog
                     open={isConfirmOpen}

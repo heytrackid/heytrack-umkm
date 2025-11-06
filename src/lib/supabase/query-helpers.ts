@@ -1,5 +1,5 @@
 import type { RecipeWithIngredients} from '@/types/query-results'
-import type {RecipesTable, IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 /**
@@ -10,8 +10,8 @@ import type {RecipesTable, IngredientsTable } from '@/types/database'
  */
 
 
-type Recipe = RecipesTable
-type Ingredient = IngredientsTable
+type Recipe = Row<'recipes'>
+type Ingredient = Row<'ingredients'>
 
 /**
  * Extract first element from Supabase join result

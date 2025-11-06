@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { AlertTriangle, Package, ShoppingCart, X } from 'lucide-react'
 import { uiLogger } from '@/lib/logger'
-import type { NotificationsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 /**
  * Inventory Notifications Component
@@ -16,7 +16,7 @@ import type { NotificationsTable } from '@/types/database'
 
 
 
-type InventoryNotification = NotificationsTable & {
+type InventoryNotification = Row<'notifications'> & {
   metadata?: {
     ingredient_id?: string
     ingredient_name?: string

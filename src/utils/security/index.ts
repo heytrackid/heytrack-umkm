@@ -1,5 +1,7 @@
 
 
+import { logger } from '@/lib/logger'
+
 // Security Utilities
 // Input sanitization, validation, and security helpers
 
@@ -145,8 +147,7 @@ export class SecurityHeaders {
     // Deprecation warning shown in development only (console allowed for deprecation notices)
      
     if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
-      console.warn('SecurityHeaders.getCSPHeader is deprecated. Use getStrictCSP from @/lib/csp instead.')
+      logger.warn('SecurityHeaders.getCSPHeader is deprecated. Use getStrictCSP from @/lib/csp instead.')
     }
     const policies = [
       "default-src 'self'",

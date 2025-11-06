@@ -2,30 +2,48 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards';
 import { prepareUpdate } from '@/lib/supabase/insert-helpers';
+import { apiLogger, logError } from '@/lib/logger';
+import { withSecurity, SecurityPresets } from '@/utils/security';
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-export async function GET(
+// Apply security middleware
+const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
+const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
+const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
+
+export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }
+
+async function getHandler(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
-  
+
   // Validate UUID format
   if (!isValidUUID(id)) {
     return NextResponse.json({ error: 'Invalid sale ID format' }, { status: 400 });
   }
-  
+
   try {
+    apiLogger.info({ saleId: id }, 'GET /api/sales/[id] - Request received');
+
     const supabase = await createClient();
-    
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      logError(apiLogger, authError, 'GET /api/sales/[id] - Unauthorized');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { data: sale, error } = await supabase
       .from('financial_records')
       .select(`
         *
       `)
       .eq('id', id)
+      .eq('user_id', user.id)
       .eq('record_type', 'INCOME')
       .single();
 
@@ -36,39 +54,51 @@ export async function GET(
           { status: 404 }
         )
       }
+      logError(apiLogger, error, 'GET /api/sales/[id] - Database error');
       return NextResponse.json(
         { error: error.message || 'Failed to fetch sale record' },
         { status: 500 }
       )
     }
 
+    apiLogger.info({ saleId: id, userId: user.id }, 'GET /api/sales/[id] - Success');
     return NextResponse.json(sale);
   } catch (error: unknown) {
+    logError(apiLogger, error, 'GET /api/sales/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
-export async function PUT(
+async function putHandler(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
-  
+
   // Validate UUID format
   if (!isValidUUID(id)) {
     return NextResponse.json({ error: 'Invalid sale ID format' }, { status: 400 });
   }
-  
-  try {
-    const supabase = await createClient();
-    const body = await request.json();
 
+  try {
+    apiLogger.info({ saleId: id }, 'PUT /api/sales/[id] - Request received');
+
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      logError(apiLogger, authError, 'PUT /api/sales/[id] - Unauthorized');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
     const updatePayload = prepareUpdate('financial_records', body)
 
     const { data: sale, error } = await supabase
       .from('financial_records')
       .update(updatePayload)
       .eq('id', id)
+      .eq('user_id', user.id)
       .eq('record_type', 'INCOME')
       .select(`
         *
@@ -82,47 +112,62 @@ export async function PUT(
           { status: 404 }
         )
       }
+      logError(apiLogger, error, 'PUT /api/sales/[id] - Database error');
       return NextResponse.json(
         { error: error.message || 'Failed to update sale record' },
         { status: 500 }
       )
     }
 
+    apiLogger.info({ saleId: id, userId: user.id }, 'PUT /api/sales/[id] - Success');
     return NextResponse.json(sale);
   } catch (error: unknown) {
+    logError(apiLogger, error, 'PUT /api/sales/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
-export async function DELETE(
+async function deleteHandler(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
-  
+
   // Validate UUID format
   if (!isValidUUID(id)) {
     return NextResponse.json({ error: 'Invalid sale ID format' }, { status: 400 });
   }
-  
+
   try {
+    apiLogger.info({ saleId: id }, 'DELETE /api/sales/[id] - Request received');
+
     const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      logError(apiLogger, authError, 'DELETE /api/sales/[id] - Unauthorized');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const { error } = await supabase
       .from('financial_records')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.id)
       .eq('record_type', 'INCOME');
 
     if (error) {
+      logError(apiLogger, error, 'DELETE /api/sales/[id] - Database error');
       return NextResponse.json(
         { error: error.message || 'Failed to delete sale record' },
         { status: 500 }
       )
     }
 
+    apiLogger.info({ saleId: id, userId: user.id }, 'DELETE /api/sales/[id] - Success');
     return NextResponse.json({ message: 'Sale deleted successfully' });
   } catch (err: unknown) {
-    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
+    logError(apiLogger, err, 'DELETE /api/sales/[id] - Unexpected error');
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 });
   }
 }

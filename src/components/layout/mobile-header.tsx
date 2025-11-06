@@ -13,7 +13,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useMobile } from '@/hooks/responsive'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import {
     ArrowLeft,
@@ -24,7 +24,7 @@ import {
     X
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { type FormEvent, type ReactNode, useEffect, useState } from 'react'
+import { type FormEvent, type ReactNode, useCallback, useEffect, useState } from 'react'
 
 interface MobileHeaderProps {
   title?: string
@@ -62,7 +62,7 @@ const MobileHeader = ({
   const [loading, setLoading] = useState(true)
   const { isMobile } = useMobile()
   const router = useRouter()
-  const supabase = createClient()
+  const { supabase } = useSupabase()
 
   // Check auth state on mount
   useEffect(() => {
@@ -91,19 +91,19 @@ const MobileHeader = ({
     return () => subscription.unsubscribe()
   }, [supabase.auth])
 
-  const handleSearchSubmit = (e: FormEvent) => {
+  const handleSearchSubmit = useCallback((e: FormEvent) => {
     e.preventDefault()
     if (onSearch) {
       onSearch(searchQuery)
     }
-  }
+  }, [onSearch, searchQuery])
 
-  const handleSearchToggle = () => {
+  const handleSearchToggle = useCallback(() => {
     void setIsSearchExpanded(!isSearchExpanded)
     if (isSearchExpanded) {
       void setSearchQuery('')
     }
-  }
+  }, [isSearchExpanded])
 
   // Auto-collapse search on outside click
   useEffect(() => {

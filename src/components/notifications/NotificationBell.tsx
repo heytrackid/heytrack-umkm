@@ -11,7 +11,7 @@ import { createClientLogger } from '@/lib/client-logger'
 import { playNotificationSound, playUrgentNotificationSound, setSoundEnabled, setSoundVolume } from '@/lib/notifications/sound'
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
 import type { Notification } from '@/types/domain/notifications'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { Bell } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NotificationList } from './NotificationList'
@@ -25,11 +25,14 @@ export const NotificationBell = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
     const lastNotificationIdRef = useRef<string | null>(null)
+    const { supabase } = useSupabase()
 
     // Fetch user preferences
     const fetchPreferences = useCallback(async () => {
         try {
-            const response = await fetch('/api/notifications/preferences')
+            const response = await fetch('/api/notifications/preferences', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const prefs = await response.json()
                 setPreferences(prefs)
@@ -49,7 +52,9 @@ export const NotificationBell = () => {
     const fetchNotifications = useCallback(async () => {
         try {
             setIsLoading(true)
-            const response = await fetch('/api/notifications?limit=20')
+            const response = await fetch('/api/notifications?limit=20', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const data = await response.json()
                 const newNotifications = data.notifications ?? []
@@ -100,8 +105,6 @@ export const NotificationBell = () => {
         void fetchNotifications()
 
         // Set up real-time subscription
-        const supabase = createClient()
-
         const channel = supabase
             .channel('notifications')
             .on(
@@ -115,12 +118,18 @@ export const NotificationBell = () => {
                     void fetchNotifications()
                 }
             )
-            .subscribe()
+            .subscribe((status) => {
+                // Suppress WebSocket errors in console - they're handled by Supabase internally
+                if (status === 'CHANNEL_ERROR') {
+                    // Silently handle channel errors without logging to console
+                    // The subscription will automatically retry
+                }
+            })
 
         return () => {
             void supabase.removeChannel(channel)
         }
-    }, [preferences, fetchNotifications])
+    }, [preferences, fetchNotifications, supabase])
 
     const handleMarkAllRead = async () => {
         try {
@@ -128,6 +137,7 @@ export const NotificationBell = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({}),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {
@@ -147,6 +157,7 @@ export const NotificationBell = () => {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updates),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {

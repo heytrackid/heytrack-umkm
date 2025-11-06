@@ -2,9 +2,9 @@
 // Type definitions for customer management
 
 // Use generated types from Supabase
-import type { CustomersTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
-export type Customer = CustomersTable
+export type Customer = Row<'customers'>
 
 // Extended type for UI state
 export interface CustomerWithStatus extends Customer {

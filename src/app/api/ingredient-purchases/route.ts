@@ -1,10 +1,10 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
 import { apiLogger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/type-guards'
-import type { IngredientPurchasesInsert, FinancialRecordsInsert, InventoryStockLogsInsert } from '@/types/database'
-import { checkBotId } from 'botid/server'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { getErrorMessage } from '@/shared/guards'
+import { IngredientPurchaseInsertSchema } from '@/lib/validations'
+import type { Insert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -12,7 +12,7 @@ export const runtime = 'nodejs'
  * GET /api/ingredient-purchases
  * List all ingredient purchases with optional filters
  */
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
     try {
         const supabase = await createClient()
 
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
  * POST /api/ingredient-purchases
  * Create new ingredient purchase and update stock
  */
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
     try {
         const supabase = await createClient()
 
@@ -111,15 +111,7 @@ export async function POST(request: NextRequest) {
                 { error: 'Unauthorized' },
                 { status: 401 }
             )
-        }
-
-        // Check if the request is from a bot
-        const verification = await checkBotId()
-        if (verification.isBot) {
-            return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-        }
-
-        const body = await request.json()
+        }        const body = await request.json()
 
         // Validate request body with Zod
         const validation = IngredientPurchaseInsertSchema.safeParse(body)
@@ -160,7 +152,7 @@ export async function POST(request: NextRequest) {
 
         // 1. Create financial transaction (expense)
         let financialTransactionId: string | null = null
-        const financialRecord: FinancialRecordsInsert = {
+        const financialRecord: Insert<'financial_records'> = {
             user_id: user.id,
             type: 'EXPENSE',
             category: 'Pembelian Bahan Baku',
@@ -183,7 +175,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Create purchase record
-        const purchaseRecord: IngredientPurchasesInsert = {
+        const purchaseRecord: Insert<'ingredient_purchases'> = {
             user_id: user.id,
             ingredient_id: validatedData.ingredient_id,
             supplier: validatedData.supplier,
@@ -250,7 +242,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 4. Create stock ledger entry
-        const stockLog: InventoryStockLogsInsert = {
+        const stockLog: Insert<'inventory_stock_logs'> = {
             ingredient_id: validatedData.ingredient_id,
             quantity_before: ingredientData.current_stock ?? 0,
             quantity_after: newStock,
@@ -274,5 +266,8 @@ export async function POST(request: NextRequest) {
         )
     }
 }
+
+export const GET = withSecurity(getHandler, SecurityPresets.enhanced())
+export const POST = withSecurity(postHandler, SecurityPresets.enhanced())
 
 // DELETE moved to /api/ingredient-purchases/[id]/route.ts

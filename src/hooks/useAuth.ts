@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/client'
 import type { Session, User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import type { UserProfilesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
@@ -12,7 +12,7 @@ import { getErrorMessage } from '@/lib/type-guards'
 
 
 
-type _UserProfile = UserProfilesTable
+type _UserProfile = Row<'user_profiles'>
 interface AuthState {
   user: User | null
   session: Session | null

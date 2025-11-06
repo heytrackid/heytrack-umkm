@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger as logger } from '@/lib/logger'
-import type { Json } from '@/types/supabase-generated'
+import type { Json } from '@/types/database'
 
 class SessionNotFoundError extends Error {
   constructor(sessionId: string) {

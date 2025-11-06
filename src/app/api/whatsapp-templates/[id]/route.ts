@@ -6,12 +6,12 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
-import type { WhatsappTemplatesUpdate } from '@/types/database'
+import type { Update } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type WhatsAppTemplateUpdate = WhatsappTemplatesUpdate
+type WhatsAppTemplateUpdate = Update<'whatsapp_templates'>
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -35,7 +35,7 @@ export async function GET(
     // 2. Query template with ownership check
     const { data, error } = await supabase
       .from('whatsapp_templates')
-      .select('*')
+      .select('id, user_id, name, message, is_active, created_at, updated_at')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()

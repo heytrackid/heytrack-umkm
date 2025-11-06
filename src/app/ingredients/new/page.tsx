@@ -13,17 +13,18 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { ArrowLeft, Package } from 'lucide-react'
-import type { IngredientsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 
 
 
 
-type IngredientInsert = IngredientsInsert
+type IngredientInsert = Insert<'ingredients'>
 
 const NewIngredientPage = () => {
   const router = useRouter()
+  const { supabase } = useSupabase()
   const { create: createIngredient } = useSupabaseCRUD('ingredients')
   const { toast } = useToast()
 
@@ -45,7 +46,6 @@ const NewIngredientPage = () => {
     try {
       setLoading(true)
 
-      const supabase = createClient()
       const {
         data: { user },
         error: authError

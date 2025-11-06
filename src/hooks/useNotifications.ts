@@ -8,7 +8,7 @@ import {
 } from '@/lib/notifications/notification-types'
 import { detectAllNotifications } from '@/lib/notifications/notification-detector'
 import { useIngredients } from './useIngredients'
-import type { OrdersTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 const STORAGE_KEY = 'heytrack_notifications'
 const PREFERENCES_KEY = 'heytrack_notification_preferences'
@@ -17,7 +17,7 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFERENCES)
   const { data: ingredients } = useIngredients()
-  const [orders, setOrders] = useState<OrdersTable[]>([])
+  const [orders, setOrders] = useState<Array<Row<'orders'>>>([])
 
   // Load saved notifications from localStorage
   useEffect(() => {
@@ -60,7 +60,9 @@ export function useNotifications() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch('/api/orders')
+        const response = await fetch('/api/orders', {
+          credentials: 'include', // Include cookies for authentication
+        })
         if (response.ok) {
           const data = await response.json()
           setOrders(Array.isArray(data) ? data : [])

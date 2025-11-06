@@ -2,14 +2,14 @@ import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { extractFirst } from '@/lib/type-guards'
-import type { TablesInsert, RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import type { Insert, Row } from '@/types/database'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
 
 
 
-type Recipe = RecipesTable
-type RecipeIngredient = RecipeIngredientsTable
-type Ingredient = IngredientsTable
+type Recipe = Row<'recipes'>
+type RecipeIngredient = Row<'recipe_ingredients'>
+type Ingredient = Row<'ingredients'>
 
 /**
  * Recipe ingredients query result type
@@ -85,7 +85,7 @@ export class InventoryUpdateService {
             const usedQuantity = ri.quantity * item.quantity
 
             // Create stock transaction record - trigger will auto-update current_stock
-            const stockTransaction: TablesInsert<'stock_transactions'> = {
+            const stockTransaction: Insert<'stock_transactions'> = {
               ingredient_id: ingredient.id,
               type: 'USAGE',
               quantity: usedQuantity, // Positive value, trigger handles the deduction

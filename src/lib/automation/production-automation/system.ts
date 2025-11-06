@@ -10,11 +10,11 @@ import type {
   ScheduledProductionItem
 } from './types'
 import type { AutomationConfig, ProductionPlan } from '@/types/features/automation'
-import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
-type Recipe = RecipesTable
-type RecipeIngredient = RecipeIngredientsTable
-type Ingredient = IngredientsTable
+type Recipe = Row<'recipes'>
+type RecipeIngredient = Row<'recipe_ingredients'>
+type Ingredient = Row<'ingredients'>
 
 /**
  * Production Automation System Orchestrator

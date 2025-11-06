@@ -22,7 +22,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
 import type { DateRange } from 'react-day-picker'
 import dynamic from 'next/dynamic'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 
 const logger = createClientLogger('OrdersPage')
 
@@ -93,7 +93,9 @@ const OrdersPage = (_props: OrdersPageProps) => {
   const { data: ordersData, isLoading: loading, error: queryError } = useQuery({
     queryKey: ['orders', 'all'],
     queryFn: async () => {
-      const response = await fetch('/api/orders')
+      const response = await fetch('/api/orders', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) { throw new Error('Failed to fetch orders') }
       const data = await response.json()
       // Ensure we always return an array
@@ -154,28 +156,29 @@ const OrdersPage = (_props: OrdersPageProps) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
 
-  const handleCreateOrder = () => {
+  const handleCreateOrder = useCallback(() => {
     setSelectedOrder(null)
     setShowOrderForm(true)
-  }
+  }, [])
 
-  const handleEditOrder = (order: Order) => {
+  const handleEditOrder = useCallback((order: Order) => {
     setSelectedOrder(order)
     setShowOrderForm(true)
-  }
+  }, [])
 
-  const handleViewOrder = (order: Order) => {
+  const handleViewOrder = useCallback((order: Order) => {
     setSelectedOrder(order)
     setShowOrderDetail(true)
-  }
+  }, [])
 
-  const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
+  const handleUpdateStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
     try {
       // Update status via API
       await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus }),
+        credentials: 'include', // Include cookies for authentication
       })
       // Refetch orders after update
       // Note: TanStack Query will handle cache invalidation
@@ -183,7 +186,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
       const message = getErrorMessage(error)
       logger.error({ error: message }, 'Failed to update status')
     }
-  }
+  }, [])
 
   // Only show loading skeleton on initial load (when no data yet)
   if (loading && orders.length === 0) {

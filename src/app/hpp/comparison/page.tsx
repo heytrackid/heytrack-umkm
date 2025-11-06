@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { BarChart3, TrendingUp, TrendingDown, Target, Package, Users } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
-import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { BarChart3, Package, Target, TrendingDown, TrendingUp, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
 // No imports needed for now
 
 interface RecipeComparison {
@@ -63,7 +63,9 @@ const ComparisonAnalyticsPage = () => {
         params.append('category', selectedCategory)
       }
 
-      const response = await fetch(`/api/hpp/comparison?${params.toString()}`)
+      const response = await fetch(`/api/hpp/comparison?${params.toString()}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (response.ok) {
         const data = await response.json()
         void setRecipes(data.recipes ?? [])

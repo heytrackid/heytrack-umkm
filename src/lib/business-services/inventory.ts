@@ -1,5 +1,5 @@
 import type { ReorderSummary } from './types'
-import type {IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { inventoryLogger } from '@/lib/logger'
 
 
@@ -11,7 +11,7 @@ import { inventoryLogger } from '@/lib/logger'
 
 
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 export class InventoryServices {
   private static instance: InventoryServices
@@ -34,7 +34,7 @@ export class InventoryServices {
       // Get all ingredients with stock information
       const { data: ingredients, error } = await supabase
         .from('ingredients')
-        .select('*')
+        .select('id, user_id, name, unit, current_stock, reorder_point, is_active, created_at, updated_at')
         .eq('is_active', true)
 
       if (error) {
@@ -103,7 +103,7 @@ export class InventoryServices {
 
       const { data: allIngredients, error } = await supabase
         .from('ingredients')
-        .select('*')
+        .select('id, user_id, name, unit, current_stock, reorder_point, is_active, created_at, updated_at')
         .eq('is_active', true)
       
       if (error) {
@@ -177,7 +177,7 @@ export class InventoryServices {
 
       const { data: ingredients, error } = await supabase
         .from('ingredients')
-        .select('*')
+        .select('id, user_id, name, unit, current_stock, reorder_point, is_active, created_at, updated_at')
         .eq('is_active', true)
 
       if (error) {

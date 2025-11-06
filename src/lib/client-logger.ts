@@ -10,9 +10,13 @@
 type LogContext = Record<string, unknown>
 
 /**
- * Check if we're in development mode
+ * Check if we're in development mode or if logging is explicitly enabled
  */
 const isDevelopment = (): boolean => {
+  // Check for explicit logging flag
+  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_ENABLE_CLIENT_LOGS === 'true') {
+    return true
+  }
   if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
     return true
   }
@@ -73,11 +77,85 @@ class ClientLogger {
     /* eslint-enable no-console */
 
     if (isDevelopment()) {
-      consoleMethod(
-        `[${timestamp}] ${logLevel}${this.context.context ? ` [${this.context.context}]` : ''}:`,
-        message || data,
-        Object.keys(data).length > 0 && message ? data : ''
-      )
+      try {
+        // Sanitize data to prevent circular reference issues
+        const sanitizeData = (obj: LogContext): LogContext => {
+          // Special handling for Error objects
+          if (obj instanceof Error) {
+            return {
+              message: obj.message,
+              name: obj.name,
+              stack: obj.stack ? '[Error Stack]' : undefined,
+              // Add other enumerable properties if they exist
+              ...Object.fromEntries(
+                Object.entries(obj).map(([key, value]) => [
+                  key,
+                  typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+                    ? value
+                    : '[Complex Property]'
+                ])
+              )
+            }
+          }
+
+          // Create a safe shallow copy to avoid circular references
+          const safe: LogContext = {}
+          try {
+            for (const key in obj) {
+              if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                const value = obj[key]
+                if (value === null || value === undefined) {
+                  safe[key] = value
+                } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+                  safe[key] = value
+                } else {
+                  // For complex objects, just mark as complex to avoid issues
+                  safe[key] = '[Complex Object]'
+                }
+              }
+            }
+          } catch {
+            // If anything fails, return empty object
+            return {}
+          }
+          return safe
+        }
+
+        const sanitizedData = data && typeof data === 'object' ? sanitizeData(data) : data
+        const hasData = sanitizedData && typeof sanitizedData === 'object' ? Object.keys(sanitizedData).length > 0 : !!sanitizedData
+
+        if (message && hasData) {
+          // Both message and data exist - log them separately to preserve console formatting
+          consoleMethod(
+            `[${timestamp}] ${logLevel}${this.context.context ? ` [${this.context.context}]` : ''}:`,
+            message,
+            sanitizedData
+          )
+        } else if (message) {
+          // Only message exists
+          consoleMethod(
+            `[${timestamp}] ${logLevel}${this.context.context ? ` [${this.context.context}]` : ''}:`,
+            message
+          )
+        } else if (hasData) {
+          // Only data exists - log separately to preserve console formatting
+          consoleMethod(
+            `[${timestamp}] ${logLevel}${this.context.context ? ` [${this.context.context}]` : ''}:`,
+            sanitizedData
+          )
+        } else {
+          // Neither exists
+          consoleMethod(
+            `[${timestamp}] ${logLevel}${this.context.context ? ` [${this.context.context}]` : ''}:`
+          )
+        }
+      } catch (_error) {
+        // Fallback logging if console fails
+        consoleMethod(
+          `[${timestamp}] ${logLevel}${this.context.context ? ` [${this.context.context}]` : ''}:`,
+          'Logging error occurred'
+        )
+      }
     }
 
     // In production, send to error tracking service

@@ -12,13 +12,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { FormField } from './shared/FormField'
-import type { FinancialRecordsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import {
   FinancialRecordSchema,
   type FinancialRecordFormData
 } from '@/lib/validations'
 
-type FinancialRecord = FinancialRecordsTable
+type FinancialRecord = Row<'financial_records'>
 
 interface FinancialRecordFormProps {
   initialData?: Partial<FinancialRecordFormData> & Partial<FinancialRecord>

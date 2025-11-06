@@ -1,32 +1,17 @@
-import type { 
+import type { Row, Insert, Update } from '@/types/database'
 
+export type Ingredient = Row<'ingredients'>
+export type IngredientInsert = Insert<'ingredients'>
+export type IngredientUpdate = Update<'ingredients'>
 
-  IngredientsTable, 
-  IngredientsInsert, 
-  IngredientsUpdate,
-  InventoryAlertsTable, 
-  InventoryAlertsInsert, 
-  InventoryAlertsUpdate,
-  IngredientPurchasesTable, 
-  IngredientPurchasesInsert, 
-  IngredientPurchasesUpdate,
-  StockTransactionsTable, 
-  StockTransactionsInsert, 
-  StockTransactionsUpdate
-} from '@/types/database'
+export type InventoryAlert = Row<'inventory_alerts'>
+export type InventoryAlertInsert = Insert<'inventory_alerts'>
+export type InventoryAlertUpdate = Update<'inventory_alerts'>
 
-export type Ingredient = IngredientsTable
-export type IngredientInsert = IngredientsInsert
-export type IngredientUpdate = IngredientsUpdate
+export type IngredientPurchase = Row<'ingredient_purchases'>
+export type IngredientPurchaseInsert = Insert<'ingredient_purchases'>
+export type IngredientPurchaseUpdate = Update<'ingredient_purchases'>
 
-export type InventoryAlert = InventoryAlertsTable
-export type InventoryAlertInsert = InventoryAlertsInsert
-export type InventoryAlertUpdate = InventoryAlertsUpdate
-
-export type IngredientPurchase = IngredientPurchasesTable
-export type IngredientPurchaseInsert = IngredientPurchasesInsert
-export type IngredientPurchaseUpdate = IngredientPurchasesUpdate
-
-export type StockTransaction = StockTransactionsTable
-export type StockTransactionInsert = StockTransactionsInsert
-export type StockTransactionUpdate = StockTransactionsUpdate
+export type StockTransaction = Row<'stock_transactions'>
+export type StockTransactionInsert = Insert<'stock_transactions'>
+export type StockTransactionUpdate = Update<'stock_transactions'>

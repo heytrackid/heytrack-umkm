@@ -1,14 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
-import type { FinancialRecordsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { TrendingUp, TrendingDown, DollarSign, PiggyBank } from 'lucide-react'
 
 // Financial Report Component
 // Handles financial data filtering, calculations, and display
 
 
-type FinancialRecord = FinancialRecordsTable
+type FinancialRecord = Row<'financial_records'>
 
 interface FinancialReportProps {
   dateRange: {

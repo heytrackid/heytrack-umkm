@@ -34,7 +34,7 @@ interface FormFieldConfig {
 interface SharedFormProps<T extends FieldValues> {
   // Form configuration
   sections: FormSection[]
-  schema: z.ZodTypeAny
+  schema: z.ZodSchema<T>
 
   // Form state
   defaultValues?: Partial<T>
@@ -80,6 +80,7 @@ export const SharedForm = <T extends FieldValues>({
   className = "",
   compact = false
 }: SharedFormProps<T>) => {
+  // zodResolver requires specific schema types, but we need generic support
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const resolver = zodResolver(schema as any) as Resolver<T>
 

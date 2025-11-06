@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { MoreVertical, Edit, Trash2, Calculator, Eye, Users, Clock } from 'lucide-react'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -15,7 +15,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 interface MobileRecipeCardProps {
     recipe: Recipe

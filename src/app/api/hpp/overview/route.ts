@@ -1,11 +1,24 @@
-import { cacheKeys, withCache } from '@/lib/cache'
+// import { cacheKeys } from '@/lib/cache' // Unused for now
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-// Types removed - not needed - queries use specific fields
+
+// Type for alerts with recipe relation
+interface AlertWithRecipe {
+  id: string
+  recipe_id: string
+  alert_type: string
+  title: string
+  message: string
+  severity: string
+  is_read: boolean | null
+  new_value: number | null
+  created_at: string | null
+  recipes: { name: string } | null
+}
 
 // GET /api/hpp/overview - Get comprehensive HPP overview data in one request
 export async function GET(_request: NextRequest) {
@@ -21,8 +34,6 @@ export async function GET(_request: NextRequest) {
         { status: 401 }
       )
     }
-
-    const cacheKey = `${cacheKeys.hpp.overview}:${user.id}`
 
     const getOverviewData = async () => {
       // Parallel queries for better performance
@@ -66,7 +77,7 @@ export async function GET(_request: NextRequest) {
 
       const totalRecipes = recipesResult.count ?? 0
       const recipesWithCost = calculationsResult.data ?? []
-      const alertsData = alertsResult.data ?? []
+      const alertsData: AlertWithRecipe[] = alertsResult.data ?? []
 
       // Calculate average HPP
       const averageHpp = recipesWithCost.length > 0
@@ -82,7 +93,7 @@ export async function GET(_request: NextRequest) {
       const recentAlerts = alertsData.map(alert => ({
         id: alert.id,
         recipe_id: alert.recipe_id,
-        recipe_name: (alert.recipes as any)?.name ?? 'Unknown Recipe',
+        recipe_name: alert.recipes?.name ?? 'Unknown Recipe',
         alert_type: alert.alert_type,
         title: alert.title,
         message: alert.message,
@@ -102,7 +113,8 @@ export async function GET(_request: NextRequest) {
       }
     }
 
-    const result = await withCache(getOverviewData, cacheKey, 60) // 1 minute cache
+    // Execute the query directly (cache can be added later with proper typing)
+    const result = await getOverviewData()
 
     apiLogger.info({
       userId: user.id,

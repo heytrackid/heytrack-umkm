@@ -3,32 +3,32 @@
 
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { CustomersTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { useSettings } from '@/contexts/settings-context'
 import { LOADING_KEYS, useLoading } from '@/hooks/loading'
-import { useResponsive } from '@/hooks/useResponsive'
-import { usePagination } from '@/hooks/usePagination'
 import { useToast } from '@/hooks/use-toast'
-import { useRouter } from 'next/navigation'
 import { useDebounce } from '@/hooks/useDebounce'
+import { usePagination } from '@/hooks/usePagination'
+import { useResponsive } from '@/hooks/useResponsive'
 import { apiLogger } from '@/lib/logger'
-import { useConfirm } from '@/components/ui/confirm-dialog'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 
 // Shared components
-import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/page-breadcrumb'
 import { Plus, RefreshCw, Users } from 'lucide-react'
 
 // Import components normally - they're lightweight
+import CustomerForm from './CustomerForm'
+import CustomerSearchFilters from './CustomerSearchFilters'
 import CustomersTable from './CustomersTable'
 import CustomerStats from './CustomerStats'
-import CustomerSearchFilters from './CustomerSearchFilters'
-import CustomerForm from './CustomerForm'
 
 import type { CustomersTable as CustomersTableType } from '@/types/database'
 import type { Customer } from './types'
@@ -57,9 +57,11 @@ const CustomersLayout = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     try {
-      const response = await fetch('/api/customers')
+      const response = await fetch('/api/customers', {
+        credentials: 'include', // Include cookies for authentication
+      })
 
       if (response.status === 401) {
         toast({
@@ -84,7 +86,7 @@ const CustomersLayout = () => {
     } finally {
       void setLoading(LOADING_KEYS.FETCH_CUSTOMERS, false)
     }
-  }
+  }, [toast, router, setLoading])
 
   const filteredCustomers = useMemo(() =>
     customers.filter((customer: Customer) =>
@@ -104,29 +106,29 @@ const CustomersLayout = () => {
   const paginatedCustomers = useMemo(() => filteredCustomers.slice(pagination.startIndex, pagination.endIndex), [filteredCustomers, pagination.startIndex, pagination.endIndex])
 
   // Update page size
-  const handlePageSizeChange = (newSize: number) => {
+  const handlePageSizeChange = useCallback((newSize: number) => {
     setPageSize(newSize)
     pagination.setPageSize(newSize)
-  }
+  }, [pagination])
 
   // Bulk action handlers
-  const handleSelectAll = () => {
+  const handleSelectAll = useCallback(() => {
     if (selectedItems.length === filteredCustomers.length) {
       void setSelectedItems([])
     } else {
       setSelectedItems(filteredCustomers.map(customer => customer.id.toString()))
     }
-  }
+  }, [selectedItems.length, filteredCustomers])
 
-  const handleSelectItem = (itemId: string) => {
+  const handleSelectItem = useCallback((itemId: string) => {
     setSelectedItems(prev =>
       prev.includes(itemId)
         ? prev.filter(id => id !== itemId)
         : [...prev, itemId]
     )
-  }
+  }, [])
 
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = useCallback(async () => {
     if (selectedItems.length === 0) { return }
 
     const customerNames = filteredCustomers
@@ -144,7 +146,10 @@ const CustomersLayout = () => {
     if (confirmed) {
       try {
         const deletePromises = selectedItems.map(id =>
-          fetch(`/api/customers/${id}`, { method: 'DELETE' })
+          fetch(`/api/customers/${id}`, {
+            method: 'DELETE',
+            credentials: 'include', // Include cookies for authentication
+          })
         )
         await Promise.all(deletePromises)
         toast({
@@ -163,9 +168,9 @@ const CustomersLayout = () => {
         })
       }
     }
-  }
+  }, [selectedItems, filteredCustomers, confirm, toast, fetchCustomers])
 
-  const handleBulkEdit = () => {
+  const handleBulkEdit = useCallback(() => {
     if (selectedItems.length === 0) { return }
 
     const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
@@ -176,7 +181,7 @@ const CustomersLayout = () => {
       description: `Bulk edit untuk ${selectedCustomers.length} pelanggan akan segera tersedia`,
       variant: 'default',
     })
-  }
+   }, [selectedItems, filteredCustomers, toast])
 
   // Individual action handlers
   const handleEditCustomer = (customer: Customer) => {
@@ -195,7 +200,10 @@ const CustomersLayout = () => {
 
     if (confirmed) {
       try {
-        const response = await fetch(`/api/customers/${customer.id}`, { method: 'DELETE' })
+        const response = await fetch(`/api/customers/${customer.id}`, {
+          method: 'DELETE',
+          credentials: 'include', // Include cookies for authentication
+        })
         if (!response.ok) { throw new Error('Failed') }
         toast({
           title: 'Berhasil',
@@ -214,20 +222,20 @@ const CustomersLayout = () => {
     }
   }
 
-  const handleViewCustomer = (customer: Customer) => {
+  const handleViewCustomer = useCallback((customer: Customer) => {
     void router.push(`/customers/${customer.id}`)
-  }
+  }, [router])
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = useCallback(() => {
     setCurrentView('list')
     setEditingCustomer(null)
     void fetchCustomers()
-  }
+  }, [fetchCustomers])
 
-  const handleFormCancel = () => {
+  const handleFormCancel = useCallback(() => {
     setCurrentView('list')
     setEditingCustomer(null)
-  }
+  }, [])
 
   // Remove redundant auth loading state - handled by middleware
 

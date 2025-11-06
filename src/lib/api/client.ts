@@ -42,7 +42,8 @@ export class ApiClient {
         headers: {
           'Content-Type': 'application/json',
           ...options?.headers
-        }
+        },
+        credentials: 'include', // Include cookies for authentication
       })
 
       return this.handleResponse<T>(response)
@@ -64,7 +65,8 @@ export class ApiClient {
           'Content-Type': 'application/json',
           ...options?.headers
         },
-        body: data ? JSON.stringify(data) : undefined
+        body: data ? JSON.stringify(data) : undefined,
+        credentials: 'include', // Include cookies for authentication
       })
 
       return this.handleResponse<T>(response)
@@ -86,7 +88,8 @@ export class ApiClient {
           'Content-Type': 'application/json',
           ...options?.headers
         },
-        body: data ? JSON.stringify(data) : undefined
+        body: data ? JSON.stringify(data) : undefined,
+        credentials: 'include', // Include cookies for authentication
       })
 
       return this.handleResponse<T>(response)
@@ -108,7 +111,8 @@ export class ApiClient {
           'Content-Type': 'application/json',
           ...options?.headers
         },
-        body: data ? JSON.stringify(data) : undefined
+        body: data ? JSON.stringify(data) : undefined,
+        credentials: 'include', // Include cookies for authentication
       })
 
       return this.handleResponse<T>(response)
@@ -129,7 +133,8 @@ export class ApiClient {
         headers: {
           'Content-Type': 'application/json',
           ...options?.headers
-        }
+        },
+        credentials: 'include', // Include cookies for authentication
       })
 
       return await this.handleResponse<T>(response)

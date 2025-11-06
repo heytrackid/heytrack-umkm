@@ -9,10 +9,11 @@ import { createClient } from '@/utils/supabase/client'
 
 const AuthCallbackPage = () => {
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
     const handleAuthCallback = async () => {
+      const supabase = createClient()
+
       try {
         const { data, error } = await supabase.auth.getSession()
 
@@ -35,7 +36,7 @@ const AuthCallbackPage = () => {
     }
 
     void handleAuthCallback()
-  }, [router, supabase.auth])
+  }, [router])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">

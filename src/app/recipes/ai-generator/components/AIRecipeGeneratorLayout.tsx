@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,14 +10,14 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { typedInsert } from '@/lib/supabase-client'
-import type { RecipesInsert, RecipeIngredientsInsert, IngredientsTable } from '@/types/database'
+import type { Insert, Row } from '@/types/database'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
 
 import { HppEstimator } from './HppEstimator'
 import { SmartIngredientSelector } from './SmartIngredientSelector'
-import { saveDraft, loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
+import { loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
 
 import GeneratedRecipeDisplay from './GeneratedRecipeDisplay'
 import RecipePreviewCard from './RecipePreviewCard'
@@ -34,6 +34,7 @@ const AIRecipeGeneratorPage = () => {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
+  const { supabase } = useSupabase()
 
   // Form state
   const [productName, setProductName] = useState('')
@@ -75,70 +76,58 @@ const AIRecipeGeneratorPage = () => {
     }
   }, [isAuthLoading, isAuthenticated, router, toast])
 
-  // Sprint 1: Load draft on mount
-  useEffect(() => {
-    const draft = loadDraft()
-    if (draft) {
-      toast({
-        title: '📝 Draft ditemukan!',
-        description: 'Mau lanjutin draft sebelumnya?',
-        action: (
-          <Button size="sm" onClick={() => {
-            setProductName(draft.productName)
-            setProductType(draft.productType)
-            setServings(draft.servings)
-            setSelectedIngredients(draft.selectedIngredients)
-            if (draft.targetPrice) { setTargetPrice(draft.targetPrice) }
-          }}>
-            Restore
-          </Button>
-        )
-      })
-    }
-  }, [toast])
+   // Sprint 1: Load draft on mount
+   useEffect(() => {
+     const draft = loadDraft()
+     if (draft) {
+       toast({
+         title: '📝 Draft ditemukan!',
+         description: 'Mau lanjutin draft sebelumnya?',
+         action: (
+           <Button size="sm" onClick={() => {
+             setProductName(draft.productName)
+             setProductType(draft.productType)
+             setServings(draft.servings)
+             setSelectedIngredients(draft.selectedIngredients)
+             if (draft.targetPrice) { setTargetPrice(draft.targetPrice) }
+           }}>
+             Restore
+           </Button>
+         )
+       })
+     }
+   }, [toast])
 
-  // Sprint 1: Auto-save draft
-  useEffect(() => {
-    if (productName || selectedIngredients.length > 0) {
-      saveDraft({
-        productName,
-        productType,
-        servings,
-        selectedIngredients,
-        targetPrice
-      })
-    }
-  }, [productName, productType, servings, selectedIngredients, targetPrice])
+   const fetchIngredients = useCallback(async () => {
+     const { data, error } = await supabase
+       .from('ingredients')
+       .select('*')
+       .order('name')
+       .returns<Array<Row<'ingredients'>>>()
 
-  useEffect(() => {
-    void fetchIngredients()
-  }, [])
+     if (!error && data) {
+       const ingredients: AvailableIngredient[] = data.map((item) => ({
+         id: item.id,
+         name: item.name,
+         unit: item.unit,
+         price_per_unit: item.price_per_unit,
+         current_stock: item.current_stock,
+         minimum_stock: item.min_stock ?? undefined
+       }))
 
-  const fetchIngredients = async () => {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('ingredients')
-      .select('*')
-      .order('name')
-      .returns<IngredientsTable[]>()
+       void setAvailableIngredients(ingredients)
+     }
+   }, [supabase])
 
-    if (!error && data) {
-      const ingredients: AvailableIngredient[] = data.map((item) => ({
-        id: item.id,
-        name: item.name,
-        unit: item.unit,
-        price_per_unit: item.price_per_unit,
-        current_stock: item.current_stock,
-        minimum_stock: item.min_stock ?? undefined
-      }))
-
-      void setAvailableIngredients(ingredients)
-    }
-  }
+   useEffect(() => {
+     void fetchIngredients()
+   }, [fetchIngredients])
 
 
 
-  const handleGenerate = async () => {
+
+
+  const handleGenerate = useCallback(async () => {
     if (!productName || !productType || !servings) {
       toast({
         title: 'Data belum lengkap',
@@ -152,7 +141,6 @@ const AIRecipeGeneratorPage = () => {
     void setGeneratedRecipe(null)
 
     try {
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -197,13 +185,12 @@ const AIRecipeGeneratorPage = () => {
     } finally {
       void setLoading(false)
     }
-  }
+  }, [productName, productType, servings, targetPrice, dietaryRestrictions, selectedIngredients, toast, supabase])
 
-  const handleSaveRecipe = async () => {
+  const handleSaveRecipe = useCallback(async () => {
     if (!generatedRecipe) { return }
 
     try {
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -211,7 +198,7 @@ const AIRecipeGeneratorPage = () => {
       }
 
       // Save recipe to database
-      const recipeInsert: RecipesInsert = {
+      const recipeInsert: Insert<'recipes'> = {
         user_id: user.id,
         name: generatedRecipe.name,
         category: generatedRecipe.category,
@@ -232,7 +219,7 @@ const AIRecipeGeneratorPage = () => {
       }
 
       // Save recipe ingredients
-      const recipeIngredients: RecipeIngredientsInsert[] = generatedRecipe.ingredients
+      const recipeIngredients: Array<Insert<'recipe_ingredients'>> = generatedRecipe.ingredients
         .map((ing) => {
           const ingredient = availableIngredients.find(
             i => i.name.toLowerCase() === ing.name.toLowerCase()
@@ -250,7 +237,7 @@ const AIRecipeGeneratorPage = () => {
             user_id: user.id
           }
         })
-        .filter((value): value is RecipeIngredientsInsert => value !== null)
+        .filter((value): value is Insert<'recipe_ingredients'> => value !== null)
 
       if (recipeIngredients.length > 0) {
       const { error: ingredientsError } = await typedInsert(supabase as never, 'recipe_ingredients', recipeIngredients)
@@ -278,16 +265,16 @@ const AIRecipeGeneratorPage = () => {
         title: 'Gagal menyimpan resep',
         description: (error as Error).message || 'Terjadi kesalahan',
         variant: 'destructive',
-      })
-    }
-  }
+       })
+     }
+   }, [generatedRecipe, availableIngredients, toast, supabase])
 
-  const handleGenerateAgain = () => {
+  const handleGenerateAgain = useCallback(() => {
     void setGeneratedRecipe(null)
-  }
+  }, [])
 
   // Wizard navigation
-  const canProceedToNextStep = () => {
+  const canProceedToNextStep = useCallback(() => {
     switch (currentStep) {
       case 1:
         return productName.trim().length >= 3 && productType !== '' && servings >= 1 && servings <= 100
@@ -298,21 +285,21 @@ const AIRecipeGeneratorPage = () => {
       default:
         return false
     }
-  }
+  }, [currentStep, productName, productType, servings, selectedIngredients])
 
-  const handleNextStep = () => {
+  const handleNextStep = useCallback(() => {
     if (canProceedToNextStep() && currentStep < totalSteps) {
       setCurrentStep(currentStep + 1)
     }
-  }
+  }, [canProceedToNextStep, currentStep, totalSteps])
 
-  const handlePrevStep = () => {
+  const handlePrevStep = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
     }
-  }
+  }, [currentStep])
 
-  const handleStepClick = (stepId: number) => {
+  const handleStepClick = useCallback((stepId: number) => {
     // Allow going back to previous steps
     if (stepId < currentStep) {
       setCurrentStep(stepId)
@@ -321,9 +308,9 @@ const AIRecipeGeneratorPage = () => {
     else if (stepId === currentStep + 1 && canProceedToNextStep()) {
       setCurrentStep(stepId)
     }
-  }
+   }, [currentStep, canProceedToNextStep])
 
-  const getStepClassName = (stepId: number) => {
+   const getStepClassName = (stepId: number) => {
     if (stepId < currentStep) {return 'bg-primary border-primary text-primary-foreground'}
     if (stepId === currentStep) {return 'border-primary text-primary bg-primary/10'}
     return 'border-muted-foreground/30 text-muted-foreground'

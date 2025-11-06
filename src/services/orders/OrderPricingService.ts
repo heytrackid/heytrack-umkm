@@ -1,7 +1,7 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { TablesUpdate } from '@/types/database'
+import type { Update } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 
 
@@ -153,7 +153,7 @@ export class OrderPricingService {
       }
 
       // Update customer
-      const updateData: TablesUpdate<'customers'> = {
+      const updateData: Update<'customers'> = {
         loyalty_points: (customer.loyalty_points ?? 0) + pointsEarned - pointsUsed,
         total_orders: (customer.total_orders ?? 0) + 1,
         total_spent: (customer.total_spent ?? 0) + orderAmount,

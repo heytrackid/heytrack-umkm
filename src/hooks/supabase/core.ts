@@ -1,7 +1,7 @@
 'use client'
 
-import { createClient } from '@/utils/supabase/client'
-import type { TableName, Row } from '@/types/database'
+import type { Row, TableName } from '@/types/database'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { UseSupabaseQueryOptions } from './types'
 
@@ -12,6 +12,7 @@ export function useSupabaseQuery<T extends TableName>(
   tableName: T,
   options: UseSupabaseQueryOptions<T> = {}
 ) {
+  const { supabase } = useSupabase()
   const [data, setData] = useState<Array<Row<T>>>(options.initial ?? [])
   const [loading, setLoading] = useState(!options.initial)
   const [error, setError] = useState<string | null>(null)
@@ -30,7 +31,6 @@ export function useSupabaseQuery<T extends TableName>(
       void setLoading(true)
       void setError(null)
 
-      const supabase = createClient()
       const currentOptions = optionsRef.current
       let query = supabase.from(tableName).select(currentOptions.select ?? '*')
 
@@ -72,13 +72,13 @@ export function useSupabaseQuery<T extends TableName>(
         return
       }
       void setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      if (fetchIdRef.current === currentFetchId) {
-        fetchIdRef.current = null
-        void setLoading(false)
-      }
-    }
-  }, [tableName])
+     } finally {
+       if (fetchIdRef.current === currentFetchId) {
+         fetchIdRef.current = null
+         void setLoading(false)
+       }
+     }
+   }, [tableName, supabase])
 
   useEffect(() => {
     // Skip initial fetch if we have initial data and refetchOnMount is false
@@ -90,7 +90,6 @@ export function useSupabaseQuery<T extends TableName>(
 
     // Setup realtime subscription if enabled
     if (options.realtime === true) {
-      const supabase = createClient()
       const channel = supabase
         .channel(`${tableName}-changes`)
         .on(
@@ -121,7 +120,13 @@ export function useSupabaseQuery<T extends TableName>(
             }
           }
         )
-        .subscribe()
+        .subscribe((status: string) => {
+          // Suppress WebSocket errors in console - they're handled by Supabase internally
+          if (status === 'CHANNEL_ERROR') {
+            // Silently handle channel errors without logging to console
+            // The subscription will automatically retry
+          }
+        })
 
       return () => {
         fetchIdRef.current = null
@@ -132,7 +137,7 @@ export function useSupabaseQuery<T extends TableName>(
     return () => {
       fetchIdRef.current = null
     }
-  }, [tableName, fetchData, options.realtime, options.refetchOnMount, options.initial])
+  }, [tableName, fetchData, options.realtime, options.refetchOnMount, options.initial, supabase])
 
   return {
     data,

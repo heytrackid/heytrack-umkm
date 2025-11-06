@@ -2,7 +2,7 @@
 
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import type { Session, User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
@@ -33,11 +33,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signOut: async () => {},
     refreshSession: async () => {}
   })
-  
+
   const router = useRouter()
+  const { supabase } = useSupabase()
 
   useEffect(() => {
-    const supabase = createClient()
 
     // Get initial session with error handling
     const getSession = async () => {
@@ -112,11 +112,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => {
       subscription?.unsubscribe()
     }
-  }, [router])
+  }, [router, supabase.auth])
 
   const signOut = async () => {
     try {
-      const supabase = createClient()
       await supabase.auth.signOut()
       setAuthState(prev => ({
         ...prev,
@@ -134,7 +133,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const refreshSession = async () => {
     try {
-      const supabase = createClient()
       const { data: { session }, error } = await supabase.auth.refreshSession()
       
       if (error) {

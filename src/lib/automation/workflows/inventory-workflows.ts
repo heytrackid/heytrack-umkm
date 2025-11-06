@@ -1,7 +1,6 @@
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { Database, NotificationsInsert } from '@/types/database'
-import type { Json } from '@/types/supabase-generated'
+import type { Insert, Database, Json } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type {WorkflowResult,
   WorkflowContext
@@ -268,7 +267,7 @@ export class InventoryWorkflowHandlers {
         ? JSON.parse(JSON.stringify(notificationData.metadata)) as Json
         : undefined
 
-      const notification: NotificationsInsert = {
+      const notification: Insert<'notifications'> = {
         type: notificationData.type,
         category: notificationData.category,
         title: notificationData.title,

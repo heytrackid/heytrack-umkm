@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 interface ProductionFormDialogProps {
     open: boolean
@@ -46,7 +46,9 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
     const fetchRecipes = async () => {
         try {
             setLoadingRecipes(true)
-            const response = await fetch('/api/recipes')
+            const response = await fetch('/api/recipes', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const data = await response.json()
                 // Ensure data is an array
@@ -87,7 +89,8 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                     quantity,
                     planned_date: formData.planned_date.toISOString(),
                     notes: formData.notes || null
-                })
+                }),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (!response.ok) {

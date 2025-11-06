@@ -4,10 +4,17 @@ import { Fragment, type ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 
 import { cn } from '@/lib/utils'
 import { useAdvancedLinkPreloading, useAdvancedButtonPreloading } from '@/hooks/usePreloading'
-import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search, Truck } from 'lucide-react'
+import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search, Truck, MoreHorizontal, Receipt, MessageSquare } from 'lucide-react'
 
 // Smart Link component with preloading
 interface SmartLinkProps {
@@ -17,6 +24,8 @@ interface SmartLinkProps {
   activeClassName?: string
   preloadOnHover?: boolean
   preloadDelay?: number
+  onClick?: () => void
+  style?: React.CSSProperties
 }
 
 export const SmartLink = ({
@@ -25,7 +34,9 @@ export const SmartLink = ({
   className,
   activeClassName,
   preloadOnHover = true,
-  preloadDelay = 100
+  preloadDelay = 100,
+  onClick,
+  style
 }: SmartLinkProps) => {
   const pathname = usePathname()
   const linkPreloading = useAdvancedLinkPreloading()
@@ -46,6 +57,12 @@ export const SmartLink = ({
     void setIsHovered(false)
   }
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick()
+    }
+  }
+
   return (
     <Link
       href={href}
@@ -54,9 +71,11 @@ export const SmartLink = ({
         isActive && activeClassName,
         isHovered && 'opacity-80 transition-opacity'
       )}
+      style={style}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={() => linkPreloading.onFocus(href)}
+      onClick={handleClick}
     >
       {children}
     </Link>
@@ -107,37 +126,37 @@ export const SmartButton = ({
 // Main navigation items with preloading
 const navigationItems = [
   {
-    title: 'Dashboard',
+    title: 'Dasbor',
     href: '/dashboard',
     icon: LayoutDashboard,
     preloadTargets: ['/orders', '/cash-flow', '/ingredients']
   },
   {
-    title: 'Orders',
+    title: 'Pesanan',
     href: '/orders',
     icon: ShoppingCart,
     preloadTargets: ['/customers', '/orders/new']
   },
   {
-    title: 'Customers',
+    title: 'Pelanggan',
     href: '/customers',
     icon: Users,
     preloadTargets: ['/orders', '/cash-flow']
   },
   {
-    title: 'Ingredients',
+    title: 'Bahan',
     href: '/ingredients',
     icon: Package,
     preloadTargets: ['/recipes', '/orders']
   },
   {
-    title: 'Recipes',
+    title: 'Resep',
     href: '/recipes',
     icon: Utensils,
     preloadTargets: ['/ingredients', '/hpp']
   },
   {
-    title: 'Suppliers',
+    title: 'Pemasok',
     href: '/suppliers',
     icon: Truck,
     preloadTargets: ['/ingredients', '/recipes']
@@ -149,15 +168,28 @@ const navigationItems = [
     preloadTargets: ['/recipes', '/hpp']
   },
   {
-    title: 'Cash Flow',
+    title: 'Arus Kas',
     href: '/cash-flow',
     icon: DollarSign,
     preloadTargets: ['/orders', '/dashboard']
   },
   {
-    title: 'Settings',
+    title: 'Pengaturan',
     href: '/settings',
     icon: Settings,
+    preloadTargets: ['/dashboard']
+  },
+  {
+    title: 'Biaya Operasional',
+    href: '/operational-costs',
+    icon: Receipt,
+    preloadTargets: ['/orders', '/production']
+  },
+  {
+    title: 'Chatbot AI',
+    href: '/ai-chatbot',
+    icon: MessageSquare,
+    badge: '✨',
     preloadTargets: ['/dashboard']
   }
 ]
@@ -166,25 +198,65 @@ const navigationItems = [
 
 // Smart Mobile Bottom Navigation
 export const SmartBottomNav = () => {
-  const mainItems = navigationItems.slice(0, 5) // First 5 items for mobile
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const mainItems = navigationItems.slice(0, 4) // First 4 items for mobile
+  const additionalItems = navigationItems.slice(4) // Remaining items for menu
 
   return (
-    <nav className="flex justify-around items-center py-2 bg-background border-t">
-      {mainItems.map((item) => (
-        <SmartLink
-          key={item.href}
-          href={item.href}
-          className="flex flex-col items-center space-y-1 px-2 py-1 text-xs font-medium transition-colors"
-          activeClassName="text-primary"
-          preloadDelay={100}
-        >
-          <item.icon className="h-5 w-5" />
-          <span>{item.title}</span>
-        </SmartLink>
-      ))}
-    </nav>
-  )
-}
+    <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+      <nav data-mobile-nav className="flex justify-around items-center py-2 bg-background border-t animate-in fade-in duration-300">
+        {mainItems.map((item, index) => (
+          <SmartLink
+            key={item.href}
+            href={item.href}
+            className="flex flex-col items-center space-y-1 px-2 py-1 text-xs font-medium transition-colors animate-in slide-in-from-bottom-2 duration-200"
+            activeClassName="text-primary"
+            preloadDelay={100}
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <item.icon className="h-5 w-5" />
+            <span>{item.title}</span>
+          </SmartLink>
+        ))}
+
+        {/* More Menu Button */}
+        <SheetTrigger asChild>
+          <button className="flex flex-col items-center space-y-1 px-2 py-1 text-xs font-medium transition-colors text-muted-foreground hover:text-foreground animate-in slide-in-from-bottom-2 duration-200" style={{ animationDelay: '400ms' }}>
+            <MoreHorizontal className="h-5 w-5" />
+            <span>Lainnya</span>
+          </button>
+        </SheetTrigger>
+      </nav>
+
+      <SheetContent side="bottom" className="h-[80vh] safe-bottom">
+        <SheetHeader>
+          <SheetTitle>Lainnya</SheetTitle>
+        </SheetHeader>
+        <div className="flex flex-col gap-3 mt-6 px-4 animate-in slide-in-from-bottom-4 duration-300">
+          {additionalItems.map((item, index) => (
+            <SmartLink
+              key={item.href}
+              href={item.href}
+              className="flex items-center space-x-4 p-4 rounded-xl border shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 bg-card hover:bg-accent/50"
+              activeClassName="border-primary bg-primary/15 shadow-primary/30 ring-2 ring-primary/20 text-primary font-semibold"
+              preloadDelay={100}
+              onClick={() => setIsMenuOpen(false)}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10">
+                <item.icon className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <span className="text-sm font-medium">{item.title}</span>
+                {item.badge && <span className="ml-2 text-xs">{item.badge}</span>}
+              </div>
+            </SmartLink>
+          ))}
+        </div>
+       </SheetContent>
+     </Sheet>
+   )
+ }
 
 // Smart Action Buttons (for forms, modals, etc)
 export const SmartActionButton = ({
@@ -223,7 +295,7 @@ export const SmartSearchButton = () => {
       onMouseEnter={() => preloadChartOnHover()}
     >
       <Search className="h-4 w-4 mr-2" />
-      Search
+      Cari
     </Button>
   )
 }
@@ -261,15 +333,15 @@ export const SmartBreadcrumbs = ({ items }: { items: BreadcrumbItem[] }) => (
 export const SmartQuickActions = () => (
   <div className="flex flex-wrap gap-2">
     <SmartActionButton action="add-order">
-      New Order
+      Pesanan Baru
     </SmartActionButton>
 
     <SmartActionButton action="add-customer" variant="outline">
-      Add Customer
+      Tambah Pelanggan
     </SmartActionButton>
 
     <SmartActionButton action="add-ingredient" variant="outline">
-      Add Ingredient
+      Tambah Bahan
     </SmartActionButton>
 
     <SmartSearchButton />

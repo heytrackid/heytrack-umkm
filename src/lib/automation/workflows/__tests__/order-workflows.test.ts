@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { OrderWorkflowHandlers } from '@/lib/automation/workflows/order-workflows'
 import type { WorkflowContext, WorkflowResult } from '@/types/features/automation'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Order Workflow Tests

@@ -1,10 +1,10 @@
-import type { NotificationPreferencesTable, NotificationPreferencesInsert, NotificationPreferencesUpdate } from '@/types/database'
+import type { Row, Insert, Update } from '@/types/database'
 
 
 
-export type NotificationPreferences = NotificationPreferencesTable
-export type NotificationPreferencesInsertType = NotificationPreferencesInsert
-export type NotificationPreferencesUpdateType = NotificationPreferencesUpdate
+export type NotificationPreferences = Row<'notification_preferences'>
+export type NotificationPreferencesInsertType = Insert<'notification_preferences'>
+export type NotificationPreferencesUpdateType = Update<'notification_preferences'>
 
 export interface NotificationPreferencesForm {
   // Category toggles

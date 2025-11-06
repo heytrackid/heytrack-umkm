@@ -128,6 +128,7 @@ export interface ErrorContext {
   action?: string;
   timestamp?: string;
   stackTrace?: string;
+  digest?: string;
 }
 
 /**

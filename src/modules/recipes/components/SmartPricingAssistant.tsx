@@ -11,16 +11,16 @@ import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTr
 import { useCurrency } from '@/hooks/useCurrency'
 import { uiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { IngredientsTable, RecipeIngredientsTable, RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import type { SmartPricingAnalysis } from '@/types/features/analytics'
 import { AlertTriangle, Calculator, CheckCircle, Lightbulb, Target, Zap } from 'lucide-react'
 import { useCallback, useEffect, useState, type FC } from 'react'
 
 
 
-type Recipe = RecipesTable
-type RecipeIngredient = RecipeIngredientsTable
-type Ingredient = IngredientsTable
+type Recipe = Row<'recipes'>
+type RecipeIngredient = Row<'recipe_ingredients'>
+type Ingredient = Row<'ingredients'>
 
 type PricingTierKey = 'economy' | 'standard' | 'premium'
 
@@ -51,7 +51,8 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ recipe })
+        body: JSON.stringify({ recipe }),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -280,55 +281,59 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
         {/* Pricing Options Tab */}
         <SwipeableTabsContent value="pricing" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
-            {(Object.entries(analysis.pricing) as Array<[PricingTierKey, typeof analysis.pricing.economy]>).map(([tier, data]) => (
-              <Card
-                key={tier}
-                className={`cursor-pointer transition-all hover: ${selectedTier === tier ? 'ring-2 ring-primary' : ''
-                  }`}
-                onClick={() => setSelectedTier(tier)}
-              >
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="capitalize">{tier}</span>
-                    <Badge variant={tier === 'economy' ? 'secondary' : tier === 'premium' ? 'default' : 'outline'}>
-                      {data.margin}%
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold mb-2">
-                    {formatCurrency(data.price)}
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    {data.positioning}
-                  </p>
-                  <div className="space-y-1 text-xs">
-                    <div className="flex justify-between">
-                      <span>Profit:</span>
-                      <span className="font-medium text-gray-600 dark:text-gray-400">
-                        {formatCurrency(data.price - analysis.breakdown.totalCost)}
-                      </span>
+            {(Object.entries(analysis.pricing) as Array<[PricingTierKey, typeof analysis.pricing.economy]>).map(([tier, data]) => {
+              const badgeVariant = tier === 'economy' ? 'secondary' : tier === 'premium' ? 'default' : 'outline'
+
+              return (
+                <Card
+                  key={tier}
+                  className={`cursor-pointer transition-all hover: ${selectedTier === tier ? 'ring-2 ring-primary' : ''
+                    }`}
+                  onClick={() => setSelectedTier(tier)}
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center justify-between">
+                      <span className="capitalize">{tier}</span>
+                      <Badge variant={badgeVariant}>
+                        {data.margin}%
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold mb-2">
+                      {formatCurrency(data.price)}
                     </div>
-                    <div className="flex justify-between">
-                      <span>Break-even:</span>
-                      <span className="font-medium">
-                        {Math.ceil(1000 / (data.price - analysis.breakdown.totalCost))} unit
-                      </span>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      {data.positioning}
+                    </p>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span>Profit:</span>
+                        <span className="font-medium text-gray-600 dark:text-gray-400">
+                          {formatCurrency(data.price - analysis.breakdown.totalCost)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Break-even:</span>
+                        <span className="font-medium">
+                          {Math.ceil(1000 / (data.price - analysis.breakdown.totalCost))} unit
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    className="w-full mt-3"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      void handleApplyPrice(tier)
-                    }}
-                  >
-                    Gunakan Harga Ini
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                    <Button
+                      size="sm"
+                      className="w-full mt-3"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        void handleApplyPrice(tier)
+                      }}
+                    >
+                      Gunakan Harga Ini
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
 
           {/* Custom Pricing */}

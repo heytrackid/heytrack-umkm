@@ -16,7 +16,7 @@ import { createClientLogger } from '@/lib/client-logger'
 const logger = createClientLogger('EnhancedOrderForm')
 import { isRecipe } from '@/lib/type-guards'
 import { validateOrderData } from '@/lib/validations/form-validations'
-import type { RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import {
     AlertCircle,
     ArrowLeft,
@@ -43,7 +43,7 @@ interface EnhancedOrderFormProps {
     loading?: boolean
 }
 
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 const EnhancedOrderForm = ({
     order,
@@ -113,7 +113,9 @@ const EnhancedOrderForm = ({
 
     const fetchRecipes = async () => {
         try {
-            const response = await fetch('/api/recipes')
+            const response = await fetch('/api/recipes', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (!response.ok) { return }
 
             const payload = await response.json()

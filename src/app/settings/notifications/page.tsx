@@ -1,14 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Slider } from '@/components/ui/slider'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
-import { Switch } from '@/components/ui/switch'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
+import AppLayout from '@/components/layout/app-layout'
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -17,12 +9,20 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
 import { apiLogger } from '@/lib/logger'
-import { toast } from 'sonner'
-import { Volume2, Bell, Clock, Layers } from 'lucide-react'
-import type { NotificationPreferences } from '@/types/domain/notification-preferences'
 import { testNotificationSound, testUrgentSound } from '@/lib/notifications/sound'
-import AppLayout from '@/components/layout/app-layout'
+import type { NotificationPreferences } from '@/types/domain/notification-preferences'
+import { Bell, Clock, Layers, Volume2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 const NotificationSettingsPage = () => {
     const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
@@ -41,7 +41,9 @@ const NotificationSettingsPage = () => {
     const fetchPreferences = async () => {
         try {
             setIsLoading(true)
-            const response = await fetch('/api/notifications/preferences')
+            const response = await fetch('/api/notifications/preferences', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const data = await response.json()
                 setPreferences(data)
@@ -63,6 +65,7 @@ const NotificationSettingsPage = () => {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(preferences),
+                credentials: 'include', // Include cookies for authentication
             })
 
             if (response.ok) {

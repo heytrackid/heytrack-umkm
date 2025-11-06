@@ -119,3 +119,6 @@ supabase/.temp/
 
 .gemini/
 gha-creds-*.json
+
+# Sentry Config File
+.env.sentry-build-plugin

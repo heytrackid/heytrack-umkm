@@ -42,7 +42,17 @@ class ValidationCache {
   private generateCacheKey(schemaName: string, data: unknown): string {
     try {
       // Create a deterministic string representation of the data
-      const dataString = JSON.stringify(data, Object.keys(data as any).sort())
+      const dataString = JSON.stringify(data, (key, value) => {
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          // Sort object keys for deterministic serialization
+          const sortedObj: Record<string, unknown> = {}
+          Object.keys(value).sort().forEach(k => {
+            sortedObj[k] = (value as Record<string, unknown>)[k]
+          })
+          return sortedObj
+        }
+        return value
+      })
       return `${schemaName}:${this.hashString(dataString)}`
     } catch (error) {
       // Fallback for non-serializable data

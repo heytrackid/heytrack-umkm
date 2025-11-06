@@ -1,6 +1,6 @@
 // Smart notification detection logic
 
-import type { IngredientsTable, OrdersTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { 
   type Notification, 
   type NotificationType,
@@ -40,7 +40,7 @@ function createNotification(
 }
 
 // Stock notification detectors
-export function detectStockNotifications(ingredients: IngredientsTable[]): Notification[] {
+export function detectStockNotifications(ingredients: Array<Row<'ingredients'>>): Notification[] {
   const notifications: Notification[] = []
 
   ingredients.forEach((ingredient) => {
@@ -93,7 +93,7 @@ export function detectStockNotifications(ingredients: IngredientsTable[]): Notif
 }
 
 // Order notification detectors
-export function detectOrderNotifications(orders: OrdersTable[]): Notification[] {
+export function detectOrderNotifications(orders: Array<Row<'orders'>>): Notification[] {
   const notifications: Notification[] = []
   const now = new Date()
 
@@ -140,7 +140,7 @@ export function detectOrderNotifications(orders: OrdersTable[]): Notification[] 
 
 // Cost increase detector
 export function detectCostIncreaseNotifications(
-  ingredients: IngredientsTable[],
+  ingredients: Array<Row<'ingredients'>>,
   previousPrices: Record<string, number>
 ): Notification[] {
   const notifications: Notification[] = []
@@ -178,8 +178,8 @@ export function detectCostIncreaseNotifications(
 
 // Aggregate all notifications
 export function detectAllNotifications(data: {
-  ingredients?: IngredientsTable[]
-  orders?: OrdersTable[]
+  ingredients?: Array<Row<'ingredients'>>
+  orders?: Array<Row<'orders'>>
   previousPrices?: Record<string, number>
 }): Notification[] {
   const notifications: Notification[] = []

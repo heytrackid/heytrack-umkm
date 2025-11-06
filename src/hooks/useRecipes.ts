@@ -4,7 +4,7 @@ import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
-import type { RecipesTable, RecipesInsert, RecipesUpdate } from '@/types/database'
+import type { Row, Insert, Update } from '@/types/database'
 
 /**
  * React Query hooks for Recipes
@@ -12,9 +12,9 @@ import type { RecipesTable, RecipesInsert, RecipesUpdate } from '@/types/databas
  */
 
 
-type _Recipe = RecipesTable
-type RecipeInsert = RecipesInsert
-type RecipeUpdate = RecipesUpdate
+type _Recipe = Row<'recipes'>
+type RecipeInsert = Insert<'recipes'>
+type RecipeUpdate = Update<'recipes'>
 
 interface UseRecipesOptions {
   limit?: number
@@ -34,7 +34,9 @@ export function useRecipes(options?: UseRecipesOptions) {
       if (options?.offset) {params.set('offset', options.offset.toString())}
       if (options?.search) {params.set('search', options.search)}
       
-      const response = await fetch(`/api/recipes?${params}`)
+      const response = await fetch(`/api/recipes?${params}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch recipes')
       }
@@ -55,7 +57,9 @@ export function useRecipe(id: string | null) {
     queryFn: async () => {
       if (!id) {return null}
       
-      const response = await fetch(`/api/recipes/${id}`)
+      const response = await fetch(`/api/recipes/${id}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch recipe')
       }
@@ -80,6 +84,7 @@ export function useCreateRecipe() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {
@@ -124,6 +129,7 @@ export function useUpdateRecipe() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {
@@ -167,6 +173,7 @@ export function useDeleteRecipe() {
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/recipes/${id}`, {
         method: 'DELETE',
+        credentials: 'include', // Include cookies for authentication
       })
       
       if (!response.ok) {

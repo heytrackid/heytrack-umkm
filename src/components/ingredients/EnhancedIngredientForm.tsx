@@ -1,19 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import type { UseFormReturn } from 'react-hook-form'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 import { FormField, FormGrid } from '@/components/ui/crud-form'
-import { AlertTriangle, Info, TrendingUp } from 'lucide-react'
 import { useSettings } from '@/contexts/settings-context'
 import type { SimpleIngredientFormData } from '@/lib/validations/form-validations'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
+import { AlertTriangle, Info, TrendingUp } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import type { UseFormReturn } from 'react-hook-form'
 
 
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 interface EnhancedIngredientFormProps {
     form: UseFormReturn<SimpleIngredientFormData>
@@ -63,10 +63,10 @@ export const EnhancedIngredientForm = ({
         <div className="space-y-6">
             {/* Current Summary (Edit Mode) */}
             {mode === 'edit' && initialData && (
-                <Card className="bg-gray-50 border-gray-300">
+                <Card className="bg-muted">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                                 <Info className="w-4 h-4" />
                                 Data Saat Ini
                             </div>
@@ -78,20 +78,20 @@ export const EnhancedIngredientForm = ({
                         </div>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                             <div>
-                                <p className="text-gray-700 mb-1">Stok</p>
-                                <p className="text-gray-900 font-semibold">
+                                <p className="text-muted-foreground mb-1">Stok</p>
+                                <p className="text-foreground font-semibold">
                                     {initialData.current_stock} {initialData.unit}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-gray-700 mb-1">Harga</p>
-                                <p className="text-gray-900 font-semibold">
+                                <p className="text-muted-foreground mb-1">Harga</p>
+                                <p className="text-foreground font-semibold">
                                     {formatCurrency(initialData.price_per_unit)}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-gray-700 mb-1">Min. Stok</p>
-                                <p className="text-gray-900 font-semibold">
+                                <p className="text-muted-foreground mb-1">Min. Stok</p>
+                                <p className="text-foreground font-semibold">
                                     {initialData.min_stock} {initialData.unit}
                                 </p>
                             </div>
@@ -123,7 +123,7 @@ export const EnhancedIngredientForm = ({
             <div className="space-y-6">
                 {/* Basic Info */}
                 <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-gray-900">Informasi Dasar</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Informasi Dasar</h3>
                     <FormGrid cols={2}>
                         <FormField
                             label="Nama Bahan"
@@ -152,7 +152,7 @@ export const EnhancedIngredientForm = ({
 
                 {/* Price & Stock */}
                 <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-gray-900">Harga & Stok</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Harga & Stok</h3>
                     <FormGrid cols={2}>
                         <FormField
                             label="Harga per Unit"
@@ -197,10 +197,10 @@ export const EnhancedIngredientForm = ({
 
                     {/* Total Value Display */}
                     {totalValue > 0 && (
-                        <div className="p-4 bg-gray-50 rounded-lg border">
+                        <div className="p-4 bg-muted rounded-lg border">
                             <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-600">Total Nilai Stok</span>
-                                <span className="text-lg font-bold text-gray-900">
+                                <span className="text-sm text-muted-foreground">Total Nilai Stok</span>
+                                <span className="text-lg font-bold text-foreground">
                                     {formatCurrency(totalValue)}
                                 </span>
                             </div>
@@ -210,7 +210,7 @@ export const EnhancedIngredientForm = ({
 
                 {/* Optional Info */}
                 <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-gray-900">Informasi Tambahan (Opsional)</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Informasi Tambahan (Opsional)</h3>
                     <FormField
                         label="Deskripsi"
                         name="description"
@@ -224,13 +224,13 @@ export const EnhancedIngredientForm = ({
 
             {/* Tips for Create Mode */}
             {mode === 'create' && (
-                <Card className="bg-gray-50 border-gray-300">
+                <Card className="bg-muted">
                     <CardContent className="p-4">
                         <div className="flex items-start gap-3">
-                            <TrendingUp className="w-5 h-5 text-gray-600 mt-0.5 shrink-0" />
+                            <TrendingUp className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                             <div className="text-sm">
-                                <p className="font-medium text-gray-900 mb-2">💡 Tips</p>
-                                <ul className="text-gray-800 space-y-1 text-xs">
+                                <p className="font-medium text-foreground mb-2">💡 Tips</p>
+                                <ul className="text-foreground space-y-1 text-xs">
                                     <li>• Set stok minimum 20-30% dari stok normal Anda</li>
                                     <li>• Gunakan satuan yang konsisten untuk kemudahan tracking</li>
                                     <li>• Update harga secara berkala untuk kalkulasi HPP yang akurat</li>

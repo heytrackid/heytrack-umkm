@@ -1,7 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger } from '@/lib/logger'
-import { safeParseAmount, safeString } from '@/lib/api-helpers'
+ import { apiLogger } from '@/lib/logger'
+ import { safeParseAmount, safeString } from '@/lib/api-helpers'
+ import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -62,7 +63,7 @@ interface CategoryBreakdownProcessing {
  * - period: 'daily' | 'weekly' | 'monthly' | 'yearly'
  * - compare: 'true' | 'false' (compare with previous period)
  */
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     // ✅ CRITICAL FIX: Add authentication
     const supabase = await createClient()
@@ -184,6 +185,8 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withSecurity(getHandler, SecurityPresets.enhanced())
 
 // Helper: Group transactions by period
 function groupByPeriod(transactions: FinancialRecordPartial[], period: string) {

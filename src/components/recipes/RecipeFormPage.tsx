@@ -15,13 +15,13 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { uiLogger } from '@/lib/logger'
-import type { Database, IngredientsTable, RecipesTable } from '@/types/database'
+import type { Row, Database } from '@/types/database'
 import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-type RecipeInsert = RecipesTable
-type Ingredient = IngredientsTable
+type RecipeInsert = Row<'recipes'>
+type Ingredient = Row<'ingredients'>
 
 interface RecipeFormPageProps {
     mode: 'create' | 'edit'
@@ -64,7 +64,9 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
 
     const loadIngredients = async () => {
         try {
-            const response = await fetch('/api/ingredients')
+            const response = await fetch('/api/ingredients', {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (response.ok) {
                 const data = await response.json()
                 setIngredients(data.ingredients ?? [])
@@ -84,7 +86,9 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
             setLoading(true)
 
             // Fetch recipe with ingredients from API
-            const response = await fetch(`/api/recipes/${recipeId}`)
+            const response = await fetch(`/api/recipes/${recipeId}`, {
+                credentials: 'include', // Include cookies for authentication
+            })
             if (!response.ok) {
                 throw new Error('Gagal memuat resep')
             }
@@ -168,6 +172,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                             notes: ri.notes,
                         })),
                     }),
+                    credentials: 'include', // Include cookies for authentication
                 })
 
                 if (!response.ok) {
@@ -197,6 +202,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                             notes: ri.notes,
                         })),
                     }),
+                    credentials: 'include', // Include cookies for authentication
                 })
 
                 if (!response.ok) {

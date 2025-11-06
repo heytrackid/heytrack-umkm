@@ -1,13 +1,13 @@
 import { apiLogger } from '@/lib/logger'
 import { generateAIInsights } from '@/lib/ai'
-import { createClient } from '@/utils/supabase/client'
-
-const supabase = createClient()
+import { useSupabase } from '@/providers/SupabaseProvider'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database'
 
 /**
  * Fetch business context dari database
  */
-async function fetchBusinessContext(userId: string) {
+async function fetchBusinessContext(supabase: SupabaseClient<Database>, userId: string) {
   try {
     // Fetch orders data
     const { data: orders, error: ordersError } = await supabase
@@ -24,7 +24,7 @@ async function fetchBusinessContext(userId: string) {
     // Fetch ingredients dengan stok rendah
     const { data: ingredients, error: ingredientsError } = await supabase
       .from('ingredients')
-      .select('id, name, current_stock, unit, minimum_stock')
+      .select('id, name, current_stock, unit, min_stock')
       .eq('user_id', userId)
       .limit(10)
 
@@ -46,7 +46,7 @@ async function fetchBusinessContext(userId: string) {
 
     // Type assertions untuk avoid TS errors
     interface OrderData { id: string; status: string; total_amount: number; created_at: string }
-    interface IngredientData { id: string; name: string; current_stock: number; unit: string; minimum_stock: number }
+    interface IngredientData { id: string; name: string; current_stock: number; unit: string; min_stock: number }
     interface RecipeData { id: string; name: string; category: string; is_active: boolean }
 
     const typedOrders = (orders ?? []) as OrderData[]
@@ -57,7 +57,7 @@ async function fetchBusinessContext(userId: string) {
     const totalOrders = typedOrders.length
     const pendingOrders = typedOrders.filter(o => o.status === 'PENDING').length
     const totalRevenue = typedOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
-    const criticalStock = typedIngredients.filter(i => i.current_stock < i.minimum_stock)
+    const criticalStock = typedIngredients.filter(i => i.current_stock < i.min_stock)
 
     return {
       orders: {
@@ -71,7 +71,7 @@ async function fetchBusinessContext(userId: string) {
           name: i.name,
           stock: i.current_stock,
           unit: i.unit,
-          minimum: i.minimum_stock
+          minimum: i.min_stock
         })),
         total: typedIngredients.length
       },
@@ -88,6 +88,7 @@ async function fetchBusinessContext(userId: string) {
 }
 
 export function useAIService() {
+  const { supabase } = useSupabase()
   const generateSuggestions = (intent: string): string[] => {
     switch (intent) {
       case 'check_inventory':
@@ -152,7 +153,7 @@ export function useAIService() {
     apiLogger.info({ userId, query: query.substring(0, 100) }, 'Processing AI chatbot query')
 
     // Fetch business context dari database
-    const businessContext = await fetchBusinessContext(userId)
+    const businessContext = await fetchBusinessContext(supabase, userId)
 
     try {
       // Use available NLP processing
@@ -195,7 +196,7 @@ export function useAIService() {
       const lowerQuery = query.toLowerCase()
 
       // Get business context for fallback responses
-      const businessContext = await fetchBusinessContext(userId)
+      const businessContext = await fetchBusinessContext(supabase, userId)
 
       // Check if it's an API configuration issue
       if (error instanceof Error && error.message.includes('API key')) {

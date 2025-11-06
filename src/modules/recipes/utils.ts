@@ -1,11 +1,11 @@
-import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 
 // Use generated types from Supabase
-export type Recipe = RecipesTable
-export type RecipeIngredient = RecipeIngredientsTable
-export type Ingredient = IngredientsTable
+export type Recipe = Row<'recipes'>
+export type RecipeIngredient = Row<'recipe_ingredients'>
+export type Ingredient = Row<'ingredients'>
 
 // Extended type for recipe with ingredient details
 export interface RecipeIngredientWithDetails extends RecipeIngredient {

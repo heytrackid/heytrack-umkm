@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCurrency } from '@/hooks/useCurrency'
-import { Edit, Eye } from 'lucide-react'
+import { ORDER_STATUS_CONFIG, ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/constants'
 import type { Order } from '@/modules/orders/types'
 import type { OrderStatus, PaymentStatus } from '@/types/database'
-import { ORDER_STATUS_CONFIG, ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/constants'
+import { Edit, Eye } from 'lucide-react'
 
 
 
@@ -62,7 +62,11 @@ export const OrderCard = ({ order, onView, onEdit, onUpdateStatus }: OrderCardPr
                         <Badge className={getStatusColor(order.status)}>
                             {order.status ? ORDER_STATUS_LABELS[order.status] : 'N/A'}
                         </Badge>
-                        <Badge className={getPaymentStatusColor(order.payment_status ?? null)}>
+                        <Badge
+                            className={getPaymentStatusColor(
+                                (order.payment_status as PaymentStatus) ?? null
+                            )}
+                        >
                             {paymentStatusLabel}
                         </Badge>
                     </div>

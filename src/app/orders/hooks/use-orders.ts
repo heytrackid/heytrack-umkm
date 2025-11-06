@@ -11,6 +11,7 @@ import type {
   OrderTotalsBreakdown,
   InvoiceData
 } from '@/app/orders/types/orders.types'
+import type { CatchError } from '@/types/common'
 import { DEFAULT_ORDERS_CONFIG, calculateOrderTotals, type OrdersModuleConfig, type OrderPriority } from '../config/orders.config' 
 
 interface FinancialMetadata {
@@ -237,7 +238,7 @@ export function useOrderTotals(
 export function useOrderSummary(filters?: OrderFilters): {
   summary: OrderSummary | null
   loading: boolean
-  error: unknown
+  error: CatchError | null
 } {
   const { orders, loading, error } = useOrders(filters)
 

@@ -16,14 +16,14 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { useSupabaseCRUD } from '@/hooks/supabase'
 import { useToast } from '@/hooks/use-toast'
-import type { OperationalCostsInsert, OperationalCostsTable, OperationalCostsUpdate } from '@/types/database'
-import { createClient } from '@/utils/supabase/client'
+import type { Insert, Row, Update } from '@/types/database'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { ArrowLeft, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-type _OperationalCost = OperationalCostsTable
-type OperationalCostInsert = OperationalCostsInsert
+type _OperationalCost = Row<'operational_costs'>
+type OperationalCostInsert = Insert<'operational_costs'>
 
 interface OperationalCostFormPageProps {
     mode: 'create' | 'edit'
@@ -44,7 +44,7 @@ const COST_CATEGORIES = [
 export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPageProps) => {
     const router = useRouter()
     const { toast } = useToast()
-    const supabase = createClient()
+    const { supabase } = useSupabase()
     const { create, update } = useSupabaseCRUD('operational_costs')
 
     const [loading, setLoading] = useState(false)
@@ -156,7 +156,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
             if (mode === 'create') {
                 await create(basePayload)
             } else if (costId) {
-                const updatePayload: OperationalCostsUpdate = {
+                const updatePayload: Update<'operational_costs'> = {
                     ...basePayload,
                     user_id: formData.user_id ?? user.id,
                 }

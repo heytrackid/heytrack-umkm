@@ -2,11 +2,11 @@
 
 import { useMemo } from 'react'
 import { useIngredients } from '@/hooks'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 
 
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 export interface ReorderSuggestion {
   ingredient_id: string

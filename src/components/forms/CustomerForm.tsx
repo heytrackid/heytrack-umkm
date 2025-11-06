@@ -13,12 +13,12 @@ import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { z } from 'zod'
 import { FormField } from './shared/FormField'
-import type { CustomersTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
 
 
 
-type Customer = CustomersTable
+type Customer = Row<'customers'>
 
 // Form schema without user_id (will be added on submit)
 const CustomerFormSchema = z.object({

@@ -14,12 +14,12 @@ import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
 import { useResponsive } from '@/hooks/useResponsive'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { MobileOperationalCostCard } from './MobileOperationalCostCard'
 import { OperationalCostFormDialog } from './OperationalCostFormDialog'
 import { OperationalCostStats } from './OperationalCostStats'
-// import { DateRangePicker } from '@/components/ui/date-range-picker' // TODO: Implement date range filter
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -35,7 +35,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import type { OperationalCostsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import {
     Edit,
     MoreVertical,
@@ -52,7 +52,7 @@ import type { DateRange } from 'react-day-picker'
 
 // Types
 
-type OperationalCost = OperationalCostsTable
+type OperationalCost = Row<'operational_costs'>
 type CategoryFilter = 'all' | 'utilities' | 'rent' | 'staff' | 'transport' | 'communication' | 'insurance' | 'maintenance' | 'other'
 
 // Constants
@@ -151,28 +151,28 @@ export const EnhancedOperationalCostsPage = () => {
     const paginatedData = useMemo(() => filteredData.slice(pagination.startIndex, pagination.endIndex), [filteredData, pagination.startIndex, pagination.endIndex])
 
     // Update page size
-    const handlePageSizeChange = (newSize: number) => {
+    const handlePageSizeChange = useCallback((newSize: number) => {
         setPageSize(newSize)
         pagination.setPageSize(newSize)
-    }
+    }, [pagination])
 
     // Handlers
-    const handleEdit = (cost: OperationalCost) => {
+    const handleEdit = useCallback((cost: OperationalCost) => {
         setEditingCost(cost)
         setShowFormDialog(true)
-    }
+    }, [])
 
-    const handleAdd = () => {
+    const handleAdd = useCallback(() => {
         setEditingCost(undefined)
         setShowFormDialog(true)
-    }
+    }, [])
 
-    const handleDelete = (cost: OperationalCost) => {
+    const handleDelete = useCallback((cost: OperationalCost) => {
         setSelectedCost(cost)
         setIsDeleteDialogOpen(true)
-    }
+    }, [])
 
-    const handleConfirmDelete = async () => {
+    const handleConfirmDelete = useCallback(async () => {
         if (!selectedCost) { return }
 
         try {
@@ -191,9 +191,9 @@ export const EnhancedOperationalCostsPage = () => {
                 variant: 'destructive',
             })
         }
-    }
+    }, [selectedCost, deleteCost, toast])
 
-    const handleQuickSetup = async () => {
+    const handleQuickSetup = useCallback(async () => {
         try {
             const confirmed = await confirm({
                 title: 'Tambahkan Template Biaya Operasional?',
@@ -201,7 +201,7 @@ export const EnhancedOperationalCostsPage = () => {
                 confirmText: 'Tambahkan',
                 variant: 'default'
             })
-            
+
             if (!confirmed) { return }
 
             const response = await fetch('/api/operational-costs/quick-setup', {
@@ -211,9 +211,9 @@ export const EnhancedOperationalCostsPage = () => {
                 },
             })
 
-            if (!response.ok) { 
+            if (!response.ok) {
                 const errorData = await response.json()
-                throw new Error(errorData.error ?? 'Failed to setup') 
+                throw new Error(errorData.error ?? 'Failed to setup')
             }
 
             const result = await response.json()
@@ -233,7 +233,7 @@ export const EnhancedOperationalCostsPage = () => {
                 variant: 'destructive',
             })
         }
-    }
+    }, [confirm, toast])
 
     const clearFilters = () => {
         setSearchTerm('')
@@ -374,6 +374,12 @@ export const EnhancedOperationalCostsPage = () => {
                                     ))}
                                 </SelectContent>
                             </Select>
+
+                            <DateRangePicker
+                                value={dateRange}
+                                onChange={setDateRange}
+                                className="w-full sm:w-[280px]"
+                            />
 
                             {hasActiveFilters && (
                                 <Button variant="ghost" size="sm" onClick={clearFilters}>

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
-import { checkBotId } from 'botid/server'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -21,19 +20,7 @@ export async function POST() {
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId({
-      advancedOptions: {
-        checkLevel: 'basic',
-      },
-    })
-    if (verification.isBot) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
-
-    // 2. Check if user already has templates
+    }    // 2. Check if user already has templates
     const { data: existingTemplates, error: checkError } = await supabase
       .from('whatsapp_templates')
       .select('id')
@@ -67,7 +54,7 @@ export async function POST() {
     // 4. Fetch created templates
     const { data: templates, error: fetchError } = await supabase
       .from('whatsapp_templates')
-      .select('*')
+      .select('id, user_id, name, message, is_active, created_at, updated_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
 

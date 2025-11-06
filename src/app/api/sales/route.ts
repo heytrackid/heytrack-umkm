@@ -3,9 +3,9 @@ import { createClient } from '@/utils/supabase/server'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations'
-import type { FinancialRecordsInsert } from '@/types/database'
+import type { Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
-import { checkBotId } from 'botid/server'
+import { typed } from '@/types/type-utilities'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -52,17 +52,17 @@ async function GET(request: NextRequest) {
   const { page, limit, search, sort_by, sort_order } = paginationValidation.data
   const { start_date, end_date, recipe_id } = salesQueryValidation.data
 
-  try {
-    const supabase = await createClient()
-    
-    // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+   try {
+     const supabase = typed(await createClient())
 
-    // Calculate offset for pagination
-    const offset = (page - 1) * limit
+     // Authenticate user
+     const { data: { user }, error: authError } = await supabase.auth.getUser()
+     if (authError || !user) {
+       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+     }
+
+     // Calculate offset for pagination
+     const offset = (page - 1) * limit
 
     let query = supabase
       .from('financial_records')
@@ -136,21 +136,13 @@ async function GET(request: NextRequest) {
 // Define the original POST function
 async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    
+    const supabase = typed(await createClient())
+
     // Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId()
-    if (verification.isBot) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
-
-    // The request body is already sanitized by the security middleware
+    }    // The request body is already sanitized by the security middleware
     const body = await request.json()
 
     // Validate request body
@@ -168,7 +160,7 @@ async function POST(request: NextRequest) {
     const validatedData = validation.data
 
     // Map sales data to financial_records structure
-    const insertPayload: FinancialRecordsInsert = {
+    const insertPayload: Insert<'financial_records'> = {
       amount: validatedData.total_amount,
       category: 'Sales',
       description: `Sale of recipe ${validatedData.recipe_id}${validatedData.customer_name ? ` to ${validatedData.customer_name}` : ''}`,
@@ -181,7 +173,7 @@ async function POST(request: NextRequest) {
     const { data: sale, error } = await supabase
       .from('financial_records')
       .insert(insertPayload)
-      .select('*')
+      .select('id, user_id, date, description, category, amount, reference, type, created_at, created_by')
       .single()
 
     if (error) {

@@ -1,9 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, FinancialRecordsInsert, FinancialRecordsUpdate, OrdersInsert } from '@/types/database'
-import { checkBotId } from 'botid/server'
-type OrderStatus = Database['public']['Enums']['order_status']
+import type { Insert, Update, Database, OrderStatus } from '@/types/database'
+import { typed } from '@/types/type-utilities'
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { createPaginationMeta } from '@/lib/validations/pagination'
@@ -16,9 +15,11 @@ import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type FinancialRecordInsert = FinancialRecordsInsert
-type FinancialRecordUpdate = FinancialRecordsUpdate
-type OrderInsert = OrdersInsert
+
+
+type FinancialRecordInsert = Insert<'financial_records'>
+type FinancialRecordUpdate = Update<'financial_records'>
+type OrderInsert = Insert<'orders'>
 
 interface FetchOrdersParams {
   page: number
@@ -67,10 +68,13 @@ const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: 
     }
 
     // Map data to match interface
-    const mappedData = data?.map((order: Record<string, unknown>) => ({
-      ...order,
-      items: order.order_items ?? []
-    })) ?? []
+    const mappedData = data?.map((order: unknown) => {
+      const orderData = order as Record<string, unknown>
+      return {
+        ...orderData,
+        items: orderData.order_items ?? []
+      }
+    }) ?? []
 
     return { data: mappedData, count }
   }, cacheKey, 5 * 60 * 1000) // Cache for 5 minutes
@@ -81,8 +85,8 @@ const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: 
 async function GET(request: NextRequest) {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/orders - Request received')
-    
-    const supabase = await createClient()
+
+    const supabase = typed(await createClient())
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -138,22 +142,14 @@ async function GET(request: NextRequest) {
 async function POST(request: NextRequest) {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/orders - Request received')
-    
-    const supabase = await createClient()
+
+    const supabase = typed(await createClient())
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
       logError(apiLogger, authError, 'POST /api/orders - Unauthorized')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId()
-    if (verification.isBot) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
-
-    const body = await request.json()
+    }    const body = await request.json()
     const validation = OrderInsertSchema.safeParse(body)
 
     if (!validation.success) {

@@ -1,7 +1,7 @@
 import { dbLogger } from '@/lib/logger'
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import { isRecipeWithIngredients } from '@/lib/type-guards'
-import type { Database, RecipesTable, RecipeIngredientsTable, IngredientsTable, HppCalculationsTable } from '@/types/database'
+import type { Row, Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 
@@ -14,9 +14,9 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  */
 
 
-type _Recipe = RecipesTable
-type RecipeIngredient = RecipeIngredientsTable
-type Ingredient = IngredientsTable
+type _Recipe = Row<'recipes'>
+type RecipeIngredient = Row<'recipe_ingredients'>
+type Ingredient = Row<'ingredients'>
 
 export interface HppCalculationResult {
   recipe_id: string // Use snake_case for consistency with DB
@@ -436,7 +436,7 @@ export class HppCalculatorService {
     supabase: SupabaseClient<Database>,
     recipeId: string,
     userId: string
-  ): Promise<HppCalculationsTable | null> {
+  ): Promise<Row<'hpp_calculations'> | null> {
     try {
       const { data, error } = await supabase
         .from('hpp_calculations')

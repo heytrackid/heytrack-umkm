@@ -1,7 +1,7 @@
-import { useState, useTransition } from 'react'
 import { getAuthErrorMessage, validateEmail, validatePassword, validatePasswordMatch } from '@/app/auth/register/utils/validation'
+import { useState, useTransition } from 'react'
 // import { signup } from '@/app/auth/register/actions' // Replaced with API call
-import type { FieldErrors, ErrorAction } from '@/app/auth/register/types'
+import type { ErrorAction, FieldErrors } from '@/app/auth/register/types'
 
 export function useRegistration() {
   const [error, setError] = useState('')
@@ -70,6 +70,7 @@ export function useRegistration() {
             password,
             fullName: email.split('@')[0], // Use email prefix as name
           }),
+          credentials: 'include', // Include cookies for authentication
         })
 
         const data = await response.json()

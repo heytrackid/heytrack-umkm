@@ -6,13 +6,13 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
-import type { IngredientsTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { ShoppingCart, TrendingUp, Calendar, Package, Sparkles, AlertCircle } from 'lucide-react'
 
 
 
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 interface ReorderSuggestion {
     ingredient: Ingredient

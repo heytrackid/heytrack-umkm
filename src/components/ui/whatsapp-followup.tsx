@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { OrdersTable, OrderItemsTable, RecipesTable } from '@/types/database'
+import type { Row } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -26,11 +26,11 @@ import {
   AlertCircle
 } from 'lucide-react'
 
-type Order = OrdersTable
-type OrderItem = OrderItemsTable
+type Order = Row<'orders'>
+type OrderItem = Row<'order_items'>
 // payment_status is a string field, not an enum
 type _PaymentStatus = string
-type Recipe = RecipesTable
+type Recipe = Row<'recipes'>
 
 // Extended type for WhatsApp follow-up
 interface OrderForWhatsApp extends Order {

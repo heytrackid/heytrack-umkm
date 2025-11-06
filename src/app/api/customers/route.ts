@@ -1,12 +1,12 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
-import { checkBotId } from 'botid/server'
 import { CUSTOMER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { typedInsert } from '@/lib/supabase/typed-insert'
 import { getErrorMessage, safeNumber, safeString } from '@/lib/type-guards'
 import { withSecurity, SecurityPresets } from '@/utils/security'
+import { typed } from '@/types/type-utilities'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
@@ -15,7 +15,7 @@ export const runtime = 'nodejs'
 async function GET(request: NextRequest) {
   try {
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -81,7 +81,7 @@ async function GET(request: NextRequest) {
 async function POST(request: NextRequest) {
   try {
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -92,16 +92,6 @@ async function POST(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       )
-    }
-
-    // Check if the request is from a bot
-    const verification = await checkBotId({
-      advancedOptions: {
-        checkLevel: 'basic',
-      },
-    })
-    if (verification.isBot) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
     const body = await request.json()

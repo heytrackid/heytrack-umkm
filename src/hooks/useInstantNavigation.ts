@@ -29,7 +29,9 @@ export function useInstantNavigation() {
       path: '/dashboard',
       queryKeys: [['dashboard', 'all-data']],
       prefetchFn: async () => {
-        const response = await fetch('/api/dashboard/stats')
+        const response = await fetch('/api/dashboard/stats', {
+          credentials: 'include', // Include cookies for authentication
+        })
         return response.json()
       }
     },
@@ -37,7 +39,9 @@ export function useInstantNavigation() {
       path: '/orders',
       queryKeys: [['orders', 'list']],
       prefetchFn: async () => {
-        const response = await fetch('/api/orders?page=1&limit=10')
+        const response = await fetch('/api/orders?page=1&limit=10', {
+          credentials: 'include', // Include cookies for authentication
+        })
         return response.json()
       }
     },
@@ -45,7 +49,9 @@ export function useInstantNavigation() {
       path: '/recipes',
       queryKeys: [['recipes', 'list']],
       prefetchFn: async () => {
-        const response = await fetch('/api/recipes')
+        const response = await fetch('/api/recipes', {
+          credentials: 'include', // Include cookies for authentication
+        })
         return response.json()
       }
     },
@@ -53,7 +59,9 @@ export function useInstantNavigation() {
       path: '/ingredients',
       queryKeys: [['ingredients', 'list']],
       prefetchFn: async () => {
-        const response = await fetch('/api/ingredients')
+        const response = await fetch('/api/ingredients', {
+          credentials: 'include', // Include cookies for authentication
+        })
         return response.json()
       }
     },
@@ -61,7 +69,9 @@ export function useInstantNavigation() {
       path: '/customers',
       queryKeys: [['customers']],
       prefetchFn: async () => {
-        const response = await fetch('/api/customers')
+        const response = await fetch('/api/customers', {
+          credentials: 'include', // Include cookies for authentication
+        })
         return response.json()
       }
     },
@@ -69,7 +79,9 @@ export function useInstantNavigation() {
       path: '/hpp',
       queryKeys: [['hpp', 'overview']],
       prefetchFn: async () => {
-        const response = await fetch('/api/hpp/overview')
+        const response = await fetch('/api/hpp/overview', {
+          credentials: 'include', // Include cookies for authentication
+        })
         return response.json()
       }
     },
@@ -77,7 +89,9 @@ export function useInstantNavigation() {
       path: '/profit',
       queryKeys: [['profit', 'report']],
       prefetchFn: async () => {
-        const response = await fetch('/api/reports/profit')
+        const response = await fetch('/api/reports/profit', {
+          credentials: 'include', // Include cookies for authentication
+        })
         return response.json()
       }
     }

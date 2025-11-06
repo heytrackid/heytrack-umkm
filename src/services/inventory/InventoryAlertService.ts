@@ -1,7 +1,7 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { Json, InventoryAlertsInsert } from '@/types/database'
+import type { Insert, Json } from '@/types/database'
 
 
 
@@ -39,7 +39,7 @@ export class InventoryAlertService {
         alert_type: string
         severity: string
         message: string
-        metadata: InventoryAlertsInsert['metadata']
+        metadata: Insert<'inventory_alerts'>['metadata']
       }
 
       const alerts: PendingInventoryAlert[] = []

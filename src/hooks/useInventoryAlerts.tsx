@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useIngredients } from '@/hooks'
-import type { IngredientsTable, Json } from '@/types/database'
+import type { Row, Json } from '@/types/database'
 import { Badge } from '@/components/ui/badge'
 import type { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
 
@@ -32,7 +32,7 @@ export interface InventoryAlert extends DatabaseInventoryAlert {
   metadata: Json
 }
 
-type Ingredient = IngredientsTable
+type Ingredient = Row<'ingredients'>
 
 export interface InventoryStatus {
   total_ingredients: number

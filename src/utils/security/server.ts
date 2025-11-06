@@ -6,10 +6,9 @@ import { JSDOM } from 'jsdom'
 // Server-only security utilities with DOMPurify
 
 
-// Create DOMPurify instance for server-side use  
+// Create DOMPurify instance for server-side use
 const {window} = new JSDOM('')
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const DOMPurifyServer = DOMPurify(window as any)
+const DOMPurifyServer = DOMPurify(window)
 
 export function sanitizeHtml(input: string): string {
   return DOMPurifyServer.sanitize(input, {

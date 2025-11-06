@@ -24,7 +24,9 @@ export function useProductionSuggestions() {
   return useQuery({
     queryKey: ['production-suggestions'],
     queryFn: async () => {
-      const response = await fetch('/api/production/suggestions')
+      const response = await fetch('/api/production/suggestions', {
+        credentials: 'include', // Include cookies for authentication
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch production suggestions')
       }
@@ -52,7 +54,8 @@ export function useCreateProductionBatch() {
       const response = await fetch('/api/production/suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(request)
+        body: JSON.stringify(request),
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
