@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
@@ -70,6 +71,7 @@ export const NotificationList = ({
     onRefresh,
 }: NotificationListProps) => {
     const [filter, setFilter] = useState<'all' | 'unread'>('all')
+    const parentRef = useRef<HTMLDivElement>(null)
 
     const filteredNotifications = notifications.filter((n) => {
         if (filter === 'unread') {
@@ -79,6 +81,16 @@ export const NotificationList = ({
     })
 
     const unreadCount = notifications.filter((n) => !n.is_read && !n.is_dismissed).length
+
+    // Use virtual scrolling for large notification lists (>30 items)
+    const useVirtualScrolling = filteredNotifications.length > 30
+
+    const virtualizer = useVirtualizer({
+        count: filteredNotifications.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 100, // Estimated height per notification
+        overscan: 5,
+    })
 
     const handleNotificationClick = (notification: Notification) => {
         if (!notification.is_read) {
@@ -152,7 +164,7 @@ export const NotificationList = ({
                         Memuat...
                     </div>
                 )}
-                
+
                 {!isLoading && filteredNotifications.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
                         <Bell className="h-8 w-8 mb-2 opacity-50" />
@@ -161,10 +173,116 @@ export const NotificationList = ({
                         </p>
                     </div>
                 )}
-                
+
                 {filteredNotifications.length > 0 && (
-                    <div className="divide-y">
-                        {filteredNotifications.map((notification) => {
+                    useVirtualScrolling ? (
+                        // Virtual scrolling for large lists
+                        <div
+                            ref={parentRef}
+                            className="h-full overflow-auto"
+                            style={{ contain: 'strict' }}
+                        >
+                            <div
+                                style={{
+                                    height: `${virtualizer.getTotalSize()}px`,
+                                    width: '100%',
+                                    position: 'relative',
+                                }}
+                            >
+                                {virtualizer.getVirtualItems().map((virtualItem) => {
+                                    const notification = filteredNotifications[virtualItem.index]
+                                    const TypeIcon = typeIcons[notification.type as keyof typeof typeIcons] || Info
+                                    const CategoryIcon = categoryIcons[notification.category as keyof typeof categoryIcons] || Settings
+                                    const typeColor = typeColors[notification.type as keyof typeof typeColors] || 'text-muted-foreground'
+                                    const priorityColor = priorityColors[(notification.priority ?? 'normal') as keyof typeof priorityColors] ?? 'border-l-blue-400'
+
+                                    return (
+                                        <div
+                                            key={notification.id}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: `${virtualItem.size}px`,
+                                                transform: `translateY(${virtualItem.start}px)`,
+                                            }}
+                                        >
+                                            <div
+                                                className={cn(
+                                                    'p-4 hover:bg-muted/50 cursor-pointer transition-colors border-l-4',
+                                                    !notification.is_read && 'bg-gray-50/50 dark:bg-gray-900/30',
+                                                    priorityColor
+                                                )}
+                                                onClick={() => handleNotificationClick(notification)}
+                                            >
+                                                <div className="flex gap-3">
+                                                    {/* Icon */}
+                                                    <div className="flex-shrink-0">
+                                                        <div className={cn('p-2 rounded-full bg-muted', typeColor)}>
+                                                            <TypeIcon className="h-4 w-4" />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Content */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start justify-between gap-2 mb-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <CategoryIcon className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                                                                <h4 className={cn(
+                                                                    'font-medium text-sm text-wrap-mobile',
+                                                                    !notification.is_read && 'font-semibold'
+                                                                )}>
+                                                                    {notification.title}
+                                                                </h4>
+                                                            </div>
+                                                            <span className="text-xs text-muted-foreground flex-shrink-0">
+                                                                {formatDistanceToNow(new Date(notification.created_at || new Date()), {
+                                                                    addSuffix: true,
+                                                                    locale: idLocale
+                                                                })}
+                                                            </span>
+                                                        </div>
+
+                                                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                                                            {notification.message}
+                                                        </p>
+
+                                                        {/* Action buttons */}
+                                                        <div className="flex items-center gap-2">
+                                                            {!notification.is_read && (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={(e) => handleMarkAsRead(e, notification.id)}
+                                                                    className="h-6 px-2 text-xs"
+                                                                >
+                                                                    <Check className="h-3 w-3 mr-1" />
+                                                                    Tandai Dibaca
+                                                                </Button>
+                                                            )}
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={(e) => handleDismiss(e, notification.id)}
+                                                                className="h-6 px-2 text-xs text-red-600 hover:text-red-700"
+                                                            >
+                                                                <X className="h-3 w-3 mr-1" />
+                                                                Tutup
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    ) : (
+                        // Regular rendering for small lists
+                        <div className="divide-y">
+                            {filteredNotifications.map((notification) => {
                             const TypeIcon = typeIcons[notification.type as keyof typeof typeIcons] || Info
                             const CategoryIcon = categoryIcons[notification.category as keyof typeof categoryIcons] || Settings
                             const typeColor = typeColors[notification.type as keyof typeof typeColors] || 'text-muted-foreground'
@@ -243,7 +361,8 @@ export const NotificationList = ({
                                 </div>
                             )
                         })}
-                    </div>
+                        </div>
+                    )
                 )}
             </ScrollArea>
         </div>

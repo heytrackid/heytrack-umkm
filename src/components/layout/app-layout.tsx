@@ -12,7 +12,7 @@ import { NotificationCenter } from '@/components/ui/notification-center'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useNotifications } from '@/hooks/useNotifications'
 import { uiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import {
   BarChart3,
@@ -95,7 +95,7 @@ const AppLayout = memo(({
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
+  const { supabase } = useSupabase()
 
   // Prevent hydration mismatch
   useEffect(() => {

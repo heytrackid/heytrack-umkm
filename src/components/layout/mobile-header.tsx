@@ -13,7 +13,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useMobile } from '@/hooks/responsive'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import {
     ArrowLeft,
@@ -62,7 +62,7 @@ const MobileHeader = ({
   const [loading, setLoading] = useState(true)
   const { isMobile } = useMobile()
   const router = useRouter()
-  const supabase = createClient()
+  const { supabase } = useSupabase()
 
   // Check auth state on mount
   useEffect(() => {

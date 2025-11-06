@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { createClientLogger } from '@/lib/client-logger'
+import { useSupabase } from '@/providers/SupabaseProvider'
+import type { Database } from '@/types/database'
 
 const logger = createClientLogger('Hook')
-import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
 
 /**
@@ -47,13 +47,12 @@ export function useSupabaseCRUD<TTable extends TableKey>(
   const [data, setData] = useState<Array<TableRow<TTable>> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
+  const { supabase } = useSupabase()
 
   const fetchData = useCallback(async () => {
     try {
       void setLoading(true)
       void setError(null)
-
-      const supabase = createClient()
       
       // Get authenticated user for RLS
       const { data: { user } } = await supabase.auth.getUser()
@@ -104,14 +103,13 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         logger.error({ error: err, table }, 'Error in fetchData')
       }
       setError(new Error(getErrorMessage(err)))
-    } finally {
-      void setLoading(false)
-    }
-  }, [table, options?.select, options?.filter, options?.orderBy])
+     } finally {
+       void setLoading(false)
+     }
+   }, [table, options?.select, options?.filter, options?.orderBy, supabase])
 
   const read = async (id: string): Promise<TableRow<TTable> | null> => {
     try {
-      const supabase = createClient()
       
       // Get authenticated user for RLS
       const { data: { user } } = await supabase.auth.getUser()
@@ -146,7 +144,6 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
   const remove = async (id: string) => {
     try {
-      const supabase = createClient()
       
       // Get authenticated user for RLS
       const { data: { user } } = await supabase.auth.getUser()
@@ -181,7 +178,6 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
   const create = async (newData: Partial<TableInsert<TTable>>): Promise<TableRow<TTable> | null> => {
     try {
-      const supabase = createClient()
       
       // Get authenticated user
       const { data: { user } } = await supabase.auth.getUser()
@@ -223,7 +219,6 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
   const update = async (id: string, updateData: Partial<TableUpdate<TTable>>): Promise<TableRow<TTable> | null> => {
     try {
-      const supabase = createClient()
       
       // Get authenticated user for RLS
       const { data: { user } } = await supabase.auth.getUser()

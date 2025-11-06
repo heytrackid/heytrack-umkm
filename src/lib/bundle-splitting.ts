@@ -1,4 +1,5 @@
 import { lazy, type ComponentType } from 'react'
+import { uiLogger } from '@/lib/logger'
 
 /**
  * Bundle Splitting Utilities
@@ -124,14 +125,11 @@ export class BundleMonitor {
       const resources = performance.getEntriesByType('resource')
       const scripts = resources.filter(r => r.name.endsWith('.js'))
 
-      // eslint-disable-next-line no-console
-      console.group('📦 Bundle Analysis')
+      uiLogger.info('📦 Bundle Analysis started')
       scripts.forEach(script => {
-        // eslint-disable-next-line no-console
-        console.log(`${script.name}: ${(script as PerformanceResourceTiming).transferSize / 1024}KB`)
+        uiLogger.info(`${script.name}: ${(script as PerformanceResourceTiming).transferSize / 1024}KB`)
       })
-      // eslint-disable-next-line no-console
-      console.groupEnd()
+      uiLogger.info('📦 Bundle Analysis completed')
     }
   }
 

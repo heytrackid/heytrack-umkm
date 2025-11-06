@@ -11,8 +11,8 @@ import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from 'react';
-import { Toaster } from 'react-hot-toast';
-import { PerformanceMonitor } from '@/components/performance/PerformanceMonitor';
+import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -73,8 +73,9 @@ const RootLayout = async ({
                       enableIdlePreloading
                       enableNetworkAware
                       debug={false}
-                    >
-                      <GlobalErrorBoundary>
+                     >
+                       <ServiceWorkerRegistration />
+                       <GlobalErrorBoundary>
                       {/* Header temporarily disabled during development */}
                       {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
                       <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">

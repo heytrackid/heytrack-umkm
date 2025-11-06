@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useSupabaseCRUD } from '@/hooks/supabase'
 import { useToast } from '@/hooks/use-toast'
 import type { Insert, Row, Update } from '@/types/database'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { ArrowLeft, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -44,7 +44,7 @@ const COST_CATEGORIES = [
 export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPageProps) => {
     const router = useRouter()
     const { toast } = useToast()
-    const supabase = createClient()
+    const { supabase } = useSupabase()
     const { create, update } = useSupabaseCRUD('operational_costs')
 
     const [loading, setLoading] = useState(false)

@@ -13,6 +13,7 @@ import {
     XCircle,
     Truck
 } from 'lucide-react'
+import { memo } from 'react'
 
 // Map the database enum values to component-friendly values
 type OrderStatus = 'pending' | 'confirmed' | 'in_production' | 'completed' | 'cancelled' | 'delivered'
@@ -95,7 +96,7 @@ const statusConfig = {
     }
 }
 
-export const OrderStatusBadge = ({
+export const OrderStatusBadge = memo(({
     status,
     showNextAction = false,
     onNextAction,
@@ -163,7 +164,7 @@ export const OrderStatusBadge = ({
             )}
         </div>
     )
-}
+})
 
 // Progress indicator component
 interface OrderProgressProps {
@@ -171,7 +172,7 @@ interface OrderProgressProps {
     className?: string
 }
 
-export const OrderProgress = ({ currentStatus, className }: OrderProgressProps) => {
+export const OrderProgress = memo(({ currentStatus, className }: OrderProgressProps) => {
     // Normalize the status to UI format
     let normalizedStatus: OrderStatus;
     if (typeof currentStatus === 'string' && Object.values(uiToDbStatusMap).includes(currentStatus as DatabaseOrderStatus)) {
@@ -242,7 +243,7 @@ export const OrderProgress = ({ currentStatus, className }: OrderProgressProps) 
             })}
         </div>
     )
-}
+})
 
 // Status change confirmation dialog helper
 export function getStatusChangeConfirmation(fromStatus: OrderStatus | DatabaseOrderStatus, toStatus: OrderStatus | DatabaseOrderStatus) {

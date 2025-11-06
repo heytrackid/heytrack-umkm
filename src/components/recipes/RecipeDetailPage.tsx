@@ -1,7 +1,7 @@
  
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DeleteModal } from '@/components/ui'
 import type { Row } from '@/types/database'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { useAuth } from '@/hooks/useAuth'
 import {
     ChefHat,
@@ -41,8 +41,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
     const router = useRouter()
     const { toast } = useToast()
     const { user, isLoading: authLoading } = useAuth()
-
-    const supabase = useMemo(() => createClient(), [])
+    const { supabase } = useSupabase()
 
     const [recipe, setRecipe] = useState<RecipeWithIngredients | null>(null)
     const [loading, setLoading] = useState(true)

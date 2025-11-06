@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => {
       subscription?.unsubscribe()
     }
-  }, [router])
+  }, [router, supabase.auth])
 
   const signOut = async () => {
     try {
@@ -133,7 +133,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const refreshSession = async () => {
     try {
-      const supabase = createClient()
       const { data: { session }, error } = await supabase.auth.refreshSession()
       
       if (error) {

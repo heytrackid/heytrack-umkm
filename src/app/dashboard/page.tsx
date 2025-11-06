@@ -3,7 +3,13 @@
 
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
+// Lazy load OnboardingWizard - only needed for new users
+const OnboardingWizard = dynamic(
+  () => import('@/components/onboarding/OnboardingWizard').then(mod => ({ default: mod.OnboardingWizard })),
+  {
+    loading: () => <div className="animate-pulse bg-muted rounded-lg h-96" />
+  }
+)
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'

@@ -11,7 +11,7 @@ import { createClientLogger } from '@/lib/client-logger'
 import { playNotificationSound, playUrgentNotificationSound, setSoundEnabled, setSoundVolume } from '@/lib/notifications/sound'
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
 import type { Notification } from '@/types/domain/notifications'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { Bell } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NotificationList } from './NotificationList'
@@ -25,6 +25,7 @@ export const NotificationBell = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
     const lastNotificationIdRef = useRef<string | null>(null)
+    const { supabase } = useSupabase()
 
     // Fetch user preferences
     const fetchPreferences = useCallback(async () => {
@@ -104,8 +105,6 @@ export const NotificationBell = () => {
         void fetchNotifications()
 
         // Set up real-time subscription
-        const supabase = createClient()
-
         const channel = supabase
             .channel('notifications')
             .on(
@@ -130,7 +129,7 @@ export const NotificationBell = () => {
         return () => {
             void supabase.removeChannel(channel)
         }
-    }, [preferences, fetchNotifications])
+    }, [preferences, fetchNotifications, supabase])
 
     const handleMarkAllRead = async () => {
         try {

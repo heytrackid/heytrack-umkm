@@ -1,10 +1,9 @@
 import { useRef, useState, useEffect } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { type Message, SUGGESTIONS } from '@/app/ai-chatbot/types'
 
-const supabase = createClient()
-
 export function useChatMessages() {
+  const { supabase } = useSupabase()
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [hasShownWelcome, setHasShownWelcome] = useState(false)
@@ -45,13 +44,13 @@ export function useChatMessages() {
           .limit(10),
         supabase
           .from('ingredients')
-          .select('id, current_stock, minimum_stock')
+          .select('id, current_stock, min_stock')
           .eq('user_id', user.id)
           .limit(50)
       ])
 
       interface OrderRow { id: string; status: string; total_amount: number; created_at: string }
-      interface InventoryRow { id: string; current_stock: number; minimum_stock: number }
+      interface InventoryRow { id: string; current_stock: number; min_stock: number }
       
       const orders = (ordersResult.data ?? []) as OrderRow[]
       const inventory = (inventoryResult.data ?? []) as InventoryRow[]
@@ -60,10 +59,10 @@ export function useChatMessages() {
       const pendingOrders = orders.filter(o => o.status === 'PENDING').length
       const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
       
-      const criticalItems = inventory.filter(i => 
-        typeof i.current_stock === 'number' && 
-        typeof i.minimum_stock === 'number' && 
-        i.current_stock < i.minimum_stock
+      const criticalItems = inventory.filter(i =>
+        typeof i.current_stock === 'number' &&
+        typeof i.min_stock === 'number' &&
+        i.current_stock < i.min_stock
       ).length
 
       const revenueFormatted = new Intl.NumberFormat('id-ID', { 
@@ -114,7 +113,7 @@ export function useChatMessages() {
     }
 
     void showWelcomeMessage()
-  }, [isMounted, hasShownWelcome])
+  }, [isMounted, hasShownWelcome, supabase])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

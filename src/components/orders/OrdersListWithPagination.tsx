@@ -15,6 +15,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
+import { VirtualizedOrderCards } from './VirtualizedOrderCards'
 import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
@@ -212,45 +213,48 @@ export const OrdersListWithPagination = () => {
                         </Button>
                     </CardContent>
                 </Card>
-            ) : (
-                <div className="space-y-3">
-                    {orders.map((order) => (
-                        <Card
-                            key={order.id}
-                            className="hover:shadow-md transition-shadow cursor-pointer"
-                            onClick={() => router.push(`/orders/${order.id}`)}
-                        >
-                            <CardContent className="p-6">
-                                <div className="flex flex-col sm:flex-row justify-between gap-4">
-                                    <div className="flex-1 space-y-2">
-                                        <div className="flex items-center gap-3">
-                                            <h3 className="font-semibold text-lg">#{order.order_no}</h3>
-                                            {getStatusBadge(order.status ?? 'PENDING')}
-                                        </div>
-                                        <div className="text-sm text-muted-foreground space-y-1">
-                                            <p>Pelanggan: {order.customer_name}</p>
-                                            <p>Tanggal: {order.order_date ? new Date(order.order_date).toLocaleDateString('id-ID') : 'No date set'}</p>
-                                            {order.delivery_date && (
-                                                <p>Pengiriman: {new Date(order.delivery_date).toLocaleDateString('id-ID')}</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-2xl font-bold">
-                                            {formatCurrency(order.total_amount ?? 0)}
-                                        </p>
-                                        {order.items && order.items.length > 0 && (
-                                            <p className="text-sm text-muted-foreground mt-1">
-                                                {order.items.length} item
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            )}
+             ) : orders.length > 20 ? (
+                 // Virtual scrolling for large lists (>20 items)
+                 <VirtualizedOrderCards orders={orders} onOrderClick={(orderId) => router.push(`/orders/${orderId}`)} formatCurrency={formatCurrency} />
+             ) : (
+                 <div className="space-y-3">
+                     {orders.map((order) => (
+                         <Card
+                             key={order.id}
+                             className="hover:shadow-md transition-shadow cursor-pointer"
+                             onClick={() => router.push(`/orders/${order.id}`)}
+                         >
+                             <CardContent className="p-6">
+                                 <div className="flex flex-col sm:flex-row justify-between gap-4">
+                                     <div className="flex-1 space-y-2">
+                                         <div className="flex items-center gap-3">
+                                             <h3 className="font-semibold text-lg">#{order.order_no}</h3>
+                                             {getStatusBadge(order.status ?? 'PENDING')}
+                                         </div>
+                                         <div className="text-sm text-muted-foreground space-y-1">
+                                             <p>Pelanggan: {order.customer_name}</p>
+                                             <p>Tanggal: {order.order_date ? new Date(order.order_date).toLocaleDateString('id-ID') : 'No date set'}</p>
+                                             {order.delivery_date && (
+                                                 <p>Pengiriman: {new Date(order.delivery_date).toLocaleDateString('id-ID')}</p>
+                                             )}
+                                         </div>
+                                     </div>
+                                     <div className="text-right">
+                                         <p className="text-2xl font-bold">
+                                             {formatCurrency(order.total_amount ?? 0)}
+                                         </p>
+                                         {order.items && order.items.length > 0 && (
+                                             <p className="text-sm text-muted-foreground mt-1">
+                                                 {order.items.length} item
+                                             </p>
+                                         )}
+                                     </div>
+                                 </div>
+                             </CardContent>
+                         </Card>
+                     ))}
+                 </div>
+             )}
 
             {/* Pagination */}
             {orders.length > 0 && (

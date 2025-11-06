@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { typedInsert } from '@/lib/supabase-client'
 import type { Insert, Row } from '@/types/database'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
@@ -34,6 +34,7 @@ const AIRecipeGeneratorPage = () => {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
+  const { supabase } = useSupabase()
 
   // Form state
   const [productName, setProductName] = useState('')
@@ -108,33 +109,34 @@ const AIRecipeGeneratorPage = () => {
         targetPrice
       })
     }
-  }, [productName, productType, servings, selectedIngredients, targetPrice])
+   }, [productName, productType, servings, selectedIngredients, targetPrice])
 
-  useEffect(() => {
-    void fetchIngredients()
-  }, [])
+   const fetchIngredients = useCallback(async () => {
+     const { data, error } = await supabase
+       .from('ingredients')
+       .select('*')
+       .order('name')
+       .returns<Array<Row<'ingredients'>>>()
 
-  const fetchIngredients = async () => {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('ingredients')
-      .select('*')
-      .order('name')
-      .returns<Array<Row<'ingredients'>>>()
+     if (!error && data) {
+       const ingredients: AvailableIngredient[] = data.map((item) => ({
+         id: item.id,
+         name: item.name,
+         unit: item.unit,
+         price_per_unit: item.price_per_unit,
+         current_stock: item.current_stock,
+         minimum_stock: item.min_stock ?? undefined
+       }))
 
-    if (!error && data) {
-      const ingredients: AvailableIngredient[] = data.map((item) => ({
-        id: item.id,
-        name: item.name,
-        unit: item.unit,
-        price_per_unit: item.price_per_unit,
-        current_stock: item.current_stock,
-        minimum_stock: item.min_stock ?? undefined
-      }))
+       void setAvailableIngredients(ingredients)
+     }
+   }, [supabase])
 
-      void setAvailableIngredients(ingredients)
-    }
-  }
+   useEffect(() => {
+     void fetchIngredients()
+   }, [fetchIngredients])
+
+
 
 
 
@@ -152,7 +154,6 @@ const AIRecipeGeneratorPage = () => {
     void setGeneratedRecipe(null)
 
     try {
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -203,7 +204,6 @@ const AIRecipeGeneratorPage = () => {
     if (!generatedRecipe) { return }
 
     try {
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
