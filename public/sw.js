@@ -14,10 +14,6 @@ const STATIC_ASSETS = [
   '/recipes',
   '/ai-chatbot',
   '/favicon.ico',
-  '/manifest.json',
-  // Cache fonts
-  '/fonts/geist-sans.woff2',
-  '/fonts/geist-mono.woff2',
 ]
 
 // API endpoints to cache

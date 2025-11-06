@@ -1,4 +1,5 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClientLogger } from '@/lib/client-logger'
 
 let browserClient: ReturnType<typeof createSupabaseClient> | null = null
 
@@ -12,7 +13,12 @@ export function createClient() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables')
+    const logger = createClientLogger('SupabaseClient')
+    logger.error({
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseAnonKey
+    }, 'Missing Supabase environment variables')
+    throw new Error('Missing Supabase environment variables. Please check your deployment configuration.')
   }
 
   browserClient = createSupabaseClient(supabaseUrl, supabaseAnonKey)

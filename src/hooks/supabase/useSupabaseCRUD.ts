@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createClientLogger } from '@/lib/client-logger'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import type { Database } from '@/types/database'
@@ -261,6 +262,87 @@ export function useSupabaseCRUD<TTable extends TableKey>(
   useEffect(() => {
     void fetchData()
   }, [fetchData])
+
+  // Realtime subscription setup
+  useEffect(() => {
+    let realtimeChannel: RealtimeChannel | null = null
+
+    const setupRealtime = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          return
+        }
+
+        realtimeChannel = supabase
+          .channel(`${table}_realtime_${user.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table,
+              filter: `user_id=eq.${user.id}`
+            },
+            (payload) => {
+              logger.debug({ table, event: payload.eventType }, 'Realtime event received')
+
+              setData((currentData) => {
+                if (!currentData) {
+                  return currentData
+                }
+
+                switch (payload.eventType) {
+                  case 'INSERT': {
+                    const newRecord = payload.new as TableRow<TTable>
+                    // Check if already exists
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const exists = currentData.some((item: any) => item.id === (newRecord as any).id)
+                    if (!exists) {
+                      return [...currentData, newRecord]
+                    }
+                    return currentData
+                  }
+                  case 'UPDATE': {
+                    const updatedRecord = payload.new as TableRow<TTable>
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    return currentData.map((item: any) =>
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      item.id === (updatedRecord as any).id ? updatedRecord : item
+                    )
+                  }
+                  case 'DELETE': {
+                    const deletedRecord = payload.old as TableRow<TTable>
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    return currentData.filter((item: any) => item.id !== (deletedRecord as any).id)
+                  }
+                  default:
+                    return currentData
+                }
+              })
+            }
+          )
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              logger.debug({ table }, 'Realtime subscription active')
+            } else if (status === 'CHANNEL_ERROR') {
+              logger.error({ table }, 'Realtime subscription error')
+            }
+          })
+
+      } catch (err) {
+        logger.error({ error: err, table }, 'Error setting up realtime')
+      }
+    }
+
+    void setupRealtime()
+
+    return () => {
+      if (realtimeChannel) {
+        void supabase.removeChannel(realtimeChannel)
+      }
+    }
+  }, [table, supabase])
 
   return {
     data,

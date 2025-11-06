@@ -59,10 +59,11 @@ export async function middleware(request: NextRequest) {
 
   // Handle CORS preflight requests
   if (request.method === 'OPTIONS') {
+    const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? 'app.heytrack.id'
     const response = new NextResponse(null, {
       status: 200,
       headers: {
-        'Access-Control-Allow-Origin': isDev ? 'http://localhost:3000' : `https://${process.env.NEXT_PUBLIC_APP_DOMAIN}`,
+        'Access-Control-Allow-Origin': isDev ? 'http://localhost:3000' : `https://${appDomain}`,
         'Access-Control-Allow-Methods': 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
         'Access-Control-Allow-Headers': 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization',
         'Access-Control-Allow-Credentials': 'true',
@@ -118,7 +119,8 @@ export async function middleware(request: NextRequest) {
 
     // API routes (relying on Supabase rate limits)
     if (request.nextUrl.pathname.startsWith('/api/')) {
-      response.headers.set('Access-Control-Allow-Origin', isDev ? 'http://localhost:3000' : `https://${process.env.NEXT_PUBLIC_APP_DOMAIN}`);
+      const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? 'app.heytrack.id'
+      response.headers.set('Access-Control-Allow-Origin', isDev ? 'http://localhost:3000' : `https://${appDomain}`);
       response.headers.set('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
       response.headers.set('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
       response.headers.set('Access-Control-Allow-Credentials', 'true');

@@ -37,7 +37,7 @@ import {
   Wallet
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { memo, useEffect, useState, type ReactNode } from 'react'
+import { memo, useEffect, useState, useRef, type ReactNode } from 'react'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -98,6 +98,7 @@ const AppLayout = memo(({
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  const mainContentRef = useRef<HTMLDivElement>(null)
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -139,6 +140,100 @@ const AppLayout = memo(({
 
     return () => subscription.unsubscribe()
   }, [supabase.auth])
+
+  // Swipe gesture support for mobile navigation
+  useEffect(() => {
+    if (!isMobile || !mounted) {
+      return
+    }
+
+    const mainContent = mainContentRef.current
+    if (!mainContent) {
+      return
+    }
+
+    let startX = 0
+    let startY = 0
+    let isHorizontalSwipe = false
+
+    const handleTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX
+      startY = e.touches[0].clientY
+      isHorizontalSwipe = false
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!startX || !startY) {
+        return
+      }
+
+      const deltaX = e.touches[0].clientX - startX
+      const deltaY = e.touches[0].clientY - startY
+
+      // Determine if this is a horizontal swipe (more horizontal than vertical movement)
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+        isHorizontalSwipe = true
+        e.preventDefault() // Prevent scrolling when swiping horizontally
+      }
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!isHorizontalSwipe || !startX) {
+        return
+      }
+
+      const endX = e.changedTouches[0].clientX
+      const deltaX = endX - startX
+
+      // Minimum swipe distance (100px)
+      if (Math.abs(deltaX) < 100) {
+        return
+      }
+
+      // Get current path to determine navigation
+      const currentPath = window.location.pathname
+
+      // Define navigation order for swipe gestures
+      const navOrder = ['/dashboard', '/orders', '/customers', '/ingredients']
+
+      const currentIndex = navOrder.findIndex(path =>
+        currentPath === path || (path !== '/' && currentPath.startsWith(path))
+      )
+
+      if (currentIndex === -1) {
+        return
+      }
+
+      let nextIndex
+      if (deltaX > 0) {
+        // Swipe right - go to previous item
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : navOrder.length - 1
+      } else {
+        // Swipe left - go to next item
+        nextIndex = currentIndex < navOrder.length - 1 ? currentIndex + 1 : 0
+      }
+
+      const nextPath = navOrder[nextIndex]
+      if (nextPath && nextPath !== currentPath) {
+        router.push(nextPath)
+      }
+
+      // Reset swipe state
+      startX = 0
+      startY = 0
+      isHorizontalSwipe = false
+    }
+
+    mainContent.addEventListener('touchstart', handleTouchStart, { passive: true })
+    mainContent.addEventListener('touchmove', handleTouchMove, { passive: false })
+    mainContent.addEventListener('touchend', handleTouchEnd, { passive: true })
+
+    return () => {
+      mainContent.removeEventListener('touchstart', handleTouchStart)
+      mainContent.removeEventListener('touchmove', handleTouchMove)
+      mainContent.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [isMobile, mounted, router])
 
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
@@ -248,12 +343,15 @@ const AppLayout = memo(({
       {/* Conditional Navigation: Tab Navigation for tablet/desktop, Bottom Nav for mobile */}
       {!isMobile && <TabNavigation tabs={mainTabs} />}
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-background">
-        <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-8">
-          {children}
-        </div>
-      </main>
+       {/* Main Content */}
+       <main
+         ref={mainContentRef}
+         className={`flex-1 overflow-auto bg-background ${isMobile ? 'pb-20' : ''}`}
+       >
+         <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-8">
+           {children}
+         </div>
+       </main>
 
       {/* Bottom Navigation for Mobile */}
       {isMobile && <SmartBottomNav />}
