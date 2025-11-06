@@ -11,6 +11,7 @@ import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { ChevronLeft, ChevronRight, Edit2, Eye, Mail, MoreHorizontal, Phone, Plus, Trash2, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { CustomersTable } from '@/types/database'
+import { useResponsive } from '@/hooks/useResponsive'
 
 interface CustomersTableProps {
   customers: CustomersTable[]
@@ -25,6 +26,102 @@ interface CustomersTableProps {
   isMobile: boolean
 }
 
+interface MobileCustomerCardProps {
+  customer: CustomersTable
+  onView: (customer: CustomersTable) => void
+  onEdit: (customer: CustomersTable) => void
+  onDelete: (customer: CustomersTable) => void
+  formatCurrency: (amount: number) => string
+}
+
+const MobileCustomerCard = ({
+  customer,
+  onView,
+  onEdit,
+  onDelete,
+  formatCurrency
+}: MobileCustomerCardProps) => (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          {/* Header */}
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold">{customer.name}</h3>
+                <Badge variant={customer.is_active ? "default" : "secondary"} className="text-xs">
+                  {customer.is_active ? 'Aktif' : 'Tidak Aktif'}
+                </Badge>
+              </div>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onView(customer)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Lihat
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onEdit(customer)}>
+                  <Edit2 className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={() => onDelete(customer)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Hapus
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Contact */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-1 text-sm">
+              <Mail className="h-3 w-3 text-gray-400 flex-shrink-0" />
+              <span className="truncate">{customer.email}</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <Phone className="h-3 w-3 text-gray-400 flex-shrink-0" />
+              <span>{customer.phone}</span>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Belanja</p>
+              <p className="font-medium text-gray-600">
+                {formatCurrency(customer.total_spent ?? 0)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Order</p>
+              <p className="font-medium">
+                {customer.total_orders ?? 0}
+              </p>
+            </div>
+          </div>
+
+          {/* Last Order */}
+          {customer.last_order_date && (
+            <div>
+              <p className="text-sm text-muted-foreground">Order Terakhir</p>
+              <p className="text-sm text-gray-600">
+                {customer.last_order_date}
+              </p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+
 /**
  * Customers Table Component with Pagination
  * Extracted from customers/page.tsx for code splitting
@@ -38,8 +135,11 @@ const CustomersTable = ({
   onEdit,
   onDelete,
   onAddNew,
-  formatCurrency
+  formatCurrency,
+  isMobile
 }: CustomersTableProps) => {
+  const { isMobile: responsiveIsMobile } = useResponsive()
+  const mobile = isMobile || responsiveIsMobile
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -89,8 +189,22 @@ const CustomersTable = ({
         </p>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
-          <Table>
+        {mobile ? (
+          <div className="space-y-4">
+            {paginatedCustomers.map((customer) => (
+              <MobileCustomerCard
+                key={customer.id}
+                customer={customer}
+                onView={onView}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                formatCurrency={formatCurrency}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-md border">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">
@@ -240,11 +354,12 @@ const CustomersTable = ({
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </CardContent>
+               </div>
+             </div>
+           )}
+         </div>
+         )}
+       </CardContent>
     </Card>
   )
 }

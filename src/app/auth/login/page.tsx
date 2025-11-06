@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { useRenderPerformance } from '@/hooks/usePerformance'
+import { useRenderPerformance } from '@/utils/performance/usePerformance'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import Link from 'next/link'

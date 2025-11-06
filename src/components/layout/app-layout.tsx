@@ -16,7 +16,8 @@ import { useNotifications } from '@/hooks/useNotifications'
 import { useResponsive } from '@/hooks/responsive'
 import { uiLogger } from '@/lib/logger'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { useAuth } from '@/providers/AuthProvider'
+
 import {
   BarChart3,
   Calculator,
@@ -94,8 +95,7 @@ const mainTabs = [
 const AppLayout = memo(({
   children
 }: AppLayoutProps) => {
-  const [user, setUser] = useState<SupabaseUser | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, isLoading: loading, isAuthenticated } = useAuth()
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const mainContentRef = useRef<HTMLDivElement>(null)
@@ -114,32 +114,7 @@ const AppLayout = memo(({
   // Supabase client
   const { supabase } = useSupabase()
 
-  // Check auth state on mount
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        void setUser(user)
-      } catch (err: unknown) {
-        const error = err as Error
-        uiLogger.error({ error }, 'Error getting user:')
-      } finally {
-        void setLoading(false)
-      }
-    }
 
-    void getUser()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        void setUser(session?.user ?? null)
-        void setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
 
   // Swipe gesture support for mobile navigation
   useEffect(() => {
@@ -323,7 +298,7 @@ const AppLayout = memo(({
             </DropdownMenu>
           )}
 
-          {!loading && !user && (
+          {!loading && !user && !isAuthenticated && (
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" onClick={() => router.push('/auth/login')}>
                 Masuk

@@ -266,12 +266,12 @@ export const NavItem = ({ item, index }: NavItemProps) => {
   return (
     <Link
       href={item.href}
-      className={cn(
-        "flex flex-col items-center space-y-1 px-4 py-4 text-xs font-medium transition-all duration-200 rounded-lg min-w-[60px] flex-1 max-w-[80px] relative group touch-manipulation",
-        "min-h-[60px] active:scale-95", // Ensure minimum touch target size (44px is iOS minimum, we use 60px for comfort)
-        isActive && "text-primary bg-primary/10 shadow-sm scale-105",
-        isHovered && !isActive && "hover:opacity-80"
-      )}
+        className={cn(
+          "flex flex-col items-center space-y-1 px-4 py-3 text-[13px] font-medium transition-all duration-200 rounded-lg min-w-[60px] flex-1 max-w-[80px] relative group touch-manipulation",
+          "min-h-[56px] active:scale-95", // Ensure minimum touch target size (44px is iOS minimum, we use 56px for comfort)
+          isActive && "text-primary bg-primary/10 shadow-sm scale-105",
+          isHovered && !isActive && "hover:opacity-80"
+        )}
       style={{ animationDelay: `${index * 100}ms` }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -283,7 +283,7 @@ export const NavItem = ({ item, index }: NavItemProps) => {
       <div className="relative">
         <item.icon
           className={cn(
-            "h-5 w-5 transition-transform",
+            "h-6 w-6 transition-transform",
             isHovered && "scale-110"
           )}
           data-testid="nav-icon"
@@ -323,7 +323,7 @@ export const SmartBottomNav = () => {
       <nav
         data-mobile-nav
         data-testid="mobile-nav"
-        className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center py-2 px-1 bg-background/95 backdrop-blur-md border-t border-border/50 shadow-lg safe-bottom animate-in fade-in duration-300"
+        className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center h-[60px] px-1 bg-background/95 backdrop-blur-md border-t border-border/50 shadow-lg safe-bottom animate-in fade-in duration-300"
         style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
         role="navigation"
         aria-label="Mobile navigation"
@@ -362,7 +362,7 @@ export const SmartBottomNav = () => {
           <SheetDescription>Menu navigasi tambahan untuk fitur lainnya</SheetDescription>
         </SheetHeader>
         <div
-          className="flex flex-col gap-3 mt-6 px-4 animate-in slide-in-from-bottom-4 duration-300"
+          className="flex flex-col gap-3 mt-6 px-4 animate-in slide-in-from-bottom-4 duration-300 overflow-y-auto"
           role="menu"
           aria-label="Additional navigation options"
         >

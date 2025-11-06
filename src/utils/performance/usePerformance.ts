@@ -10,61 +10,41 @@ const perfLogger = createClientLogger('Performance')
 export const useRenderPerformance = (componentName: string) => {
   const renderStartRef = useRef<number | null>(null)
   const mountedRef = useRef(true)
+  const renderCountRef = useRef(0)
   const [renderCount, setRenderCount] = useState(0)
 
   useEffect(() => {
     mountedRef.current = true
-    setRenderCount(prev => prev + 1)
-    
+    renderCountRef.current += 1
+    setRenderCount(renderCountRef.current)
+
     // Measure initial render
     renderStartRef.current = performance.now()
-    
+
     // Log when component mounts
     perfLogger.debug({ componentName, renderCount: 1 }, 'Component mounted')
-    
+
     return () => {
       mountedRef.current = false
-      
+
       // Component unmount cleanup
-      perfLogger.debug({ componentName, renderCount }, 'Component unmounted')
-      
+      perfLogger.debug({ componentName, renderCount: renderCountRef.current }, 'Component unmounted')
+
       // Clean up any pending operations
       if (renderStartRef.current !== null) {
         const duration = performance.now() - renderStartRef.current
-        perfLogger.warn({ 
-          componentName, 
+        perfLogger.warn({
+          componentName,
           duration: duration.toFixed(2),
-          renderCount
+          renderCount: renderCountRef.current
         }, 'Pending render operation cleaned up')
         renderStartRef.current = null
       }
     }
-  }, [componentName, renderCount])
+  }, [componentName])
 
-  useEffect(() => {
-    if (!mountedRef.current) {return} // Don't run if component is unmounted
-    
-    if (renderStartRef.current !== null) {
-      const renderTime = performance.now() - renderStartRef.current
-      
-      // Log slow renders
-      if (renderTime > 16.67) { // More than one frame at 60fps
-        perfLogger.warn({ 
-          componentName, 
-          renderTime: renderTime.toFixed(2),
-          renderCount
-        }, 'Slow component render detected')
-      } else {
-        perfLogger.debug({ 
-          componentName, 
-          renderTime: renderTime.toFixed(2),
-          renderCount
-        }, 'Component rendered')
-      }
-      
-      renderStartRef.current = null
-    }
-  }, [componentName, renderCount])
+  // Note: Removed per-render measurement to prevent infinite loops
+  // If needed, implement with useLayoutEffect or different approach
   
   // Return render count for optimization decisions
   return { renderCount }

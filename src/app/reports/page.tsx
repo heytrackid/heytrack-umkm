@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/hooks'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'

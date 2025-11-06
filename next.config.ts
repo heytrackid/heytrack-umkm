@@ -23,9 +23,7 @@ const nextConfig: NextConfig = {
   generateBuildId: async () =>
     process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 10) || `build-${Date.now()}`,
 
-  turbopack: {
-    root: __dirname,
-  },
+  turbopack: {},
 
   experimental: {
     serverActions: {

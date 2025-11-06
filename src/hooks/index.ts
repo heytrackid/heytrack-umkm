@@ -18,7 +18,7 @@ export { useToast } from './use-toast'
 // export { useErrorHandler, useAsyncError, useFormErrors, useRetry } from './useErrorHandler'
 
 // Auth Hooks
-export { useAuth } from './useAuth'
+export { useAuth } from '@/providers/AuthProvider'
 
 // Database Hooks
 export {

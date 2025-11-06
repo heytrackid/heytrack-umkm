@@ -56,18 +56,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           return
         }
 
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-        if (userError) {
-          authLogger.error({ error: userError }, 'User error:')
-        }
-
         setAuthState(prev => ({
           ...prev,
-          user: user ?? null,
+          user: session?.user ?? null,
           session: session ?? null,
           isLoading: false,
-          isAuthenticated: !!user,
+          isAuthenticated: !!session?.user,
         }))
       } catch (error: unknown) {
         const message = getErrorMessage(error)

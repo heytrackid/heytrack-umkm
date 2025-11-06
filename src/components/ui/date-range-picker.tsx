@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { CalendarIcon } from 'lucide-react'
+import { useResponsive } from '@/hooks/useResponsive'
 import { format, subDays, startOfMonth, endOfMonth, startOfYear } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import type { DateRange } from 'react-day-picker'
@@ -71,6 +72,7 @@ export const DateRangePicker = ({
   onChange,
   className,
 }: DateRangePickerProps) => {
+  const { isMobile } = useResponsive()
   const [date, setDate] = useState<DateRange | undefined>(value)
   const [selectedPreset, setSelectedPreset] = useState<string>('')
 
@@ -102,7 +104,7 @@ export const DateRangePicker = ({
             id="date"
             variant="outline"
             className={cn(
-              'w-[300px] justify-start text-left font-normal',
+              'w-full sm:w-[300px] justify-start text-left font-normal',
               !date && 'text-muted-foreground'
             )}
           >
@@ -124,7 +126,7 @@ export const DateRangePicker = ({
             defaultMonth={date?.from}
             selected={date}
             onSelect={handleDateChange}
-            numberOfMonths={2}
+            numberOfMonths={isMobile ? 1 : 2}
             locale={idLocale}
           />
         </PopoverContent>

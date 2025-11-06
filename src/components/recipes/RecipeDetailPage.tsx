@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { DeleteModal } from '@/components/ui'
 import type { Row } from '@/types/database'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/hooks'
 import {
     ChefHat,
     Edit,
