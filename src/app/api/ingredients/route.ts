@@ -152,8 +152,8 @@ async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-// Apply security middleware with enhanced security for write operations
-const securedGET = withSecurity(GET, SecurityPresets.basic())
+// Apply security middleware with consistent enhanced security
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
 const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
 
 // Export secured handlers
