@@ -25,7 +25,12 @@ const nextConfig: NextConfig = {
   generateBuildId: async () =>
     process.env['VERCEL_GIT_COMMIT_SHA']?.slice(0, 10) || `build-${Date.now()}`,
 
-  turbopack: {},
+  turbopack: {
+    resolveAlias: {
+      // Fix CommonJS export warning for Supabase realtime
+      '@supabase/realtime-js': '@supabase/realtime-js',
+    },
+  },
 
   experimental: {
     serverActions: {
@@ -235,7 +240,12 @@ const nextConfig: NextConfig = {
     return config
   },
 
-  serverExternalPackages: ['@supabase/realtime-js', '@supabase/ssr', 'exceljs'],
+  serverExternalPackages: [
+    '@supabase/realtime-js', 
+    '@supabase/ssr', 
+    'exceljs',
+    'ws',
+  ],
 
   async redirects() {
     return []
