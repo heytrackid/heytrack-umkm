@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields';
@@ -45,6 +45,20 @@ export const SuppliersCRUD = (): JSX.Element => {
     }
   });
 
+  // Reset create form when modal opens
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      createForm.reset({
+        name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: '',
+      })
+    }
+  }, [isCreateModalOpen, createForm])
+
   const editForm = useForm<SupplierForm>({
     resolver: zodResolver(SupplierFormSchema),
     defaultValues: {
@@ -85,16 +99,8 @@ export const SuppliersCRUD = (): JSX.Element => {
   ];
 
   const handleCreate = useCallback((): void => {
-    createForm.reset({
-      name: '',
-      contact_person: '',
-      phone: '',
-      email: '',
-      address: '',
-      notes: '',
-    })
     setIsCreateModalOpen(true)
-  }, [createForm])
+  }, [])
 
   const handleEdit = useCallback((supplier: Supplier): void => {
     setSelectedSupplier(supplier)
@@ -118,18 +124,10 @@ export const SuppliersCRUD = (): JSX.Element => {
     try {
       await createSupplier(data as Insert<'suppliers'>)
       setIsCreateModalOpen(false)
-      createForm.reset({
-        name: '',
-        contact_person: '',
-        phone: '',
-        email: '',
-        address: '',
-        notes: '',
-      })
     } catch (error: unknown) {
       logger.error({ error }, 'Failed to create supplier:')
     }
-  }, [createSupplier, createForm])
+  }, [createSupplier])
 
   const handleSubmitEdit = useCallback(async (data: Record<string, unknown>) => {
     if (!selectedSupplier) { return }
