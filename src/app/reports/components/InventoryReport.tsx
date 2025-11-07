@@ -1,7 +1,7 @@
 import { Package, PackageCheck, AlertTriangle, ShoppingCart } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
+import { useSupabaseCRUD } from '@/hooks/supabase'
 import { useCurrency } from '@/hooks/useCurrency'
 
 // Inventory Report Component

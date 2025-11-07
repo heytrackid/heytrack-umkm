@@ -32,7 +32,7 @@ export type SafeUpdate<T extends string> = T extends TableName
   : Record<string, unknown>
 
 // Helper type for nested relations
-export type WithNestedRelation<T, K extends string, R> = T & { [P in K]: R }
+export type WithNestedRelation<T, K extends string, R> = T & Record<K, R>
 
 // Table Row types (for SELECT queries) - using Tables helper from supabase-generated
 export type AppSettingsTable = SupabaseTables<'app_settings'>
@@ -182,9 +182,9 @@ export type StockReservationStatus = 'ACTIVE' | 'CONSUMED' | 'EXPIRED' | 'RELEAS
 // Batch status (stored as string in database)
 export type BatchStatus = 'CANCELLED' | 'COMPLETED' | 'IN_PROGRESS' | 'PLANNED'
 
-// ============================================
+// ==================================
 // EXTENDED TYPES WITH RELATIONS
-// ============================================
+// ==================================
 
 // Order with relations
 export type OrderWithItems = OrdersTable & {
@@ -226,9 +226,9 @@ export type SupplierWithIngredients = SuppliersTable & {
   }>
 }
 
-// ============================================
+// ==================================
 // UTILITY TYPES
-// ============================================
+// ==================================
 
 // Extract specific fields from table
 export type PickFields<T extends TableName, K extends keyof Row<T>> = Pick<Row<T>, K>
@@ -263,9 +263,9 @@ export interface ApiErrorResponse {
 
 export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse
 
-// ============================================
+// ==================================
 // DOMAIN-SPECIFIC TYPES
-// ============================================
+// ==================================
 
 // Stock Reservation - using generated types
 export type StockReservation = StockReservationsTable
@@ -301,9 +301,9 @@ export interface InventoryStatusCustom {
   status: 'LOW' | 'OK' | 'OUT_OF_STOCK' | 'REORDER_NEEDED'
 }
 
-// ============================================
+// ==================================
 // FORM TYPES
-// ============================================
+// ==================================
 
 // Form data types (for client-side forms)
 export type IngredientFormData = Omit<IngredientsInsert, 'created_at' | 'id' | 'updated_at' | 'user_id'>
@@ -312,9 +312,9 @@ export type OrderFormData = Omit<OrdersInsert, 'created_at' | 'id' | 'updated_at
 export type CustomerFormData = Omit<CustomersInsert, 'created_at' | 'id' | 'updated_at' | 'user_id'>
 export type SupplierFormData = Omit<SuppliersInsert, 'created_at' | 'id' | 'updated_at' | 'user_id'>
 
-// ============================================
+// ==================================
 // QUERY FILTER TYPES
-// ============================================
+// ==================================
 
 export interface DateRangeFilter {
   start: string
@@ -336,9 +336,9 @@ export interface SearchParams {
   fields?: string[]
 }
 
-// ============================================
+// ==================================
 // CONSTANTS
-// ============================================
+// ==================================
 
 // Table names as const for type safety
 export const TABLE_NAMES = {

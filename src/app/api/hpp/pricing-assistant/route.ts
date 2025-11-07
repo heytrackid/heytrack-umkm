@@ -14,7 +14,7 @@ interface PricingRecommendation {
 }
 
 // POST /api/hpp/pricing-assistant - Generate pricing recommendation
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()

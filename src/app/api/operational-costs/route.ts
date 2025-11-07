@@ -7,21 +7,21 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
+import type { Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert } from '@/types/database'
 
 /**
  * GET /api/operational-costs
  *
- * Fetch all operational costs (expenses where category != 'Revenue')
+ * Fetch all operational costs (expenses where category !== 'Revenue')
  *
  * Query Parameters:
  * - start_date: Filter by start date (optional)
  * - end_date: Filter by end date (optional)
  */
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()

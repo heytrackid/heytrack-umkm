@@ -321,6 +321,10 @@ export const ActionButtons = ({
       buttonSize = 'lg'
       iconSize = 'h-5 w-5'
       break
+    case 'md':
+      buttonSize = 'default'
+      iconSize = 'h-4 w-4'
+      break
     default:
       buttonSize = 'default'
       iconSize = 'h-4 w-4'

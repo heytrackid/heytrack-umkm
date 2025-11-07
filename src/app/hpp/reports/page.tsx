@@ -67,7 +67,7 @@ const reportsBreadcrumbs = [
   { label: 'Reports' }
 ]
 
-const HppReportsPage = () => {
+const HppReportsPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const { isMobile } = useResponsive()

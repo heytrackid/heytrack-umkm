@@ -59,6 +59,9 @@ export const MobileInput = ({
       case 'tel': return 'tel'
       case 'url': return 'url'
       case 'number': return 'decimal'
+      case 'date': return 'text'
+      case 'text': return 'text'
+      case 'password': return 'text'
       default: return 'text'
     }
   }

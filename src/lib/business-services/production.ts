@@ -286,7 +286,7 @@ export class ProductionServices {
     }
   }
 
-  async cancelProductionBatch(batchId: string): Promise<void> {
+  cancelProductionBatch(batchId: string): void {
     try {
       // TODO: Implement batch cancellation logic
       // const { createServerClient } = await import('@/utils/supabase/client-safe')

@@ -18,7 +18,7 @@ export const BulkActions = ({
   onClearSelection,
   onBulkEdit,
   onBulkDelete
-}: BulkActionsProps) => {
+}: BulkActionsProps): JSX.Element | null => {
   if (selectedItems.length === 0) { return null }
 
   const selectedCategories = filteredCategories.filter(category =>

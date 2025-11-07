@@ -39,7 +39,7 @@ export const RegistrationForm = ({
   onTogglePasswordVisibility,
   onToggleConfirmPasswordVisibility,
   onSuccess
-}: RegistrationFormProps) => {
+}: RegistrationFormProps): JSX.Element => {
   const {
     error,
     errorAction,

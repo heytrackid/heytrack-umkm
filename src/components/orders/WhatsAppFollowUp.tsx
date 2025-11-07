@@ -16,12 +16,11 @@ import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTr
 import { Textarea } from '@/components/ui/textarea';
 import { useSettings } from '@/contexts/settings-context';
 import { createClientLogger } from '@/lib/client-logger'
+import type { OrderData } from '@/lib/communications/types';
 import { WhatsAppService } from '@/lib/communications/whatsapp';
 
 
 const logger = createClientLogger('WhatsAppFollowUp');
-
-import type { OrderData } from '@/lib/communications/types';
 
 
 
@@ -33,7 +32,7 @@ interface OrderItemData {
   name?: string;
 }
 
-interface WhatsAppFollowUpProps {
+export interface WhatsAppFollowUpProps {
   order: {
     id: string;
     customer_name: string;
@@ -48,7 +47,7 @@ interface WhatsAppFollowUpProps {
   onSent?: (type: 'business' | 'whatsapp', message: string) => void;
 }
 
-const WhatsAppFollowUp = ({
+export const WhatsAppFollowUp = ({
   order,
   businessName = 'UMKM UMKM',
   onSent
@@ -411,5 +410,3 @@ const WhatsAppFollowUp = ({
     </Dialog>
   );
 };
-
-export default WhatsAppFollowUp;

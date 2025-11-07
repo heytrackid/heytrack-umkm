@@ -16,16 +16,16 @@ const triggerHapticFeedback = (type: 'heavy' | 'light' | 'medium' = 'light') => 
           medium: [20],
           heavy: [30]
         }
-        const pattern = patterns[type] || [10]
+        const pattern = patterns[type] ?? [10]
         navigator.vibrate(pattern)
       }
-      else if ('hapticFeedback' in (window as any)) {
+      else if ('hapticFeedback' in (window as Window & { hapticFeedback?: { impact: (type: string) => void } })) {
         const hapticTypes: Record<string, string> = {
           light: 'impactLight',
           medium: 'impactMedium',
           heavy: 'impactHeavy'
         }
-        ;(window as any).hapticFeedback.impact(hapticTypes[type])
+        ;(window as Window & { hapticFeedback?: { impact: (type: string) => void } }).hapticFeedback?.impact(hapticTypes[type] ?? 'impactLight')
       }
     } catch {
       // Silently fail if haptic feedback is not supported

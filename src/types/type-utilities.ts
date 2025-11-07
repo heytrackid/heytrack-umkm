@@ -92,9 +92,7 @@ export type WithNestedRelation<
   TBase,
   TKey extends string,
   TTable extends TableName
-> = TBase & {
-  [K in TKey]: Row<TTable> | null
-}
+> = TBase & Record<TKey, Row<TTable> | null>
 
 /* -------------------------------------------------------------------------- */
 /*  🌐 BROWSER API TYPE GUARDS                                               */

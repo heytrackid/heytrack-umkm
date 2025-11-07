@@ -1,3 +1,11 @@
+import type {
+  AutomationConfig,
+  SaleData,
+  ExpenseData,
+  Ingredient,
+  FinancialAnalysis
+} from '@/lib/automation/types'
+
 import { AlertGenerator } from './alert-generator'
 import { BreakEvenAnalyzer } from './break-even-analyzer'
 import { MetricsCalculator } from './metrics-calculator'
@@ -18,13 +26,6 @@ import type {
   HistoricalData,
   ProjectionResult
 } from './types'
-import type {
-  AutomationConfig,
-  SaleData,
-  ExpenseData,
-  Ingredient,
-  FinancialAnalysis
-} from '@/lib/automation/types'
 
 export class FinancialAutomation {
   constructor(private readonly config: AutomationConfig) {}

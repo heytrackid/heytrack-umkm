@@ -43,12 +43,12 @@ interface HppBreakdownVisualProps {
     }
 }
 
-export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVisualProps) => {
+export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVisualProps): JSX.Element => {
     const { toast } = useToast()
     const { formatCurrency } = useCurrency()
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['ingredients']))
 
-    const toggleSection = (section: string) => {
+    const toggleSection = (section: string): void => {
         const newExpanded = new Set(expandedSections)
         if (newExpanded.has(section)) {
             newExpanded.delete(section)
@@ -118,7 +118,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
         return acc
     }, {} as Record<string, IngredientDisplay[]>)
 
-    const exportToPDF = () => {
+    const exportToPDF = (): void => {
         // TODO: Implement PDF export
         toast({
             title: 'Fitur akan segera tersedia',

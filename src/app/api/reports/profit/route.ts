@@ -128,9 +128,9 @@ async function getHandler(request: NextRequest) {
 
     // Calculate profit metrics
     const profitData = await calculateProfitMetrics(
-      orders || [],
+      orders ?? [],
       recipes,
-      expenses || [],
+      expenses ?? [],
       period
     )
 

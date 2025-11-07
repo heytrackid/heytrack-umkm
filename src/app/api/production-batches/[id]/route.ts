@@ -13,7 +13,7 @@ import { createClient } from '@/utils/supabase/server'
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const { id } = params
   
   // Validate UUID format

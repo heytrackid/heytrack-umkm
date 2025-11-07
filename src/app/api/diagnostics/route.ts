@@ -4,9 +4,78 @@ export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
 
+interface EnvVarDiagnostics {
+  exists: boolean
+  length?: number
+  startsWith?: boolean
+  value?: string
+}
 
-export async function GET() {
-  const diagnostics = {
+interface DiagnosticsPayload {
+  timestamp: string
+  environment: Record<string, string | undefined>
+  required_env_vars: Record<string, EnvVarDiagnostics>
+  supabase_connectivity: 'unknown' | 'connected' | 'error' | 'missing_credentials' | 'connection_failed'
+  deployment_status: 'checking' | 'operational'
+}
+
+type EnvKey =
+  | 'NEXT_PUBLIC_SUPABASE_URL'
+  | 'NEXT_PUBLIC_SUPABASE_ANON_KEY'
+  | 'NEXT_PUBLIC_APP_DOMAIN'
+  | 'SUPABASE_SERVICE_ROLE_KEY'
+
+const ENV_RULES: Record<EnvKey, { startsWith?: string; includeValue?: boolean }> = {
+  NEXT_PUBLIC_SUPABASE_URL: { startsWith: 'https://' },
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: { startsWith: 'ey' },
+  NEXT_PUBLIC_APP_DOMAIN: { includeValue: true },
+  SUPABASE_SERVICE_ROLE_KEY: {}
+}
+
+function buildEnvVarReport(): Record<string, EnvVarDiagnostics> {
+  const report: Record<string, EnvVarDiagnostics> = {}
+  const envKeys = Object.keys(ENV_RULES) as EnvKey[]
+
+  envKeys.forEach((key) => {
+    const value = process['env'][key]
+    const diagnostics: EnvVarDiagnostics = { exists: Boolean(value) }
+
+    if (value) {
+      diagnostics.length = value.length
+      if (ENV_RULES[key].startsWith) {
+        diagnostics.startsWith = value.startsWith(ENV_RULES[key].startsWith as string)
+      }
+      if (ENV_RULES[key].includeValue) {
+        diagnostics.value = value
+      }
+    }
+
+    report[key] = diagnostics
+  })
+
+  return report
+}
+
+async function checkSupabaseConnectivity(): Promise<DiagnosticsPayload['supabase_connectivity']> {
+  const url = process['env']['NEXT_PUBLIC_SUPABASE_URL']
+  const anonKey = process['env']['NEXT_PUBLIC_SUPABASE_ANON_KEY']
+
+  if (!url || !anonKey) {
+    return 'missing_credentials'
+  }
+
+  try {
+    const { createClient } = await import('@supabase/supabase-js')
+    const client = createClient(url, anonKey)
+    const { error } = await client.from('users').select('count').limit(1).single()
+    return error ? 'error' : 'connected'
+  } catch {
+    return 'connection_failed'
+  }
+}
+
+function buildDiagnosticsSkeleton(): DiagnosticsPayload {
+  return {
     timestamp: new Date().toISOString(),
     environment: {
       NODE_ENV: process['env']['NODE_ENV'],
@@ -14,49 +83,15 @@ export async function GET() {
       VERCEL_URL: process['env']['VERCEL_URL'],
       VERCEL_REGION: process['env']['VERCEL_REGION'],
     },
-    required_env_vars: {
-      NEXT_PUBLIC_SUPABASE_URL: {
-        exists: Boolean(process['env']['NEXT_PUBLIC_SUPABASE_URL']),
-        length: process['env']['NEXT_PUBLIC_SUPABASE_URL']?.length ?? 0,
-        startsWith: process['env']['NEXT_PUBLIC_SUPABASE_URL']?.startsWith('https://') ?? false,
-      },
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: {
-        exists: Boolean(process['env']['NEXT_PUBLIC_SUPABASE_ANON_KEY']),
-        length: process['env']['NEXT_PUBLIC_SUPABASE_ANON_KEY']?.length ?? 0,
-        startsWith: process['env']['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? false,
-      },
-      NEXT_PUBLIC_APP_DOMAIN: {
-        exists: Boolean(process['env']['NEXT_PUBLIC_APP_DOMAIN']),
-        value: process['env']['NEXT_PUBLIC_APP_DOMAIN'],
-      },
-      SUPABASE_SERVICE_ROLE_KEY: {
-        exists: Boolean(process['env']['SUPABASE_SERVICE_ROLE_KEY']),
-        length: process['env']['SUPABASE_SERVICE_ROLE_KEY']?.length ?? 0,
-      },
-    },
+    required_env_vars: buildEnvVarReport(),
     supabase_connectivity: 'unknown',
     deployment_status: 'checking',
   }
+}
 
-  // Test Supabase connectivity
-  try {
-    if (process['env']['NEXT_PUBLIC_SUPABASE_URL'] && process['env']['NEXT_PUBLIC_SUPABASE_ANON_KEY']) {
-      const { createClient } = await import('@supabase/supabase-js')
-      const client = createClient(
-        process['env']['NEXT_PUBLIC_SUPABASE_URL'],
-        process['env']['NEXT_PUBLIC_SUPABASE_ANON_KEY']
-      )
-
-      // Try a simple query to test connectivity
-      const { error } = await client.from('users').select('count').limit(1).single()
-      diagnostics.supabase_connectivity = error ? 'error' : 'connected'
-    } else {
-      diagnostics.supabase_connectivity = 'missing_credentials'
-    }
-  } catch (_error) {
-    diagnostics.supabase_connectivity = 'connection_failed'
-  }
-
+export async function GET(): Promise<NextResponse> {
+  const diagnostics = buildDiagnosticsSkeleton()
+  diagnostics.supabase_connectivity = await checkSupabaseConnectivity()
   diagnostics.deployment_status = 'operational'
 
   return NextResponse.json(diagnostics, {

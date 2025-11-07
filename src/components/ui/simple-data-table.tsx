@@ -281,7 +281,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
             <div className="h-4 bg-gray-200 rounded w-1/4" />
-            {[...Array(5)].map((_, i) => (
+            {Array.from({length: 5}).map((_, i) => (
               <div key={i} className="h-4 bg-gray-200 rounded" />
             ))}
           </div>
@@ -341,7 +341,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
                 .map(col => (
                   <Select
                     key={String(col.key)}
-                    value={filters[String(col.key)] || 'all'}
+                    value={filters[String(col.key)] ?? 'all'}
                     onValueChange={(value) => handleFilterChange(String(col.key), value)}
                   >
                     <SelectTrigger className={isMobile ? 'w-full' : 'w-[150px]'}>

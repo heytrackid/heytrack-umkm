@@ -5,9 +5,9 @@ export const runtime = 'nodejs'
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
+import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Row } from '@/types/database'
 
 
 type Recipe = Row<'recipes'>
@@ -37,7 +37,7 @@ const getEfficiencyLevel = (timesMade: number): 'high' | 'low' | 'medium' => {
 }
 
 // GET /api/hpp/comparison - Get recipe comparison data
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Process comparison data
-    const comparisonData = ((recipes as Recipe[]) || []).map(recipe => {
+    const comparisonData = ((recipes as Recipe[]) ?? []).map(recipe => {
       const hppValue = Number(recipe.cost_per_unit) || 0
       const sellingPrice = Number(recipe.selling_price) || 0
       const margin = sellingPrice - hppValue

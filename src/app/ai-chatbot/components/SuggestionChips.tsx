@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { SUGGESTIONS } from '@/app/ai-chatbot/types'
 import { Button } from '@/components/ui/button'
 
@@ -6,7 +8,7 @@ interface SuggestionChipsProps {
   disabled?: boolean
 }
 
-export const SuggestionChips = ({ onSuggestionClick, disabled }: SuggestionChipsProps) => (
+export const SuggestionChips = ({ onSuggestionClick, disabled }: SuggestionChipsProps): React.JSX.Element => (
     <div className="mb-3 flex flex-wrap gap-2">
       {SUGGESTIONS.slice(0, 4).map((suggestion) => (
         <Button

@@ -1,7 +1,7 @@
 import { dbLogger } from '@/lib/logger'
+import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
 
-import type { Row } from '@/types/database'
 
 type RecipeRow = Row<'recipes'>
 type RecipeIngredientRow = Row<'recipe_ingredients'>
@@ -217,7 +217,7 @@ export class PricingAssistantService {
     hppValue: number,
     strategy: PricingStrategy,
     marketFactors: PricingRecommendation['marketFactors']
-  ) {
+  ): Pick<PricingRecommendation, 'recommendedPrice' | 'minPrice' | 'maxPrice' | 'optimalMargin' | 'reasoning' | 'confidence'> {
     const reasoning: string[] = []
     let recommendedPrice = hppValue * (1 + strategy.targetMargin / 100)
     let confidence = 0.8

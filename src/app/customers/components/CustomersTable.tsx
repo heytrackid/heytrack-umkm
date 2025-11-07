@@ -42,7 +42,7 @@ const MobileCustomerCard = ({
   onEdit,
   onDelete,
   formatCurrency
-}: MobileCustomerCardProps) => (
+}: MobileCustomerCardProps): JSX.Element => (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="space-y-3">
@@ -139,7 +139,7 @@ const CustomersTable = ({
   onAddNew,
   formatCurrency,
   isMobile
-}: CustomersTableProps) => {
+}: CustomersTableProps): JSX.Element => {
   const { isMobile: responsiveIsMobile } = useResponsive()
   const mobile = isMobile || responsiveIsMobile
 

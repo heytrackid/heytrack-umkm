@@ -9,7 +9,7 @@ interface GlobalErrorProps {
   reset: () => void
 }
 
-const GlobalError = ({ error, reset }: GlobalErrorProps) => {
+const GlobalError = ({ error, reset }: GlobalErrorProps): JSX.Element => {
   useEffect(() => {
     // Log global error for debugging
     logError(logger, error, 'Global error occurred', { digest: error.digest ?? 'unknown' })

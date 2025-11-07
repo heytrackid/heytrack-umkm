@@ -14,7 +14,7 @@ import { getAuthErrorMessage, validatePassword, } from '@/lib/auth-errors'
 
 import { updatePassword } from './actions'
 
-const UpdatePasswordPage = () => {
+const UpdatePasswordPage = (): JSX.Element => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)

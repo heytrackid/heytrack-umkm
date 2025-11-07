@@ -16,7 +16,7 @@ import { createClient } from '@/utils/supabase/server'
  * POST /api/financial/records
  * Create a new financial record (manual entry)
  */
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -94,7 +94,7 @@ async function POST(request: NextRequest) {
  * GET /api/financial/records
  * Get financial records for the current user
  */
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -146,7 +146,7 @@ async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: records || []
+      data: records ?? []
     })
 
   } catch (error: unknown) {

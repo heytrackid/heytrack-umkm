@@ -9,7 +9,7 @@ import { RegistrationForm, RegistrationSuccess } from './components'
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
-const RegisterPage = () => {
+const RegisterPage = (): JSX.Element => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)

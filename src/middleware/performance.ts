@@ -1,8 +1,9 @@
 import { apiLogger } from '@/lib/logger'
-import { Cache } from '@/utils/performance/performance'
-import { PerformanceMonitor } from '@/utils/performance/performance-monitoring'
+import { Cache, PerformanceMonitor } from '@/lib/performance'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
+
+
 
 interface PerformanceApiRequest extends NextApiRequest {
   performanceStart?: number
@@ -13,7 +14,7 @@ export const performanceMiddleware = (
   req: PerformanceApiRequest,
   res: NextApiResponse,
   next?: () => void
-) => {
+): void => {
   req.performanceStart = Date.now()
   
   // Continue with the request

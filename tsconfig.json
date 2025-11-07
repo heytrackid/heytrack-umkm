@@ -39,7 +39,7 @@
     "noPropertyAccessFromIndexSignature": true,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
-    "exactOptionalPropertyTypes": false,
+    "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,
     // Path Aliases
     "baseUrl": ".",
@@ -84,11 +84,9 @@
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "src/**/*.{ts,tsx}",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "src/services/**/*.ts"
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -96,7 +94,16 @@
     "out",
     "build",
     "dist",
-    "supabase/functions",
-    "scripts"
+    "supabase",
+    "scripts",
+    "public",
+    "docs",
+    "eslint-rules",
+    "*.config.*",
+    "*.test.*",
+    "**/__tests__/**",
+    ".kiro",
+    "workers",
+    "src/types/supabase-generated.ts"
   ]
 }

@@ -12,7 +12,7 @@ import SupabaseProvider from '@/providers/SupabaseProvider';
 import { SWRProvider } from '@/providers/SWRProvider';
 
 import type { Metadata } from "next";
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import "./globals.css";
 
@@ -37,7 +37,7 @@ const RootLayout = async ({
   children,
 }: Readonly<{
   children: ReactNode;
-}>) => {
+}>): Promise<ReactElement> => {
   // Get CSP nonce for this request
   const nonce = await getNonce()
 
@@ -54,7 +54,7 @@ const RootLayout = async ({
         <link rel="dns-prefetch" href="https://api.openrouter.ai" />
 
         {/* CSP nonce for Next.js inline scripts */}
-        {nonce && (
+        {nonce !== null && (
           <meta property="csp-nonce" content={nonce} />
         )}
       </head>

@@ -8,9 +8,9 @@ import { authLogger } from '@/lib/logger'
  */
 
 
-// ============================================================================
+// ==========================================================
 // AUTH ERROR MESSAGES
-// ============================================================================
+// ==========================================================
 
 export const AUTH_ERROR_MESSAGES = {
   // Sign up errors
@@ -68,9 +68,9 @@ export const AUTH_ERROR_MESSAGES = {
 
 } as const
 
-// ============================================================================
+// ==========================================================
 // AUTH ERROR MESSAGE GETTER
-// ============================================================================
+// ==========================================================
 
 /**
  * Extract error message from error object
@@ -95,7 +95,7 @@ export function getAuthErrorMessage(error: Error | string | { message?: string }
   const errorMessage = extractErrorMessage(error)
 
   // Check for exact matches in our error messages
-  if (AUTH_ERROR_MESSAGES[errorMessage as keyof typeof AUTH_ERROR_MESSAGES]) {
+  if (errorMessage in AUTH_ERROR_MESSAGES) {
     return AUTH_ERROR_MESSAGES[errorMessage as keyof typeof AUTH_ERROR_MESSAGES]
   }
 
@@ -130,8 +130,15 @@ export function getAuthErrorMessage(error: Error | string | { message?: string }
   }
 
   // Log the unknown error for debugging
-  authLogger.warn({ 
-    originalError: typeof error === 'string' ? error : error?.message ?? 'Unknown auth error',
+  let originalError = 'Unknown auth error'
+  if (typeof error === 'string') {
+    originalError = error
+  } else if (error && typeof error === 'object' && 'message' in error) {
+    originalError = (error as { message?: string }).message ?? 'Unknown auth error'
+  }
+
+  authLogger.warn({
+    originalError,
     errorType: typeof error
   }, 'Unknown authentication error received')
   
@@ -139,9 +146,9 @@ export function getAuthErrorMessage(error: Error | string | { message?: string }
   return 'Terjadi kesalahan. Silakan coba lagi.'
 }
 
-// ============================================================================
+// ==========================================================
 // EMAIL VALIDATION
-// ============================================================================
+// ==========================================================
 
 /**
  * Email validation schema using Zod
@@ -176,9 +183,9 @@ export function validateEmail(email: string): {
   }
 }
 
-// ============================================================================
+// ==========================================================
 // PASSWORD VALIDATION
-// ============================================================================
+// ==========================================================
 
 /**
  * Password validation schema
@@ -222,9 +229,9 @@ export function validatePassword(password: string): {
   }
 }
 
-// ============================================================================
+// ==========================================================
 // AUTH FORM VALIDATION
-// ============================================================================
+// ==========================================================
 
 /**
  * Login form validation schema
@@ -264,9 +271,9 @@ export const UpdatePasswordSchema = z.object({
   path: ['confirmPassword'],
 })
 
-// ============================================================================
+// ==========================================================
 // UTILITY FUNCTIONS
-// ============================================================================
+// ==========================================================
 
 /**
  * Extract error message from various error formats

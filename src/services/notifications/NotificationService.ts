@@ -1,9 +1,9 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
+import type { Row, Insert, Json } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Row, Insert, Json } from '@/types/database'
 
 type Notification = Row<'notifications'>
 

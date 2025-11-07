@@ -1,6 +1,9 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
+import { createClientLogger } from '@/lib/client-logger'
+
 // Simple error message getter
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {return error.message}
@@ -8,12 +11,7 @@ function getErrorMessage(error: unknown): string {
   return 'An unknown error occurred'
 }
 
-// Simple logger
-const logger = {
-  error: (obj: unknown, msg?: string) => console.error(obj, msg),
-  warn: (obj: unknown, msg?: string) => console.warn(obj, msg),
-  info: (obj: unknown, msg?: string) => console.info(obj, msg),
-}
+const logger = createClientLogger('ErrorHandler')
 
 /**
  * Error Handler Types

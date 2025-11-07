@@ -67,7 +67,7 @@ const OrdersTableSection = ({
   }, [orders.length])
 
   // Delete handler
-  const handleDeleteOrder = async () => {
+  const handleDeleteOrder = async (): Promise<void> => {
     if (!orderToDelete) {return}
 
     try {
@@ -82,15 +82,15 @@ const OrdersTableSection = ({
     }
   }
 
-  const handleViewOrder = (order: OrderForTable) => {
+  const handleViewOrder = (order: OrderForTable): void => {
     router.push(`/orders/${order['id']}`)
   }
 
-  const handleEditOrder = (order: OrderForTable) => {
+  const handleEditOrder = (order: OrderForTable): void => {
     router.push(`/orders/${order['id']}/edit`)
   }
 
-  const handleDeleteClick = (order: OrderForTable) => {
+  const handleDeleteClick = (order: OrderForTable): void => {
     setOrderToDelete(order)
     setDeleteDialogOpen(true)
   }

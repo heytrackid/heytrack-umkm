@@ -37,7 +37,7 @@ export interface ApiError {
  */
 export type StringRecord = Record<string, boolean | number | string | null | undefined>
 
-/* eslint-disable @typescript-eslint/sort-type-constituents */
+ 
 /**
  * JSON-serializable value
  */

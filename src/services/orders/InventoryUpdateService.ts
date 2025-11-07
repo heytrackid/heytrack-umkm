@@ -2,9 +2,9 @@ import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { extractFirst } from '@/lib/type-guards'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
+import type { Insert, Row } from '@/types/database'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 
-import type { Insert, Row } from '@/types/database'
 
 
 

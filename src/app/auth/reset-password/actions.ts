@@ -2,7 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 
-export async function resetPassword(formData: FormData) {
+export async function resetPassword(formData: FormData): Promise<{ error?: string; success?: boolean }> {
     const supabase = await createClient()
     const email = formData.get('email') as string
 

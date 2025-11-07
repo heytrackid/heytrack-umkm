@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 
 import { createClientLogger } from '@/lib/client-logger'
-
 const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
 
@@ -25,6 +24,7 @@ export interface Expense {
   updated_at?: string
 }
 
+ 
 export function useExpenses() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(true)
@@ -41,8 +41,8 @@ export function useExpenses() {
         throw new Error('Failed to fetch expenses')
       }
 
-      const data = await response.json()
-      setExpenses(data)
+       const data = await response.json() as Expense[]
+       setExpenses(data)
     } catch (error) {
       const errorMessage = getErrorMessage(error)
       setError(errorMessage)
@@ -67,9 +67,9 @@ export function useExpenses() {
         throw new Error('Failed to add expense')
       }
 
-      const newExpense = await response.json()
-      setExpenses(prev => [newExpense, ...prev])
-      return newExpense
+       const newExpense = await response.json() as Expense
+       setExpenses(prev => [newExpense, ...prev])
+       return newExpense
     } catch (error) {
       const errorMessage = getErrorMessage(error)
       setError(errorMessage)
@@ -92,13 +92,13 @@ export function useExpenses() {
         throw new Error('Failed to update expense')
       }
 
-      const updatedExpense = await response.json()
-      setExpenses(prev =>
-        prev.map(expense =>
-          expense['id'] === id ? updatedExpense : expense
-        )
-      )
-      return updatedExpense
+       const updatedExpense = await response.json() as Expense
+       setExpenses(prev =>
+         prev.map(expense =>
+           expense['id'] === id ? updatedExpense : expense
+         )
+       )
+       return updatedExpense
     } catch (error) {
       const errorMessage = getErrorMessage(error)
       setError(errorMessage)

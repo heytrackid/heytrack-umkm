@@ -1,8 +1,8 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
+import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 const normalizeError = (error: unknown): Error =>
@@ -33,9 +33,11 @@ export class WacEngineService {
   private readonly logger = dbLogger
   private supabase: SupabaseClient<Database> | null = null
 
-  private async getSupabase() {
-    this.supabase ??= await createClient()
-    return this.supabase
+  private async getSupabase(): Promise<SupabaseClient<Database>> {
+    if (!this.supabase) {
+      this.supabase = await createClient()
+    }
+    return this.supabase!
   }
 
   /**

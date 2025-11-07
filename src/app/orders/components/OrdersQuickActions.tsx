@@ -15,11 +15,11 @@ interface OrdersQuickActionsProps {
 const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
   const router = useRouter()
 
-  const handleNavigateToTemplates = () => {
+  const handleNavigateToTemplates = (): void => {
     router.push('/orders/whatsapp-templates')
   }
 
-  const handleExportOrders = async () => {
+  const handleExportOrders = async (): Promise<void> => {
     // TODO: Implement actual export functionality
   }
 

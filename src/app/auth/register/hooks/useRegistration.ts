@@ -1,18 +1,26 @@
 import { useState, useTransition } from 'react'
 
+import type { ErrorAction, FieldErrors } from '@/app/auth/register/types'
 import { getAuthErrorMessage, validateEmail, validatePassword, validatePasswordMatch } from '@/app/auth/register/utils/validation'
 
 // import { signup } from '@/app/auth/register/actions' // Replaced with API call
-import type { ErrorAction, FieldErrors } from '@/app/auth/register/types'
 
-export function useRegistration() {
+export function useRegistration(): {
+  error: string
+  errorAction: ErrorAction | null
+  fieldErrors: FieldErrors
+  success: boolean
+  isPending: boolean
+  clearFieldError: (field: keyof FieldErrors) => void
+  handleSubmit: (formData: FormData) => void
+} {
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<ErrorAction | null>(null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [success, setSuccess] = useState(false)
   const [isPending, startTransition] = useTransition()
 
-  const clearFieldError = (field: keyof FieldErrors) => {
+  const clearFieldError = (field: keyof FieldErrors): void => {
     setFieldErrors((prev) => {
       const newErrors = { ...prev }
       delete newErrors[field]
@@ -43,7 +51,7 @@ export function useRegistration() {
     return errors
   }
 
-  const handleSubmit = (formData: FormData) => {
+  const handleSubmit = (formData: FormData): void => {
     setError('')
     setErrorAction(null)
     setFieldErrors({})

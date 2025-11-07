@@ -40,7 +40,7 @@ interface HppScenarioPlannerProps {
     recipe: RecipeWithCosts
 }
 
-export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
+export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Element => {
     const { formatCurrency } = useCurrency()
     const [scenarios, setScenarios] = useState<Scenario[]>([])
     const [selectedIngredient, setSelectedIngredient] = useState('')
@@ -55,7 +55,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
         ingredientId: string,
         type: 'price' | 'quantity',
         changePercent: number
-    ) => {
+    ): Scenario | null => {
         const ingredient = recipe.ingredients.find((item) => item['id'] === ingredientId)
         if (!ingredient) { return null }
 
@@ -82,7 +82,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
         }
     }
 
-    const addScenario = () => {
+    const addScenario = (): void => {
         if (!selectedIngredient) { return }
 
         const ingredient = recipe.ingredients.find((item) => item['id'] === selectedIngredient)
@@ -105,7 +105,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
         setScenarios([...scenarios, newScenario])
     }
 
-    const removeScenario = (id: string) => {
+    const removeScenario = (id: string): void => {
         setScenarios(scenarios.filter(s => s['id'] !== id))
     }
 

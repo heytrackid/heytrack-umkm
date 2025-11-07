@@ -114,7 +114,7 @@ export class Cache {
     let size = 0
     try {
       size = JSON.stringify(data).length
-    } catch (error) {
+    } catch (_error) {
       // If serialization fails, set a default size
       size = 100
     }
@@ -187,62 +187,6 @@ export class Cache {
       estimatedMemory
     }
   }
-}
-
-// Enhanced debounce utility with cancellation support to prevent memory leaks
-export function debounce<T extends (...args: unknown[]) => unknown>(
-  func: T,
-  wait: number
-): { (...args: Parameters<T>): void; cancel: () => void } {
-  let timeout: NodeJS.Timeout | null = null
-  
-  const debouncedFunc: ((...args: Parameters<T>) => void) & { cancel: () => void } = ((...args: Parameters<T>) => {
-    if (timeout) {
-      clearTimeout(timeout)
-    }
-    
-    timeout = setTimeout(() => {
-      func(...args)
-    }, wait)
-  }) as ((...args: Parameters<T>) => void) & { cancel: () => void }
-  
-  debouncedFunc.cancel = () => {
-    if (timeout) {
-      clearTimeout(timeout)
-      timeout = null
-    }
-  }
-  
-  return debouncedFunc
-}
-
-// Enhanced throttle utility with cancellation support
-export function throttle<T extends (...args: unknown[]) => unknown>(
-  func: T,
-  limit: number
-): { (...args: Parameters<T>): void; cancel: () => void } {
-  let inThrottle: boolean
-  let timeout: NodeJS.Timeout | null = null
-  
-  const throttledFunc: ((...args: Parameters<T>) => void) & { cancel: () => void } = ((...args: Parameters<T>) => {
-    if (!inThrottle) {
-      func(...args)
-      inThrottle = true
-      timeout = setTimeout(() => {
-        inThrottle = false
-      }, limit)
-    }
-  }) as ((...args: Parameters<T>) => void) & { cancel: () => void }
-  
-  throttledFunc.cancel = () => {
-    if (timeout) {
-      clearTimeout(timeout)
-      timeout = null
-      inThrottle = false
-    }
-  }
-  
-  return throttledFunc
 }
 
 // Interval utility with automatic cleanup to prevent memory leaks

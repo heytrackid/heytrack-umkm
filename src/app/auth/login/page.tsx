@@ -13,10 +13,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
-import { useRenderPerformance } from '@/utils/performance/usePerformance'
+
+import { useRenderPerformance } from '@/lib/performance'
 // import { login } from './actions' // Replaced with API call
 
-const LoginPage = () => {
+const LoginPage = (): JSX.Element => {
   const router = useRouter()
   useRenderPerformance('LoginPage')
   const mountedRef = useRef(true)
@@ -28,14 +29,14 @@ const LoginPage = () => {
 
   const [isPending, startTransition] = useTransition()
 
-  useEffect(() => () => {
-    mountedRef.current = false
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-    }
-  }, [])
+   useEffect((): (() => void) => () => {
+     mountedRef.current = false
+     if (abortControllerRef.current) {
+       abortControllerRef.current.abort()
+     }
+   }, [])
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault()
     setError('')
     setErrorAction(null)
@@ -102,7 +103,7 @@ const LoginPage = () => {
     })
   }
 
-  const clearFieldError = (field: 'email' | 'password') => {
+   const clearFieldError = (field: 'email' | 'password'): void => {
     setFieldErrors((prev) => {
       const newErrors = { ...prev }
       delete newErrors[field]

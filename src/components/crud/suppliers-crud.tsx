@@ -24,7 +24,7 @@ import type { Row, Insert, Update } from '@/types/database'
 type Supplier = Row<'suppliers'>
 
 
-export const SuppliersCRUD = () => {
+export const SuppliersCRUD = (): JSX.Element => {
   const { data: suppliersData, loading, error } = useSuppliers();
   const { create: createSupplier, update: updateSupplier, delete: deleteSupplier } = useSupabaseCRUD('suppliers');
   const suppliers = suppliersData || [];
@@ -84,7 +84,7 @@ export const SuppliersCRUD = () => {
     },
   ];
 
-  const handleCreate = useCallback(() => {
+  const handleCreate = useCallback((): void => {
     createForm.reset({
       name: '',
       contact_person: '',
@@ -96,7 +96,7 @@ export const SuppliersCRUD = () => {
     setIsCreateModalOpen(true)
   }, [createForm])
 
-  const handleEdit = useCallback((supplier: Supplier) => {
+  const handleEdit = useCallback((supplier: Supplier): void => {
     setSelectedSupplier(supplier)
     editForm.reset({
       name: supplier.name,
@@ -114,7 +114,7 @@ export const SuppliersCRUD = () => {
     setIsDeleteDialogOpen(true)
   }, [])
 
-  const handleSubmitCreate = useCallback(async (data: Record<string, unknown>) => {
+  const handleSubmitCreate = useCallback(async (data: Record<string, unknown>): Promise<void> => {
     try {
       await createSupplier(data as Insert<'suppliers'>)
       setIsCreateModalOpen(false)
@@ -151,7 +151,7 @@ export const SuppliersCRUD = () => {
     }
   }, [selectedSupplier, updateSupplier, editForm])
 
-  const handleConfirmDelete = useCallback(async () => {
+  const handleConfirmDelete = useCallback(async (): Promise<void> => {
     if (!selectedSupplier) { return }
 
     try {

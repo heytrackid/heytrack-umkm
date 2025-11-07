@@ -22,7 +22,7 @@ export function createTextColumn<T extends Record<string, unknown>>(
   return {
     accessorKey: key,
     header,
-    cell: ({ getValue }) => getValue(),
+    cell: ({ getValue }): unknown => getValue(),
     enableSorting: options?.sortable !== false,
     ...(options?.width !== undefined && { size: options.width }),
   }
@@ -42,7 +42,7 @@ export function createNumberColumn<T extends Record<string, unknown>>(
   return {
     accessorKey: key,
     header,
-    cell: ({ getValue }) => {
+    cell: ({ getValue }): string => {
       const value = getValue() as number
       return options?.format ? options.format(value) : value.toString()
     },
@@ -70,7 +70,7 @@ export function createCurrencyColumn<T extends Record<string, unknown>>(
   return {
     accessorKey: key,
     header,
-    cell: ({ getValue }) => {
+    cell: ({ getValue }): string => {
       const value = getValue() as number
       return formatter.format(value)
     },
@@ -94,7 +94,7 @@ export function createDateColumn<T extends Record<string, unknown>>(
   return {
     accessorKey: key,
     header,
-    cell: ({ getValue }) => {
+    cell: ({ getValue }): string => {
       const value = getValue()
       if (!value) { return '-' }
       const date = new Date(value as string)
@@ -115,7 +115,7 @@ export function createStatusColumn<T extends Record<string, unknown>>(
   return {
     accessorKey: key,
     header,
-    cell: ({ getValue }) => {
+    cell: ({ getValue }): React.ReactNode => {
       const value = getValue() as string
       const config = statusConfig[value]
       if (!config) { return value }
@@ -143,7 +143,7 @@ export function createActionColumn<T extends Record<string, unknown>>(
   return {
     id: 'actions',
     header: 'Actions',
-    cell: ({ row }) => (
+    cell: ({ row }): React.ReactNode => (
       <div className="flex gap-2">
         {actions.map((action, idx) => (
           <Button
@@ -166,14 +166,14 @@ export function createActionColumn<T extends Record<string, unknown>>(
 export function createCheckboxColumn<T>(): ColumnDef<T> {
   return {
     id: 'select',
-    header: ({ table }) => (
+    header: ({ table }): React.ReactNode => (
       <input
         type="checkbox"
         checked={table.getIsAllPageRowsSelected()}
         onChange={(e) => table.toggleAllPageRowsSelected(Boolean(e.target.checked))}
       />
     ),
-    cell: ({ row }) => (
+    cell: ({ row }): React.ReactNode => (
       <input
         type="checkbox"
         checked={row.getIsSelected()}

@@ -7,12 +7,13 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useState, useMemo, useCallback } from 'react'
 
+import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { uiLogger } from '@/lib/logger'
-import { arrayCalculations } from '@/lib/performance-optimized'
+import { arrayCalculations } from '@/lib/performance'
 import { getErrorMessage } from '@/lib/type-guards'
 import { DashboardView } from '@/modules/orders/components/OrdersPage/DashboardView'
 import { OrderFilters } from '@/modules/orders/components/OrdersPage/OrderFilters'
@@ -21,7 +22,7 @@ import { StatusSummary } from '@/modules/orders/components/OrdersPage/StatusSumm
 
 import { OrdersList } from './OrdersList'
 
-import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
+
 
 
 

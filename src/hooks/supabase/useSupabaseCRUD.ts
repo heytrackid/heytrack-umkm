@@ -1,12 +1,14 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import useSWR, { type SWRConfiguration } from 'swr'
 
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { useSupabase } from '@/providers/SupabaseProvider'
 
 import type { Database } from '@/types/database'
+
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
 const logger = createClientLogger('Hook')
@@ -27,6 +29,15 @@ type TableFilters<TTable extends TableKey> = Partial<{
   [K in keyof TableRow<TTable>]: TableRow<TTable>[K] | null
 }>
 
+export interface UseSupabaseCRUDOptions<TTable extends TableKey> {
+  select?: string
+  filter?: TableFilters<TTable>
+  orderBy?: { column: string & keyof TableRow<TTable>; ascending?: boolean }
+  strategy?: 'local' | 'swr'
+  swrConfig?: SWRConfiguration<Array<TableRow<TTable>>>
+  realtime?: boolean
+}
+
 interface UseSupabaseCRUDReturn<Row, Insert, Update> {
   data: Row[] | null
   loading: boolean
@@ -41,84 +52,96 @@ interface UseSupabaseCRUDReturn<Row, Insert, Update> {
 
 export function useSupabaseCRUD<TTable extends TableKey>(
   table: TTable,
-  options?: {
-    select?: string
-    filter?: TableFilters<TTable>
-    orderBy?: { column: string & keyof TableRow<TTable>; ascending?: boolean }
-  }
+  options?: UseSupabaseCRUDOptions<TTable>
 ): UseSupabaseCRUDReturn<TableRow<TTable>, TableInsert<TTable>, TableUpdate<TTable>> {
-  const [data, setData] = useState<Array<TableRow<TTable>> | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
+  const [localData, setLocalData] = useState<Array<TableRow<TTable>> | null>(null)
+  const [localLoading, setLocalLoading] = useState((options?.strategy ?? 'local') === 'local')
+  const [localError, setLocalError] = useState<Error | null>(null)
   const { supabase } = useSupabase()
+  const strategy = options?.strategy ?? 'local'
+  const enableRealtime = options?.realtime ?? true
+  const queryKey = [table, options?.select, options?.filter, options?.orderBy] as const
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      // Get authenticated user for RLS
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      let _query = supabase.from(table).select(options?.select ?? '*')
+  const runQuery = useCallback(async (): Promise<Array<TableRow<TTable>>> => {
+    const { data: { user } } = await supabase.auth.getUser()
 
-      // Apply user_id filter for RLS (if user is authenticated)
-      if (user) {
-        _query = _query.eq('user_id' as never, user['id'] as never)
-      }
+    let _query = supabase.from(table).select(options?.select ?? '*')
 
-      // Apply filters
-      if (options?.filter) {
-        Object.entries(options.filter).forEach(([column, value]) => {
-          if (value === undefined) { return }
-          const typedColumn = column as keyof TableRow<TTable>
-          if (value === null) {
-            _query = _query.is(typedColumn as string, null)
-          } else {
-            _query = _query.eq(
-              typedColumn as string,
-              value as TableRow<TTable>[typeof typedColumn]
-            )
-          }
-        })
-      }
-
-      // Apply ordering
-      if (options?.orderBy) {
-        _query = _query.order(options.orderBy.column, {
-          ascending: options.orderBy.ascending ?? true
-        })
-      }
-
-      const { data: result, error: queryError } = await _query as {
-        data: Array<TableRow<TTable>> | null
-        error: Error | null
-      }
-
-      if (queryError) {
-        if (process['env'].NODE_ENV === 'development') {
-          logger.error({ table, error: queryError }, 'Error fetching from table')
-        }
-        throw queryError
-      }
-
-      logger.debug(
-        {
-          table,
-          rowCount: result?.length ?? 0
-        },
-        `Fetched rows from ${table}`
-      )
-      setData(result)
-    } catch (error) {
-      if (process['env'].NODE_ENV === 'development') {
-        logger.error({ error, table }, 'Error in fetchData')
-      }
-      setError(new Error(getErrorMessage(error)))
-    } finally {
-      setLoading(false)
+    if (user) {
+      _query = _query.eq('user_id' as never, user['id'] as never)
     }
+
+    if (options?.filter) {
+      Object.entries(options.filter).forEach(([column, value]) => {
+        if (value === undefined) { return }
+        const typedColumn = column as keyof TableRow<TTable>
+        if (value === null) {
+          _query = _query.is(typedColumn as string, null)
+        } else {
+          _query = _query.eq(typedColumn as string, value as never)
+        }
+      })
+    }
+
+    if (options?.orderBy) {
+      _query = _query.order(options.orderBy.column, {
+        ascending: options.orderBy.ascending ?? true
+      })
+    }
+
+    const { data: result, error: queryError } = await _query as {
+      data: Array<TableRow<TTable>> | null
+      error: Error | null
+    }
+
+    if (queryError) {
+      logger.error({ table, error: queryError }, 'Error fetching from table')
+      throw queryError
+    }
+
+    logger.debug({ table, rowCount: result?.length ?? 0 }, `Fetched rows from ${table}`)
+    return result ?? []
   }, [table, options?.select, options?.filter, options?.orderBy, supabase])
+
+  const {
+    data: swrData,
+    error: swrError,
+    isLoading: swrLoading,
+    mutate
+  } = useSWR(strategy === 'swr' ? queryKey : null, runQuery, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: true,
+    errorRetryCount: 3,
+    ...options?.swrConfig
+  })
+
+  const fetchData = useCallback(async (): Promise<void> => {
+    if (strategy === 'swr') {
+      await mutate()
+      return
+    }
+
+    try {
+      setLocalLoading(true)
+      setLocalError(null)
+      const result = await runQuery()
+      setLocalData(result)
+    } catch (error) {
+      const normalizedError = new Error(getErrorMessage(error))
+      setLocalError(normalizedError)
+      throw normalizedError
+    } finally {
+      setLocalLoading(false)
+    }
+  }, [strategy, mutate, runQuery])
+
+  const refreshAfterChange = useCallback(async (): Promise<void> => {
+    if (strategy === 'swr') {
+      await mutate()
+    } else {
+      await fetchData()
+    }
+  }, [strategy, mutate, fetchData])
 
   const read = async (id: string): Promise<TableRow<TTable> | null> => {
     try {
@@ -152,12 +175,12 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         logger.error({ error, table }, 'Error in read')
       }
       const normalizedError = new Error(getErrorMessage(error))
-      setError(normalizedError)
+      setLocalError(normalizedError)
       throw normalizedError
     }
   }
 
-  const remove = async (id: string) => {
+  const remove = async (id: string): Promise<void> => {
     try {
       
       // Get authenticated user for RLS
@@ -179,14 +202,13 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         throw deleteError
       }
 
-      // Refresh data after delete
-      await fetchData()
+      await refreshAfterChange()
     } catch (error) {
       if (process['env'].NODE_ENV === 'development') {
         logger.error({ error, table }, 'Error in remove')
       }
       const normalizedError = new Error(getErrorMessage(error))
-      setError(normalizedError)
+      setLocalError(normalizedError)
       throw normalizedError
     }
   }
@@ -222,15 +244,14 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         throw createError
       }
 
-      // Refresh data after create
-      await fetchData()
+      await refreshAfterChange()
       return result
     } catch (error) {
       if (process['env'].NODE_ENV === 'development') {
         logger.error({ error, table }, 'Error in create')
       }
       const normalizedError = new Error(getErrorMessage(error))
-      setError(normalizedError)
+      setLocalError(normalizedError)
       throw normalizedError
     }
   }
@@ -262,32 +283,37 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         throw updateError
       }
 
-      // Refresh data after update
-      await fetchData()
+      await refreshAfterChange()
       return result
     } catch (error) {
       if (process['env'].NODE_ENV === 'development') {
         logger.error({ error, table }, 'Error in update')
       }
       const normalizedError = new Error(getErrorMessage(error))
-      setError(normalizedError)
+      setLocalError(normalizedError)
       throw normalizedError
     }
   }
 
-  const clearError = () => {
-    setError(null)
+  const clearError = (): void => {
+    setLocalError(null)
   }
 
   useEffect(() => {
-    void fetchData()
-  }, [fetchData])
+    if (strategy === 'local') {
+      void fetchData()
+    }
+  }, [fetchData, strategy])
 
   // Realtime subscription setup
   useEffect(() => {
+    if (!enableRealtime) {
+      return
+    }
+
     let realtimeChannel: RealtimeChannel | null = null
 
-    const setupRealtime = async () => {
+    const setupRealtime = async (): Promise<void> => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
@@ -307,7 +333,12 @@ export function useSupabaseCRUD<TTable extends TableKey>(
             (payload) => {
               logger.debug({ table, event: payload.eventType }, 'Realtime event received')
 
-              setData((currentData) => {
+              if (strategy === 'swr') {
+                void mutate()
+                return
+              }
+
+              setLocalData((currentData) => {
                 if (!currentData) {
                   return currentData
                 }
@@ -315,7 +346,6 @@ export function useSupabaseCRUD<TTable extends TableKey>(
                 switch (payload.eventType) {
                   case 'INSERT': {
                     const newRecord = payload.new as TableRow<TTable>
-                    // Check if already exists
                     const exists = currentData.some((item) => item.id === newRecord.id)
                     if (!exists) {
                       return [...currentData, newRecord]
@@ -353,17 +383,26 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
     void setupRealtime()
 
-    return () => {
+    return (): void => {
       if (realtimeChannel) {
         void supabase.removeChannel(realtimeChannel)
       }
     }
-  }, [table, supabase])
+  }, [table, supabase, strategy, mutate, enableRealtime])
+
+  const resolvedData = strategy === 'swr' ? swrData ?? null : localData
+  const resolvedLoading = strategy === 'swr' ? (swrLoading ?? false) : localLoading
+  let resolvedError: Error | null
+  if (strategy === 'swr') {
+    resolvedError = swrError ? new Error(getErrorMessage(swrError)) : null
+  } else {
+    resolvedError = localError
+  }
 
   return {
-    data,
-    loading,
-    error,
+    data: resolvedData,
+    loading: resolvedLoading,
+    error: resolvedError,
     refetch: fetchData,
     read,
     remove,

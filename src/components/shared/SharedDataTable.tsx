@@ -136,7 +136,7 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
       // Search filter
       const matchesSearch = !searchTerm || columns.some(col => {
         const value = getValue(item, col.key)
-        return value != null && String(value).toLowerCase().includes(searchTerm.toLowerCase())
+        return value !== null && String(value).toLowerCase().includes(searchTerm.toLowerCase())
       })
 
       // Column filters

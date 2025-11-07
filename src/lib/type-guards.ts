@@ -7,9 +7,9 @@
 
 import type { Row, OrderStatus, ProductionStatus } from '@/types/database'
 
-// ============================================================================
+// ==========================================================
 // GENERIC TYPE GUARDS
-// ============================================================================
+// ==========================================================
 
 /**
  * Check if value is a plain object (not null, not array)
@@ -53,9 +53,9 @@ export function hasKeys<T extends string>(
   return keys.every(key => key in value)
 }
 
-// ============================================================================
+// ==========================================================
 // SAFE PARSERS & UTILITIES
-// ============================================================================
+// ==========================================================
 
 /**
  * Safe number parser with fallback
@@ -171,21 +171,21 @@ export function getErrorMessage(error: unknown): string {
   
   // Handle objects with message property
   if (isRecord(error) && 'message' in error) {
-    return safeString(error.message, 'Unknown error')
+    return safeString(error['message'], 'Unknown error')
   }
   
   // Handle objects with error property (nested errors)
   if (isRecord(error) && 'error' in error) {
-    return getErrorMessage(error.error)
+    return getErrorMessage(error['error'])
   }
   
   // Fallback for truly unknown errors
   return 'An unknown error occurred'
 }
 
-// ============================================================================
+// ==========================================================
 // TYPE ASSERTIONS (Throw errors if validation fails)
-// ============================================================================
+// ==========================================================
 
 /**
  * Assert that value is a record
@@ -221,9 +221,9 @@ export function assertArrayOf<T>(
   }
 }
 
-// ============================================================================
+// ==========================================================
 // DETAILED VALIDATION FUNCTIONS (Return error details)
-// ============================================================================
+// ==========================================================
 
 /**
  * Validation result type
@@ -244,16 +244,16 @@ export function validateIngredient(value: unknown): ValidationResult {
     return { valid: false, errors }
   }
 
-  const record = value as Record<string, unknown>
+  const record = value
 
   if (typeof record['id'] !== 'string') {
     errors.push('id must be a string')
   }
-  const name = record['name']
+  const { name } = record
   if (typeof name !== 'string' || name.trim() === '') {
     errors.push('name must be a non-empty string')
   }
-  const unit = record['unit']
+  const { unit } = record
   if (typeof unit !== 'string' || unit.trim() === '') {
     errors.push('unit must be a non-empty string')
   }
@@ -285,7 +285,7 @@ export function validateRecipe(value: unknown): ValidationResult {
     return { valid: false, errors }
   }
 
-  const record = value as Record<string, unknown>
+  const record = value
 
   if (typeof record['id'] !== 'string') {
     errors.push('id must be a string')
@@ -315,7 +315,7 @@ export function validateOrder(value: unknown): ValidationResult {
     return { valid: false, errors }
   }
 
-  const record = value as Record<string, unknown>
+  const record = value
 
   if (typeof record['id'] !== 'string') {
     errors.push('id must be a string')
@@ -336,9 +336,9 @@ export function validateOrder(value: unknown): ValidationResult {
   return { valid: errors.length === 0, errors }
 }
 
-// ============================================================================
+// ==========================================================
 // SUPABASE JOIN HELPERS (Generic & Type-Safe)
-// ============================================================================
+// ==========================================================
 
 /**
  * Helper to safely extract nested Supabase join data
@@ -365,9 +365,9 @@ export function ensureArray<T>(data: T | T[] | null | undefined): T[] {
   return [data]
 }
 
-// ============================================================================
+// ==========================================================
 // SUPABASE-SPECIFIC TYPE GUARDS
-// ============================================================================
+// ==========================================================
 
 /**
  * Type guard for recipe ingredient item (deep validation)

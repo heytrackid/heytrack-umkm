@@ -24,7 +24,7 @@ interface RestockSuggestion {
 }
 
 // GET /api/inventory/restock-suggestions
-async function getHandler(request: NextRequest) {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/inventory/restock-suggestions')
     

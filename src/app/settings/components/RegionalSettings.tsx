@@ -3,13 +3,13 @@
 import { Settings, RotateCcw } from 'lucide-react'
 import { useState } from 'react'
 
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { useSettings } from '@/contexts/settings-context'
 
 
-import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 
 
 

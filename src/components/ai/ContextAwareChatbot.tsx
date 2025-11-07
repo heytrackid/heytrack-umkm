@@ -12,7 +12,7 @@ import { useContextAwareChat } from '@/hooks/useContextAwareChat'
  * Context-Aware AI Chatbot Component - Enhanced UI/UX 
  */
 
-export const ContextAwareChatbot = () => {
+export const ContextAwareChatbot = (): JSX.Element => {
   const {
     messages,
     isLoading,
@@ -43,7 +43,7 @@ export const ContextAwareChatbot = () => {
     }
   }, [messages])
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault()
 
     if (!input.trim() || isLoading) { return }
@@ -53,7 +53,7 @@ export const ContextAwareChatbot = () => {
     await sendMessage(messageToSend)
   }
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = (suggestion: string): void => {
     setInput(suggestion)
     inputRef.current?.focus()
   }

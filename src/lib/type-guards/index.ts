@@ -12,9 +12,9 @@ import type { Row, OrderStatus, ProductionStatus } from '@/types/database'
  */
 
 
-// ============================================================================
+// ==========================================================
 // Basic Type Guards
-// ============================================================================
+// ==========================================================
 
 export function isString(value: unknown): value is string {
   return typeof value === 'string'
@@ -40,9 +40,9 @@ export function isError(value: unknown): value is Error {
   return value instanceof Error
 }
 
-// ============================================================================
+// ==========================================================
 // Database Type Guards
-// ============================================================================
+// ==========================================================
 
 type Recipe = Row<'recipes'>
 type Ingredient = Row<'ingredients'>
@@ -57,8 +57,8 @@ export function isRecipe(value: unknown): value is Recipe {
   
   return (
     isString(value['id']) &&
-    isString(value.name) &&
-    isString(value.created_by)
+    isString(value['name']) &&
+    isString(value['created_by'])
   )
 }
 
@@ -70,9 +70,9 @@ export function isIngredient(value: unknown): value is Ingredient {
   
   return (
     isString(value['id']) &&
-    isString(value.name) &&
-    isString(value.unit) &&
-    isString(value.user_id)
+    isString(value['name']) &&
+    isString(value['unit']) &&
+    isString(value['user_id'])
   )
 }
 
@@ -85,7 +85,7 @@ export function isOrder(value: unknown): value is Order {
   return (
     isString(value['id']) &&
     isString(value['order_no']) &&
-    isString(value.user_id)
+    isString(value['user_id'])
   )
 }
 
@@ -97,14 +97,14 @@ export function isCustomer(value: unknown): value is Customer {
   
   return (
     isString(value['id']) &&
-    isString(value.name) &&
-    isString(value.user_id)
+    isString(value['name']) &&
+    isString(value['user_id'])
   )
 }
 
-// ============================================================================
+// ==========================================================
 // Extended Type Guards (with relations)
-// ============================================================================
+// ==========================================================
 
 interface RecipeWithIngredients extends Recipe {
   recipe_ingredients?: Array<{
@@ -154,9 +154,9 @@ export function isOrderWithItems(value: unknown): value is OrderWithItems {
   return true
 }
 
-// ============================================================================
+// ==========================================================
 // API Response Type Guards
-// ============================================================================
+// ==========================================================
 
 interface SupabaseResponse<T> {
   data: T | null
@@ -181,9 +181,9 @@ export function isErrorResponse<T>(
   return response.error !== null
 }
 
-// ============================================================================
+// ==========================================================
 // Utility Type Guards
-// ============================================================================
+// ==========================================================
 
 /**
  * Check if value is a valid UUID
@@ -232,9 +232,9 @@ export function isNonNegativeNumber(value: unknown): value is number {
   return isNumber(value) && value >= 0
 }
 
-// ============================================================================
+// ==========================================================
 // Array Type Guards
-// ============================================================================
+// ==========================================================
 
 /**
  * Check if array contains only strings
@@ -264,9 +264,9 @@ export function isIngredientArray(value: unknown): value is Ingredient[] {
   return isArray(value) && value.every(isIngredient)
 }
 
-// ============================================================================
+// ==========================================================
 // Enum Type Guards
-// ============================================================================
+// ==========================================================
 
 /**
  * Check if value is a valid order status
@@ -288,9 +288,9 @@ export function isProductionStatus(value: unknown): value is ProductionStatus {
   return validStatuses.includes(value as ProductionStatus)
 }
 
-// ============================================================================
+// ==========================================================
 // Export all
-// ============================================================================
+// ==========================================================
 
 export const TypeGuards = {
   // Basic

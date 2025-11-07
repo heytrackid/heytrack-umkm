@@ -11,6 +11,7 @@ import { useSettings } from '@/contexts/settings-context'
 
 import type { SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import type { Row } from '@/types/database'
+
 import type { UseFormReturn } from 'react-hook-form'
 
 

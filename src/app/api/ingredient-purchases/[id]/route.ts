@@ -6,11 +6,11 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID, isRecord, extractFirst } from '@/lib/type-guards'
+import type { IngredientPurchaseUpdate } from '@/lib/validations/database-validations'
+import type { Update, Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { IngredientPurchaseUpdate } from '@/lib/validations/database-validations'
-import type { Update, Insert } from '@/types/database'
 
 
 interface RouteContext {
@@ -21,7 +21,7 @@ interface RouteContext {
 async function getHandler(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await context['params']
     
@@ -95,7 +95,7 @@ async function getHandler(
 async function putHandler(
   request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await context['params']
     
@@ -227,7 +227,7 @@ async function putHandler(
 async function deleteHandler(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await context['params']
     

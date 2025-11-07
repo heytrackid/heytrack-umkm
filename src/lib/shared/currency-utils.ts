@@ -58,7 +58,7 @@ export function formatMargin(percentage: number): string {
 }
 
 // Currency conversion utilities
-export function convertToIDR(amount: number, fromCurrency: string, rate: number): number {
+export function convertToIDR(amount: number, rate: number): number {
   // Simple conversion - in real app, use proper exchange rates
   return amount * rate
 }

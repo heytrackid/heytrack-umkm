@@ -24,7 +24,7 @@ export const Pagination = ({
   endItem,
   onPageChange,
   onPageSizeChange
-}: PaginationProps) => {
+}: PaginationProps): JSX.Element | null => {
   if (totalPages <= 1) { return null }
 
   return (

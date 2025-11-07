@@ -7,9 +7,9 @@ import { cn } from '@/lib/utils'
  */
 
 
-// ============================================================================
+// ==========================================================
 // SHARED UTILITIES
-// ============================================================================
+// ==========================================================
 
 export { cn }
 
@@ -56,9 +56,9 @@ export const formatRelativeTime = (date: Date | string): string => {
 // Debounce utilities
 export { debounce } from '@/lib/debounce'
 
-// ============================================================================
+// ==========================================================
 // TYPE GUARD UTILITIES
-// ============================================================================
+// ==========================================================
 
 // Primitive type guards
 export function isString(value: unknown): value is string {
@@ -217,9 +217,9 @@ export const formatPhoneNumber = (phone: string): string => {
   return cleaned
 }
 
-// ============================================================================
+// ==========================================================
 // BUSINESS UTILITIES
-// ============================================================================
+// ==========================================================
 
 export const formatProductName = (name: string, category?: string): string => {
   const formatted = capitalize(name)
@@ -258,9 +258,9 @@ export const calculateTrend = (current: number, previous: number): { value: numb
   return { value: Math.abs(change), isPositive: change >= 0 }
 }
 
-// ============================================================================
+// ==========================================================
 // CONSTANTS
-// ============================================================================
+// ==========================================================
 
 export const BUSINESS_TYPES = {
   FOOD: 'food',
@@ -301,9 +301,9 @@ export const UNITS = {
   BOTTLE: 'botol'
 } as const
 
-// ============================================================================
+// ==========================================================
 // TYPE DEFINITIONS
-// ============================================================================
+// ==========================================================
 
 export type BusinessType = typeof BUSINESS_TYPES[keyof typeof BUSINESS_TYPES]
 export type OrderStatus = typeof ORDER_STATUSES[keyof typeof ORDER_STATUSES]

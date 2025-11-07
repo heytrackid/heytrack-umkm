@@ -29,7 +29,7 @@ const DynamicChart = dynamic(
   }
 )
 
-const MiniChart = (props: MiniChartProps) => {
+const MiniChart = (props: MiniChartProps): JSX.Element => {
   const { data, height = 60, className = '' } = props
 
   if (!data || data.length === 0) {

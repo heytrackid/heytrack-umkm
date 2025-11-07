@@ -42,7 +42,7 @@ class ErrorMonitoringService {
     this.config = {
       enabled: true,
       environment: process['env'].NODE_ENV || 'development',
-      release: process['env'].NEXT_PUBLIC_APP_VERSION ?? '1.0.0',
+      release: process['env']?.['NEXT_PUBLIC_APP_VERSION'] ?? '1.0.0',
       sampleRate: 1.0,
       beforeSend: (event) => event,
       ...config
@@ -73,7 +73,7 @@ class ErrorMonitoringService {
    */
   captureException(
     error: Error, 
-    _context: {
+    context: {
       _user?: ErrorEvent['_user']
       tags?: ErrorEvent['tags']
       extra?: Record<string, unknown>
@@ -91,7 +91,7 @@ class ErrorMonitoringService {
     }
 
     const tags: Record<string, string> = {
-      ...(_context.tags ?? {}),
+      ...(context.tags ?? {}),
       environment: this.config.environment ?? 'development',
       release: this.config.release ?? '1.0.0'
     }
@@ -101,10 +101,10 @@ class ErrorMonitoringService {
       stack: error.stack,
       name: error.name,
       timestamp: new Date().toISOString(),
-      _context: _context.extra,
-      _user: _context._user,
+      _context: context.extra,
+      _user: context._user,
       tags,
-      level: _context.level ?? 'error',
+      level: context.level ?? 'error',
       url: typeof window !== 'undefined' ? window.location.href : undefined,
       userAgent: typeof window !== 'undefined' 
         ? window.navigator.userAgent 

@@ -1,6 +1,13 @@
 import { useMemo } from 'react'
 
-export function usePasswordValidation(password: string) {
+export function usePasswordValidation(password: string): {
+  passwordStrength: number
+  strengthColors: string[]
+  strengthLabels: string[]
+  passwordRequirements: Array<{ label: string; met: boolean }>
+  currentStrengthColor: string
+  currentStrengthLabel: string
+} {
   const passwordStrength = useMemo(() => {
     let strength = 0
     if (password.length >= 8) {strength++}

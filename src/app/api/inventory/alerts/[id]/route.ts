@@ -16,7 +16,7 @@ import { createClient } from '@/utils/supabase/server'
 export async function PUT(
   __request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const { id } = params
   
   try {

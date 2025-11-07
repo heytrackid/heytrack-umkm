@@ -29,7 +29,7 @@ const chatbotBreadcrumbs = [
   { label: 'Chatbot' }
 ]
 
-const AIChatbotPage = () => {
+const AIChatbotPage = (): JSX.Element => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
   const { messages, isLoading, scrollAreaRef, addMessage, setLoading } = useChatMessages()

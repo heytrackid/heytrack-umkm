@@ -1,9 +1,9 @@
-import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
+ import { dbLogger } from '@/lib/logger'
+ import type { Database } from '@/types/database'
+ import { createClient } from '@/utils/supabase/client'
 
-import type { Database } from '@/types/database'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { ZodType } from 'zod'
+ import type { SupabaseClient } from '@supabase/supabase-js'
+ import type { ZodType } from 'zod'
 
 /**
  * Structured environment for agent execution
@@ -102,8 +102,8 @@ export function createAgentContext(
 
   return {
     correlationId,
-    ...(userId && { userId }),
-    ...(sessionId && { sessionId }),
+    ...(userId !== null ? { userId } : {}),
+    ...(sessionId !== null ? { sessionId } : {}),
     featureFlags: {
       aiChatbot,
       advancedAnalytics,
@@ -121,7 +121,12 @@ export function createAgentContext(
 /**
  * Create a logger for agents
  */
-export function createAgentLogger(agentName: string, correlationId: string) {
+export function createAgentLogger(agentName: string, correlationId: string): {
+  info: (message: string, data?: Record<string, unknown>) => void
+  error: (data: Record<string, unknown>, message?: string) => void
+  warn: (message: string, data?: Record<string, unknown>) => void
+  debug: (message: string, data?: Record<string, unknown>) => void
+} {
   // For now, use dbLogger with correlationId in context
   return {
     info: (message: string, data?: Record<string, unknown>) => dbLogger.info({ agent: agentName, correlationId, ...(data ?? {}) }, message),

@@ -122,7 +122,7 @@ export const SuspenseWrapper = ({
   loadingType = 'default',
   errorFallback
 }: SuspenseWrapperProps) => {
-  const LoadingComponent = loadingComponents[loadingType] || DataTableSkeleton
+  const LoadingComponent = loadingComponents[loadingType] ?? DataTableSkeleton
 
   return (
     <ErrorBoundary fallback={errorFallback}>
@@ -192,7 +192,8 @@ export function createTrackedLazyComponent(
   } = {}
 ) {
   const LazyComponent = lazy(() =>
-    import(`../path/to/component/${componentName}`).then(module => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    import(componentName).then((module: any) => {
       // Track component load time
       const startTime = performance.now()
       setTimeout(() => {
@@ -200,6 +201,7 @@ export function createTrackedLazyComponent(
           (window as WindowWithMetrics).LazyLoadingMetrics?.trackComponentLoad(componentName, startTime)
         }
       }, 0)
+       
       return module
     })
   )

@@ -2,6 +2,7 @@
 
 import { BarChart3, Clock, Plus, ShoppingCart } from 'lucide-react'
 
+import type { Order } from '@/app/orders/types/orders.types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,7 +10,6 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS } from '@/modules/orders/types'
 
-import type { Order } from '@/app/orders/types/orders.types'
 
 
 

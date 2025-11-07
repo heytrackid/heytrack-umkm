@@ -2,13 +2,13 @@
 
 import { Filter, Search, XCircle } from 'lucide-react'
 
+import type { OrderStatus } from '@/app/orders/types/orders.types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 
-import type { OrderStatus } from '@/app/orders/types/orders.types'
 
 
 

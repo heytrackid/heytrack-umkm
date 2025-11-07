@@ -1,9 +1,9 @@
 import 'server-only'
 
 import { dbLogger } from '@/lib/logger'
+import type { Database, Insert } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert, Json } from '@/types/database'
 
 const normalizeError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error))
@@ -15,6 +15,88 @@ interface PendingInventoryAlert {
   message: string
   metadata: Insert<'inventory_alerts'>['metadata']
 }
+
+type IngredientRow = Database['public']['Tables']['ingredients']['Row']
+type StockSnapshot = Pick<IngredientRow, 'id' | 'current_stock' | 'min_stock' | 'reorder_point'>
+type ActiveInventoryAlert = Database['public']['Tables']['inventory_alerts']['Row'] & {
+  ingredient: Pick<IngredientRow, 'name' | 'unit' | 'current_stock'>
+}
+
+interface StockMetrics {
+  currentStock: number
+  minStock: number
+  reorderPoint: number
+}
+
+const getStockNumbers = (snapshot: StockSnapshot): StockMetrics => {
+  const currentStock = snapshot.current_stock ?? 0
+  const minStock = snapshot.min_stock ?? 0
+  const reorderPoint = snapshot.reorder_point ?? minStock
+  return { currentStock, minStock, reorderPoint }
+}
+
+const isStockHealthy = (snapshot: StockSnapshot): boolean => {
+  const { currentStock, reorderPoint } = getStockNumbers(snapshot)
+  return currentStock > reorderPoint
+}
+
+const buildAlertMetadata = (
+  ingredient: IngredientRow,
+  overrides: Record<string, unknown> = {}
+): Insert<'inventory_alerts'>['metadata'] => {
+  const { currentStock, minStock, reorderPoint } = getStockNumbers(ingredient)
+  return {
+    current_stock: currentStock,
+    min_stock: minStock,
+    reorder_point: reorderPoint,
+    ingredient_name: ingredient.name,
+    unit: ingredient.unit,
+    ...overrides
+  }
+}
+
+const buildAlertPayload = (ingredient: IngredientRow): PendingInventoryAlert | null => {
+  const { currentStock, minStock, reorderPoint } = getStockNumbers(ingredient)
+
+  if (currentStock <= 0) {
+    return {
+      ingredient_id: ingredient['id'],
+      alert_type: 'OUT_OF_STOCK',
+      severity: 'CRITICAL',
+      message: `${ingredient.name} habis! Stok saat ini: 0 ${ingredient.unit}`,
+      metadata: buildAlertMetadata(ingredient)
+    }
+  }
+
+  if (currentStock <= reorderPoint && reorderPoint > 0) {
+    return {
+      ingredient_id: ingredient['id'],
+      alert_type: 'REORDER_NEEDED',
+      severity: 'HIGH',
+      message: `${ingredient.name} perlu dipesan ulang. Stok: ${currentStock} ${ingredient.unit}, Reorder point: ${reorderPoint} ${ingredient.unit}`,
+      metadata: buildAlertMetadata(ingredient, {
+        supplier: ingredient['supplier'],
+        lead_time: ingredient['lead_time']
+      })
+    }
+  }
+
+  if (currentStock <= minStock && minStock > 0) {
+    return {
+      ingredient_id: ingredient['id'],
+      alert_type: 'LOW_STOCK',
+      severity: 'MEDIUM',
+      message: `${ingredient.name} stok rendah. Stok: ${currentStock} ${ingredient.unit}, Minimum: ${minStock} ${ingredient.unit}`,
+      metadata: buildAlertMetadata(ingredient)
+    }
+  }
+
+  return null
+}
+
+const isValidAlert = (
+  alert: PendingInventoryAlert | null
+): alert is PendingInventoryAlert => alert !== null
 
 /**
  * Service for managing inventory alerts
@@ -29,13 +111,11 @@ export class InventoryAlertService {
   async checkLowStockAlerts(userId: string): Promise<void> {
     try {
       const supabase = await createClient()
-      
-      // Get all ingredients with stock below reorder point
       const { data: ingredients, error } = await supabase
         .from('ingredients')
         .select()
         .eq('user_id', userId)
-        .eq('is_active', true)
+        .eq('is_active', true) as { data: IngredientRow[] | null; error: Error | null }
 
       if (error) {
         throw new Error(`Failed to fetch ingredients: ${error.message}`)
@@ -45,97 +125,46 @@ export class InventoryAlertService {
         return
       }
 
-      const alerts: PendingInventoryAlert[] = []
-
-      for (const ingredient of ingredients) {
-        const currentStock = ingredient.current_stock ?? 0
-        const minStock = ingredient.min_stock ?? 0
-        const reorderPoint = ingredient.reorder_point ?? minStock
-
-        // Out of stock
-        if (currentStock <= 0) {
-          alerts.push({
-            ingredient_id: ingredient['id'],
-            alert_type: 'OUT_OF_STOCK',
-            severity: 'CRITICAL',
-            message: `${ingredient.name} habis! Stok saat ini: 0 ${ingredient.unit}`,
-            metadata: {
-              current_stock: currentStock,
-              min_stock: minStock,
-              ingredient_name: ingredient.name,
-              unit: ingredient.unit
-            } as Json
-          })
-        }
-        // Low stock (below reorder point)
-        else if (currentStock <= reorderPoint && reorderPoint > 0) {
-          alerts.push({
-            ingredient_id: ingredient['id'],
-            alert_type: 'REORDER_NEEDED',
-            severity: 'HIGH',
-            message: `${ingredient.name} perlu dipesan ulang. Stok: ${currentStock} ${ingredient.unit}, Reorder point: ${reorderPoint} ${ingredient.unit}`,
-            metadata: {
-              current_stock: currentStock,
-              reorder_point: reorderPoint,
-              min_stock: minStock,
-              ingredient_name: ingredient.name,
-              unit: ingredient.unit,
-              supplier: ingredient.supplier,
-              lead_time: ingredient.lead_time
-            } as Json
-          })
-        }
-        // Below minimum stock
-        else if (currentStock <= minStock && minStock > 0) {
-          alerts.push({
-            ingredient_id: ingredient['id'],
-            alert_type: 'LOW_STOCK',
-            severity: 'MEDIUM',
-            message: `${ingredient.name} stok rendah. Stok: ${currentStock} ${ingredient.unit}, Minimum: ${minStock} ${ingredient.unit}`,
-            metadata: {
-              current_stock: currentStock,
-              min_stock: minStock,
-              ingredient_name: ingredient.name,
-              unit: ingredient.unit
-            } as Json
-          })
-        }
-      }
-
-      // Deactivate old alerts for ingredients that are now OK
       await this.deactivateResolvedAlerts(userId, ingredients)
 
-      // Insert new alerts (only if they don't exist)
-      if (alerts.length > 0) {
-        await Promise.all(
-          alerts.map(async (alert) => {
-            const { data: existingAlert } = await supabase
-              .from('inventory_alerts')
-              .select('id')
-              .eq('ingredient_id', alert.ingredient_id)
-              .eq('alert_type', alert.alert_type)
-              .eq('is_active', true)
-              .eq('user_id', userId)
-              .single()
+      const alerts = ingredients
+        .map((ingredient) => buildAlertPayload(ingredient))
+        .filter(isValidAlert)
 
-            if (!existingAlert) {
-              await supabase
-                .from('inventory_alerts')
-                .insert({
-                  ...alert,
-                  user_id: userId,
-                  is_active: true
-                })
-            }
-          })
-        )
-
-        this.logger.info({
-          userId,
-          alertCount: alerts.length
-        }, 'Inventory alerts created')
+      if (alerts.length === 0) {
+        return
       }
 
+      await Promise.all(
+        alerts.map(async (alert) => {
+          const { data: existingAlert } = await supabase
+            .from('inventory_alerts')
+            .select('id')
+            .eq('ingredient_id', alert.ingredient_id)
+            .eq('alert_type', alert.alert_type)
+            .eq('is_active', true)
+            .eq('user_id', userId)
+            .single()
+
+          if (!existingAlert) {
+            await supabase
+              .from('inventory_alerts')
+              .insert({
+                ...alert,
+                user_id: userId,
+                is_active: true
+              })
+          }
+        })
+      )
+
+      this.logger.info(
+        {
+          userId,
+          alertCount: alerts.length
+        },
+        'Inventory alerts created'
+      )
     } catch (error) {
       const normalizedError = normalizeError(error)
       this.logger.error({ error: normalizedError, userId }, 'Failed to check low stock alerts')
@@ -148,34 +177,24 @@ export class InventoryAlertService {
    */
   private async deactivateResolvedAlerts(
     userId: string,
-    ingredients: Array<{ id: string; current_stock: number | null; min_stock: number | null; reorder_point: number | null }>
+    ingredients: StockSnapshot[]
   ): Promise<void> {
     try {
       const supabase = await createClient()
       
-      const updatePromises = ingredients.reduce<Array<Promise<unknown>>>((promises, ingredient) => {
-        const currentStock = ingredient.current_stock ?? 0
-        const minStock = ingredient.min_stock ?? 0
-        const reorderPoint = ingredient.reorder_point ?? minStock
-
-        if (currentStock > reorderPoint) {
-          promises.push(
-            (async () => {
-              await supabase
-                .from('inventory_alerts')
-                .update({
-                  is_active: false,
-                  resolved_at: new Date().toISOString()
-                })
-                .eq('ingredient_id', ingredient['id'])
-                .eq('user_id', userId)
-                .eq('is_active', true)
-            })()
-          )
-        }
-
-        return promises
-      }, [])
+      const updatePromises = ingredients
+        .filter(isStockHealthy)
+        .map(async (ingredient) => {
+          await supabase
+            .from('inventory_alerts')
+            .update({
+              is_active: false,
+              resolved_at: new Date().toISOString()
+            })
+            .eq('ingredient_id', ingredient['id'])
+            .eq('user_id', userId)
+            .eq('is_active', true)
+        })
 
       await Promise.all(updatePromises)
     } catch (error) {
@@ -195,85 +214,45 @@ export class InventoryAlertService {
         .select()
         .eq('id', ingredientId)
         .eq('user_id', userId)
-        .single()
+        .single() as { data: IngredientRow | null; error: Error | null }
 
       if (error || !ingredient) {
         return
       }
 
-      const currentStock = ingredient.current_stock ?? 0
-      const minStock = ingredient.min_stock ?? 0
-      const reorderPoint = ingredient.reorder_point ?? minStock
-
-      // Deactivate old alerts if stock is now OK
-      if (currentStock > reorderPoint) {
-        await supabase
-          .from('inventory_alerts')
-          .update({
-            is_active: false,
-            resolved_at: new Date().toISOString()
-          })
-          .eq('ingredient_id', ingredientId)
-          .eq('user_id', userId)
-          .eq('is_active', true)
-        
+      if (isStockHealthy(ingredient)) {
+        await this.deactivateResolvedAlerts(userId, [ingredient])
         return
       }
 
-      // Create alert if needed
-      let alertType = ''
-      let severity = ''
-      let message = ''
+      const alertPayload = buildAlertPayload(ingredient)
 
-      if (currentStock <= 0) {
-        alertType = 'OUT_OF_STOCK'
-        severity = 'CRITICAL'
-        message = `${ingredient.name} habis! Stok saat ini: 0 ${ingredient.unit}`
-      } else if (currentStock <= reorderPoint && reorderPoint > 0) {
-        alertType = 'REORDER_NEEDED'
-        severity = 'HIGH'
-        message = `${ingredient.name} perlu dipesan ulang. Stok: ${currentStock} ${ingredient.unit}`
-      } else if (currentStock <= minStock && minStock > 0) {
-        alertType = 'LOW_STOCK'
-        severity = 'MEDIUM'
-        message = `${ingredient.name} stok rendah. Stok: ${currentStock} ${ingredient.unit}`
+      if (!alertPayload) {
+        return
       }
 
-      if (alertType) {
-        // Check if alert already exists
-        const { data: existingAlert } = await supabase
+      const { data: existingAlert } = await supabase
+        .from('inventory_alerts')
+        .select('id')
+        .eq('ingredient_id', ingredientId)
+        .eq('alert_type', alertPayload.alert_type)
+        .eq('is_active', true)
+        .eq('user_id', userId)
+        .single()
+
+      if (!existingAlert) {
+        await supabase
           .from('inventory_alerts')
-          .select('id')
-          .eq('ingredient_id', ingredientId)
-          .eq('alert_type', alertType)
-          .eq('is_active', true)
-          .eq('user_id', userId)
-          .single()
+          .insert({
+            ...alertPayload,
+            user_id: userId,
+            is_active: true
+          })
 
-        if (!existingAlert) {
-          await supabase
-            .from('inventory_alerts')
-            .insert({
-              ingredient_id: ingredientId,
-              alert_type: alertType,
-              severity,
-              message,
-              user_id: userId,
-              is_active: true,
-              metadata: {
-                current_stock: currentStock,
-                min_stock: minStock,
-                reorder_point: reorderPoint,
-                ingredient_name: ingredient.name,
-                unit: ingredient.unit
-              }
-            })
-
-          this.logger.info({
-            ingredientId,
-            alertType
-          }, 'Inventory alert created')
-        }
+        this.logger.info({
+          ingredientId,
+          alertType: alertPayload.alert_type
+        }, 'Inventory alert created')
       }
 
     } catch (error) {
@@ -284,7 +263,7 @@ export class InventoryAlertService {
   /**
    * Get active alerts for user
    */
-  async getActiveAlerts(userId: string): Promise<unknown[]> {
+  async getActiveAlerts(userId: string): Promise<ActiveInventoryAlert[]> {
     try {
       const supabase = await createClient()
       
@@ -297,13 +276,13 @@ export class InventoryAlertService {
         .eq('user_id', userId)
         .eq('is_active', true)
         .order('severity', { ascending: false })
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false }) as { data: ActiveInventoryAlert[] | null; error: Error | null }
 
       if (error) {
         throw new Error(`Failed to fetch alerts: ${error.message}`)
       }
 
-      return alerts || []
+      return alerts ?? []
 
     } catch (error) {
       this.logger.error({ error: normalizeError(error), userId }, 'Failed to get active alerts')

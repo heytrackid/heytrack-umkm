@@ -3,10 +3,6 @@
 import { useMemo } from 'react'
 
 import { PRODUCTION_CONFIG } from '@/app/recipes/config/production.config'
-import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks'
-import { formatCurrency, DEFAULT_CURRENCY, currencies, type Currency } from '@/lib/currency'
-import { isRecord } from '@/types/shared/guards'
-
 import type {
   ProductionBatch,
   CreateBatchData,
@@ -20,7 +16,11 @@ import type {
   BatchPriority,
   QualityStatus
 } from '@/app/recipes/types/production.types'
+import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks'
+import { formatCurrency, DEFAULT_CURRENCY, currencies, type Currency } from '@/lib/currency'
 import type { Row } from '@/types/database'
+import { isRecord } from '@/types/shared/guards'
+
 
 // Production service hooks for Indonesian UMKM operations
 

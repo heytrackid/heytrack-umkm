@@ -15,7 +15,7 @@ import { getErrorMessage, safeNumber } from '@/lib/type-guards'
 import { createClient } from '@/utils/supabase/server'
 
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authentication
     const supabase = await createClient()
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     }
 
     apiLogger.info({ userId: user['id'], count: logs?.length || 0 }, 'Performance logs fetched')
-    return NextResponse.json(logs || [])
+    return NextResponse.json(logs ?? [])
 
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/admin/performance-logs')

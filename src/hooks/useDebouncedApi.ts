@@ -53,7 +53,7 @@ export function useDebouncedApi<T>(
   const mountedRef = useRef(true)
 
   // Cancel any pending requests
-  const cancel = useCallback(() => {
+  const cancel = useCallback((): void => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
       timeoutRef.current = null
@@ -65,7 +65,7 @@ export function useDebouncedApi<T>(
   }, [])
 
   // Execute the API call
-  const executeApi = useCallback(() => {
+  const executeApi = useCallback((): void => {
     if (!enabled) { return }
 
     // Cancel any pending request
@@ -89,10 +89,10 @@ export function useDebouncedApi<T>(
           setError(null)
           onSuccess?.(result)
         }
-      } catch (unknownError) {
+      } catch (error) {
         // Only update error if still mounted and not aborted
         if (mountedRef.current && !controller.signal.aborted) {
-          const normalizedError = unknownError instanceof Error ? unknownError : new Error('API call failed')
+          const normalizedError = error instanceof Error ? error : new Error('API call failed')
           setError(normalizedError)
           onError?.(normalizedError)
         }
@@ -106,7 +106,7 @@ export function useDebouncedApi<T>(
   }, [apiFunction, delay, enabled, cancel, onSuccess, onError])
 
   // Refetch function (no debounce)
-  const refetch = useCallback(async () => {
+  const refetch = useCallback(async (): Promise<void> => {
     if (!enabled) { return }
 
     cancel()
@@ -120,9 +120,9 @@ export function useDebouncedApi<T>(
         setError(null)
         onSuccess?.(result)
       }
-    } catch (unknownError) {
+    } catch (error) {
       if (mountedRef.current) {
-        const normalizedError = unknownError instanceof Error ? unknownError : new Error('API call failed')
+        const normalizedError = error instanceof Error ? error : new Error('API call failed')
         setError(normalizedError)
         onError?.(normalizedError)
       }

@@ -15,7 +15,7 @@ import { createClient } from '@/utils/supabase/server'
  * GET /api/inventory/alerts
  * Get active inventory alerts
  */
-async function GET(__request: NextRequest) {
+async function GET(__request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = typed(await createClient())
     
@@ -42,7 +42,7 @@ async function GET(__request: NextRequest) {
  * POST /api/inventory/alerts
  * Manually trigger alert check for all ingredients
  */
-async function POST(__request: NextRequest) {
+async function POST(__request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     

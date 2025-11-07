@@ -84,7 +84,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
 /**
  * Hook to use modal context
  */
-export function useModal() {
+export function useModal(): JSX.Element {
   const context = useContext(ModalContext)
   if (!context) {
     throw new Error('useModal must be used within ModalProvider')

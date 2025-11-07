@@ -6,16 +6,16 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations'
 import { getErrorMessage } from '@/shared/guards'
+import type { Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert } from '@/types/database'
 
 /**
  * GET /api/ingredient-purchases
  * List all ingredient purchases with optional filters
  */
-async function getHandler(request: NextRequest) {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
     try {
         const supabase = await createClient()
 
@@ -85,7 +85,7 @@ async function getHandler(request: NextRequest) {
             )
         }
 
-        return NextResponse.json(purchases || [])
+        return NextResponse.json(purchases ?? [])
     } catch (error: unknown) {
         apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/ingredient-purchases:')
         return NextResponse.json(
@@ -99,7 +99,7 @@ async function getHandler(request: NextRequest) {
  * POST /api/ingredient-purchases
  * Create new ingredient purchase and update stock
  */
-async function postHandler(request: NextRequest) {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
     try {
         const supabase = await createClient()
 

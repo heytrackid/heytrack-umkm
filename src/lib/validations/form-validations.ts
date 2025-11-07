@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import type { OrderFormData as OrderFormValues } from '@/components/orders/types'
+
 import {
 
   UUIDSchema,
@@ -12,7 +14,6 @@ import {
   percentage
 } from './base-validations'
 
-import type { OrderFormData as OrderFormValues } from '@/components/orders/types'
 
 // Form validation schemas
 // Validation schemas specifically for form submissions and user input 

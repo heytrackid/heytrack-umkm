@@ -26,7 +26,14 @@ interface UseApiState<T> {
 export function useApi<T = unknown >(
   endpoint: string,
   options: UseApiOptions<T> = {}
-) {
+): {
+  data: T | null;
+  error: string | null;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  fetch: (config?: RequestConfig) => Promise<void>;
+  refetch: (config?: RequestConfig) => Promise<void>;
+} {
   const { onSuccess, onError, autoLoad = false } = options
 
   const [state, setState] = useState<UseApiState<T>>({
@@ -39,7 +46,7 @@ export function useApi<T = unknown >(
   /**
    * Execute GET request
    */
-  const fetch = useCallback(async (config?: RequestConfig) => {
+  const fetch = useCallback(async (config?: RequestConfig): Promise<void> => {
     setState((prev) => ({ ...prev, isLoading: true }))
 
     try {
@@ -78,7 +85,7 @@ export function useApi<T = unknown >(
   /**
    * Refetch data
    */
-  const refetch = useCallback(async (config?: RequestConfig) => {
+  const refetch = useCallback(async (config?: RequestConfig): Promise<void> => {
     setState((prev) => ({ ...prev, isRefreshing: true }))
 
     try {
@@ -138,7 +145,12 @@ export function useMutationApi<T = unknown , R = unknown >(
   endpoint: string,
   method: 'DELETE' | 'PATCH' | 'POST' | 'PUT' = 'POST',
   options: UseApiOptions<R> = {}
-) {
+): {
+  data: R | null;
+  error: string | null;
+  isLoading: boolean;
+  mutate: (body?: T, config?: RequestConfig) => Promise<void>;
+} {
   const { onSuccess, onError } = options
 
   const [state, setState] = useState<Omit<UseApiState<R>, 'isRefreshing'> & { data: R | null }>({
@@ -151,7 +163,7 @@ export function useMutationApi<T = unknown , R = unknown >(
    * Execute mutation
    */
   const mutate = useCallback(
-    async (body?: T, config?: RequestConfig) => {
+    async (body?: T, config?: RequestConfig): Promise<void> => {
       setState({ data: null, error: null, isLoading: true })
 
       try {

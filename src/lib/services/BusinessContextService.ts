@@ -1,5 +1,4 @@
 import { logger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
 
 import type { Json } from '@/types/database'
 import type {
@@ -13,6 +12,7 @@ import type {
   QuickStat,
   BusinessInsight,
 } from '@/types/features/chat'
+import { createClient } from '@/utils/supabase/server'
 
 // Business Context Service - Aggregates business data for AI context
 

@@ -9,7 +9,7 @@ import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 
 
-async function POST(_request: NextRequest) {
+async function POST(_request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 

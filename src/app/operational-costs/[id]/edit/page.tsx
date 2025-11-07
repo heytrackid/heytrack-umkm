@@ -15,7 +15,7 @@ interface EditOperationalCostPageProps {
     }
 }
 
-const EditOperationalCostPage = ({ params }: EditOperationalCostPageProps) => (
+const EditOperationalCostPage = ({ params }: EditOperationalCostPageProps): JSX.Element => (
     <AppLayout pageTitle="Edit Biaya Operasional">
         <div className="p-6">
             <Suspense fallback={<DataGridSkeleton rows={6} />}>

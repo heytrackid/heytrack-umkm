@@ -29,7 +29,7 @@ const RecentOrdersSection = ({
   orders = [], 
   onDateRangeChange,
   showDateFilter = false 
-}: RecentOrdersSectionProps) => {
+}: RecentOrdersSectionProps): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const router = useRouter()
   

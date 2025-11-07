@@ -11,7 +11,7 @@ import { createClient } from '@/utils/supabase/server'
 
 
 // POST /api/orders/calculate-price - Calculate order price with discounts
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/orders/calculate-price')
     

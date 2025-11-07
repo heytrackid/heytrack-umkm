@@ -1,7 +1,8 @@
 import { inventoryLogger } from '@/lib/logger'
 
-import type { ReorderSummary } from './types'
 import type { Row } from '@/types/database'
+
+import type { ReorderSummary } from './types'
 
 
 /**
@@ -13,6 +14,19 @@ import type { Row } from '@/types/database'
 
 
 type Ingredient = Row<'ingredients'>
+
+function calculateUrgency(currentStock: number, reorderPoint: number): 'high' | 'low' | 'medium' {
+  if (currentStock <= 0) {
+    return 'high'
+  }
+  if (currentStock <= reorderPoint * 0.5) {
+    return 'high'
+  }
+  if (currentStock <= reorderPoint) {
+    return 'medium'
+  }
+  return 'low'
+}
 
 export class InventoryServices {
   private static instance: InventoryServices
@@ -60,14 +74,7 @@ export class InventoryServices {
           const suggestedReorder = Math.max(minStock * 1.5, reorderPoint * 1.5, 10)
 
           // Determine urgency
-          let urgency: 'high' | 'low' | 'medium' = 'low'
-          if (currentStock <= 0) {
-            urgency = 'high'
-          } else if (currentStock <= reorderPoint * 0.5) {
-            urgency = 'high'
-          } else if (currentStock <= reorderPoint) {
-            urgency = 'medium'
-          }
+          const urgency = calculateUrgency(currentStock, reorderPoint)
 
           return {
             id: ingredient['id'],

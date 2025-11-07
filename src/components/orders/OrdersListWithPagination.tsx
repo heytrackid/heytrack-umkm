@@ -20,10 +20,11 @@ import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
 
-import { VirtualizedOrderCards } from './VirtualizedOrderCards'
 
 import type { PaginatedResponse } from '@/lib/validations/pagination'
 import type { Row, OrderStatus } from '@/types/database'
+
+import { VirtualizedOrderCards } from './VirtualizedOrderCards'
 
 type Order = Row<'orders'>
 
@@ -37,7 +38,7 @@ interface OrderWithItems extends Order {
     }>
 }
 
-export const OrdersListWithPagination = () => {
+export const OrdersListWithPagination = (): JSX.Element => {
     const router = useRouter()
     const { toast } = useToast()
     const { formatCurrency } = useSettings()

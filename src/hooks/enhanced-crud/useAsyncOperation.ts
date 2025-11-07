@@ -8,12 +8,17 @@ import { createClientLogger } from '@/lib/client-logger'
 const logger = createClientLogger('Hook')
 import type { AsyncOperationOptions } from './types'
 
-
+interface UseAsyncOperationReturn {
+  execute: <T>(operation: () => Promise<T>, options?: AsyncOperationOptions) => Promise<T | null>
+  loading: boolean
+  error: string | null
+  clearError: () => void
+}
 
 /**
  * Utility hook for handling async operations with toast feedback
  */
-export function useAsyncOperation() {
+export function useAsyncOperation(): UseAsyncOperationReturn {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

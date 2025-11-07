@@ -15,15 +15,15 @@ export const cacheKeys = {
   recipes: {
     list: 'recipes:list',
     all: 'recipes:all',
-    detail: (id: string) => `recipes:detail:${id}`
+    detail: (id: string): string => `recipes:detail:${id}`
   },
   ingredients: {
     list: 'ingredients:list',
-    detail: (id: string) => `ingredients:detail:${id}`
+    detail: (id: string): string => `ingredients:detail:${id}`
   },
   orders: {
     list: 'orders:list',
-    detail: (id: string) => `orders:detail:${id}`
+    detail: (id: string): string => `orders:detail:${id}`
   }
 }
 
@@ -113,59 +113,59 @@ export async function withCache<T>(
 
 // Granular cache invalidation
 export const cacheInvalidation = {
-  hpp: () => {
+  hpp: (): void => {
     memoryCache.deletePattern('^hpp:')
     apiLogger.info('HPP cache invalidated')
   },
-  
-  recipes: (recipeId?: string) => {
+
+  recipes: (recipeId?: string): void => {
     if (recipeId) {
       memoryCache.delete(cacheKeys.recipes.detail(recipeId))
     }
     memoryCache.deletePattern('^recipes:')
     apiLogger.info({ recipeId }, 'Recipes cache invalidated')
   },
-  
-  ingredients: (ingredientId?: string) => {
+
+  ingredients: (ingredientId?: string): void => {
     if (ingredientId) {
       memoryCache.delete(cacheKeys.ingredients.detail(ingredientId))
     }
     memoryCache.deletePattern('^ingredients:')
     apiLogger.info({ ingredientId }, 'Ingredients cache invalidated')
   },
-  
-  orders: (orderId?: string) => {
+
+  orders: (orderId?: string): void => {
     if (orderId) {
       memoryCache.delete(cacheKeys.orders.detail(orderId))
     }
     memoryCache.deletePattern('^orders:')
     apiLogger.info({ orderId }, 'Orders cache invalidated')
   },
-  
-  customers: (customerId?: string) => {
+
+  customers: (customerId?: string): void => {
     if (customerId) {
       memoryCache.deletePattern(`^customers:.*${customerId}`)
     }
     memoryCache.deletePattern('^customers:')
     apiLogger.info({ customerId }, 'Customers cache invalidated')
   },
-  
-  suppliers: (supplierId?: string) => {
+
+  suppliers: (supplierId?: string): void => {
     if (supplierId) {
       memoryCache.deletePattern(`^suppliers:.*${supplierId}`)
     }
     memoryCache.deletePattern('^suppliers:')
     apiLogger.info({ supplierId }, 'Suppliers cache invalidated')
   },
-  
-  all: () => {
+
+  all: (): void => {
     memoryCache.clear()
     apiLogger.info('All cache cleared')
   }
 }
 
 // Cache statistics
-export function getCacheStats() {
+export function getCacheStats(): { size: number; timestamp: string } {
   return {
     size: memoryCache.size(),
     timestamp: new Date().toISOString()

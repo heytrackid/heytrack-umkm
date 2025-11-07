@@ -1,9 +1,9 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
+import type { Row, Json } from '@/types/database'
 import { safeGet, typed, isRecord, hasKey, isArray } from '@/types/type-utilities'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Row, Json } from '@/types/database'
 
 
 type JsonValue = Json
@@ -179,9 +179,83 @@ export class RecipeAvailabilityService {
   }
 
   /**
+   * Get recipes that are currently available for ordering
+   */
+  static async getAvailableRecipes(): Promise<RecipeOption[]> {
+    try {
+      const supabase = await createClient()
+
+      const { data: recipes, error } = await supabase
+        .from('recipes')
+        .select(`
+          id,
+          name,
+          category,
+          servings,
+          description,
+          selling_price,
+          is_active,
+          cost_per_unit,
+          margin_percentage,
+          prep_time,
+          cook_time,
+          recipe_ingredients!inner (
+            quantity,
+            unit,
+            ingredient:ingredients (
+              id,
+              name,
+              current_stock,
+              reorder_point,
+              is_active
+            )
+          )
+        `)
+        .eq('is_active', true)
+        .order('name')
+
+      if (error) {
+        throw error
+      }
+      if (!recipes) {
+        return []
+      }
+
+      return recipes.map((recipe) => {
+        const price = recipe.selling_price ?? 0
+        const estimatedMargin = 0.3
+
+        const recipeIngredients = (recipe.recipe_ingredients || []).map(ri => ({
+          ...ri,
+          ingredient: ri.ingredient || null
+        }))
+
+        const isAvailable = this.checkIngredientAvailability(recipeIngredients)
+
+        return {
+          id: recipe['id'],
+          name: recipe.name,
+          category: recipe.category ?? '',
+          servings: recipe.servings ?? 1,
+          description: recipe.description,
+          selling_price: price,
+          cost_per_unit: recipe.cost_per_unit ?? (price * 0.7),
+          margin_percentage: recipe.margin_percentage ?? estimatedMargin,
+          is_available: isAvailable,
+          prep_time: recipe.prep_time ?? null,
+          cook_time: recipe.cook_time ?? null
+        }
+      })
+    } catch (error) {
+      dbLogger.error({ error }, 'Error fetching available recipes')
+      throw new Error('Failed to fetch available recipes')
+    }
+  }
+
+  /**
    * Get all available recipes (can be made with current stock)
    */
-  static async getAvailableRecipes(userId: string): Promise<Array<{
+  static async getRecipeStockAvailability(userId: string): Promise<Array<{
     recipe_id: string
     recipe_name: string
     max_quantity: number

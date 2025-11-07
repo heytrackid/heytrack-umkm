@@ -1,8 +1,9 @@
 import { Bot, Loader2 } from 'lucide-react'
+import React from 'react'
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
-export const TypingIndicator = () => (
+export const TypingIndicator = (): React.JSX.Element => (
     <div className="flex gap-3">
       <Avatar className="w-8 h-8">
         <AvatarFallback className="bg-primary/10">

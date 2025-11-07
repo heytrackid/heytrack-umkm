@@ -70,7 +70,7 @@ export const CategoryTable = ({
   onBulkEdit,
   onBulkDelete,
   onClearSelection
-}: CategoryTableProps) => {
+}: CategoryTableProps): JSX.Element => {
   if (isLoading) {
     return (
       <Card>

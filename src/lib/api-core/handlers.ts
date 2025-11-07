@@ -21,7 +21,7 @@ import type { z } from 'zod'
 export function createRouteHandler<T>(
   handler: (context: RouteHandlerContext<T>) => Promise<NextResponse>,
   config: RouteHandlerConfig = {}
-) {
+): (request: NextRequest) => Promise<NextResponse> {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
       // Run middleware

@@ -11,7 +11,7 @@ import { createClient } from '@/utils/supabase/server'
 
 
 // GET /api/recipes/availability?recipe_id=xxx&quantity=10
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url)
     const recipeId = searchParams.get('recipe_id')
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/recipes/availability - Check multiple recipes
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const client = await createClient()
 

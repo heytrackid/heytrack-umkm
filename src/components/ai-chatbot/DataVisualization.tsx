@@ -111,7 +111,7 @@ const FinancialChart = ({ data, compact = false, formatCurrency, colors }: {
   compact?: boolean
   formatCurrency: (value: number) => string
   colors: string[]
-}) => {
+}): JSX.Element => {
   const chartData: ChartEntry[] = useMemo(() => [
     { name: 'Revenue', value: data.revenue, color: colors[0] ?? '#10B981' },
     { name: 'Costs', value: data.costs, color: colors[1] ?? '#EF4444' },
@@ -201,7 +201,7 @@ const AnalysisChart = ({ data: _data, compact: _compact }: { data: AnalysisData;
   <Card><CardContent className="p-4"><div className="text-sm text-gray-500">Analysis visualization</div></CardContent></Card>
 )
 
-const DataVisualization = ({ type, data, compact = false }: DataVisualizationProps) => {
+const DataVisualization = ({ type, data, compact = false }: DataVisualizationProps): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const colors = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']
 

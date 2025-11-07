@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { createClient } from '@/utils/supabase/server'
 
-async function handleSignOut(request: NextRequest) {
+async function handleSignOut(request: NextRequest): Promise<NextResponse> {
     const supabase = await createClient()
 
     // Check if user is authenticated
@@ -20,7 +20,7 @@ async function handleSignOut(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
 }
 
-export function POST(request: NextRequest) {
+export function POST(request: NextRequest): Promise<NextResponse> {
     return handleSignOut(request)
 }
 

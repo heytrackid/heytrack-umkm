@@ -50,7 +50,7 @@ interface HppCalculationExtended {
   user_id: string
 }
 
-const HppCalculatorPage = () => {
+const HppCalculatorPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
 

@@ -6,15 +6,15 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import { NotificationInsertSchema } from '@/lib/validations/domains/notification'
+import type { Insert, Json, Row } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert, Json, Row } from '@/types/database'
 
 
 type Notification = Row<'notifications'>
 
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     
@@ -78,7 +78,7 @@ async function GET(request: NextRequest) {
   }
 }
 
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     

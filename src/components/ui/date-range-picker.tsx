@@ -90,7 +90,7 @@ const loadFromStorage = (pageKey?: string): { range: DateRange | undefined; pres
   if (typeof window === 'undefined') {return null}
   try {
     const stored = localStorage.getItem(getStorageKey(pageKey))
-    return stored ? JSON.parse(stored) : null
+    return stored ? JSON.parse(stored) as { range: DateRange | undefined; preset: string | null } : null
   } catch {
     // Silently fail if localStorage is not available
     return null
@@ -355,6 +355,8 @@ export const DateRangePicker = ({
           if (range?.from && range?.to && Object.keys(errors).length === 0) {
             void handleApply()
           }
+          break
+        default:
           break
       }
     }

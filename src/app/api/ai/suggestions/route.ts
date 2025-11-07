@@ -14,7 +14,7 @@ import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
 import { createClient } from '@/utils/supabase/server'
 
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 

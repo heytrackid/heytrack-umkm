@@ -44,11 +44,12 @@ import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
 import { useResponsive } from '@/hooks/useResponsive'
 
+import type { Row } from '@/types/database'
+
 import { MobileOperationalCostCard } from './MobileOperationalCostCard'
 import { OperationalCostFormDialog } from './OperationalCostFormDialog'
 import { OperationalCostStats } from './OperationalCostStats'
 
-import type { Row } from '@/types/database'
 import type { DateRange } from 'react-day-picker'
 
 type OperationalCost = Row<'operational_costs'>
@@ -103,7 +104,7 @@ const DEFAULT_CATEGORY: CostCategory =
     COST_CATEGORIES[COST_CATEGORIES.length - 1] ??
     { id: 'other', name: 'Lainnya', icon: '📦', description: 'Biaya lainnya' }
 
-export const EnhancedOperationalCostsPage = () => {
+export const EnhancedOperationalCostsPage = (): JSX.Element => {
     const _router = useRouter()
     const { formatCurrency } = useSettings()
 

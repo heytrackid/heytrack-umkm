@@ -16,9 +16,10 @@ import { useSettings } from '@/contexts/settings-context'
 import { animations } from '@/lib/animations'
 import { cn } from '@/lib/utils'
 
+import type { Row } from '@/types/database'
+
 import { StockBadge, CompactStockIndicator } from './StockBadge'
 
-import type { Row } from '@/types/database'
 
 type Ingredient = Row<'ingredients'>
 

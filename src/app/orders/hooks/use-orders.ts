@@ -1,9 +1,6 @@
 import { useMemo } from 'react'
 
 import { DEFAULT_ORDERS_CONFIG, calculateOrderTotals, type OrdersModuleConfig, type OrderPriority } from '@/app/orders/config/orders.config'
-import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks'
-import { formatCurrency, parseCurrencyString } from '@/lib/currency'
-
 import type {
   Order,
   OrderItem,
@@ -14,6 +11,9 @@ import type {
   OrderTotalsBreakdown,
   InvoiceData
 } from '@/app/orders/types/orders.types'
+import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks'
+import { formatCurrency, parseCurrencyString } from '@/lib/currency'
+
 import type { CatchError } from '@/types/common' 
 
 interface FinancialMetadata {

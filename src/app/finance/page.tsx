@@ -7,7 +7,7 @@ import { useEffect } from 'react'
  * Redirect page for backward compatibility
  * /finance -> /cash-flow
  */
-const FinanceRedirect = () => {
+const FinanceRedirect = (): JSX.Element => {
   const router = useRouter()
 
   useEffect(() => {

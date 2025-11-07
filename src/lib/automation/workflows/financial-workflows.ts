@@ -236,7 +236,7 @@ export class FinancialWorkflowHandlers {
 
       // Trigger HPP recalculation for affected recipes
       const eventData = typeof event['data'] === 'object' && event['data'] !== null
-        ? event['data'] as Record<string, unknown>
+        ? event['data']
         : null
       const affectedRecipeIds = Array.isArray(eventData?.['affectedRecipeIds'])
         ? eventData['affectedRecipeIds']

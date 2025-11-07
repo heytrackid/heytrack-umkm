@@ -26,17 +26,17 @@ const EnhancedSummaryCards = ({
     comparison,
     formatCurrency,
     isMobile
-}: EnhancedSummaryCardsProps) => {
+}: EnhancedSummaryCardsProps): JSX.Element | null => {
     if (!summary) {
         return null
     }
 
-    const scrollToTransactions = () => {
+    const scrollToTransactions = (): void => {
         const element = document.getElementById('transaction-list')
         element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
 
-    const getHealthStatus = () => {
+    const getHealthStatus = (): { status: string; color: string; label: string } => {
         const ratio = summary.total_income > 0
             ? (summary.total_expenses / summary.total_income) * 100
             : 0
@@ -52,7 +52,7 @@ const EnhancedSummaryCards = ({
         ? (summary.total_expenses / summary.total_income) * 100
         : 0
 
-    const renderTrendBadge = (value: number | undefined) => {
+    const renderTrendBadge = (value: number | undefined): JSX.Element | null => {
         if (!value || value === 0) { return null }
 
         const isPositive = value > 0

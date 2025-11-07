@@ -41,7 +41,7 @@ const isInventoryNotification = (value: unknown): value is InventoryNotification
 const isInventoryNotificationArray = (value: unknown): value is InventoryNotification[] =>
   Array.isArray(value) && value.every(isInventoryNotification)
 
-export const InventoryNotifications = () => {
+export const InventoryNotifications = (): JSX.Element => {
   const router = useRouter()
   const [notifications, setNotifications] = useState<InventoryNotification[]>([])
   const [loading, setLoading] = useState(true)

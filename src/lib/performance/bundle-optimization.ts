@@ -17,20 +17,20 @@ import { performanceLogger } from '@/lib/client-logger'
  */
 export const lazyImports = {
   // Charts - Load only when needed
-  recharts: () => import('recharts'),
-  
+  recharts: (): Promise<unknown> => import('recharts'),
+
   // Excel export - Load only when exporting
-  exceljs: () => import('exceljs'),
-  
+  exceljs: (): Promise<unknown> => import('exceljs'),
+
   // File saver - Load only when downloading
-  fileSaver: () => import('file-saver'),
-  
+  fileSaver: (): Promise<unknown> => import('file-saver'),
+
   // Date picker - Load only when date input is shown
-  datePicker: () => import('react-day-picker'),
-  
+  datePicker: (): Promise<unknown> => import('react-day-picker'),
+
   // Rich text editor - Load only when editing
   // editor: () => import('@tiptap/react'),
-  
+
   // PDF generation - Load only when generating PDF
   // pdf: () => import('jspdf'),
 }
@@ -38,7 +38,7 @@ export const lazyImports = {
 /**
  * Preload critical resources
  */
-export function preloadCriticalResources() {
+export function preloadCriticalResources(): void {
   if (typeof window === 'undefined') {return}
 
   // Preload fonts
@@ -61,7 +61,7 @@ export function preloadCriticalResources() {
 /**
  * Prefetch next page resources
  */
-export function prefetchRoute(route: string) {
+export function prefetchRoute(route: string): void {
   if (typeof window === 'undefined') {return}
 
   const link = document.createElement('link')
@@ -130,7 +130,7 @@ export function getOptimalImageQuality(): number {
 /**
  * Defer non-critical scripts
  */
-export function deferNonCriticalScripts() {
+export function deferNonCriticalScripts(): void {
   if (typeof window === 'undefined') {return}
 
   // Defer analytics
@@ -146,15 +146,15 @@ export function deferNonCriticalScripts() {
 /**
  * Remove unused CSS
  */
-export function removeUnusedCSS() {
+export function removeUnusedCSS(): void {
   if (typeof window === 'undefined') {return}
   if (process['env'].NODE_ENV !== 'production') {return}
 
   // This would typically be done at build time with PurgeCSS
   // But we can also do runtime cleanup for dynamic content
-  
+
   const usedSelectors = new Set<string>()
-  
+
   // Get all elements
   document.querySelectorAll('*').forEach(el => {
     el.classList.forEach(className => {
@@ -169,7 +169,7 @@ export function removeUnusedCSS() {
 /**
  * Optimize third-party scripts
  */
-export function optimizeThirdPartyScripts() {
+export function optimizeThirdPartyScripts(): void {
   if (typeof window === 'undefined') {return}
 
   // Delay third-party scripts until page is interactive
@@ -180,10 +180,10 @@ export function optimizeThirdPartyScripts() {
   }
 }
 
-function loadThirdPartyScripts() {
+function loadThirdPartyScripts(): void {
   // Load non-critical third-party scripts
   // Example: Google Analytics, Hotjar, etc.
-  
+
   // Use requestIdleCallback if available
   if ('requestIdleCallback' in window) {
     window.requestIdleCallback(() => {
@@ -199,19 +199,19 @@ function loadThirdPartyScripts() {
 /**
  * Monitor bundle size in development
  */
-export function monitorBundleSize() {
+export function monitorBundleSize(): void {
   if (typeof window === 'undefined') {return}
   if (process['env'].NODE_ENV !== 'development') {return}
 
   const resources = performance.getEntriesByType('resource')
-  
+
   const jsResources = resources.filter(r => r.name.endsWith('.js'))
   const cssResources = resources.filter(r => r.name.endsWith('.css'))
-  
+
   const totalJSSize = jsResources.reduce((acc, r) => acc + (r.transferSize || 0), 0)
   const totalCSSSize = cssResources.reduce((acc, r) => acc + (r.transferSize || 0), 0)
-  
-  performanceLogger.info({ 
+
+  performanceLogger.info({
     jsKB: (totalJSSize / 1024).toFixed(2),
     cssKB: (totalCSSSize / 1024).toFixed(2),
     totalKB: ((totalJSSize + totalCSSSize) / 1024).toFixed(2)

@@ -192,7 +192,7 @@ export function withErrorBoundary<P extends object>(
 /**
  * Hook-based error boundary for functional components
  */
-export function useErrorHandler() {
+export function useErrorHandler(): JSX.Element {
   return (error: Error, errorInfo?: ErrorInfo) => {
     logger.error({
       error: error.toString(),

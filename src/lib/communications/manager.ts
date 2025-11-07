@@ -65,6 +65,9 @@ export class CommunicationsManager {
         case 'followup':
           this.whatsapp.sendFollowUp(orderData);
           break;
+        default:
+          // Unknown notification type
+          break;
       }
     }
 

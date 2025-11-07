@@ -87,7 +87,12 @@ export const validationFunctions = {
 
   // Business hours validation
   businessHours: (time: string) => {
-    const [hours, minutes] = time.split(':').map(Number)
+    const [hoursStr, minutesStr] = time.split(':')
+    const hours = Number(hoursStr)
+    const minutes = Number(minutesStr)
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+      return false
+    }
     return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59
   },
 

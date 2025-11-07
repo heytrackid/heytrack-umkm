@@ -11,6 +11,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { animations } from '@/lib/animations'
+import type { Notification, NotificationPriority } from '@/lib/notifications/notification-types'
 import { cn } from '@/lib/utils'
 
 import { Badge } from './badge'
@@ -18,7 +19,6 @@ import { Button } from './button'
 import { ScrollArea } from './scroll-area'
 
 
-import type { Notification, NotificationPriority } from '@/lib/notifications/notification-types'
 
 
 interface NotificationCenterProps {

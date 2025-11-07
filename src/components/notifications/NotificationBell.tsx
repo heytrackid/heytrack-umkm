@@ -14,15 +14,16 @@ import { createClientLogger } from '@/lib/client-logger'
 import { playNotificationSound, playUrgentNotificationSound, setSoundEnabled, setSoundVolume } from '@/lib/notifications/sound'
 import { useSupabase } from '@/providers/SupabaseProvider'
 
-import { NotificationList } from './NotificationList'
 
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
 import type { Notification } from '@/types/domain/notifications'
 
+import { NotificationList } from './NotificationList'
+
 
 const logger = createClientLogger('NotificationBell')
 
-export const NotificationBell = () => {
+export const NotificationBell = (): JSX.Element => {
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [unreadCount, setUnreadCount] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
@@ -53,6 +54,20 @@ export const NotificationBell = () => {
         }
     }, [])
 
+    const playNotificationSoundIfNeeded = useCallback((latestNotif: Notification, preferences: NotificationPreferences) => {
+        const shouldPlaySound = preferences.sound_enabled &&
+            !latestNotif.is_read &&
+            (!preferences.sound_for_urgent_only || latestNotif.priority === 'urgent')
+
+        if (shouldPlaySound) {
+            if (latestNotif.priority === 'urgent') {
+                playUrgentNotificationSound(preferences.sound_volume ?? undefined)
+            } else {
+                playNotificationSound(preferences.sound_volume ?? undefined)
+            }
+        }
+    }, [])
+
     const fetchNotifications = useCallback(async () => {
         try {
             setIsLoading(true)
@@ -64,25 +79,13 @@ export const NotificationBell = () => {
                 const newNotifications = _data.notifications ?? []
 
                 // Check for new notification and play sound
-                if (newNotifications.length > 0 && preferences) {
-                    const latestNotif = newNotifications[0]!
+                if (newNotifications[0] && preferences) {
+                    const latestNotif = newNotifications[0]
 
                     // Only play sound if it's a new notification
                     if (latestNotif.id !== lastNotificationIdRef.current) {
                         lastNotificationIdRef.current = latestNotif.id
-
-                        // Check if we should play sound based on preferences
-                        const shouldPlaySound = preferences.sound_enabled &&
-                            !latestNotif.is_read &&
-                            (!preferences.sound_for_urgent_only || latestNotif.priority === 'urgent')
-
-                        if (shouldPlaySound) {
-                            if (latestNotif.priority === 'urgent') {
-                                playUrgentNotificationSound(preferences.sound_volume ?? undefined)
-                            } else {
-                                playNotificationSound(preferences.sound_volume ?? undefined)
-                            }
-                        }
+                        playNotificationSoundIfNeeded(latestNotif, preferences)
                     }
                 }
 
@@ -97,7 +100,7 @@ export const NotificationBell = () => {
         } finally {
             setIsLoading(false)
         }
-    }, [preferences])
+    }, [preferences, playNotificationSoundIfNeeded])
 
     useEffect(() => {
         void fetchPreferences()

@@ -19,13 +19,13 @@ interface GlobalDateFilterProviderProps {
   defaultDateRange?: DateRange
 }
 
-export const GlobalDateFilterProvider = ({ 
-  children, 
-  defaultDateRange 
-}: GlobalDateFilterProviderProps) => {
+export const GlobalDateFilterProvider = ({
+  children,
+  defaultDateRange
+}: GlobalDateFilterProviderProps): JSX.Element => {
   const [globalDateRange, setGlobalDateRange] = useState<DateRange | undefined>(defaultDateRange)
 
-  const clearGlobalDateRange = () => {
+  const clearGlobalDateRange = (): void => {
     setGlobalDateRange(undefined)
   }
 
@@ -46,7 +46,7 @@ export const GlobalDateFilterProvider = ({
 }
 
 // Hook untuk menggunakan global date filter
-export const useGlobalDateFilter = () => {
+export const useGlobalDateFilter = (): GlobalDateFilterContextValue => {
   const context = useContext(GlobalDateFilterContext)
   if (context === undefined) {
     throw new Error('useGlobalDateFilter must be used within a GlobalDateFilterProvider')

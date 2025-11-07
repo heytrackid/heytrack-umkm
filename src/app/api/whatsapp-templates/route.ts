@@ -9,15 +9,15 @@ export const runtime = 'nodejs'
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
+import type { Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert } from '@/types/database'
 
 
 type WhatsAppTemplateInsert = Insert<'whatsapp_templates'>
 
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authentication
     const supabase = await createClient()
@@ -61,7 +61,7 @@ async function GET(request: NextRequest) {
   }
 }
 
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authentication
     const supabase = await createClient()

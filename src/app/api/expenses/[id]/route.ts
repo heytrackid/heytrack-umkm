@@ -22,7 +22,7 @@ export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }
 async function getHandler(
   _request: Request,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const { id } = params;
 
   // Validate UUID format
@@ -97,7 +97,7 @@ async function getHandler(
 async function putHandler(
   request: Request,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const { id } = params;
 
   // Validate UUID format
@@ -166,7 +166,7 @@ async function putHandler(
 async function deleteHandler(
   _request: Request,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const { id } = params;
 
   // Validate UUID format

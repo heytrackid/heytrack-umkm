@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils'
 interface ErrorMessageProps {
     title?: string
     message?: string
-    error?: Error | unknown
+    error?: unknown
     onRetry?: () => void
     onGoBack?: () => void
     showTechnicalDetails?: boolean
@@ -301,7 +301,7 @@ export const ErrorMessage = ({
 }
 
 // Hook for easy error handling
-export function useErrorHandler() {
+export function useErrorHandler(): JSX.Element {
     const [error, setError] = useState<Error | null>(null)
 
     const handleError = (error: unknown) => {

@@ -15,9 +15,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/lib/type-guards'
 
+import type { Row } from '@/types/database'
+
 import { FormField } from './shared/FormField'
 
-import type { Row } from '@/types/database'
 
 
 
@@ -44,7 +45,7 @@ interface CustomerFormComponentProps {
   isLoading?: boolean
 }
 
-export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormComponentProps) => {
+export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormComponentProps): JSX.Element => {
   const { toast } = useToast()
 
   const form = useForm<CustomerFormData>({
@@ -62,7 +63,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
     }
   })
 
-  const handleSubmit = async (data: CustomerFormData) => {
+  const handleSubmit = async (data: CustomerFormData): Promise<void> => {
     try {
       await onSubmit(data)
       toast({

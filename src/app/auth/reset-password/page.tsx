@@ -14,7 +14,7 @@ import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 
 import { resetPassword } from './actions'
 
-const ResetPasswordPage = () => {
+const ResetPasswordPage = (): JSX.Element => {
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string }>({})

@@ -8,42 +8,201 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/database'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 
+type OrderStatus = 'CANCELLED' | 'CONFIRMED' | 'DELIVERED' | 'IN_PROGRESS' | 'PENDING' | 'READY'
+type OrderRow = Database['public']['Tables']['orders']['Row']
+type TriggerWorkflow = typeof triggerWorkflow
+type ApiLogger = typeof apiLogger
+
+const VALID_STATUSES = [
+  'PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'
+]
 
 interface RouteContext {
   params: Promise<{ id: string }>
+}
+
+function validateStatusInput(status?: string): { isValid: boolean; error?: string } {
+  if (!status) {
+    return { isValid: false, error: 'Status is required' }
+  }
+
+  if (!VALID_STATUSES.includes(status)) {
+    return { isValid: false, error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` }
+  }
+
+  return { isValid: true }
+}
+
+async function fetchCurrentOrder(supabase: ReturnType<typeof createServiceRoleClient>, orderId: string): Promise<OrderRow> {
+  const { data: currentOrder, error: fetchError } = await supabase
+    .from('orders')
+    .select('id, order_no, status, total_amount, delivery_date, order_date, customer_name, user_id')
+    .eq('id', orderId)
+    .single()
+
+  if (fetchError || !currentOrder) {
+    throw new Error('Order not found')
+  }
+
+  return currentOrder
+}
+
+async function createIncomeRecordIfNeeded(
+  supabase: ReturnType<typeof createServiceRoleClient>,
+  status: string,
+  previousStatus: string | null,
+  currentOrder: OrderRow,
+  apiLoggerInstance: ApiLogger
+): Promise<string | null> {
+  if (status === 'DELIVERED' && previousStatus !== 'DELIVERED' && currentOrder.total_amount !== null && currentOrder.total_amount > 0) {
+    const { data: incomeRecord, error: incomeError } = await supabase
+      .from('financial_records')
+      .insert([{
+        type: 'INCOME',
+        category: 'Revenue',
+        amount: currentOrder.total_amount || 0,
+        date: (currentOrder.delivery_date ?? currentOrder.order_date ?? new Date().toISOString().split('T')[0]) as string,
+        reference: `Order #${currentOrder['order_no'] || ''}${currentOrder['customer_name'] ? ` - ${currentOrder['customer_name']}` : ''}`,
+        description: `Income from order ${currentOrder['order_no'] || ''}`,
+        user_id: currentOrder.user_id
+      }])
+      .select()
+      .single()
+
+    if (incomeError) {
+      apiLoggerInstance.error({ error: incomeError }, 'Error creating income record:')
+      throw new Error('Failed to create income record for delivered order')
+    }
+
+    apiLoggerInstance.info(`💰 Income record created for order ${currentOrder['order_no']}: ${currentOrder.total_amount}`)
+    return incomeRecord['id']
+  }
+
+  return null
+}
+
+async function updateOrderStatus(
+  supabase: ReturnType<typeof createServiceRoleClient>,
+  orderId: string,
+  status: string,
+  notes: string | undefined,
+  incomeRecordId: string | null,
+  apiLoggerInstance: ApiLogger
+): Promise<OrderRow> {
+  const { data: updatedOrder, error: updateError } = await supabase
+    .from('orders')
+    .update({
+      status: status as OrderStatus,
+      updated_at: new Date().toISOString(),
+      ...(notes && { notes }),
+      ...(incomeRecordId && { financial_record_id: incomeRecordId })
+    })
+    .eq('id', orderId)
+    .select('id, order_no, status, total_amount, customer_name, delivery_date, order_date, updated_at, financial_record_id')
+    .single()
+
+  if (updateError) {
+    apiLoggerInstance.error({ error: updateError }, 'Error updating order status:')
+    // Rollback income record if order update fails
+    if (incomeRecordId) {
+      await supabase
+        .from('financial_records')
+        .delete()
+        .eq('id', incomeRecordId)
+    }
+    throw new Error('Failed to update order status')
+  }
+
+  return updatedOrder as OrderRow
+}
+
+async function triggerWorkflows(
+  workflowTrigger: TriggerWorkflow,
+  orderId: string,
+  status: string,
+  previousStatus: string | null,
+  updatedOrder: OrderRow,
+  notes: string | undefined,
+  apiLoggerInstance: ApiLogger
+) {
+  try {
+    if (status === 'DELIVERED' && previousStatus !== 'DELIVERED') {
+      apiLoggerInstance.info('🚀 Triggering order completion automation...')
+      await workflowTrigger('order.completed', orderId, {
+        order: updatedOrder,
+        previousStatus: previousStatus ?? '',
+        newStatus: status
+      })
+    }
+
+    if (status === 'CANCELLED' && previousStatus !== 'CANCELLED') {
+      apiLoggerInstance.info('🚀 Triggering order cancellation automation...')
+      await workflowTrigger('order.cancelled', orderId, {
+        order: updatedOrder,
+        previousStatus: previousStatus ?? '',
+        newStatus: status,
+        reason: notes ?? 'Order cancelled'
+      })
+    }
+
+    await workflowTrigger('order.status_changed', orderId, {
+      order: updatedOrder,
+      previousStatus: previousStatus ?? '',
+      newStatus: status,
+      notes
+    })
+  } catch (error) {
+    apiLoggerInstance.error({ error }, '⚠️ Automation trigger error (non-blocking):')
+  }
+}
+
+function buildResponse(
+  status: string,
+  updatedOrder: OrderRow,
+  previousStatus: string | null,
+  incomeRecordId: string | null,
+  currentOrder: OrderRow
+) {
+  return NextResponse.json({
+    success: true,
+    order: updatedOrder,
+    status_change: {
+      from: previousStatus ?? '',
+      to: status as OrderStatus,
+      timestamp: new Date().toISOString()
+    },
+    automation: {
+      triggered: status === 'DELIVERED' || status === 'CANCELLED',
+      workflows: getTriggeredWorkflows(status as OrderStatus, previousStatus ?? '')
+    },
+    financial: {
+      income_recorded: Boolean(incomeRecordId),
+      income_record_id: incomeRecordId,
+      amount: incomeRecordId ? (currentOrder.total_amount ?? 0) : null
+    },
+    message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing and income tracking' : ''}`
+  })
 }
 
 // PUT /api/orders/[id]/status - Update order status dengan automatic workflow triggers
 export async function PUT(
   request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id: orderId } = await context['params']
 
     const body = await request.json() as { status?: string; notes?: string }
     const { status, notes } = body
 
-    type OrderStatus = 'CANCELLED' | 'CONFIRMED' | 'DELIVERED' | 'IN_PROGRESS' | 'PENDING' | 'READY'
-
-    // Validate required fields
-    if (!status) {
+    // Validate status input
+    const validation = validateStatusInput(status)
+    if (!validation.isValid) {
       return NextResponse.json(
-        { error: 'Status is required' },
-        { status: 400 }
-      )
-    }
-
-    // Valid order statuses
-    const validStatuses = [
-      'PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'
-    ]
-
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: `Invalid status. Must be one of: ${  validStatuses.join(', ')}` },
+        { error: validation.error },
         { status: 400 }
       )
     }
@@ -51,13 +210,10 @@ export async function PUT(
     const supabase = createServiceRoleClient()
 
     // Get current order to check previous status
-    const { data: currentOrder, error: fetchError } = await supabase
-      .from('orders')
-      .select('id, order_no, status, total_amount, delivery_date, order_date, customer_name, user_id')
-      .eq('id', orderId)
-      .single()
-
-    if (fetchError || !currentOrder) {
+    let currentOrder: OrderRow
+    try {
+      currentOrder = await fetchCurrentOrder(supabase, orderId)
+    } catch (_error) {
       return NextResponse.json(
         { error: 'Order not found' },
         { status: 404 }
@@ -65,122 +221,20 @@ export async function PUT(
     }
 
     const previousStatus = currentOrder['status']
-    let incomeRecordId = null
 
-    // If transitioning to DELIVERED, create income record
-    if (status === 'DELIVERED' && previousStatus !== 'DELIVERED' && currentOrder.total_amount !== null && currentOrder.total_amount > 0) {
-      const { data: incomeRecord, error: incomeError } = await supabase
-        .from('financial_records')
-        .insert([{
-          type: 'INCOME',
-          category: 'Revenue',
-          amount: currentOrder.total_amount || 0,
-          date: (currentOrder.delivery_date ?? currentOrder.order_date ?? new Date().toISOString().split('T')[0]) as string,
-          reference: `Order #${currentOrder['order_no'] || ''}${currentOrder['customer_name'] ? ` - ${  currentOrder['customer_name']}` : ''}`,
-          description: `Income from order ${currentOrder['order_no'] || ''}`,
-          user_id: currentOrder.user_id
-        }])
-        .select()
-        .single()
+    // Create income record if needed
+    const incomeRecordId = await createIncomeRecordIfNeeded(supabase, status!, previousStatus, currentOrder, apiLogger)
 
-      if (incomeError) {
-        apiLogger.error({ error: incomeError }, 'Error creating income record:')
-        return NextResponse.json(
-          { error: 'Failed to create income record for delivered order' },
-          { status: 500 }
-        )
-      }
-
-      incomeRecordId = incomeRecord['id']
-      apiLogger.info(`💰 Income record created for order ${currentOrder['order_no']}: ${currentOrder.total_amount}`)
-    }
-
-    // Update order status with financial_record_id if income was created
-    const { data: updatedOrder, error: updateError } = await supabase
-      .from('orders')
-      .update({
-        status: status as OrderStatus,
-        updated_at: new Date().toISOString(),
-        ...(notes && { notes }),
-        ...(incomeRecordId && { financial_record_id: incomeRecordId })
-      })
-      .eq('id', orderId)
-      .select('id, order_no, status, total_amount, customer_name, delivery_date, order_date, updated_at, financial_record_id')
-      .single()
-
-    if (updateError) {
-      apiLogger.error({ error: updateError }, 'Error updating order status:')
-      // Rollback income record if order update fails
-      if (incomeRecordId) {
-        await supabase
-          .from('financial_records')
-          .delete()
-          .eq('id', incomeRecordId)
-      }
-      return NextResponse.json(
-        { error: 'Failed to update order status' },
-        { status: 500 }
-      )
-    }
+    // Update order status
+    const updatedOrder = await updateOrderStatus(supabase, orderId, status!, notes, incomeRecordId, apiLogger)
 
     apiLogger.info(`🔄 Order ${currentOrder['order_no']}: ${previousStatus} → ${status}`)
 
-    // TRIGGER AUTOMATION WORKFLOWS based on status change
-    try {
-      // Order completed workflow
-      if (status === 'DELIVERED' && previousStatus !== 'DELIVERED') {
-        apiLogger.info('🚀 Triggering order completion automation...')
-        await triggerWorkflow('order.completed', orderId, {
-          order: updatedOrder,
-          previousStatus: previousStatus ?? '',
-          newStatus: status
-        })
-      }
+    // Trigger automation workflows
+    await triggerWorkflows(triggerWorkflow, orderId, status!, previousStatus, updatedOrder, notes, apiLogger)
 
-      // Order cancelled workflow
-      if (status === 'CANCELLED' && previousStatus !== 'CANCELLED') {
-        apiLogger.info('🚀 Triggering order cancellation automation...')
-        await triggerWorkflow('order.cancelled', orderId, {
-          order: updatedOrder,
-          previousStatus: previousStatus ?? '',
-          newStatus: status,
-          reason: notes ?? 'Order cancelled'
-        })
-      }
-
-      // General status change trigger
-      await triggerWorkflow('order.status_changed', orderId, {
-        order: updatedOrder,
-        previousStatus: previousStatus ?? '',
-        newStatus: status,
-        notes
-      })
-
-    } catch (error) {
-      apiLogger.error({ error }, '⚠️ Automation trigger error (non-blocking):')
-      // Don't fail the status update if automation fails
-    }
-
-    // Return success response with automation and income tracking info
-    return NextResponse.json({
-      success: true,
-      order: updatedOrder,
-      status_change: {
-        from: previousStatus ?? '',
-        to: status as OrderStatus,
-        timestamp: new Date().toISOString()
-      },
-      automation: {
-        triggered: status === 'DELIVERED' || status === 'CANCELLED',
-        workflows: getTriggeredWorkflows(status as OrderStatus, previousStatus ?? '')
-      },
-      financial: {
-        income_recorded: Boolean(incomeRecordId),
-        income_record_id: incomeRecordId,
-        amount: incomeRecordId ? (currentOrder.total_amount ?? 0) : null
-      },
-      message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing and income tracking' : ''}`
-    })
+    // Return success response
+    return buildResponse(status!, updatedOrder, previousStatus, incomeRecordId, currentOrder)
 
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error in order status update:')
@@ -195,7 +249,7 @@ export async function PUT(
 export async function GET(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id: orderId } = await context['params']
 

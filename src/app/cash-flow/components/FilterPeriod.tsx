@@ -34,8 +34,8 @@ const FilterPeriod = ({
   onApplyFilters,
   loading,
   isMobile
-}: FilterPeriodProps) => {
-  const handlePresetClick = (period: PeriodType) => {
+}: FilterPeriodProps): JSX.Element => {
+  const handlePresetClick = (period: PeriodType): void => {
     onPeriodChange(period)
     if (period !== 'custom') {
       // Auto-apply for preset periods
@@ -43,7 +43,7 @@ const FilterPeriod = ({
     }
   }
 
-  const getActivePeriodText = () => {
+  const getActivePeriodText = (): string => {
     if (selectedPeriod === 'custom' && startDate && endDate) {
       const start = new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
       const end = new Date(endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })

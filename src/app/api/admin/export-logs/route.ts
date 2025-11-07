@@ -12,60 +12,105 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 
+import type { SupabaseClient } from '@supabase/supabase-js'
 
-export async function GET(_request: NextRequest) {
+interface AdminContext {
+  supabase: SupabaseClient<Database>
+  userId: string
+}
+
+interface AuthResult {
+  context?: AdminContext
+  statusCode?: number
+}
+
+async function authenticateAdmin(): Promise<AuthResult> {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    return { statusCode: 401 }
+  }
+
+  const hasAdminAccess = await isAdmin(user['id'])
+  if (!hasAdminAccess) {
+    return { statusCode: 403 }
+  }
+
+  return { context: { supabase, userId: user['id'] } }
+}
+
+interface LogSummary {
+  perfLogs: unknown[]
+  errLogs: unknown[]
+}
+
+async function fetchLogs(supabase: SupabaseClient<Database>): Promise<LogSummary> {
+  const { data: perfLogs } = await supabase
+    .from('performance_logs')
+    .select('id, user_id, action, duration, timestamp, metadata')
+    .order('timestamp', { ascending: false })
+    .limit(1000)
+
+  const { data: errLogs } = await supabase
+    .from('error_logs')
+    .select('id, user_id, message, stack, timestamp, url, user_agent, ip_address, metadata')
+    .order('timestamp', { ascending: false })
+    .limit(500)
+
+  return { perfLogs: perfLogs ?? [], errLogs: errLogs ?? [] }
+}
+
+interface ExportPayload {
+  exported_at: string
+  exported_by: string
+  performance_logs: unknown[]
+  error_logs: unknown[]
+  system_metrics: {
+    timestamp: string
+    total_performance_logs: number
+    total_error_logs: number
+  }
+}
+
+function buildExportPayload(userId: string, perfLogs: unknown[], errLogs: unknown[]): ExportPayload {
+  const exportedAt = new Date().toISOString()
+  return {
+    exported_at: exportedAt,
+    exported_by: userId,
+    performance_logs: perfLogs,
+    error_logs: errLogs,
+    system_metrics: {
+      timestamp: exportedAt,
+      total_performance_logs: perfLogs.length,
+      total_error_logs: errLogs.length
+    }
+  }
+}
+
+export async function GET(_request: NextRequest): Promise<NextResponse> {
   try {
-    // 1. Authentication
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { context, statusCode } = await authenticateAdmin()
+
+    if (!context) {
+      return NextResponse.json({ error: statusCode === 403 ? 'Forbidden - Admin access required' : 'Unauthorized' }, { status: statusCode ?? 401 })
     }
 
-    // 2. Admin role check
-    const hasAdminAccess = await isAdmin(user['id'])
-    if (!hasAdminAccess) {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
-    }
+    const { supabase, userId } = context
+    const { perfLogs, errLogs } = await fetchLogs(supabase)
+    const exportData = buildExportPayload(userId, perfLogs, errLogs)
 
-    // 3. Gather logs data from database
-    const { data: perfLogs } = await supabase
-      .from('performance_logs')
-      .select('id, user_id, action, duration, timestamp, metadata')
-      .order('timestamp', { ascending: false })
-      .limit(1000)
+    apiLogger.info({ userId }, 'Logs exported')
 
-    const { data: errLogs } = await supabase
-      .from('error_logs')
-      .select('id, user_id, message, stack, timestamp, url, user_agent, ip_address, metadata')
-      .order('timestamp', { ascending: false })
-      .limit(500)
-
-    const exportData = {
-      exported_at: new Date().toISOString(),
-      exported_by: user['id'],
-      performance_logs: perfLogs ?? [],
-      error_logs: errLogs ?? [],
-      system_metrics: {
-        timestamp: new Date().toISOString(),
-        total_performance_logs: perfLogs?.length ?? 0,
-        total_error_logs: errLogs?.length ?? 0
-      }
-    }
-
-    apiLogger.info({ userId: user['id'] }, 'Logs exported')
-
-    // 3. Return as downloadable JSON
     return new NextResponse(JSON.stringify(exportData, null, 2), {
       headers: {
         'Content-Type': 'application/json',
         'Content-Disposition': `attachment; filename="logs-${new Date().toISOString().split('T')[0]}.json"`
       }
     })
-
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/admin/export-logs')
     return NextResponse.json(

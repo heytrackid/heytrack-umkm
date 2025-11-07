@@ -92,7 +92,7 @@ const UMKMTooltip = ({ title, content, children }: { title: string, content: str
   </TooltipProvider>
 )
 
-const AutoSyncFinancialDashboard = () => {
+const AutoSyncFinancialDashboard = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const [data, setData] = useState<AutoSyncData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -105,7 +105,7 @@ const AutoSyncFinancialDashboard = () => {
     setIsMounted(true)
   }, [])
 
-  const fetchAutoSyncData = async () => {
+  const fetchAutoSyncData = async (): Promise<void> => {
     try {
       setRefreshing(true)
       const response = await fetch('/api/financial/auto-sync')
@@ -133,7 +133,7 @@ const AutoSyncFinancialDashboard = () => {
     void fetchAutoSyncData()
   }, [])
 
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
+  const formatDate = (dateString: string): string => new Date(dateString).toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -141,7 +141,7 @@ const AutoSyncFinancialDashboard = () => {
     minute: '2-digit'
   })
 
-  const getHealthBadge = (health: string) => {
+  const getHealthBadge = (health: string): JSX.Element => {
     switch (health) {
       case 'healthy':
         return <Badge className="bg-gray-100 text-gray-800 hover:bg-green-200"><CheckCircle2 className="w-3 h-3 mr-1" />Sehat</Badge>

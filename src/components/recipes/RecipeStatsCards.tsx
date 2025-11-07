@@ -20,7 +20,7 @@ const getDifficultyLabel = (difficulty: string): string => {
         'MEDIUM': 'Sedang',
         'HARD': 'Sulit'
     }
-    return labels[difficulty] || difficulty
+    return labels[difficulty] ?? difficulty
 }
 
 export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
@@ -50,12 +50,12 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
     const categoryCount = recipes.reduce(
         (acc, r) => {
             const category = r.category ?? 'other';
-            acc[category] = (acc[category] || 0) + 1
+            acc[category] = (acc[category] ?? 0) + 1
             return acc
         },
         {} as Record<string, number>
     )
-    const mostCommonCategory = Object.entries(categoryCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '-'
+    const mostCommonCategory = Object.entries(categoryCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '-'
 
     const getCategoryLabel = (category: string) => {
         const labels: Record<string, string> = {
@@ -65,7 +65,7 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
             cookie: 'Cookie',
             other: 'Lainnya',
         }
-        return labels[category] || category
+        return labels[category] ?? category
     }
 
     return (
@@ -107,7 +107,7 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
                             <p className="text-sm font-medium text-muted-foreground">Kategori Terbanyak</p>
                             <p className="text-2xl font-bold">{getCategoryLabel(mostCommonCategory)}</p>
                             <p className="text-xs text-muted-foreground">
-                                {categoryCount[mostCommonCategory] || 0} resep
+                                {categoryCount[mostCommonCategory] ?? 0} resep
                             </p>
                         </div>
                         <BarChart3 className="h-8 w-8 text-gray-600 dark:text-gray-400" />

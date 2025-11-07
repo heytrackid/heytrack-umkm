@@ -118,7 +118,7 @@ export const ConfirmDialog = ({
 }
 
 // Hook untuk mudah pakai
-export function useConfirm() {
+export function useConfirm(): JSX.Element {
   const [state, setState] = useState<{
     open: boolean
     title: string

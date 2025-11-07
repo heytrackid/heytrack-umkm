@@ -8,7 +8,7 @@ import { BundleMonitor } from '@/lib/bundle-splitting'
  * Performance monitoring component
  * Tracks real-world performance metrics
  */
-export const PerformanceMonitor = () => {
+export const PerformanceMonitor = (): JSX.Element => {
   useEffect(() => {
     // Log bundle analysis on mount
     BundleMonitor.logBundleInfo()

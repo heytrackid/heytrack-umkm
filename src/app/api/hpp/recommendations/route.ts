@@ -11,7 +11,7 @@ import { createClient } from '@/utils/supabase/server'
 
 
 // GET /api/hpp/recommendations - Get HPP recommendations
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     const cacheKey = `${cacheKeys.hpp.recommendations}:${user['id']}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${priority ?? ''}:${isImplemented ?? ''}`
 
     // Wrap database query with caching
-    const getRecommendations = async () => {
+    const getRecommendations = async (): Promise<{ recommendations: any[], total: number, page: number, limit: number, totalPages: number }> => {
       let query = supabase
         .from('hpp_recommendations')
         .select(`
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
       }
 
       return {
-        recommendations: data || [],
+        recommendations: data ?? [],
         total: count ?? 0,
         page,
         limit,
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/hpp/recommendations - Create new recommendation
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()

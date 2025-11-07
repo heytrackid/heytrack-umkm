@@ -25,7 +25,7 @@ interface AlertWithRecipe {
 }
 
 // GET /api/hpp/overview - Get comprehensive HPP overview data in one request
-async function GET(_request: NextRequest) {
+async function GET(_request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -39,7 +39,7 @@ async function GET(_request: NextRequest) {
       )
     }
 
-    const getOverviewData = async () => {
+    const getOverviewData = async (): Promise<{ totalRecipes: number, recipesWithHpp: number, averageHpp: number, totalAlerts: number, unreadAlerts: number, recentAlerts: any[] }> => {
       // Parallel queries for better performance
       const [recipesResult, calculationsResult, alertsResult] = await Promise.all([
         // Get recipes count

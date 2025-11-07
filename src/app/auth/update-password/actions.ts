@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import { createClient } from '@/utils/supabase/server'
 
-export async function updatePassword(formData: FormData) {
+export async function updatePassword(formData: FormData): Promise<{ error?: string; success?: boolean }> {
     const supabase = await createClient()
     const password = formData.get('password') as string
     const confirmPassword = formData.get('confirmPassword') as string

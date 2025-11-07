@@ -9,11 +9,11 @@ import { ImportDialog } from '@/components/import/ImportDialog'
 import AppLayout from '@/components/layout/app-layout'
 import { BreadcrumbPatterns, PageBreadcrumb, PageHeader, StatsCards } from '@/components/ui'
 import { Button } from '@/components/ui/button'
-import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
+import { useSupabaseCRUD } from '@/hooks/supabase'
 
 import type { Row } from '@/types/database'
 
-const SuppliersPage = () => {
+const SuppliersPage = (): JSX.Element => {
     const { data: suppliers } = useSupabaseCRUD('suppliers')
     const [importDialogOpen, setImportDialogOpen] = useState(false)
 

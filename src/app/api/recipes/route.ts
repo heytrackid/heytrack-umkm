@@ -10,15 +10,15 @@ import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { PaginationQuerySchema } from '@/lib/validations'
 import { createPaginationMeta } from '@/lib/validations/pagination'
+import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert } from '@/types/database'
 
 
 // GET /api/recipes - Get all recipes with ingredient relationships
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = typed(await createClient())
@@ -121,7 +121,7 @@ async function GET(request: NextRequest) {
       }
 
       return {
-        data: recipes || [],
+        data: recipes ?? [],
         meta: createPaginationMeta(page, limit, count ?? 0)
       }
     }, cacheKey, 10 * 60 * 1000) // Cache for 10 minutes
@@ -148,7 +148,7 @@ async function GET(request: NextRequest) {
 }
 
 // POST /api/recipes - Create new recipe with ingredients
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = typed(await createClient())

@@ -42,7 +42,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
     }
   }
 
-  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Log the error
     const errorId = this.state.errorId ?? `error_${Date.now()}`
 
@@ -67,15 +67,15 @@ export class GlobalErrorBoundary extends Component<Props, State> {
     // Example: Sentry.captureException(error, { contexts: { react: { componentStack: errorInfo.componentStack } } })
   }
 
-  handleRetry = () => {
+  handleRetry = (): void => {
     this.setState({ hasError: false, error: undefined, errorInfo: undefined })
   }
 
-  handleGoHome = () => {
+  handleGoHome = (): void => {
     window.location.href = '/'
   }
 
-  override render() {
+  override render(): ReactNode {
     if (this.state.hasError) {
       // Custom fallback UI
       if (this.props.fallback) {

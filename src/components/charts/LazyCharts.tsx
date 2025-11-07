@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 
 // Loading component for charts
-const ChartSkeleton = () => (
+const ChartSkeleton = (): JSX.Element => (
     <div className="space-y-3">
         <Skeleton className="h-[300px] w-full" />
         <div className="flex gap-4">
@@ -91,7 +91,7 @@ interface LazyChartWrapperProps {
     children: React.ReactNode
 }
 
-export const LazyChartWrapper = ({ title, description, children }: LazyChartWrapperProps) => (
+export const LazyChartWrapper = ({ title, description, children }: LazyChartWrapperProps): JSX.Element => (
     <Card>
         {(title ?? description) && (
             <CardHeader>

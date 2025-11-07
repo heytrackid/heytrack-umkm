@@ -28,7 +28,7 @@ const CustomerStats = ({
   customers,
   isLoading,
   isMobile
-}: CustomerStatsProps) => {
+}: CustomerStatsProps): JSX.Element => {
   const { formatCurrency, settings } = useSettings()
 
   const stats: CustomerStatsData = {

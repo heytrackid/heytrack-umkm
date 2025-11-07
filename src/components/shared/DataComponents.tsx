@@ -148,7 +148,7 @@ export const AdvancedFilters = ({
                   {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
                 </label>
                 <Select
-                  value={filters[key] || ""}
+                  value={filters[key] ?? ""}
                   onValueChange={(value) => onFilterChange(key, value)}
                 >
                   <SelectTrigger>

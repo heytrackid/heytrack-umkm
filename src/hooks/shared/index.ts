@@ -17,6 +17,7 @@ type TablesMap = Database['public']['Tables']
 type TableInsert<TTable extends keyof TablesMap> = TablesMap[TTable]['Insert']
 type TableUpdate<TTable extends keyof TablesMap> = TablesMap[TTable]['Update']
 
+ 
 export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable) {
   const { create: createRecord, update: updateRecord, delete: deleteRecord } = useSupabaseCRUD(tableName)
   const { toast } = useToast()
@@ -202,6 +203,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
 
     try {
       const item = window.localStorage.getItem(key)
+       
       return item ? JSON.parse(item) : defaultValue
     } catch (_error) {
       return defaultValue
@@ -216,7 +218,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore))
       }
-    } catch (error) {
+    } catch (_error) {
       // Storage _error handled silently
     }
   }, [key, value])
@@ -227,7 +229,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(key)
       }
-    } catch (error) {
+    } catch (_error) {
       // Storage _error handled silently
     }
   }, [key, defaultValue])

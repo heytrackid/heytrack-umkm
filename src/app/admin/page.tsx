@@ -16,7 +16,7 @@ export const metadata = {
     description: 'System administration and performance monitoring'
 }
 
-const AdminPage = async () => {
+const AdminPage = async (): Promise<JSX.Element> => {
     const supabase = await createClient()
 
     // Check authentication

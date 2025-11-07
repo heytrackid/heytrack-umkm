@@ -8,7 +8,7 @@ import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
 
 
-const NewOperationalCostPage = () => (
+const NewOperationalCostPage = (): JSX.Element => (
     <AppLayout pageTitle="Tambah Biaya Operasional">
         <div className="p-6">
             <Suspense fallback={<DataGridSkeleton rows={6} />}>

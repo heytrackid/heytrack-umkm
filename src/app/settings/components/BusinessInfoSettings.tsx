@@ -3,6 +3,7 @@
 import { Building } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { validateBusinessInfoSettings } from '@/lib/settings-validation'
 
-import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 
 
 

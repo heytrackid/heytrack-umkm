@@ -2,11 +2,11 @@
 
 import { Package, Plus, XCircle } from 'lucide-react'
 
+import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { OrderCard } from '@/modules/orders/components/OrdersPage/OrderCard'
 
-import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 
 
 

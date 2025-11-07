@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useCallback } from 'react'
 
+import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -19,13 +20,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { createClientLogger } from '@/lib/client-logger'
-import { arrayCalculations } from '@/lib/performance-optimized'
+import { arrayCalculations } from '@/lib/performance'
 import { getErrorMessage } from '@/lib/type-guards'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
 
-import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import type { DateRange } from 'react-day-picker'
+
 
 const logger = createClientLogger('OrdersPage')
 

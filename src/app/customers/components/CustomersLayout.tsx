@@ -27,15 +27,16 @@ import { apiLogger } from '@/lib/logger'
 
 
 // Import components normally - they're lightweight
+import type { CustomersTable as CustomersTableType } from '@/types/database'
+
 import CustomerForm from './CustomerForm'
 import CustomerSearchFilters from './CustomerSearchFilters'
 import CustomersTable from './CustomersTable'
 import CustomerStats from './CustomerStats'
 
 import type { Customer } from './types'
-import type { CustomersTable as CustomersTableType } from '@/types/database'
 
-const CustomersLayout = () => {
+const CustomersLayout = (): JSX.Element => {
   const router = useRouter()
   const { isMobile } = useResponsive()
   const { formatCurrency } = useSettings()

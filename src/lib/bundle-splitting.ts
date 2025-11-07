@@ -1,4 +1,4 @@
-import { lazy, type ComponentType } from 'react'
+import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
 
 import { uiLogger } from '@/lib/logger'
 
@@ -10,7 +10,7 @@ import { uiLogger } from '@/lib/logger'
 // Lazy load with error boundary
 export function lazyLoad<T extends ComponentType<any>>( // eslint-disable-line @typescript-eslint/no-explicit-any
   importFunc: () => Promise<{ default: T }>
-) {
+): LazyExoticComponent<T> {
   return lazy(() =>
      importFunc().catch((error) => {
        uiLogger.error('Failed to load component:', error)
@@ -25,7 +25,7 @@ export function lazyLoad<T extends ComponentType<any>>( // eslint-disable-line @
 export class RoutePreloader {
   private static readonly preloadedRoutes = new Set<string>()
 
-  static preloadRoute(route: string) {
+  static preloadRoute(route: string): void {
     if (this.preloadedRoutes.has(route)) {
       return
     }
@@ -58,15 +58,15 @@ export class RoutePreloader {
     this.preloadedRoutes.add(route)
   }
 
-  static preloadOnHover(route: string, delay = 100) {
+  static preloadOnHover(route: string, delay = 100): { preload: () => void; cancel: () => void } {
     let timeoutId: NodeJS.Timeout
 
-    const preload = () => {
+    const preload = (): void => {
       clearTimeout(timeoutId)
       timeoutId = setTimeout(() => this.preloadRoute(route), delay)
     }
 
-    const cancel = () => {
+    const cancel = (): void => {
       clearTimeout(timeoutId)
     }
 
@@ -78,7 +78,7 @@ export class RoutePreloader {
 export class ComponentPreloader {
   private static readonly preloadedComponents = new Set<string>()
 
-  static preloadComponent(componentId: string, importFunc: () => Promise<unknown>) {
+  static preloadComponent(componentId: string, importFunc: () => Promise<unknown>): void {
     if (this.preloadedComponents.has(componentId)) {
       return
     }
@@ -93,7 +93,7 @@ export class ComponentPreloader {
     componentId: string,
     importFunc: () => Promise<unknown>,
     options: IntersectionObserverInit = {}
-  ) {
+  ): IntersectionObserver | undefined {
     if (typeof window === 'undefined') {
       return
     }
@@ -116,7 +116,7 @@ export class ComponentPreloader {
 
 // Bundle size monitoring
 export class BundleMonitor {
-  static logBundleInfo() {
+  static logBundleInfo(): void {
     if (typeof window === 'undefined') {
       return
     }
@@ -133,7 +133,7 @@ export class BundleMonitor {
     }
   }
 
-  static getBundleStats() {
+  static getBundleStats(): Array<{ name: string | undefined; size: number; loadTime: number }> | null {
     if (typeof window === 'undefined') {
       return null
     }

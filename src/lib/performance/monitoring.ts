@@ -145,9 +145,10 @@ export function usePerformanceMonitor() {
         const entries = performance.getEntriesByName(name)
         if (entries.length > 0) {
           const entry = entries[entries.length - 1]
+          if (!entry) { return null }
           const metric: PerformanceMetric = {
             name,
-            value: 'duration' in entry ? (entry).duration : (entry as PerformanceEntry).startTime || 0,
+            value: (Number.isFinite(entry.duration) ? entry.duration : entry.startTime) ?? 0,
             timestamp: Date.now(),
             type: entry.entryType
           }
@@ -219,6 +220,9 @@ export function usePerformanceMonitor() {
           break
         case 'first-input-delay':
           summary.firstInputDelay = metric.value
+          break
+        default:
+          // Unknown metric
           break
       }
     })

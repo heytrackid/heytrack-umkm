@@ -12,11 +12,11 @@ import { apiLogger, logError } from '@/lib/logger'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { createPaginationMeta } from '@/lib/validations/pagination'
+import type { Insert, Update, Database, OrderStatus } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert, Update, Database, OrderStatus } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 
@@ -88,7 +88,7 @@ const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: 
 /* eslint-enable require-await */
 
 // GET /api/orders - Get all orders with caching
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/orders - Request received')
 
@@ -156,7 +156,7 @@ async function GET(request: NextRequest) {
 }
 
 // POST /api/orders - Create new order with cache invalidation
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/orders - Request received')
 

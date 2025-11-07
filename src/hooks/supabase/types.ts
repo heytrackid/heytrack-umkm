@@ -12,15 +12,11 @@ export interface UseSupabaseQueryOptions<T extends keyof TablesMap> {
   realtime?: boolean
 }
 
-export interface CRUDOptions {
-  showSuccessToast?: boolean
-  showErrorToast?: boolean
-  successMessages?: {
-    create?: string
-    update?: string
-    delete?: string
-  }
-  customErrorHandler?: (error: Error, operation: 'create' | 'delete' | 'update') => void
+export interface UseSupabaseQueryResult<T extends keyof TablesMap> {
+  data: Array<TablesMap[T]['Row']>
+  loading: boolean
+  error: string | null
+  refetch: () => Promise<void>
 }
 
 export interface BulkUpdateItem<T extends keyof TablesMap> {

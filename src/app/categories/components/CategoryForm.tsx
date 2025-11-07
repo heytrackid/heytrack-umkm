@@ -32,22 +32,22 @@ export const CategoryForm = ({
   onCategoryChange,
   onSave,
   onCancel
-}: CategoryFormProps) => {
-  const handleAddIngredient = () => {
+}: CategoryFormProps): JSX.Element => {
+  const handleAddIngredient = (): void => {
     onCategoryChange({
       ...category,
       commonIngredients: [...category.commonIngredients, '']
     })
   }
 
-  const handleUpdateIngredient = (index: number, value: string) => {
+  const handleUpdateIngredient = (index: number, value: string): void => {
     onCategoryChange({
       ...category,
       commonIngredients: category.commonIngredients.map((ing, i) => i === index ? value : ing)
     })
   }
 
-  const handleRemoveIngredient = (index: number) => {
+  const handleRemoveIngredient = (index: number): void => {
     onCategoryChange({
       ...category,
       commonIngredients: category.commonIngredients.filter((_, i) => i !== index)

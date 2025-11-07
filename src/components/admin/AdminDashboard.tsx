@@ -78,7 +78,7 @@ interface ErrorLog {
     stack_trace: string | null
 }
 
-const AdminDashboard = (_props: AdminDashboardProps) => {
+const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
     const [metrics, setMetrics] = useState<SystemMetrics | null>(null)
     const [performanceLogs, setPerformanceLogs] = useState<PerformanceLog[]>([])
     const [errorLogs, setErrorLogs] = useState<ErrorLog[]>([])
@@ -92,7 +92,7 @@ const AdminDashboard = (_props: AdminDashboardProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const loadMetrics = async () => {
+    const loadMetrics = async (): Promise<void> => {
         try {
             setLoading(true)
 
@@ -127,7 +127,7 @@ const AdminDashboard = (_props: AdminDashboardProps) => {
         }
     }
 
-    const handleRefresh = async () => {
+    const handleRefresh = async (): Promise<void> => {
         setRefreshing(true)
         await loadMetrics()
         setRefreshing(false)
@@ -137,7 +137,7 @@ const AdminDashboard = (_props: AdminDashboardProps) => {
         })
     }
 
-    const handleExportLogs = async () => {
+    const handleExportLogs = async (): Promise<void> => {
         try {
             const response = await fetch('/api/admin/export-logs')
             if (!response.ok) { throw new Error('Export failed') }

@@ -15,7 +15,7 @@ export const NonceScript = async ({
     children: string
     id?: string
     strategy?: 'afterInteractive' | 'beforeInteractive' | 'lazyOnload'
-}) => {
+}): Promise<JSX.Element> => {
     const nonce = await getNonce()
 
     return (

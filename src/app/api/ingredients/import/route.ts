@@ -5,14 +5,14 @@ export const runtime = 'nodejs'
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
+import type { Insert } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert } from '@/types/database'
 
 
 type IngredientInsert = Insert<'ingredients'>
 
-const sanitizeString = (value?: string | null, fallback?: string | null) => {
+const sanitizeString = (value?: string | null, fallback?: string | null): string | null => {
   const trimmed = value?.trim()
   if (trimmed && trimmed.length > 0) {
     return trimmed
@@ -25,7 +25,7 @@ const sanitizeString = (value?: string | null, fallback?: string | null) => {
   return null
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authenticate
     const supabase = await createClient()

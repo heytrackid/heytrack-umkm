@@ -41,7 +41,7 @@ const dbToUiStatusMap: Record<DatabaseOrderStatus, OrderStatus> = {
 } as const
 
 interface OrderStatusBadgeProps {
-    status: OrderStatus | DatabaseOrderStatus // Accept both UI and DB formats
+    status: DatabaseOrderStatus | OrderStatus // Accept both UI and DB formats
     showNextAction?: boolean
     onNextAction?: () => void
     compact?: boolean

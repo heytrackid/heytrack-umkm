@@ -6,9 +6,7 @@ import type { ReactNode } from 'react'
  */
 
 // Chart data interfaces
-export interface ChartDataPoint {
-  [key: string]: boolean | number | string | null | undefined
-}
+export type ChartDataPoint = Record<string, boolean | number | string | null | undefined>;
 
 export interface TooltipEntry {
   color: string

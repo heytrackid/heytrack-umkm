@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 
 
 
-export const ThemeToggle = () => {
+export const ThemeToggle = (): JSX.Element => {
   const { theme, setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 

@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
 import { HppAlertsTab } from '@/modules/hpp/components/HppAlertsTab'
 
-const HppAlertsPage = () => (
+const HppAlertsPage = (): JSX.Element => (
   <AppLayout>
     <div className="space-y-6 p-6">
       <PageBreadcrumb items={BreadcrumbPatterns.hppAlerts} />

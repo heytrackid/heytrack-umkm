@@ -61,7 +61,7 @@ export const DataTable = <TData, TValue>({
   showColumnToggle = true,
   onRowClick,
   className,
-}: DataTableProps<TData, TValue>) => {
+}: DataTableProps<TData, TValue>): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = useState('')

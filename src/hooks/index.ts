@@ -60,4 +60,4 @@ export { useReorderManagement, usePurchaseOrderGenerator } from './useReorderMan
 // export { useHPPAutomation, useRecipeHPPAnalysis } from './useHPPAutomation'
 
 // Performance Hooks
-export { usePerformanceMonitoring } from '../utils/performance/usePerformanceMonitoring'
+export { usePerformanceMonitoring } from '@/lib/performance'

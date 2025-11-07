@@ -1,13 +1,13 @@
 import { Bot, User } from 'lucide-react'
 import React from 'react'
 
+import type { Message } from '@/app/ai-chatbot/types'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 import { DataCard } from './DataCard'
 
-import type { Message } from '@/app/ai-chatbot/types'
 
 
 interface MessageBubbleProps {
@@ -15,51 +15,63 @@ interface MessageBubbleProps {
   onSuggestionClick?: (suggestion: string) => void
 }
 
-export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps) => {
+const validateData = (data: unknown): Record<string, unknown> | null => {
+  if (!data || typeof data !== 'object') {
+    return null
+  }
+
+  const dataObj = data as Record<string, unknown>
+  const {businessContext} = dataObj
+
+  if (!businessContext || typeof businessContext !== 'object') {
+    return null
+  }
+
+  return businessContext as Record<string, unknown>
+}
+
+const hasValidData = (contextObj: Record<string, unknown>): boolean => {
+  const hasOrdersData = contextObj['orders'] && typeof contextObj['orders'] === 'object'
+  const hasInventoryData = contextObj['inventory'] && typeof contextObj['inventory'] === 'object'
+  return hasOrdersData || hasInventoryData
+}
+
+const buildDataCards = (contextObj: Record<string, unknown>): React.ReactElement[] => {
+  const cards: React.ReactElement[] = []
+
+  if (contextObj['orders'] && typeof contextObj['orders'] === 'object') {
+    cards.push(
+      <DataCard
+        key="orders-card"
+        title="📊 Status Pesanan"
+        data={contextObj['orders'] as Record<string, unknown>}
+        type="orders"
+      />
+    )
+  }
+
+  if (contextObj['inventory'] && typeof contextObj['inventory'] === 'object') {
+    cards.push(
+      <DataCard
+        key="inventory-card"
+        title="⚠️ Stok Kritis"
+        data={contextObj['inventory'] as Record<string, unknown>}
+        type="inventory"
+      />
+    )
+  }
+
+  return cards
+}
+
+export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps): JSX.Element => {
   const renderMessageData = (data: unknown): React.ReactElement | null => {
-    if (!data || typeof data !== 'object') { 
-      return null 
-    }
-    
-    const dataObj = data as Record<string, unknown>
-    const {businessContext} = dataObj
-    
-    if (!businessContext || typeof businessContext !== 'object') { 
-      return null 
-    }
-
-    const contextObj = businessContext as Record<string, unknown>
-    const hasOrdersData = contextObj['orders'] && typeof contextObj['orders'] === 'object'
-    const hasInventoryData = contextObj['inventory'] && typeof contextObj['inventory'] === 'object'
-
-    if (!hasOrdersData && !hasInventoryData) {
+    const contextObj = validateData(data)
+    if (!contextObj || !hasValidData(contextObj)) {
       return null
     }
 
-    const cards: React.ReactElement[] = []
-
-    if (hasOrdersData) {
-      cards.push(
-        <DataCard
-          key="orders-card"
-          title="📊 Status Pesanan"
-          data={contextObj['orders'] as Record<string, unknown>}
-          type="orders"
-        />
-      )
-    }
-
-    if (hasInventoryData) {
-      cards.push(
-        <DataCard
-          key="inventory-card"
-          title="⚠️ Stok Kritis"
-          data={contextObj['inventory'] as Record<string, unknown>}
-          type="inventory"
-        />
-      )
-    }
-
+    const cards = buildDataCards(contextObj)
     if (cards.length === 0) {
       return null
     }

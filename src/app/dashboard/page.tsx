@@ -1,5 +1,4 @@
 'use client'
-'use client'
 
 import { useQuery } from '@tanstack/react-query'
 import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Plus, Users } from 'lucide-react'
@@ -174,7 +173,7 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
 
 
 
-const StatsCardsGridSkeleton = () => (
+const StatsCardsGridSkeleton = (): JSX.Element => (
   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
     {Array.from({ length: 4 }, (_, i) => (
       <StatsCardSkeleton key={i} />
@@ -182,7 +181,7 @@ const StatsCardsGridSkeleton = () => (
   </div>
 )
 
-const Dashboard = () => {
+const Dashboard = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const [currentTime, setCurrentTime] = useState(new Date())
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth()
@@ -228,7 +227,7 @@ const Dashboard = () => {
 
     let timer: ReturnType<typeof setInterval> | null = null
 
-    const tick = () => {
+    const tick = (): void => {
       setCurrentTime(new Date())
     }
 

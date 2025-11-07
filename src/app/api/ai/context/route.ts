@@ -14,7 +14,7 @@ import { createClient } from '@/utils/supabase/server';
 /**
  * GET /api/ai/context - Load business context for AI chat
  */
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient();
     const {
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 /**
  * DELETE /api/ai/context - Invalidate context cache
  */
-export async function DELETE() {
+export async function DELETE(): Promise<NextResponse> {
   try {
     const supabase = await createClient();
     const {

@@ -1,7 +1,6 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 
-const logger = createClientLogger('EnhancedOrderForm')
 import {
     AlertCircle,
     ArrowLeft,
@@ -17,8 +16,10 @@ import {
     Trash2,
     User
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
+import { useOrderItemsController } from '@/components/orders/hooks/useOrderItemsController'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -28,16 +29,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { LabelWithTooltip } from '@/components/ui/tooltip-helper'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
-import { createClientLogger } from '@/lib/client-logger'
-import { isRecipe } from '@/lib/type-guards'
 import { validateOrderData } from '@/lib/validations/form-validations'
 
+
+import type { Row } from '@/types/database'
 
 import { calculateOrderTotal, normalizePriority } from './utils'
 
 import type { Order, OrderFormData, OrderFormItem, Priority } from './types'
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
-import type { Row } from '@/types/database'
 
 interface EnhancedOrderFormProps {
     order?: Order
@@ -69,7 +68,6 @@ const EnhancedOrderForm = ({
         order_items: []
     })
 
-    const [recipes, setRecipes] = useState<Recipe[]>([])
     const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([])
     const [searchTerm, setSearchTerm] = useState('')
     const [errors, setErrors] = useState<string[]>([])
@@ -99,9 +97,33 @@ const EnhancedOrderForm = ({
         }
     }, [order])
 
-    useEffect(() => {
-        void fetchRecipes()
-    }, [])
+    const createEmptyOrderItem = useCallback((): OrderFormItem => ({
+        recipe_id: '',
+        product_name: null,
+        quantity: 1,
+        special_requests: null,
+        total_price: 0,
+        unit_price: 0
+    }), [])
+
+    const {
+        recipes,
+        addItem: addOrderItem,
+        updateItem: updateOrderItem,
+        removeItem: removeOrderItem
+    } = useOrderItemsController<OrderFormItem>({
+        items: formData.order_items,
+        onItemsChange: (nextItems) => setFormData(prev => ({ ...prev, order_items: nextItems })),
+        createEmptyItem: createEmptyOrderItem,
+        onRecipeSelected: (recipe, item) => {
+            const unitPrice = recipe.selling_price ?? item.unit_price
+            return {
+                ...item,
+                unit_price: unitPrice,
+                total_price: unitPrice * item.quantity
+            }
+        }
+    })
 
     useEffect(() => {
         if (searchTerm) {
@@ -114,25 +136,6 @@ const EnhancedOrderForm = ({
         }
     }, [searchTerm, recipes])
 
-    const fetchRecipes = async () => {
-        try {
-            const response = await fetch('/api/recipes', {
-                credentials: 'include', // Include cookies for authentication
-            })
-            if (!response.ok) { return }
-
-            const payload = await response.json() as unknown
-            const recipeList: Recipe[] = Array.isArray(payload)
-                ? (payload as Recipe[]).filter((item) => isRecipe(item))
-                : []
-
-            setRecipes(recipeList)
-            setFilteredRecipes(recipeList)
-        } catch (error: unknown) {
-            logger.error({ error }, 'Error fetching recipes')
-        }
-    }
-
     const handleInputChange = <K extends keyof OrderFormData>(
         field: K,
         value: OrderFormData[K]
@@ -141,22 +144,6 @@ const EnhancedOrderForm = ({
         if (errors.length > 0) {
             setErrors([])
         }
-    }
-
-    const addOrderItem = () => {
-        const newItem: OrderFormItem = {
-            recipe_id: '',
-            product_name: null,
-            quantity: 1,
-            special_requests: null,
-            total_price: 0,
-            unit_price: 0
-        }
-
-        setFormData(prev => ({
-            ...prev,
-            order_items: [...prev.order_items, newItem]
-        }))
     }
 
     const addRecipeToOrder = (recipe: Recipe) => {
@@ -191,26 +178,6 @@ const EnhancedOrderForm = ({
             }))
         }
         setSearchTerm('')
-    }
-
-    const updateOrderItem = <K extends keyof OrderFormItem>(
-        index: number,
-        field: K,
-        value: OrderFormItem[K]
-    ) => {
-        setFormData(prev => ({
-            ...prev,
-            order_items: prev.order_items.map((item, i) =>
-                i === index ? { ...item, [field]: value } : item
-            )
-        }))
-    }
-
-    const removeOrderItem = (index: number) => {
-        setFormData(prev => ({
-            ...prev,
-            order_items: prev.order_items.filter((_, i) => i !== index)
-        }))
     }
 
     const handleSubmit = () => {

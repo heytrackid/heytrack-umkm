@@ -6,13 +6,14 @@ import { useEffect, useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 
+import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
+
 import ActiveBatchesList from './components/ActiveBatchesList'
 import BatchDetails from './components/BatchDetails'
 import CompletedBatches from './components/CompletedBatches'
 import ProductionOverview from './components/ProductionOverview'
 import { PRODUCTION_STEPS, QUALITY_CHECKS, type BatchExecutionState } from './components/types'
 
-import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
 
 const logger = createClientLogger('ProductionBatchExecution')
 

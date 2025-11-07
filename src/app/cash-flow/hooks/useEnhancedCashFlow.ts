@@ -63,7 +63,7 @@ interface UseEnhancedCashFlowReturn {
 }
 
 // Utility: Calculate date range
-function calculateDateRange(period: PeriodType, startDate?: string, endDate?: string) {
+function calculateDateRange(period: PeriodType, startDate?: string, endDate?: string): { startDate: string | undefined; endDate: string } {
   const today = new Date()
   let calculatedStartDate = startDate
   const calculatedEndDate = endDate ?? today.toISOString().split('T')[0]
@@ -159,7 +159,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
   const [transactionType, setTransactionType] = useState<'expense' | 'income'>('expense')
 
   // Fetch cash flow data
-  const fetchCashFlowData = useCallback(async () => {
+  const fetchCashFlowData = useCallback(async (): Promise<void> => {
     setLoading(true)
     setError(null)
 
@@ -181,7 +181,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
         throw new Error('Gagal mengambil data arus kas')
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+       
       const data: CashFlowResponse = await response.json()
       setCashFlowData(data)
 
@@ -207,7 +207,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
   }, [selectedPeriod, startDate, endDate])
 
   // Handle add transaction
-  const handleAddTransaction = useCallback(async (formData: TransactionFormData) => {
+  const handleAddTransaction = useCallback(async (formData: TransactionFormData): Promise<void> => {
     const amount = parseFloat(formData.amount)
     if (isNaN(amount) || amount <= 0) {
       throw new Error('Jumlah tidak valid')
@@ -231,9 +231,9 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
       })
 
        if (!response.ok) {
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          
          const errorData = await response.json()
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
+          
          throw new Error(errorData.error ?? 'Gagal menyimpan transaksi')
        }
 
@@ -248,7 +248,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
   }, [transactionType, fetchCashFlowData])
 
   // Handle delete transaction
-  const handleDeleteTransaction = useCallback(async (transaction: Transaction) => {
+  const handleDeleteTransaction = useCallback(async (transaction: Transaction): Promise<void> => {
     try {
       setLoading(true)
 
@@ -260,9 +260,9 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
       })
 
        if (!response.ok) {
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          
          const errorData = await response.json()
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
+          
          throw new Error(errorData.error ?? 'Gagal menghapus transaksi')
        }
 
@@ -278,7 +278,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
 
 
   // Refresh data
-  const refreshData = useCallback(async () => {
+  const refreshData = useCallback(async (): Promise<void> => {
     await fetchCashFlowData()
   }, [fetchCashFlowData])
 

@@ -2,15 +2,15 @@
 
 import { Calendar } from 'lucide-react'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-
 import type {
   AppSettingsState,
   SettingsUpdateHandler,
   DateFormatOption,
   TimeFormatOption,
 } from '@/app/settings/types'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+
 
 interface DateTimeSettingsProps {
   settings: AppSettingsState

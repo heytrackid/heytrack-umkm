@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 
 
-export const HppEmptyState = () => {
+export const HppEmptyState = (): JSX.Element => {
     const router = useRouter()
 
     return (

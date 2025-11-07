@@ -6,7 +6,7 @@ interface PasswordRequirementsProps {
   password: string
 }
 
-export const PasswordRequirements = ({ password }: PasswordRequirementsProps) => {
+export const PasswordRequirements = ({ password }: PasswordRequirementsProps): JSX.Element | null => {
   const { passwordRequirements } = usePasswordValidation(password)
 
   if (!password) { return null }

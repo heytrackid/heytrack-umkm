@@ -12,7 +12,7 @@ import { useDashboardSchedule } from '@/hooks/useDashboardSchedule'
 
 
 
-export const ProductionScheduleWidget = () => {
+export const ProductionScheduleWidget = (): JSX.Element => {
     const { data, isLoading, error } = useDashboardSchedule()
 
     if (isLoading) {
@@ -118,7 +118,7 @@ export const ProductionScheduleWidget = () => {
                     {production_schedule && production_schedule.length > 0 ? (
                         <div className="space-y-4">
                             {production_schedule.map((batch) => {
-                                const getBadgeVariant = () => {
+                                const getBadgeVariant = (): string => {
                                     if (batch.batch_status === 'COMPLETED') {return 'default'}
                                     if (batch.batch_status === 'IN_PROGRESS') {return 'secondary'}
                                     return 'outline'

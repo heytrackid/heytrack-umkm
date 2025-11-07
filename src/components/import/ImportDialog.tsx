@@ -34,7 +34,7 @@ export const ImportDialog = ({
     templateFilename,
     onImport,
     parseCSV
-}: ImportDialogProps) => {
+}: ImportDialogProps): JSX.Element => {
     const [file, setFile] = useState<File | null>(null)
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<{
@@ -46,7 +46,7 @@ export const ImportDialog = ({
     const fileInputRef = useRef<HTMLInputElement>(null)
     const { toast } = useToast()
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const selectedFile = e.target.files?.[0]
         if (selectedFile) {
             if (!selectedFile.name.endsWith('.csv')) {
@@ -62,7 +62,7 @@ export const ImportDialog = ({
         }
     }
 
-    const handleImport = async () => {
+    const handleImport = async (): Promise<void> => {
         if (!file) { return }
 
         setLoading(true)
@@ -113,7 +113,7 @@ export const ImportDialog = ({
         }
     }
 
-    const handleDownloadTemplate = () => {
+    const handleDownloadTemplate = (): void => {
         const link = document.createElement('a')
         link.href = templateUrl
         link.download = templateFilename
@@ -122,7 +122,7 @@ export const ImportDialog = ({
         document['body'].removeChild(link)
     }
 
-    const handleClose = () => {
+    const handleClose = (): void => {
         if (!loading) {
             onOpenChange(false)
             setFile(null)

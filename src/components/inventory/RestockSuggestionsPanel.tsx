@@ -13,7 +13,7 @@ import { useRestockSuggestions } from '@/hooks/useRestockSuggestions'
 
 
 
-export const RestockSuggestionsPanel = () => {
+export const RestockSuggestionsPanel = (): JSX.Element => {
     const { data, isLoading, error } = useRestockSuggestions()
 
     if (isLoading) {

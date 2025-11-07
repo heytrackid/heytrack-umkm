@@ -7,10 +7,10 @@ import { NextResponse } from 'next/server'
 import { cacheInvalidation } from '@/lib/cache'
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Database } from '@/types/database'
 
 
 async function getHandler() {
@@ -49,7 +49,7 @@ async function getHandler() {
       // Add missing fields with default values
       priority: 5, // Default priority (assuming 1-10 scale)
       estimated_duration: batch.recipe?.cook_time ?? 30, // Default to 30 minutes if not available
-    })) || []
+    })) ?? []
 
     return NextResponse.json(mappedBatches);
    } catch (error: unknown) {

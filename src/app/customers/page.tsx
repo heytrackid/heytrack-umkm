@@ -3,6 +3,6 @@
 
 import CustomersLayout from './components/CustomersLayout'
 
-const CustomersPage = () => <CustomersLayout />
+const CustomersPage = (): JSX.Element => <CustomersLayout />
 
 export default CustomersPage

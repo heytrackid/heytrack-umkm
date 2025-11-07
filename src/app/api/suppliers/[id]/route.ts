@@ -7,10 +7,10 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import type { Update } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Update } from '@/types/database'
 
 
 interface RouteContext {

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { OrderStatusBadge, OrderProgress } from '@/components/orders/OrderStatusBadge'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -25,7 +26,6 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { getPaymentInfo, getPriorityInfo } from './utils'
 
 import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 
 interface OrdersListProps {
   orders: Order[]

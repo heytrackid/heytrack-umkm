@@ -9,8 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useHppOverview } from '@/modules/hpp/hooks/useHppOverview'
-import type { HppOverviewData } from '@/modules/hpp/hooks/useHppOverview'
+import { useHppOverview, type HppOverviewData } from '@/modules/hpp/hooks/useHppOverview'
 
 interface HppAlertsTabProps {
   className?: string
@@ -18,7 +17,7 @@ interface HppAlertsTabProps {
 
 type HppAlert = HppOverviewData['recentAlerts'][number]
 
-export const HppAlertsTab = ({ className }: HppAlertsTabProps) => {
+export const HppAlertsTab = ({ className }: HppAlertsTabProps): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const {
     data: overview,
@@ -27,7 +26,7 @@ export const HppAlertsTab = ({ className }: HppAlertsTabProps) => {
     isLoading
   } = useHppOverview()
 
-  const getAlertIcon = (severity: string) => {
+  const getAlertIcon = (severity: string): JSX.Element => {
     switch (severity) {
       case 'high':
       case 'critical':
@@ -41,7 +40,7 @@ export const HppAlertsTab = ({ className }: HppAlertsTabProps) => {
     }
   }
 
-  const getAlertVariant = (severity: string) => {
+  const getAlertVariant = (severity: string): 'destructive' | 'default' | 'secondary' | 'outline' => {
     switch (severity) {
       case 'high':
       case 'critical':

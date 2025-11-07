@@ -70,7 +70,7 @@ export function paginateCategories(
 /**
  * Calculate pagination info
  */
-export function calculatePagination(totalItems: number, pageSize: number) {
+export function calculatePagination(totalItems: number, pageSize: number): { totalPages: number; totalItems: number } {
   const totalPages = Math.ceil(totalItems / pageSize)
   return { totalPages, totalItems }
 }
@@ -82,7 +82,7 @@ export function getPaginationInfo(
   currentPage: number,
   pageSize: number,
   totalItems: number
-) {
+): { startItem: number; endItem: number; totalItems: number; currentPage: number; totalPages: number } {
   const startItem = ((currentPage - 1) * pageSize) + 1
   const endItem = Math.min(currentPage * pageSize, totalItems)
 

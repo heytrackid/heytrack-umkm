@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type DependencyList } from 'react'
 
-import { createClientLogger } from '@/lib/client-logger'
-
 
 
 /**
@@ -11,8 +9,6 @@ import { createClientLogger } from '@/lib/client-logger'
  * Extends base performance.ts with more advanced features
  */
 
-
-const perfLogger = createClientLogger('Component')
 
 /**
  * Memoize array operations to prevent unnecessary recalculations
@@ -30,22 +26,22 @@ export function useMemoizedArrayOps<T, M = T>(
   }
 ) {
   return useMemo(() => {
-    let result: M[] | T[] = [...array]
+    let working: T[] = [...array]
 
     if (operations.filter) {
-      result = (result).filter(operations.filter)
+      working = working.filter(operations.filter)
     }
-    if (operations.map) {
-      result = (result).map(operations.map)
-    }
+
+    let result: Array<M | T> = operations.map ? working.map(operations.map) : working
+
     if (operations.sort) {
       result = [...(result as T[])].sort(operations.sort)
     }
     if (operations.reduce) {
-      result = (result as T[]).reduce(operations.reduce, [] as M[])
+      result = (working).reduce(operations.reduce, [] as M[])
     }
 
-    return result
+    return result as M[] | T[]
   }, [array, operations.filter, operations.map, operations.reduce, operations.sort])
 }
 
@@ -71,7 +67,10 @@ export function useBatchedCalculations<T extends Record<string, () => unknown>>(
     const results = {} as { [K in keyof T]: T[K] extends () => infer R ? R : never }
     Object.keys(calculations).forEach((key) => {
       const k = key as keyof T
-      results[k] = calculations[k]() as { [K in keyof T]: T[K] extends () => infer R ? R : never }[typeof k]
+      const calculation = calculations[k]
+      if (typeof calculation === 'function') {
+        results[k] = calculation() as { [K in keyof T]: T[K] extends () => infer R ? R : never }[typeof k]
+      }
     })
     return results
   }, [calculations])
@@ -80,7 +79,7 @@ export function useBatchedCalculations<T extends Record<string, () => unknown>>(
 /**
  * Virtual scrolling hook for large lists
  */
-export function useVirtualScroll<T>(
+export function useSimpleVirtualScroll<T>(
   items: T[],
   itemHeight: number,
   containerHeight: number
@@ -253,38 +252,6 @@ export function useThrottledCallback<T extends (...args: Parameters<T>) => Retur
 }
 
 /**
- * Measure component performance
- */
-export function usePerformanceMonitor(componentName: string, enabled = false) {
-  const renderCount = useRef(0)
-  const renderTimes = useRef<number[]>([])
-
-  useEffect(() => {
-    if (!enabled) {return}
-
-    renderCount.current += 1
-    const startTime = performance.now()
-    const currentRenderTimes = renderTimes.current
-
-    return () => {
-      const endTime = performance.now()
-      const renderTime = endTime - startTime
-      currentRenderTimes.push(renderTime)
-
-      if (renderCount.current % 10 === 0) {
-        const avg = currentRenderTimes.reduce((a, b) => a + b, 0) / currentRenderTimes.length
-        perfLogger.info({
-          componentName,
-          renders: renderCount.current,
-          avgTime: `${avg.toFixed(2)}ms`,
-          lastTime: `${renderTime.toFixed(2)}ms`
-        }, 'Component performance metrics')
-      }
-    }
-  })
-}
-
-/**
  * Lazy load component with intersection observer
  */
 export function useLazyLoad(threshold = 0.1) {
@@ -293,8 +260,9 @@ export function useLazyLoad(threshold = 0.1) {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
+      (entries) => {
+        const [entry] = entries
+        if (entry?.isIntersecting) {
           setIsVisible(true)
           observer.disconnect()
         }

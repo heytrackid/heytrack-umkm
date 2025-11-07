@@ -6,10 +6,10 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
+import type { Insert, OrderStatus } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert, OrderStatus } from '@/types/database'
 
 
 type CustomerInsert = Insert<'customers'>
@@ -54,128 +54,157 @@ const isImportOrdersRequest = (value: unknown): value is ImportOrdersRequest => 
   return orders.every(isRawImportedOrder)
 }
 
-async function POST(request: NextRequest) {
+async function authenticateUser(supabase: ReturnType<typeof createClient>) {
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    throw new Error('Unauthorized')
+  }
+
+  return user
+}
+
+async function parseAndValidateRequest(request: NextRequest): Promise<{ orders: RawImportedOrder[] }> {
+  const body = await request.json() as unknown
+
+  if (!isImportOrdersRequest(body) || !body.orders || body.orders.length === 0) {
+    throw new Error('Data pesanan tidak valid')
+  }
+
+  return { orders: body.orders }
+}
+
+async function fetchRecipes(supabase: ReturnType<typeof createClient>, userId: string): Promise<Map<string, string>> {
+  const { data: recipes, error: recipesError } = await supabase
+    .from('recipes')
+    .select('id, name')
+    .eq('user_id', userId)
+
+  if (recipesError) {
+    apiLogger.error({ error: recipesError }, 'Failed to fetch recipes')
+    throw new Error('Gagal memuat data resep')
+  }
+
+  return new Map(recipes.map(r => [r.name.toLowerCase(), r['id']]))
+}
+
+function processOrders(
+  orders: RawImportedOrder[],
+  recipeMap: Map<string, string>,
+  userId: string
+): {
+  errors: Array<{ row: number; error: string }>
+  customersToCreate: Map<string, CustomerInsert>
+  ordersToCreate: Array<{
+    order: OrderInsert
+    items: OrderItemInsert[]
+    customerName: string
+  }>
+} {
+  const errors: Array<{ row: number; error: string }> = []
+  const customersToCreate = new Map<string, CustomerInsert>()
+  const ordersToCreate: Array<{
+    order: OrderInsert
+    items: OrderItemInsert[]
+    customerName: string
+  }> = []
+
+  for (let index = 0; index < orders.length; index++) {
+    const order = orders[index]
+    if (!order) { continue }
+    const rowNum = index + 2
+
+    // Validate required fields
+    if (!order['order_no']?.trim()) {
+      errors.push({ row: rowNum, error: 'Nomor pesanan wajib diisi' })
+      continue
+    }
+
+    if (!order['customer_name']?.trim()) {
+      errors.push({ row: rowNum, error: 'Nama customer wajib diisi' })
+      continue
+    }
+
+    if (!order['recipe_name']?.trim()) {
+      errors.push({ row: rowNum, error: 'Nama resep wajib diisi' })
+      continue
+    }
+
+    const quantity = Number(order.quantity)
+    if (isNaN(quantity) || quantity <= 0) {
+      errors.push({ row: rowNum, error: 'Jumlah harus angka positif' })
+      continue
+    }
+
+    const unitPrice = Number(order.unit_price)
+    if (isNaN(unitPrice) || unitPrice < 0) {
+      errors.push({ row: rowNum, error: 'Harga satuan harus angka positif' })
+      continue
+    }
+
+    // Find recipe
+    const recipeId = recipeMap.get(order['recipe_name'].toLowerCase())
+    if (!recipeId) {
+      errors.push({ row: rowNum, error: `Resep "${order['recipe_name']}" tidak ditemukan` })
+      continue
+    }
+
+    // Prepare customer data (will be created if not exists)
+    const customerKey = order['customer_name'].toLowerCase().trim()
+    if (!customersToCreate.has(customerKey)) {
+      customersToCreate.set(customerKey, {
+        name: order['customer_name'].trim(),
+        phone: sanitizeOptionalString(order.customer_phone),
+        email: sanitizeOptionalString(order.customer_email),
+        address: sanitizeOptionalString(order.customer_address),
+        user_id: userId,
+        is_active: true
+      })
+    }
+
+    // Prepare order data
+    const totalPrice = quantity * unitPrice
+    ordersToCreate.push({
+      order: {
+        order_no: order['order_no'].trim(),
+        customer_name: order['customer_name'].trim(),
+        customer_phone: sanitizeOptionalString(order.customer_phone),
+        customer_address: sanitizeOptionalString(order.customer_address),
+        status: (order['status'] ? order['status'].toUpperCase() : 'PENDING') as OrderStatus,
+        total_amount: totalPrice,
+        delivery_date: order.delivery_date ? new Date(order.delivery_date).toISOString() : null,
+        notes: sanitizeOptionalString(order.notes),
+        user_id: userId
+      },
+      items: [{
+        recipe_id: recipeId,
+        quantity,
+        unit_price: unitPrice,
+        total_price: totalPrice,
+        product_name: order['recipe_name'].trim(),
+        user_id: userId
+      }],
+      customerName: customerKey
+    })
+  }
+
+  return { errors, customersToCreate, ordersToCreate }
+}
+
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authenticate
     const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    // 2. Parse CSV data from request
-    const body = await request.json() as unknown
+    const user = await authenticateUser(supabase)
 
-    if (!isImportOrdersRequest(body) || !body.orders || body.orders.length === 0) {
-      return NextResponse.json(
-        { error: 'Data pesanan tidak valid' },
-        { status: 400 }
-      )
-    }
-    const { orders } = body
+    // 2. Parse and validate request
+    const { orders } = await parseAndValidateRequest(request)
 
     // 3. Get all recipes for mapping
-    const { data: recipes, error: recipesError } = await supabase
-      .from('recipes')
-      .select('id, name')
-      .eq('user_id', user['id'])
-
-    if (recipesError) {
-      apiLogger.error({ error: recipesError }, 'Failed to fetch recipes')
-      return NextResponse.json(
-        { error: 'Gagal memuat data resep' },
-        { status: 500 }
-      )
-    }
-
-    const recipeMap = new Map(recipes.map(r => [r.name.toLowerCase(), r['id']]))
+    const recipeMap = await fetchRecipes(supabase, user['id'])
 
     // 4. Process orders
-    const errors: Array<{ row: number; error: string }> = []
-    const customersToCreate = new Map<string, CustomerInsert>()
-    const ordersToCreate: Array<{
-      order: OrderInsert
-      items: OrderItemInsert[]
-      customerName: string
-    }> = []
-
-    for (let index = 0; index < orders.length; index++) {
-      const order = orders[index]
-      if (!order) {continue}
-      const rowNum = index + 2
-
-      // Validate required fields
-      if (!order['order_no']?.trim()) {
-        errors.push({ row: rowNum, error: 'Nomor pesanan wajib diisi' })
-        continue
-      }
-
-      if (!order['customer_name']?.trim()) {
-        errors.push({ row: rowNum, error: 'Nama customer wajib diisi' })
-        continue
-      }
-
-      if (!order['recipe_name']?.trim()) {
-        errors.push({ row: rowNum, error: 'Nama resep wajib diisi' })
-        continue
-      }
-
-      const quantity = Number(order.quantity)
-      if (isNaN(quantity) || quantity <= 0) {
-        errors.push({ row: rowNum, error: 'Jumlah harus angka positif' })
-        continue
-      }
-
-      const unitPrice = Number(order.unit_price)
-      if (isNaN(unitPrice) || unitPrice < 0) {
-        errors.push({ row: rowNum, error: 'Harga satuan harus angka positif' })
-        continue
-      }
-
-      // Find recipe
-      const recipeId = recipeMap.get(order['recipe_name'].toLowerCase())
-      if (!recipeId) {
-        errors.push({ row: rowNum, error: `Resep "${order['recipe_name']}" tidak ditemukan` })
-        continue
-      }
-
-      // Prepare customer data (will be created if not exists)
-      const customerKey = order['customer_name'].toLowerCase().trim()
-      if (!customersToCreate.has(customerKey)) {
-        customersToCreate.set(customerKey, {
-          name: order['customer_name'].trim(),
-          phone: sanitizeOptionalString(order.customer_phone),
-          email: sanitizeOptionalString(order.customer_email),
-          address: sanitizeOptionalString(order.customer_address),
-          user_id: user['id'],
-          is_active: true
-        })
-      }
-
-      // Prepare order data
-      const totalPrice = quantity * unitPrice
-      ordersToCreate.push({
-        order: {
-          order_no: order['order_no'].trim(),
-          customer_name: order['customer_name'].trim(),
-          customer_phone: sanitizeOptionalString(order.customer_phone),
-          customer_address: sanitizeOptionalString(order.customer_address),
-          status: (order['status'] ? order['status'].toUpperCase() : 'PENDING') as OrderStatus,
-          total_amount: totalPrice,
-          delivery_date: order.delivery_date ? new Date(order.delivery_date).toISOString() : null,
-          notes: sanitizeOptionalString(order.notes),
-          user_id: user['id']
-        },
-        items: [{
-          recipe_id: recipeId,
-          quantity,
-          unit_price: unitPrice,
-          total_price: totalPrice,
-          product_name: order['recipe_name'].trim(),
-          user_id: user['id']
-        }],
-        customerName: customerKey
-      })
-    }
+    const { errors, customersToCreate, ordersToCreate } = processOrders(orders, recipeMap, user['id'])
 
     // Return validation errors if any
     if (errors.length > 0) {

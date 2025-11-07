@@ -12,7 +12,7 @@ import { createClient } from '@/utils/supabase/server'
 
 
 // GET /api/hpp/calculations - Get HPP calculations with pagination and filtering
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     const cacheKey = `${cacheKeys.hpp.calculations}:${user['id']}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${startDate ?? ''}:${endDate ?? ''}`
 
     // Wrap database query with caching
-    const getCalculations = async () => {
+    const getCalculations = async (): Promise<{ calculations: any[], total: number, page: number, limit: number, totalPages: number }> => {
       let query = supabase
         .from('hpp_calculations')
         .select(`
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
       }
 
       return {
-        calculations: data || [],
+        calculations: data ?? [],
         total: count ?? 0,
         page,
         limit,
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/hpp/calculations - Create new HPP calculation
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()

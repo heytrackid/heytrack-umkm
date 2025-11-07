@@ -9,7 +9,7 @@ export const runtime = 'nodejs'
  import { createClient } from '@/utils/supabase/server'
 
 
-async function longTasksPOST(request: NextRequest) {
+async function longTasksPOST(request: NextRequest): Promise<NextResponse> {
   try {
     // ✅ Add authentication
     const supabase = await createClient()

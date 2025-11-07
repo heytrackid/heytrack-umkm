@@ -35,7 +35,7 @@ export abstract class BaseWorkflowAutomation {
   /**
    * Trigger workflow automation event
    */
-  async triggerEvent(eventData: Partial<WorkflowEventData>) {
+  async triggerEvent(eventData: Partial<WorkflowEventData>): Promise<void> {
     if (!eventData.event || !eventData.entityId) {
       throw new Error('Event and entityId are required')
     }

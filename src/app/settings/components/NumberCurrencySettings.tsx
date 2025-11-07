@@ -2,11 +2,11 @@
 
 import { DollarSign } from 'lucide-react'
 
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { useSettings, currencies } from '@/contexts/settings-context'
 
-import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 
 
 

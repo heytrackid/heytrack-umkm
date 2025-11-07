@@ -29,7 +29,7 @@ const EnhancedTransactionList = ({
     onDeleteTransaction,
     formatCurrency,
     loading
-}: EnhancedTransactionListProps) => {
+}: EnhancedTransactionListProps): JSX.Element => {
     const [filterType, setFilterType] = useState<FilterType>('all')
     const [searchQuery, setSearchQuery] = useState('')
     const [sortBy, setSortBy] = useState<SortBy>('date-desc')
@@ -87,12 +87,12 @@ const EnhancedTransactionList = ({
          
     }, [])
 
-    const handleDeleteClick = (transaction: Transaction) => {
+    const handleDeleteClick = (transaction: Transaction): void => {
         setTransactionToDelete(transaction)
         setDeleteDialogOpen(true)
     }
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = (): void => {
         if (transactionToDelete) {
             onDeleteTransaction(transactionToDelete)
             setDeleteDialogOpen(false)

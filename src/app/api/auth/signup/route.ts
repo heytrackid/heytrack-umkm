@@ -16,7 +16,7 @@ const SignupSchema = z.object({
   fullName: z.string().min(2),
 })
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/auth/signup - Request received')
 

@@ -1,7 +1,7 @@
 import { createClientLogger } from '@/lib/client-logger'
+import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
 
-import type { Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 const logger = createClientLogger('ClientFile')
@@ -13,9 +13,9 @@ const logger = createClientLogger('ClientFile')
  */
 
 
-// ============================================================================
+// ==========================================================
 // TYPE UTILITIES
-// ============================================================================
+// ==========================================================
 
 // Import types from database
 type Tables = Database['public']['Tables']
@@ -35,9 +35,9 @@ export interface QueryArrayResult<T> {
   error: Error | null
 }
 
-// ============================================================================
+// ==========================================================
 // TYPED CRUD OPERATIONS
-// ============================================================================
+// ==========================================================
 
 /**
  * Generic insert wrapper with proper typing
@@ -191,9 +191,9 @@ export async function typedSelect<T extends TableName>(
   }
 }
 
-// ============================================================================
+// ==========================================================
 // CLIENT INSTANCES
-// ============================================================================
+// ==========================================================
 
 /**
  * Get Supabase client instance (client-side)
@@ -207,9 +207,9 @@ export function getSupabaseClient() {
  */
 export { updateSession } from '@/utils/supabase/middleware'
 
-// ============================================================================
+// ==========================================================
 // UTILITY FUNCTIONS
-// ============================================================================
+// ==========================================================
 
 /**
  * Check if user is authenticated
@@ -233,7 +233,7 @@ export async function getCurrentUser() {
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) {throw error}
     return user
-  } catch (error) {
+  } catch (_error) {
     return null
   }
 }
@@ -252,9 +252,9 @@ export async function signOut() {
   }
 }
 
-// ============================================================================
+// ==========================================================
 // TYPE EXPORTS
-// ============================================================================
+// ==========================================================
 
 export type {
   Database,

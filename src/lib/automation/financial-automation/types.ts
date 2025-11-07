@@ -78,6 +78,4 @@ export interface HistoricalData {
 }
 
 // Expenses by Category Type
-export interface ExpensesByCategory {
-  [category: string]: number
-}
+export type ExpensesByCategory = Record<string, number>;

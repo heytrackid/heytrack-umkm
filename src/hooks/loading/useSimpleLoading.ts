@@ -2,7 +2,11 @@
 
 import { useCallback, useState } from 'react'
 
-
+type UseSimpleLoadingReturn = readonly [
+  boolean,
+  React.Dispatch<React.SetStateAction<boolean>>,
+  <T>(fn: () => Promise<T>) => Promise<T>
+]
 
 /**
  * Hook sederhana untuk single loading state
@@ -10,7 +14,7 @@ import { useCallback, useState } from 'react'
  * @param initialValue - Initial loading value
  * @returns Array dengan [isLoading, setLoading, withLoading]
  */
-export function useSimpleLoading(initialValue = false) {
+export function useSimpleLoading(initialValue = false): UseSimpleLoadingReturn {
   const [isLoading, setIsLoading] = useState(initialValue)
 
   const withLoading = useCallback(async <T>(fn: () => Promise<T>): Promise<T> => {

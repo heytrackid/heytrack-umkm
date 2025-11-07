@@ -4,6 +4,12 @@ import { useCallback, useState } from 'react'
 
 import { useErrorHandler } from './useErrorHandler'
 
+interface UseRetryReturn {
+  retry: <T>(asyncFn: () => Promise<T>, onRetry?: (count: number, error: Error) => void) => Promise<T | null>
+  retryCount: number
+  isRetrying: boolean
+  reset: () => void
+}
 
 // Removed unused import: RetryOptions
 
@@ -37,7 +43,8 @@ import { useErrorHandler } from './useErrorHandler'
  *   </div>
  * )
  */
-export function useRetry(maxRetries = 3, initialDelay = 1000) {
+
+export function useRetry(maxRetries = 3, initialDelay = 1000): UseRetryReturn {
   const [retryCount, setRetryCount] = useState(0)
   const [isRetrying, setIsRetrying] = useState(false)
   const { handleError } = useErrorHandler()
@@ -47,9 +54,9 @@ export function useRetry(maxRetries = 3, initialDelay = 1000) {
       asyncFn: () => Promise<T>,
       onRetry?: (count: number, error: Error) => void
     ): Promise<T | null> => {
-      let lastError: Error | null = null
+       let lastError: Error | null = null
 
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
           setIsRetrying(attempt > 0)
           const result = await asyncFn()
@@ -67,9 +74,9 @@ export function useRetry(maxRetries = 3, initialDelay = 1000) {
             setRetryCount(attempt + 1)
           }
         }
-      }
+       }
 
-      // All retries failed
+       // All retries failed
       if (lastError) {
         void handleError(lastError, `useRetry: Failed after ${maxRetries} retries`)
       }

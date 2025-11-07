@@ -1,8 +1,8 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
+import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Row } from '@/types/database'
 
 
 

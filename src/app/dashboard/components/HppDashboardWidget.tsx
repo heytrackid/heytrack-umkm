@@ -36,7 +36,7 @@ interface HppDashboardData {
   }>
 }
 
-const HppDashboardWidget = () => {
+const HppDashboardWidget = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const router = useRouter()

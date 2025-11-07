@@ -25,7 +25,7 @@ import type { Insert } from '@/types/database'
 
 type IngredientInsert = Insert<'ingredients'>
 
-const NewIngredientPage = () => {
+const NewIngredientPage = (): JSX.Element => {
   const router = useRouter()
   const { supabase } = useSupabase()
   const { create: createIngredient } = useSupabaseCRUD('ingredients')

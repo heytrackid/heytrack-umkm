@@ -15,7 +15,7 @@ import { createClient } from '@/utils/supabase/server'
 import type { NextRequest } from 'next/server'
 
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
 
     return createCachedResponse(
       {
-        recipes: recipes || [],
+        recipes: recipes ?? [],
         total: count ?? 0,
         limit
       },

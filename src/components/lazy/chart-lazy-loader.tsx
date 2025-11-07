@@ -102,9 +102,7 @@ export const ComposedChartWithSuspense = ({ title, height, children, ...props }:
 )
 
 // Chart Component Elements with Suspense
-interface ChartElementProps {
-  [key: string]: unknown;
-}
+type ChartElementProps = Record<string, unknown>;
 
 export const CartesianGridWithSuspense = (props: ChartElementProps) => (
   <Suspense fallback={null}>

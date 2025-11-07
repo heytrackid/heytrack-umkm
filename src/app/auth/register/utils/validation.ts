@@ -16,7 +16,7 @@ export function validatePasswordMatch(password: string, confirmPassword: string)
   return null
 }
 
-export function getAuthErrorMessage(error: string) {
+export function getAuthErrorMessage(error: string): { message: string; action: null } {
   return {
     message: error,
     action: null

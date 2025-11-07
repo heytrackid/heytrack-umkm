@@ -23,7 +23,7 @@ import type { ComponentType, ReactNode } from 'react'
 // Define a type for our lazy charts
 export type LazyChartComponent<T = Record<string, unknown>> = ComponentType<T>
 
-const chartLoadingFallback = () => (
+const chartLoadingFallback = (): ReactNode => (
   <div className="p-4 text-center text-gray-500">Loading chart...</div>
 )
 
@@ -88,7 +88,7 @@ export const LazyRechartsPieChart = dynamic(
 )
 
 // Utility function to preload chart components
-export async function preloadChartComponents() {
+export async function preloadChartComponents(): Promise<boolean> {
   // Preload chart components
   await Promise.all([
   ])
@@ -97,7 +97,7 @@ export async function preloadChartComponents() {
 }
 
 // Preload Recharts library bundle
-export async function preloadRechartsBundle() {
+export async function preloadRechartsBundle(): Promise<boolean> {
   try {
     await import('recharts')
     return true
@@ -131,7 +131,7 @@ type SmartChartLoaderProps =
   | MiniChartLoaderProps
 
 // Smart loader component
-export const SmartChartLoader = (props: SmartChartLoaderProps) => {
+export const SmartChartLoader = (props: SmartChartLoaderProps): ReactNode => {
   const fallback = props.fallback ?? defaultChartFallback
 
   switch (props.chartType) {
@@ -149,14 +149,14 @@ export const SmartChartLoader = (props: SmartChartLoaderProps) => {
 }
 
 // Dashboard with progressive loading
-export const ChartDashboardWithProgressiveLoading = ({ children }: { children?: ReactNode }) => (
+export const ChartDashboardWithProgressiveLoading = ({ children }: { children?: ReactNode }): ReactNode => (
   <div className="space-y-6">
     {children}
   </div>
 )
 
 // Hook for progressive loading
-export const useChartProgressiveLoading = () =>
+export const useChartProgressiveLoading = (): { isLoading: boolean; loadChart: (chartType: string) => void; preloadCharts: () => Promise<boolean> } =>
 // This would typically handle loading states for charts
 ({
   isLoading: false,
@@ -174,7 +174,7 @@ export const ChartPerformanceUtils = {
     return data.filter((_, i) => i % step === 0)
   },
 
-  debounce: <TArgs extends unknown[]>(func: (...args: TArgs) => void, wait: number) => {
+  debounce: <TArgs extends unknown[]>(func: (...args: TArgs) => void, wait: number): (...args: TArgs) => void => {
     let timeout: ReturnType<typeof setTimeout> | undefined
 
     return (...args: TArgs) => {

@@ -166,7 +166,7 @@ export const ProgressiveDataTable = <T extends Record<string, ReactNode>>({
 }
 
 // Skeleton components untuk different loading states
-export const DataTableSkeleton = () => (
+export const DataTableSkeleton = (): JSX.Element => (
   <div className="space-y-4">
     <div className="flex justify-between">
       <Skeleton className="h-8 w-32" />
@@ -189,7 +189,7 @@ export const DataTableSkeleton = () => (
   </div>
 )
 
-export const FormSkeleton = () => (
+export const FormSkeleton = (): JSX.Element => (
   <div className="space-y-4">
     <div className="grid grid-cols-2 gap-4">
       {Array.from({ length: 6 }).map((_, i) => (
@@ -210,7 +210,7 @@ export const FormSkeleton = () => (
   </div>
 )
 
-export const StatsCardSkeleton = () => (
+export const StatsCardSkeleton = (): JSX.Element => (
   <Card>
     <CardHeader className="pb-2">
       <div className="flex justify-between">

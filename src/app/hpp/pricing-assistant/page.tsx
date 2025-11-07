@@ -48,7 +48,7 @@ interface PricingRecommendation {
   }
 }
 
-const PricingAssistantPage = () => {
+const PricingAssistantPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const [recipes, setRecipes] = useState<Recipe[]>([])

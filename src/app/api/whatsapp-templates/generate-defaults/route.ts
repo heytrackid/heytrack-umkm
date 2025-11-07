@@ -12,7 +12,7 @@ import { createClient } from '@/utils/supabase/server'
  * Generate default WhatsApp templates for current user
  * POST /api/whatsapp-templates/generate-defaults
  */
-export async function POST() {
+export async function POST(): Promise<NextResponse> {
   try {
     // 1. Authentication
     const supabase = await createClient()

@@ -148,7 +148,7 @@ export const ActiveFilters = ({ filters, onRemoveFilter, filterLabels = {} }: Ac
       <span className="text-sm text-gray-600 self-center">Filter aktif:</span>
       {activeFilters.map(([key, value]) => (
         <Badge key={key} variant="secondary" className="flex items-center gap-1">
-          {filterLabels[key] || key}: {String(value)}
+          {filterLabels[key] ?? key}: {String(value)}
           <Button
             variant="ghost"
             size="sm"

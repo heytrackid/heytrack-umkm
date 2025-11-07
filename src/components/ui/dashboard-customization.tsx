@@ -25,12 +25,10 @@ interface DashboardWidget {
   position: number
 }
 
-interface DashboardLayout {
-  [key: string]: {
+type DashboardLayout = Record<string, {
     visible: boolean
     position: number
-  }
-}
+  }>;
 
 interface DashboardCustomizationProps {
   children: React.ReactNode

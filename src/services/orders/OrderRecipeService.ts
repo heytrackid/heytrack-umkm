@@ -1,11 +1,13 @@
+import type { RecipeOption, OrderPricing } from '@/modules/orders/types'
+
+import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
+
 import { InventoryUpdateService } from './InventoryUpdateService'
 import { OrderPricingService } from './OrderPricingService'
 import { OrderValidationService } from './OrderValidationService'
 import { ProductionTimeService } from './ProductionTimeService'
-import { RecipeAvailabilityService } from './RecipeAvailabilityService'
 import { RecipeRecommendationService } from './RecipeRecommendationService'
 
-import type { RecipeOption, OrderPricing } from '@/modules/orders/types'
 
 
 

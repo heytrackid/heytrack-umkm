@@ -1,8 +1,3 @@
-import { AvailabilityChecker } from './availability-checker'
-import { ProductionRecommendations } from './recommendations'
-import { TimeCalculator } from './time-calculator'
-
-import type { OrderForProduction } from './types'
 import type {
   Recipe,
   RecipeIngredient,
@@ -12,6 +7,12 @@ import type {
   ProductionPlanSummary,
   AutomationConfig
 } from '@/lib/automation/types'
+
+import { AvailabilityChecker } from './availability-checker'
+import { ProductionRecommendations } from './recommendations'
+import { TimeCalculator } from './time-calculator'
+
+import type { OrderForProduction } from './types'
 
 /**
  * Production Planner Module

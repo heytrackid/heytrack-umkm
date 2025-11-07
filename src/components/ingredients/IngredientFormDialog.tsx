@@ -9,10 +9,11 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import { useToast } from '@/hooks/use-toast'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 
+import type { Row } from '@/types/database'
+
 import { EnhancedIngredientForm } from './EnhancedIngredientForm'
 
 
-import type { Row } from '@/types/database'
 
 
 

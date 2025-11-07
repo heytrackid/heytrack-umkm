@@ -2,16 +2,16 @@
 
 import { Palette } from 'lucide-react'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { useSettings } from '@/contexts/settings-context'
-
 import type {
   AppSettingsState,
   SettingsUpdateHandler,
   ThemeOption,
   LanguageOption,
 } from '@/app/settings/types'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { useSettings } from '@/contexts/settings-context'
+
 
 interface UIThemeSettingsProps {
   settings: AppSettingsState

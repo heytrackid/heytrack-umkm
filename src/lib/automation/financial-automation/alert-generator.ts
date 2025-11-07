@@ -119,6 +119,10 @@ export class AlertGenerator {
           })
         }
         break
+
+      default:
+        // No alerts for unknown scenarios
+        break
     }
 
     return alerts

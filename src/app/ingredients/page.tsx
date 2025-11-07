@@ -18,7 +18,7 @@ import type { Row } from '@/types/database'
 
 
 // Lazy load heavy components
-const IngredientsCRUDSkeleton = () => (
+const IngredientsCRUDSkeleton = (): JSX.Element => (
   <div className="border rounded-lg p-6">
     <div className="animate-pulse space-y-4">
       <div className="h-10 bg-muted rounded" />

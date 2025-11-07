@@ -303,7 +303,7 @@ const MobileHeader = ({
 export default MobileHeader
 
 // Pre-built header variants for common use cases
-export const DashboardHeader = () => (
+export const DashboardHeader = (): JSX.Element => (
   <MobileHeader
     title="Dashboard"
     notification={{

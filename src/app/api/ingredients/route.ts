@@ -9,11 +9,11 @@ import { createSuccessResponse, createErrorResponse, handleAPIError, withQueryVa
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
+import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert } from '@/types/database'
 
 
 // Extended schema for ingredients query
@@ -24,7 +24,7 @@ const IngredientsQuerySchema = PaginationSchema.extend({
 })
 
 // GET /api/ingredients - Get all bahan baku with pagination and filtering
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Validate query parameters
     const queryValidation = withQueryValidation(IngredientsQuerySchema)(request)
@@ -88,7 +88,7 @@ async function GET(request: NextRequest) {
 }
 
 // POST /api/ingredients - Create new bahan baku
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Parse and validate request body
     let _body: unknown

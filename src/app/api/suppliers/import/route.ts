@@ -9,7 +9,7 @@ import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
 // POST /api/suppliers/import - Import suppliers from CSV
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/suppliers/import - Request received')
 

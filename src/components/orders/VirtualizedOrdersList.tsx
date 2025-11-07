@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/button'
 import { VirtualizedTable } from '@/components/ui/virtualized-table'
 import { useCurrency } from '@/hooks/useCurrency'
 
+import type { Order } from '@/types'
+
 import { OrderStatusBadge, OrderProgress } from './OrderStatusBadge'
 
 
-import type { Order } from '@/types'
 
 interface VirtualizedOrdersListProps {
   orders: Order[]

@@ -8,7 +8,11 @@ import { getErrorMessage } from '@/lib/type-guards'
 const logger = createClientLogger('Hook')
 import type { AppError, ErrorState } from './types'
 
-
+interface UseErrorHandlerReturn extends ErrorState {
+  handleError: (error: unknown, context?: string) => AppError
+  resetError: () => void
+  throwError: (error: AppError) => never
+}
 
 /**
  * Hook untuk handle errors dalam functional components
@@ -35,7 +39,7 @@ import type { AppError, ErrorState } from './types'
  *   return <ErrorDisplay message={message} onRetry={resetError} />
  * }
  */
-export function useErrorHandler() {
+export function useErrorHandler(): UseErrorHandlerReturn {
   const [errorState, setErrorState] = useState<ErrorState>({
     error: null,
     isError: false,

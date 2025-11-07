@@ -9,9 +9,10 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useSettings } from '@/contexts/settings-context'
 
+import type { PricingMethod } from '@/modules/recipes/types'
+
 import { UMKMTooltip } from './UMKMTooltip'
 
-import type { PricingMethod } from '@/modules/recipes/types'
 
 
 

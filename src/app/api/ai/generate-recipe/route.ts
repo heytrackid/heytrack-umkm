@@ -7,9 +7,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
-import { createClient } from '@/utils/supabase/server'
 
 import type { Row } from '@/types/database'
+import { createClient } from '@/utils/supabase/server'
 
 // Use generated types from database.ts (these are already Row types)
 type Ingredient = Row<'ingredients'>
@@ -95,7 +95,7 @@ export const maxDuration = 60
  * AI Recipe Generator API
  * Generates UMKM recipes with accurate ingredient measurements and HPP calculations
  */
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
         // 1. Authenticate user first
         const supabase = await createClient()
@@ -252,7 +252,7 @@ function buildRecipePrompt(params: {
     dietaryRestrictions?: string[]
     availableIngredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>
     userProvidedIngredients?: string[]
-}) {
+}): string {
     const {
         productName,
         productType,
@@ -667,7 +667,7 @@ async function calculateRecipeHPP(
     recipe: GeneratedRecipe, 
     availableIngredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>, 
     userId: string
-) {
+): Promise<number> {
     let totalMaterialCost = 0
     const ingredientBreakdown: Array<{
         name: string

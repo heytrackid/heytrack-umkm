@@ -6,7 +6,7 @@ interface PasswordStrengthIndicatorProps {
   password: string
 }
 
-export const PasswordStrengthIndicator = ({ password }: PasswordStrengthIndicatorProps) => {
+export const PasswordStrengthIndicator = ({ password }: PasswordStrengthIndicatorProps): JSX.Element | null => {
   const { passwordStrength, strengthColors, currentStrengthLabel } = usePasswordValidation(password)
 
   if (!password) { return null }

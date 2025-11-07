@@ -7,144 +7,140 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { checkAdminPrivileges } from '@/lib/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+import type { Insert } from '@/types/database'
 import { SecurityPresets, withSecurity } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert } from '@/types/database'
+interface ErrorBody {
+  message?: string
+  msg?: string
+  stack?: string
+  url?: string
+  userAgent?: string
+  componentStack?: string
+  timestamp?: number | string
+  errorType?: string
+  browser?: string
+  os?: string
+  device?: string
+}
 
+interface SanitizedError {
+  message: string
+  stack: string | null
+  url: string | null
+  userAgent: string | null
+  timestamp: string
+  componentStack: string | null
+}
 
-// POST /api/errors - Log errors to database
-async function POST(request: NextRequest) {
+async function getOptionalUserId(): Promise<string | null> {
   try {
-    // Authenticate user (optional - errors can be logged without auth)
-    let userId: string | null = null
-    try {
-      const supabase = await createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user?.id) {
-        userId = user.id
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    return user?.id ?? null
+  } catch (error: unknown) {
+    apiLogger.debug({ error: getErrorMessage(error) }, 'Anonymous error report')
+    return null
+  }
+}
+
+async function parseErrorBody(request: NextRequest): Promise<ErrorBody> {
+  const contentType = request.headers.get('content-type') ?? ''
+
+  if (contentType.includes('application/json')) {
+    return request.json() as Promise<ErrorBody>
+  }
+
+  if (contentType.includes('text/plain')) {
+    const text = await request.text()
+    return JSON.parse(text) as ErrorBody
+  }
+
+  return request.json() as Promise<ErrorBody>
+}
+
+function sanitizeErrorBody(body: ErrorBody): SanitizedError {
+  const timestamp = body.timestamp ? String(body.timestamp) : new Date().toISOString()
+
+  return {
+    message: String(body.message ?? body.msg ?? 'Unknown error').slice(0, 1000),
+    stack: body.stack ? String(body.stack).slice(0, 5000) : null,
+    url: body.url ? String(body.url).slice(0, 500) : null,
+    userAgent: body.userAgent ? String(body.userAgent).slice(0, 500) : null,
+    componentStack: body.componentStack ? String(body.componentStack).slice(0, 2000) : null,
+    timestamp
+  }
+}
+
+async function logErrorToDatabase(
+  userId: string,
+  sanitized: SanitizedError,
+  original: ErrorBody
+): Promise<void> {
+  try {
+    const supabase = await createClient()
+    const payload: Insert<'error_logs'> = {
+      user_id: userId,
+      endpoint: sanitized.url ?? 'unknown',
+      error_message: sanitized.message,
+      error_type: String(original.errorType ?? 'ClientError'),
+      stack_trace: sanitized.stack,
+      timestamp: sanitized.timestamp,
+      metadata: {
+        url: sanitized.url,
+        userAgent: sanitized.userAgent,
+        componentStack: sanitized.componentStack,
+        browser: original.browser ? String(original.browser) : undefined,
+        os: original.os ? String(original.os) : undefined,
+        device: original.device ? String(original.device) : undefined,
       }
+    }
+
+    const { error } = await supabase.from('error_logs').insert(payload)
+    if (error) {
+      throw error
+    }
+  } catch (error: unknown) {
+    apiLogger.error({ error: getErrorMessage(error) }, 'Database error when logging error')
+  }
+}
+
+async function POST(request: NextRequest): Promise<NextResponse> {
+  try {
+    const userId = await getOptionalUserId()
+
+    let errorBody: ErrorBody
+    try {
+      errorBody = await parseErrorBody(request)
     } catch (error: unknown) {
-      // Ignore auth errors - client-side errors can be anonymous
-      apiLogger.debug({ error: getErrorMessage(error) }, 'Anonymous error report')
+      apiLogger.error({ error: getErrorMessage(error) }, 'Failed to parse error report body')
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     }
 
-    // Parse _body - handle both JSON and text/plain
-    interface ErrorBody {
-      message?: string
-      msg?: string
-      stack?: string
-      url?: string
-      userAgent?: string
-      componentStack?: string
-      timestamp?: number | string
-      errorType?: string
-      browser?: string
-      os?: string
-      device?: string
-    }
-    let _body: ErrorBody
-    const contentType = request.headers.get('content-type') ?? ''
-    
-    try {
-      if (contentType.includes('application/json')) {
-        _body = await request.json() as ErrorBody
-      } else if (contentType.includes('text/plain')) {
-        // Try to parse text as JSON (sendBeacon might send JSON as text/plain)
-        const text = await request.text()
-        _body = JSON.parse(text) as ErrorBody
-      } else {
-        _body = await request.json() as ErrorBody // Default to JSON
-      }
-    } catch (error) {
-      apiLogger.error({ error: getErrorMessage(error), contentType }, 'Failed to parse error report body')
-      return NextResponse.json(
-        { error: 'Invalid request body' },
-        { status: 400 }
-      )
-    }
-    
-    // Validate required fields
-    if (!_body.message && !_body.msg) {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      )
+    if (!errorBody.message && !errorBody.msg) {
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
 
-    // Sanitize error data with proper type casting
-    const message = String(_body.message ?? _body.msg ?? 'Unknown error')
-    const stack = _body.stack ? String(_body.stack) : null
-    const url = _body.url ? String(_body.url) : null
-    const userAgent = _body.userAgent ? String(_body.userAgent) : null
-    const componentStack = _body.componentStack ? String(_body.componentStack) : null
-    const timestamp = _body.timestamp ? String(_body.timestamp) : new Date().toISOString()
-    
-    const sanitizedErrorData = {
-      message: message.substring(0, 1000), // Limit message length
-      stack: stack ? stack.substring(0, 5000) : null, // Limit stack trace
-      url: url ? url.substring(0, 500) : null,
-      userAgent: userAgent ? userAgent.substring(0, 500) : null,
-      timestamp,
-      componentStack: componentStack ? componentStack.substring(0, 2000) : null,
-      // Add any additional fields you want to log
-    }
+    const sanitized = sanitizeErrorBody(errorBody)
 
-    // Log to database if authenticated
     if (userId) {
-      try {
-        const supabase = await createClient()
-        const errorLogData: Insert<'error_logs'> = {
-          user_id: userId,
-          endpoint: sanitizedErrorData.url ?? 'unknown',
-          error_message: sanitizedErrorData.message,
-          error_type: String(_body.errorType ?? 'ClientError'),
-          stack_trace: sanitizedErrorData.stack,
-          timestamp: sanitizedErrorData['timestamp'],
-          metadata: {
-            url: sanitizedErrorData.url,
-            userAgent: sanitizedErrorData.userAgent,
-            componentStack: sanitizedErrorData.componentStack,
-            browser: _body.browser ? String(_body.browser) : undefined,
-            os: _body.os ? String(_body.os) : undefined,
-            device: _body.device ? String(_body.device) : undefined,
-          }
-        }
-        
-        const { error: dbError } = await supabase
-          .from('error_logs')
-          .insert(errorLogData)
-
-        if (dbError) {
-          apiLogger.error({ error: getErrorMessage(dbError) }, 'Database error when logging error')
-          // Continue to return success even if DB logging fails
-        }
-      } catch (error) {
-        apiLogger.error({ error: getErrorMessage(error) }, 'Database error when logging error')
-        // Continue to return success even if DB logging fails
-      }
+      await logErrorToDatabase(userId, sanitized, errorBody)
     }
 
-    // In development, log as well
     if (process['env'].NODE_ENV === 'development') {
-      apiLogger.info({
-        ...sanitizedErrorData,
-        userId
-      }, 'Client-side error reported')
+      apiLogger.info({ ...sanitized, userId }, 'Client-side error reported')
     }
 
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/errors')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 // GET /api/errors - Get recent errors (admin only)
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 

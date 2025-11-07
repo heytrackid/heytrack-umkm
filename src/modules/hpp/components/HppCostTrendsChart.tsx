@@ -10,6 +10,7 @@ import { createClientLogger } from '@/lib/client-logger'
 import { formatCurrency as formatCurrencyUtil } from '@/lib/currency'
 
 import type { Currency } from '@/shared'
+
 import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 
 const logger = createClientLogger('ClientFile')
@@ -54,7 +55,7 @@ export const HppCostTrendsChart = ({
   className,
   showLegend = true,
   currency
-}: HppCostTrendsChartProps) => {
+}: HppCostTrendsChartProps): JSX.Element => {
   const { currency: defaultCurrency } = useCurrency()
   const resolvedCurrency = currency ?? defaultCurrency
 
@@ -64,7 +65,20 @@ export const HppCostTrendsChart = ({
     return generateFallbackData()
   }, [data])
 
-  const formatCurrencyValue = (value: number) => formatCurrencyUtil(value, resolvedCurrency)
+  const formatCurrencyValue = (value: number): string => formatCurrencyUtil(value, resolvedCurrency)
+
+  const legendLabel = (key: string): string => {
+    switch (key) {
+      case 'bestHpp':
+        return 'HPP Terbaik'
+      case 'averageHpp':
+        return 'HPP Rata-rata'
+      case 'worstHpp':
+        return 'HPP Terburuk'
+      default:
+        return key
+    }
+  }
 
   return (
     <Card className={clsx('h-full', className)}>
@@ -129,17 +143,6 @@ export const HppCostTrendsChart = ({
   )
 }
 
-const legendLabel = (key: string) => {
-  switch (key) {
-    case 'bestHpp':
-      return 'HPP Terbaik'
-    case 'averageHpp':
-      return 'HPP Rata-rata'
-    case 'worstHpp':
-      return 'HPP Terburuk'
-    default:
-      return key
-  }
-}
+
 
 export default HppCostTrendsChart

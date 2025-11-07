@@ -80,6 +80,8 @@ export const NotificationCenter = ({
         return <DollarSign className={cn(iconClass, "text-gray-500")} />
       case 'system':
         return <Settings className={cn(iconClass, "text-gray-500")} />
+      case 'info':
+        return <Info className={cn(iconClass, "text-blue-500")} />
       default:
         return <Info className={cn(iconClass, "text-gray-500")} />
     }
@@ -93,6 +95,8 @@ export const NotificationCenter = ({
         return 'border-orange-200 bg-orange-50'
       case 'medium':
         return 'border-yellow-200 bg-yellow-50'
+      case 'low':
+        return 'border-blue-200 bg-blue-50'
       default:
         return 'border-gray-200 bg-gray-50'
     }
@@ -255,6 +259,8 @@ export const ToastNotification = ({
         return 'border-red-200 bg-red-50 text-red-800'
       case 'warning':
         return 'border-yellow-200 bg-yellow-50 text-yellow-800'
+      case 'info':
+        return 'border-blue-200 bg-blue-50 text-blue-800'
       default:
         return 'border-gray-300 bg-gray-50 text-gray-800'
     }
@@ -268,6 +274,8 @@ export const ToastNotification = ({
         return <XCircle className="h-5 w-5" />
       case 'warning':
         return <AlertTriangle className="h-5 w-5" />
+      case 'info':
+        return <Info className="h-5 w-5" />
       default:
         return <Info className="h-5 w-5" />
     }
@@ -354,6 +362,8 @@ export const ActivityFeed = ({
         return <Package className="h-4 w-4 text-orange-500" />
       case 'financial':
         return <DollarSign className="h-4 w-4 text-gray-500" />
+      case 'system':
+        return <Settings className="h-4 w-4 text-gray-500" />
       default:
         return <Settings className="h-4 w-4 text-gray-500" />
     }
@@ -369,6 +379,8 @@ export const ActivityFeed = ({
         return 'border-l-orange-500'
       case 'financial':
         return 'border-l-purple-500'
+      case 'system':
+        return 'border-l-gray-500'
       default:
         return 'border-l-gray-500'
     }
@@ -481,6 +493,8 @@ export const AlertBanner = ({
         return 'border-yellow-200 bg-yellow-50 text-yellow-800'
       case 'error':
         return 'border-red-200 bg-red-50 text-red-800'
+      case 'info':
+        return 'border-blue-200 bg-blue-50 text-blue-800'
       default:
         return 'border-gray-300 bg-gray-50 text-gray-800'
     }
@@ -494,6 +508,8 @@ export const AlertBanner = ({
         return <AlertTriangle className="h-5 w-5" />
       case 'error':
         return <XCircle className="h-5 w-5" />
+      case 'info':
+        return <Info className="h-5 w-5" />
       default:
         return <Info className="h-5 w-5" />
     }

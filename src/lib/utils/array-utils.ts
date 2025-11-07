@@ -19,8 +19,10 @@ export function filterMapSlice<T, R>(
   const maxItems = limit ?? array.length
   
   for (let i = 0; i < array.length && result.length < maxItems; i++) {
-    if (predicate(array[i])) {
-      result.push(mapper(array[i]))
+    const item = array[i]
+    if (item === undefined) { continue }
+    if (predicate(item)) {
+      result.push(mapper(item))
     }
   }
   
@@ -156,13 +158,18 @@ export function minBy<T>(
 ): T | undefined {
   if (array.length === 0) {return undefined}
   
-  let min = array[0]
+  const firstItem = array[0]
+  if (firstItem === undefined) {return undefined}
+  
+  let min = firstItem
   let minVal = keyFn(min)
   
   for (let i = 1; i < array.length; i++) {
-    const val = keyFn(array[i])
+    const current = array[i]
+    if (current === undefined) {continue}
+    const val = keyFn(current)
     if (val < minVal) {
-      min = array[i]
+      min = current
       minVal = val
     }
   }
@@ -176,13 +183,17 @@ export function maxBy<T>(
 ): T | undefined {
   if (array.length === 0) {return undefined}
   
-  let max = array[0]
+  const firstItem = array[0]
+  if (firstItem === undefined) {return undefined}
+  let max = firstItem
   let maxVal = keyFn(max)
   
   for (let i = 1; i < array.length; i++) {
-    const val = keyFn(array[i])
+    const current = array[i]
+    if (current === undefined) {continue}
+    const val = keyFn(current)
     if (val > maxVal) {
-      max = array[i]
+      max = current
       maxVal = val
     }
   }

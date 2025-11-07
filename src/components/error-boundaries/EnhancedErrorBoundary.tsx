@@ -34,7 +34,7 @@ class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBou
     return { hasError: true, error, errorId };
   }
 
-  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     const { errorId } = this.state;
 
     // Log the error with additional context
@@ -52,11 +52,11 @@ class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBou
     }
   }
 
-  resetError = () => {
+  resetError = (): void => {
     this.setState({ hasError: false });
   };
 
-  override render() {
+  override render(): React.ReactNode {
     if (this.state.hasError) {
       const FallbackComponent = this.props.fallback;
 

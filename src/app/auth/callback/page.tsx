@@ -7,11 +7,11 @@ import { useEffect } from 'react'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 
-const AuthCallbackPage = () => {
+const AuthCallbackPage = (): JSX.Element => {
   const router = useRouter()
 
   useEffect(() => {
-    const handleAuthCallback = async () => {
+    const handleAuthCallback = async (): Promise<void> => {
       const supabase = createClient()
 
       try {

@@ -9,7 +9,7 @@ import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
 
-async function postHandler(request: NextRequest) {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // ✅ Add authentication
     const supabase = await createClient()

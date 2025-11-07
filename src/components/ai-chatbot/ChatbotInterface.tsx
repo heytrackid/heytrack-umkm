@@ -7,11 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 import { createClientLogger } from '@/lib/client-logger'
 
 import DataVisualization from './DataVisualization';
 
-import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 
 const logger = createClientLogger('ChatbotInterface')
 
@@ -39,7 +39,7 @@ const ChatbotInterface = ({
   className = '',
   isMinimized = false,
   onToggleMinimize
-}: ChatbotInterfaceProps) => {
+}: ChatbotInterfaceProps): JSX.Element => {
   const [messages, setMessages] = useState<ExtendedChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +48,7 @@ const ChatbotInterface = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto scroll to bottom when new messages arrive
-  const scrollToBottom = () => {
+  const scrollToBottom = (): void => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -80,7 +80,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
   }, []);
 
   // Handle sending messages via API
-  const handleSendMessage = async (message?: string) => {
+  const handleSendMessage = async (message?: string): Promise<void> => {
     const messageToSend = message ?? inputValue.trim();
     if (!messageToSend || isLoading) { return; }
 
@@ -166,7 +166,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
   };
 
   // Handle action button clicks via API
-  const handleActionClick = async (action: ChatAction) => {
+  const handleActionClick = async (action: ChatAction): Promise<void> => {
     if (!context) { return; }
 
     try {
@@ -239,7 +239,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
 
 
   // Get icon for action type
-  const getActionIcon = (type: string) => {
+  const getActionIcon = (type: string): JSX.Element => {
     switch (type) {
       case 'add_order': return <Package className="h-4 w-4" />;
       case 'check_stock': return <Package className="h-4 w-4" />;
@@ -252,7 +252,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
 
   // Message bubble component
   // eslint-disable-next-line react/no-unstable-nested-components
-  const MessageBubble = ({ message }: { message: ExtendedChatMessage }) => {
+  const MessageBubble = ({ message }: { message: ExtendedChatMessage }): JSX.Element => {
     const isUser = message.role === 'user';
     const isSystem = message.role === 'system';
 
@@ -340,7 +340,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
 
   // Quick action buttons with smart suggestions
   // eslint-disable-next-line react/no-unstable-nested-components
-  const QuickActions = () => (
+  const QuickActions = (): JSX.Element => (
     <div className="p-3 bg-gradient-to-r from-gray-50 to-gray-100 border-t">
       <p className="text-xs font-medium text-gray-700 mb-2">💡 Coba tanyakan:</p>
       <div className="flex flex-wrap gap-2">

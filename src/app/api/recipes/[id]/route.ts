@@ -8,9 +8,9 @@ import { cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import type { Insert } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert } from '@/types/database'
 
 
 interface RouteContext {
@@ -21,7 +21,7 @@ interface RouteContext {
 export async function GET(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await context['params']
     
@@ -64,7 +64,7 @@ export async function GET(
 export async function PUT(
   request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await context['params']
     
@@ -177,7 +177,7 @@ export async function PUT(
 export async function DELETE(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await context['params']
     

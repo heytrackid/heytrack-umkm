@@ -29,7 +29,7 @@ const CustomerSearchFilters = ({
   onBulkEdit,
   onBulkDelete,
   isLoading
-}: CustomerSearchFiltersProps) => {
+}: CustomerSearchFiltersProps): JSX.Element => {
   if (isLoading) {
     return <SearchFormSkeleton />
   }

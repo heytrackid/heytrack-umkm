@@ -36,7 +36,7 @@ interface Recommendation {
   } | null
 }
 
-const HppRecommendationsPage = () => {
+const HppRecommendationsPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])

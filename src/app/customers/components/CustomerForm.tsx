@@ -68,7 +68,7 @@ interface CustomerFormProps {
     onCancel: () => void
 }
 
-const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
+const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX.Element => {
     const { toast } = useToast()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const isEditMode = Boolean(customer)

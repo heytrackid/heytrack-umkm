@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,7 +29,6 @@ import OrderStatusTimeline from './OrderStatusTimeline'
 import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
 
 import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 
 interface OrderDetailViewProps {
     order: Order

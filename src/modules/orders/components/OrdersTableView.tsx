@@ -4,6 +4,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState, useCallback } from 'react'
 
+import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
 import OrdersTableComponent from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { createClientLogger } from '@/lib/client-logger'
@@ -11,7 +12,6 @@ import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'
 import { OrderDetailView } from '@/modules/orders/components/OrderDetailView'
 import { OrderForm } from '@/modules/orders/components/OrderForm'
 
-import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
 import type { OrdersTable as OrdersTableRow } from '@/types/database'
 
 const logger = createClientLogger('OrdersTableView')

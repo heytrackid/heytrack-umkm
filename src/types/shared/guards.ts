@@ -1,4 +1,3 @@
-import type { ApiError, ApiResponse } from './api';
 import type { 
 
 
@@ -29,6 +28,8 @@ import type {
   SuppliersTable, 
   UserProfilesTable 
 } from '@/types/database';
+
+import type { ApiError, ApiResponse } from './api';
 
 // Type aliases for easier use in guards
 type Customer = CustomersTable;

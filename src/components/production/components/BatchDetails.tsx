@@ -8,8 +8,9 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 
 
-import type { BatchExecutionState } from './types'
 import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
+
+import type { BatchExecutionState } from './types'
 
 // Batch Details Component - Lazy Loaded
 // Displays detailed view of selected batch with quality control and notes

@@ -18,7 +18,7 @@ const CategoryList = dynamic(() => import('./components/CategoryList'), {
   ssr: false
 })
 
-const CategoryFormSkeleton = () => (
+const CategoryFormSkeleton = (): JSX.Element => (
   <div className="space-y-4">
     <div className="h-16 bg-muted animate-pulse rounded" />
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -39,7 +39,7 @@ const CategoryForm = dynamic(() => import('./components/CategoryForm').then(mod 
 })
 
 // Breadcrumb helper
-const getBreadcrumbItems = (currentView: string) => [
+const getBreadcrumbItems = (currentView: string): Array<{ label: string; href?: string }> => [
   { label: "Home", href: '/' },
   { label: "Resep", href: '/recipes' },
   {
@@ -51,7 +51,7 @@ const getBreadcrumbItems = (currentView: string) => [
   }] : [])
 ]
 
-const CategoriesPage = () => {
+const CategoriesPage = (): JSX.Element => {
   const { isMobile } = useResponsive()
   const searchParams = useSearchParams()
   const isAddView = searchParams.get('tambah') !== null

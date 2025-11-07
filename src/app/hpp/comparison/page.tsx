@@ -39,7 +39,7 @@ interface BenchmarkData {
   totalProduction: number
 }
 
-const ComparisonAnalyticsPage = () => {
+const ComparisonAnalyticsPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const [recipes, setRecipes] = useState<RecipeComparison[]>([])

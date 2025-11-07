@@ -6,7 +6,7 @@ import { createClientLogger } from '@/lib/client-logger'
 
 const perfLogger = createClientLogger('PerformanceMonitoring')
 
-interface PerformanceMetrics {
+export interface PerformanceMetrics {
   // Core Web Vitals
   lcp: number | null // Largest Contentful Paint
   fid: number | null // First Input Delay
@@ -87,6 +87,175 @@ export function usePerformanceMonitoring() {
     eventListenersRef.current.clear()
   }, [])
 
+  const observeCoreWebVitals = () => {
+    // Largest Contentful Paint (LCP)
+    try {
+      const lcpObserver = new PerformanceObserver((list) => {
+        if (!mountedRef.current) {return}
+
+        const entries = list.getEntries()
+        const lastEntry = entries[entries.length - 1] as PerformanceEntry & { size?: number }
+
+        setMetrics(prev => ({
+          ...prev,
+          lcp: lastEntry.startTime
+        }))
+      })
+      lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
+      observersRef.current.add(lcpObserver)
+    } catch (error) {
+      perfLogger.warn({ error }, 'LCP observation not supported')
+    }
+
+    // First Input Delay (FID)
+    try {
+      const fidObserver = new PerformanceObserver((list) => {
+        if (!mountedRef.current) {return}
+
+        const entries = list.getEntries()
+        entries.forEach((entry: PerformanceEntry) => {
+          const firstInputEntry = entry as PerformanceEventTiming
+          setMetrics(prev => ({
+            ...prev,
+            fid: firstInputEntry.processingStart - firstInputEntry.startTime
+          }))
+        })
+      })
+      fidObserver.observe({ entryTypes: ['first-input'] })
+      observersRef.current.add(fidObserver)
+    } catch (error) {
+      perfLogger.warn({ error }, 'FID observation not supported')
+    }
+
+    // Cumulative Layout Shift (CLS)
+    try {
+      let clsValue = 0
+      const clsObserver = new PerformanceObserver((list) => {
+        if (!mountedRef.current) {return}
+
+        const entries = list.getEntries()
+        entries.forEach((entry: PerformanceEntry) => {
+          const layoutShiftEntry = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number }
+          if (!layoutShiftEntry.hadRecentInput && layoutShiftEntry.value) {
+            clsValue += layoutShiftEntry.value
+          }
+        })
+        setMetrics(prev => ({
+          ...prev,
+          cls: clsValue
+        }))
+      })
+      clsObserver.observe({ entryTypes: ['layout-shift'] })
+      observersRef.current.add(clsObserver)
+    } catch (error) {
+      perfLogger.warn({ error }, 'CLS observation not supported')
+    }
+
+    // First Contentful Paint (FCP)
+    try {
+      const fcpObserver = new PerformanceObserver((list) => {
+        if (!mountedRef.current) {return}
+
+        const entries = list.getEntries()
+        entries.forEach((entry) => {
+          if (entry.name === 'first-contentful-paint') {
+            setMetrics(prev => ({
+              ...prev,
+              fcp: entry.startTime
+            }))
+          }
+        })
+      })
+      fcpObserver.observe({ entryTypes: ['paint'] })
+      observersRef.current.add(fcpObserver)
+    } catch (error) {
+      perfLogger.warn({ error }, 'FCP observation not supported')
+    }
+  }
+
+  const observeNavigationTiming = () => {
+    // Use Navigation Timing API
+    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+
+    if (navigation) {
+      setMetrics(prev => ({
+        ...prev,
+        ttfb: navigation.responseStart - navigation.requestStart,
+        domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
+        loadComplete: navigation.loadEventEnd - navigation.loadEventStart
+      }))
+    }
+
+    // Monitor page load
+    const loadHandler = () => {
+      if (!mountedRef.current) {return}
+
+      const loadTime = performance.now() - startTimeRef.current
+      setMetrics(prev => ({
+        ...prev,
+        loadComplete: loadTime
+      }))
+    }
+
+    window.addEventListener('load', loadHandler)
+    eventListenersRef.current.add({ element: window, event: 'load', handler: loadHandler })
+
+    // Monitor DOM Content Loaded
+    const domContentLoadedHandler = () => {
+      if (!mountedRef.current) {return}
+
+      const domTime = performance.now() - startTimeRef.current
+      setMetrics(prev => ({
+        ...prev,
+        domContentLoaded: domTime
+      }))
+    }
+
+    document.addEventListener('DOMContentLoaded', domContentLoadedHandler)
+    eventListenersRef.current.add({ element: document, event: 'DOMContentLoaded', handler: domContentLoadedHandler })
+  }
+
+  const observeResourceTiming = () => {
+    // Monitor resource loading performance
+    const resourceObserver = new PerformanceObserver((list) => {
+      if (!mountedRef.current) {return}
+
+      // Could analyze resource loading times here
+      // Silently track resource timing
+      const entries = list.getEntries()
+      perfLogger.debug({
+        resourceCount: entries.length,
+        url: window.location.href
+      }, 'Resource timing observed')
+    })
+    resourceObserver.observe({ entryTypes: ['resource'] })
+    observersRef.current.add(resourceObserver)
+  }
+
+  const updateMemoryUsage = () => {
+    if (!mountedRef.current || !('memory' in performance)) {return}
+
+    type PerformanceWithMemory = Performance & {
+      memory: {
+        usedJSHeapSize?: number
+        totalJSHeapSize?: number
+        jsHeapSizeLimit?: number
+      }
+    }
+
+    const perfWithMemory = performance as PerformanceWithMemory
+    const {memory} = perfWithMemory
+
+    setMetrics(prev => ({
+      ...prev,
+      memoryUsage: {
+        used: memory.usedJSHeapSize ?? null,
+        total: memory.totalJSHeapSize ?? null,
+        limit: memory.jsHeapSizeLimit ?? null
+      }
+    }))
+  }
+
   // Initialize performance monitoring
   useEffect(() => {
     mountedRef.current = true
@@ -122,177 +291,14 @@ export function usePerformanceMonitoring() {
       mountedRef.current = false
       cleanupAll()
     }
-  }, [cleanupAll])
+   }, [cleanupAll])
 
-  const observeCoreWebVitals = () => {
-    // Largest Contentful Paint (LCP)
-    try {
-      const lcpObserver = new PerformanceObserver((list) => {
-        if (!mountedRef.current) {return}
-        
-        const entries = list.getEntries()
-        const lastEntry = entries[entries.length - 1] as PerformanceEntry & { size?: number }
 
-        setMetrics(prev => ({
-          ...prev,
-          lcp: lastEntry.startTime
-        }))
-      })
-      lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
-      observersRef.current.add(lcpObserver)
-    } catch (error) {
-      perfLogger.warn({ error }, 'LCP observation not supported')
-    }
 
-    // First Input Delay (FID)
-    try {
-      const fidObserver = new PerformanceObserver((list) => {
-        if (!mountedRef.current) {return}
-        
-        const entries = list.getEntries()
-        entries.forEach((entry: PerformanceEntry) => {
-          const firstInputEntry = entry as PerformanceEventTiming
-          setMetrics(prev => ({
-            ...prev,
-            fid: firstInputEntry.processingStart - firstInputEntry.startTime
-          }))
-        })
-      })
-      fidObserver.observe({ entryTypes: ['first-input'] })
-      observersRef.current.add(fidObserver)
-    } catch (error) {
-      perfLogger.warn({ error }, 'FID observation not supported')
-    }
 
-    // Cumulative Layout Shift (CLS)
-    try {
-      let clsValue = 0
-      const clsObserver = new PerformanceObserver((list) => {
-        if (!mountedRef.current) {return}
-        
-        const entries = list.getEntries()
-        entries.forEach((entry: PerformanceEntry) => {
-          const layoutShiftEntry = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number }
-          if (!layoutShiftEntry.hadRecentInput && layoutShiftEntry.value) {
-            clsValue += layoutShiftEntry.value
-          }
-        })
-        setMetrics(prev => ({
-          ...prev,
-          cls: clsValue
-        }))
-      })
-      clsObserver.observe({ entryTypes: ['layout-shift'] })
-      observersRef.current.add(clsObserver)
-    } catch (error) {
-      perfLogger.warn({ error }, 'CLS observation not supported')
-    }
-
-    // First Contentful Paint (FCP)
-    try {
-      const fcpObserver = new PerformanceObserver((list) => {
-        if (!mountedRef.current) {return}
-        
-        const entries = list.getEntries()
-        entries.forEach((entry) => {
-          setMetrics(prev => ({
-            ...prev,
-            fcp: entry.startTime
-          }))
-        })
-      })
-      fcpObserver.observe({ entryTypes: ['paint'] })
-      observersRef.current.add(fcpObserver)
-    } catch (error) {
-      perfLogger.warn({ error }, 'FCP observation not supported')
-    }
-  }
-
-  const observeNavigationTiming = () => {
-    // Use Navigation Timing API
-    const navigation = performance.getEntriesByType('navigation')[0]
-
-    if (navigation) {
-      setMetrics(prev => ({
-        ...prev,
-        ttfb: navigation.responseStart - navigation.requestStart,
-        domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
-        loadComplete: navigation.loadEventEnd - navigation.loadEventStart
-      }))
-    }
-
-    // Monitor page load
-    const loadHandler = () => {
-      if (!mountedRef.current) {return}
-      
-      const loadTime = performance.now() - startTimeRef.current
-      setMetrics(prev => ({
-        ...prev,
-        loadComplete: loadTime
-      }))
-    }
-    
-    window.addEventListener('load', loadHandler)
-    eventListenersRef.current.add({ element: window, event: 'load', handler: loadHandler })
-
-    // Monitor DOM Content Loaded
-    const domContentLoadedHandler = () => {
-      if (!mountedRef.current) {return}
-      
-      const domTime = performance.now() - startTimeRef.current
-      setMetrics(prev => ({
-        ...prev,
-        domContentLoaded: domTime
-      }))
-    }
-    
-    document.addEventListener('DOMContentLoaded', domContentLoadedHandler)
-    eventListenersRef.current.add({ element: document, event: 'DOMContentLoaded', handler: domContentLoadedHandler })
-  }
-
-  const observeResourceTiming = () => {
-    // Monitor resource loading performance
-    const resourceObserver = new PerformanceObserver((list) => {
-      if (!mountedRef.current) {return}
-      
-      // Could analyze resource loading times here
-      // Silently track resource timing
-      const entries = list.getEntries()
-      perfLogger.debug({
-        resourceCount: entries.length,
-        url: window.location.href
-      }, 'Resource timing observed')
-    })
-    resourceObserver.observe({ entryTypes: ['resource'] })
-    observersRef.current.add(resourceObserver)
-  }
-
-  const updateMemoryUsage = () => {
-    if (!mountedRef.current || !('memory' in performance)) {return}
-    
-    type PerformanceWithMemory = Performance & {
-      memory: {
-        usedJSHeapSize?: number
-        totalJSHeapSize?: number
-        jsHeapSizeLimit?: number
-      }
-    }
-    
-    const perfWithMemory = performance as PerformanceWithMemory
-    const {memory} = perfWithMemory
-    
-    setMetrics(prev => ({
-      ...prev,
-      memoryUsage: {
-        used: memory.usedJSHeapSize ?? null,
-        total: memory.totalJSHeapSize ?? null,
-        limit: memory.jsHeapSizeLimit ?? null
-      }
-    }))
-  }
 
   // Get performance score based on Core Web Vitals
-  const getPerformanceScore = useMemo(() => () => {
+  const getPerformanceScore = useMemo(() => {
     const { lcp, fid, cls } = metrics
 
     if (lcp === null || fid === null || cls === null) {
@@ -318,8 +324,8 @@ export function usePerformanceMonitoring() {
   }, [metrics])
 
   // Get performance rating
-  const getPerformanceRating = useMemo(() => () => {
-    const score = getPerformanceScore()
+  const getPerformanceRating = useMemo(() => {
+    const score = getPerformanceScore
     if (score === null) {return 'unknown'}
     if (score >= 90) {return 'excellent'}
     if (score >= 70) {return 'good'}
@@ -328,21 +334,22 @@ export function usePerformanceMonitoring() {
   }, [getPerformanceScore])
 
   // Export metrics for analytics
-  const exportMetrics = useMemo(() => () => ({
+  const exportMetrics = useMemo(() => ({
       ...metrics,
       timestamp: Date.now(),
       url: window.location.href,
       userAgent: navigator.userAgent,
-      score: getPerformanceScore(),
-      rating: getPerformanceRating()
+      score: getPerformanceScore,
+      rating: getPerformanceRating
     }), [metrics, getPerformanceScore, getPerformanceRating])
 
   return {
     metrics,
     isSupported,
-    performanceScore: getPerformanceScore(),
-    performanceRating: getPerformanceRating(),
+    performanceScore: getPerformanceScore,
+    performanceRating: getPerformanceRating,
     exportMetrics,
     cleanupAll
   }
 }
+

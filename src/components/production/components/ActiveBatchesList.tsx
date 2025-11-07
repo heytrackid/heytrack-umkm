@@ -10,8 +10,9 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 
-import type { BatchExecutionState } from './types'
 import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
+
+import type { BatchExecutionState } from './types'
 
 // Active Batches List Component - Lazy Loaded
 // Displays the list of active and scheduled production batches

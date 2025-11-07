@@ -1,8 +1,6 @@
 import { dbLogger } from '@/lib/logger'
 
-
-/* eslint-disable no-await-in-loop */
-/**
+/** 
  * Database Transaction Management
  * 
  * Provides transaction support for complex operations that need atomicity.
@@ -219,8 +217,8 @@ export async function executeParallel<T>(
       try {
         const data = await operation()
         results.push({ success: true, data })
-      } catch (operationError) {
-        const normalizedError = operationError instanceof Error ? operationError : new Error('Unknown error')
+      } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error('Unknown error')
         results.push({ success: false, error: normalizedError })
         
         if (!continueOnError) {

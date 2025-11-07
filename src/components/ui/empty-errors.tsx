@@ -1,13 +1,13 @@
-import type { ComponentType } from 'react'
-
 'use client'
+
+import { AlertTriangle, FileX, Search, Package, Users, ShoppingCart, Calculator, RefreshCw, Plus, Home } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
-import { /** * Shared Empty and Error States * Reusable empty states and error displays */ AlertTriangle, FileX, Search, Package, Users, ShoppingCart, Calculator, RefreshCw, Plus, Home } from 'lucide-react' 
+import type { ComponentType } from 'react' 
 
 // Empty state for different contexts
 interface EmptyStateProps {

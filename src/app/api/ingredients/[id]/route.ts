@@ -9,9 +9,9 @@ import { handleDatabaseError } from '@/lib/errors'
 import { apiLogger } from '@/lib/logger'
 import { isValidUUID } from '@/lib/type-guards'
 import { IdParamSchema, IngredientUpdateSchema } from '@/lib/validations'
+import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Row } from '@/types/database'
 import type { NextRequest } from 'next/server'
 
 
@@ -22,7 +22,7 @@ type Ingredient = Row<'ingredients'>
 export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const { id } = params
   try {
     // Validate UUID format first
@@ -72,7 +72,7 @@ export async function GET(
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const { id } = params
   
   // Validate UUID format first
@@ -196,7 +196,7 @@ export async function PUT(
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const { id } = params
   try {
     // Validate UUID format first

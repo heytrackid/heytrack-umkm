@@ -40,7 +40,6 @@ const triggerHapticFeedback = (type: 'heavy' | 'light' | 'medium' = 'light') => 
           medium: 'impactMedium',
           heavy: 'impactHeavy'
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(window as { hapticFeedback?: { impact: (type: string) => void } }).hapticFeedback?.impact(hapticTypes[type] ?? 'impactLight')
       }
     } catch {

@@ -3,9 +3,7 @@
 import { lazy, Suspense } from 'react'
 
 // Define props interface to replace 'any' types
-interface DashboardComponentProps {
-  [key: string]: unknown
-}
+type DashboardComponentProps = Record<string, unknown>;
 
 interface StatsCardsProps {
   stats?: {
@@ -54,7 +52,7 @@ const HppDashboardWidgetWithSuspenseComponent = (): JSX.Element => (
   </Suspense>
 )
 
-const RecentOrdersSkeleton = () => (
+const RecentOrdersSkeleton = (): JSX.Element => (
   <div className="space-y-4">
     <div className="h-12 bg-gray-100 animate-pulse rounded" />
     <div className="space-y-3">
@@ -71,7 +69,7 @@ const RecentOrdersSectionWithSuspenseComponent = (props: DashboardComponentProps
   </Suspense>
 )
 
-const StatsCardsSkeleton = () => (
+const StatsCardsSkeleton = (): JSX.Element => (
   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
     {Array.from({ length: 4 }, (_, i) => (
       <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
@@ -85,7 +83,7 @@ const StatsCardsSectionWithSuspenseComponent = (props: DashboardComponentProps):
   </Suspense>
 )
 
-const StockAlertsSkeleton = () => (
+const StockAlertsSkeleton = (): JSX.Element => (
   <div className="space-y-4">
     <div className="h-12 bg-gray-100 animate-pulse rounded" />
     <div className="space-y-3">

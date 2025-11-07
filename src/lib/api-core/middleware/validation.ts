@@ -28,7 +28,7 @@ export function withValidation<T>(schema: z.ZodSchema<T>) {
       }
 
       return result['data']
-    } catch (error) {
+    } catch (_error) {
       return createErrorResponse('Invalid request body', 400)
     }
   }

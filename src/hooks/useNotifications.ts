@@ -9,9 +9,10 @@ import {
   DEFAULT_NOTIFICATION_PREFERENCES 
 } from '@/lib/notifications/notification-types'
 
+import type { Row } from '@/types/database'
+
 import { useIngredients } from './useIngredients'
 
-import type { Row } from '@/types/database'
 
 const STORAGE_KEY = 'heytrack_notifications'
 const PREFERENCES_KEY = 'heytrack_notification_preferences'
@@ -32,7 +33,7 @@ export function useNotifications() {
           ...n,
           timestamp: new Date(n['timestamp'])
         })))
-      } catch (error) {
+      } catch (_error) {
         // Invalid data, ignore
       }
     }
@@ -41,7 +42,7 @@ export function useNotifications() {
     if (savedPrefs) {
       try {
         setPreferences(JSON.parse(savedPrefs))
-      } catch (error) {
+      } catch (_error) {
         // Invalid data, use defaults
       }
     }
@@ -70,7 +71,7 @@ export function useNotifications() {
           const data = await response.json()
           setOrders(Array.isArray(data) ? data : [])
         }
-      } catch (error) {
+      } catch (_error) {
         // Silently fail
       }
     }
@@ -224,7 +225,7 @@ function playNotificationSound() {
       oscillator.disconnect()
       gainNode.disconnect()
     }
-  } catch (error) {
+  } catch (_error) {
     // Browser doesn't support Web Audio API
   }
 }

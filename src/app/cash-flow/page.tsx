@@ -23,13 +23,13 @@ import FilterPeriod from './components/FilterPeriod'
 import { useEnhancedCashFlow } from './hooks/useEnhancedCashFlow'
 
 // Summary cards skeleton component
-const SummaryCardsSkeleton = () => (
+const SummaryCardsSkeleton = (): JSX.Element[] => (
   Array.from({ length: 3 }, (_, i) => (
     <div key={`summary-card-${i}`} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
   ))
 )
 
-const CashFlowPage = () => {
+const CashFlowPage = (): JSX.Element => {
   const { formatCurrency } = useSettings()
   const { isMobile } = useResponsive()
 

@@ -25,7 +25,7 @@ const categoryColors = [
   'bg-teal-500'
 ]
 
-const CategoryBreakdown = ({ summary, formatCurrency, isMobile }: CategoryBreakdownProps) => {
+const CategoryBreakdown = ({ summary, formatCurrency, isMobile }: CategoryBreakdownProps): JSX.Element | null => {
   if (!summary) { return null }
 
   const hasIncomeData = Object.keys(summary.income_by_category || {}).length > 0

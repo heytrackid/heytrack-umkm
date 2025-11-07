@@ -16,6 +16,8 @@ import { loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
 import { useSupabase } from '@/providers/SupabaseProvider'
 
 
+import type { Insert, Row } from '@/types/database'
+
 import GeneratedRecipeDisplay from './GeneratedRecipeDisplay'
 import { HppEstimator } from './HppEstimator'
 import RecipeGeneratorForm from './RecipeGeneratorForm'
@@ -25,7 +27,6 @@ import { SmartIngredientSelector } from './SmartIngredientSelector'
 
 
 import type { GeneratedRecipe, AvailableIngredient } from './types'
-import type { Insert, Row } from '@/types/database'
 
 // AI Recipe Generator Layout - Enhanced Interactive Version
 // Improved UX with live preview, quick mode, and better guidance

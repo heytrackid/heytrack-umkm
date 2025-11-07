@@ -46,7 +46,7 @@ export const PrefetchLink = ({
     if (prefetchOnHover && typeof href === 'string') {
       try {
         router.prefetch(href)
-      } catch (error) {
+      } catch {
         // Silently fail - prefetch is enhancement, not critical
         logger.debug(`Prefetch failed for: ${href}`)
       }

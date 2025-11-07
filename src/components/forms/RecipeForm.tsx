@@ -19,9 +19,10 @@ import {
   type RecipeForm as RecipeFormData
 } from '@/lib/validations/domains/recipe'
 
+import type { Row } from '@/types/database'
+
 import { FormField } from './shared/FormField'
 
-import type { Row } from '@/types/database'
 
 type Recipe = Row<'recipes'>
 

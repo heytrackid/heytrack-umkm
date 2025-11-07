@@ -200,7 +200,7 @@ export function formatCurrentCurrency(amount: number): string {
  * Get locale string for currency formatting based on currency code
  */
 export function getCurrencyLocale(currencyCode: string): string {
-  const localeMap: { [key: string]: string } = {
+  const localeMap: Record<string, string> = {
     'IDR': 'id-ID',
     'USD': 'en-US',
     'EUR': 'de-DE',

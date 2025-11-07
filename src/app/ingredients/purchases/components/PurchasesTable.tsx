@@ -11,7 +11,7 @@ interface PurchasesTableProps {
   purchases: IngredientPurchase[]
 }
 
-const PurchasesTable = ({ purchases }: PurchasesTableProps) => (
+const PurchasesTable = ({ purchases }: PurchasesTableProps): JSX.Element => (
   <Card>
     <CardHeader>
       <CardTitle>Riwayat Pembelian</CardTitle>

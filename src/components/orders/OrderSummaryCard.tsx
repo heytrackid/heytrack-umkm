@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { memo } from 'react'
 
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
@@ -19,7 +20,6 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
 
 import type { Order, PaymentStatus, Priority } from './types'
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 
 // ✅ OPTIMIZED: Memoized to prevent unnecessary re-renders in lists
 

@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useRef, useCallback } from 'react'
 
 import { createLogger } from '@/lib/logger'
@@ -84,8 +86,9 @@ export function useIntersectionObserver(
     const target = targetRef.current
     if (!target) {return}
 
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
+    const observer = new IntersectionObserver((entries) => {
+      const [entry] = entries
+      if (entry?.isIntersecting) {
         callback()
       }
     }, options)

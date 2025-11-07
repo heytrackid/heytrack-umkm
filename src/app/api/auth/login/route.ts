@@ -16,7 +16,7 @@ const LoginSchema = z.object({
   password: z.string().min(6),
 })
 
-async function loginPOST(request: NextRequest) {
+async function loginPOST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/auth/login - Request received')
 

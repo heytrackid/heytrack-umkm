@@ -7,7 +7,7 @@ import { createClient } from '@/utils/supabase/server'
  * Root page - redirects based on auth status
  * Middleware will handle the redirect, but this provides server-side fallback
  */
-export default async function HomePage() {
+export default async function HomePage(): Promise<void> {
   const supabase = await createClient()
 
   try {

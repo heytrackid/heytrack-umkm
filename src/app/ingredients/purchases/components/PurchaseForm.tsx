@@ -30,7 +30,7 @@ interface PurchaseFormProps {
   onSuccess: () => void
 }
 
-const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) => {
+const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps): JSX.Element => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { toast } = useToast()
 

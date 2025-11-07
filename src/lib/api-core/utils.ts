@@ -27,9 +27,9 @@ export function getClientIP(request: NextRequest): string {
  * Create ETag for response caching
  */
 export function createETag(data: unknown): string {
-  const hash = JSON.stringify(data).split('').reduce((a, b) => {
-    a = ((a << 5) - a) + b.charCodeAt(0)
-    return a & a
+  const hash = JSON.stringify(data).split('').reduce((acc, char) => {
+    const nextHash = ((acc << 5) - acc) + char.charCodeAt(0)
+    return nextHash & nextHash
   }, 0)
   return `"${hash}"`
 }

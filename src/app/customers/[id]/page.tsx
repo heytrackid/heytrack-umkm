@@ -24,7 +24,7 @@ import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/supabase'
 import { useCurrency } from '@/hooks/useCurrency'
 
 // Helper function to get status variant
-const getStatusVariant = (status: string) => {
+const getStatusVariant = (status: string): string => {
   switch (status) {
     case 'DELIVERED':
       return 'default'
@@ -37,7 +37,7 @@ const getStatusVariant = (status: string) => {
 
 import type { Order } from '@/types'
 
-const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
+const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JSX.Element => {
   const { id } = use(params)
   const router = useRouter()
   const { formatCurrency } = useCurrency()
@@ -58,7 +58,7 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }) => 
     orderBy: { column: 'created_at', ascending: false }
   })
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<void> => {
     try {
       await deleteCustomer(id)
       toast.success('Pelanggan berhasil dihapus')

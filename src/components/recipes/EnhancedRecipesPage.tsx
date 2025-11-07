@@ -49,11 +49,12 @@ import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
 import { useResponsive } from '@/hooks/useResponsive'
 
+import type { Row } from '@/types/database'
+
 import { MobileRecipeCard } from './MobileRecipeCard'
 import { RecipeStatsCards } from './RecipeStatsCards'
 
 
-import type { Row } from '@/types/database'
 
 
 // import { useSettings } from '@/contexts/settings-context'
@@ -73,7 +74,7 @@ type Recipe = Row<'recipes'>
 type CategoryFilter = 'all' | 'bread' | 'cake' | 'cookie' | 'other' | 'pastry'
 type DifficultyFilter = 'all' | 'easy' | 'hard' | 'medium'
 
-export const EnhancedRecipesPage = () => {
+export const EnhancedRecipesPage = (): JSX.Element => {
     const router = useRouter()
     const { data: recipes, loading } = useRecipes({ realtime: true })
     const { delete: deleteRecipe } = useSupabaseCRUD('recipes')
@@ -374,7 +375,7 @@ export const EnhancedRecipesPage = () => {
             {/* Recipe List */}
             {loading ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {[...Array(6)].map((_, i) => (
+                    {Array.from({length: 6}).map((_, i) => (
                         <Card key={i}>
                             <CardContent className="p-6">
                                 <div className="space-y-3">

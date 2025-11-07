@@ -3,13 +3,13 @@
 import { useCallback, useState } from 'react'
 
 import { successToast } from '@/hooks/use-toast'
+import type { TableName, Row, Insert, Update } from '@/types/database'
 import { getErrorMessage, typed } from '@/types/type-utilities'
 import { createClient as createSupabaseClient } from '@/utils/supabase/client'
 
 import { handleCRUDError, validateCRUDInputs, validateBulkInputs } from './utils'
 
 import type { EnhancedCRUDOptions } from './types'
-import type { TableName, Row, Insert, Update } from '@/types/database'
 
 /**
  * Enhanced CRUD hook with toast notifications and error handling
@@ -20,7 +20,24 @@ import type { TableName, Row, Insert, Update } from '@/types/database'
 export function useEnhancedCRUD<TTable extends TableName>(
   table: TTable,
   options: EnhancedCRUDOptions = {}
-) {
+): {
+  // Core CRUD operations
+  create: (data: Insert<TTable>) => Promise<Row<TTable>>
+  update: (id: string, data: Update<TTable>) => Promise<Row<TTable>>
+  delete: (id: string) => Promise<boolean>
+
+  // Bulk operations
+  bulkCreate: (items: Array<Insert<TTable>>) => Promise<Array<Row<TTable>>>
+  bulkUpdate: (updates: Array<{ id: string; data: Update<TTable> }>) => Promise<Array<Row<TTable>>>
+  bulkDelete: (ids: string[]) => Promise<boolean>
+
+  // State
+  loading: boolean
+  error: string | null
+
+  // Utility
+  clearError: () => void
+} {
   type TRow = Row<TTable>
   type TInsert = Insert<TTable>
   type TUpdate = Update<TTable>
@@ -209,7 +226,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
           .update(update['data'] as never)
           .eq('id', update['id'] as never)
           .select()
-          .single() as { data: TRow | null; error: Error | null }
+          .single()
 
         if (error) {
           throw new Error(`Gagal update record ${update['id']}: ${error.message}`)
@@ -219,7 +236,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
           throw new Error(`Update returned no data for ${update['id']}`)
         }
 
-        results.push(result)
+        results.push(result as unknown as TRow)
       }
 
       if (showSuccessToast) {

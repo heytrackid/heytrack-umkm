@@ -12,7 +12,7 @@ export { OrderDetailView } from './components/OrderDetailView'
 export { OrdersTableView } from './components/OrdersTableView'
 
 // Services
-export { OrderRecipeService } from '../../services/orders/OrderRecipeService'
+export { OrderRecipeService } from '@/services/orders/OrderRecipeService'
 
 // Types
 export type {

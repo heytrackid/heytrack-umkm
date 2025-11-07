@@ -1,14 +1,14 @@
 'use client'
 
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { useEffect, useRef, type RefObject } from 'react'
+import React, { useEffect, useRef, type RefObject } from 'react'
 
+import type { Message } from '@/app/ai-chatbot/types'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { MessageBubble } from './MessageBubble'
 import { TypingIndicator } from './TypingIndicator'
 
-import type { Message } from '@/app/ai-chatbot/types'
 
 interface MessageListProps {
   messages: Message[]
@@ -22,7 +22,7 @@ export const MessageList = ({
   isLoading,
   scrollAreaRef,
   onSuggestionClick
-}: MessageListProps) => {
+}: MessageListProps): React.JSX.Element => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const virtualizerRef = useRef<HTMLDivElement>(null)
 
@@ -96,7 +96,7 @@ export const MessageList = ({
                   </div>
                 )
               })}
-              {isLoading && (
+              {isLoading ? (
                 <div
                   style={{
                     position: 'absolute',
@@ -107,7 +107,7 @@ export const MessageList = ({
                 >
                   <TypingIndicator />
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         ) : (
@@ -115,13 +115,13 @@ export const MessageList = ({
           <div ref={scrollAreaRef} className="p-6 space-y-6 max-w-4xl mx-auto">
             {messages.map((message) => (
               <MessageBubble
-                key={message['id']}
+                key={message.id}
                 message={message}
                 onSuggestionClick={onSuggestionClick}
               />
             ))}
 
-            {isLoading && <TypingIndicator />}
+            {isLoading ? <TypingIndicator /> : null}
           </div>
         )}
         <div ref={messagesEndRef} />

@@ -1,11 +1,77 @@
 {
-  "extends": "./tsconfig.json",
+  // "$schema": "https://json.schemastore.org/tsconfig", // Removed or commented out to avoid schema loading error
   "compilerOptions": {
-    "noEmit": true
+    "target": "ES2022",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "incremental": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@/modules/*": [
+        "./src/modules/*"
+      ],
+      "@/shared/*": [
+        "./src/shared/*"
+      ],
+      "@/services/*": [
+        "./src/services/*"
+      ],
+      "@/inventory": [
+        "./src/modules/inventory"
+      ],
+      "@/orders": [
+        "./src/modules/orders"
+      ],
+      "@/recipes": [
+        "./src/modules/recipes"
+      ],
+      "@/finance": [
+        "./src/modules/finance"
+      ],
+      "@/production": [
+        "./src/modules/production"
+      ],
+      "@/reports": [
+        "./src/modules/reports"
+      ]
+    }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "src/**/*.{ts,tsx}",
     "eslint.config.js"
   ],
   "exclude": [
@@ -14,6 +80,15 @@
     "dist",
     "build",
     "out",
-    "supabase/functions"
+    "supabase",
+    "scripts",
+    "public",
+    "docs",
+    "eslint-rules",
+    ".kiro",
+    "workers",
+    "**/__tests__/**",
+    "**/*.test.*",
+    "**/*.spec.*"
   ]
 }

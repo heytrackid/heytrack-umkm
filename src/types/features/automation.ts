@@ -1,5 +1,6 @@
 import type { Recipe, Ingredient, RecipeIngredient } from '@/types'
 import type { Database } from '@/types/database'
+
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 export type { Recipe, Ingredient, RecipeIngredient }

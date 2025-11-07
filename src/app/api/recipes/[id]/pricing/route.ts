@@ -6,9 +6,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { PricingAutomation, UMKM_CONFIG } from '@/lib/automation'
 import { apiLogger } from '@/lib/logger'
+import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Row } from '@/types/database'
 
 
 type RecipeIngredient = Row<'recipe_ingredients'>
@@ -31,7 +31,7 @@ interface RecipeIngredientWithIngredient {
   } | null
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     const { id: recipeId } = params
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
       // Transform the data structure to match RecipeWithIngredients
       // Supabase returns joined data as arrays, so we need to extract the first element
-      const transformedIngredients = (data.recipe_ingredients || []).map((ri: RecipeIngredientWithIngredient) => ({
+      const transformedIngredients = (data.recipe_ingredients ?? []).map((ri: RecipeIngredientWithIngredient) => ({
         id: '',
         recipe_id: data.id,
         ingredient_id: ri.ingredients?.id ?? '',

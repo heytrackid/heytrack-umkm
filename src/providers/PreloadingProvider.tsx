@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 import { useSimplePreload } from '@/hooks/usePreloading'
 import { createClientLogger } from '@/lib/client-logger'
@@ -29,7 +29,7 @@ interface PreloadingContextType {
 
 const PreloadingContext = createContext<PreloadingContextType | null>(null)
 
-export const usePreloading = () => {
+export const usePreloading = (): PreloadingContextType => {
   const context = useContext(PreloadingContext)
   if (!context) {
     throw new Error('usePreloading must be used within PreloadingProvider')
@@ -37,122 +37,8 @@ export const usePreloading = () => {
   return context
 }
 
-interface PreloadingProviderProps {
-  children: ReactNode
-  enableSmartPreloading?: boolean
-  enableIdlePreloading?: boolean
-  enableNetworkAware?: boolean
-  debug?: boolean
-}
-
-export const PreloadingProvider = ({
-  children,
-  enableSmartPreloading: _enableSmartPreloading = true,
-  enableIdlePreloading: _enableIdlePreloading = true,
-  enableNetworkAware: _enableNetworkAware = true,
-  debug = false
-}: PreloadingProviderProps) => {
-  const pathname = usePathname()
-  const { preloadRoute: hookPreloadRoute } = useSimplePreload()
-
-  const [isPreloading, setIsPreloading] = useState(false)
-  const [preloadedRoutes, setPreloadedRoutes] = useState(new Set<string>())
-  const [_preloadedComponents, _setPreloadedComponents] = useState(new Set<string>())
-
-  // Hooks must be called unconditionally
-  // const smartPreloading = useSmartPreloading()
-  // const idlePreloading = useIdleTimePreloading()
-  // const networkAwarePreloading = useNetworkAwarePreloading()
-
-  // Use hooks only if enabled (effects inside hooks should check enablement)
-  // Note: We call hooks unconditionally but they can decide to do nothing based on props
-  // useEffect(() => {
-  //   if (enableSmartPreloading && smartPreloading) {
-  //     // Smart preloading logic would be here if needed
-  //     // Currently hooks are called but logic is handled internally
-  //   }
-  // }, [enableSmartPreloading, smartPreloading])
-
-  // useEffect(() => {
-  //   if (enableIdlePreloading && idlePreloading) {
-  //     // Idle preloading logic would be here if needed
-  //     // Currently hooks are called but logic is handled internally
-  //   }
-  // }, [enableIdlePreloading, idlePreloading])
-
-  // useEffect(() => {
-  //   if (enableNetworkAware && networkAwarePreloading) {
-  //     // Network aware logic would be here if needed
-  //     // Currently hooks are called but logic is handled internally
-  //   }
-  // }, [enableNetworkAware, networkAwarePreloading])
-
-  // Track preloaded routes
-  const preloadRoute = (route: string): Promise<void> => {
-    if (preloadedRoutes.has(route)) {
-      if (debug) { logger.info(`🔄 Route ${route} already preloaded`) }
-      return Promise.resolve()
-    }
-
-    setIsPreloading(true)
-    const startTime = performance.now()
-
-    try {
-      hookPreloadRoute(route)
-      setPreloadedRoutes(prev => new Set([...prev, route]))
-
-      const endTime = performance.now()
-      if (debug) {
-        logger.info(`✅ Preloaded route ${route} in ${(endTime - startTime).toFixed(2)}ms`)
-      }
-    } catch (error) {
-      if (debug) {
-        const errorMsg = error instanceof Error ? error.message : String(error)
-        logger.warn(`❌ Failed to preload route ${route}: ${errorMsg}`)
-      }
-    } finally {
-      setIsPreloading(false)
-    }
-    return Promise.resolve()
-  }
-
-  // Debug logging
-  useEffect(() => {
-    if (debug) {
-      logger.info(`🛣️ Route changed to: ${pathname}`)
-      logger.info(`📊 Preloaded routes: ${preloadedRoutes.size}`)
-      logger.info(`🧩 Preloaded components: ${_preloadedComponents.size}`)
-    }
-  }, [pathname, preloadedRoutes.size, _preloadedComponents.size, debug])
-
-  // Performance monitoring
-  const getMetrics = (): PreloadingMetrics => ({
-    currentRoute: pathname,
-    preloadedRoutesCount: preloadedRoutes.size,
-    preloadedComponentsCount: _preloadedComponents.size,
-    preloadedRoutes: Array.from(preloadedRoutes),
-    preloadedComponents: Array.from(_preloadedComponents)
-  })
-
-  // Context value
-  const value: PreloadingContextType = {
-    isPreloading,
-    preloadedRoutes,
-    preloadedComponents: _preloadedComponents,
-    preloadRoute,
-    getMetrics
-  }
-
-  return (
-    <PreloadingContext.Provider value={value}>
-      {children}
-      {debug && <PreloadingDebugPanel />}
-    </PreloadingContext.Provider>
-  )
-}
-
 // Debug panel component
-const PreloadingDebugPanel = () => {
+const PreloadingDebugPanel = (): JSX.Element => {
   const { getMetrics, isPreloading } = usePreloading()
   const [showDebug, setShowDebug] = useState(false)
   const [metrics, setMetrics] = useState<PreloadingMetrics | null>(null)
@@ -251,8 +137,123 @@ const PreloadingDebugPanel = () => {
   )
 }
 
+interface PreloadingProviderProps {
+  children: ReactNode
+  enableSmartPreloading?: boolean
+  enableIdlePreloading?: boolean
+  enableNetworkAware?: boolean
+  debug?: boolean
+}
+
+export const PreloadingProvider = ({
+  children,
+  enableSmartPreloading: _enableSmartPreloading = true,
+  enableIdlePreloading: _enableIdlePreloading = true,
+  enableNetworkAware: _enableNetworkAware = true,
+  debug = false
+}: PreloadingProviderProps): JSX.Element => {
+  const pathname = usePathname()
+  const { preloadRoute: hookPreloadRoute } = useSimplePreload()
+
+  const [isPreloading, setIsPreloading] = useState(false)
+  const [preloadedRoutes, setPreloadedRoutes] = useState(new Set<string>())
+  const [_preloadedComponents, _setPreloadedComponents] = useState(new Set<string>())
+
+  // Hooks must be called unconditionally
+  // const smartPreloading = useSmartPreloading()
+  // const idlePreloading = useIdleTimePreloading()
+  // const networkAwarePreloading = useNetworkAwarePreloading()
+
+  // Use hooks only if enabled (effects inside hooks should check enablement)
+  // Note: We call hooks unconditionally but they can decide to do nothing based on props
+  // useEffect(() => {
+  //   if (enableSmartPreloading && smartPreloading) {
+  //     // Smart preloading logic would be here if needed
+  //     // Currently hooks are called but logic is handled internally
+  //   }
+  // }, [enableSmartPreloading, smartPreloading])
+
+  // useEffect(() => {
+  //   if (enableIdlePreloading && idlePreloading) {
+  //     // Idle preloading logic would be here if needed
+  //     // Currently hooks are called but logic is handled internally
+  //   }
+  // }, [enableIdlePreloading, idlePreloading])
+
+  // useEffect(() => {
+  //   if (enableNetworkAware && networkAwarePreloading) {
+  //     // Network aware logic would be here if needed
+  //     // Currently hooks are called but logic is handled internally
+  //   }
+  // }, [enableNetworkAware, networkAwarePreloading])
+
+  // Track preloaded routes
+  const preloadRoute = useCallback(async (route: string): Promise<void> => {
+    if (preloadedRoutes.has(route)) {
+      if (debug) { logger.info(`🔄 Route ${route} already preloaded`) }
+      return
+    }
+
+    setIsPreloading(true)
+    const startTime = performance.now()
+
+    try {
+      await hookPreloadRoute(route)
+      setPreloadedRoutes(prev => new Set([...prev, route]))
+
+      const endTime = performance.now()
+      if (debug) {
+        logger.info(`✅ Preloaded route ${route} in ${(endTime - startTime).toFixed(2)}ms`)
+      }
+    } catch (error) {
+      if (debug) {
+        const errorMsg = error instanceof Error ? error.message : String(error)
+        logger.warn(`❌ Failed to preload route ${route}: ${errorMsg}`)
+      }
+    } finally {
+      setIsPreloading(false)
+    }
+  }, [debug, hookPreloadRoute, preloadedRoutes])
+
+  // Debug logging
+  useEffect(() => {
+    if (debug) {
+      logger.info(`🛣️ Route changed to: ${pathname}`)
+      logger.info(`📊 Preloaded routes: ${preloadedRoutes.size}`)
+      logger.info(`🧩 Preloaded components: ${_preloadedComponents.size}`)
+    }
+  }, [pathname, preloadedRoutes.size, _preloadedComponents.size, debug])
+
+  // Performance monitoring
+  const getMetrics = useCallback((): PreloadingMetrics => ({
+    currentRoute: pathname,
+    preloadedRoutesCount: preloadedRoutes.size,
+    preloadedComponentsCount: _preloadedComponents.size,
+    preloadedRoutes: Array.from(preloadedRoutes),
+    preloadedComponents: Array.from(_preloadedComponents)
+  }), [pathname, preloadedRoutes, _preloadedComponents])
+
+  // Context value
+  const value: PreloadingContextType = useMemo(() => ({
+    isPreloading,
+    preloadedRoutes,
+    preloadedComponents: _preloadedComponents,
+    preloadRoute,
+    getMetrics
+  }), [isPreloading, preloadedRoutes, _preloadedComponents, preloadRoute, getMetrics])
+
+  return (
+    <PreloadingContext.Provider value={value}>
+      {children}
+      {debug && <PreloadingDebugPanel />}
+    </PreloadingContext.Provider>
+  )
+}
+
+
+
 // Hook to preload specific page resources
-export const usePagePreloading = (pageType: 'customers' | 'dashboard' | 'finance' | 'inventory' | 'orders') => {
+export const usePagePreloading = (pageType: 'customers' | 'dashboard' | 'finance' | 'inventory' | 'orders'): void => {
   const { preloadRoute } = usePreloading()
 
   useEffect(() => {
@@ -276,7 +277,7 @@ export const usePagePreloading = (pageType: 'customers' | 'dashboard' | 'finance
 }
 
 // Performance monitoring hook
-export const usePreloadingAnalytics = () => {
+export const usePreloadingAnalytics = (): void => {
   const { getMetrics } = usePreloading()
 
   useEffect(() => {
@@ -286,7 +287,7 @@ export const usePreloadingAnalytics = () => {
 
     let interval: NodeJS.Timeout | null = null
 
-    const tick = () => {
+    const tick = (): void => {
       const metrics = getMetrics()
 
       if (metrics.preloadedRoutesCount > 0 || metrics.preloadedComponentsCount > 0) {
@@ -301,7 +302,7 @@ export const usePreloadingAnalytics = () => {
       }
     }
 
-    const start = () => {
+    const start = (): void => {
       if (interval || document.hidden) {
         return
       }
@@ -309,7 +310,7 @@ export const usePreloadingAnalytics = () => {
       interval = setInterval(tick, 30000)
     }
 
-    const stop = () => {
+    const stop = (): void => {
       if (!interval) {
         return
       }
@@ -317,7 +318,7 @@ export const usePreloadingAnalytics = () => {
       interval = null
     }
 
-    const handleVisibilityChange = () => {
+    const handleVisibilityChange = (): void => {
       if (document.hidden) {
         stop()
       } else {
@@ -329,7 +330,7 @@ export const usePreloadingAnalytics = () => {
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     // Send analytics every 30 seconds if there's activity
-    return () => {
+    return (): void => {
       stop()
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }

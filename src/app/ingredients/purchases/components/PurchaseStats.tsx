@@ -12,7 +12,7 @@ interface PurchaseStatsProps {
   purchases: IngredientPurchase[]
 }
 
-const PurchaseStats = ({ purchases }: PurchaseStatsProps) => {
+const PurchaseStats = ({ purchases }: PurchaseStatsProps): JSX.Element => {
   // Calculate stats
   const thisMonth = purchases.filter((p) => {
     const purchaseDate = new Date(p.purchase_date)

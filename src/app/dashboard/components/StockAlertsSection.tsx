@@ -16,7 +16,7 @@ interface StockAlertsSectionProps {
   lowStockItems?: LowStockItem[]
 }
 
-const StockAlertsSection = ({ lowStockItems }: StockAlertsSectionProps) => {
+const StockAlertsSection = ({ lowStockItems }: StockAlertsSectionProps): JSX.Element => {
   // Show skeleton if data is undefined
   if (lowStockItems === undefined) {
     return (

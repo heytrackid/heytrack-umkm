@@ -7,9 +7,9 @@ import { apiLogger } from '@/lib/logger'
  */
 
 
-// ============================================================================
+// ==========================================================
 // GENERAL ERROR HANDLING
-// ============================================================================
+// ==========================================================
 
 export type ErrorSeverity = 'debug' | 'error' | 'fatal' | 'info' | 'warning'
 
@@ -76,6 +76,9 @@ export function captureMessage(
     case 'debug':
       apiLogger.debug(logData, message)
       break
+    default:
+      // Unknown log level
+      break
   }
 }
 
@@ -104,11 +107,12 @@ export function handleApiError(error: unknown, context?: ErrorContext): {
   }
 }
 
-// ============================================================================
+// ==========================================================
 // AUTH ERROR HANDLING
-// ============================================================================
+// ==========================================================
 
 export interface AuthError {
+  code?: string
   message: string
   action?: {
     label: string
@@ -227,14 +231,15 @@ export function logAuthError(error: unknown, context?: ErrorContext): void {
  */
 export function createAuthError(code: string, message: string, action?: AuthError['action']): AuthError {
   return {
+    code,
     message,
     action
   }
 }
 
-// ============================================================================
+// ==========================================================
 // DATABASE ERROR HANDLING
-// ============================================================================
+// ==========================================================
 
 /**
  * Handle database operation errors

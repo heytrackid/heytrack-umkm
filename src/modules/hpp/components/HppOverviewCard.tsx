@@ -21,12 +21,12 @@ interface HppOverviewCardProps {
     }
 }
 
-export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
+export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element => {
     const { formatCurrency } = useCurrency()
     const router = useRouter()
     const { toast } = useToast()
 
-    const handleCalculateAll = async () => {
+    const handleCalculateAll = async (): Promise<void> => {
         try {
             const response = await fetch('/api/hpp/calculate', {
                 method: 'PUT',

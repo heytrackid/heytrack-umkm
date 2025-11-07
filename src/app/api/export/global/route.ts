@@ -11,7 +11,7 @@ import { createClient } from '@/utils/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-async function GET(_request: NextRequest) {
+async function GET(_request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authenticate
     const supabase = await createClient()

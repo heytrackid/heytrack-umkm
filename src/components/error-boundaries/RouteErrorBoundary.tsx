@@ -42,7 +42,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
     }
   }
 
-  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     const routeName = this.props.routeName ?? 'Unknown Route'
 
     logger.error({
@@ -56,14 +56,14 @@ export class RouteErrorBoundary extends Component<Props, State> {
     // Example: Sentry.captureException(error, { tags: { route: routeName } })
   }
 
-  handleRetry = () => {
+  handleRetry = (): void => {
     this.setState(prevState => ({
       hasError: false,
       retryCount: prevState.retryCount + 1
     }))
   }
 
-  handleGoBack = () => {
+  handleGoBack = (): void => {
     if (window.history.length > 1) {
       window.history.back()
     } else {
@@ -71,7 +71,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
     }
   }
 
-  override render() {
+  override render(): ReactNode {
     if (this.state.hasError) {
       const routeName = this.props.routeName ?? 'this page'
       const maxRetries = 3
@@ -128,8 +128,8 @@ export class RouteErrorBoundary extends Component<Props, State> {
 export function withRouteErrorBoundary<P extends object>(
   Component: ComponentType<P>,
   routeName?: string
-) {
-  const WrappedComponent = (props: P) => (
+): ComponentType<P> {
+  const WrappedComponent = (props: P): ReactNode => (
     <RouteErrorBoundary {...(routeName && { routeName })}>
       <Component {...props} />
     </RouteErrorBoundary>

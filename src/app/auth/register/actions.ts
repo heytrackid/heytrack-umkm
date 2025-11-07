@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 
 import { createClient } from '@/utils/supabase/server'
 
-export async function signup(formData: FormData) {
+export async function signup(formData: FormData): Promise<{ error?: string; success?: boolean }> {
     const supabase = await createClient()
 
     const email = formData.get('email') as string
@@ -38,7 +38,7 @@ export async function signup(formData: FormData) {
     return { success: true }
 }
 
-export async function signupWithGoogle() {
+export async function signupWithGoogle(): Promise<{ error: string } | never> {
     const supabase = await createClient()
 
     const { data, error } = await supabase.auth.signInWithOAuth({

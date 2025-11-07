@@ -8,9 +8,9 @@
  *   import { createClient } from '@/lib/auth'
  */
 
-// ============================================================================
+// ==========================================================
 // RESPONSIVE UTILITIES
-// ============================================================================
+// ==========================================================
 
 export {
   isMobile,
@@ -22,9 +22,9 @@ export {
 // Re-export BREAKPOINTS and DEVICE_BREAKPOINTS from responsive utils
 export { BREAKPOINTS, DEVICE_BREAKPOINTS } from '@/utils/responsive'
 
-// ============================================================================
+// ==========================================================
 // SUPABASE UTILITIES
-// ============================================================================
+// ==========================================================
 
 export { createClient } from './supabase/client'
 // Server client functionality is only available in server contexts

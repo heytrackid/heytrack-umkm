@@ -1,14 +1,14 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 
 import { createClientLogger } from '@/lib/client-logger'
+import { cachePresets } from '@/providers/QueryProvider'
+import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
 
-import type { Row } from '@/types/database'
 
 const logger = createClientLogger('Hook')
-import { cachePresets } from '@/providers/QueryProvider'
 
 
 // Dashboard stats type
@@ -212,7 +212,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
       const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000)
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
-      
+
       const { data: orders, error } = await createClient()
         .from('orders')
         .select('*')
@@ -223,7 +223,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
 
       type Order = Row<'orders'>
       const revenue = orders?.reduce((sum: number, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
-      
+
       weekData.push({
         day: date.toLocaleDateString('id-ID', { weekday: 'short' }),
         revenue,
@@ -251,19 +251,19 @@ const fetchTopProducts = (): TopProductsData[] => {
 }
 
 // Hooks
-export const useDashboardStats = () => useQuery({
+export const useDashboardStats = (): UseQueryResult<DashboardStats> => useQuery<DashboardStats, Error>({
     queryKey: ['dashboard', 'stats'],
     queryFn: fetchDashboardStats,
     ...cachePresets.dashboard,
   })
 
-export const useWeeklySales = () => useQuery({
+export const useWeeklySales = (): UseQueryResult<WeeklySalesData> => useQuery<WeeklySalesData, Error>({
     queryKey: ['dashboard', 'weekly-sales'],
     queryFn: fetchWeeklySales,
     ...cachePresets.analytics,
   })
 
-export const useTopProducts = () => useQuery({
+export const useTopProducts = (): UseQueryResult<TopProductsData> => useQuery<TopProductsData, Error>({
     queryKey: ['dashboard', 'top-products'],
     queryFn: fetchTopProducts,
     ...cachePresets.analytics,

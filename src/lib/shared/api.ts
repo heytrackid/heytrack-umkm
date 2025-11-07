@@ -459,8 +459,10 @@ export const responseTransformers = {
 export const apiAnalytics = {
   requests: new Map<string, { count: number; totalTime: number; errors: number }>(),
 
-  trackRequest: (url: string, duration: number, error = false) => {
-    const key = url.split('?')[0] // Remove query params for grouping
+  trackRequest: (url: string | undefined, duration: number, error = false) => {
+    const sanitizedUrl = url ?? 'unknown'
+    const [keyPart] = sanitizedUrl.split('?')
+    const key = keyPart ?? sanitizedUrl
     const existing = apiAnalytics.requests.get(key) ?? { count: 0, totalTime: 0, errors: 0 }
 
     apiAnalytics.requests.set(key, {

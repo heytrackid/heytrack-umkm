@@ -189,7 +189,7 @@ export const BatchEditMode = <T,>({
 }
 
 // Hook untuk batch edit state
-export function useBatchEdit() {
+export function useBatchEdit(): JSX.Element {
   const [isActive, setIsActive] = useState(false)
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
 

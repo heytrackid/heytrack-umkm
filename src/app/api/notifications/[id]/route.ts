@@ -18,7 +18,7 @@ import { createClient } from '@/utils/supabase/server'
 async function putHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     const { id: notificationId } = params

@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import useSWR from 'swr'
 
+import type { ProfitData, ProfitFilters, ExportFormat } from '@/app/profit/components/types'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 
-import type { ProfitData, ProfitFilters, ExportFormat } from '@/app/profit/components/types'
 
 /**
  * Profit Data Hook with SWR Caching
@@ -61,27 +61,30 @@ export function useProfitData() {
   // Get dates for the SWR key
   const { calculatedStartDate, calculatedEndDate } = getCalculatedDates()
 
-  // SWR key and fetcher
-  const swrKey = calculatedStartDate && calculatedEndDate 
-    ? [`/api/reports/profit?start_date=${calculatedStartDate}&end_date=${calculatedEndDate}`]
-    : null
+   // SWR key and fetcher
+   const swrKey = calculatedStartDate && calculatedEndDate
+     ? [`/api/reports/profit?start_date=${calculatedStartDate}&end_date=${calculatedEndDate}`]
+     : null
 
-  const { data: profitData, error, mutate, isLoading } = useSWR<ProfitData>(
-    swrKey,
-    async (url: string) => {
-      const response = await fetch(url)
-      if (!response.ok) {
-        throw new Error('Gagal mengambil data laporan laba')
-      }
-      return await response.json() as ProfitData
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      errorRetryCount: 3,
-      refreshInterval: 5 * 60 * 1000, // Refresh every 5 minutes
-    }
-  )
+   const fetchProfitData = async (url: string): Promise<ProfitData> => {
+     const response = await fetch(url)
+     if (!response.ok) {
+       throw new Error('Gagal mengambil data laporan laba')
+     }
+     return await response.json() as ProfitData
+   }
+
+    
+   const { data: profitData, error, mutate, isLoading } = useSWR<ProfitData>(
+     swrKey,
+     fetchProfitData,
+     {
+       revalidateOnFocus: false,
+       revalidateOnReconnect: true,
+       errorRetryCount: 3,
+       refreshInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+     }
+   )
 
   const updateFilters = (newFilters: Partial<ProfitFilters>) => {
     const sanitizedEntries = Object.entries(newFilters).filter(([, value]) => value !== undefined)

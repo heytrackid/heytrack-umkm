@@ -5,9 +5,9 @@ export const runtime = 'nodejs'
 import { NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
+import type { Insert } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert } from '@/types/database'
 
 
 /**
@@ -15,7 +15,7 @@ import type { Insert } from '@/types/database'
  * 
  * Creates template operational costs for new users
  */
-export async function POST() {
+export async function POST(): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     

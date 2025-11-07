@@ -19,7 +19,7 @@ interface CostCalculationCardProps {
     isCalculating?: boolean
 }
 
-export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: CostCalculationCardProps) => {
+export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: CostCalculationCardProps): JSX.Element => {
     const { formatCurrency } = useCurrency()
     const hasIngredientsWithoutPrice = recipe.ingredients.some((ingredient) => ingredient.unit_price === 0)
     const ingredientsCost = recipe.ingredients.reduce((sum, ingredient) => sum + (ingredient.quantity * ingredient.unit_price), 0)

@@ -2,14 +2,14 @@
 
 import { useSupabaseQuery } from './core'
 
-
+import type { UseSupabaseQueryResult } from './types'
 
 /**
  * Entity-specific hooks for common database operations
  */
 
 // Ingredients
-export function useIngredients(options?: { realtime?: boolean }) {
+export function useIngredients(options?: { realtime?: boolean }): UseSupabaseQueryResult<'ingredients'> {
   return useSupabaseQuery('ingredients', {
     orderBy: { column: 'name' },
     realtime: options?.realtime,
@@ -17,7 +17,7 @@ export function useIngredients(options?: { realtime?: boolean }) {
 }
 
 // Recipes
-export function useRecipes(options?: { realtime?: boolean }) {
+export function useRecipes(options?: { realtime?: boolean }): UseSupabaseQueryResult<'recipes'> {
   return useSupabaseQuery('recipes', {
     filter: { is_active: true },
     orderBy: { column: 'name' },
@@ -26,7 +26,7 @@ export function useRecipes(options?: { realtime?: boolean }) {
 }
 
 // Orders
-export function useOrders(options?: { realtime?: boolean }) {
+export function useOrders(options?: { realtime?: boolean }): UseSupabaseQueryResult<'orders'> {
   return useSupabaseQuery('orders', {
     orderBy: { column: 'created_at', ascending: false },
     realtime: options?.realtime,
@@ -34,7 +34,7 @@ export function useOrders(options?: { realtime?: boolean }) {
 }
 
 // Customers
-export function useCustomers(options?: { realtime?: boolean }) {
+export function useCustomers(options?: { realtime?: boolean }): UseSupabaseQueryResult<'customers'> {
   return useSupabaseQuery('customers', {
     orderBy: { column: 'name' },
     realtime: options?.realtime,
@@ -42,7 +42,7 @@ export function useCustomers(options?: { realtime?: boolean }) {
 }
 
 // Suppliers
-export function useSuppliers(options?: { realtime?: boolean }) {
+export function useSuppliers(options?: { realtime?: boolean }): UseSupabaseQueryResult<'suppliers'> {
   return useSupabaseQuery('suppliers', {
     orderBy: { column: 'name' },
     realtime: options?.realtime,
@@ -50,7 +50,7 @@ export function useSuppliers(options?: { realtime?: boolean }) {
 }
 
 // Expenses
-export function useExpenses(options?: { realtime?: boolean }) {
+export function useExpenses(options?: { realtime?: boolean }): UseSupabaseQueryResult<'expenses'> {
   return useSupabaseQuery('expenses', {
     orderBy: { column: 'expense_date', ascending: false },
     realtime: options?.realtime,
@@ -58,7 +58,7 @@ export function useExpenses(options?: { realtime?: boolean }) {
 }
 
 // Operational Costs
-export function useOperationalCosts(options?: { realtime?: boolean }) {
+export function useOperationalCosts(options?: { realtime?: boolean }): UseSupabaseQueryResult<'operational_costs'> {
   return useSupabaseQuery('operational_costs', {
     orderBy: { column: 'created_at', ascending: false },
     realtime: options?.realtime,
@@ -71,7 +71,7 @@ export function useFinancialRecords(options?: {
   endDate?: string
   type?: 'EXPENSE' | 'INCOME' | 'INVESTMENT' | 'WITHDRAWAL'
   realtime?: boolean
-}) {
+}): UseSupabaseQueryResult<'financial_records'> {
   const filter: Record<string, unknown> = {}
   if (options?.type) {filter['type'] = options.type}
 
@@ -83,7 +83,7 @@ export function useFinancialRecords(options?: {
 }
 
 // Productions
-export function useProductions(options?: { realtime?: boolean }) {
+export function useProductions(options?: { realtime?: boolean }): UseSupabaseQueryResult<'productions'> {
   return useSupabaseQuery('productions', {
     orderBy: { column: 'created_at', ascending: false },
     realtime: options?.realtime,

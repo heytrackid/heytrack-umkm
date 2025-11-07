@@ -67,7 +67,7 @@ export function usePerformanceObserver(
         try {
             observer.observe({ entryTypes })
         } catch (error) {
-            performanceLogger.error({ error: e }, 'PerformanceObserver error')
+            performanceLogger.error({ error }, 'PerformanceObserver error')
         }
 
         return () => observer.disconnect()

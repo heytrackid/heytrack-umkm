@@ -9,7 +9,7 @@ import { type NextRequest, NextResponse } from 'next/server'
  import { createClient } from '@/utils/supabase/server'
 
 
-async function postHandler(request: NextRequest) {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     

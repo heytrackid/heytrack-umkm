@@ -2,6 +2,7 @@ import { apiLogger } from '@/lib/logger'
 import { NotificationService } from '@/modules/notifications/services/NotificationService'
 
 import type { Database } from '@/types/database'
+
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 

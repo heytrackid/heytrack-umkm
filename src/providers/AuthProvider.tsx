@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
@@ -26,7 +26,7 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
+export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const [authState, setAuthState] = useState<AuthContextType>({
     user: null,
     session: null,
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
 
     // Get initial session with error handling
-    const getSession = async () => {
+    const getSession = async (): Promise<void> => {
       try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
@@ -105,12 +105,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     )
 
-    return () => {
+    return (): void => {
       subscription?.unsubscribe()
     }
   }, [router, supabase.auth])
 
-  const signOut = async () => {
+  const signOut = useCallback(async (): Promise<void> => {
     try {
       await supabase.auth.signOut()
       setAuthState(prev => ({
@@ -125,9 +125,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const message = getErrorMessage(error)
       authLogger.error({ error: message }, 'Sign out error:')
     }
-  }
+  }, [router, supabase.auth])
 
-  const refreshSession = async () => {
+  const refreshSession = useCallback(async (): Promise<void> => {
     try {
       const { data: { session }, error } = await supabase.auth.refreshSession()
       
@@ -145,21 +145,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const message = getErrorMessage(error)
       authLogger.error({ error: message }, 'Session refresh error:')
     }
-  }
+  }, [supabase.auth])
 
-  const value = {
+  const value = useMemo(() => ({
     user: authState.user,
     session: authState.session,
     isLoading: authState.isLoading,
     isAuthenticated: authState.isAuthenticated,
     signOut,
     refreshSession
-  }
+  }), [authState.user, authState.session, authState.isLoading, authState.isAuthenticated, signOut, refreshSession])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext)
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')

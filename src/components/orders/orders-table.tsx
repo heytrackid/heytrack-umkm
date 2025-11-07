@@ -45,8 +45,9 @@ import {
 } from '@/components/ui/table'
 import { useCurrency } from '@/hooks/useCurrency'
 
-import type { OrderItem, Order } from './types'
 import type { OrdersTable } from '@/types/database'
+
+import type { OrderItem, Order } from './types'
 
 // Extended type for table display
 interface OrderWithItems extends Order {

@@ -109,7 +109,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
         }
 
         void loadRecipe(user['id'])
-    }, [user?.id, authLoading, loadRecipe])
+    }, [user, authLoading, loadRecipe])
 
     const handleDelete = async () => {
         if (!recipe || !user?.id) { return }
@@ -147,7 +147,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             cake: '🍰',
             cookie: '🍪',
         }
-        return icons[category] || '👩‍🍳'
+        return icons[category] ?? '👩‍🍳'
     }
 
     const getDifficultyColor = (difficulty: string) => {
@@ -156,7 +156,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             medium: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
             hard: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
         }
-        return colors[difficulty] || 'bg-gray-100 text-gray-700'
+        return colors[difficulty] ?? 'bg-gray-100 text-gray-700'
     }
 
     const getDifficultyLabel = (difficulty: string) => {
@@ -165,7 +165,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             medium: 'Sedang',
             hard: 'Sulit',
         }
-        return labels[difficulty] || difficulty
+        return labels[difficulty] ?? difficulty
     }
 
     if (loading || authLoading) {

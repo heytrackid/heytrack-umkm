@@ -11,16 +11,17 @@ import { useIngredientPurchases, useCreateIngredientPurchase } from '@/hooks/use
 import { useIngredients } from '@/hooks/useIngredients'
 import { apiLogger as _apiLogger } from '@/lib/logger'
 
+import type { Insert } from '@/types/database'
+
 import PurchaseForm from './PurchaseForm'
 import PurchasesTable from './PurchasesTable'
 import PurchaseStats from './PurchaseStats'
 
 import type { IngredientPurchase as _IngredientPurchase, AvailableIngredient as _AvailableIngredient } from './types'
-import type { Insert } from '@/types/database'
 
 
 
-const IngredientPurchasesLayout = () => {
+const IngredientPurchasesLayout = (): JSX.Element => {
   const { data: purchases = [], isLoading: _purchasesLoading } = useIngredientPurchases()
   const { data: ingredients = [], isLoading: _ingredientsLoading } = useIngredients()
   const createPurchase = useCreateIngredientPurchase()

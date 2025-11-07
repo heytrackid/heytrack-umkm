@@ -202,6 +202,10 @@ export class RecommendationEngine {
         recommendations.push('🔬 Invest in R&D for product innovation')
         recommendations.push('📈 Consider diversification or adjacent markets')
         break
+
+      default:
+        // No specific recommendations for unknown business stages
+        break
     }
 
     return recommendations

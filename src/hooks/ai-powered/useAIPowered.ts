@@ -17,7 +17,23 @@ import type { AnalysisType } from './types'
  * Provides intelligent insights powered by OpenRouter AI
  * Now modularized for better maintainability and testability
  */
-export function useAIPowered() {
+export function useAIPowered(): {
+  pricing: ReturnType<typeof usePricingAnalysis>;
+  inventory: ReturnType<typeof useInventoryOptimization>;
+  customer: ReturnType<typeof useCustomerAnalytics>;
+  financial: ReturnType<typeof useFinancialAnalysis>;
+  analyzePricing: ReturnType<typeof usePricingAnalysis>['analyzePricing'];
+  optimizeInventory: ReturnType<typeof useInventoryOptimization>['optimizeInventory'];
+  analyzeCustomers: ReturnType<typeof useCustomerAnalytics>['analyzeCustomers'];
+  analyzeFinancials: ReturnType<typeof useFinancialAnalysis>['analyzeFinancials'];
+  generateSmartInsights: ReturnType<typeof useSmartInsights>['generateSmartInsights'];
+  clearAnalysis: (type: AnalysisType) => void;
+  checkAIAvailability: () => Promise<boolean>;
+  isAnyLoading: boolean;
+  hasAnyData: boolean;
+  getConfidenceLevel: (confidence: number) => string;
+  formatInsight: (insight: Record<string, unknown>, type: string) => Record<string, unknown>;
+} {
   // Individual AI analysis hooks
   const pricingAnalysis = usePricingAnalysis()
   const inventoryAnalysis = useInventoryOptimization()
@@ -33,7 +49,7 @@ export function useAIPowered() {
   /**
    * Clear specific analysis state
    */
-  const clearAnalysis = useCallback((type: AnalysisType) => {
+  const clearAnalysis = useCallback((type: AnalysisType): void => {
     switch (type) {
       case 'pricing':
         pricingAnalysis.clearAnalysis()
@@ -47,13 +63,15 @@ export function useAIPowered() {
       case 'financial':
         financialAnalysis.clearAnalysis()
         break
+      default:
+        break
     }
   }, [pricingAnalysis, inventoryAnalysis, customerAnalysis, financialAnalysis])
 
   /**
    * Check if AI service is available
    */
-  const checkAIAvailability = useCallback(async () => {
+  const checkAIAvailability = useCallback(async (): Promise<boolean> => {
     try {
       const response = await fetch('/api/ai/health', {
         credentials: 'include', // Include cookies for authentication
@@ -85,13 +103,13 @@ export function useAIPowered() {
     hasAnyData: Boolean(pricingAnalysis['data'] ?? inventoryAnalysis['data'] ?? customerAnalysis['data'] ?? financialAnalysis['data']),
 
     // Helper functions
-    getConfidenceLevel: (confidence: number) => {
+    getConfidenceLevel: (confidence: number): string => {
       if (confidence >= 0.8) {return 'high'}
       if (confidence >= 0.6) {return 'medium'}
       return 'low'
     },
 
-    formatInsight: (insight: Record<string, unknown>, type: string) => ({
+    formatInsight: (insight: Record<string, unknown>, type: string): Record<string, unknown> => ({
       ...insight,
       type,
       confidence: (insight['metadata'] as Record<string, unknown>)?.['confidence'] as number || 0.7,

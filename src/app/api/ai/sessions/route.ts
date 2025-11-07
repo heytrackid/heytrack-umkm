@@ -15,7 +15,7 @@ import { safeNumber } from '@/lib/type-guards'
 import { createClient } from '@/utils/supabase/server'
 
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 

@@ -32,7 +32,7 @@ export const OptimizedImage = ({
   fill = false,
   objectFit = 'cover',
   quality = 75
-}: OptimizedImageProps) => {
+}: OptimizedImageProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
 

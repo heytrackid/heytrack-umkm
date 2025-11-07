@@ -7,13 +7,11 @@
  */
 
 // Simple interface definition
-interface DataObject {
-  [key: string]: unknown
-}
+type DataObject = Record<string, unknown>;
 
-// ============================================================================
+// ==========================================================
 // PRIMITIVE TYPE GUARDS
-// ============================================================================
+// ==========================================================
 
 export function isString(value: unknown): value is string {
   return typeof value === 'string'
@@ -47,9 +45,9 @@ export function isObject<T extends DataObject = DataObject>(value: unknown): val
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-// ============================================================================
+// ==========================================================
 // BUSINESS TYPE GUARDS
-// ============================================================================
+// ==========================================================
 
 export function isEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -69,9 +67,9 @@ export function isValidPercentage(value: number): boolean {
   return typeof value === 'number' && value >= 0 && value <= 100
 }
 
-// ============================================================================
+// ==========================================================
 // ERROR TYPE GUARDS
-// ============================================================================
+// ==========================================================
 
 export function isError(value: unknown): value is Error {
   return value instanceof Error

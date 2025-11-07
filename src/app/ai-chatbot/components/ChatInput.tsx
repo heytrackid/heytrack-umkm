@@ -13,15 +13,15 @@ interface ChatInputProps {
   isLoading: boolean
 }
 
-export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInputProps) => {
-  const handleSubmit = (e: FormEvent) => {
+export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInputProps): JSX.Element => {
+  const handleSubmit = (e: FormEvent): void => {
     e.preventDefault()
     if (input.trim() && !isLoading) {
       onSendMessage()
     }
   }
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = (suggestion: string): void => {
     onSendMessage(suggestion)
   }
 

@@ -14,14 +14,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { usePerformanceMonitoring } from '@/utils/performance/usePerformanceMonitoring'
+import { usePerformanceMonitoring } from '@/lib/performance'
 
 /**
  * Performance Monitor Component
  * Real-time display of Core Web Vitals and performance metrics
  */
 
-export const PerformanceMonitor = () => {
+export const PerformanceMonitor = (): JSX.Element | null => {
   const {
     metrics,
     isSupported,
@@ -45,12 +45,12 @@ export const PerformanceMonitor = () => {
     return null
   }
 
-  const formatMetric = (value: number | null, unit = 'ms') => {
+  const formatMetric = (value: number | null, unit = 'ms'): string => {
     if (value === null) {return '—'}
     return `${value.toFixed(0)}${unit}`
   }
 
-  const getScoreColor = (score: number | null) => {
+  const getScoreColor = (score: number | null): string => {
     if (score === null) {return 'gray'}
     if (score >= 90) {return 'green'}
     if (score >= 70) {return 'yellow'}
@@ -58,7 +58,7 @@ export const PerformanceMonitor = () => {
     return 'red'
   }
 
-  const getRatingBadge = (rating: string) => {
+  const getRatingBadge = (rating: string): JSX.Element => {
     const variants = {
       excellent: { label: 'Excellent', variant: 'default' as const },
       good: { label: 'Good', variant: 'secondary' as const },
@@ -72,7 +72,7 @@ export const PerformanceMonitor = () => {
     return <Badge variant={variant}>{label}</Badge>
   }
 
-  const handleExport = () => {
+  const handleExport = (): void => {
     exportMetrics()
     // Could send to analytics service here
   }
@@ -215,8 +215,8 @@ interface MetricRowProps {
   icon: React.ComponentType<{ className?: string }>
 }
 
-const MetricRow = ({ label, value, threshold, currentValue, icon: Icon }: MetricRowProps) => {
-  const getStatus = () => {
+const MetricRow = ({ label, value, threshold, currentValue, icon: Icon }: MetricRowProps): JSX.Element => {
+  const getStatus = (): string => {
     if (currentValue === null) {return 'unknown'}
     if (currentValue <= threshold.good) {return 'good'}
     if (currentValue <= threshold.poor) {return 'needs-improvement'}

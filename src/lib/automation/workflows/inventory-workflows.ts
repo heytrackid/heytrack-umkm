@@ -5,6 +5,7 @@ import type { Insert, Database, Json } from '@/types/database'
 import type {WorkflowResult,
   WorkflowContext
 } from '@/types/features/automation'
+
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**

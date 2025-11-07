@@ -13,7 +13,7 @@ import { InventoryAlertsList } from '@/hooks/useInventoryAlerts'
 
 
 
-export const InventoryDashboard = () => {
+export const InventoryDashboard = (): JSX.Element => {
   const { formatCurrency } = useSettings()
   const { inventoryStatus, loading: alertsLoading, refetch: refetchAlerts } = useInventoryAlerts()
   const { reorderData, loading: reorderLoading, refetch: refetchReorder } = useReorderManagement()

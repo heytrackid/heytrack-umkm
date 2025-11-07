@@ -13,7 +13,7 @@ import { createClient } from '@/utils/supabase/server'
 
 
 // POST /api/hpp/calculate - Calculate HPP for a recipe
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -122,7 +122,7 @@ async function POST(request: NextRequest) {
 }
 
 // POST /api/hpp/calculate/batch - Calculate HPP for all recipes
-async function PUT(request: NextRequest) {
+async function PUT(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -148,7 +148,7 @@ async function PUT(request: NextRequest) {
 
     // Calculate HPP for each recipe in parallel
     const results = await Promise.allSettled(
-      (recipes || []).map(async (recipe) => {
+      (recipes ?? []).map(async (recipe) => {
         const response = await fetch(`${request.nextUrl.origin}/api/hpp/calculate`, {
           method: 'POST',
           headers: {

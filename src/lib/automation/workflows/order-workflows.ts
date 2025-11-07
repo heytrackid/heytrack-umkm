@@ -1,10 +1,12 @@
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 
-import { triggerWorkflow } from './index'
 
 import type { Row, Insert, Update, Database } from '@/types/database'
 import type { WorkflowContext, WorkflowResult } from '@/types/features/automation'
+
+import { triggerWorkflow } from './index'
+
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
@@ -146,6 +148,61 @@ export class OrderWorkflowHandlers {
   }
 
   /**
+   * Create a single production batch for a recipe
+   */
+  private static async createSingleProductionBatch(options: {
+    recipeId: string
+    recipe: RecipeRow
+    totalQuantity: number
+    orderId: string
+    order: OrderWithRelations
+    supabase: SupabaseClient<Database>
+    logger: typeof automationLogger
+  }): Promise<{ id: string } | null> {
+    const { recipeId, recipe, totalQuantity, orderId, order, supabase, logger } = options
+
+    const orderIdFragment = orderId ?? 'UNKNOWN'
+    const [datePart = ''] = new Date().toISOString().split('T')
+    const sanitizedDate = datePart.replace(/-/g, '')
+    const batchNumber = `BATCH-${sanitizedDate}-${orderIdFragment.slice(0, 8)}`
+
+    const productionBatch = {
+      recipe_id: recipeId,
+      batch_number: batchNumber,
+      quantity: totalQuantity,
+      cost_per_unit: recipe.cost_per_unit ?? 0,
+      total_cost: (recipe.cost_per_unit ?? 0) * totalQuantity,
+      status: 'PLANNED' as const,
+      notes: `Auto-created for order ${order['order_no']}`,
+      user_id: order.user_id,
+      labor_cost: 0,
+      batch_status: 'PLANNED' as const,
+      total_orders: 1,
+      planned_start_time: order.delivery_date ?? new Date().toISOString()
+    }
+
+    const { data: batchData, error: batchError } = await supabase
+      .from('productions')
+      .insert(productionBatch)
+      .select()
+      .single()
+
+    if (batchError) {
+      logger.error({ orderId, recipeId, error: batchError }, 'Failed to create production batch')
+      return null
+    }
+
+    logger.info({
+      orderId,
+      batchId: batchData?.id,
+      recipeId,
+      quantity: totalQuantity
+    }, 'Production batch created successfully')
+
+    return batchData
+  }
+
+  /**
    * Create production batch for confirmed order
    * ✅ NEW: Auto-creates production batch and reserves ingredients
    */
@@ -201,68 +258,66 @@ export class OrderWorkflowHandlers {
     }
 
     // Create production batch for each recipe
+    let firstBatchId: string | null = null
+    const batchPromises: Array<Promise<void>> = []
+
     for (const [recipeId, { recipe, totalQuantity }] of recipeGroups) {
-      const orderIdFragment = orderId?.slice(0, 8) ?? 'UNKNOWN'
-      const batchNumber = `BATCH-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${orderIdFragment}`
-      
-      const productionBatch = {
-        recipe_id: recipeId,
-        quantity: totalQuantity,
-        cost_per_unit: recipe.cost_per_unit ?? 0,
-        total_cost: (recipe.cost_per_unit ?? 0) * totalQuantity,
-        status: 'PLANNED' as const,
-        notes: `Auto-created for order ${order['order_no']}`,
-        user_id: order.user_id,
-        labor_cost: 0,
-        batch_status: 'PLANNED' as const,
-        total_orders: 1,
-        planned_start_time: order.delivery_date ?? new Date().toISOString()
-      }
-
-      const { data: batchData, error: batchError } = await supabase
-        .from('productions')
-        .insert(productionBatch)
-        .select()
-        .single()
-
-      if (batchError) {
-        logger.error({ orderId, recipeId, error: batchError }, 'Failed to create production batch')
-        continue
-      }
-
-      // Update order with production_batch_id (first batch only)
-      if (batchData && !order.production_batch_id) {
-        await supabase
-          .from('orders')
-          .update({ production_batch_id: batchData['id'] })
-          .eq('id', orderId)
-      }
-
-      // Reserve ingredients for this batch
-      await this.reserveIngredientsForBatch(recipeId, totalQuantity, orderId, order.user_id, supabase, automationLogger)
-
-      logger.info({
-        orderId,
-        batchId: batchData?.id,
+      const batchPromise = this.createSingleProductionBatch({
         recipeId,
-        quantity: totalQuantity,
-        batchNumber
-      }, 'Production batch created and ingredients reserved')
+        recipe,
+        totalQuantity,
+        orderId,
+        order,
+        supabase,
+        logger
+      }).then(async (batchData) => {
+        if (batchData) {
+          if (!firstBatchId) {
+            firstBatchId = batchData.id
+          }
+          // Reserve ingredients for this batch
+          await this.reserveIngredientsForBatch({
+            recipeId,
+            quantity: totalQuantity,
+            orderId,
+            userId: order.user_id,
+            supabase,
+            logger: automationLogger
+          })
+        }
+        return undefined
+      })
+      batchPromises.push(batchPromise)
     }
-  }
+
+    await Promise.all(batchPromises)
+
+     // Update order with first production_batch_id
+     if (firstBatchId) {
+       await supabase
+         .from('orders')
+         .update({ production_batch_id: firstBatchId })
+         .eq('id', orderId)
+     }
+
+     logger.info({ orderId, batchId: firstBatchId }, 'Production batch created and ingredients reserved')
+   }
 
   /**
    * Reserve ingredients for production batch
    * ✅ NEW: Creates stock reservations for order
    */
   private static async reserveIngredientsForBatch(
-    recipeId: string,
-    quantity: number,
-    orderId: string,
-    userId: string,
-    supabase: SupabaseClient<Database>,
-    _logger: unknown
+    options: {
+      recipeId: string
+      quantity: number
+      orderId: string
+      userId: string
+      supabase: SupabaseClient<Database>
+      logger: unknown
+    }
   ): Promise<void> {
+    const { recipeId, quantity, orderId, userId, supabase } = options
     const logger = automationLogger
     // Get recipe ingredients
     const { data: recipeIngredients, error: ingredientsError } = await supabase
@@ -293,7 +348,7 @@ export class OrderWorkflowHandlers {
       // Note: stock_reservations table exists in database but not in generated types yet
       // This will work at runtime
       type SupabaseWithReservations = typeof supabase & {
-        from(table: 'stock_reservations'): {
+        from: (table: 'stock_reservations') => {
           insert: (data: typeof reservation) => Promise<{ error: unknown }>
         }
       }

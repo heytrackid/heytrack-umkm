@@ -17,9 +17,10 @@ import {
   type FinancialRecordFormData
 } from '@/lib/validations'
 
+import type { Row } from '@/types/database'
+
 import { FormField } from './shared/FormField'
 
-import type { Row } from '@/types/database'
 
 type FinancialRecord = Row<'financial_records'>
 

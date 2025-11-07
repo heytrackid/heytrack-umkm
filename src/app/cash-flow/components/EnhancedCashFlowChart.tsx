@@ -28,7 +28,7 @@ interface TooltipPayload {
     payload?: ChartDataPoint;
 }
 
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayload[] }) => {
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayload[] }): JSX.Element | null => {
     if (active && payload?.length) {
         const data = payload[0]?.payload
         if (!data) { return null }
@@ -80,11 +80,11 @@ const EnhancedCashFlowChart = ({
     onStartDateChange,
     onEndDateChange,
     isMobile
-}: EnhancedCashFlowChartProps) => {
+}: EnhancedCashFlowChartProps): JSX.Element => {
     const [chartType, setChartType] = useState<ChartType>('line')
 
     // Calculate trend
-    const calculateTrend = () => {
+    const calculateTrend = (): { direction: string; percentage: number } => {
         if (chartData.length < 2) { return { direction: 'stable', percentage: 0 } }
 
         const recent = chartData[chartData.length - 1]
@@ -123,7 +123,7 @@ const EnhancedCashFlowChart = ({
         lowestNet: Math.min(...chartData.map(d => d.net), 0)
     }
 
-    const downloadChart = () => {
+    const downloadChart = (): void => {
         // Simple CSV export of chart data
         const headers = ['Tanggal', 'Pemasukan', 'Pengeluaran', 'Net']
         const rows = chartData.map(d => [
@@ -148,13 +148,13 @@ const EnhancedCashFlowChart = ({
         document['body'].removeChild(link)
     }
 
-    const formatYAxis = (value: number) => {
+    const formatYAxis = (value: number): string => {
         if (value >= 1000000) { return `${(value / 1000000).toFixed(1)}jt` }
         if (value >= 1000) { return `${(value / 1000).toFixed(0)}rb` }
         return value.toString()
     }
 
-    const renderChart = () => {
+    const renderChart = (): JSX.Element => {
         const commonProps = {
             data: chartData,
             margin: { top: 5, right: 5, left: 0, bottom: 5 }

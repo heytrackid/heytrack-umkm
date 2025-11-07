@@ -11,7 +11,7 @@ import { createClient } from '@/utils/supabase/server'
 
 
 // GET /api/production/suggestions - Get suggested production batches
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/production/suggestions - Request received')
     
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/production/suggestions - Create batch from suggestion
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/production/suggestions - Request received')
     

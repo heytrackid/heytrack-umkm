@@ -1,5 +1,6 @@
-import type { WeeklyData } from './types'
 import type { SaleData, ExpenseData, FinancialTrend } from '@/lib/automation/types'
+
+import type { WeeklyData } from './types'
 
 /**
  * Trend Analyzer Module
@@ -119,7 +120,7 @@ export class TrendAnalyzer {
 
     trends.forEach(trend => {
       const periodValue = trend.period ?? ''
-      const [periodPart] = periodValue.split('-W')
+      const [periodPart = ''] = periodValue.split('-W')
       const monthSegment = periodPart.slice(-2)
       const month = parseInt(monthSegment, 10)
       if (Number.isNaN(month)) {return}

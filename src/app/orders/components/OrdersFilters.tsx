@@ -32,7 +32,7 @@ const OrdersFilters = ({
   setDateTo,
   statusConfig,
   // _t not used
-}: OrdersFiltersProps) => (
+}: OrdersFiltersProps): JSX.Element => (
   <Card>
     <CardContent className="p-6">
       <div className="flex gap-4 flex-wrap">

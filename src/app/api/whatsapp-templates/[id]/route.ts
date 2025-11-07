@@ -10,9 +10,9 @@ export const runtime = 'nodejs'
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
+import type { Update } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Update } from '@/types/database'
 
 
 type WhatsAppTemplateUpdate = Update<'whatsapp_templates'>
@@ -24,7 +24,7 @@ interface RouteContext {
 export async function GET(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await context['params']
 
@@ -67,7 +67,7 @@ export async function GET(
 export async function PUT(
   request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await context['params']
 
@@ -144,7 +144,7 @@ export async function PUT(
 export async function DELETE(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await context['params']
 

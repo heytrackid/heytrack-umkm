@@ -181,7 +181,7 @@ export async function safeExecute<T>(
   errorContext?: string
 ): Promise<{ data?: T; error?: AppError }> {
   try {
-    const _data = await fn();
+    const data = await fn();
     return { data };
   } catch (error) {
     const appError = convertToAppError(error, errorContext);

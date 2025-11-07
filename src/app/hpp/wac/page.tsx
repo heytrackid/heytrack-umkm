@@ -17,7 +17,7 @@ import type { Row as _Row } from '@/types/database'
 
 
 
-const WacEnginePage = () => {
+const WacEnginePage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
 

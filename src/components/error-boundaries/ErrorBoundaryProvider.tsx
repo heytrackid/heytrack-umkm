@@ -20,7 +20,7 @@ const ErrorBoundaryProvider: React.FC<ErrorBoundaryProviderProps> = ({
   onError
 }) => (
     <EnhancedErrorBoundary
-      fallback={fallback ?? (() => null)}
+      fallback={fallback ?? (() => null as null)}
       {...(onError && { onError })}
     >
       {children}

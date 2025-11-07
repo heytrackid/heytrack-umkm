@@ -7,10 +7,10 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID, isRecord } from '@/lib/type-guards'
 import { OrderUpdateSchema } from '@/lib/validations/domains/order'
+import type { Update } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Update } from '@/types/database'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -28,7 +28,7 @@ const normalizeDateValue = (value?: string | null) => {
 async function GET(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
     const { id } = await context['params']
     

@@ -39,13 +39,13 @@ import { usePagination } from '@/hooks/usePagination'
 import {
     genericErrorToast,
 } from '@/lib/ingredients-toast'
+import type { Row } from '@/types/database'
 import { useMobile } from '@/utils/responsive'
 
 import { IngredientFormDialog } from './IngredientFormDialog'
 import { MobileIngredientList } from './MobileIngredientCard'
 import { StockBadge } from './StockBadge'
 
-import type { Row } from '@/types/database'
 
 
 type Ingredient = Row<'ingredients'>

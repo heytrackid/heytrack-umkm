@@ -7,13 +7,13 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getErrorMessage } from '@/lib/type-guards'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
+import type { Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
-import type { Insert } from '@/types/database'
 
 
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url)
 
   // Validate query parameters
@@ -87,7 +87,7 @@ async function GET(request: NextRequest) {
   }
 }
 
-async function POST(request: Request) {
+async function POST(request: Request): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     

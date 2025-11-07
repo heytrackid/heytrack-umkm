@@ -1,14 +1,6 @@
 import { apiLogger as logger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
 
 import type { Json } from '@/types/database'
-
-class SessionNotFoundError extends Error {
-  constructor(sessionId: string) {
-    super(`Session not found: ${sessionId}`)
-    this.name = 'SessionNotFoundError'
-  }
-}
 import type {
 
   ChatSession,
@@ -17,6 +9,15 @@ import type {
   BusinessContext,
   MessageMetadata,
 } from '@/types/features/chat'
+
+import { createClient } from '@/utils/supabase/server'
+
+class SessionNotFoundError extends Error {
+  constructor(sessionId: string) {
+    super(`Session not found: ${sessionId}`)
+    this.name = 'SessionNotFoundError'
+  }
+}
 
 // Chat Session Service - Manages chat session persistence
 

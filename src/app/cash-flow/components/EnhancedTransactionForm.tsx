@@ -31,7 +31,7 @@ const EnhancedTransactionForm = ({
     onTransactionTypeChange,
     onSubmit,
     loading
-}: EnhancedTransactionFormProps) => {
+}: EnhancedTransactionFormProps): JSX.Element => {
     const [formData, setFormData] = useState<TransactionFormData>({
         description: '',
         category: '',
@@ -56,7 +56,7 @@ const EnhancedTransactionForm = ({
     }, [isOpen])
 
     // Validate field
-    const validateField = (name: string, value: string) => {
+    const validateField = (name: string, value: string): string => {
         switch (name) {
             case 'description':
                 if (!value.trim()) { return 'Deskripsi wajib diisi' }
@@ -94,7 +94,7 @@ const EnhancedTransactionForm = ({
     }
 
     // Handle field change
-    const handleFieldChange = (name: string, value: string) => {
+    const handleFieldChange = (name: string, value: string): void => {
         setFormData(prev => ({ ...prev, [name]: value }))
 
         // Validate on change if field was touched
@@ -105,14 +105,14 @@ const EnhancedTransactionForm = ({
     }
 
     // Handle field blur
-    const handleFieldBlur = (name: string) => {
+    const handleFieldBlur = (name: string): void => {
         setTouched(prev => ({ ...prev, [name]: true }))
         const error = validateField(name, formData[name as keyof TransactionFormData])
         setErrors(prev => ({ ...prev, [name]: error }))
     }
 
     // Validate all fields
-    const validateAll = () => {
+    const validateAll = (): boolean => {
         const newErrors: Record<string, string> = {}
         Object.keys(formData).forEach(key => {
             const error = validateField(key, formData[key as keyof TransactionFormData])
@@ -129,7 +129,7 @@ const EnhancedTransactionForm = ({
     }
 
     // Handle submit
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault()
 
         if (!validateAll()) {
