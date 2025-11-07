@@ -2,6 +2,7 @@
 
 import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from 'react'
 
+import { globalLazyLoadingUtils } from '@/components/lazy'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import {
   DataTableSkeleton,
@@ -10,7 +11,7 @@ import {
   AvatarSkeleton
 } from '@/components/ui/skeletons'
 
-import { globalLazyLoadingUtils } from '../lazy'
+import { globalLazyLoadingUtils } from '@/components/lazy'
 
 // Type for window with lazy loading metrics
 interface WindowWithMetrics extends Window {
@@ -192,8 +193,7 @@ export function createTrackedLazyComponent(
   } = {}
 ) {
   const LazyComponent = lazy(() =>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    import(componentName).then((module: any) => {
+    import(componentName).then((module: { default: React.ComponentType<unknown> }) => {
       // Track component load time
       const startTime = performance.now()
       setTimeout(() => {

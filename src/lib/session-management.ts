@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 
-import { apiLogger } from '../lib/logger'
+import { apiLogger } from '@/lib/logger'
 
 import type { User } from '@supabase/supabase-js'
 

@@ -204,14 +204,25 @@ export function withSecurity<Params extends {} = {}>(
       processedReq = new NextRequest(newUrlObj.toString(), req)
     }
 
+    // Cache for request body to prevent multiple consumption
+    let cachedBodyText: string | undefined = undefined
+
+    const readBodyOnce = async (): Promise<string> => {
+      if (cachedBodyText === undefined) {
+        const clone = req.clone()
+        cachedBodyText = await clone.text()
+      }
+      return cachedBodyText
+    }
+
     // 4. Request body sanitization
     let sanitizedBody: Record<string, unknown> | undefined = undefined
-    
+
     if (mergedConfig.sanitizeInputs && req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'DELETE') {
       try {
-        // Clone the request to avoid consuming the body
-        const clonedReq = req.clone()
-        const body = await clonedReq.json()
+        // Use cached body to avoid consuming the stream multiple times
+        const bodyText = await readBodyOnce()
+        const body = JSON.parse(bodyText)
         sanitizedBody = APISecurity.sanitizeRequestBody(body)
         try {
           BaseBodySchema.parse(sanitizedBody)
@@ -230,13 +241,13 @@ export function withSecurity<Params extends {} = {}>(
     // 5. Additional security checks
     if (mergedConfig.checkForSQLInjection || mergedConfig.checkForXSS) {
       let checkData = sanitizedBody || {}
-      
+
       // If we don't have a sanitized body and method has body, parse for security checks
       if (!sanitizedBody && req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'DELETE') {
         try {
-          // Clone the request to avoid consuming the body
-          const clonedReq = req.clone()
-          checkData = await clonedReq.json()
+          // Use cached body to avoid consuming the stream multiple times
+          const bodyText = await readBodyOnce()
+          checkData = JSON.parse(bodyText)
         } catch (e) {
           // If we can't parse the body, use an empty object
           checkData = {}
@@ -279,11 +290,19 @@ export function withSecurity<Params extends {} = {}>(
       }
     }
 
-    // 6. Add sanitized body to request if it was modified
+    // 6. Rehydrate request with proper body
     if (sanitizedBody !== undefined) {
+      // Use sanitized body if it was modified
       const sanitizedJson = JSON.stringify(sanitizedBody)
       processedReq = new NextRequest(processedReq, {
         body: sanitizedJson,
+        headers: new Headers(processedReq.headers),
+        method: processedReq.method
+      })
+    } else if (cachedBodyText !== undefined) {
+      // Rehydrate with original cached body if no sanitization occurred
+      processedReq = new NextRequest(processedReq, {
+        body: cachedBodyText,
         headers: new Headers(processedReq.headers),
         method: processedReq.method
       })
@@ -368,28 +387,30 @@ export const SecurityPresets = {
     sanitizeQueryParams: true,
     validateContentType: false, // Allow any content type in dev
     rateLimit: { maxRequests: 1000, windowMs: 15 * 60 * 1000 }, // Very high limit for dev
-    checkForSQLInjection: false,
-    checkForXSS: false
+    checkForSQLInjection: false, // Explicit: No SQL injection checks
+    checkForXSS: false         // Explicit: No XSS checks
   }),
-  
-  // Basic security for most API routes
+
+  // Basic security for most API routes - NO deep body inspection
   basic: (): SecurityConfig => ({
     sanitizeInputs: true,
     sanitizeQueryParams: true,
     validateContentType: true,
     allowedContentTypes: ['application/json'],
-    rateLimit: { maxRequests: 100, windowMs: 15 * 60 * 1000 } // 100 requests per 15 minutes
+    rateLimit: { maxRequests: 100, windowMs: 15 * 60 * 1000 }, // 100 requests per 15 minutes
+    checkForSQLInjection: false, // Explicit: No SQL injection checks (prevents body consumption)
+    checkForXSS: false         // Explicit: No XSS checks (prevents body consumption)
   }),
-  
-  // Enhanced security for sensitive routes
+
+  // Enhanced security for sensitive routes - WITH deep body inspection
   enhanced: (): SecurityConfig => ({
     sanitizeInputs: true,
     sanitizeQueryParams: true,
     validateContentType: true,
     allowedContentTypes: ['application/json'],
     rateLimit: { maxRequests: 50, windowMs: 15 * 60 * 1000 }, // 50 requests per 15 minutes
-    checkForSQLInjection: true,
-    checkForXSS: true
+    checkForSQLInjection: true,  // Explicit: YES SQL injection checks
+    checkForXSS: true           // Explicit: YES XSS checks
   }),
   
   // Maximum security for critical routes

@@ -7,9 +7,9 @@ import { type ReactNode, useState } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 
-import { Badge } from '../badge'
-import { Button } from '../button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 import type { BaseMobileChartProps } from './types'
 

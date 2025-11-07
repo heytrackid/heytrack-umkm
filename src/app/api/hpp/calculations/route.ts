@@ -55,7 +55,32 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     const cacheKey = `${cacheKeys.hpp.calculations}:${user['id']}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${startDate ?? ''}:${endDate ?? ''}`
 
     // Wrap database query with caching
-    const getCalculations = async (): Promise<{ calculations: any[], total: number, page: number, limit: number, totalPages: number }> => {
+    const getCalculations = async (): Promise<{
+      calculations: Array<{
+        id: string
+        recipe_id: string | null
+        calculation_date: string | null
+        material_cost: number
+        labor_cost: number
+        overhead_cost: number
+        total_hpp: number
+        cost_per_unit: number
+        production_quantity: number | null
+        wac_adjustment: number | null
+        notes: string | null
+        created_at: string | null
+        user_id: string | null
+        recipes: {
+          id: string
+          name: string
+          category: string | null
+        } | null
+      }>
+      total: number
+      page: number
+      limit: number
+      totalPages: number
+    }> => {
       let query = supabase
         .from('hpp_calculations')
         .select(`

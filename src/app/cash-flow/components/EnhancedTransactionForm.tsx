@@ -3,6 +3,7 @@
 import { ArrowUpCircle, ArrowDownCircle, AlertCircle, Loader2, Calendar } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
+import { incomeCategories, expenseCategories, type TransactionFormData } from '@/app/cash-flow/constants'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
@@ -12,8 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '
 import { SwipeableTabs, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 // SwipeableTabsContent not used in this component
 import { Textarea } from '@/components/ui/textarea'
-
-import { incomeCategories, expenseCategories, type TransactionFormData } from '../constants'
 
 interface EnhancedTransactionFormProps {
     isOpen: boolean

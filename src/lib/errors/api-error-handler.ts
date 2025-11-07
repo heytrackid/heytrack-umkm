@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 
-import { apiLogger } from '../logger'
-
 import {
 
   AppError,
@@ -12,7 +10,9 @@ import {
   DatabaseError,
   ExternalServiceError,
   RateLimitError
-} from './app-error'
+} from '@/lib/errors/app-error'
+
+import { apiLogger } from '@/lib/logger'
 
 /**
  * Centralized Error Response Handler for API Routes
@@ -20,15 +20,15 @@ import {
  */
 
 // Export AppError as APIError for backward compatibility
-export { AppError as APIError } from './app-error';
-export type { AppError };
+export { AppError as APIError } from './app-error'
+export type { AppError }
 
 interface ErrorResponse {
-  error: string;
-  code?: string;
-  status: number;
-  details?: Record<string, unknown>;
-  timestamp: string;
+  error: string
+  code?: string
+  status: number
+  details?: Record<string, unknown>
+  timestamp: string
 }
 
 /**

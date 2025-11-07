@@ -39,7 +39,25 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    const getOverviewData = async (): Promise<{ totalRecipes: number, recipesWithHpp: number, averageHpp: number, totalAlerts: number, unreadAlerts: number, recentAlerts: any[] }> => {
+    const getOverviewData = async (): Promise<{
+      totalRecipes: number
+      recipesWithHpp: number
+      averageHpp: number
+      totalAlerts: number
+      unreadAlerts: number
+      recentAlerts: Array<{
+        id: string
+        recipe_id: string
+        recipe_name: string
+        alert_type: string
+        title: string
+        message: string
+        severity: string
+        is_read: boolean | null
+        new_value: number | null
+        created_at: string | null
+      }>
+    }> => {
       // Parallel queries for better performance
       const [recipesResult, calculationsResult, alertsResult] = await Promise.all([
         // Get recipes count

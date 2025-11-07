@@ -1,4 +1,4 @@
-import { apiLogger, dbLogger, uiLogger } from '../logger';
+import { apiLogger, dbLogger, uiLogger } from '@/lib/logger'
 
 
 /**

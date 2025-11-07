@@ -3,14 +3,13 @@
 import { Receipt, ArrowUpCircle, ArrowDownCircle, Trash2, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useState, useMemo } from 'react'
 
+import type { Transaction } from '@/app/cash-flow/constants'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
-
-import type { Transaction } from '../constants'
 
 interface EnhancedTransactionListProps {
     transactions: Transaction[]

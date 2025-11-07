@@ -154,11 +154,14 @@ async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-// Apply security middleware with custom configuration (no input sanitization to avoid double body parsing)
+// Apply security middleware with custom configuration
+// HOTFIX: Explicitly disable SQL/XSS checks to prevent body consumption
 const securedGET = withSecurity(GET, SecurityPresets.basic())
 const securedPOST = withSecurity(POST, {
   ...SecurityPresets.basic(),
   sanitizeInputs: false, // Disable input sanitization to avoid double body parsing
+  checkForSQLInjection: false, // HOTFIX: Prevent body consumption
+  checkForXSS: false         // HOTFIX: Prevent body consumption
 })
 
 // Export secured handlers

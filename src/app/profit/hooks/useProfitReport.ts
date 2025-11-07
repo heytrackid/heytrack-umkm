@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useToast } from '@/hooks/use-toast'
-import { apiLogger } from '@/lib/logger'
-
-import { calculateProfitDateRange, exportProfitReport, prepareProductChartData, validateProfitData } from '../utils'
-
 import type {
     ChartDataPoint,
     ProfitData,
     ProfitPeriodType
-} from '../constants'
+} from '@/app/profit/constants'
+
+import { calculateProfitDateRange, exportProfitReport, prepareProductChartData, validateProfitData } from '@/app/profit/utils'
+import { useToast } from '@/hooks/use-toast'
+import { apiLogger } from '@/lib/logger'
 
 
 interface UseProfitReportReturn {

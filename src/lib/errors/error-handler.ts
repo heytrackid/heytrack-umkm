@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { apiLogger } from '../logger';
+import { apiLogger } from '@/lib/logger'
 
 import {
   AppError,
