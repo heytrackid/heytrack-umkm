@@ -154,9 +154,12 @@ async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-// Apply security middleware with basic security configuration
+// Apply security middleware with custom configuration (no input sanitization to avoid double body parsing)
 const securedGET = withSecurity(GET, SecurityPresets.basic())
-const securedPOST = withSecurity(POST, SecurityPresets.basic())
+const securedPOST = withSecurity(POST, {
+  ...SecurityPresets.basic(),
+  sanitizeInputs: false, // Disable input sanitization to avoid double body parsing
+})
 
 // Export secured handlers
 export { securedGET as GET, securedPOST as POST }
