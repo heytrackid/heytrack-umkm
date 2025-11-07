@@ -1,12 +1,16 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
-import { cacheInvalidation } from '@/lib/cache'
-import type { Insert, OrderStatus } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { cacheInvalidation } from '@/lib/cache'
+import { apiLogger } from '@/lib/logger'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Insert, OrderStatus } from '@/types/database'
+
 
 type CustomerInsert = Insert<'customers'>
 type OrderInsert = Insert<'orders'>
@@ -15,6 +19,39 @@ type OrderItemInsert = Omit<Insert<'order_items'>, 'order_id'>
 const sanitizeOptionalString = (value?: string | null) => {
   const trimmed = value?.trim()
   return trimmed && trimmed.length > 0 ? trimmed : null
+}
+
+interface RawImportedOrder {
+  order_no?: string | null
+  customer_name?: string | null
+  recipe_name?: string | null
+  quantity?: number | string | null
+  unit_price?: number | string | null
+  customer_phone?: string | null
+  customer_email?: string | null
+  customer_address?: string | null
+  status?: string | null
+  delivery_date?: string | null
+  notes?: string | null
+}
+
+interface ImportOrdersRequest {
+  orders?: RawImportedOrder[]
+}
+
+const isRawImportedOrder = (value: unknown): value is RawImportedOrder =>
+  typeof value === 'object' && value !== null
+
+const isImportOrdersRequest = (value: unknown): value is ImportOrdersRequest => {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+  const record = value as Record<string, unknown>
+  const { orders } = record
+  if (!Array.isArray(orders)) {
+    return false
+  }
+  return orders.every(isRawImportedOrder)
 }
 
 async function POST(request: NextRequest) {
@@ -26,33 +63,21 @@ async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }    // 2. Parse CSV data from request
-    const body = await request.json()
-    const { orders } = body as { orders: Array<{
-      order_no: string
-      customer_name: string
-      customer_phone?: string
-      customer_email?: string
-      customer_address?: string
-      recipe_name: string
-      quantity: number
-      unit_price: number
-      delivery_date?: string
-      notes?: string
-      status?: string
-    }> }
+    const body = await request.json() as unknown
 
-    if (!orders || !Array.isArray(orders) || orders.length === 0) {
+    if (!isImportOrdersRequest(body) || !body.orders || body.orders.length === 0) {
       return NextResponse.json(
         { error: 'Data pesanan tidak valid' },
         { status: 400 }
       )
     }
+    const { orders } = body
 
     // 3. Get all recipes for mapping
     const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
       .select('id, name')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (recipesError) {
       apiLogger.error({ error: recipesError }, 'Failed to fetch recipes')
@@ -62,7 +87,7 @@ async function POST(request: NextRequest) {
       )
     }
 
-    const recipeMap = new Map(recipes.map(r => [r.name.toLowerCase(), r.id]))
+    const recipeMap = new Map(recipes.map(r => [r.name.toLowerCase(), r['id']]))
 
     // 4. Process orders
     const errors: Array<{ row: number; error: string }> = []
@@ -75,20 +100,21 @@ async function POST(request: NextRequest) {
 
     for (let index = 0; index < orders.length; index++) {
       const order = orders[index]
+      if (!order) {continue}
       const rowNum = index + 2
 
       // Validate required fields
-      if (!order.order_no?.trim()) {
+      if (!order['order_no']?.trim()) {
         errors.push({ row: rowNum, error: 'Nomor pesanan wajib diisi' })
         continue
       }
 
-      if (!order.customer_name?.trim()) {
+      if (!order['customer_name']?.trim()) {
         errors.push({ row: rowNum, error: 'Nama customer wajib diisi' })
         continue
       }
 
-      if (!order.recipe_name?.trim()) {
+      if (!order['recipe_name']?.trim()) {
         errors.push({ row: rowNum, error: 'Nama resep wajib diisi' })
         continue
       }
@@ -106,21 +132,21 @@ async function POST(request: NextRequest) {
       }
 
       // Find recipe
-      const recipeId = recipeMap.get(order.recipe_name.toLowerCase())
+      const recipeId = recipeMap.get(order['recipe_name'].toLowerCase())
       if (!recipeId) {
-        errors.push({ row: rowNum, error: `Resep "${order.recipe_name}" tidak ditemukan` })
+        errors.push({ row: rowNum, error: `Resep "${order['recipe_name']}" tidak ditemukan` })
         continue
       }
 
       // Prepare customer data (will be created if not exists)
-      const customerKey = order.customer_name.toLowerCase().trim()
+      const customerKey = order['customer_name'].toLowerCase().trim()
       if (!customersToCreate.has(customerKey)) {
         customersToCreate.set(customerKey, {
-          name: order.customer_name.trim(),
+          name: order['customer_name'].trim(),
           phone: sanitizeOptionalString(order.customer_phone),
           email: sanitizeOptionalString(order.customer_email),
           address: sanitizeOptionalString(order.customer_address),
-          user_id: user.id,
+          user_id: user['id'],
           is_active: true
         })
       }
@@ -129,23 +155,23 @@ async function POST(request: NextRequest) {
       const totalPrice = quantity * unitPrice
       ordersToCreate.push({
         order: {
-          order_no: order.order_no.trim(),
-          customer_name: order.customer_name.trim(),
+          order_no: order['order_no'].trim(),
+          customer_name: order['customer_name'].trim(),
           customer_phone: sanitizeOptionalString(order.customer_phone),
           customer_address: sanitizeOptionalString(order.customer_address),
-          status: (order.status ? order.status.toUpperCase() : 'PENDING') as OrderStatus,
+          status: (order['status'] ? order['status'].toUpperCase() : 'PENDING') as OrderStatus,
           total_amount: totalPrice,
           delivery_date: order.delivery_date ? new Date(order.delivery_date).toISOString() : null,
           notes: sanitizeOptionalString(order.notes),
-          user_id: user.id
+          user_id: user['id']
         },
         items: [{
           recipe_id: recipeId,
           quantity,
           unit_price: unitPrice,
           total_price: totalPrice,
-          product_name: order.recipe_name.trim(),
-          user_id: user.id
+          product_name: order['recipe_name'].trim(),
+          user_id: user['id']
         }],
         customerName: customerKey
       })
@@ -167,17 +193,17 @@ async function POST(request: NextRequest) {
     // 5. Create or get customers
     const customerIds = new Map<string, string>()
 
-    for (const [customerKey, customerData] of Array.from(customersToCreate.entries())) {
+    const customerPromises = Array.from(customersToCreate.entries()).map(async ([customerKey, customerData]) => {
       // Check if customer exists
       const { data: existingCustomer } = await supabase
         .from('customers')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', user['id'])
         .ilike('name', customerData.name)
         .maybeSingle()
 
       if (existingCustomer) {
-        customerIds.set(customerKey, existingCustomer.id)
+        customerIds.set(customerKey, existingCustomer['id'])
       } else {
         // Create new customer
         const { data: newCustomer, error: customerError } = await supabase
@@ -188,20 +214,26 @@ async function POST(request: NextRequest) {
 
         if (customerError) {
           apiLogger.error({ error: customerError }, 'Failed to create customer')
-          return NextResponse.json(
-            { error: `Gagal membuat customer: ${customerData.name}` },
-            { status: 500 }
-          )
+          throw new Error(`Gagal membuat customer: ${customerData.name}`)
         }
 
-        customerIds.set(customerKey, newCustomer.id)
+        customerIds.set(customerKey, newCustomer['id'])
       }
+    })
+
+    try {
+      await Promise.all(customerPromises)
+    } catch (error) {
+      return NextResponse.json(
+        { error: (error as Error).message },
+        { status: 500 }
+      )
     }
 
     // 6. Create orders with items
     const createdOrders = []
 
-    for (const orderData of ordersToCreate) {
+    const orderPromises = ordersToCreate.map(async (orderData) => {
       const customerId = customerIds.get(orderData.customerName)
 
       // Create order
@@ -216,13 +248,13 @@ async function POST(request: NextRequest) {
 
       if (orderError) {
         apiLogger.error({ error: orderError }, 'Failed to create order')
-        continue
+        return null
       }
 
       // Create order items
       const itemsWithOrderId = orderData.items.map(item => ({
         ...item,
-        order_id: newOrder.id
+        order_id: newOrder['id']
       }))
 
       const { error: itemsError } = await supabase
@@ -232,16 +264,19 @@ async function POST(request: NextRequest) {
       if (itemsError) {
         apiLogger.error({ error: itemsError }, 'Failed to create order items')
         // Rollback: delete the order
-        await supabase.from('orders').delete().eq('id', newOrder.id)
-        continue
+        await supabase.from('orders').delete().eq('id', newOrder['id'])
+        return null
       }
 
-      createdOrders.push(newOrder)
-    }
+      return newOrder
+    })
+
+    const orderResults = await Promise.all(orderPromises)
+    createdOrders.push(...orderResults.filter(order => order !== null))
 
     apiLogger.info(
       {
-        userId: user.id,
+        userId: user['id'],
         ordersCount: createdOrders.length,
         customersCount: customerIds.size
       },

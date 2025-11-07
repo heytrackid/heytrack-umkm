@@ -1,9 +1,11 @@
 'use client'
 
 import { Suspense, lazy, useState } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
-import { useSettingsManager } from './hooks'
+
 import { SettingsLoadingSkeleton } from './components'
+import { useSettingsManager } from './hooks'
 
 // Lazy load settings components
 const SettingsHeader = lazy(() => import('./components/layout/SettingsHeader').then(mod => ({ default: mod.SettingsHeader })))

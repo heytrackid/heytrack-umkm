@@ -1,15 +1,16 @@
 'use client'
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 const logger = createClientLogger('ClientFile')
 
 
 
 
-interface HppOverviewData {
+export interface HppOverviewData {
   totalRecipes: number
   recipesWithHpp: number
   averageHpp: number
@@ -40,7 +41,7 @@ export function useHppOverview() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  const query = useQuery<HppOverviewData>({
+  const _query = useQuery({
     queryKey: ['hpp-overview'],
     queryFn: async () => {
       const response = await fetch('/api/hpp/overview', {
@@ -76,7 +77,7 @@ export function useHppOverview() {
         queryClient.setQueryData<HppOverviewData>(['hpp-overview'], {
           ...previousData,
           unreadAlerts: Math.max(0, previousData.unreadAlerts - 1),
-          recentAlerts: previousData.recentAlerts.filter(a => a.id !== alertId)
+          recentAlerts: previousData.recentAlerts.filter(a => a['id'] !== alertId)
         })
       }
       
@@ -88,7 +89,7 @@ export function useHppOverview() {
         queryClient.setQueryData(['hpp-overview'], context.previousData)
       }
       
-      logger.error({ err: error, alertId }, 'Failed to mark alert as read')
+      logger.error({ error, alertId }, 'Failed to mark alert as read')
       toast({
         title: 'Error',
         description: 'Failed to mark alert as read',
@@ -123,7 +124,7 @@ export function useHppOverview() {
       })
     },
     onError: (error) => {
-      logger.error({ err: error }, 'Failed to mark all alerts as read')
+      logger.error({ error }, 'Failed to mark all alerts as read')
       toast({
         title: 'Error',
         description: 'Failed to mark all alerts as read',
@@ -133,7 +134,7 @@ export function useHppOverview() {
   })
 
   return {
-    ...query,
+    ..._query,
     markAlertAsRead,
     markAllAlertsAsRead
   }

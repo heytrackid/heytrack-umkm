@@ -1,5 +1,8 @@
 'use client'
 
+import { Bell } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -9,12 +12,13 @@ import {
 } from '@/components/ui/popover'
 import { createClientLogger } from '@/lib/client-logger'
 import { playNotificationSound, playUrgentNotificationSound, setSoundEnabled, setSoundVolume } from '@/lib/notifications/sound'
+import { useSupabase } from '@/providers/SupabaseProvider'
+
+import { NotificationList } from './NotificationList'
+
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
 import type { Notification } from '@/types/domain/notifications'
-import { useSupabase } from '@/providers/SupabaseProvider'
-import { Bell } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { NotificationList } from './NotificationList'
+
 
 const logger = createClientLogger('NotificationBell')
 
@@ -34,16 +38,16 @@ export const NotificationBell = () => {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
-                const prefs = await response.json()
+                const prefs = await response.json() as NotificationPreferences
                 setPreferences(prefs)
 
                 // Update sound settings
-                setSoundEnabled(prefs.sound_enabled)
-                setSoundVolume(prefs.sound_volume)
+                setSoundEnabled(prefs.sound_enabled ?? false)
+                setSoundVolume(prefs.sound_volume ?? 50)
             }
         } catch (error: unknown) {
             // Silent fail - preferences are non-critical
-            if (process.env.NODE_ENV === 'development') {
+            if (process['env'].NODE_ENV === 'development') {
                 logger.error({ error }, 'Failed to fetch preferences')
             }
         }
@@ -56,12 +60,12 @@ export const NotificationBell = () => {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
-                const data = await response.json()
-                const newNotifications = data.notifications ?? []
+                const _data = await response.json() as { notifications?: Notification[]; unread_count?: number }
+                const newNotifications = _data.notifications ?? []
 
                 // Check for new notification and play sound
                 if (newNotifications.length > 0 && preferences) {
-                    const latestNotif = newNotifications[0]
+                    const latestNotif = newNotifications[0]!
 
                     // Only play sound if it's a new notification
                     if (latestNotif.id !== lastNotificationIdRef.current) {
@@ -83,11 +87,11 @@ export const NotificationBell = () => {
                 }
 
                 setNotifications(newNotifications)
-                setUnreadCount(data.unread_count ?? 0)
+                setUnreadCount(_data.unread_count ?? 0)
             }
         } catch (error: unknown) {
             // Silent fail - will retry on next fetch
-            if (process.env.NODE_ENV === 'development') {
+            if (process['env'].NODE_ENV === 'development') {
                 logger.error({ error }, 'Failed to fetch notifications')
             }
         } finally {
@@ -145,7 +149,7 @@ export const NotificationBell = () => {
             }
         } catch (error: unknown) {
             // Silent fail - user can retry
-            if (process.env.NODE_ENV === 'development') {
+            if (process['env'].NODE_ENV === 'development') {
                 logger.error({ error }, 'Failed to mark all as read')
             }
         }
@@ -165,7 +169,7 @@ export const NotificationBell = () => {
             }
         } catch (error: unknown) {
             // Silent fail - user can retry
-            if (process.env.NODE_ENV === 'development') {
+            if (process['env'].NODE_ENV === 'development') {
                 logger.error({ error }, 'Failed to update notification')
             }
         }

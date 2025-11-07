@@ -1,13 +1,16 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { BarChart3 } from 'lucide-react'
-import { LazyBarChart, LazyLineChart, LazyAreaChart, Bar, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
-import type { ProductChartData, ProfitFilters, PeriodType } from './types'
+import { useState } from 'react'
+
 import { formatCurrencyAmount } from '@/app/profit/utils/chartData'
+import { LazyBarChart, LazyLineChart, LazyAreaChart, Bar, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
+
 import { CustomTooltip } from './CustomTooltip'
+
+import type { ProductChartData, ProfitFilters, PeriodType } from './types'
 
 interface ProductProfitabilityChartProps {
   chartData: ProductChartData[]
@@ -25,7 +28,7 @@ export const ProductProfitabilityChart = ({
   isMobile
 }: ProductProfitabilityChartProps) => {
   // State to manage chart type
-  const [chartType, setChartType] = useState<'bar' | 'line' | 'area'>('bar')
+  const [chartType, setChartType] = useState<'area' | 'bar' | 'line'>('bar')
 
   return (
     <Card className="border-0 shadow-sm">
@@ -87,7 +90,7 @@ export const ProductProfitabilityChart = ({
                 {/* Chart type selector */}
                 <Select
                   value={chartType}
-                  onValueChange={(value: 'bar' | 'line' | 'area') => setChartType(value)}
+                  onValueChange={(value: 'area' | 'bar' | 'line') => setChartType(value)}
                 >
                   <SelectTrigger className={`${isMobile ? 'w-full' : 'w-[120px]'} h-9`}>
                     <SelectValue />
@@ -134,36 +137,63 @@ export const ProductProfitabilityChart = ({
                               cogs: 'HPP (COGS)',
                               profit: 'Laba'
                             }
-                            return labels[value] || value
+                            return labels[value] ?? value
                           }}
                         />
                       </>
                     )
                   }
 
-                  switch (chartType) {
-                    case 'bar':
-                      return (
-                        <LazyBarChart {...commonProps}>
-                          {commonProps.children}
-                           <Bar
-                             dataKey="revenue"
-                             fill="hsl(var(--muted))"
-                             radius={[4, 4, 0, 0]}
-                           />
-                           <Bar
-                             dataKey="cogs"
-                             fill="hsl(var(--muted-foreground))"
-                             radius={[4, 4, 0, 0]}
-                           />
-                           <Bar
-                             dataKey="profit"
-                             fill="hsl(var(--primary))"
-                             radius={[4, 4, 0, 0]}
-                           />
-                        </LazyBarChart>
-                      )
-                    case 'line':
+                   switch (chartType) {
+                     case 'bar':
+                       return (
+                         <LazyBarChart {...commonProps}>
+                           {commonProps.children}
+                            <Bar
+                              dataKey="revenue"
+                              fill="hsl(var(--muted))"
+                              radius={[4, 4, 0, 0]}
+                            />
+                            <Bar
+                              dataKey="cogs"
+                              fill="hsl(var(--muted-foreground))"
+                              radius={[4, 4, 0, 0]}
+                            />
+                            <Bar
+                              dataKey="profit"
+                              fill="hsl(var(--primary))"
+                              radius={[4, 4, 0, 0]}
+                            />
+                         </LazyBarChart>
+                       )
+                     case 'area':
+                       return (
+                         <LazyAreaChart {...commonProps}>
+                           {commonProps.children}
+                            <Area
+                              type="monotone"
+                              dataKey="revenue"
+                              stackId="1"
+                              stroke="hsl(var(--muted))"
+                              fill="hsl(var(--muted))"
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="cogs"
+                              stackId="1"
+                              stroke="hsl(var(--muted-foreground))"
+                              fill="hsl(var(--muted-foreground))"
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="profit"
+                              stackId="1"
+                              stroke="hsl(var(--primary))"
+                              fill="hsl(var(--primary))"
+                            />
+                         </LazyAreaChart>
+                       )
+                     case 'line':
                       return (
                         <LazyLineChart {...commonProps}>
                           {commonProps.children}

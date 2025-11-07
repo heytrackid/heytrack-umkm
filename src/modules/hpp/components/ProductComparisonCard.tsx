@@ -1,13 +1,15 @@
 'use client'
 /* eslint-disable no-nested-ternary */
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Info, BarChart3, TrendingUp, CheckCircle, AlertTriangle, Lightbulb, ArrowRight, TrendingDown } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
 import { useRouter } from 'next/navigation'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useCurrency } from '@/hooks/useCurrency'
+
 
 
 
@@ -77,7 +79,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
 
                 return (
                   <div
-                    key={item.id}
+                    key={item['id']}
                     className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all hover:shadow-md ${
                       isGood 
                         ? 'bg-gray-50 dark:bg-gray-900/20 border-gray-300 dark:border-gray-800' 

@@ -1,23 +1,25 @@
 'use client'
 
+import { ArrowUpCircle, ArrowDownCircle, AlertCircle, Loader2, Calendar } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 // SwipeableTabsContent not used in this component
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Textarea } from '@/components/ui/textarea'
-import { ArrowUpCircle, ArrowDownCircle, AlertCircle, Loader2, Calendar } from 'lucide-react'
+
 import { incomeCategories, expenseCategories, type TransactionFormData } from '../constants'
 
 interface EnhancedTransactionFormProps {
     isOpen: boolean
     onOpenChange: (open: boolean) => void
-    transactionType: 'income' | 'expense'
-    onTransactionTypeChange: (type: 'income' | 'expense') => void
+    transactionType: 'expense' | 'income'
+    onTransactionTypeChange: (type: 'expense' | 'income') => void
     onSubmit: (formData: TransactionFormData) => Promise<void>
     loading: boolean
 }
@@ -34,7 +36,7 @@ const EnhancedTransactionForm = ({
         description: '',
         category: '',
         amount: '',
-        date: new Date().toISOString().split('T')[0] || ''
+        date: new Date().toISOString().split('T')[0] ?? ''
     })
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [touched, setTouched] = useState<Record<string, boolean>>({})
@@ -46,7 +48,7 @@ const EnhancedTransactionForm = ({
                 description: '',
                 category: '',
                 amount: '',
-                date: new Date().toISOString().split('T')[0] || ''
+                date: new Date().toISOString().split('T')[0] ?? ''
             })
             setErrors({})
             setTouched({})
@@ -176,7 +178,7 @@ const EnhancedTransactionForm = ({
                     {/* Transaction Type Tabs */}
                     <SwipeableTabs
                         value={transactionType}
-                        onValueChange={(value) => onTransactionTypeChange(value as 'income' | 'expense')}
+                        onValueChange={(value) => onTransactionTypeChange(value as 'expense' | 'income')}
                         className="mb-4"
                     >
                         <SwipeableTabsList className="grid w-full grid-cols-2">
@@ -207,13 +209,13 @@ const EnhancedTransactionForm = ({
                                 value={formData.description}
                                 onChange={(e) => handleFieldChange('description', e.target.value)}
                                 onBlur={() => handleFieldBlur('description')}
-                                className={errors.description && touched.description ? 'border-red-500' : ''}
+                                className={errors['description'] && touched['description'] ? 'border-red-500' : ''}
                                 rows={3}
                             />
-                            {errors.description && touched.description && (
+                            {errors['description'] && touched['description'] && (
                                 <p className="text-xs text-red-500 flex items-center gap-1">
                                     <AlertCircle className="h-3 w-3" />
-                                    {errors.description}
+                                    {errors['description']}
                                 </p>
                             )}
                             <p className="text-xs text-muted-foreground">
@@ -232,7 +234,7 @@ const EnhancedTransactionForm = ({
                             >
                                 <SelectTrigger
                                     id="category"
-                                    className={errors.category && touched.category ? 'border-red-500' : ''}
+                                    className={errors['category'] && touched['category'] ? 'border-red-500' : ''}
                                     onBlur={() => handleFieldBlur('category')}
                                 >
                                     <SelectValue placeholder="Pilih kategori" />
@@ -245,10 +247,10 @@ const EnhancedTransactionForm = ({
                                     ))}
                                 </SelectContent>
                             </Select>
-                            {errors.category && touched.category && (
+                            {errors['category'] && touched['category'] && (
                                 <p className="text-xs text-red-500 flex items-center gap-1">
                                     <AlertCircle className="h-3 w-3" />
-                                    {errors.category}
+                                    {errors['category']}
                                 </p>
                             )}
                         </div>
@@ -272,16 +274,16 @@ const EnhancedTransactionForm = ({
                                         handleFieldChange('amount', value)
                                     }}
                                     onBlur={() => handleFieldBlur('amount')}
-                                    className={`pl-10 text-right ${errors.amount && touched.amount ? 'border-red-500' : ''}`}
+                                    className={`pl-10 text-right ${errors['amount'] && touched['amount'] ? 'border-red-500' : ''}`}
                                 />
                             </div>
-                            {errors.amount && touched.amount && (
+                            {errors['amount'] && touched['amount'] && (
                                 <p className="text-xs text-red-500 flex items-center gap-1">
                                     <AlertCircle className="h-3 w-3" />
-                                    {errors.amount}
+                                    {errors['amount']}
                                 </p>
                             )}
-                            {formData.amount && !errors.amount && (
+                            {formData.amount && !errors['amount'] && (
                                 <p className="text-xs text-muted-foreground">
                                     {formatCurrencyInput(formData.amount)} Rupiah
                                 </p>
@@ -302,13 +304,13 @@ const EnhancedTransactionForm = ({
                                     onChange={(e) => handleFieldChange('date', e.target.value)}
                                     onBlur={() => handleFieldBlur('date')}
                                     max={new Date().toISOString().split('T')[0]}
-                                    className={`pl-10 ${errors.date && touched.date ? 'border-red-500' : ''}`}
+                                    className={`pl-10 ${errors['date'] && touched['date'] ? 'border-red-500' : ''}`}
                                 />
                             </div>
-                            {errors.date && touched.date && (
+                            {errors['date'] && touched['date'] && (
                                 <p className="text-xs text-red-500 flex items-center gap-1">
                                     <AlertCircle className="h-3 w-3" />
-                                    {errors.date}
+                                    {errors['date']}
                                 </p>
                             )}
                         </div>

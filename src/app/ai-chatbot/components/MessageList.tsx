@@ -1,10 +1,13 @@
 'use client'
 
-import { useEffect, useRef, type RefObject } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
+import { useEffect, useRef, type RefObject } from 'react'
+
 import { ScrollArea } from '@/components/ui/scroll-area'
+
 import { MessageBubble } from './MessageBubble'
 import { TypingIndicator } from './TypingIndicator'
+
 import type { Message } from '@/app/ai-chatbot/types'
 
 interface MessageListProps {
@@ -72,9 +75,10 @@ export const MessageList = ({
             >
               {virtualizer.getVirtualItems().map((virtualItem) => {
                 const message = messages[virtualItem.index]
+                if (!message) {return null}
                 return (
                   <div
-                    key={message.id}
+                    key={message?.['id'] ?? 'temp-key'}
                     style={{
                       position: 'absolute',
                       top: 0,
@@ -111,7 +115,7 @@ export const MessageList = ({
           <div ref={scrollAreaRef} className="p-6 space-y-6 max-w-4xl mx-auto">
             {messages.map((message) => (
               <MessageBubble
-                key={message.id}
+                key={message['id']}
                 message={message}
                 onSuggestionClick={onSuggestionClick}
               />

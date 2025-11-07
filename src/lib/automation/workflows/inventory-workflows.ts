@@ -1,10 +1,11 @@
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+
 import type { Insert, Database, Json } from '@/types/database'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import type {WorkflowResult,
   WorkflowContext
 } from '@/types/features/automation'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Inventory Workflow Handlers
@@ -18,7 +19,7 @@ export class InventoryWorkflowHandlers {
   static async handleOutOfStock(context: WorkflowContext): Promise<WorkflowResult> {
     const { event, logger } = context
 
-    if (!event.data || typeof event.data !== 'object') {
+    if (!event['data'] || typeof event['data'] !== 'object') {
       return {
         success: false,
         message: 'Invalid out of stock event data',
@@ -112,7 +113,7 @@ export class InventoryWorkflowHandlers {
   static async handleLowStock(context: WorkflowContext): Promise<WorkflowResult> {
     const { event, logger } = context
 
-    if (!event.data || typeof event.data !== 'object') {
+    if (!event['data'] || typeof event['data'] !== 'object') {
       return {
         success: false,
         message: 'Invalid low stock event data',
@@ -209,7 +210,7 @@ export class InventoryWorkflowHandlers {
   ): {
     shouldReorder: boolean
     recommendedQuantity: number
-    priority: 'low' | 'medium' | 'high' | 'critical'
+    priority: 'critical' | 'high' | 'low' | 'medium'
     reason: string
   } {
     const minStock = ingredient.min_stock ?? 0
@@ -217,7 +218,7 @@ export class InventoryWorkflowHandlers {
 
     const shouldReorder = currentStock <= reorderPoint
     let recommendedQuantity = Math.max(minStock * 2, 50) // Order at least double min stock or 50 units
-    let priority: 'low' | 'medium' | 'high' | 'critical' = 'low'
+    let priority: 'critical' | 'high' | 'low' | 'medium' = 'low'
     let reason = 'Stock at reorder level'
 
     if (currentStock <= minStock) {

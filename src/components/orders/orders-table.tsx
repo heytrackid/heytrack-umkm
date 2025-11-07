@@ -1,11 +1,33 @@
 'use client'
 
+import {
+  Eye,
+  Edit,
+  MoreHorizontal,
+  Trash2,
+  CheckCircle,
+  XCircle,
+   Package,
+   Truck,
+   Download,
+   RefreshCw,
+   Archive
+} from 'lucide-react'
 import { useState } from 'react'
-import type { OrdersTable } from '@/types/database'
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useCurrency } from '@/hooks/useCurrency'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,30 +43,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import {
-  Eye,
-  Edit,
-  MoreHorizontal,
-  Trash2,
-  CheckCircle,
-  XCircle,
-   Package,
-   Truck,
-   Download,
-   RefreshCw,
-   Archive
-} from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
+
 import type { OrderItem, Order } from './types'
+import type { OrdersTable } from '@/types/database'
 
 // Extended type for table display
 interface OrderWithItems extends Order {
@@ -100,7 +102,7 @@ const OrdersTable = ({
   // Selection handlers
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedOrders(orders.map(order => order.id))
+      setSelectedOrders(orders.map(order => order['id']))
     } else {
       setSelectedOrders([])
     }
@@ -330,19 +332,19 @@ const OrdersTable = ({
             ) : (
               orders.map((order) => (
                 <TableRow
-                  key={order.id}
-                  className={selectedOrders.includes(order.id) ? 'bg-muted/50' : ''}
+                  key={order['id']}
+                  className={selectedOrders.includes(order['id']) ? 'bg-muted/50' : ''}
                 >
                   <TableCell>
                     <Checkbox
-                      checked={selectedOrders.includes(order.id)}
-                      onCheckedChange={(checked) => handleSelectOrder(order.id, !!checked)}
+                      checked={selectedOrders.includes(order['id'])}
+                      onCheckedChange={(checked) => handleSelectOrder(order['id'], Boolean(checked))}
                     />
                   </TableCell>
 
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="font-medium">{order.order_no}</div>
+                      <div className="font-medium">{order['order_no']}</div>
                       <div className="text-sm text-muted-foreground">
                         {order.order_items?.length ?? 0} item • {order.order_items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0} produk
                       </div>
@@ -351,7 +353,7 @@ const OrdersTable = ({
 
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="font-medium">{order.customer_name}</div>
+                      <div className="font-medium">{order['customer_name']}</div>
                       {order.customer_phone && (
                         <div className="text-sm text-muted-foreground">{order.customer_phone}</div>
                       )}
@@ -361,36 +363,36 @@ const OrdersTable = ({
                    <TableCell>
                      <div className="space-y-2">
                        <div className="flex items-center gap-2">
-                         {getStatusBadge(order.status)}
+                         {getStatusBadge(order['status'])}
                          <div className="flex gap-1">
-                           {order.status === 'PENDING' && (
+                           {order['status'] === 'PENDING' && (
                              <Button
                                variant="ghost"
                                size="sm"
                                className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                               onClick={() => onUpdateStatus?.(order.id, 'CONFIRMED')}
+                               onClick={() => onUpdateStatus?.(order['id'], 'CONFIRMED')}
                                title="Konfirmasi pesanan"
                              >
                                <CheckCircle className="h-3 w-3" />
                              </Button>
                            )}
-                           {order.status === 'CONFIRMED' && (
+                           {order['status'] === 'CONFIRMED' && (
                              <Button
                                variant="ghost"
                                size="sm"
                                className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                               onClick={() => onUpdateStatus?.(order.id, 'READY')}
+                               onClick={() => onUpdateStatus?.(order['id'], 'READY')}
                                title="Tandai siap kirim"
                              >
                                <Package className="h-3 w-3" />
                              </Button>
                            )}
-                           {order.status === 'READY' && (
+                           {order['status'] === 'READY' && (
                              <Button
                                variant="ghost"
                                size="sm"
                                className="h-6 w-6 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                               onClick={() => onUpdateStatus?.(order.id, 'SHIPPED')}
+                               onClick={() => onUpdateStatus?.(order['id'], 'SHIPPED')}
                                title="Tandai dikirim"
                              >
                                <Truck className="h-3 w-3" />
@@ -446,29 +448,29 @@ const OrdersTable = ({
 
                         <DropdownMenuSeparator />
 
-                        {order.status === 'PENDING' && onUpdateStatus && (
-                          <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'CONFIRMED')}>
+                        {order['status'] === 'PENDING' && onUpdateStatus && (
+                          <DropdownMenuItem onClick={() => onUpdateStatus(order['id'], 'CONFIRMED')}>
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Konfirmasi Pesanan
                           </DropdownMenuItem>
                         )}
 
-                        {order.status === 'CONFIRMED' && onUpdateStatus && (
-                          <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'IN_PROGRESS')}>
+                        {order['status'] === 'CONFIRMED' && onUpdateStatus && (
+                          <DropdownMenuItem onClick={() => onUpdateStatus(order['id'], 'IN_PROGRESS')}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Mulai Proses
                           </DropdownMenuItem>
                         )}
 
-                        {order.status === 'IN_PROGRESS' && onUpdateStatus && (
-                          <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'READY')}>
+                        {order['status'] === 'IN_PROGRESS' && onUpdateStatus && (
+                          <DropdownMenuItem onClick={() => onUpdateStatus(order['id'], 'READY')}>
                             <Package className="h-4 w-4 mr-2" />
                             Siap Antar
                           </DropdownMenuItem>
                         )}
 
-                        {order.status === 'READY' && onUpdateStatus && (
-                          <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'DELIVERED')}>
+                        {order['status'] === 'READY' && onUpdateStatus && (
+                          <DropdownMenuItem onClick={() => onUpdateStatus(order['id'], 'DELIVERED')}>
                             <Truck className="h-4 w-4 mr-2" />
                             Kirim Pesanan
                           </DropdownMenuItem>

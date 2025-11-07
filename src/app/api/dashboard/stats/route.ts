@@ -1,15 +1,18 @@
- 
-import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { DateRangeQuerySchema } from '@/lib/validations/domains/common'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-import type { OrderStatus } from '@/types/database'
+
+
+ 
+
+import { NextResponse } from 'next/server'
+
 import { safeParseAmount, safeString, safeParseInt, safeTimestamp, isInArray } from '@/lib/api-helpers'
-import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
+import type { OrderStatus } from '@/types/database'
 
 // Partial types for dashboard queries (only fields we fetch)
 interface OrderStats {
@@ -50,41 +53,26 @@ async function GET(request: Request) {
     // Validate optional date range parameters - make validation more flexible
     const startDateParam = searchParams.get('start_date')
     const endDateParam = searchParams.get('end_date')
-    
-    let startDate: string | undefined
-    let endDate: string | undefined
-    
-    // Only validate if parameters are provided
-    if (startDateParam) {
-      const startDateValidation = DateRangeQuerySchema.shape.start_date.safeParse(startDateParam)
-      if (startDateValidation.success) {
-        startDate = startDateValidation.data
-      }
-      // If validation fails, we'll just ignore the parameter and use default behavior
-    }
-    
-    if (endDateParam) {
-      const endDateValidation = DateRangeQuerySchema.shape.end_date.safeParse(endDateParam)
-      if (endDateValidation.success) {
-        endDate = endDateValidation.data
-      }
-      // If validation fails, we'll just ignore the parameter and use default behavior
-    }
 
+    // Parse and validate dates
+    const startDate = startDateParam ? new Date(startDateParam).toISOString().split('T')[0] : undefined
+    const endDate = endDateParam ? new Date(endDateParam).toISOString().split('T')[0] : undefined
+
+    // Create Supabase client
     const supabase = await createClient()
-    
+
     // Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date().toISOString().split('T')[0] as string
     
     // Calculate yesterday for comparison
     const yesterdayDate = new Date()
     yesterdayDate.setDate(yesterdayDate.getDate() - 1)
-    const yesterdayStr = yesterdayDate.toISOString().split('T')[0]
+    const yesterdayStr = yesterdayDate.toISOString().split('T')[0] as string
     
     // Calculate date ranges for comparison if needed
     let comparisonStartDate: string | undefined = undefined
@@ -121,26 +109,26 @@ async function GET(request: Request) {
         ? supabase
             .from('orders')
             .select('id, total_amount, status, order_date, customer_name, created_at')
-            .eq('user_id', user.id)
+            .eq('user_id', user['id'])
             .gte('order_date', startDate)
             .lte('order_date', endDate)
         : supabase
             .from('orders')
             .select('id, total_amount, status, order_date, customer_name, created_at')
-            .eq('user_id', user.id),
+            .eq('user_id', user['id']),
       
       // Current period orders (today's if no date range) - for daily metrics
       startDate && endDate
         ? supabase
             .from('orders')
             .select('id, total_amount, status, customer_name, created_at')
-            .eq('user_id', user.id)
+            .eq('user_id', user['id'])
             .gte('order_date', startDate)
             .lte('order_date', endDate)
         : supabase
             .from('orders')
             .select('id, total_amount, status, customer_name, created_at')
-            .eq('user_id', user.id)
+            .eq('user_id', user['id'])
             .eq('order_date', today),
       
       // Previous period orders for comparison - if date range provided
@@ -148,55 +136,55 @@ async function GET(request: Request) {
         ? supabase
             .from('orders')
             .select('total_amount')
-            .eq('user_id', user.id)
+            .eq('user_id', user['id'])
             .gte('order_date', comparisonStartDate)
             .lte('order_date', comparisonEndDate)
         : supabase
             .from('orders')
             .select('total_amount')
-            .eq('user_id', user.id)
+            .eq('user_id', user['id'])
             .eq('order_date', yesterdayStr),
       
       // Customers
       supabase
         .from('customers')
         .select('id, customer_type')
-        .eq('user_id', user.id),
+        .eq('user_id', user['id']),
       
       // Ingredients with stock info
       supabase
         .from('ingredients')
         .select('id, name, current_stock, min_stock, reorder_point, category')
-        .eq('user_id', user.id),
+        .eq('user_id', user['id']),
       
       // Recipes
       supabase
         .from('recipes')
         .select('id, times_made, name')
-        .eq('user_id', user.id),
+        .eq('user_id', user['id']),
       
       // Expenses in the specified date range
       startDate && endDate
         ? supabase
             .from('expenses')  
             .select('amount')
-            .eq('user_id', user.id)
+            .eq('user_id', user['id'])
             .gte('expense_date', startDate)
             .lte('expense_date', endDate)
         : supabase
             .from('expenses')  
             .select('amount')
-            .eq('user_id', user.id)
+            .eq('user_id', user['id'])
             .eq('expense_date', today)
     ])
     
-    const orders = ordersResult.data
-    const currentPeriodOrders = currentPeriodOrdersResult.data
-    const comparisonOrders = comparisonOrdersResult.data
-    const customers = customersResult.data
-    const ingredients = ingredientsResult.data
-    const recipes = recipesResult.data
-    const expenses = expensesResult.data
+    const orders = ordersResult['data']
+    const currentPeriodOrders = currentPeriodOrdersResult['data']
+    const comparisonOrders = comparisonOrdersResult['data']
+    const customers = customersResult['data']
+    const ingredients = ingredientsResult['data']
+    const recipes = recipesResult['data']
+    const expenses = expensesResult['data']
     
     // Calculate metrics
     const totalRevenue = orders?.reduce((sum: number, order: OrderStats) =>
@@ -207,7 +195,7 @@ async function GET(request: Request) {
 
     const validStatuses = ['PENDING', 'CONFIRMED', 'IN_PROGRESS'] as const
     const activeOrders = orders?.filter((order: OrderStats) =>
-      isInArray(order.status, validStatuses)).length ?? 0
+      isInArray(order['status'], validStatuses)).length ?? 0
 
     const totalCustomers = customers?.length ?? 0
     const vipCustomers = customers?.filter((customer: CustomerStats) =>
@@ -245,7 +233,7 @@ async function GET(request: Request) {
       const reorderPoint = safeParseAmount(ingredient.reorder_point ?? ingredient.min_stock)
       return currentStock <= reorderPoint
     }).map((ingredient: IngredientWithName) => ({
-      id: ingredient.id,
+      id: ingredient['id'],
       name: safeString(ingredient.name, 'Unknown'),
       currentStock: safeParseAmount(ingredient.current_stock),
       reorderPoint: safeParseAmount(ingredient.reorder_point ?? ingredient.min_stock)
@@ -276,10 +264,10 @@ async function GET(request: Request) {
         total: orders?.length ?? 0,
         today: currentPeriodOrders?.length ?? 0,
         recent: recentOrders.map((order: OrderStats) => ({
-          id: order.id,
-          customer: safeString(order.customer_name, 'Walk-in customer'),
+          id: order['id'],
+          customer: safeString(order['customer_name'], 'Walk-in customer'),
           amount: order.total_amount,
-          status: order.status,
+          status: order['status'],
           time: order.created_at
         }))
       },
@@ -333,30 +321,30 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const today = new Date().toISOString().split('T')[0]
-    
+    const today = new Date().toISOString().split('T')[0] as string
+
     // Get today's data - only needed fields
     const { data: todayOrders } = await supabase
       .from('orders')
       .select('id, total_amount')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .eq('order_date', today)
     
     const { data: todayOrderItems } = await supabase
       .from('order_items')
       .select('order_id, quantity')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
     
     const { data: todayExpenses } = await supabase
       .from('expenses')
       .select('amount')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .eq('expense_date', today)
     
     interface OrderIdOnly { id: string; total_amount: number | null }
     interface OrderItemPartial { order_id: string; quantity: number }
     
-    const todayOrderIds = todayOrders?.map((order: OrderIdOnly) => order.id) ?? []
+    const todayOrderIds = todayOrders?.map((order: OrderIdOnly) => order['id']) ?? []
 
     const todayItems = todayOrderItems?.filter((item: OrderItemPartial) =>
       todayOrderIds.includes(item.order_id)) ?? []
@@ -377,7 +365,7 @@ export async function POST() {
     // Upsert daily summary
     const summaryData = {
       sales_date: today,
-      user_id: user.id,
+      user_id: user['id'],
       total_orders: todayOrders?.length ?? 0,
       total_revenue: totalRevenue,
       total_items_sold: totalItemsSold,

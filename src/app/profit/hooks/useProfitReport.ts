@@ -1,12 +1,16 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
+
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+
+import { calculateProfitDateRange, exportProfitReport, prepareProductChartData, validateProfitData } from '../utils'
+
 import type {
     ChartDataPoint,
     ProfitData,
     ProfitPeriodType
 } from '../constants'
-import { calculateProfitDateRange, exportProfitReport, prepareProductChartData, validateProfitData } from '../utils'
+
 
 interface UseProfitReportReturn {
   // State
@@ -50,8 +54,8 @@ export function useProfitReport(): UseProfitReportReturn {
 
   // Fetch profit data
   const fetchProfitData = useCallback(async () => {
-    void setLoading(true)
-    void setError(null)
+    setLoading(true)
+    setError(null)
 
     try {
       const { startDate: calculatedStartDate, endDate: calculatedEndDate } = calculateProfitDateRange(
@@ -70,19 +74,17 @@ export function useProfitReport(): UseProfitReportReturn {
         throw new Error('Gagal mengambil data laporan laba')
       }
 
-      const data = await response.json()
+       const data = await response.json() as unknown as ProfitData
 
-      if (!validateProfitData(data)) {
+       if (!validateProfitData(data)) {
         throw new Error('Data laporan laba tidak valid')
-      }
+       }
 
-      void setProfitData(data)
-    } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error fetching profit data:')
-      void setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
-    } finally {
-      void setLoading(false)
-    }
+       setProfitData(data)
+     } catch (error) {
+       apiLogger.error({ error }, 'Error fetching profit data:')
+       setError(error instanceof Error ? error.message : 'Terjadi kesalahan saat mengambil data')
+     }
   }, [selectedPeriod, startDate, endDate])
 
   // Handle export report
@@ -93,16 +95,16 @@ export function useProfitReport(): UseProfitReportReturn {
       const filename = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
       exportProfitReport(profitData, format, filename)
       return Promise.resolve()
-    } catch (err: unknown) {
-      const error = err as Error
-      apiLogger.error({ error: error.message }, 'Error exporting report:')
-      toast({
-        title: 'Gagal',
-        description: 'Gagal mengekspor laporan',
-        variant: 'destructive',
-      })
-      return Promise.reject(error)
-    }
+     } catch (error) {
+       const caughtError = error as Error
+       apiLogger.error({ error: caughtError.message }, 'Error exporting report:')
+       toast({
+         title: 'Gagal',
+         description: 'Gagal mengekspor laporan',
+         variant: 'destructive',
+       })
+       return Promise.reject(caughtError)
+     }
   }
 
   // Computed values

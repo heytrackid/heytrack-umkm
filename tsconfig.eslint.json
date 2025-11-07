@@ -4,8 +4,8 @@
     "noEmit": true
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
     "eslint.config.js"
   ],
   "exclude": [

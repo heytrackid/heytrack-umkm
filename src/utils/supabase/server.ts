@@ -1,7 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import type { SupabaseClient } from '@supabase/supabase-js'
+
 import type { Database } from '@/types/database'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 
 
@@ -15,12 +16,12 @@ function validateServerEnvironment() {
 
   // ✅ FIXED: Allow both nodejs and edge runtime
   // Vercel Edge Runtime uses 'edge', not 'nodejs'
-  const runtime = process.env['NEXT_RUNTIME']
+  const runtime = process['env']['NEXT_RUNTIME']
   if (runtime && runtime !== 'nodejs' && runtime !== 'edge') {
     throw new Error(`Supabase server client requires NEXT_RUNTIME to be "nodejs" or "edge", received "${runtime}"`)
   }
 
-  const missingEnv = REQUIRED_ENV_VARS.filter((key) => !process.env[key])
+  const missingEnv = REQUIRED_ENV_VARS.filter((key) => !process['env'][key])
   if (missingEnv.length > 0) {
     throw new Error(`Missing Supabase environment variables: ${missingEnv.join(', ')}`)
   }
@@ -32,8 +33,8 @@ export async function createClient(): Promise<SupabaseClient<Database>> {
   const cookieStore = await cookies()
 
   const client = createServerClient<Database>(
-    process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? '',
-    process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? '',
+    process['env']['NEXT_PUBLIC_SUPABASE_URL'] ?? '',
+    process['env']['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? '',
     {
       cookies: {
         getAll() {

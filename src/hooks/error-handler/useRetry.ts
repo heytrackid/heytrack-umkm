@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import { useErrorHandler } from './useErrorHandler'
 
 
@@ -50,20 +51,20 @@ export function useRetry(maxRetries = 3, initialDelay = 1000) {
 
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
-          void setIsRetrying(attempt > 0)
+          setIsRetrying(attempt > 0)
           const result = await asyncFn()
-          void setRetryCount(0)
-          void setIsRetrying(false)
+          setRetryCount(0)
+          setIsRetrying(false)
           return result
         } catch (error) {
           lastError = error as Error
 
           if (attempt < maxRetries) {
-            const delay = initialDelay * Math.pow(2, attempt)
+            const delay = initialDelay * 2**attempt
             onRetry?.(attempt + 1, lastError)
 
             await new Promise((resolve) => setTimeout(resolve, delay))
-            void setRetryCount(attempt + 1)
+            setRetryCount(attempt + 1)
           }
         }
       }
@@ -73,15 +74,15 @@ export function useRetry(maxRetries = 3, initialDelay = 1000) {
         void handleError(lastError, `useRetry: Failed after ${maxRetries} retries`)
       }
 
-      void setIsRetrying(false)
+      setIsRetrying(false)
       return null
     },
     [maxRetries, initialDelay, handleError]
   )
 
   const reset = useCallback(() => {
-    void setRetryCount(0)
-    void setIsRetrying(false)
+    setRetryCount(0)
+    setIsRetrying(false)
   }, [])
 
   return {

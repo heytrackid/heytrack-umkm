@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
@@ -12,7 +13,7 @@ interface ProductionSuggestion {
   total_quantity: number
   order_count: number
   estimated_cost: number
-  priority: 'HIGH' | 'MEDIUM' | 'LOW'
+  priority: 'HIGH' | 'LOW' | 'MEDIUM'
 }
 
 interface CreateBatchRequest {

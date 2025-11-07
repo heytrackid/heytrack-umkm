@@ -17,7 +17,7 @@ export default {
       noConsole: 'Use logger instead of console. Import logger from "@/lib/logger" and use apiLogger, dbLogger, etc. as appropriate.',
     },
   },
-  create: function(context) {
+  create(context) {
     return {
       MemberExpression(node) {
         if (

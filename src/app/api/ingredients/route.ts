@@ -1,16 +1,20 @@
-import { createSuccessResponse, createErrorResponse, handleAPIError, withQueryValidation, PaginationSchema, calculateOffset, createPaginationMeta } from '@/lib/api-core'
-import { z } from 'zod'
-import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest } from 'next/server'
-import type { Insert } from '@/types/database'
-import { typed } from '@/types/type-utilities'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest } from 'next/server'
+import { z } from 'zod'
+
+import { createSuccessResponse, createErrorResponse, handleAPIError, withQueryValidation, PaginationSchema, calculateOffset, createPaginationMeta } from '@/lib/api-core'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
+import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
+import { typed } from '@/types/type-utilities'
 import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Insert } from '@/types/database'
+
 
 // Extended schema for ingredients query
 const IngredientsQuerySchema = PaginationSchema.extend({
@@ -47,7 +51,7 @@ async function GET(request: NextRequest) {
     let supabaseQuery = supabase
       .from('ingredients')
       .select(INGREDIENT_FIELDS.LIST, { count: 'exact' })
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .range(offset, offset + limit - 1)
 
     // Apply search filter - using name instead of nama_bahan
@@ -66,7 +70,7 @@ async function GET(request: NextRequest) {
 
     if (error) {
       const apiError = handleAPIError(error)
-      return createErrorResponse(apiError.message, apiError.statusCode)
+      return createErrorResponse(apiError.message, apiError['statusCode'])
     }
 
     // Create pagination metadata
@@ -79,7 +83,7 @@ async function GET(request: NextRequest) {
 
   } catch (error: unknown) {
     const apiError = handleAPIError(error)
-    return createErrorResponse(apiError.message, apiError.statusCode)
+    return createErrorResponse(apiError.message, apiError['statusCode'])
   }
 }
 
@@ -87,22 +91,22 @@ async function GET(request: NextRequest) {
 async function POST(request: NextRequest) {
   try {
     // Parse and validate request body
-    let body: unknown
+    let _body: unknown
     try {
-      body = await request.json()
-    } catch (parseError) {
-      apiLogger.error({ error: parseError }, 'Failed to parse request body')
+      _body = await request.json()
+    } catch (error) {
+      apiLogger.error({ error }, 'Failed to parse request body')
       return createErrorResponse('Invalid JSON in request body', 400)
     }
 
     // Validate request body
-    const validation = IngredientInsertSchema.safeParse(body)
+    const validation = IngredientInsertSchema.safeParse(_body)
     if (!validation.success) {
       const errorMessages = validation.error.issues.map(issue => issue.message)
       return createErrorResponse('Invalid request data', 400, errorMessages)
     }
 
-    const validatedData = validation.data
+    const validatedData = validation['data']
 
     // Create authenticated Supabase client
     const supabase = typed(await createClient())
@@ -114,10 +118,19 @@ async function POST(request: NextRequest) {
       apiLogger.error({ error: authError }, 'Auth error:')
       return createErrorResponse('Unauthorized', 401)
     }
-    const ingredientData: Insert<'ingredients'> = {
-      ...validatedData,
-      user_id: user.id
-    }
+    const ingredientData = {
+      user_id: user['id'],
+      name: validatedData.name,
+      unit: validatedData.unit,
+      price_per_unit: validatedData.price_per_unit,
+      current_stock: validatedData.current_stock,
+      min_stock: validatedData.min_stock,
+      category: validatedData.category ?? null,
+      max_stock: validatedData.max_stock ?? null,
+      supplier: validatedData.supplier ?? null,
+      description: validatedData.description ?? null,
+      is_active: validatedData.is_active ?? true,
+    } as Insert<'ingredients'>
 
     const { data: insertedData, error } = await supabase
       .from('ingredients')
@@ -127,14 +140,14 @@ async function POST(request: NextRequest) {
 
     if (error) {
       const apiError = handleAPIError(error)
-      return createErrorResponse(apiError.message, apiError.statusCode)
+      return createErrorResponse(apiError.message, apiError['statusCode'])
     }
 
     return createSuccessResponse(insertedData, 'Bahan baku berhasil ditambahkan')
 
   } catch (error: unknown) {
     const apiError = handleAPIError(error)
-    return createErrorResponse(apiError.message, apiError.statusCode)
+    return createErrorResponse(apiError.message, apiError['statusCode'])
   }
 }
 

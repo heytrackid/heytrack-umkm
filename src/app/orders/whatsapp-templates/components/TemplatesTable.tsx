@@ -1,12 +1,14 @@
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { TEMPLATE_CATEGORIES, type WhatsAppTemplate } from './types'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Eye, Edit, Trash2, Star, StarOff, Copy, MessageCircle } from 'lucide-react'
+
+import { TEMPLATE_CATEGORIES, type WhatsAppTemplate } from '@/app/orders/whatsapp-templates/components/types'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
+
 
 interface TemplatesTableProps {
     templates: WhatsAppTemplate[]
@@ -55,7 +57,7 @@ const TemplatesTable = ({
         }
 
         return templates.map((template) => (
-            <TableRow key={template.id}>
+            <TableRow key={template['id']}>
                 <TableCell>
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
@@ -126,7 +128,7 @@ const TemplatesTable = ({
                 <TableCell>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
+                            <Button variant="ghost" className="h-8 w-8 p-0" aria-label="More options">
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>

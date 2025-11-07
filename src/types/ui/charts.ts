@@ -20,7 +20,7 @@ export interface LineChartOptions extends ChartOptions {
 export interface BarChartOptions extends ChartOptions {
   showGrid?: boolean;
   showLegend?: boolean;
-  layout?: 'vertical' | 'horizontal';
+  layout?: 'horizontal' | 'vertical';
 }
 
 export interface PieChartOptions extends ChartOptions {

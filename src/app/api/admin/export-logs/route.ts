@@ -1,16 +1,19 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 /**
  * GET /api/admin/export-logs
  * Export logs as JSON file
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+
 import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+import { createClient } from '@/utils/supabase/server'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
 
 export async function GET(_request: NextRequest) {
   try {
@@ -23,7 +26,7 @@ export async function GET(_request: NextRequest) {
     }
 
     // 2. Admin role check
-    const hasAdminAccess = await isAdmin(user.id)
+    const hasAdminAccess = await isAdmin(user['id'])
     if (!hasAdminAccess) {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
     }
@@ -43,7 +46,7 @@ export async function GET(_request: NextRequest) {
 
     const exportData = {
       exported_at: new Date().toISOString(),
-      exported_by: user.id,
+      exported_by: user['id'],
       performance_logs: perfLogs ?? [],
       error_logs: errLogs ?? [],
       system_metrics: {
@@ -53,7 +56,7 @@ export async function GET(_request: NextRequest) {
       }
     }
 
-    apiLogger.info({ userId: user.id }, 'Logs exported')
+    apiLogger.info({ userId: user['id'] }, 'Logs exported')
 
     // 3. Return as downloadable JSON
     return new NextResponse(JSON.stringify(exportData, null, 2), {

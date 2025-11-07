@@ -1,8 +1,11 @@
-import type { ComponentType, ReactNode } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Edit, Trash2, MoreHorizontal, Download, Share, Plus } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+import type { ComponentType, ReactNode } from 'react'
+
 
 /**
  * Shared Detail View Components
@@ -198,7 +201,7 @@ interface DetailTabsProps {
     id: string
     label: string
     content: ReactNode
-    badge?: string | number
+    badge?: number | string
   }>
   activeTab: string
   onTabChange: (tabId: string) => void
@@ -211,9 +214,9 @@ export const DetailTabs = ({ tabs, activeTab, onTabChange }: DetailTabsProps) =>
       <nav className="-mb-px flex space-x-8">
         {tabs.map((tab) => (
           <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${activeTab === tab.id
+            key={tab['id']}
+            onClick={() => onTabChange(tab['id'])}
+            className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${activeTab === tab['id']
               ? 'border-blue-500 text-gray-600'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
@@ -231,7 +234,7 @@ export const DetailTabs = ({ tabs, activeTab, onTabChange }: DetailTabsProps) =>
 
     {/* Tab Content */}
     <div>
-      {tabs.find(tab => tab.id === activeTab)?.content}
+      {tabs.find(tab => tab['id'] === activeTab)?.content}
     </div>
   </div>
 )
@@ -239,11 +242,11 @@ export const DetailTabs = ({ tabs, activeTab, onTabChange }: DetailTabsProps) =>
 // Timeline component for activity/history
 interface TimelineItem {
   id: string
-  timestamp: string | Date
+  timestamp: Date | string
   title: string
   description?: string
   user?: string
-  type?: 'create' | 'update' | 'delete' | 'status_change' | 'note'
+  type?: 'create' | 'delete' | 'note' | 'status_change' | 'update'
   icon?: ComponentType<{ className?: string }>
 }
 
@@ -273,11 +276,11 @@ export const DetailTimeline = ({ items, title = "Riwayat Aktivitas" }: DetailTim
           </p>
         ) : (
           items.map((item, index) => {
-            const Icon = item.icon ?? getIcon(item.type)
+            const Icon = item.icon ?? getIcon(item['type'])
             const isLast = index === items.length - 1
 
             return (
-              <div key={item.id} className="flex gap-4">
+              <div key={item['id']} className="flex gap-4">
                 <div className="flex flex-col items-center">
                   <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                     <Icon className="w-4 h-4 text-gray-600" />
@@ -298,7 +301,7 @@ export const DetailTimeline = ({ items, title = "Riwayat Aktivitas" }: DetailTim
                       )}
                     </div>
                     <time className="text-xs text-gray-500">
-                      {new Date(item.timestamp).toLocaleString('id-ID')}
+                      {new Date(item['timestamp']).toLocaleString('id-ID')}
                     </time>
                   </div>
                   {item.user && (

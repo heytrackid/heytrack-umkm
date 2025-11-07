@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+
 import { RoutePreloader } from '@/lib/bundle-splitting'
 
 /**

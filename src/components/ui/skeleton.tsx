@@ -1,12 +1,13 @@
-import type { ComponentProps, HTMLAttributes } from 'react'
 import { cn } from "@/lib/utils"
+
+import type { ComponentProps, HTMLAttributes } from 'react'
 
 
 interface SkeletonProps {
   className?: string
 }
 
-const Skeleton = ({ className, ...props }: SkeletonProps & HTMLAttributes<HTMLDivElement>) => (
+const Skeleton = ({ className, ...props }: HTMLAttributes<HTMLDivElement> & SkeletonProps) => (
     <div
       data-slot="skeleton"
       className={cn(
@@ -22,7 +23,7 @@ const SkeletonText = ({
   className,
   lines = 1,
   ...props 
-}: SkeletonProps & { lines?: number } & HTMLAttributes<HTMLDivElement>) => {
+}: HTMLAttributes<HTMLDivElement> & SkeletonProps & { lines?: number }) => {
   if (lines === 1) {
     return <Skeleton className={cn("h-4 w-full", className)} {...props} />
   }

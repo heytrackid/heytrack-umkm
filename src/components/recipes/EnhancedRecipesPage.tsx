@@ -1,43 +1,6 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { useToast } from '@/hooks/use-toast'
-import { useResponsive } from '@/hooks/useResponsive'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { MobileRecipeCard } from './MobileRecipeCard'
-import { RecipeStatsCards } from './RecipeStatsCards'
-import { DeleteModal } from '@/components/ui'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { useRecipes } from '@/hooks/supabase/entities'
-import { useSupabaseCRUD } from '@/hooks/supabase'
-import { usePagination } from '@/hooks/usePagination'
-import { SimplePagination } from '@/components/ui/simple-pagination'
-import type { Row } from '@/types/database'
-
-
-// import { useSettings } from '@/contexts/settings-context'
-
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
     Search,
     Plus,
@@ -51,9 +14,50 @@ import {
     Users,
     X
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState, useMemo, useCallback } from 'react'
+
+import { PageHeader } from '@/components/layout/PageHeader'
+import { DeleteModal } from '@/components/ui'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { undoableToast } from '@/components/ui/enhanced-toast'
 import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
 import { SimpleFAB } from '@/components/ui/floating-action-button'
-import { undoableToast } from '@/components/ui/enhanced-toast'
+import { Input } from '@/components/ui/input'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { SimplePagination } from '@/components/ui/simple-pagination'
+import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useRecipes } from '@/hooks/supabase/entities'
+import { useToast } from '@/hooks/use-toast'
+import { usePagination } from '@/hooks/usePagination'
+import { useResponsive } from '@/hooks/useResponsive'
+
+import { MobileRecipeCard } from './MobileRecipeCard'
+import { RecipeStatsCards } from './RecipeStatsCards'
+
+
+import type { Row } from '@/types/database'
+
+
+// import { useSettings } from '@/contexts/settings-context'
+
 
 // UI Components
 
@@ -66,8 +70,8 @@ import { undoableToast } from '@/components/ui/enhanced-toast'
 // Types
 
 type Recipe = Row<'recipes'>
-type CategoryFilter = 'all' | 'bread' | 'pastry' | 'cake' | 'cookie' | 'other'
-type DifficultyFilter = 'all' | 'easy' | 'medium' | 'hard'
+type CategoryFilter = 'all' | 'bread' | 'cake' | 'cookie' | 'other' | 'pastry'
+type DifficultyFilter = 'all' | 'easy' | 'hard' | 'medium'
 
 export const EnhancedRecipesPage = () => {
     const router = useRouter()
@@ -160,11 +164,11 @@ export const EnhancedRecipesPage = () => {
 
     // Handlers
     const handleView = useCallback((recipe: Recipe) => {
-        router.push(`/recipes/${recipe.id}`)
+        router.push(`/recipes/${recipe['id']}`)
     }, [router])
 
     const handleEdit = useCallback((recipe: Recipe) => {
-        router.push(`/recipes/${recipe.id}/edit`)
+        router.push(`/recipes/${recipe['id']}/edit`)
     }, [router])
 
     const handleDelete = useCallback((recipe: Recipe) => {
@@ -173,7 +177,7 @@ export const EnhancedRecipesPage = () => {
     }, [])
 
     const handleCalculateHPP = useCallback((recipe: Recipe) => {
-        router.push(`/hpp?recipe=${recipe.id}`)
+        router.push(`/hpp?recipe=${recipe['id']}`)
     }, [router])
 
     const handleConfirmDelete = useCallback(async () => {
@@ -181,7 +185,7 @@ export const EnhancedRecipesPage = () => {
 
         try {
             const deletedRecipe = selectedRecipe
-            await deleteRecipe(selectedRecipe.id)
+            await deleteRecipe(selectedRecipe['id'])
 
             // Enhanced toast with undo
             undoableToast({
@@ -199,8 +203,8 @@ export const EnhancedRecipesPage = () => {
 
             setIsDeleteDialogOpen(false)
             setSelectedRecipe(null)
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal menghapus resep'
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Gagal menghapus resep'
             toast({
                 title: 'Gagal menghapus resep',
                 description: message,
@@ -432,7 +436,7 @@ export const EnhancedRecipesPage = () => {
                 <div className="space-y-3">
                     {paginatedData.map((recipe) => (
                         <MobileRecipeCard
-                            key={recipe.id}
+                            key={recipe['id']}
                             recipe={recipe}
                             onView={handleView}
                             onEdit={handleEdit}
@@ -448,7 +452,7 @@ export const EnhancedRecipesPage = () => {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {paginatedData.map((recipe) => (
                         <Card
-                            key={recipe.id}
+                            key={recipe['id']}
                             className="hover:shadow-md transition-shadow cursor-pointer"
                             onClick={() => handleView(recipe)}
                         >

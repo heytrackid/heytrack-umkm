@@ -1,7 +1,8 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { RecipeOption } from '../types'
+
+import type { RecipeOption } from '@/modules/orders/types'
 
 
 
@@ -85,7 +86,7 @@ export class RecipeAvailabilityService {
         const isAvailable = this.checkIngredientAvailability(recipeIngredients)
 
         return {
-          id: recipe.id,
+          id: recipe['id'],
           name: recipe.name,
           category: recipe.category ?? '',
           servings: recipe.servings ?? 1,
@@ -100,8 +101,8 @@ export class RecipeAvailabilityService {
       })
 
       return recipeOptions
-    } catch (err: unknown) {
-      dbLogger.error({ error: err }, 'Error fetching available recipes')
+    } catch (error) {
+      dbLogger.error({ error }, 'Error fetching available recipes')
       throw new Error('Failed to fetch available recipes')
     }
   }

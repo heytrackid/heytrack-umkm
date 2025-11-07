@@ -1,10 +1,14 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
-import type { Insert } from '@/types/database'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Insert } from '@/types/database'
+
 
 type IngredientInsert = Insert<'ingredients'>
 
@@ -30,8 +34,8 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }    // 2. Parse CSV data from request
-    const body = await request.json()
-    const { ingredients } = body as { ingredients: Array<Partial<IngredientInsert>> }
+    const body = await request.json() as { ingredients: Array<Partial<IngredientInsert>> }
+    const { ingredients } = body
 
     if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
       return NextResponse.json(
@@ -83,7 +87,7 @@ export async function POST(request: NextRequest) {
         description: sanitizeString(ing.description),
         category: sanitizeString(ing.category, 'General'),
         supplier: sanitizeString(ing.supplier),
-        user_id: user.id,
+        user_id: user['id'],
         is_active: true
       })
     })
@@ -108,7 +112,7 @@ export async function POST(request: NextRequest) {
       .select()
 
     if (error) {
-      apiLogger.error({ error, userId: user.id }, 'Failed to import ingredients')
+      apiLogger.error({ error, userId: user['id'] }, 'Failed to import ingredients')
       return NextResponse.json(
         { error: 'Gagal menyimpan data bahan baku' },
         { status: 500 }
@@ -116,7 +120,7 @@ export async function POST(request: NextRequest) {
     }
 
     apiLogger.info(
-      { userId: user.id, count: data.length },
+      { userId: user['id'], count: data.length },
       'Ingredients imported successfully'
     )
 

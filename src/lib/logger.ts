@@ -10,9 +10,9 @@ import pino from 'pino'
  */
 
 
-const isDevelopment = process.env.NODE_ENV === 'development'
-const isPreview = process.env.VERCEL_ENV === 'preview'
-const isTest = process.env.NODE_ENV === 'test'
+const isDevelopment = process['env'].NODE_ENV === 'development'
+const isPreview = process['env'].VERCEL_ENV === 'preview'
+const isTest = process['env'].NODE_ENV === 'test'
 
 // Configure Pino logger
 const getLogLevel = () => {
@@ -30,16 +30,16 @@ const logger = pino({
   },
   // Add more detailed serialization for better debugging
   serializers: {
-    error: (err: Error) => ({
-        type: err.constructor.name,
-        name: err.name,
-        message: err.message,
-        stack: err.stack,
+    error: (error: Error) => ({
+        type: error.constructor.name,
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
         // Include additional error properties
-        ...Object.getOwnPropertyNames(err).reduce((acc, key) => {
+        ...Object.getOwnPropertyNames(error).reduce((acc, key) => {
           if (!['name', 'message', 'stack'].includes(key)) {
             try {
-              const errorRecord = err as unknown as Record<string, unknown>
+              const errorRecord = error as unknown as Record<string, unknown>
               acc[key] = errorRecord[key]
             } catch {
               // If property can't be accessed, skip it
@@ -85,22 +85,22 @@ export const serializeError = (error: unknown): Record<string, unknown> | Serial
     }
 
     // Include additional error properties if they exist
-    if (error.cause) {
-      serialized.cause = serializeError(error.cause)
+    if (error['cause']) {
+      serialized['cause'] = serializeError(error['cause'])
     }
     
     // Add request-specific properties if they exist
     if ('status' in error) {
-      serialized.status = (error as Record<string, unknown>).status
+      serialized['status'] = (error as Record<string, unknown>)['status']
     }
     if ('statusCode' in error) {
-      serialized.statusCode = (error as Record<string, unknown>).statusCode
+      serialized['statusCode'] = (error as Record<string, unknown>)['statusCode']
     }
     if ('code' in error) {
-      serialized.code = (error as Record<string, unknown>).code
+      serialized['code'] = (error as Record<string, unknown>)['code']
     }
     if ('errno' in error) {
-      serialized.errno = (error as Record<string, unknown>).errno
+      serialized['errno'] = (error as Record<string, unknown>)['errno']
     }
     
     return serialized
@@ -157,7 +157,7 @@ export interface DebugOptions {
   performanceTracking?: boolean;
   logParams?: boolean;
   logResult?: boolean;
-  logLevel?: 'debug' | 'info' | 'warn' | 'error';
+  logLevel?: 'debug' | 'error' | 'info' | 'warn';
 }
 
 /**
@@ -172,11 +172,11 @@ export const createDebugLogger = (context: string, userId?: string) => {
       const logData: Record<string, unknown> = { ...additionalContext ?? {} };
       
       if (options?.includeTimestamp) {
-        logData.timestamp = new Date().toISOString();
+        logData['timestamp'] = new Date().toISOString();
       }
       
       if (options?.includeUserId && userId) {
-        logData.userId = userId;
+        logData['userId'] = userId;
       }
       
       const level = options?.logLevel ?? 'debug';

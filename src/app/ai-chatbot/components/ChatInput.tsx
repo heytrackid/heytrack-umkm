@@ -1,7 +1,9 @@
+import { Send, Loader2 } from 'lucide-react'
 import { type FormEvent } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Send, Loader2 } from 'lucide-react'
+
 import { SuggestionChips } from './SuggestionChips'
 
 interface ChatInputProps {

@@ -39,7 +39,7 @@ export class ProductionDataIntegration {
       }
       
       const data = await response.json()
-      
+
       // Validate the response with type guards
       if (isRecord(data) && hasKeys(data, [
         'total_batches', 
@@ -49,11 +49,11 @@ export class ProductionDataIntegration {
         'average_completion_time'
       ])) {
         return {
-          total_batches: typeof data.total_batches === 'number' ? data.total_batches : 0,
-          completed_batches: typeof data.completed_batches === 'number' ? data.completed_batches : 0,
-          in_progress_batches: typeof data.in_progress_batches === 'number' ? data.in_progress_batches : 0,
-          total_quantity_produced: typeof data.total_quantity_produced === 'number' ? data.total_quantity_produced : 0,
-          average_completion_time: typeof data.average_completion_time === 'number' ? data.average_completion_time : 0
+          total_batches: typeof data['total_batches'] === 'number' ? data['total_batches'] : 0,
+          completed_batches: typeof data['completed_batches'] === 'number' ? data['completed_batches'] : 0,
+          in_progress_batches: typeof data['in_progress_batches'] === 'number' ? data['in_progress_batches'] : 0,
+          total_quantity_produced: typeof data['total_quantity_produced'] === 'number' ? data['total_quantity_produced'] : 0,
+          average_completion_time: typeof data['average_completion_time'] === 'number' ? data['average_completion_time'] : 0
         }
       }
       
@@ -65,8 +65,8 @@ export class ProductionDataIntegration {
         total_quantity_produced: 0,
         average_completion_time: 0
       }
-    } catch (err) {
-      const message = getErrorMessage(err)
+    } catch (error) {
+      const message = getErrorMessage(error)
       apiLogger.error({ error: message }, 'Error fetching production metrics')
       return {
         total_batches: 0,
@@ -88,8 +88,8 @@ export class ProductionDataIntegration {
         credentials: 'include', // Include cookies for authentication
       })
       return response.ok
-    } catch (err) {
-      const message = getErrorMessage(err)
+    } catch (error) {
+      const message = getErrorMessage(error)
       apiLogger.error({ error: message }, 'Error syncing with inventory')
       return false
     }
@@ -107,8 +107,8 @@ export class ProductionDataIntegration {
         credentials: 'include', // Include cookies for authentication
       })
       return response.ok
-    } catch (err) {
-      const message = getErrorMessage(err)
+    } catch (error) {
+      const message = getErrorMessage(error)
       apiLogger.error({ error: message }, 'Error linking batch to order')
       return false
     }

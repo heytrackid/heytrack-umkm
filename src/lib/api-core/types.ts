@@ -114,7 +114,7 @@ export interface RouteHandlerConfig {
     query?: unknown // z.ZodSchema
     params?: unknown // z.ZodSchema
   }
-  middleware?: Array<(request: NextRequest) => Promise<NextResponse | void> | NextResponse | void>
+  middleware?: Array<(request: NextRequest) => NextResponse | Promise<NextResponse | void> | void>
   pagination?: boolean
   caching?: {
     key: string

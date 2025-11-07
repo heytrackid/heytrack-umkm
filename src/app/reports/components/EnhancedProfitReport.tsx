@@ -1,19 +1,21 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { TrendingUp, AlertCircle, Download, RefreshCw, FileText, Printer, BarChart3 } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
 import { apiLogger } from '@/lib/logger'
-import { TrendingUp, AlertCircle, Download, RefreshCw, FileText, Printer, BarChart3 } from 'lucide-react'
 
 // Import our separated components
-import type { ProfitReportProps, ProfitData, PeriodType, ChartType, SelectedDataPoint } from './ProfitReportTypes'
+import { exportToCSV, exportToPDF, printReport } from './ProfitReportExport'
 import { ProfitMetrics, ProfitBreakdown } from './ProfitReportMetrics'
 import { ProfitReportTabs } from './ProfitReportTabs'
-import { exportToCSV, exportToPDF, printReport } from './ProfitReportExport'
+
+import type { ProfitReportProps, ProfitData, PeriodType, ChartType, SelectedDataPoint } from './ProfitReportTypes'
 
 // Main component
 const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
@@ -31,22 +33,21 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
     const fetchProfitData = useCallback(async () => {
         try {
             setLoading(true)
-            const params = new URLSearchParams({
-                start_date: dateRange.start,
-                end_date: dateRange.end,
-                period,
-                include_breakdown: 'true'
-            })
+            const params = new URLSearchParams()
+            if (dateRange.start) {params.set('start_date', dateRange.start)}
+            if (dateRange.end) {params.set('end_date', dateRange.end)}
+            params.set('period', period)
+            params.set('include_breakdown', 'true')
 
             const response = await fetch(`/api/reports/profit?${params.toString()}`)
             if (!response.ok) {
                 throw new Error('Failed to fetch profit data')
             }
 
-            const data = await response.json()
+            const data = await response.json() as ProfitData
             setProfitData(data)
-        } catch (err) {
-            apiLogger.error({ err }, 'Error fetching profit data')
+        } catch (error) {
+            apiLogger.error({ error }, 'Error fetching profit data')
         } finally {
             setLoading(false)
         }
@@ -59,6 +60,7 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
 
         try {
             // Calculate previous period dates
+            if (!dateRange.start || !dateRange.end) {return}
             const startDate = new Date(dateRange.start)
             const endDate = new Date(dateRange.end)
             const diffTime = Math.abs(endDate.getTime() - startDate.getTime())
@@ -69,22 +71,21 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
             const prevStartDate = new Date(prevEndDate)
             prevStartDate.setDate(prevStartDate.getDate() - diffDays + 1)
 
-            const params = new URLSearchParams({
-                start_date: prevStartDate.toISOString().split('T')[0],
-                end_date: prevEndDate.toISOString().split('T')[0],
-                period,
-                include_breakdown: 'true'
-            })
+            const params = new URLSearchParams()
+            if (prevStartDate) {params.set('start_date', prevStartDate.toISOString().split('T')[0] as string)}
+            if (prevEndDate) {params.set('end_date', prevEndDate.toISOString().split('T')[0] as string)}
+            params.set('period', period)
+            params.set('include_breakdown', 'true')
 
             const response = await fetch(`/api/reports/profit?${params.toString()}`)
             if (!response.ok) {
                 throw new Error('Failed to fetch comparison data')
             }
 
-            const data = await response.json()
+            const data = await response.json() as ProfitData
             setComparisonData(data)
-        } catch (err) {
-            apiLogger.error({ err }, 'Error fetching comparison data')
+        } catch (error) {
+            apiLogger.error({ error }, 'Error fetching comparison data')
             setComparisonData(null)
         }
     }, [dateRange, period, compareMode])
@@ -103,7 +104,7 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
     if (loading) {
         return (
             <div className="space-y-4">
-                {[...Array(4)].map((_, i) => (
+                {Array.from({ length: 4 }, (_, i) => (
                     <Card key={i} className="animate-pulse">
                         <CardContent className="h-32" />
                     </Card>
@@ -164,11 +165,11 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuItem onClick={() => exportToCSV({ profitData, dateRange })}>
+                            <DropdownMenuItem onClick={() => exportToCSV({ profitData, dateRange: { start: dateRange.start as string, end: dateRange.end as string } })}>
                                 <FileText className="h-4 w-4 mr-2" />
                                 Ekspor CSV
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => exportToPDF({ profitData, dateRange, formatCurrency })}>
+                            <DropdownMenuItem onClick={() => exportToPDF({ profitData, dateRange: { start: dateRange.start as string, end: dateRange.end as string }, formatCurrency })}>
                                 <FileText className="h-4 w-4 mr-2" />
                                 Ekspor PDF
                             </DropdownMenuItem>

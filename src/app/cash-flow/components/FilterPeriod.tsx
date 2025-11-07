@@ -1,8 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Calendar } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+
 import { type PeriodType } from '@/app/cash-flow/constants'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 interface FilterPeriodProps {
   selectedPeriod: PeriodType

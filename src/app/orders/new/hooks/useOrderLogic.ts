@@ -1,15 +1,56 @@
 'use client'
 
-import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Row } from '@/types/database'
+import { useEffect, useState, type FormEvent } from 'react'
+
+
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isArrayOf, isRecipe, isCustomer } from '@/lib/type-guards'
+
+import type { Row } from '@/types/database'
 
 
 
 type Recipe = Row<'recipes'>
 type Customer = Row<'customers'>
+
+const isRecipeArray = (value: unknown): value is Recipe[] =>
+  Array.isArray(value) && isArrayOf(value, isRecipe)
+
+const isCustomerArray = (value: unknown): value is Customer[] =>
+  Array.isArray(value) && isArrayOf(value, isCustomer)
+
+const extractRecipes = (payload: unknown): Recipe[] | null => {
+  if (isRecipeArray(payload)) {
+    return payload
+  }
+  if (typeof payload === 'object' && payload !== null) {
+    const record = payload as Record<string, unknown>
+    if (isRecipeArray(record['recipes'])) {
+      return record['recipes']
+    }
+    if (isRecipeArray(record['data'])) {
+      return record['data']
+    }
+  }
+  return null
+}
+
+const extractCustomers = (payload: unknown): Customer[] | null => {
+  if (isCustomerArray(payload)) {
+    return payload
+  }
+  if (typeof payload === 'object' && payload !== null) {
+    const record = payload as Record<string, unknown>
+    if (isCustomerArray(record['customers'])) {
+      return record['customers']
+    }
+    if (isCustomerArray(record['data'])) {
+      return record['data']
+    }
+  }
+  return null
+}
 
 export interface OrderItem {
   id?: string
@@ -30,11 +71,11 @@ export interface OrderFormData {
   order_date: string
   delivery_date: string
   delivery_time: string
-  delivery_method: 'pickup' | 'delivery'
+  delivery_method: 'delivery' | 'pickup'
   delivery_address: string
   delivery_fee: number
-  payment_method: 'cash' | 'transfer' | 'credit_card' | 'digital_wallet'
-  priority: 'low' | 'normal' | 'high'
+  payment_method: 'cash' | 'credit_card' | 'digital_wallet' | 'transfer'
+  priority: 'high' | 'low' | 'normal'
   discount_amount: number
   tax_rate: number
   notes: string
@@ -48,7 +89,6 @@ export const useOrderLogic = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('customer')
-  const [loading, setLoading] = useState(true) // Add loading state
   
   const [formData, setFormData] = useState<OrderFormData>({
     customer_name: '',
@@ -85,28 +125,24 @@ export const useOrderLogic = () => {
         credentials: 'include', // Include cookies for authentication
       })
       if (response.ok) {
-        const data = await response.json()
-        // Validate with type guards
-        if (isArrayOf(data, isRecipe)) {
-          void setAvailableRecipes(data)
-        } else if (data && typeof data === 'object' && Array.isArray(data?.recipes) && isArrayOf(data.recipes, isRecipe)) {
-          void setAvailableRecipes(data.recipes)
+        const payload: unknown = await response.json()
+        const recipesData = extractRecipes(payload)
+        if (recipesData) {
+          setAvailableRecipes(recipesData)
         } else {
-          apiLogger.warn({ data }, 'API returned unexpected format for recipes')
-          void setAvailableRecipes([])
+          apiLogger.warn({ payload }, 'API returned unexpected format for recipes')
+          setAvailableRecipes([])
         }
       } else {
         const errorText = await response.text()
         apiLogger.error({ error: errorText }, 'Failed to fetch recipes')
-        void setAvailableRecipes([])
+        setAvailableRecipes([])
       }
-    } catch (err: unknown) {
-      const message = getErrorMessage(err)
-      apiLogger.error({ error: message }, 'Failed to fetch recipes:')
-      void setAvailableRecipes([])
-    } finally {
-      setLoading(false) // Set loading to false after fetch
-    }
+     } catch (error) {
+       const message = getErrorMessage(error)
+       apiLogger.error({ error: message }, 'Failed to fetch recipes:')
+       setAvailableRecipes([])
+     }
   }
 
   const fetchCustomers = async () => {
@@ -115,26 +151,24 @@ export const useOrderLogic = () => {
         credentials: 'include', // Include cookies for authentication
       })
       if (response.ok) {
-        const data = await response.json()
-        // Validate with type guards
-        if (isArrayOf(data, isCustomer)) {
-          void setCustomers(data)
-        } else if (data && typeof data === 'object' && Array.isArray(data?.customers) && isArrayOf(data.customers, isCustomer)) {
-          void setCustomers(data.customers)
+        const payload: unknown = await response.json()
+        const customersData = extractCustomers(payload)
+        if (customersData) {
+          setCustomers(customersData)
         } else {
-          apiLogger.warn({ data }, 'API returned unexpected format for customers')
-          void setCustomers([])
+          apiLogger.warn({ payload }, 'API returned unexpected format for customers')
+          setCustomers([])
         }
       } else {
         const errorText = await response.text()
         apiLogger.error({ error: errorText }, 'Failed to fetch customers')
-        void setCustomers([])
+        setCustomers([])
       }
-    } catch (err: unknown) {
-      const message = getErrorMessage(err)
-      apiLogger.error({ error: message }, 'Failed to fetch customers:')
-      void setCustomers([])
-    }
+     } catch (error) {
+       const message = getErrorMessage(error)
+       apiLogger.error({ error: message }, 'Failed to fetch customers:')
+       setCustomers([])
+     }
   }
 
   // Calculations
@@ -143,20 +177,21 @@ export const useOrderLogic = () => {
   const totalAmount = subtotal - formData.discount_amount + taxAmount + formData.delivery_fee
 
   // Form handlers
-  const handleInputChange = (field: keyof OrderFormData, value: string | number | boolean) => {
+  const handleInputChange = (field: keyof OrderFormData, value: boolean | number | string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const addOrderItem = () => {
     if (availableRecipes.length === 0) {
-      void setError('Belum ada resep tersedia')
+      setError('Belum ada resep tersedia')
       return
     }
     
     const firstRecipe = availableRecipes[0]
+    if (!firstRecipe) {return}
     const fallbackPrice = firstRecipe.selling_price ?? 0
     const newItem: OrderItem = {
-      recipe_id: firstRecipe.id,
+      recipe_id: firstRecipe['id'],
       product_name: firstRecipe.name,
       quantity: 1,
       unit_price: fallbackPrice,
@@ -164,7 +199,7 @@ export const useOrderLogic = () => {
       special_requests: ''
     }
     
-    void setOrderItems(prev => [...prev, newItem])
+    setOrderItems(prev => [...prev, newItem])
   }
 
   const updateOrderItem = (index: number, field: keyof OrderItem, value: OrderItem[keyof OrderItem]) => {
@@ -175,7 +210,7 @@ export const useOrderLogic = () => {
       const currentItem = updated[index]
 
       if (field === 'recipe_id') {
-        const selectedRecipe = availableRecipes.find(recipe => recipe.id === value)
+        const selectedRecipe = availableRecipes.find(recipe => recipe['id'] === value)
         if (selectedRecipe) {
           updated[index] = {
             ...currentItem,
@@ -215,7 +250,8 @@ export const useOrderLogic = () => {
   const reorderOrderItems = (fromIndex: number, toIndex: number) => {
     setOrderItems(prev => {
       const newItems = [...prev]
-      const [movedItem] = newItems.splice(fromIndex, 1)
+      const movedItem = newItems.splice(fromIndex, 1)[0]
+      if (!movedItem) {return prev}
       newItems.splice(toIndex, 0, movedItem)
       return newItems
     })
@@ -243,7 +279,7 @@ export const useOrderLogic = () => {
     const errors: string[] = []
 
     // Customer validation
-    if (!formData.customer_name.trim()) {
+    if (!formData['customer_name'].trim()) {
       errors.push('Nama pelanggan harus diisi')
     }
     if (!formData.customer_phone.trim()) {
@@ -287,19 +323,19 @@ export const useOrderLogic = () => {
 
     const validationErrors = validateForm()
     if (validationErrors.length > 0) {
-      void setError(validationErrors.join('\n'))
+      setError(validationErrors.join('\n'))
       return
     }
     
-    void setIsSubmitting(true)
-    void setError('')
+    setIsSubmitting(true)
+    setError('')
     
     try {
       const orderNo = generateOrderNo()
       
       const orderData = {
         order_no: orderNo,
-        customer_name: formData.customer_name,
+        customer_name: formData['customer_name'],
         customer_phone: formData.customer_phone,
         customer_email: formData.customer_email,
         customer_address: formData.customer_address,
@@ -341,17 +377,17 @@ export const useOrderLogic = () => {
         const responseClone = response.clone()
         let errorMessage = 'Gagal menyimpan pesanan'
 
-        try {
-          const errorData = await response.json()
-          const apiMessage = typeof errorData?.error === 'string' ? errorData.error.trim() : ''
-          if (apiMessage.length > 0) {
-            errorMessage = apiMessage
-          } else {
-            const fallbackText = (await responseClone.text()).trim()
-            if (fallbackText.length > 0) {
-              errorMessage = fallbackText
-            }
-          }
+         try {
+           const errorData = await response.json() as unknown
+           const apiMessage = typeof errorData === 'object' && errorData !== null && 'error' in errorData && typeof (errorData as { error?: unknown }).error === 'string' ? (errorData as { error: string }).error.trim() : ''
+           if (apiMessage.length > 0) {
+             errorMessage = apiMessage
+           } else {
+             const fallbackText = (await responseClone.text()).trim()
+             if (fallbackText.length > 0) {
+               errorMessage = fallbackText
+             }
+           }
         } catch {
           const fallbackText = (await responseClone.text()).trim()
           if (fallbackText.length > 0) {
@@ -363,15 +399,13 @@ export const useOrderLogic = () => {
       }
       
       // Redirect to orders page with success message
-      void router.push('/orders?success=true')
+      router.push('/orders?success=true')
       
-    } catch (err: unknown) {
-      const error = err as Error
-      const message = getErrorMessage(error)
-      void setError(message)
-    } finally {
-      void setIsSubmitting(false)
-    }
+     } catch (error) {
+       const caughtError = error as Error
+       const message = getErrorMessage(caughtError)
+       setError(message)
+     }
   }
 
   return {
@@ -383,7 +417,6 @@ export const useOrderLogic = () => {
     isSubmitting,
     error,
     activeTab,
-    loading, // Add loading to return
     
     // Calculated values
     subtotal,

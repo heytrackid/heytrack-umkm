@@ -1,13 +1,15 @@
 // Tabbed content components for Profit Report
 'use client'
 
-import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { TrendingUp, TrendingDown } from 'lucide-react'
+import React from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
-import { COLORS, type SelectedDataPoint, type ProfitData } from './ProfitReportTypes'
+
 import { ProfitChart, ExpensesPieChart, ComparisonChart } from './ProfitReportCharts'
+import { COLORS, type SelectedDataPoint, type ProfitData } from './ProfitReportTypes'
 
 interface PartialProfitData {
     summary: {
@@ -62,7 +64,7 @@ interface ProfitReportTabsProps {
     // Data props
     profitData: PartialProfitData
     // State props
-    chartType: 'line' | 'bar' | 'area'
+    chartType: 'area' | 'bar' | 'line'
     selectedDataPoint: SelectedDataPoint | null
     setSelectedDataPoint: (dataPoint: SelectedDataPoint | null) => void
     compareMode: boolean
@@ -72,7 +74,7 @@ interface ProfitReportTabsProps {
 // Trend tab content
 const TrendTab: React.FC<{
     profitData: PartialProfitData
-    chartType: 'line' | 'bar' | 'area'
+    chartType: 'area' | 'bar' | 'line'
     selectedDataPoint: SelectedDataPoint | null
     setSelectedDataPoint: (dataPoint: SelectedDataPoint | null) => void
 }> = ({ profitData, chartType, selectedDataPoint, setSelectedDataPoint }) => {
@@ -347,7 +349,7 @@ const ComparisonTab: React.FC<{
             <CardContent>
                 <ComparisonChart
                     currentData={profitData.profit_by_period}
-                    previousData={comparisonData?.profit_by_period}
+                    previousData={comparisonData?.profit_by_period ?? null}
                 />
             </CardContent>
         </Card>

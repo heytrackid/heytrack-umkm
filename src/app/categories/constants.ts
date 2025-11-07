@@ -8,7 +8,7 @@ export interface Category {
   commonIngredients: string[]
 }
 
-export type CategoryView = 'list' | 'add' | 'edit'
+export type CategoryView = 'add' | 'edit' | 'list'
 
 export interface CategoriesState {
   categories: Category[]

@@ -1,13 +1,14 @@
 'use client'
 
 import { type ReactNode, lazy, Suspense } from 'react'
+
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { uiLogger } from '@/lib/logger'
 void import(/* webpackChunkName: "recharts" */ 'recharts')
 
 // Chart Loading Skeleton Component
-const ChartLoadingSkeleton = ({ title, height = 'h-64' }: { title?: string, height?: string }) => (
+const ChartLoadingSkeleton = ({ title, height = 'h-64' }: { title?: string | undefined, height?: string | undefined }) => (
   <Card>
     <CardHeader>
       {title && <Skeleton className="h-6 w-48" />}
@@ -43,8 +44,8 @@ export const LazyCell = lazy(() => import(/* webpackChunkName: "recharts" */ 're
 
 // Wrapper Components with Suspense
 interface ChartSuspenseProps {
-  title?: string;
-  height?: string;
+  title?: string | undefined;
+  height?: string | undefined;
   children: ReactNode;
   [key: string]: unknown;
 }
@@ -149,7 +150,7 @@ export const BarWithSuspense = (props: ChartElementProps) => (
 )
 
 interface AreaProps extends ChartElementProps {
-  dataKey: string | number;
+  dataKey: number | string;
   [key: string]: unknown;
 }
 
@@ -172,7 +173,7 @@ export const preloadChartBundle = () =>
 
 
 // Chart Type Detection for Dynamic Loading
-export type ChartType = 'line' | 'bar' | 'area' | 'pie' | 'composed'
+export type ChartType = 'area' | 'bar' | 'composed' | 'line' | 'pie'
 
 export const ChartContainer = ({
   type,

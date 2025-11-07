@@ -1,12 +1,14 @@
 'use client'
 
+import { TrendingUp, TrendingDown, DollarSign, Package, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
+ 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import type { ProfitData } from './types'
-import { TrendingUp, TrendingDown, DollarSign, Package, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react' 
 
 interface ProfitSummaryCardsProps {
   summary: ProfitData['summary']
-  trends?: ProfitData['trends']
+  trends?: ProfitData['trends'] | undefined
   formatCurrency: (amount: number) => string
   isMobile: boolean
 }

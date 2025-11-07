@@ -21,7 +21,7 @@ export type OrderUpdate = Update<'orders'>
 export type { PaymentMethod, OrderStatus } from '@/types/database'
 
 // Custom types (not in database enums)
-export type PaymentStatus = 'PENDING' | 'PAID' | 'PARTIAL' | 'REFUNDED'
+export type PaymentStatus = 'PAID' | 'PARTIAL' | 'PENDING' | 'REFUNDED'
 export type DeliveryMethod = 'PICKUP' | 'DELIVERY' | 'DINE_IN'
 
 // Extended types with relations for UI
@@ -113,7 +113,7 @@ export interface CreateOrderRequest {
   notes?: string
   internal_notes?: string
   special_requirements?: string
-  priority?: 'low' | 'normal' | 'high' | 'urgent'
+  priority?: 'high' | 'low' | 'normal' | 'urgent'
 }
 
 export interface UpdateOrderRequest extends Partial<CreateOrderRequest> {
@@ -124,7 +124,7 @@ export interface OrderFilters {
   status?: OrderStatus[]
   payment_status?: PaymentStatus[]
   delivery_method?: DeliveryMethod[]
-  priority?: Array<'low' | 'normal' | 'high' | 'urgent'>
+  priority?: Array<'high' | 'low' | 'normal' | 'urgent'>
   date_from?: string
   date_to?: string
   customer_search?: string

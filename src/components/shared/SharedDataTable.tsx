@@ -1,21 +1,5 @@
 'use client'
 
-import { type ReactNode, useEffect, useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
-import { VirtualizedTable } from '@/components/ui/virtualized-table'
-import { EmptyState } from '@/components/ui/empty-state'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   Search,
   Plus,
@@ -26,6 +10,23 @@ import {
   Download,
   RefreshCw
 } from 'lucide-react'
+import { type ReactNode, useEffect, useState, useMemo } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { VirtualizedTable } from '@/components/ui/virtualized-table'
 
 /* eslint-disable */
 
@@ -129,14 +130,6 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
     return [10, 25, 50, 100]
   }, [enablePagination, pageSizeOptions, data.length])
 
-  const _sanitizedInitialPageSize = useMemo(() => {
-    if (!enablePagination) { return Math.max(data.length, 1) }
-    if (initialPageSize && sanitizedPageSizeOptions.includes(initialPageSize)) {
-      return initialPageSize
-    }
-    return sanitizedPageSizeOptions[0]
-  }, [enablePagination, initialPageSize, sanitizedPageSizeOptions, data.length])
-
   // Filter data (sorting not supported in VirtualizedTable)
   const processedData = useMemo(() => {
     return data.filter(item => {
@@ -211,9 +204,9 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
     link.setAttribute('href', url)
     link.setAttribute('download', `${title || 'data'}-${new Date().toISOString().split('T')[0]}.csv`)
     link.style.visibility = 'hidden'
-    document.body.appendChild(link)
+    document['body'].appendChild(link)
     link.click()
-    document.body.removeChild(link)
+    document['body'].removeChild(link)
   }
 
   // Reset pagination when filters change
@@ -327,23 +320,38 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
 
         {/* Virtualized Table */}
         {processedData.length === 0 ? (
-          <EmptyState
-            title={emptyMessage}
-            description={emptyDescription}
-            actions={onAdd ? [{ label: addButtonText, onClick: onAdd }] : undefined}
-          />
+          onAdd ? (
+            <EmptyState
+              title={emptyMessage}
+              description={emptyDescription}
+              actions={[{ label: addButtonText, onClick: onAdd }]}
+            />
+          ) : (
+            <EmptyState
+              title={emptyMessage}
+              description={emptyDescription}
+            />
+          )
         ) : (
           <div className="space-y-4">
             <VirtualizedTable
               data={paginatedData}
-              columns={columns.map(col => ({
-                header: col.header,
-                accessor: col.key,
-                cell: col.render ? (item: T) => {
-                  const value = getValue(item, col.key)
-                  return col.render ? col.render(value, item) : String(value)
-                } : undefined
-              })).concat(onView || onEdit || onDelete ? [{
+              columns={columns.map(col => {
+                const base = {
+                  header: col.header,
+                  accessor: col.key,
+                }
+                if (col.render) {
+                  return {
+                    ...base,
+                    cell: (item: T) => {
+                      const value = getValue(item, col.key)
+                      return col.render!(value, item)
+                    }
+                  }
+                }
+                return base
+              }).concat(onView || onEdit || onDelete ? [{
                 header: 'Actions',
                 accessor: 'actions' as keyof T,
                 cell: (item: T) => (

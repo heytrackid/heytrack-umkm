@@ -1,8 +1,9 @@
+import { NextResponse, type NextRequest } from 'next/server'
+import { z } from 'zod'
+
 import { generateNonce, getStrictCSP } from '@/lib/csp'
 import { middlewareLogger } from '@/lib/logger'
 import { updateSession } from '@/utils/supabase/middleware'
-import { NextResponse, type NextRequest } from 'next/server'
-import { z } from 'zod'
 
 
 
@@ -59,7 +60,7 @@ export async function middleware(request: NextRequest) {
 
   // Handle CORS preflight requests
   if (request.method === 'OPTIONS') {
-    const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? 'app.heytrack.id'
+    const appDomain = process.env['NEXT_PUBLIC_APP_DOMAIN'] ?? 'app.heytrack.id'
     const response = new NextResponse(null, {
       status: 200,
       headers: {
@@ -77,7 +78,7 @@ export async function middleware(request: NextRequest) {
     middlewareLogger.debug({
       url: request.url,
       method: request.method,
-      appDomain: process.env.NEXT_PUBLIC_APP_DOMAIN,
+      appDomain: process.env['NEXT_PUBLIC_APP_DOMAIN'],
       nodeEnv: process.env.NODE_ENV
     }, 'Middleware request')
   }
@@ -141,7 +142,7 @@ export async function middleware(request: NextRequest) {
 
     // API routes (relying on Supabase rate limits)
     if (request.nextUrl.pathname.startsWith('/api/')) {
-      const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? 'app.heytrack.id'
+    const appDomain = process.env['NEXT_PUBLIC_APP_DOMAIN'] ?? 'app.heytrack.id'
       response.headers.set('Access-Control-Allow-Origin', isDev ? 'http://localhost:3000' : `https://${appDomain}`);
       response.headers.set('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
       response.headers.set('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');

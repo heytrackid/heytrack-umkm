@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { authLogger } from '@/lib/logger'
 
 /**
@@ -74,7 +75,7 @@ export const AUTH_ERROR_MESSAGES = {
 /**
  * Extract error message from error object
  */
-function extractErrorMessage(error: string | Error | { message?: string }): string {
+function extractErrorMessage(error: Error | string | { message?: string }): string {
   if (typeof error === 'string') {
     return error
   }
@@ -90,7 +91,7 @@ function extractErrorMessage(error: string | Error | { message?: string }): stri
 /**
  * Get user-friendly error message for authentication errors
  */
-export function getAuthErrorMessage(error: string | Error | { message?: string }): string {
+export function getAuthErrorMessage(error: Error | string | { message?: string }): string {
   const errorMessage = extractErrorMessage(error)
 
   // Check for exact matches in our error messages
@@ -193,13 +194,13 @@ export const PasswordSchema = z
 export function validatePassword(password: string): {
   isValid: boolean
   error?: string
-  strength?: 'weak' | 'medium' | 'strong'
+  strength?: 'medium' | 'strong' | 'weak'
 } {
   try {
     PasswordSchema.parse(password)
 
     // Check password strength
-    let strength: 'weak' | 'medium' | 'strong' = 'weak'
+    let strength: 'medium' | 'strong' | 'weak' = 'weak'
     if (password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /\d/.test(password)) {
       strength = 'strong'
     } else if (password.length >= 6 && (/[A-Z]/.test(password) || /[a-z]/.test(password) || /\d/.test(password))) {
@@ -207,11 +208,11 @@ export function validatePassword(password: string): {
     }
 
     return { isValid: true, strength }
-  } catch (err) {
-    if (err instanceof z.ZodError) {
+  } catch (error) {
+    if (error instanceof z.ZodError) {
       return {
         isValid: false,
-        error: err.issues[0]?.message || 'Password tidak valid'
+        error: error.issues[0]?.message || 'Password tidak valid'
       }
     }
     return {

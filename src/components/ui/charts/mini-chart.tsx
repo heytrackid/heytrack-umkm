@@ -1,6 +1,8 @@
 import { memo } from 'react'
-import { cn } from '@/lib/utils'
 import { Line, LineChart, Area, AreaChart, Bar, BarChart, ResponsiveContainer } from 'recharts'
+
+import { cn } from '@/lib/utils'
+
 import { type ChartDataPoint, CHART_COLORS } from './types'
 
 /**
@@ -11,7 +13,7 @@ import { type ChartDataPoint, CHART_COLORS } from './types'
 
 interface MiniChartProps {
   data: ChartDataPoint[]
-  type: 'line' | 'area' | 'bar'
+  type: 'area' | 'bar' | 'line'
   dataKey: string
   color?: string
   className?: string
@@ -75,6 +77,6 @@ export const MiniChart = memo(({
       </ResponsiveContainer>
     </div>
   )
-}, (prevProps: MiniChartProps, nextProps: MiniChartProps) => prevProps.data === nextProps.data && prevProps.type === nextProps.type)
+}, (prevProps: MiniChartProps, nextProps: MiniChartProps) => prevProps['data'] === nextProps['data'] && prevProps['type'] === nextProps['type'])
 
 export default memo(MiniChart)

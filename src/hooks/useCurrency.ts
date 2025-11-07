@@ -1,4 +1,5 @@
 import { useSettings } from '@/contexts/settings-context'
+
 import type { Currency } from '@/shared'
 
 /**
@@ -25,7 +26,7 @@ export function useCurrency(): UseCurrencyReturn {
   
   const getCurrencySymbol = () => settings.currency.symbol
   
-  const getCurrencyCode = () => settings.currency.code
+  const getCurrencyCode = () => settings.currency['code']
   
   const getCurrencyDecimals = () => settings.currency.decimals
   

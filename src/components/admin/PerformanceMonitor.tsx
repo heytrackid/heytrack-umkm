@@ -1,10 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { 
   Activity, 
   Zap, 
@@ -13,6 +8,12 @@ import {
   CheckCircle,
   TrendingUp
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { usePerformanceMonitoring } from '@/utils/performance/usePerformanceMonitoring'
 
 /**
@@ -34,7 +35,7 @@ export const PerformanceMonitor = () => {
   useEffect(() => {
     // Show monitor only in development or when ?perf=true is in URL
     const shouldShow = 
-      process.env.NODE_ENV === 'development' || 
+      process['env'].NODE_ENV === 'development' || 
       new URLSearchParams(window.location.search).get('perf') === 'true'
     
     setIsVisible(shouldShow)
@@ -58,24 +59,22 @@ export const PerformanceMonitor = () => {
   }
 
   const getRatingBadge = (rating: string) => {
-    const variants: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-      excellent: { label: 'Excellent', variant: 'default' },
-      good: { label: 'Good', variant: 'secondary' },
-      'needs-improvement': { label: 'Needs Improvement', variant: 'outline' },
-      poor: { label: 'Poor', variant: 'destructive' },
-      unknown: { label: 'Unknown', variant: 'outline' }
+    const variants = {
+      excellent: { label: 'Excellent', variant: 'default' as const },
+      good: { label: 'Good', variant: 'secondary' as const },
+      'needs-improvement': { label: 'Needs Improvement', variant: 'outline' as const },
+      poor: { label: 'Poor', variant: 'destructive' as const },
+      unknown: { label: 'Unknown', variant: 'outline' as const }
     }
 
-    const { label, variant } = variants[rating] || variants.unknown
+    const ratingData = variants[rating as keyof typeof variants] || variants.unknown
+    const { label, variant } = ratingData
     return <Badge variant={variant}>{label}</Badge>
   }
 
   const handleExport = () => {
-    const _data = exportMetrics()
-    // console.log('Performance Metrics:', _data)
-    
+    exportMetrics()
     // Could send to analytics service here
-    // analytics.track('performance_metrics', _data)
   }
 
   return (

@@ -1,7 +1,8 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+
+import { type PageSize, PAGINATION_DEFAULTS } from '@/app/categories/constants'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { type PageSize, PAGINATION_DEFAULTS } from '@/app/categories/constants'
 
 interface PaginationProps {
   currentPage: number

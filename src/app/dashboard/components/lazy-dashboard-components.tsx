@@ -12,7 +12,7 @@ interface StatsCardsProps {
     revenue: {
       total: number
       growth: string
-      trend: 'up' | 'down'
+      trend: 'down' | 'up'
     }
     orders: {
       total: number

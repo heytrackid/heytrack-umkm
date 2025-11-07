@@ -1,12 +1,10 @@
 'use client'
 
+import { BarChart3, Calendar, AlertCircle, Filter, CheckCircle, TrendingUp, ShoppingCart, Package, DollarSign } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useState, type ReactNode } from 'react'
 
 import AppLayout from '@/components/layout/app-layout'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,19 +13,21 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
-import { BarChart3, Calendar, AlertCircle, Filter, CheckCircle, TrendingUp, ShoppingCart, Package, DollarSign } from 'lucide-react'
-import dynamic from 'next/dynamic'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 
 const SalesReport = dynamic(() => import('./SalesReport'), {
   loading: () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
+        {Array.from({ length: 4 }, (_, i) => (
           <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
         ))}
       </div>
       <div className="space-y-2">
-        {[...Array(5)].map((_, i) => (
+        {Array.from({ length: 5 }, (_, i) => (
           <div key={i} className="h-16 bg-muted/50 rounded animate-pulse" />
         ))}
       </div>
@@ -40,7 +40,7 @@ const InventoryReport = dynamic(() => import('./InventoryReport'), {
   loading: () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
+        {Array.from({ length: 4 }, (_, i) => (
           <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
         ))}
       </div>
@@ -57,7 +57,7 @@ const FinancialReport = dynamic(() => import('./FinancialReport'), {
   loading: () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
+        {Array.from({ length: 4 }, (_, i) => (
           <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
         ))}
       </div>
@@ -75,7 +75,7 @@ const EnhancedProfitReport = dynamic(() => import('./EnhancedProfitReport'), {
     <div className="space-y-4">
       <div className="h-16 bg-muted/50 rounded animate-pulse" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
+        {Array.from({ length: 4 }, (_, i) => (
           <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
         ))}
       </div>
@@ -93,13 +93,15 @@ interface ReportsLayoutProps {
 }
 
 export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
-  const [dateRange, setDateRange] = useState({
-    start: new Date(new Date().setDate(1)).toISOString().split('T')[0], // First day of month
-    end: new Date().toISOString().split('T')[0] // Today
+  const [dateRange, setDateRange] = useState(() => {
+    const start = new Date(new Date().setDate(1)).toISOString().substring(0, 10)
+    const end = new Date().toISOString().substring(0, 10)
+    return { start, end }
   })
   const [dateError, setDateError] = useState<string>('')
 
-  const validateDateRange = (start: string, end: string): boolean => {
+  const validateDateRange = (start: string | undefined, end: string | undefined): boolean => {
+    if (!start || !end) {return false}
     const startDate = new Date(start)
     const endDate = new Date(end)
     const today = new Date()
@@ -127,8 +129,8 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
     return true
   }
 
-  const handleDateChange = (field: 'start' | 'end', value: string) => {
-    const newRange = { ...dateRange, [field]: value }
+  const handleDateChange = (field: 'end' | 'start', value: string) => {
+    const newRange = { ...dateRange, [field]: value } as { start: string; end: string }
     if (validateDateRange(newRange.start, newRange.end)) {
       setDateRange(newRange)
     }
@@ -236,44 +238,40 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                    <Button
                      variant="outline"
                      size="sm"
-                     onClick={() => {
-                       const today = new Date().toISOString().split('T')[0]
-                       if (validateDateRange(today, today)) {
+                       onClick={() => {
+                         const today = new Date().toISOString().substring(0, 10)
                          setDateRange({ start: today, end: today })
-                       }
-                     }}
+                       }}
                    >
                      Hari Ini
                    </Button>
                    <Button
                      variant="outline"
                      size="sm"
-                     onClick={() => {
-                       const end = new Date()
-                       const start = new Date(end)
-                       start.setDate(start.getDate() - 6)
-                       const startStr = start.toISOString().split('T')[0]
-                       const endStr = end.toISOString().split('T')[0]
-                       if (validateDateRange(startStr, endStr)) {
-                         setDateRange({ start: startStr, end: endStr })
-                       }
-                     }}
+                       onClick={() => {
+                         const end = new Date()
+                         const start = new Date(end)
+                         start.setDate(start.getDate() - 6)
+                         const startStr: string = start.toISOString().substring(0, 10)
+                         const endStr: string = end.toISOString().substring(0, 10)
+                           setDateRange({ start: startStr, end: endStr })
+                       }}
                    >
                      7 Hari
                    </Button>
                    <Button
                      variant="outline"
                      size="sm"
-                     onClick={() => {
-                       const end = new Date()
-                       const start = new Date(end)
-                       start.setDate(start.getDate() - 29)
-                       const startStr = start.toISOString().split('T')[0]
-                       const endStr = end.toISOString().split('T')[0]
-                       if (validateDateRange(startStr, endStr)) {
-                         setDateRange({ start: startStr, end: endStr })
-                       }
-                     }}
+                      onClick={() => {
+                        const end = new Date()
+                        const start = new Date(end)
+                        start.setDate(start.getDate() - 29)
+                         const startStr = start.toISOString().substring(0, 10)
+                         const endStr = end.toISOString().substring(0, 10)
+                        if (validateDateRange(startStr, endStr)) {
+                            setDateRange({ start: startStr, end: endStr })
+                        }
+                      }}
                    >
                      30 Hari
                    </Button>
@@ -286,7 +284,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                        const startStr = start.toISOString().split('T')[0]
                        const endStr = now.toISOString().split('T')[0]
                        if (validateDateRange(startStr, endStr)) {
-                         setDateRange({ start: startStr, end: endStr })
+                           setDateRange({ start: startStr as string, end: endStr as string })
                        }
                      }}
                    >
@@ -302,7 +300,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                        const startStr = start.toISOString().split('T')[0]
                        const endStr = now.toISOString().split('T')[0]
                        if (validateDateRange(startStr, endStr)) {
-                         setDateRange({ start: startStr, end: endStr })
+                           setDateRange({ start: startStr as string, end: endStr as string })
                        }
                      }}
                    >
@@ -317,7 +315,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                        const startStr = start.toISOString().split('T')[0]
                        const endStr = now.toISOString().split('T')[0]
                        if (validateDateRange(startStr, endStr)) {
-                         setDateRange({ start: startStr, end: endStr })
+                           setDateRange({ start: startStr as string, end: endStr as string })
                        }
                      }}
                    >
@@ -336,7 +334,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                        value={dateRange.start}
                        onChange={(e) => handleDateChange('start', e.target.value)}
                        className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                       max={new Date().toISOString().split('T')[0]}
+                        max={new Date().toISOString().split('T')[0]}
                      />
                    </div>
                    <div className="flex-1">
@@ -346,10 +344,10 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                        value={dateRange.end}
                        onChange={(e) => handleDateChange('end', e.target.value)}
                        className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                       max={new Date().toISOString().split('T')[0]}
+                        max={new Date().toISOString().split('T')[0]}
                      />
                    </div>
-                   <Button className="w-full sm:w-auto" disabled={!!dateError}>
+                   <Button className="w-full sm:w-auto" disabled={Boolean(dateError)}>
                      <Calendar className="h-4 w-4 mr-2" />
                      Terapkan Filter
                    </Button>

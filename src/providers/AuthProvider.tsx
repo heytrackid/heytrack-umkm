@@ -1,11 +1,13 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { useSupabase } from '@/providers/SupabaseProvider'
+
 import type { Session, User } from '@supabase/supabase-js'
-import { useRouter } from 'next/navigation'
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
 const authLogger = createClientLogger('Auth')
 
@@ -61,7 +63,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           user: session?.user ?? null,
           session: session ?? null,
           isLoading: false,
-          isAuthenticated: !!session?.user,
+          isAuthenticated: Boolean(session?.user),
         }))
       } catch (error: unknown) {
         const message = getErrorMessage(error)
@@ -88,7 +90,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           user: session?.user ?? null,
           session: session ?? null,
           isLoading: false,
-          isAuthenticated: !!session?.user,
+          isAuthenticated: Boolean(session?.user),
         }))
 
         // Refresh router on auth changes
@@ -98,7 +100,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         // Handle session expiry - redirect to login with reason
         if (event === 'SIGNED_OUT' && !session) {
-          void router.push('/auth/login?reason=session_expired')
+          router.push('/auth/login?reason=session_expired')
         }
       }
     )
@@ -118,7 +120,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isLoading: false,
         isAuthenticated: false,
       }))
-      void router.push('/auth/login')
+      router.push('/auth/login')
     } catch (error: unknown) {
       const message = getErrorMessage(error)
       authLogger.error({ error: message }, 'Sign out error:')
@@ -137,7 +139,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         ...prev,
         session: session ?? null,
         user: session?.user ?? prev.user,
-        isAuthenticated: !!session?.user,
+        isAuthenticated: Boolean(session?.user),
       }))
     } catch (error: unknown) {
       const message = getErrorMessage(error)

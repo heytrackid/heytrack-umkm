@@ -1,9 +1,13 @@
 'use client'
 
-import { useState, Suspense, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
+import { useState, Suspense, useCallback, useEffect } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/shared'
+import { useAuth } from '@/providers/AuthProvider'
+
 import { useChatMessages, useAIService } from './hooks'
 
 // Lazy load heavy chatbot components
@@ -26,10 +30,41 @@ const chatbotBreadcrumbs = [
 ]
 
 const AIChatbotPage = () => {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
+  const router = useRouter()
   const { messages, isLoading, scrollAreaRef, addMessage, setLoading } = useChatMessages()
   const { processAIQuery } = useAIService()
   const [input, setInput] = useState('')
-  
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/auth/login?redirectTo=/ai-chatbot')
+    }
+  }, [authLoading, isAuthenticated, router])
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <AppLayout pageTitle="AI Chatbot">
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </div>
+      </AppLayout>
+    )
+  }
+
+  // Don't render if not authenticated (should redirect)
+  if (!isAuthenticated || !user) {
+    return (
+      <AppLayout pageTitle="AI Chatbot">
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <div className="text-muted-foreground">Redirecting to login...</div>
+        </div>
+      </AppLayout>
+    )
+  }
+
 
   const handleSendMessage = useCallback(async (messageText?: string) => {
     const textToSend = (messageText ?? input).trim()
@@ -43,8 +78,8 @@ const AIChatbotPage = () => {
     }
 
     addMessage(userMessage)
-    void setInput('')
-    void setLoading(true)
+    setInput('')
+    setLoading(true)
 
     try {
       const response = await processAIQuery(textToSend)
@@ -55,11 +90,11 @@ const AIChatbotPage = () => {
         content: response.message,
         timestamp: new Date(),
         suggestions: response.suggestions,
-        data: (response.data ?? {}) as Record<string, unknown>
+        data: (response['data'] ?? {}) as Record<string, unknown>
       }
 
       addMessage(assistantMessage)
-    } catch (_err) {
+    } catch (_error) {
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant' as const,
@@ -68,7 +103,7 @@ const AIChatbotPage = () => {
       }
       addMessage(errorMessage)
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [input, isLoading, addMessage, setInput, setLoading, processAIQuery])
 

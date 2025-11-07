@@ -1,7 +1,8 @@
-import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
-import { Label } from '../label'
+import { cn } from '@/lib/utils'
+
 import { Checkbox } from '../checkbox'
+import { Label } from '../label'
 
 /**
  * Mobile Checkbox Component

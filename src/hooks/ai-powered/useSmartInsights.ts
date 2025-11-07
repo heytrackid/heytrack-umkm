@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
@@ -71,9 +72,9 @@ export function useSmartInsights({
                 analysis: pricingAnalysis,
                 priority: 'high'
               })
-            } catch (err: unknown) {
-              logger.warn({ err }, `Pricing analysis failed for ${recipe.name ?? 'unknown'}`)
-            }
+             } catch (error) {
+               logger.warn({ error }, `Pricing analysis failed for ${recipe.name ?? 'unknown'}`)
+             }
           }
         }
       }
@@ -97,17 +98,17 @@ export function useSmartInsights({
             analysis: inventoryOptimization,
             priority: 'medium'
           })
-        } catch (err: unknown) {
-          logger.warn({ err }, 'Inventory optimization failed')
-        }
+        } catch (error) {
+           logger.warn({ error }, 'Inventory optimization failed')
+         }
       }
 
       return insights
 
-    } catch (err: unknown) {
-      logger.error({ err }, 'Smart insights generation failed')
-      return []
-    }
+     } catch (error) {
+       logger.error({ error }, 'Smart insights generation failed')
+       return []
+     }
   }, [analyzePricing, optimizeInventory])
 
   return {

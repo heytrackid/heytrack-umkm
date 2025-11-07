@@ -1,7 +1,9 @@
 import { Suspense, lazy } from 'react'
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+
 import { SettingsLoadingSkeleton } from '@/app/settings/components/SettingsLoadingSkeleton'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 
 // Lazy load all settings components
 const BusinessInfoSettings = lazy(() => import('@/app/settings/components/BusinessInfoSettings').then(mod => ({ default: mod.BusinessInfoSettings })))

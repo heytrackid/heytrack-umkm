@@ -1,13 +1,16 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { OrderUpdateSchema } from '@/lib/validations/domains/order'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-import type { Update } from '@/types/database'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
 import { apiLogger } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage, isValidUUID, isRecord } from '@/lib/type-guards'
+import { OrderUpdateSchema } from '@/lib/validations/domains/order'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Update } from '@/types/database'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -27,7 +30,7 @@ async function GET(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -67,11 +70,11 @@ async function GET(
         )
       `)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json(
           { error: 'Order not found' },
           { status: 404 }
@@ -118,7 +121,7 @@ async function PUT(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -137,7 +140,7 @@ async function PUT(
       )
     }
 
-    const body = await request.json()
+    const body = await request.json() as unknown
 
     // Validate request body
     const validation = OrderUpdateSchema.safeParse(body)
@@ -158,7 +161,7 @@ async function PUT(
       .from('orders')
       .select('id, status, financial_record_id')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (checkError || !existingOrder) {
@@ -170,7 +173,9 @@ async function PUT(
 
     // Update order
     const updateData: OrderUpdate = {
-      ...validatedData,
+      ...Object.fromEntries(
+        Object.entries(validatedData).map(([key, value]) => [key, value ?? null])
+      ),
       updated_at: new Date().toISOString()
     }
 
@@ -178,7 +183,7 @@ async function PUT(
       .from('orders')
       .update(updateData)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select()
       .single()
 
@@ -192,8 +197,8 @@ async function PUT(
 
     // If status changed to DELIVERED and there's no financial record, create one
     if (
-      validatedData.status === 'DELIVERED' && 
-      existingOrder.status !== 'DELIVERED' &&
+      validatedData['status'] === 'DELIVERED' && 
+      existingOrder['status'] !== 'DELIVERED' &&
       !existingOrder.financial_record_id &&
       updatedOrder.total_amount && 
       updatedOrder.total_amount > 0
@@ -203,13 +208,13 @@ async function PUT(
  ?? new Date().toISOString().split('T')[0]
 
       const incomeData = {
-        user_id: user.id,
+        user_id: user['id'],
         type: 'INCOME' as const,
         category: 'Revenue',
         amount: updatedOrder.total_amount,
-        date: incomeDate,
-        reference: `Order #${updatedOrder.order_no}${updatedOrder.customer_name ? ` - ${updatedOrder.customer_name}` : ''}`,
-        description: `Income from order ${updatedOrder.order_no}`
+        date: incomeDate ?? null,
+        reference: `Order #${updatedOrder['order_no']}${updatedOrder['customer_name'] ? ` - ${updatedOrder['customer_name']}` : ''}`,
+        description: `Income from order ${updatedOrder['order_no']}`
       }
 
       const { data: incomeRecord, error: incomeError } = await supabase
@@ -222,28 +227,28 @@ async function PUT(
         // Link financial record to order
         await supabase
           .from('orders')
-          .update({ financial_record_id: incomeRecord.id } as OrderUpdate)
+          .update({ financial_record_id: incomeRecord['id'] } as OrderUpdate)
           .eq('id', id)
-          .eq('user_id', user.id)
+          .eq('user_id', user['id'])
       }
     }
 
     // If status changed from DELIVERED to something else, update financial record
     if (
-      existingOrder.status === 'DELIVERED' && 
-      validatedData.status && 
-      validatedData.status !== 'DELIVERED' &&
+      existingOrder['status'] === 'DELIVERED' && 
+      validatedData['status'] && 
+      validatedData['status'] !== 'DELIVERED' &&
       existingOrder.financial_record_id
     ) {
       // Mark financial record as cancelled or update reference
       const updateFinancialData: FinancialRecordUpdate = {
-        description: `Order ${updatedOrder.order_no} - Status changed to ${validatedData.status}`
+        description: `Order ${updatedOrder['order_no']} - Status changed to ${validatedData['status']}`
       }
       await supabase
         .from('financial_records')
         .update(updateFinancialData)
         .eq('id', existingOrder.financial_record_id)
-        .eq('user_id', user.id)
+        .eq('user_id', user['id'])
     }
 
     return NextResponse.json(updatedOrder)
@@ -262,7 +267,7 @@ async function DELETE(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -286,7 +291,7 @@ async function DELETE(
       .from('orders')
       .select('id, financial_record_id')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (checkError || !existingOrder) {
@@ -301,14 +306,14 @@ async function DELETE(
       .from('order_items')
       .delete()
       .eq('order_id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     // Delete order
     const { error: deleteError } = await supabase
       .from('orders')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (deleteError) {
       apiLogger.error({ error: deleteError }, 'Error deleting order:')
@@ -324,7 +329,7 @@ async function DELETE(
         .from('financial_records')
         .delete()
         .eq('id', existingOrder.financial_record_id)
-        .eq('user_id', user.id)
+        .eq('user_id', user['id'])
     }
 
     return NextResponse.json({ message: 'Order deleted successfully' })

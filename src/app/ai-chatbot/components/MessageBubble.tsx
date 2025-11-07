@@ -1,10 +1,14 @@
+import { Bot, User } from 'lucide-react'
 import React from 'react'
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Bot, User } from 'lucide-react'
-import type { Message } from '@/app/ai-chatbot/types'
+
 import { DataCard } from './DataCard'
+
+import type { Message } from '@/app/ai-chatbot/types'
+
 
 interface MessageBubbleProps {
   message: Message
@@ -25,8 +29,8 @@ export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps
     }
 
     const contextObj = businessContext as Record<string, unknown>
-    const hasOrdersData = contextObj.orders && typeof contextObj.orders === 'object'
-    const hasInventoryData = contextObj.inventory && typeof contextObj.inventory === 'object'
+    const hasOrdersData = contextObj['orders'] && typeof contextObj['orders'] === 'object'
+    const hasInventoryData = contextObj['inventory'] && typeof contextObj['inventory'] === 'object'
 
     if (!hasOrdersData && !hasInventoryData) {
       return null
@@ -39,7 +43,7 @@ export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps
         <DataCard
           key="orders-card"
           title="📊 Status Pesanan"
-          data={contextObj.orders as Record<string, unknown>}
+          data={contextObj['orders'] as Record<string, unknown>}
           type="orders"
         />
       )
@@ -50,7 +54,7 @@ export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps
         <DataCard
           key="inventory-card"
           title="⚠️ Stok Kritis"
-          data={contextObj.inventory as Record<string, unknown>}
+          data={contextObj['inventory'] as Record<string, unknown>}
           type="inventory"
         />
       )
@@ -89,7 +93,7 @@ export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps
         <p className="text-sm leading-relaxed">{message.content}</p>
 
         {/* Display data if available */}
-        {renderMessageData(message.data)}
+        {renderMessageData(message['data'])}
 
         {/* Suggestions */}
         {message.suggestions && message.suggestions.length > 0 && (
@@ -98,7 +102,7 @@ export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps
             <div className="flex flex-wrap gap-2">
               {message.suggestions.map((suggestion) => (
                 <Button
-                  key={`${message.id}-${suggestion}`}
+                  key={`${message['id']}-${suggestion}`}
                   variant="outline"
                   size="sm"
                   className="text-xs h-7"

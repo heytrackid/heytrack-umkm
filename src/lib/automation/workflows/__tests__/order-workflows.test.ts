@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { OrderWorkflowHandlers } from '@/lib/automation/workflows/order-workflows'
-import type { WorkflowContext, WorkflowResult } from '@/types/features/automation'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { WorkflowContext } from '@/types/features/automation'
 
 /**
  * Order Workflow Tests
@@ -89,7 +88,10 @@ describe('OrderWorkflowHandlers', () => {
 
   describe('handleOrderCompleted', () => {
     it('should return error when supabase client is not available', async () => {
-      const contextWithoutSupabase = { ...context, supabase: null }
+      const contextWithoutSupabase: WorkflowContext = {
+        ...context,
+        supabase: null
+      }
 
       const result = await OrderWorkflowHandlers.handleOrderCompleted(contextWithoutSupabase)
 
@@ -151,7 +153,10 @@ describe('OrderWorkflowHandlers', () => {
 
   describe('handleOrderCancelled', () => {
     it('should return error when supabase client is not available', async () => {
-      const contextWithoutSupabase = { ...context, supabase: null }
+      const contextWithoutSupabase: WorkflowContext = {
+        ...context,
+        supabase: null
+      }
 
       const result = await OrderWorkflowHandlers.handleOrderCancelled(contextWithoutSupabase)
 

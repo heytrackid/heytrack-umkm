@@ -1,15 +1,6 @@
 'use client'
 /* eslint-disable no-nested-ternary */
 
-import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { useToast } from '@/hooks/use-toast'
-import { useSettings } from '@/contexts/settings-context'
 import { format } from 'date-fns'
 import {
     Activity,
@@ -26,6 +17,16 @@ import {
     RefreshCw,
     Download
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+import { useSettings } from '@/contexts/settings-context'
+import { useToast } from '@/hooks/use-toast'
 
 interface AdminDashboardProps {
     userId: string
@@ -98,21 +99,21 @@ const AdminDashboard = (_props: AdminDashboardProps) => {
             // Load system metrics
             const metricsRes = await fetch('/api/admin/metrics')
             if (metricsRes.ok) {
-                const data = await metricsRes.json()
+                const data = await metricsRes.json() as SystemMetrics
                 setMetrics(data)
             }
 
             // Load performance logs
             const perfRes = await fetch('/api/admin/performance-logs?limit=50')
             if (perfRes.ok) {
-                const data = await perfRes.json()
+                const data = await perfRes.json() as PerformanceLog[]
                 setPerformanceLogs(data)
             }
 
             // Load error logs
             const errorRes = await fetch('/api/admin/error-logs?limit=20')
             if (errorRes.ok) {
-                const data = await errorRes.json()
+                const data = await errorRes.json() as ErrorLog[]
                 setErrorLogs(data)
             }
         } catch (_error) {
@@ -146,10 +147,10 @@ const AdminDashboard = (_props: AdminDashboardProps) => {
             const a = document.createElement('a')
             a.href = url
             a.download = `logs-${format(new Date(), 'yyyy-MM-dd')}.json`
-            document.body.appendChild(a)
+            document['body'].appendChild(a)
             a.click()
             window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
+            document['body'].removeChild(a)
 
             toast({
                 title: 'Success',
@@ -338,12 +339,12 @@ const AdminDashboard = (_props: AdminDashboardProps) => {
                                 <div className="space-y-1 max-h-64 overflow-y-auto">
                                     {performanceLogs.map((log) => (
                                         <div
-                                            key={log.id}
+                                            key={log['id']}
                                             className="flex items-center justify-between p-2 text-xs border rounded"
                                         >
                                             <div className="flex items-center gap-2">
                                                 <Badge
-                                                    variant={log.status >= 400 ? 'destructive' : 'outline'}
+                                                    variant={log['status'] >= 400 ? 'destructive' : 'outline'}
                                                     className="text-xs"
                                                 >
                                                     {log.method}
@@ -363,7 +364,7 @@ const AdminDashboard = (_props: AdminDashboardProps) => {
                                                     {log.duration_ms}ms
                                                 </span>
                                                 <span className="text-muted-foreground">
-                                                    {format(new Date(log.timestamp), 'HH:mm:ss')}
+                                                    {format(new Date(log['timestamp']), 'HH:mm:ss')}
                                                 </span>
                                             </div>
                                         </div>
@@ -469,7 +470,7 @@ const AdminDashboard = (_props: AdminDashboardProps) => {
                                 <div className="space-y-2 max-h-96 overflow-y-auto">
                                     {errorLogs.map((log) => (
                                         <div
-                                            key={log.id}
+                                            key={log['id']}
                                             className="p-3 border rounded-lg space-y-2"
                                         >
                                             <div className="flex items-start justify-between">
@@ -481,7 +482,7 @@ const AdminDashboard = (_props: AdminDashboardProps) => {
                                                     <p className="text-sm">{log.error_message}</p>
                                                 </div>
                                                 <span className="text-xs text-muted-foreground">
-                                                    {format(new Date(log.timestamp), 'MMM dd, HH:mm')}
+                                                    {format(new Date(log['timestamp']), 'MMM dd, HH:mm')}
                                                 </span>
                                             </div>
                                             {log.stack_trace && (

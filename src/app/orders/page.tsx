@@ -1,7 +1,8 @@
 'use client'
 
-import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
+import { Suspense } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
 import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 

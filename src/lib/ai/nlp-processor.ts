@@ -1,4 +1,5 @@
 import { apiLogger } from '@/lib/logger'
+
 import { AISecurity } from './security'
 import { AIService } from './service'
 
@@ -18,8 +19,8 @@ export interface NLPAnalysis {
   intents: NLPIntent[]
   primaryIntent: string
   entities: NLPEntities
-  sentiment: 'positive' | 'negative' | 'neutral'
-  complexity: 'simple' | 'medium' | 'complex'
+  sentiment: 'negative' | 'neutral' | 'positive'
+  complexity: 'complex' | 'medium' | 'simple'
   context: string[]
 }
 
@@ -68,8 +69,8 @@ Focus on Indonesian food business terminology.`
       } catch (_error) {
         return this.fallbackAnalysis(safeQuery)
       }
-    } catch (err) {
-      apiLogger.error({ error: err }, 'NLP Processing Error')
+    } catch (error) {
+      apiLogger.error({ error }, 'NLP Processing Error')
       return this.fallbackAnalysis(query)
     }
   }
@@ -164,7 +165,7 @@ Focus on Indonesian food business terminology.`
    * Detect sentiment with nuanced scoring
    */
   static analyzeSentiment(query: string): {
-    sentiment: 'positive' | 'negative' | 'neutral'
+    sentiment: 'negative' | 'neutral' | 'positive'
     score: number
     confidence: number
   } {
@@ -195,7 +196,7 @@ Focus on Indonesian food business terminology.`
     
     const totalWords = positiveCount + negativeCount
     let score = 0
-    let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral'
+    let sentiment: 'negative' | 'neutral' | 'positive' = 'neutral'
     let confidence = 0.5
     
     if (totalWords > 0) {
@@ -248,7 +249,7 @@ Focus on Indonesian food business terminology.`
       intents.push({ intent: 'analyze_profit', confidence: 0.9, entities: { numbers } })
     }
     
-    let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral'
+    let sentiment: 'negative' | 'neutral' | 'positive' = 'neutral'
     const positiveWords = ['bagus', 'baik', 'untung', 'naik', 'meningkat']
     const negativeWords = ['buruk', 'jelek', 'rugi', 'turun', 'menurun']
     
@@ -258,7 +259,7 @@ Focus on Indonesian food business terminology.`
     if (hasPositive && !hasNegative) {sentiment = 'positive'}
     else if (hasNegative && !hasPositive) {sentiment = 'negative'}
     
-    let complexity: 'simple' | 'medium' | 'complex' = 'simple'
+    let complexity: 'complex' | 'medium' | 'simple' = 'simple'
     if (intents.length > 2) {complexity = 'complex'}
     else if (intents.length === 2 || numbers.length > 2) {complexity = 'medium'}
     
@@ -270,7 +271,8 @@ Focus on Indonesian food business terminology.`
     
     let primaryIntent: string
     if (intents.length > 0) {
-      primaryIntent = intents.sort((a, b) => b.confidence - a.confidence)[0].intent
+      const sortedIntents = [...intents].sort((a, b) => b.confidence - a.confidence)
+      primaryIntent = sortedIntents[0]?.intent ?? (questionType ? 'question' : 'statement')
     } else {
       primaryIntent = questionType ? 'question' : 'statement'
     }
@@ -282,7 +284,7 @@ Focus on Indonesian food business terminology.`
         entities: { originalQuery: query, numbers, questionType }
       }],
       primaryIntent,
-      entities: { originalQuery: query, numbers, currencies, questionType, hasQuestion: !!questionType },
+      entities: { originalQuery: query, numbers, currencies, questionType, hasQuestion: Boolean(questionType) },
       sentiment,
       complexity,
       context: contexts

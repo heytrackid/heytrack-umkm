@@ -1,10 +1,7 @@
 'use client';
 
-import { createContext, useContext, useId, type ComponentProps } from 'react'
-import type * as LabelPrimitive from "@radix-ui/react-label"
 import { Slot } from "@radix-ui/react-slot"
-import { cn } from "@/lib/utils"
-import { Label } from "@/components/ui/label"
+import { createContext, useContext, useId, type ComponentProps } from 'react'
 import {
   Controller,
   FormProvider,
@@ -14,6 +11,12 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form"
+
+import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
+
+import type * as LabelPrimitive from "@radix-ui/react-label"
+
 
 
 const Form = FormProvider
@@ -94,7 +97,7 @@ const FormLabel = ({
   return (
     <Label
       data-slot="form-label"
-      data-error={!!error}
+      data-error={Boolean(error)}
       className={cn("data-[error=true]:text-destructive", className)}
       htmlFor={formItemId}
       {...props}
@@ -114,7 +117,7 @@ const FormControl = ({ ...props }: ComponentProps<typeof Slot>) => {
           ? `${formDescriptionId}`
           : `${formDescriptionId} ${formMessageId}`
       }
-      aria-invalid={!!error}
+      aria-invalid={Boolean(error)}
       {...props}
     />
   )

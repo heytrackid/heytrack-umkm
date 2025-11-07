@@ -1,5 +1,9 @@
 'use client'
 
+import { Check, CheckCircle, Eye, EyeOff, Loader2, Lock, X } from 'lucide-react'
+import Link from 'next/link'
+import { type FormEvent, useState, useTransition } from 'react'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,9 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { getAuthErrorMessage, validatePassword, } from '@/lib/auth-errors'
-import { Check, CheckCircle, Eye, EyeOff, Loader2, Lock, X } from 'lucide-react'
-import Link from 'next/link'
-import { type FormEvent, useState, useTransition } from 'react'
+
 import { updatePassword } from './actions'
 
 const UpdatePasswordPage = () => {
@@ -48,8 +50,8 @@ const UpdatePasswordPage = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    void setError('')
-    void setFieldErrors({})
+    setError('')
+    setFieldErrors({})
 
     const formData = new FormData(e.currentTarget)
     const pwd = formData.get('password') as string
@@ -60,7 +62,7 @@ const UpdatePasswordPage = () => {
 
     const passwordValidation = validatePassword(pwd)
     if (!passwordValidation.isValid) {
-      errors.password = passwordValidation.error
+      errors.password = passwordValidation.error ?? ''
     }
 
     if (pwd !== confirmPwd) {
@@ -68,7 +70,7 @@ const UpdatePasswordPage = () => {
     }
 
     if (Object.keys(errors).length > 0) {
-      void setFieldErrors(errors)
+      setFieldErrors(errors)
       return
     }
 
@@ -76,20 +78,20 @@ const UpdatePasswordPage = () => {
       const result = await updatePassword(formData)
       if (result?.error) {
         const authError = getAuthErrorMessage(result.error)
-        void setError(authError)
+        setError(authError)
       } else if (result?.success) {
-        void setSuccess(true)
+        setSuccess(true)
       }
     })
   }
 
-  const clearFieldError = (field: 'password' | 'confirmPassword') => {
+  const clearFieldError = (field: 'confirmPassword' | 'password') => {
     setFieldErrors((prev) => {
       const newErrors = { ...prev }
       delete newErrors[field]
       return newErrors
     })
-    void setError('')
+    setError('')
   }
 
   if (success) {
@@ -170,13 +172,13 @@ const UpdatePasswordPage = () => {
                     placeholder="Minimal 8 karakter"
                     value={password}
                     onChange={(e) => {
-                      void setPassword(e.target.value)
+                      setPassword(e.target.value)
                       clearFieldError('password')
                     }}
                     className={`pl-10 pr-12 h-11 text-base transition-all duration-200 ${fieldErrors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                     required
                     disabled={isPending}
-                    aria-invalid={!!fieldErrors.password}
+                    aria-invalid={Boolean(fieldErrors.password)}
                     aria-describedby={fieldErrors.password ? 'password-error' : undefined}
                   />
                   <Button
@@ -206,7 +208,7 @@ const UpdatePasswordPage = () => {
                 {password && (
                   <div className="space-y-2 animate-fade-in">
                     <div className="flex gap-1">
-                      {[...Array(5)].map((_, i) => (
+                      {Array.from({ length: 5 }, (_, i) => (
                         <div
                           key={`bar-${i}`}
                           className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-slate-200 dark:bg-slate-700'
@@ -215,7 +217,7 @@ const UpdatePasswordPage = () => {
                       ))}
                     </div>
                     <p className="text-xs text-slate-600 dark:text-slate-400 transition-opacity duration-200">
-                      Kekuatan: {strengthLabels[passwordStrength - 1] || 'Sangat Lemah'}
+                      Kekuatan: {strengthLabels[passwordStrength - 1] ?? 'Sangat Lemah'}
                     </p>
                   </div>
                 )}
@@ -255,13 +257,13 @@ const UpdatePasswordPage = () => {
                     placeholder="Ulangi password baru"
                     value={confirmPassword}
                     onChange={(e) => {
-                      void setConfirmPassword(e.target.value)
+                      setConfirmPassword(e.target.value)
                       clearFieldError('confirmPassword')
                     }}
                     className={`pl-10 pr-12 h-11 text-base transition-all duration-200 ${fieldErrors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                     required
                     disabled={isPending}
-                    aria-invalid={!!fieldErrors.confirmPassword}
+                    aria-invalid={Boolean(fieldErrors.confirmPassword)}
                     aria-describedby={fieldErrors.confirmPassword ? 'confirm-password-error' : undefined}
                   />
                   <Button

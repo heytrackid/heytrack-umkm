@@ -1,6 +1,9 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 
+import { AlertTriangle, ArrowRight, CheckCircle, Download, FileText, Upload, X } from 'lucide-react'
+import { useRef, useState } from 'react'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -8,8 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { uiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import { AlertTriangle, ArrowRight, CheckCircle, Download, FileText, Upload, X } from 'lucide-react'
-import { useRef, useState } from 'react'
 
 
 
@@ -31,7 +32,7 @@ interface BulkImportWizardProps {
     onCancel: () => void
 }
 
-type Step = 'upload' | 'validate' | 'review' | 'import' | 'complete'
+type Step = 'complete' | 'import' | 'review' | 'upload' | 'validate'
 
 export const BulkImportWizard = ({ onImport, onCancel }: BulkImportWizardProps) => {
     const [currentStep, setCurrentStep] = useState<Step>('upload')
@@ -67,13 +68,17 @@ export const BulkImportWizard = ({ onImport, onCancel }: BulkImportWizardProps) 
 
             const parsedData: ImportRow[] = dataLines.map((line, index) => {
                 const columns = line.split(',').map(col => col.trim())
+                const parseNumber = (value?: string) => {
+                  const parsed = Number(value)
+                  return Number.isFinite(parsed) ? parsed : 0
+                }
                 const row = index + 2 // +2 because we skip header and arrays are 0-indexed
 
                 const name = columns[0] || ''
                 const unit = columns[1] || ''
-                const price_per_unit = parseFloat(columns[2]) || 0
-                const current_stock = parseFloat(columns[3]) || 0
-                const min_stock = parseFloat(columns[4]) || 0
+                const price_per_unit = parseNumber(columns[2])
+                const current_stock = parseNumber(columns[3])
+                const min_stock = parseNumber(columns[4])
                 const description = columns[5] || ''
 
                 // Validation
@@ -181,7 +186,7 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
             { id: 'complete', label: 'Selesai' }
         ]
 
-        const currentIndex = steps.findIndex(s => s.id === currentStep)
+        const currentIndex = steps.findIndex(s => s['id'] === currentStep)
 
         return (
             <div className="flex items-center justify-between mb-6">
@@ -198,7 +203,7 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
                         : 'bg-gray-200'
 
                     return (
-                        <div key={step.id} className="flex items-center flex-1">
+                        <div key={step['id']} className="flex items-center flex-1">
                             <div className="flex flex-col items-center flex-1">
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${circleClasses}`}>
                                     {isCompleted ? <CheckCircle className="h-5 w-5" /> : index + 1}

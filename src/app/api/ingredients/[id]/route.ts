@@ -1,16 +1,20 @@
-import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
-import { withValidation } from '@/lib/api-core/middleware'
-import { handleDatabaseError } from '@/lib/errors'
-import { createClient } from '@/utils/supabase/server'
-import { IdParamSchema, IngredientUpdateSchema } from '@/lib/validations'
-import { triggerWorkflow } from '@/lib/automation/workflows/index'
-import { apiLogger } from '@/lib/logger'
-import type { NextRequest } from 'next/server'
-import type { Row } from '@/types/database'
-import { isValidUUID } from '@/lib/type-guards'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { withValidation } from '@/lib/api-core/middleware'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
+import { triggerWorkflow } from '@/lib/automation/workflows/index'
+import { handleDatabaseError } from '@/lib/errors'
+import { apiLogger } from '@/lib/logger'
+import { isValidUUID } from '@/lib/type-guards'
+import { IdParamSchema, IngredientUpdateSchema } from '@/lib/validations'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Row } from '@/types/database'
+import type { NextRequest } from 'next/server'
+
+
 
 type Ingredient = Row<'ingredients'>
 
@@ -43,11 +47,11 @@ export async function GET(
       .from('ingredients')
       .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, description, supplier, created_at, updated_at, user_id')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return createErrorResponse('Bahan baku tidak ditemukan', 404)
       }
       return handleDatabaseError(error)
@@ -103,7 +107,7 @@ export async function PUT(
       .from('ingredients')
       .select('id, name, current_stock, min_stock, unit')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (fetchError) {
@@ -111,16 +115,29 @@ export async function PUT(
     }
 
     // Update bahan baku
+    const { name, price_per_unit, unit, ...updateData } = validatedData
     const { data, error } = await supabase
       .from('ingredients')
-      .update(validatedData)
+      .update({
+        ...updateData,
+        category: validatedData.category ?? null,
+        max_stock: validatedData.max_stock ?? null,
+        current_stock: validatedData.current_stock ?? null,
+        description: validatedData.description ?? null,
+        expiry_date: validatedData.expiry_date ?? null,
+        is_active: validatedData.is_active ?? null,
+        min_stock: validatedData.min_stock ?? null,
+        ...(name !== undefined && { name }),
+        ...(price_per_unit !== undefined && { price_per_unit }),
+        ...(unit !== undefined && { unit }),
+      })
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, description, supplier, updated_at')
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return createErrorResponse('Bahan baku tidak ditemukan', 404)
       }
       return handleDatabaseError(error)
@@ -138,7 +155,7 @@ export async function PUT(
       if (newStock <= 0 && oldStock > 0) {
         // Stock went from positive to zero or negative - OUT OF STOCK
         apiLogger.info(`🚨 Out of stock alert triggered for ${updatedIngredient.name}`)
-        await triggerWorkflow('inventory.out_of_stock', updatedIngredient.id, {
+        await triggerWorkflow('inventory.out_of_stock', updatedIngredient['id'], {
           ingredient: {
             name: updatedIngredient.name,
             unit: updatedIngredient.unit,
@@ -151,7 +168,7 @@ export async function PUT(
       } else if (newStock <= minStock && oldStock > minStock) {
         // Stock went from above minimum to at/below minimum - LOW STOCK
         apiLogger.info(`⚠️ Low stock alert triggered for ${updatedIngredient.name}`)
-        await triggerWorkflow('inventory.low_stock', updatedIngredient.id, {
+        await triggerWorkflow('inventory.low_stock', updatedIngredient['id'], {
           ingredient: {
             name: updatedIngredient.name,
             unit: updatedIngredient.unit,
@@ -163,8 +180,8 @@ export async function PUT(
         })
       }
 
-    } catch (automationError) {
-      apiLogger.error({ error: automationError }, '⚠️ Inventory automation trigger error (non-blocking):')
+    } catch (error) {
+      apiLogger.error({ error }, '⚠️ Inventory automation trigger error (non-blocking):')
       // Don't fail the ingredient update if automation fails
     }
 
@@ -205,7 +222,7 @@ export async function DELETE(
       .from('ingredients')
       .select('id')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (!existing) {
@@ -231,7 +248,7 @@ export async function DELETE(
       .from('ingredients')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (error) {
       return handleDatabaseError(error)

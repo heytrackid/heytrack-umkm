@@ -10,7 +10,7 @@ export interface EnhancedCRUDOptions {
     update?: string
     delete?: string
   }
-  customErrorHandler?: (error: Error, operation: 'create' | 'update' | 'delete') => void
+  customErrorHandler?: (error: Error, operation: 'create' | 'delete' | 'update') => void
 }
 
 export interface BulkUpdateItem<T extends keyof TablesMap> {
@@ -25,4 +25,4 @@ export interface AsyncOperationOptions {
   showToasts?: boolean
 }
 
-export type CRUDOperation = 'create' | 'update' | 'delete'
+export type CRUDOperation = 'create' | 'delete' | 'update'

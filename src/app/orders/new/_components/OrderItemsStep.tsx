@@ -1,20 +1,23 @@
 'use client'
 
+import { Plus, Trash2, Package, GripVertical } from 'lucide-react'
+import { useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, Package, GripVertical } from 'lucide-react'
+
 import type { OrderItem } from '@/app/orders/new/hooks/useOrderLogic'
 import type { Recipe } from '@/types'
-import { useState } from 'react'
+
 
 interface OrderItemsStepProps {
   orderItems: OrderItem[]
   availableRecipes: Recipe[]
   subtotal: number
   onAddItem: () => void
-  onUpdateItem: (index: number, field: keyof OrderItem, value: string | number | boolean) => void
+  onUpdateItem: (index: number, field: keyof OrderItem, value: boolean | number | string) => void
   onRemoveItem: (index: number) => void
   onReorderItems?: (fromIndex: number, toIndex: number) => void
 }
@@ -71,7 +74,7 @@ const OrderItemsStep = ({
       ) : (
         <div className="space-y-4">
           {orderItems.map((item, index) => {
-            const itemKey = item.id ?? `${item.recipe_id}-${index}`
+            const itemKey = item['id'] ?? `${item.recipe_id}-${index}`
 
             return (
               <div
@@ -79,7 +82,7 @@ const OrderItemsStep = ({
                 className={`border rounded-lg p-4 transition-all ${
                   draggedIndex === index ? 'opacity-50 shadow-lg' : ''
                 } ${draggedIndex !== null && draggedIndex !== index ? 'hover:border-primary/50' : ''}`}
-                draggable={!!onReorderItems}
+                draggable={Boolean(onReorderItems)}
                 onDragStart={(e) => handleDragStart(e, index)}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, index)}
@@ -107,7 +110,7 @@ const OrderItemsStep = ({
                       </SelectTrigger>
                       <SelectContent>
                         {availableRecipes.map((recipe) => (
-                          <SelectItem key={recipe.id} value={recipe.id}>
+                          <SelectItem key={recipe['id']} value={recipe['id']}>
                             {recipe.name}
                           </SelectItem>
                         ))}

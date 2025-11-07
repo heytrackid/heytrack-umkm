@@ -1,3 +1,7 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 /**
  * Optimized Recipes API Route
  * Example of using caching and performance optimizations
@@ -5,12 +9,11 @@
 
 import { createCachedResponse, cachePresets } from '@/lib/api-cache'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
-import type { NextRequest } from 'next/server'
 import { safeNumber, getErrorMessage } from '@/lib/type-guards'
+import { createClient } from '@/utils/supabase/server'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
+import type { NextRequest } from 'next/server'
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,7 +62,7 @@ export async function GET(request: NextRequest) {
       `,
         { count: 'exact' }
       )
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .order('created_at', { ascending: false })
       .limit(limit)
 
@@ -71,7 +74,7 @@ export async function GET(request: NextRequest) {
     const { data: recipes, error, count } = await query
 
     if (error) {
-      dbLogger.error({ error, userId: user.id, msg: 'Failed to fetch recipes' })
+      dbLogger.error({ error, userId: user['id'], msg: 'Failed to fetch recipes' })
       return createCachedResponse(
         { error: 'Failed to fetch recipes' },
         cachePresets.realtime

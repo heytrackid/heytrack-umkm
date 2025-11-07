@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import type { AIAnalysisState, InventoryOptimizationRequest } from './types'
 
 
@@ -39,21 +40,21 @@ export function useInventoryOptimization() {
         data: result,
         loading: false,
         error: null,
-        confidence: result.metadata?.confidence ?? 0.8,
+        confidence: result['metadata']?.confidence ?? 0.8,
         lastUpdated: new Date().toISOString()
       })
 
       return result
 
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      setState(prev => ({
-        ...prev,
-        loading: false,
-        error: errorMessage
-      }))
-      throw err
-    }
+     } catch (error) {
+       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+       setState(prev => ({
+         ...prev,
+         loading: false,
+         error: errorMessage
+       }))
+       throw error
+     }
   }, [])
 
   const clearAnalysis = useCallback(() => {

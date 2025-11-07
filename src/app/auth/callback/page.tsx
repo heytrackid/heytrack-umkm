@@ -19,19 +19,19 @@ const AuthCallbackPage = () => {
 
         if (error) {
           apiLogger.error({ error }, 'Auth callback error:')
-          void router.push('/auth/login?error=auth_callback_error')
+          router.push('/auth/login?error=auth_callback_error')
           return
         }
 
         if (data.session) {
-          void router.push('/dashboard')
+          router.push('/dashboard')
         } else {
-          void router.push('/auth/login')
+          router.push('/auth/login')
         }
-      } catch (err: unknown) {
-        const error = err as Error
-        apiLogger.error({ error }, 'Unexpected error in auth callback:')
-        void router.push('/auth/login?error=unexpected_error')
+      } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error(String(error))
+        apiLogger.error({ error: normalizedError }, 'Unexpected error in auth callback:')
+        router.push('/auth/login?error=unexpected_error')
       }
     }
 

@@ -1,5 +1,6 @@
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
+
 import type { Row } from '@/types/database'
 
 
@@ -22,7 +23,7 @@ function isRecipeValidationResult(data: unknown): data is RecipeWithIngredientsF
   if (!data || typeof data !== 'object') {return false}
   const recipe = data as RecipeWithIngredientsForValidation
   return (
-    typeof recipe.id === 'string' &&
+    typeof recipe['id'] === 'string' &&
     typeof recipe.name === 'string' &&
     Array.isArray(recipe.recipe_ingredients)
   )
@@ -117,8 +118,8 @@ export class OrderValidationService {
         warnings,
         errors
       }
-    } catch (err: unknown) {
-      dbLogger.error({ error: err }, 'Error validating order against inventory')
+    } catch (error) {
+      dbLogger.error({ error }, 'Error validating order against inventory')
       return {
         isValid: false,
         warnings,

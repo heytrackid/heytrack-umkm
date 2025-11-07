@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +21,7 @@ interface ConfirmDialogProps {
   confirmText?: string
   cancelText?: string
   variant?: 'default' | 'destructive'
-  onConfirm: () => void | Promise<void>
+  onConfirm: () => Promise<void> | void
   consequences?: string[]
   requireConfirmation?: boolean
   confirmationText?: string
@@ -125,7 +126,7 @@ export function useConfirm() {
     confirmText?: string
     cancelText?: string
     variant?: 'default' | 'destructive'
-    onConfirm?: () => void | Promise<void>
+    onConfirm?: () => Promise<void> | void
   }>({
     open: false,
     title: '',
@@ -133,7 +134,7 @@ export function useConfirm() {
     onConfirm: undefined
   })
 
-  const confirm = (options: Omit<typeof state, 'open' | 'onConfirm'>) => new Promise<boolean>((resolve) => {
+  const confirm = (options: Omit<typeof state, 'onConfirm' | 'open'>) => new Promise<boolean>((resolve) => {
     setState({
       ...options,
       open: true,

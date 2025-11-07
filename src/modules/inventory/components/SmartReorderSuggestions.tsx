@@ -1,13 +1,15 @@
 'use client'
 
 
+import { ShoppingCart, TrendingUp, Calendar, Package, Sparkles, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
+
 import type { Row } from '@/types/database'
-import { ShoppingCart, TrendingUp, Calendar, Package, Sparkles, AlertCircle } from 'lucide-react'
 
 
 
@@ -17,7 +19,7 @@ type Ingredient = Row<'ingredients'>
 interface ReorderSuggestion {
     ingredient: Ingredient
     suggestedQuantity: number
-    urgency: 'critical' | 'high' | 'medium' | 'low'
+    urgency: 'critical' | 'high' | 'low' | 'medium'
     estimatedCost: number
     reason: string
     daysUntilOut?: number
@@ -47,7 +49,7 @@ export const SmartReorderSuggestions = ({
         .map(ing => {
             const currentStock = ing.current_stock ?? 0
             const minStock = ing.min_stock ?? 0
-            const avgDailyUsage = usageHistory[ing.id] || (minStock * 0.1) // fallback estimate
+            const avgDailyUsage = usageHistory[ing['id']] || (minStock * 0.1) // fallback estimate
             const daysUntilOut = avgDailyUsage > 0 ? Math.floor(currentStock / avgDailyUsage) : 0
 
             // Calculate suggested quantity (2x min stock for safety)
@@ -100,7 +102,7 @@ export const SmartReorderSuggestions = ({
     }
 
     const selectAll = () => {
-        setSelectedSuggestions(new Set(suggestions.map(s => s.ingredient.id)))
+        setSelectedSuggestions(new Set(suggestions.map(s => s.ingredient['id'])))
     }
 
     const clearSelection = () => {
@@ -108,11 +110,11 @@ export const SmartReorderSuggestions = ({
     }
 
     const selectedTotal = suggestions
-        .filter(s => selectedSuggestions.has(s.ingredient.id))
+        .filter(s => selectedSuggestions.has(s.ingredient['id']))
         .reduce((sum, s) => sum + s.estimatedCost, 0)
 
     const handleCreatePO = () => {
-        const selected = suggestions.filter(s => selectedSuggestions.has(s.ingredient.id))
+        const selected = suggestions.filter(s => selectedSuggestions.has(s.ingredient['id']))
         onCreatePurchaseOrder?.(selected)
     }
 
@@ -220,15 +222,15 @@ export const SmartReorderSuggestions = ({
             {/* Suggestions List */}
             <div className="space-y-3">
                 {suggestions.map(suggestion => {
-                    const isSelected = selectedSuggestions.has(suggestion.ingredient.id)
+                    const isSelected = selectedSuggestions.has(suggestion.ingredient['id'])
                     const urgencyColor = getUrgencyColor(suggestion.urgency)
 
                     return (
                         <Card
-                            key={suggestion.ingredient.id}
+                            key={suggestion.ingredient['id']}
                             className={`cursor-pointer transition-all ${isSelected ? 'ring-2 ring-purple-500 border-gray-400' : ''
                                 }`}
-                            onClick={() => toggleSelection(suggestion.ingredient.id)}
+                            onClick={() => toggleSelection(suggestion.ingredient['id'])}
                         >
                             <CardContent className="p-4">
                                 <div className="flex items-start gap-4">
@@ -237,7 +239,7 @@ export const SmartReorderSuggestions = ({
                                         <input
                                             type="checkbox"
                                             checked={isSelected}
-                                            onChange={() => toggleSelection(suggestion.ingredient.id)}
+                                            onChange={() => toggleSelection(suggestion.ingredient['id'])}
                                             className="w-5 h-5 rounded border-gray-300"
                                             onClick={(e) => e.stopPropagation()}
                                         />

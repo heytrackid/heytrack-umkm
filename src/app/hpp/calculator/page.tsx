@@ -1,5 +1,8 @@
 'use client'
 
+import { Calculator, DollarSign, Package, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader, SharedStatsCards } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
@@ -12,8 +15,8 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useRecipes } from '@/hooks/useRecipes'
 import { dbLogger } from '@/lib/logger'
-import { Calculator, DollarSign, Package, TrendingUp } from 'lucide-react'
-import { useState } from 'react'
+
+import type { Recipe } from '@/types'
 
 // Force dynamic rendering to avoid SSG issues
 export const dynamic = 'force-dynamic'
@@ -52,7 +55,8 @@ const HppCalculatorPage = () => {
   const { toast } = useToast()
 
   // ✅ OPTIMIZED: Use TanStack Query for caching
-  const { data: recipesData, isLoading: loading } = useRecipes({ limit: 1000 })
+  const result = useRecipes({ limit: 1000 }) as { data?: { recipes?: Recipe[] }; isLoading: boolean }
+  const { data: recipesData, isLoading: loading } = result
   const recipes = recipesData?.recipes ?? []
 
   const [selectedRecipe, setSelectedRecipe] = useState<string>('')
@@ -71,7 +75,7 @@ const HppCalculatorPage = () => {
     }
 
     try {
-      void setCalculating(true)
+      setCalculating(true)
       const response = await fetch('/api/hpp/calculations', {
         method: 'POST',
         headers: {
@@ -82,8 +86,8 @@ const HppCalculatorPage = () => {
       })
 
       if (response.ok) {
-        const data = await response.json()
-        void setCalculation(data.calculation)
+        const data = await response.json() as { calculation?: HppCalculationExtended }
+        setCalculation(data.calculation ?? null)
 
         toast({
           title: 'Success',
@@ -92,15 +96,15 @@ const HppCalculatorPage = () => {
       } else {
         throw new Error('Failed to calculate HPP')
       }
-    } catch (err: unknown) {
-      dbLogger.error({ err }, 'Failed to calculate HPP')
+    } catch (_error) {
+      dbLogger.error({ _error }, 'Failed to calculate HPP')
       toast({
         title: 'Error',
         description: 'Failed to calculate HPP',
         variant: 'destructive'
       })
     } finally {
-      void setCalculating(false)
+      setCalculating(false)
     }
   }
 
@@ -164,8 +168,8 @@ const HppCalculatorPage = () => {
                     <SelectValue placeholder="Pilih resep..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {recipes.map((recipe: { id: string; name: string }) => (
-                      <SelectItem key={recipe.id} value={recipe.id}>
+                    {recipes.map((recipe) => (
+                      <SelectItem key={recipe['id']} value={recipe['id']}>
                         {recipe.name}
                       </SelectItem>
                     ))}
@@ -283,9 +287,9 @@ const HppCalculatorPage = () => {
                 </h4>
                 <div className="space-y-2">
                   {calculation.material_breakdown.map((item) => (
-                    <div key={item.ingredient_name} className="flex justify-between items-center p-3 border rounded-lg">
+                    <div key={item['ingredient_name']} className="flex justify-between items-center p-3 border rounded-lg">
                       <div>
-                        <div className="font-medium">{item.ingredient_name}</div>
+                        <div className="font-medium">{item['ingredient_name']}</div>
                         <div className="text-sm text-muted-foreground">
                           {item.quantity} {item.unit} × {formatCurrency(item.unit_price)}
                         </div>

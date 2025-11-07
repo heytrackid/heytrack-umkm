@@ -1,10 +1,20 @@
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
+
 import type { Row } from '@/types/database'
 
+type RecipeRow = Row<'recipes'>
+type RecipeIngredientRow = Row<'recipe_ingredients'>
+type IngredientRow = Row<'ingredients'>
 
+type RecipeWithIngredients = RecipeRow & {
+  recipe_ingredients?: Array<RecipeIngredientRow & {
+    ingredient?: IngredientRow | null
+  }>
+}
 
-type Recipe = Row<'recipes'>
+const normalizeError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error(String(error))
 
 interface PricingRecommendation {
   recipeId: string
@@ -18,18 +28,18 @@ interface PricingRecommendation {
   confidence: number
   marketFactors: {
     competitorPrices: number[]
-    demandLevel: 'low' | 'medium' | 'high'
+    demandLevel: 'high' | 'low' | 'medium'
     seasonality: 'low' | 'normal' | 'peak'
     category: string
   }
   riskAssessment: {
-    riskLevel: 'low' | 'medium' | 'high'
+    riskLevel: 'high' | 'low' | 'medium'
     riskFactors: string[]
   }
 }
 
 interface PricingStrategy {
-  strategy: 'cost_plus' | 'market_based' | 'competition' | 'value_based'
+  strategy: 'competition' | 'cost_plus' | 'market_based' | 'value_based'
   targetMargin: number
   reasoning: string
 }
@@ -37,7 +47,7 @@ interface PricingStrategy {
 export class PricingAssistantService {
   /**
    * Generate pricing recommendation for a recipe
-   */
+  */
   static async generatePricingRecommendation(recipeId: string, userId: string): Promise<PricingRecommendation> {
     try {
       const supabase = createClient()
@@ -46,7 +56,13 @@ export class PricingAssistantService {
       // Get recipe details
       const { data, error } = await supabase
         .from('recipes')
-        .select('*')
+        .select(`
+          *,
+          recipe_ingredients (
+            *,
+            ingredient:ingredients (*)
+          )
+        `)
         .eq('id', recipeId)
         .eq('user_id', userId)
         .single()
@@ -55,21 +71,32 @@ export class PricingAssistantService {
         throw new Error(`Recipe not found: ${recipeId}`)
       }
       
-      const recipe = data as Row<'recipes'>
+      const recipe = data as RecipeWithIngredients
 
-      // Get HPP calculation - simplified for now
-      const hppValue = (recipe.selling_price ?? 0) * 0.7 // Estimate 70% cost
+      const sanitizedIngredients: Array<RecipeIngredientRow & { ingredient: IngredientRow }> =
+        (recipe.recipe_ingredients ?? [])
+          .filter((ri): ri is RecipeIngredientRow & { ingredient: IngredientRow } => Boolean(ri.ingredient))
+          .map(ri => ({
+            ...ri,
+            ingredient: ri.ingredient
+          }))
+
+      const recipeRow = recipe as RecipeRow
+      const ingredientCostBase = sanitizedIngredients.reduce((total, ri) => {
+        const price = ri.ingredient.price_per_unit ?? ri.ingredient.weighted_average_cost ?? 0
+        return total + price * (ri.quantity ?? 0)
+      }, 0)
+      const hppValue = ingredientCostBase > 0 ? ingredientCostBase : (recipeRow.selling_price ?? 0) * 0.7
 
       // Analyze market factors
-      const marketFactors = await this.analyzeMarketFactors(recipe)
+      const marketFactors = await this.analyzeMarketFactors(recipeRow)
 
       // Determine pricing strategy
-      const strategy = this.determinePricingStrategy(recipe, marketFactors)
+      const strategy = this.determinePricingStrategy(recipeRow, marketFactors)
 
       // Calculate price recommendations
       const recommendations = this.calculatePriceRecommendations(
         hppValue,
-        recipe.selling_price ?? 0,
         strategy,
         marketFactors
       )
@@ -79,7 +106,7 @@ export class PricingAssistantService {
 
       const result: PricingRecommendation = {
         recipeId,
-        currentPrice: recipe.selling_price ?? 0,
+        currentPrice: recipeRow.selling_price ?? 0,
         recommendedPrice: recommendations.recommendedPrice,
         hppValue,
         minPrice: recommendations.minPrice,
@@ -94,16 +121,17 @@ export class PricingAssistantService {
       dbLogger.info(`Pricing recommendation generated for recipe ${recipeId}: ${result.recommendedPrice}`)
       return result
 
-    } catch (err: unknown) {
-      dbLogger.error({ error: err }, `Failed to generate pricing recommendation for recipe ${recipeId}`)
-      throw err
+    } catch (error) {
+      const normalizedError = normalizeError(error)
+      dbLogger.error({ error: normalizedError, recipeId }, 'Failed to generate pricing recommendation')
+      throw normalizedError
     }
   }
 
   /**
    * Analyze market factors for pricing
    */
-  private static async analyzeMarketFactors(recipe: Recipe): Promise<PricingRecommendation['marketFactors']> {
+  private static async analyzeMarketFactors(recipe: RecipeRow): Promise<PricingRecommendation['marketFactors']> {
     try {
       const supabase = createClient()
       
@@ -113,7 +141,7 @@ export class PricingAssistantService {
         .select('selling_price')
         .eq('category', recipe.category ?? '')
         .eq('user_id', recipe.user_id)
-        .neq('id', recipe.id)
+        .neq('id', recipe['id'])
         .not('selling_price', 'is', null)
         .limit(10)
 
@@ -134,8 +162,9 @@ export class PricingAssistantService {
         category: recipe.category ?? 'General'
       }
 
-    } catch (err: unknown) {
-      dbLogger.warn({ error: err }, 'Failed to analyze market factors, using defaults')
+    } catch (error) {
+      const normalizedError = normalizeError(error)
+      dbLogger.warn({ error: normalizedError }, 'Failed to analyze market factors, using defaults')
       return {
         competitorPrices: [],
         demandLevel: 'medium',
@@ -149,7 +178,7 @@ export class PricingAssistantService {
    * Determine pricing strategy based on recipe and market factors
    */
   private static determinePricingStrategy(
-    recipe: Recipe,
+    recipe: RecipeRow,
     marketFactors: PricingRecommendation['marketFactors']
   ): PricingStrategy {
     const hppMargin = recipe.margin_percentage ?? 30
@@ -186,7 +215,6 @@ export class PricingAssistantService {
    */
   private static calculatePriceRecommendations(
     hppValue: number,
-    currentPrice: number,
     strategy: PricingStrategy,
     marketFactors: PricingRecommendation['marketFactors']
   ) {
@@ -211,6 +239,12 @@ export class PricingAssistantService {
           confidence = 0.9
           reasoning.push(`Competition-based pricing: Matched competitor average price`)
         }
+        break
+
+      case 'cost_plus':
+      case 'value_based':
+      default:
+        reasoning.push('Cost-plus pricing baseline applied')
         break
     }
 
@@ -293,7 +327,7 @@ export class PricingAssistantService {
       riskFactors.push('Limited competitor data, pricing based on assumptions')
     }
 
-    let riskLevel: 'low' | 'medium' | 'high' = 'low'
+    let riskLevel: 'high' | 'low' | 'medium' = 'low'
     if (riskFactors.length > 2) {
       riskLevel = 'high'
     } else if (riskFactors.length > 0) {
@@ -309,7 +343,7 @@ export class PricingAssistantService {
   /**
    * Calculate demand level based on usage
    */
-  private static calculateDemandLevel(timesMade: number): 'low' | 'medium' | 'high' {
+  private static calculateDemandLevel(timesMade: number): 'high' | 'low' | 'medium' {
     if (timesMade > 50) {return 'high'}
     if (timesMade > 20) {return 'medium'}
     return 'low'
@@ -394,7 +428,7 @@ export class PricingAssistantService {
       const pricingOpportunities = recipeRows
         .filter((r): r is RecipePricingRow & { selling_price: number } => typeof r.selling_price === 'number' && r.selling_price < 50000)
         .map((r) => ({
-          recipeId: r.id,
+          recipeId: r['id'],
           recipeName: r.name ?? 'Unknown recipe',
           currentMargin: 25,
           potentialMargin: 35, // Target margin
@@ -409,9 +443,10 @@ export class PricingAssistantService {
         pricingOpportunities
       }
 
-    } catch (err: unknown) {
-      dbLogger.error({ error: err }, 'Failed to get pricing insights')
-      throw err
+    } catch (error) {
+      const normalizedError = normalizeError(error)
+      dbLogger.error({ error: normalizedError }, 'Failed to get pricing insights')
+      throw normalizedError
     }
   }
 }

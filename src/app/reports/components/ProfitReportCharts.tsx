@@ -2,8 +2,6 @@
 'use client'
 
 import React, { Suspense } from 'react'
-import type { ChartType, ChartDataPoint, SelectedDataPoint } from './ProfitReportTypes'
-import { useCurrency } from '@/hooks/useCurrency'
 import {
   LineChart,
   BarChart,
@@ -21,6 +19,10 @@ import {
   Cell,
   type PieLabelRenderProps
 } from 'recharts'
+
+import { useCurrency } from '@/hooks/useCurrency'
+
+import type { ChartType, ChartDataPoint, SelectedDataPoint } from './ProfitReportTypes'
 
 interface ProfitChartProps {
     data: ChartDataPoint[]
@@ -188,11 +190,11 @@ export const ExpensesPieChart: React.FC<ExpensesPieChartProps> = ({ data }) => {
                         cy="50%"
                         outerRadius={100}
                          label={(props: PieLabelRenderProps) => {
-                           const data = props.payload as { category: string; total: number; percentage: number }
-                           return `${data.category}: ${data.percentage.toFixed(1)}%`
-                         }}
-                    >
-                        {data.map((_, index) => (
+                             const _data = props['payload'] as { category: string; total: number; percentage: number }
+                             return `${_data.category}: ${_data.percentage.toFixed(1)}%`
+                           }}
+                     >
+                         {data.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>

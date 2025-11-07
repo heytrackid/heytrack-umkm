@@ -1,5 +1,16 @@
 'use client'
 
+import {
+    AlertCircle,
+    ArrowLeft,
+    Edit,
+    Eye,
+    Plus,
+    RefreshCw,
+    Trash2
+} from 'lucide-react'
+import { Fragment, type ReactNode } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import {
     Breadcrumb,
@@ -13,16 +24,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { getStatusColor, getStatusText } from '@/lib/shared/utilities'
-import {
-    AlertCircle,
-    ArrowLeft,
-    Edit,
-    Eye,
-    Plus,
-    RefreshCw,
-    Trash2
-} from 'lucide-react'
-import { Fragment, type ReactNode } from 'react'
 
 interface BreadcrumbItem {
   label: string
@@ -39,7 +40,7 @@ interface PageHeaderProps {
 
 interface StatsCard {
   title: string
-  value: string | number
+  value: number | string
   subtitle?: string
   icon?: ReactNode
   trend?: {
@@ -55,7 +56,7 @@ interface StatsCardsProps {
 }
 
 interface ErrorCardProps {
-  error: string | Error
+  error: Error | string
   onRetry?: () => void
   className?: string
 }
@@ -83,8 +84,8 @@ interface ActionButtonsProps {
   deleteLabel?: string
   refreshLabel?: string
   className?: string
-  size?: 'sm' | 'md' | 'lg'
-  variant?: 'horizontal' | 'vertical' | 'dropdown'
+  size?: 'lg' | 'md' | 'sm'
+  variant?: 'dropdown' | 'horizontal' | 'vertical'
 }
 
 /**
@@ -308,7 +309,7 @@ export const ActionButtons = ({
   size = "sm",
   variant = "horizontal"
 }: ActionButtonsProps) => {
-  let buttonSize: 'sm' | 'lg' | 'default'
+  let buttonSize: 'default' | 'lg' | 'sm'
   let iconSize: string
 
   switch (size) {
@@ -377,7 +378,7 @@ export const ActionButtons = ({
 interface StatusBadgeProps {
   status: string
   variant?: 'filled' | 'outline'
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'lg' | 'md' | 'sm'
   className?: string
 }
 

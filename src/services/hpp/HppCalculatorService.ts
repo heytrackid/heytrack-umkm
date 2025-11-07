@@ -1,7 +1,8 @@
-import { dbLogger } from '@/lib/logger'
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
+import { dbLogger } from '@/lib/logger'
 import { isRecipeWithIngredients } from '@/lib/type-guards'
-import type { Row, Database } from '@/types/database'
+
+import type { Row, Insert, Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 
@@ -14,7 +15,6 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  */
 
 
-type _Recipe = Row<'recipes'>
 type RecipeIngredient = Row<'recipe_ingredients'>
 type Ingredient = Row<'ingredients'>
 
@@ -38,7 +38,7 @@ export interface HppCalculationResult {
 }
 
 export class HppCalculatorService {
-  private logger = dbLogger
+  private readonly logger = dbLogger
 
   /**
    * Calculate HPP for a specific recipe
@@ -107,7 +107,7 @@ export class HppCalculatorService {
         const total_cost = quantity * unit_price
 
         material_breakdown.push({
-          ingredient_id: validIngredient.id,
+          ingredient_id: validIngredient['id'],
           ingredient_name: validIngredient.name,
           quantity,
           unit: ri.unit,
@@ -127,7 +127,6 @@ export class HppCalculatorService {
       // Apply WAC adjustment based on recipe quantities
       const wac_adjustment = await this.calculateWacAdjustment(
         supabase,
-        recipeId,
         userId,
         recipeIngredients as unknown as Array<RecipeIngredient & { ingredients: Ingredient | null }>
       )
@@ -299,7 +298,6 @@ export class HppCalculatorService {
    */
   private async calculateWacAdjustment(
     supabase: SupabaseClient<Database>,
-    recipeId: string,
     userId: string,
     recipeIngredients: Array<RecipeIngredient & { ingredients: Ingredient | null }>
   ): Promise<number> {
@@ -366,7 +364,7 @@ export class HppCalculatorService {
         totalAdjustment += adjustment
 
         this.logger.debug({
-          ingredientId: ingredient.id,
+          ingredientId: ingredient['id'],
           ingredientName: ingredient.name,
           wac,
           currentPrice,
@@ -392,10 +390,10 @@ export class HppCalculatorService {
     userId: string
   ): Promise<void> {
     try {
-      const calculationData = {
+      const calculationData: Insert<'hpp_calculations'> = {
         recipe_id: result.recipe_id,
         user_id: userId,
-        calculation_date: new Date().toISOString().split('T')[0],
+        calculation_date: new Date().toISOString().split('T')[0] ?? null,
         material_cost: result.material_cost,
         labor_cost: result.labor_cost,
         overhead_cost: result.overhead_cost,
@@ -447,7 +445,7 @@ export class HppCalculatorService {
         .limit(1)
         .single()
 
-      if (error && error.code !== 'PGRST116') {
+      if (error && error['code'] !== 'PGRST116') {
         throw new Error(`Failed to fetch latest HPP: ${error.message}`)
       }
 

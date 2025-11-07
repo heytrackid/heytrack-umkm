@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react'
+
 import { createLogger } from '@/lib/logger'
 
 
@@ -111,7 +112,7 @@ export function useRenderTime(componentName: string) {
     const endTime = performance.now()
     const renderTime = endTime - startTime.current
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process['env'].NODE_ENV === 'development') {
       perfLogger.info({
         componentName,
         render: renderCount.current,
@@ -160,7 +161,7 @@ export function isSlowConnection(): boolean {
   if (typeof navigator === 'undefined') {return false}
   
   interface NetworkInformation extends EventTarget {
-    readonly effectiveType: 'slow-2g' | '2g' | '3g' | '4g'
+    readonly effectiveType: '2g' | '3g' | '4g' | 'slow-2g'
     readonly saveData: boolean
   }
   
@@ -197,7 +198,7 @@ export function useAdaptiveLoading() {
  * Measure and report web vitals
  */
 export function reportWebVitals(metric: { name: string; value: number; id: string }) {
-  if (process.env.NODE_ENV === 'production') {
+  if (process['env'].NODE_ENV === 'production') {
     // Send to analytics
     perfLogger.info({ metric }, 'Web vital metric')
   }

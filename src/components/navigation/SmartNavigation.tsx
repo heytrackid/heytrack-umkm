@@ -1,8 +1,10 @@
 'use client'
 
-import { Fragment, type ReactNode, useState } from 'react'
+import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search, Truck, MoreHorizontal, Receipt, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Fragment, type ReactNode, useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -12,14 +14,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-
-import { cn } from '@/lib/utils'
-import { useAdvancedLinkPreloading, useAdvancedButtonPreloading } from '@/hooks/usePreloading'
 import { useInstantNavigation } from '@/hooks/useInstantNavigation'
-import { LayoutDashboard, ShoppingCart, Users, Package, Utensils, DollarSign, Settings, BarChart3, Plus, Search, Truck, MoreHorizontal, Receipt, MessageSquare } from 'lucide-react'
+import { useAdvancedLinkPreloading, useAdvancedButtonPreloading } from '@/hooks/usePreloading'
+import { cn } from '@/lib/utils'
+
 
 // Haptic feedback utility for mobile devices
-const triggerHapticFeedback = (type: 'light' | 'medium' | 'heavy' = 'light') => {
+const triggerHapticFeedback = (type: 'heavy' | 'light' | 'medium' = 'light') => {
   if (typeof window !== 'undefined' && 'navigator' in window) {
     try {
       // Check for modern vibration API
@@ -29,7 +30,7 @@ const triggerHapticFeedback = (type: 'light' | 'medium' | 'heavy' = 'light') => 
           medium: [20],
           heavy: [30]
         }
-        navigator.vibrate(patterns[type])
+        navigator.vibrate(patterns[type] ?? [10])
       }
       // Fallback for iOS devices with haptic feedback
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,7 +41,7 @@ const triggerHapticFeedback = (type: 'light' | 'medium' | 'heavy' = 'light') => 
           heavy: 'impactHeavy'
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(window as any).hapticFeedback.impact(hapticTypes[type])
+        ;(window as { hapticFeedback?: { impact: (type: string) => void } }).hapticFeedback?.impact(hapticTypes[type] ?? 'impactLight')
       }
     } catch {
       // Silently fail if haptic feedback is not supported
@@ -81,7 +82,7 @@ export const SmartLink = ({
     (href === '/dashboard' && pathname === '/')
 
   const handleMouseEnter = () => {
-    void setIsHovered(true)
+    setIsHovered(true)
     if (preloadOnHover) {
       setTimeout(() => {
         linkPreloading.onMouseEnter(href)
@@ -90,7 +91,7 @@ export const SmartLink = ({
   }
 
   const handleMouseLeave = () => {
-    void setIsHovered(false)
+    setIsHovered(false)
   }
 
   const handleClick = () => {
@@ -111,7 +112,7 @@ export const SmartLink = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={() => linkPreloading.onFocus(href)}
-      onClick={handleClick}
+      {...(onClick && { onClick: handleClick })}
       {...props}
     >
       {children}
@@ -126,8 +127,8 @@ interface SmartButtonProps {
   modalType?: string
   preloadOnHover?: boolean
   className?: string
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
-  size?: "default" | "sm" | "lg" | "icon"
+  variant?: "default" | "destructive" | "ghost" | "link" | "outline" | "secondary"
+  size?: "default" | "icon" | "lg" | "sm"
 }
 
 export const SmartButton = ({
@@ -143,7 +144,7 @@ export const SmartButton = ({
 
   const handleMouseEnter = () => {
     if (preloadOnHover && modalType) {
-      void preloadModalOnHover(modalType)
+      preloadModalOnHover(modalType)
     }
   }
 
@@ -251,14 +252,14 @@ export const NavItem = ({ item, index }: NavItemProps) => {
     (item.href === '/dashboard' && pathname === '/')
 
   const handleMouseEnter = () => {
-    void setIsHovered(true)
+    setIsHovered(true)
     setTimeout(() => {
       linkPreloading.onMouseEnter(item.href)
     }, 100)
   }
 
   const handleMouseLeave = () => {
-    void setIsHovered(false)
+    setIsHovered(false)
   }
 
   const handleClick = () => {
@@ -272,7 +273,7 @@ export const NavItem = ({ item, index }: NavItemProps) => {
         navigateInstant(item.href)
       }}
       className={cn(
-        "flex flex-col items-center space-y-1 px-4 py-3 text-[13px] font-medium transition-all duration-200 rounded-lg min-w-[60px] flex-1 max-w-[80px] relative group touch-manipulation",
+        "flex flex-col items-center space-y-1 px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-[13px] font-medium transition-all duration-200 rounded-lg min-w-[50px] sm:min-w-[60px] flex-1 max-w-[70px] sm:max-w-[80px] relative group touch-manipulation",
         "min-h-[56px] active:scale-95", // Ensure minimum touch target size (44px is iOS minimum, we use 56px for comfort)
         isActive && "text-primary bg-primary/10 shadow-sm scale-105",
         isHovered && !isActive && "hover:opacity-80"
@@ -287,7 +288,7 @@ export const NavItem = ({ item, index }: NavItemProps) => {
       <div className="relative">
         <item.icon
           className={cn(
-            "h-6 w-6 transition-transform",
+            "h-5 w-5 sm:h-6 sm:w-6 transition-transform",
             isHovered && "scale-110"
           )}
           data-testid="nav-icon"
@@ -327,7 +328,7 @@ export const SmartBottomNav = () => {
       <nav
         data-mobile-nav
         data-testid="mobile-nav"
-        className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center h-[56px] px-1 bg-background/95 backdrop-blur-md border-t border-border/50 shadow-lg safe-bottom animate-in fade-in duration-300 pb-[env(safe-area-inset-bottom)]"
+        className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 place-items-center h-[56px] px-1 bg-background/95 backdrop-blur-md border-t border-border/50 shadow-lg safe-bottom animate-in fade-in duration-300 pb-[env(safe-area-inset-bottom)]"
         role="navigation"
         aria-label="Mobile navigation"
       >
@@ -342,14 +343,14 @@ export const SmartBottomNav = () => {
         {/* More Menu Button */}
         <SheetTrigger asChild>
           <button
-            className="flex flex-col items-center space-y-1 px-4 py-4 text-xs font-medium transition-all duration-200 rounded-lg min-w-[60px] flex-1 max-w-[80px] text-muted-foreground hover:text-foreground hover:bg-accent/50 active:scale-95 animate-in slide-in-from-bottom-2 duration-200 touch-manipulation min-h-[60px]"
+            className="flex flex-col items-center space-y-1 px-2 py-2 sm:px-4 sm:py-4 text-xs font-medium transition-all duration-200 rounded-lg min-w-[50px] sm:min-w-[60px] flex-1 max-w-[70px] sm:max-w-[80px] text-muted-foreground hover:text-foreground hover:bg-accent/50 active:scale-95 animate-in slide-in-from-bottom-2 duration-200 touch-manipulation min-h-[60px]"
             style={{ animationDelay: '400ms' }}
             aria-label="More navigation options"
             aria-expanded={isMenuOpen}
             aria-haspopup="dialog"
             onClick={handleMoreClick}
           >
-            <MoreHorizontal className="h-5 w-5" />
+            <MoreHorizontal className="h-4 w-4 sm:h-5 sm:w-5" />
             <span className="truncate text-center leading-tight">Lainnya</span>
           </button>
         </SheetTrigger>
@@ -403,10 +404,10 @@ export const SmartActionButton = ({
   action,
   children,
   ...props
-}: {
-  action: 'add-order' | 'add-customer' | 'add-ingredient' | 'add-recipe' | 'add-finance'
+}: Omit<SmartButtonProps, 'modalType'> & {
+  action: 'add-customer' | 'add-finance' | 'add-ingredient' | 'add-order' | 'add-recipe'
   children: ReactNode
-} & Omit<SmartButtonProps, 'modalType'>) => {
+}) => {
 
   const modalTypeMap = {
     'add-order': 'order-form',

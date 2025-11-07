@@ -1,15 +1,17 @@
-import { createClient } from '@/utils/supabase/server'
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 import { type NextRequest, NextResponse } from 'next/server'
-import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
+
 import { CUSTOMER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { typedInsert } from '@/lib/supabase/typed-insert'
 import { getErrorMessage, safeNumber, safeString } from '@/lib/type-guards'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
 import { typed } from '@/types/type-utilities'
-
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
 
 // GET /api/customers - Get all customers
 async function GET(request: NextRequest) {
@@ -94,7 +96,7 @@ async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
+    const body = await request.json() as Record<string, unknown>
 
     // Validate request body
     const validation = CustomerInsertSchema.safeParse({

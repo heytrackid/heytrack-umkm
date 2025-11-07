@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
 
@@ -12,7 +13,7 @@ interface ModalConfig {
   content: ReactNode
   isOpen: boolean
   onClose?: () => void
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'lg' | 'md' | 'sm' | 'xl'
   closeButton?: boolean
   showOverlay?: boolean
 }
@@ -108,10 +109,10 @@ const ModalRenderer = () => {
     <>
       {Array.from(modals.values()).map((modal) => (
         <Dialog
-          key={modal.id}
+          key={modal['id']}
           open
           onOpenChange={(open) => {
-            if (!open) { closeModal(modal.id) }
+            if (!open) { closeModal(modal['id']) }
           }}
         >
           <DialogContent className={sizeClasses[modal.size ?? 'md']}>

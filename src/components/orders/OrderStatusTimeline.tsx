@@ -1,11 +1,14 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 
+import { CheckCircle2, Clock, Package, Truck, XCircle } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircle2, Clock, Package, Truck, XCircle } from 'lucide-react'
-import type { OrderStatus } from './types'
 import { useResponsive } from '@/hooks/useResponsive'
+
+import type { OrderStatus } from './types'
+
 
 
 
@@ -58,7 +61,7 @@ const OrderStatusTimeline = ({
 }: OrderStatusTimelineProps) => {
     const { isMobile } = useResponsive()
 
-    const currentIndex = statusFlow.findIndex(s => s.status === currentStatus)
+    const currentIndex = statusFlow.findIndex(s => s['status'] === currentStatus)
     const isCancelled = currentStatus === 'CANCELLED'
 
     const getStatusColor = (index: number) => {
@@ -103,7 +106,7 @@ const OrderStatusTimeline = ({
                                 const isClickable = onStatusChange && index <= currentIndex + 1
 
                                 return (
-                                    <div key={step.status} className="relative">
+                                    <div key={step['status']} className="relative">
                                         <div
                                             className={`flex items-start gap-3 p-3 rounded-lg border-2 transition-all ${isActive
                                                 ? 'border-primary bg-primary/5'
@@ -111,7 +114,7 @@ const OrderStatusTimeline = ({
                                                     ? 'border-border bg-muted'
                                                     : 'border-gray-200'
                                                 } ${isClickable ? 'cursor-pointer hover:border-primary' : ''}`}
-                                            onClick={() => isClickable && handleStatusClick(step.status)}
+                                            onClick={() => isClickable && handleStatusClick(step['status'])}
                                         >
                                             <div className={`mt-0.5 ${getStatusColor(index)}`}>
                                                 {isCompleted ? (
@@ -185,11 +188,11 @@ const OrderStatusTimeline = ({
                                 const isClickable = onStatusChange && index <= currentIndex + 1
 
                                 return (
-                                    <div key={step.status} className="flex-1 relative">
+                                    <div key={step['status']} className="flex-1 relative">
                                         <div className="flex flex-col items-center">
                                             {/* Icon */}
                                             <button
-                                                onClick={() => isClickable && handleStatusClick(step.status)}
+                                                onClick={() => isClickable && handleStatusClick(step['status'])}
                                                 disabled={!isClickable}
                                                 className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${isActive
                                                     ? 'border-primary bg-primary text-white scale-110'

@@ -8,7 +8,7 @@
  */
 
 // UI Hooks
-export { useResponsive, useMobile, useIsMobile, useMediaQuery, useScreenSize, useOrientation, useTouchDevice } from './responsive'
+export { useResponsive, useMobile, useIsMobile, useMediaQuery, useScreenSize, useOrientation, useTouchDevice } from '@/utils/responsive'
 
 // export { useLoading } from './useLoading'
 export { useConfirm } from './useConfirm'

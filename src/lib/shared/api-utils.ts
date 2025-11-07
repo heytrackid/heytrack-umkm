@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { getErrorMessage } from '@/shared'
+
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/shared'
+
 import type { ZodSchema } from 'zod'
 
 
@@ -84,8 +86,8 @@ export async function validateRequestData<T>(
     }
 
     return result.data
-  } catch (err) {
-    throw new Error(`Request validation failed: ${getErrorMessage(err)}`)
+  } catch (error) {
+    throw new Error(`Request validation failed: ${getErrorMessage(error)}`)
   }
 }
 
@@ -171,8 +173,8 @@ export function handleConditionalGET(
   etag: string,
   lastModified?: string
 ): NextResponse | null {
-  const ifNoneMatch = request.headers.get('if-none-match')
-  const ifModifiedSince = request.headers.get('if-modified-since')
+  const ifNoneMatch = request['headers'].get('if-none-match')
+  const ifModifiedSince = request['headers'].get('if-modified-since')
 
   if (ifNoneMatch === etag || (lastModified && ifModifiedSince === lastModified)) {
     return new NextResponse(null, { status: 304 })
@@ -196,8 +198,8 @@ export function logAPIRequest(
     path: url.pathname,
     query: Object.fromEntries(url.searchParams.entries()),
     userId,
-    userAgent: request.headers.get('user-agent'),
-    ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+    userAgent: request['headers'].get('user-agent'),
+    ip: request['headers'].get('x-forwarded-for') || request['headers'].get('x-real-ip'),
     ...(extra ?? {})
   }
 
@@ -214,13 +216,13 @@ export function logAPIResponse(
   const logData = {
     method: request.method,
     path: url.pathname,
-    status: response.status,
+    status: response['status'],
     duration: `${duration}ms`,
     userId,
-    size: response.headers.get('content-length')
+    size: response['headers'].get('content-length')
   }
 
-  if (response.status >= 400) {
+  if (response['status'] >= 400) {
     apiLogger.warn(logData, 'API Error Response')
   } else {
     apiLogger.info(logData, 'API Response')
@@ -239,10 +241,10 @@ export function withTiming<T extends any[]>(
       const duration = Date.now() - start
       logger(duration, ...args)
       return result
-    } catch (err) {
+    } catch (error) {
       const duration = Date.now() - start
       logger(duration, ...args)
-      throw err
+      throw error
     }
   }
 }
@@ -288,7 +290,7 @@ export function validateFileUpload(
     return { valid: false, error: `File size exceeds ${maxSize / 1024 / 1024}MB limit` }
   }
 
-  if (allowedTypes.length > 0 && !allowedTypes.includes(file.type)) {
+  if (allowedTypes.length > 0 && !allowedTypes.includes(file['type'])) {
     return { valid: false, error: `File type not allowed. Allowed types: ${allowedTypes.join(', ')}` }
   }
 

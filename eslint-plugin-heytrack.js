@@ -1,16 +1,19 @@
 /**
- * ESLint plugin to enforce using logger instead of console methods
+ * ESLint plugin for HeyTrack custom rules
  */
 
-const noConsoleUsage = require('./eslint-rules/no-console-usage');
+import consistentErrorHandling from './eslint-rules/consistent-error-handling.js';
+import noConsoleUsage from './eslint-rules/no-console-usage.js';
 
-module.exports = {
+export default {
   rules: {
+    'consistent-error-handling': consistentErrorHandling,
     'no-console-usage': noConsoleUsage,
   },
   configs: {
     recommended: {
       rules: {
+        'heytrack/consistent-error-handling': 'error',
         'heytrack/no-console-usage': 'error',
       },
     },

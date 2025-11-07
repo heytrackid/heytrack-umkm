@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import { errorToast, infoToast, successToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 
@@ -27,8 +28,8 @@ export function useAsyncOperation() {
       showToasts = true
     } = options
 
-    void setLoading(true)
-    void setError(null)
+    setLoading(true)
+    setError(null)
 
     if (showToasts && loadingMessage) {
       infoToast(loadingMessage)
@@ -42,9 +43,9 @@ export function useAsyncOperation() {
       }
 
       return result
-    } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : 'Terjadi kesalahan tak terduga'
-      void setError(errorMsg)
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Terjadi kesalahan tak terduga'
+      setError(errorMsg)
 
       if (showToasts) {
         errorToast(
@@ -53,15 +54,15 @@ export function useAsyncOperation() {
         )
       }
 
-      logger.error({ error: err }, 'Async operation error:')
+      logger.error({ error }, 'Async operation error:')
       return null
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [])
 
   const clearError = useCallback(() => {
-    void setError(null)
+    setError(null)
   }, [])
 
   return { execute, loading, error, clearError }

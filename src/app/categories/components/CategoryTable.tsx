@@ -1,13 +1,17 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Tags, MoreHorizontal, Eye, Edit2, Trash2 } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Tags, MoreHorizontal, Eye, Edit2, Trash2 } from 'lucide-react'
 import { CategoriesTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
-import { Pagination } from './Pagination'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
+
 import { BulkActions } from './BulkActions'
+import { Pagination } from './Pagination'
+
 import type { Category, PageSize } from '../constants'
 
 interface CategoryTableProps {
@@ -120,11 +124,11 @@ export const CategoryTable = ({
               </TableHeader>
               <TableBody>
                 {paginatedCategories.map((category) => (
-                  <TableRow key={category.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <TableRow key={category['id']} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <TableCell>
                       <Checkbox
-                        checked={selectedItems.includes(category.id)}
-                        onCheckedChange={() => onSelectItem(category.id)}
+                        checked={selectedItems.includes(category['id'])}
+                        onCheckedChange={() => onSelectItem(category['id'])}
                       />
                     </TableCell>
                     <TableCell>
@@ -143,7 +147,7 @@ export const CategoryTable = ({
                     <TableCell>
                       <div className="flex flex-wrap gap-1 max-w-48">
                         {category.commonIngredients.slice(0, 3).map((ingredient, index) => (
-                          <Badge key={`${category.id}-${ingredient}-${index}`} variant="secondary" className="text-xs">
+                          <Badge key={`${category['id']}-${ingredient}-${index}`} variant="secondary" className="text-xs">
                             {ingredient}
                           </Badge>
                         ))}
@@ -176,7 +180,7 @@ export const CategoryTable = ({
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-red-600 dark:text-red-400"
-                              onClick={() => onDelete(category.id)}
+                              onClick={() => onDelete(category['id'])}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Hapus

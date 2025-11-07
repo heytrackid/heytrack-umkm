@@ -1,7 +1,9 @@
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
 import { ChefHat, TrendingUp, Calculator, BarChart3 } from 'lucide-react'
+
+import { Card, CardContent } from '@/components/ui/card'
+
 import type { Row } from '@/types/database'
 
 

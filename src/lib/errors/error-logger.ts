@@ -21,7 +21,7 @@ export interface ErrorLog {
   stack?: string;
   context: ErrorContext;
   timestamp: string;
-  level: 'error' | 'warn' | 'info';
+  level: 'error' | 'info' | 'warn';
   type: string;
 }
 
@@ -135,9 +135,9 @@ export class EnhancedErrorLogger {
     const url = new URL(request.url);
     return {
       url: url.toString(),
-      userAgent: request.headers.get('user-agent') ?? undefined,
-      ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0] ?? 
-                 request.headers.get('x-real-ip') ?? 
+      userAgent: request['headers'].get('user-agent') ?? undefined,
+      ipAddress: request['headers'].get('x-forwarded-for')?.split(',')[0] ?? 
+                 request['headers'].get('x-real-ip') ?? 
                  undefined,
     };
   }

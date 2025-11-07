@@ -1,5 +1,6 @@
-import { createClient } from '@/utils/supabase/server'
 import { apiLogger as logger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/server'
+
 import type { Json } from '@/types/database'
 
 class SessionNotFoundError extends Error {
@@ -105,7 +106,7 @@ export class ChatSessionService {
     }
 
     // Get message counts and last messages
-    const sessionIds = sessions.map((s) => s.id);
+    const sessionIds = sessions.map((s) => s['id']);
     const { data: messages } = await supabase
       .from('chat_messages')
       .select('session_id, content, created_at')
@@ -114,7 +115,7 @@ export class ChatSessionService {
 
     const sessionMap = new Map<string, SessionListItem>();
     sessions.forEach((session) => {
-      sessionMap.set(session.id, {
+      sessionMap.set(session['id'], {
         ...session,
         message_count: 0,
         last_message: undefined,
@@ -184,7 +185,7 @@ export class ChatSessionService {
    */
   static async addMessage(
     sessionId: string,
-    role: 'user' | 'assistant' | 'system',
+    role: 'assistant' | 'system' | 'user',
     content: string,
     metadata: Record<string, unknown> = {}
   ): Promise<ChatMessage> {
@@ -245,7 +246,7 @@ export class ChatSessionService {
 
     return (data || []).map(message => ({
       ...message,
-      metadata: (message.metadata as MessageMetadata | null) ?? {},
+      metadata: (message['metadata'] as MessageMetadata | null) ?? {},
     })) as ChatMessage[]
   }
 

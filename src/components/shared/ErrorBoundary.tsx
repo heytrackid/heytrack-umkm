@@ -1,9 +1,10 @@
 'use client'
 
-import { Component, type ReactNode, type ErrorInfo, type ComponentType } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { Component, type ReactNode, type ErrorInfo, type ComponentType } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ErrorBoundary')

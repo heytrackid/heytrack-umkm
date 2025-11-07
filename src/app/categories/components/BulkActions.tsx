@@ -1,5 +1,7 @@
-import { Button } from '@/components/ui/button'
 import { Edit2, Trash2, X } from 'lucide-react'
+
+import { Button } from '@/components/ui/button'
+
 import type { Category } from '../constants'
 
 interface BulkActionsProps {
@@ -20,7 +22,7 @@ export const BulkActions = ({
   if (selectedItems.length === 0) { return null }
 
   const selectedCategories = filteredCategories.filter(category =>
-    selectedItems.includes(category.id)
+    selectedItems.includes(category['id'])
   )
   const categoryNames = selectedCategories.map(category => category.name).slice(0, 2).join(', ')
 

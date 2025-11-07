@@ -6,12 +6,7 @@
  */
 
 export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+  Json[] | boolean | number | string | { [key: string]: Json | undefined } | null
 
 export interface DatabaseInternals {
   __InternalSupabase: {

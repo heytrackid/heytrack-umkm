@@ -69,11 +69,11 @@ export function useOperationalCosts(options?: { realtime?: boolean }) {
 export function useFinancialRecords(options?: {
   startDate?: string
   endDate?: string
-  type?: 'INCOME' | 'EXPENSE' | 'INVESTMENT' | 'WITHDRAWAL'
+  type?: 'EXPENSE' | 'INCOME' | 'INVESTMENT' | 'WITHDRAWAL'
   realtime?: boolean
 }) {
   const filter: Record<string, unknown> = {}
-  if (options?.type) {filter.type = options.type}
+  if (options?.type) {filter['type'] = options.type}
 
   return useSupabaseQuery('financial_records', {
     filter,

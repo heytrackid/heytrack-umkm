@@ -1,6 +1,10 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 
+import { addHours, differenceInMinutes, endOfDay, format, startOfDay } from 'date-fns'
+import { AlertTriangle, BarChart3, Calendar, CheckCircle, ChefHat, Clock, Flame, Package, Play } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,9 +16,6 @@ import {
     type SchedulingResult,
     type TimelineSlot
 } from '@/services/production/BatchSchedulingService'
-import { addHours, differenceInMinutes, endOfDay, format, startOfDay } from 'date-fns'
-import { AlertTriangle, BarChart3, Calendar, CheckCircle, ChefHat, Clock, Flame, Package, Play } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
 
 /**
  * ProductionTimeline
@@ -23,10 +24,7 @@ import { useEffect, useMemo, useState } from 'react'
  */
 
 // Define the status type for production batches based on the enum
-type ProductionStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
-
-// Define the resource type
-type ResourceType = 'oven' | 'mixer' | 'decorator' | 'packaging'
+type ProductionStatus = 'CANCELLED' | 'COMPLETED' | 'IN_PROGRESS' | 'PLANNED'
 
 interface ProductionTimelineProps {
   schedulingResult?: SchedulingResult
@@ -43,12 +41,7 @@ interface TimelineGridConfig {
   totalWidth: number
 }
 
-const _RESOURCE_COLORS: Record<ResourceType, string> = {
-  oven: 'bg-orange-500',
-  mixer: 'bg-gray-100 dark:bg-gray-800',
-  decorator: 'bg-gray-100 dark:bg-gray-800',
-  packaging: 'bg-gray-100 dark:bg-gray-800'
-}
+
 
 const STATUS_COLORS: Record<ProductionStatus | 'blocked', string> = {
   PLANNED: 'bg-gray-400',
@@ -145,35 +138,33 @@ const ProductionTimeline = ({
 
     schedulingResult.timeline.forEach(slot => {
       const key = `${slot.resource_type}-${slot.resource_id}`
-      if (!groups[key]) {
-        groups[key] = []
-      }
+      groups[key] ??= []
       groups[key].push(slot)
     })
 
     return Object.entries(groups).map(([resourceKey, slots]) => ({
       resourceKey,
-      resourceType: slots[0]?.resource_type || 'oven',
-      resourceId: slots[0]?.resource_id || '',
+      resourceType: slots[0]?.resource_type ?? 'oven',
+      resourceId: slots[0]?.resource_id ?? '',
       slots: slots.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
     }))
   }, [schedulingResult])
 
   const handleBatchClick = (batch: ProductionBatchWithDetails) => {
-    setSelectedBatch(batch.id)
+    setSelectedBatch(batch['id'])
     onBatchSelect?.(batch)
   }
 
   const handleStatusToggle = (batch: ProductionBatchWithDetails) => {
     let nextStatus: ProductionStatus
-    if (batch.status === 'PLANNED') {
+    if (batch['status'] === 'PLANNED') {
       nextStatus = 'IN_PROGRESS'
-    } else if (batch.status === 'IN_PROGRESS') {
+    } else if (batch['status'] === 'IN_PROGRESS') {
       nextStatus = 'COMPLETED'
     } else {
       nextStatus = 'PLANNED'
     }
-    onBatchStatusChange?.(batch.id, nextStatus)
+    onBatchStatusChange?.(batch['id'], nextStatus)
   }
 
   return (
@@ -233,19 +224,19 @@ const ProductionTimeline = ({
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <CheckCircle className="h-4 w-4" />
-                {schedulingResult.schedule.filter(b => b.status === 'PLANNED').length} planned
+                {schedulingResult.schedule.filter(b => b['status'] === 'PLANNED').length} planned
               </div>
               <div className="flex items-center gap-1">
                 <Play className="h-4 w-4" />
-                {schedulingResult.schedule.filter(b => b.status === 'IN_PROGRESS').length} in progress
+                {schedulingResult.schedule.filter(b => b['status'] === 'IN_PROGRESS').length} in progress
               </div>
               <div className="flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4" />
-                {schedulingResult.schedule.filter(b => b.status === 'COMPLETED').length} completed
+                {schedulingResult.schedule.filter(b => b['status'] === 'COMPLETED').length} completed
               </div>
               <div className="flex items-center gap-1">
                 <BarChart3 className="h-4 w-4" />
-                {Math.round(schedulingResult.resource_utilization.oven_utilization || 0)}% oven utilization
+                {Math.round(schedulingResult.resource_utilization.oven_utilization ?? 0)}% oven utilization
               </div>
             </div>
           )}
@@ -313,7 +304,7 @@ const ProductionTimeline = ({
                         {(resourceType === 'decorator' || resourceType === 'packaging') && <Package className="h-4 w-4" />}
 
                         <span className="text-sm font-medium capitalize">
-                          {resourceType} {resourceId.split('T')[1] || resourceId}
+                          {resourceType} {resourceId.split('T')[1] ?? resourceId}
                         </span>
                       </div>
 
@@ -333,7 +324,7 @@ const ProductionTimeline = ({
 
                         {/* Production batches */}
                         {slots.map((slot) => {
-                          const batch = schedulingResult.schedule.find(b => b.id === slot.batch_id)
+                          const batch = schedulingResult.schedule.find(b => b['id'] === slot.batch_id)
                           if (!batch) { return null }
 
                           const position = calculateBatchPosition(batch)
@@ -343,8 +334,8 @@ const ProductionTimeline = ({
                             <Tooltip key={slot.batch_id}>
                               <TooltipTrigger asChild>
                                 <div
-                                  className={`absolute top-1 h-10 rounded cursor-pointer border-2 transition-all duration-200 ${STATUS_COLORS[batch.status as ProductionStatus] || 'bg-gray-400'
-                                    } ${selectedBatch === batch.id
+                                  className={`absolute top-1 h-10 rounded cursor-pointer border-2 transition-all duration-200 ${STATUS_COLORS[batch['status'] as ProductionStatus] ?? 'bg-gray-400'
+                                    } ${selectedBatch === batch['id']
                                       ? 'border-primary scale-105'
                                       : 'border-transparent hover:border-primary/50'
                                     }`}
@@ -356,22 +347,22 @@ const ProductionTimeline = ({
                                 >
                                   <div className="flex items-center justify-between h-full px-2 text-xs text-white font-medium">
                                     <span className="truncate-desktop-only">
-                                      {batch.recipe_id || 'Batch'}
+                                      {batch.recipe_id ?? 'Batch'}
                                     </span>
                                     <span className="ml-1 flex-shrink-0">
-                                      {batch.quantity || 0}
+                                      {batch.quantity ?? 0}
                                     </span>
                                   </div>
 
                                   {/* Status indicator */}
                                   <div className="absolute -top-1 -right-1">
-                                    {batch.status === 'COMPLETED' && (
+                                    {batch['status'] === 'COMPLETED' && (
                                       <CheckCircle className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
-                                    {batch.status === 'IN_PROGRESS' && (
+                                    {batch['status'] === 'IN_PROGRESS' && (
                                       <Play className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
-                                    {batch.status === 'PLANNED' && (
+                                    {batch['status'] === 'PLANNED' && (
                                       <Clock className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
                                   </div>
@@ -380,10 +371,10 @@ const ProductionTimeline = ({
 
                               <TooltipContent side="top" className="max-w-xs">
                                 <div className="space-y-1">
-                                  <div className="font-semibold">{batch.recipe_id || 'Production Batch'}</div>
+                                  <div className="font-semibold">{batch.recipe_id ?? 'Production Batch'}</div>
                                   <div className="text-xs space-y-1">
-                                    <div>Quantity: {batch.quantity || 0}</div>
-                                    <div>Status: <Badge variant="outline" className="text-xs">{batch.status}</Badge></div>
+                                    <div>Quantity: {batch.quantity ?? 0}</div>
+                                    <div>Status: <Badge variant="outline" className="text-xs">{batch['status']}</Badge></div>
                                     <div>Start: {batch.scheduled_start ? format(new Date(batch.scheduled_start), 'HH:mm') : 'Not scheduled'}</div>
                                     <div>End: {batch.scheduled_end ? format(new Date(batch.scheduled_end), 'HH:mm') : 'Not scheduled'}</div>
                                   </div>
@@ -396,11 +387,11 @@ const ProductionTimeline = ({
                                       className="h-6 text-xs"
                                       onClick={(e) => {
                                         e.stopPropagation()
-                                        void handleStatusToggle(batch)
+                                        handleStatusToggle(batch)
                                       }}
                                     >
-                                      {batch.status === 'PLANNED' ? 'Start' :
-                                        batch.status === 'IN_PROGRESS' ? 'Complete' : 'Reset'}
+                                      {batch['status'] === 'PLANNED' ? 'Start' :
+                                        batch['status'] === 'IN_PROGRESS' ? 'Complete' : 'Reset'}
                                     </Button>
                                   </div>
                                 </div>

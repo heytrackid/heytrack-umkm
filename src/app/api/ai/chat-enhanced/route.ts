@@ -1,19 +1,23 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 /**
  * Enhanced AI Chat API with Context Awareness and Session Persistence
  */
 
 import { type NextRequest, NextResponse } from 'next/server';
-import { ContextAwareAI } from '@/lib/ai-chatbot-enhanced';
-import { ChatSessionService } from '@/lib/services/ChatSessionService';
-import { BusinessContextService } from '@/lib/services/BusinessContextService';
-import { SuggestionEngine } from '@/lib/services/SuggestionEngine';
-import { AIFallbackService } from '@/lib/services/AIFallbackService';
-import { RateLimiter, RATE_LIMITS } from '@/lib/services/RateLimiter';
-import { logger } from '@/lib/logger';
-import { createClient } from '@/utils/supabase/server';
-import { APIError } from '@/lib/errors/api-error-handler';
 
-export const runtime = 'nodejs';
+import { ContextAwareAI } from '@/lib/ai-chatbot-enhanced';
+import { APIError } from '@/lib/errors/api-error-handler';
+import { logger } from '@/lib/logger';
+import { AIFallbackService } from '@/lib/services/AIFallbackService';
+import { BusinessContextService } from '@/lib/services/BusinessContextService';
+import { ChatSessionService } from '@/lib/services/ChatSessionService';
+import { RateLimiter, RATE_LIMITS } from '@/lib/services/RateLimiter';
+import { SuggestionEngine } from '@/lib/services/SuggestionEngine';
+import { createClient } from '@/utils/supabase/server';
+
 export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
@@ -33,13 +37,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limiting - per minute
-    const rateLimitKey = `ai-chat:${user.id}`;
+    const rateLimitKey = `ai-chat:${user['id']}`;
     if (!RateLimiter.check(rateLimitKey, RATE_LIMITS.AI_CHAT.maxRequests, RATE_LIMITS.AI_CHAT.windowMs)) {
       const resetTime = RateLimiter.getResetTime(rateLimitKey);
       const remaining = RateLimiter.getRemaining(rateLimitKey, RATE_LIMITS.AI_CHAT.maxRequests);
       
       logger.warn(
-        { userId: user.id, remaining, resetTime },
+        { userId: user['id'], remaining, resetTime },
         'AI chat rate limit exceeded'
       );
       
@@ -50,7 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limiting - per hour
-    const hourlyRateLimitKey = `ai-chat-hourly:${user.id}`;
+    const hourlyRateLimitKey = `ai-chat-hourly:${user['id']}`;
     if (!RateLimiter.check(hourlyRateLimitKey, RATE_LIMITS.AI_CHAT_HOURLY.maxRequests, RATE_LIMITS.AI_CHAT_HOURLY.windowMs)) {
       throw new APIError(
         'Anda telah mencapai batas maksimal chat per jam. Silakan coba lagi nanti.',
@@ -58,7 +62,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    const body = await request.json() as { message: string; session_id?: string; currentPage?: string };
     const { message, session_id, currentPage } = body;
 
     // Input validation and sanitization
@@ -100,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     if (containsSuspiciousPattern) {
       logger.warn(
-        { userId: user.id, message: sanitizedMessage.substring(0, 100) },
+        { userId: user['id'], message: sanitizedMessage.substring(0, 100) },
         'Potential prompt injection attempt detected'
       );
       // Don't reject, but log for monitoring
@@ -110,16 +114,16 @@ export async function POST(request: NextRequest) {
     let sessionId = session_id;
     if (!sessionId) {
       const context = await BusinessContextService.loadContext(
-        user.id,
+        user['id'],
         currentPage
       );
       const title = ChatSessionService.generateTitle(message);
       const session = await ChatSessionService.createSession(
-        user.id,
+        user['id'],
         title,
         context
       );
-      sessionId = session.id;
+      sessionId = session['id'];
     }
 
     // Save user message (use sanitized version)
@@ -127,7 +131,7 @@ export async function POST(request: NextRequest) {
 
     // Load business context
     const context = await BusinessContextService.loadContext(
-      user.id,
+      user['id'],
       currentPage
     );
 
@@ -136,7 +140,7 @@ export async function POST(request: NextRequest) {
         sanitizedMessage,
         context,
         async () => {
-          const ai = new ContextAwareAI(user.id, sessionId);
+          const ai = new ContextAwareAI(user['id'], sessionId);
           await ai.initializeSession();
           const result = await ai.processQuery(sanitizedMessage, context as Record<string, unknown>);
           return result.content || '';
@@ -155,7 +159,7 @@ export async function POST(request: NextRequest) {
     // Generate suggestions
     const suggestions = SuggestionEngine.generateSuggestions(context);
 
-    logger.info(`Chat message processed - User: ${user.id}, Session: ${sessionId}, Response time: ${responseTime}ms, Fallback: ${fallbackUsed}`);
+    logger.info(`Chat message processed - User: ${user['id']}, Session: ${sessionId}, Response time: ${responseTime}ms, Fallback: ${fallbackUsed}`);
 
     return NextResponse.json({
       message: aiResponse,

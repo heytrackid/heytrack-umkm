@@ -1,6 +1,7 @@
-import { ProductionPlanner } from './production-planner'
 import { CapacityManager } from './capacity-manager'
+import { ProductionPlanner } from './production-planner'
 import { TimeCalculator } from './time-calculator'
+
 import type {
   OrderForProduction,
   Equipment,
@@ -9,8 +10,8 @@ import type {
   WorkingHours,
   ScheduledProductionItem
 } from './types'
-import type { AutomationConfig, ProductionPlan } from '@/types/features/automation'
 import type { Row } from '@/types/database'
+import type { AutomationConfig, ProductionPlan } from '@/types/features/automation'
 
 type Recipe = Row<'recipes'>
 type RecipeIngredient = Row<'recipe_ingredients'>
@@ -22,7 +23,7 @@ type Ingredient = Row<'ingredients'>
  */
 
 export class ProductionAutomation {
-  constructor(private config: AutomationConfig) {}
+  constructor(private readonly config: AutomationConfig) {}
 
   /**
    * 🏭 PRODUCTION AUTOMATION: Smart Production Planning

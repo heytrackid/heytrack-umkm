@@ -1,7 +1,9 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { apiLogger } from '@/lib/logger'
+
 import type { Insert, Database, Json } from '@/types/database'
 import type { CreateNotificationParams } from '@/types/domain/notifications'
-import { apiLogger } from '@/lib/logger'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
 
 
 

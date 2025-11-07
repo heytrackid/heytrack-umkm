@@ -1,8 +1,9 @@
 'use client';
 
-import { useContext, type ComponentProps } from 'react'
 import { OTPInput, OTPInputContext } from "input-otp"
 import { MinusIcon } from "lucide-react"
+import { useContext, type ComponentProps } from 'react'
+
 import { cn } from "@/lib/utils"
 
 

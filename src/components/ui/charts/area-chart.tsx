@@ -1,5 +1,7 @@
 import { memo, lazy, Suspense } from 'react'
+
 import { useResponsive } from '@/hooks/useResponsive'
+
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from './types'
@@ -114,4 +116,4 @@ export const MobileAreaChart = memo(({
       </Suspense>
     </BaseMobileChart>
   )
-}, (prevProps: MobileAreaChartProps, nextProps: MobileAreaChartProps) => prevProps.data === nextProps.data && prevProps.areas === nextProps.areas)
+}, (prevProps: MobileAreaChartProps, nextProps: MobileAreaChartProps) => prevProps['data'] === nextProps['data'] && prevProps.areas === nextProps.areas)

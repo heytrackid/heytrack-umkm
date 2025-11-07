@@ -1,4 +1,5 @@
 import { lazy, type ComponentType } from 'react'
+
 import { uiLogger } from '@/lib/logger'
 
 /**
@@ -22,7 +23,7 @@ export function lazyLoad<T extends ComponentType<any>>( // eslint-disable-line @
 
 // Route-based preloading
 export class RoutePreloader {
-  private static preloadedRoutes = new Set<string>()
+  private static readonly preloadedRoutes = new Set<string>()
 
   static preloadRoute(route: string) {
     if (this.preloadedRoutes.has(route)) {
@@ -75,7 +76,7 @@ export class RoutePreloader {
 
 // Component preloading based on user interaction
 export class ComponentPreloader {
-  private static preloadedComponents = new Set<string>()
+  private static readonly preloadedComponents = new Set<string>()
 
   static preloadComponent(componentId: string, importFunc: () => Promise<unknown>) {
     if (this.preloadedComponents.has(componentId)) {

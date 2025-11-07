@@ -1,6 +1,9 @@
 'use client'
 /* eslint-disable no-nested-ternary */
 
+import { AlertTriangle, Calculator, CheckCircle, Lightbulb, Target, Zap } from 'lucide-react'
+import { useCallback, useEffect, useState, type FC } from 'react'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -11,10 +14,9 @@ import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTr
 import { useCurrency } from '@/hooks/useCurrency'
 import { uiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+
 import type { Row } from '@/types/database'
 import type { SmartPricingAnalysis } from '@/types/features/analytics'
-import { AlertTriangle, Calculator, CheckCircle, Lightbulb, Target, Zap } from 'lucide-react'
-import { useCallback, useEffect, useState, type FC } from 'react'
 
 
 
@@ -22,7 +24,7 @@ type Recipe = Row<'recipes'>
 type RecipeIngredient = Row<'recipe_ingredients'>
 type Ingredient = Row<'ingredients'>
 
-type PricingTierKey = 'economy' | 'standard' | 'premium'
+type PricingTierKey = 'economy' | 'premium' | 'standard'
 
 interface RecipeWithIngredients extends Recipe {
   recipe_ingredients?: Array<RecipeIngredient & {
@@ -46,7 +48,7 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
   const analyzePricing = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/recipes/${recipe.id}/pricing`, {
+      const response = await fetch(`/api/recipes/${recipe['id']}/pricing`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -56,7 +58,7 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
       })
 
       if (!response.ok) {
-        throw new Error(`API call failed: ${response.status}`)
+        throw new Error(`API call failed: ${response['status']}`)
       }
 
       const pricingAnalysis = await response.json() as SmartPricingAnalysis
@@ -325,7 +327,7 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
                       className="w-full mt-3"
                       onClick={(e) => {
                         e.stopPropagation()
-                        void handleApplyPrice(tier)
+                        handleApplyPrice(tier)
                       }}
                     >
                       Gunakan Harga Ini

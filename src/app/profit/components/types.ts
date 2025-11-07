@@ -57,4 +57,4 @@ export interface DateRangeParams {
 }
 
 export type ExportFormat = 'csv' | 'pdf' | 'xlsx'
-export type PeriodType = 'week' | 'month' | 'quarter' | 'year' | 'custom'
+export type PeriodType = 'custom' | 'month' | 'quarter' | 'week' | 'year'

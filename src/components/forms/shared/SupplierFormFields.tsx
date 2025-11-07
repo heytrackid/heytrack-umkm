@@ -1,6 +1,7 @@
 import { FormField, FormGrid, FormSection } from '@/components/ui/crud-form'
-import type { UseFormRegister, FieldErrors } from 'react-hook-form'
+
 import type { SupplierForm } from '@/lib/validations/form-validations'
+import type { UseFormRegister, FieldErrors } from 'react-hook-form'
 
 /**
  * Shared Form Fields Components

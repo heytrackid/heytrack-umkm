@@ -1,6 +1,7 @@
 'use client'
 
 import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from 'react'
+
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import {
   DataTableSkeleton,
@@ -8,6 +9,7 @@ import {
   DashboardCardSkeleton,
   AvatarSkeleton
 } from '@/components/ui/skeletons'
+
 import { globalLazyLoadingUtils } from '../lazy'
 
 // Type for window with lazy loading metrics
@@ -120,7 +122,7 @@ export const SuspenseWrapper = ({
   loadingType = 'default',
   errorFallback
 }: SuspenseWrapperProps) => {
-  const LoadingComponent = loadingComponents[loadingType]
+  const LoadingComponent = loadingComponents[loadingType] || DataTableSkeleton
 
   return (
     <ErrorBoundary fallback={errorFallback}>

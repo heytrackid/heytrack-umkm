@@ -1,6 +1,7 @@
-import { NLPProcessor } from './nlp-processor'
-import { BusinessAI } from './business'
 import { apiLogger } from '@/lib/logger'
+
+import { BusinessAI } from './business'
+import { NLPProcessor } from './nlp-processor'
 
 /**
  * AI Module - Main Export

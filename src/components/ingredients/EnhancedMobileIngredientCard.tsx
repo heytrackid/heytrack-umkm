@@ -1,21 +1,24 @@
 'use client'
 
-import { useState } from 'react'
-import type { Row } from '@/types/database'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { useSettings } from '@/contexts/settings-context'
-import { StockBadge, CompactStockIndicator } from './StockBadge'
-import { SwipeableCard, SwipeActions } from '@/components/ui/swipeable-card'
-import { QuickStockAdjustment } from '@/components/ui/quick-stock-adjustment'
-import { animations } from '@/lib/animations'
-import { cn } from '@/lib/utils'
 import {
     ChevronDown,
     ChevronUp,
     ShoppingCart,
     Package
 } from 'lucide-react'
+import { useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { QuickStockAdjustment } from '@/components/ui/quick-stock-adjustment'
+import { SwipeableCard, SwipeActions } from '@/components/ui/swipeable-card'
+import { useSettings } from '@/contexts/settings-context'
+import { animations } from '@/lib/animations'
+import { cn } from '@/lib/utils'
+
+import { StockBadge, CompactStockIndicator } from './StockBadge'
+
+import type { Row } from '@/types/database'
 
 type Ingredient = Row<'ingredients'>
 
@@ -209,18 +212,18 @@ export const EnhancedMobileIngredientList = ({
         <div className="space-y-3">
             {ingredients.map((ingredient, index) => (
                 <div
-                    key={ingredient.id}
+                    key={ingredient['id']}
                     className={animations.fadeInUp}
                     style={animations.stagger(index, 30)}
                 >
                     <EnhancedMobileIngredientCard
                         ingredient={ingredient}
-                        onEdit={onEdit}
-                        onDelete={onDelete}
-                        onQuickBuy={onQuickBuy}
-                        onStockAdjust={onStockAdjust}
-                        enableSwipe={enableSwipe}
-                        showQuickAdjust={showQuickAdjust}
+                        {...(onEdit ? { onEdit } : {})}
+                        {...(onDelete ? { onDelete } : {})}
+                        {...(onQuickBuy ? { onQuickBuy } : {})}
+                        {...(onStockAdjust ? { onStockAdjust } : {})}
+                        {...(enableSwipe !== undefined ? { enableSwipe } : {})}
+                        {...(showQuickAdjust !== undefined ? { showQuickAdjust } : {})}
                     />
                 </div>
             ))}

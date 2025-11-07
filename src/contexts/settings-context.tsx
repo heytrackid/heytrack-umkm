@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+
 import { uiLogger } from '@/lib/logger'
 
 
@@ -51,11 +52,11 @@ export const languages: Language[] = [
   { code: 'en', name: 'English', flag: '🇺🇸' }
 ]
 
-const DEFAULT_CURRENCY_CODE = process.env['NEXT_PUBLIC_DEFAULT_CURRENCY'] ?? 'IDR'
-const DEFAULT_LANGUAGE_CODE = process.env['NEXT_PUBLIC_DEFAULT_LANGUAGE'] ?? 'id'
+const DEFAULT_CURRENCY_CODE = process['env']['NEXT_PUBLIC_DEFAULT_CURRENCY'] ?? 'IDR'
+const DEFAULT_LANGUAGE_CODE = process['env']['NEXT_PUBLIC_DEFAULT_LANGUAGE'] ?? 'id'
 
-const defaultCurrency = currencies.find(c => c.code === DEFAULT_CURRENCY_CODE) ?? currencies[0]
-const defaultLanguage = languages.find(l => l.code === DEFAULT_LANGUAGE_CODE) ?? languages[0]
+const defaultCurrency = currencies.find(c => c['code'] === DEFAULT_CURRENCY_CODE) ?? currencies[0]!
+const defaultLanguage = languages.find(l => l['code'] === DEFAULT_LANGUAGE_CODE) ?? languages[0]!
 
 const defaultSettings: Settings = {
   currency: defaultCurrency,
@@ -84,15 +85,15 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
             currency: parsedCurrency,
             language: parsedLanguage
           }
-          void setSettings(newSettings)
+          setSettings(newSettings)
           localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
-        } catch (err: unknown) {
-          uiLogger.error({ err }, 'Failed to parse saved settings from localStorage')
-          void setSettings(defaultSettings)
+        } catch (error) {
+          uiLogger.error({ error }, 'Failed to parse saved settings from localStorage')
+          setSettings(defaultSettings)
           localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
         }
       } else {
-        void setSettings(defaultSettings)
+        setSettings(defaultSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
       }
     }
@@ -100,13 +101,13 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
   const updateCurrency = (currency: Currency) => {
     const newSettings = { ...settings, currency }
-    void setSettings(newSettings)
+    setSettings(newSettings)
     localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
   }
 
   const updateLanguage = (language: Language) => {
     const newSettings = { ...settings, language }
-    void setSettings(newSettings)
+    setSettings(newSettings)
     localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
   }
 
@@ -121,7 +122,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const resetToDefault = () => {
-    void setSettings(defaultSettings)
+    setSettings(defaultSettings)
     localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
   }
 

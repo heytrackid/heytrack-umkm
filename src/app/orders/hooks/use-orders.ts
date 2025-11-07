@@ -1,6 +1,9 @@
 import { useMemo } from 'react'
+
+import { DEFAULT_ORDERS_CONFIG, calculateOrderTotals, type OrdersModuleConfig, type OrderPriority } from '@/app/orders/config/orders.config'
 import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks'
 import { formatCurrency, parseCurrencyString } from '@/lib/currency'
+
 import type {
   Order,
   OrderItem,
@@ -11,8 +14,7 @@ import type {
   OrderTotalsBreakdown,
   InvoiceData
 } from '@/app/orders/types/orders.types'
-import type { CatchError } from '@/types/common'
-import { DEFAULT_ORDERS_CONFIG, calculateOrderTotals, type OrdersModuleConfig, type OrderPriority } from '../config/orders.config' 
+import type { CatchError } from '@/types/common' 
 
 interface FinancialMetadata {
   currency?: string | null
@@ -20,7 +22,7 @@ interface FinancialMetadata {
   tax_inclusive?: boolean | null
 }
 
-const hasFinancialMetadata = (order: Order): order is Order & FinancialMetadata =>
+const hasFinancialMetadata = (order: Order): order is FinancialMetadata & Order =>
   typeof order === 'object' &&
   order !== null &&
   ('currency' in order || 'tax_rate' in order || 'tax_inclusive' in order)
@@ -132,8 +134,8 @@ export function useOrders(filters?: OrderFilters) {
       if (typeof search === 'string' && search.trim().length > 0) {
         const searchLower = search.toLowerCase()
         filteredOrders = filteredOrders.filter(order => {
-          const name = order.customer_name?.toLowerCase() ?? ''
-          const orderNo = order.order_no?.toLowerCase() || ''
+          const name = order['customer_name']?.toLowerCase() ?? ''
+          const orderNo = order['order_no']?.toLowerCase() || ''
           return name.includes(searchLower) || orderNo.includes(searchLower)
         })
       }
@@ -266,21 +268,25 @@ export function useOrderSummary(filters?: OrderFilters): {
         totalRevenue += order.total_amount
       }
 
-      // Status counts
-      switch (order.status) {
-        case 'DELIVERED':
-          completedOrders++
-          break
-        case 'CANCELLED':
-          cancelledOrders++
-          break
-        case 'PENDING':
-        case 'CONFIRMED':
-        case 'IN_PROGRESS':
-        case 'READY':
-          pendingOrders++
-          break
-      }
+       // Status counts
+       switch (order['status']) {
+         case 'DELIVERED':
+           completedOrders++
+           break
+         case 'CANCELLED':
+           cancelledOrders++
+           break
+         case 'PENDING':
+         case 'CONFIRMED':
+         case 'IN_PROGRESS':
+         case 'READY':
+           pendingOrders++
+           break
+         case null:
+           break
+         default:
+           break
+       }
 
       // Top selling items tracking - items would need to be fetched separately
       // Skipping for now as order.items doesn't exist on the base type
@@ -307,15 +313,15 @@ export function useOrderSummary(filters?: OrderFilters): {
 export function useOrderStatus(orderId: string) {
   const { update } = useOrders()
 
-  const updateStatus = async (newStatus: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'READY' | 'DELIVERED' | 'CANCELLED', reason?: string) => {
+  const updateStatus = async (newStatus: 'CANCELLED' | 'CONFIRMED' | 'DELIVERED' | 'IN_PROGRESS' | 'PENDING' | 'READY', reason?: string) => {
     try {
       await update(orderId, {
         status: newStatus,
-        notes: reason ? `Status changed to ${newStatus}: ${reason}` : undefined
+        notes: reason ? `Status changed to ${newStatus}: ${reason}` : null
       })
-    } catch (err: unknown) {
-      throw new Error(`Failed to update order status: ${err instanceof Error ? err.message : 'Unknown error'}`)
-    }
+     } catch (error) {
+       throw new Error(`Failed to update order status: ${error instanceof Error ? error.message : 'Unknown error'}`)
+     }
   }
 
   const canTransitionTo = (currentStatus: string, targetStatus: string): boolean => {
@@ -329,7 +335,7 @@ export function useOrderStatus(orderId: string) {
       'CANCELLED': []
     }
 
-    return transitions[currentStatus]?.includes(targetStatus) || false
+    return transitions[currentStatus]?.includes(targetStatus) ?? false
   }
 
   return {
@@ -392,12 +398,12 @@ export function useInvoiceGeneration() {
 
     return {
       order,
-      company_info: companyInfo,
+      company_info: companyInfo ?? { name: '', address: '', phone: '', email: '' },
       totals_breakdown: totalsBreakdown,
       payment_terms: paymentTerms,
-      due_date: dueDate.toISOString().split('T')[0],
-      invoice_number: order.order_no || `INV-${order.id.slice(-8)}`,
-      notes: order.notes ?? undefined
+      due_date: dueDate.toISOString().split('T')[0] as string,
+      invoice_number: order['order_no'] ?? `INV-${order['id'].slice(-8)}`,
+      notes: order.notes as string | null | undefined
     }
   }
 

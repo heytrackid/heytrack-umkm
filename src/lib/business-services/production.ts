@@ -1,7 +1,8 @@
-import type { ProductionBatch } from './types'
-import type { Row } from '@/types/database'
+
 import { productionLogger } from '@/lib/logger'
 import { isIngredient } from '@/lib/type-guards'
+
+import type { ProductionBatch } from './types'
 
 
 /**
@@ -12,8 +13,7 @@ import { isIngredient } from '@/lib/type-guards'
 
 
 
-type _Recipe = Row<'recipes'>
-type _Ingredient = Row<'ingredients'>
+
 
 export class ProductionServices {
   private static instance: ProductionServices
@@ -77,8 +77,8 @@ export class ProductionServices {
         produced_quantity: 0,
         status: 'planned',
         notes: newBatch.notes,
-        created_by: user.id,
-        user_id: user.id
+        created_by: user['id'],
+        user_id: user['id']
       }
 
       const { error: insertError } = await batchSupabase
@@ -95,9 +95,9 @@ export class ProductionServices {
 
       productionLogger.info({ batchId, recipeId: batch.recipe_id, quantity: batch.quantity }, 'Production batch scheduled successfully')
       return newBatch
-    } catch (err) {
-      productionLogger.error({ err, recipeId: batch.recipe_id }, 'Error in scheduleProductionBatch')
-      throw err
+    } catch (error) {
+      productionLogger.error({ error, recipeId: batch.recipe_id }, 'Error in scheduleProductionBatch')
+      throw error
     }
   }
 
@@ -168,7 +168,7 @@ export class ProductionServices {
         const availableQuantity = ingredient.current_stock ?? 0
 
         requiredIngredients.push({
-          ingredient_id: ingredient.id,
+          ingredient_id: ingredient['id'],
           ingredient_name: ingredient.name,
           required_quantity: requiredQuantity,
           available_quantity: availableQuantity,
@@ -186,8 +186,8 @@ export class ProductionServices {
         insufficientIngredients,
         requiredIngredients
       }
-    } catch (err) {
-      productionLogger.error({ err, recipeId, quantity }, 'Error in checkProductionFeasibility')
+    } catch (error) {
+      productionLogger.error({ error, recipeId, quantity }, 'Error in checkProductionFeasibility')
       return {
         feasible: false,
         insufficientIngredients: ['Error checking feasibility'],
@@ -240,10 +240,10 @@ export class ProductionServices {
             current_stock: newStock,
             updated_at: new Date().toISOString()
           })
-          .eq('id', ingredient.id)
+          .eq('id', ingredient['id'])
 
         if (updateError) {
-          productionLogger.error({ error: updateError, ingredientId: ingredient.id, recipeId, quantity }, 'Error reserving stock for ingredient')
+          productionLogger.error({ error: updateError, ingredientId: ingredient['id'], recipeId, quantity }, 'Error reserving stock for ingredient')
           throw updateError
         }
       }
@@ -260,8 +260,8 @@ export class ProductionServices {
       // TODO: Implement when production_batches table is created
       // For now, return empty array
       return []
-    } catch (err) {
-      productionLogger.error({ err }, 'Error in getProductionQueue')
+    } catch (error) {
+      productionLogger.error({ error }, 'Error in getProductionQueue')
       return []
     }
   }
@@ -270,9 +270,9 @@ export class ProductionServices {
     try {
       // TODO: Implement when production_batches table is created
       productionLogger.info({ batchId, status }, 'Updating production batch status')
-    } catch (err) {
-      productionLogger.error({ err, batchId, status }, 'Error in updateBatchStatus')
-      throw err
+    } catch (error) {
+      productionLogger.error({ error, batchId, status }, 'Error in updateBatchStatus')
+      throw error
     }
   }
 
@@ -280,18 +280,17 @@ export class ProductionServices {
     try {
       // TODO: Implement when production_batches table is created
       return []
-    } catch (err) {
-      productionLogger.error({ err }, 'Error in getActiveBatches')
+    } catch (error) {
+      productionLogger.error({ error }, 'Error in getActiveBatches')
       return []
     }
   }
 
   async cancelProductionBatch(batchId: string): Promise<void> {
     try {
-      const { createServerClient } = await import('@/utils/supabase/client-safe')
-      const _supabase = await createServerClient()
-
-      // TODO: Implement batch cancellation logic using _supabase
+      // TODO: Implement batch cancellation logic
+      // const { createServerClient } = await import('@/utils/supabase/client-safe')
+      // const supabase = await createServerClient()
       // This would involve:
       // 1. Finding the batch
       // 2. Returning reserved ingredients to stock
@@ -338,7 +337,7 @@ export class ProductionServices {
       // Find the limiting ingredient
       const limitingIngredient = feasibility.requiredIngredients
         .map(ing => ({
-          name: ing.ingredient_name,
+          name: ing['ingredient_name'],
           availableBatches: Math.floor(ing.available_quantity / ing.required_quantity)
         }))
         .sort((a, b) => a.availableBatches - b.availableBatches)[0]

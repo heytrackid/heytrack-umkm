@@ -26,10 +26,10 @@ export class AIClient {
     systemPrompt: string,
     model = 'x-ai/grok-4-fast'
   ): Promise<string> {
-    const apiKey = process.env['OPENROUTER_API_KEY']
+    const apiKey = process['env']['OPENROUTER_API_KEY']
 
     if (!apiKey) {
-      throw new Error('OpenRouter API key not configured. Please set OPENROUTER_API_KEY in your .env file')
+      throw new Error('OpenRouter API key not configured. Please set OPENROUTER_API_KEY in your environment file')
     }
 
     try {
@@ -38,7 +38,7 @@ export class AIClient {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
-          'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+          'HTTP-Referer': process['env']['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
           'X-Title': 'HeyTrack AI Assistant'
         },
         body: JSON.stringify({
@@ -68,13 +68,13 @@ export class AIClient {
         }
         
         apiLogger.error({ 
-          status: response.status, 
+          status: response['status'], 
           error: errorData,
           model,
-          hasApiKey: !!apiKey 
+          hasApiKey: Boolean(apiKey) 
         }, 'OpenRouter API Error')
         
-        throw new Error(`OpenRouter API error: ${response.status} - ${errorData.error?.message ?? 'Unknown error'}`)
+        throw new Error(`OpenRouter API error: ${response['status']} - ${errorData.error?.message ?? 'Unknown error'}`)
       }
 
       const data = await response.json()
@@ -86,9 +86,9 @@ export class AIClient {
       
       return content
       
-    } catch (err) {
-      apiLogger.error({ error: err, model, hasApiKey: !!apiKey }, 'OpenRouter Client Error')
-      throw err
+    } catch (error) {
+      apiLogger.error({ error, model, hasApiKey: Boolean(apiKey) }, 'OpenRouter Client Error')
+      throw error
     }
   }
 
@@ -100,10 +100,10 @@ export class AIClient {
     systemPrompt: string,
     model = 'x-ai/grok-4-fast'
   ): Promise<string> {
-    const apiKey = process.env['OPENROUTER_API_KEY']
+    const apiKey = process['env']['OPENROUTER_API_KEY']
 
     if (!apiKey) {
-      throw new Error('OpenRouter API key not configured. Please set OPENROUTER_API_KEY in your .env file')
+      throw new Error('OpenRouter API key not configured. Please set OPENROUTER_API_KEY in your environment file')
     }
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -111,7 +111,7 @@ export class AIClient {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+        'HTTP-Referer': process['env']['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
         'X-Title': 'HeyTrack AI Assistant'
       },
       body: JSON.stringify({
@@ -133,7 +133,7 @@ export class AIClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      throw new Error(`OpenRouter API error: ${response.status} - ${errorData.error?.message ?? 'Unknown error'}`)
+      throw new Error(`OpenRouter API error: ${response['status']} - ${errorData.error?.message ?? 'Unknown error'}`)
     }
 
     const data = await response.json()

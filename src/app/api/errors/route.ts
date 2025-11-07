@@ -1,13 +1,17 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
 import { checkAdminPrivileges } from '@/lib/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { Insert } from '@/types/database'
 import { SecurityPresets, withSecurity } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
+import type { Insert } from '@/types/database'
+
 
 // POST /api/errors - Log errors to database
 async function POST(request: NextRequest) {
@@ -20,12 +24,12 @@ async function POST(request: NextRequest) {
       if (user?.id) {
         userId = user.id
       }
-    } catch (authError: unknown) {
+    } catch (error: unknown) {
       // Ignore auth errors - client-side errors can be anonymous
-      apiLogger.debug({ error: getErrorMessage(authError) }, 'Anonymous error report')
+      apiLogger.debug({ error: getErrorMessage(error) }, 'Anonymous error report')
     }
 
-    // Parse body - handle both JSON and text/plain
+    // Parse _body - handle both JSON and text/plain
     interface ErrorBody {
       message?: string
       msg?: string
@@ -33,27 +37,27 @@ async function POST(request: NextRequest) {
       url?: string
       userAgent?: string
       componentStack?: string
-      timestamp?: string | number
+      timestamp?: number | string
       errorType?: string
       browser?: string
       os?: string
       device?: string
     }
-    let body: ErrorBody
+    let _body: ErrorBody
     const contentType = request.headers.get('content-type') ?? ''
     
     try {
       if (contentType.includes('application/json')) {
-        body = await request.json()
+        _body = await request.json() as ErrorBody
       } else if (contentType.includes('text/plain')) {
         // Try to parse text as JSON (sendBeacon might send JSON as text/plain)
         const text = await request.text()
-        body = JSON.parse(text)
+        _body = JSON.parse(text) as ErrorBody
       } else {
-        body = await request.json() // Default to JSON
+        _body = await request.json() as ErrorBody // Default to JSON
       }
-    } catch (parseError: unknown) {
-      apiLogger.error({ error: getErrorMessage(parseError), contentType }, 'Failed to parse error report body')
+    } catch (error) {
+      apiLogger.error({ error: getErrorMessage(error), contentType }, 'Failed to parse error report body')
       return NextResponse.json(
         { error: 'Invalid request body' },
         { status: 400 }
@@ -61,7 +65,7 @@ async function POST(request: NextRequest) {
     }
     
     // Validate required fields
-    if (!body.message && !body.msg) {
+    if (!_body.message && !_body.msg) {
       return NextResponse.json(
         { error: 'Message is required' },
         { status: 400 }
@@ -69,12 +73,12 @@ async function POST(request: NextRequest) {
     }
 
     // Sanitize error data with proper type casting
-    const message = String(body.message ?? body.msg ?? 'Unknown error')
-    const stack = body.stack ? String(body.stack) : null
-    const url = body.url ? String(body.url) : null
-    const userAgent = body.userAgent ? String(body.userAgent) : null
-    const componentStack = body.componentStack ? String(body.componentStack) : null
-    const timestamp = body.timestamp ? String(body.timestamp) : new Date().toISOString()
+    const message = String(_body.message ?? _body.msg ?? 'Unknown error')
+    const stack = _body.stack ? String(_body.stack) : null
+    const url = _body.url ? String(_body.url) : null
+    const userAgent = _body.userAgent ? String(_body.userAgent) : null
+    const componentStack = _body.componentStack ? String(_body.componentStack) : null
+    const timestamp = _body.timestamp ? String(_body.timestamp) : new Date().toISOString()
     
     const sanitizedErrorData = {
       message: message.substring(0, 1000), // Limit message length
@@ -94,16 +98,16 @@ async function POST(request: NextRequest) {
           user_id: userId,
           endpoint: sanitizedErrorData.url ?? 'unknown',
           error_message: sanitizedErrorData.message,
-          error_type: String(body.errorType ?? 'ClientError'),
+          error_type: String(_body.errorType ?? 'ClientError'),
           stack_trace: sanitizedErrorData.stack,
-          timestamp: sanitizedErrorData.timestamp,
+          timestamp: sanitizedErrorData['timestamp'],
           metadata: {
             url: sanitizedErrorData.url,
             userAgent: sanitizedErrorData.userAgent,
             componentStack: sanitizedErrorData.componentStack,
-            browser: body.browser ? String(body.browser) : undefined,
-            os: body.os ? String(body.os) : undefined,
-            device: body.device ? String(body.device) : undefined,
+            browser: _body.browser ? String(_body.browser) : undefined,
+            os: _body.os ? String(_body.os) : undefined,
+            device: _body.device ? String(_body.device) : undefined,
           }
         }
         
@@ -115,14 +119,14 @@ async function POST(request: NextRequest) {
           apiLogger.error({ error: getErrorMessage(dbError) }, 'Database error when logging error')
           // Continue to return success even if DB logging fails
         }
-      } catch (dbError: unknown) {
-        apiLogger.error({ error: getErrorMessage(dbError) }, 'Database error when logging error')
+      } catch (error) {
+        apiLogger.error({ error: getErrorMessage(error) }, 'Database error when logging error')
         // Continue to return success even if DB logging fails
       }
     }
 
     // In development, log as well
-    if (process.env.NODE_ENV === 'development') {
+    if (process['env'].NODE_ENV === 'development') {
       apiLogger.info({
         ...sanitizedErrorData,
         userId
@@ -158,7 +162,7 @@ async function GET(request: NextRequest) {
     const adminCheck = await checkAdminPrivileges(user)
     if (!adminCheck.hasPermission) {
       apiLogger.warn({ 
-        userId: user.id, 
+        userId: user['id'], 
         email: user.email 
       }, 'Unauthorized access attempt to error logs')
       

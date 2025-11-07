@@ -1,6 +1,7 @@
-import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+
 import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/server'
 
 /**
  * Root page - redirects based on auth status

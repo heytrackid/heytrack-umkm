@@ -1,10 +1,5 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
-import { formatCurrentCurrency } from '@/lib/currency'
 import {
   BarChart3,
   Download,
@@ -15,6 +10,13 @@ import {
   TrendingUp
 } from 'lucide-react'
 import { useState } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
+import { formatCurrentCurrency } from '@/lib/currency'
+
 import type { DateRange } from 'react-day-picker'
 
 interface ReportData {
@@ -39,7 +41,7 @@ export const AdvancedReporting = ({
   reportData
 }: AdvancedReportingProps) => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(initialDateRange)
-  const [activeReport, setActiveReport] = useState<'sales' | 'orders' | 'profit'>('sales')
+  const [activeReport, setActiveReport] = useState<'orders' | 'profit' | 'sales'>('sales')
   const [isExporting, setIsExporting] = useState(false)
 
   // Sample data if not provided
@@ -90,7 +92,7 @@ export const AdvancedReporting = ({
     }
   }
 
-  const handleExport = (format: 'pdf' | 'excel' | 'csv') => {
+  const handleExport = (format: 'csv' | 'excel' | 'pdf') => {
     setIsExporting(true)
     // Simulate export process
     setTimeout(() => {
@@ -221,7 +223,7 @@ export const AdvancedReporting = ({
         <h3 className="text-lg font-semibold mb-4">
           {getChartTitle()}
         </h3>
-        <div className="h-80 flex items-center justify-center text-muted-foreground">
+        <div className="h-64 sm:h-80 flex items-center justify-center text-muted-foreground">
           Chart visualization placeholder
         </div>
       </div>

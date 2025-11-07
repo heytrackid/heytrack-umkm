@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { getErrorMessage } from '@/lib/type-guards'
+
 import { createClientLogger } from '@/lib/client-logger'
+import { getErrorMessage } from '@/lib/type-guards'
 
 const logger = createClientLogger('Hook')
 import type { AppError, ErrorState } from './types'
@@ -26,8 +27,8 @@ import type { AppError, ErrorState } from './types'
  *
  * try {
  *   await someAsyncOperation()
- * } catch (err) {
- *   handleError(err, 'MyComponent.operation')
+ * } catch (error) {
+ *   handleError(error, 'MyComponent.operation')
  * }
  *
  * if (isError) {

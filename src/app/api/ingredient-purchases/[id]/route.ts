@@ -1,12 +1,17 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger } from '@/lib/logger'
-import type { Update, Insert } from '@/types/database'
-import { getErrorMessage, isValidUUID, isRecord, extractFirst } from '@/lib/type-guards'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isValidUUID, isRecord, extractFirst } from '@/lib/type-guards'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
+import type { IngredientPurchaseUpdate } from '@/lib/validations/database-validations'
+import type { Update, Insert } from '@/types/database'
+
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -18,7 +23,7 @@ async function getHandler(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -47,11 +52,11 @@ async function getHandler(
         )
       `)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Purchase not found' }, { status: 404 })
       }
       apiLogger.error({ error }, 'Error fetching purchase')
@@ -70,7 +75,7 @@ async function getHandler(
       if (ingredient && isRecord(ingredient)) {
         // Ingredient data is safely extracted and validated
         apiLogger.info({ 
-          purchaseId: data.id, 
+          purchaseId: data['id'], 
           ingredientName: ingredient.name 
         }, 'Purchase fetched with ingredient details')
       }
@@ -92,7 +97,7 @@ async function putHandler(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -107,14 +112,14 @@ async function putHandler(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = await request.json() as IngredientPurchaseUpdate
 
     // Get existing purchase
     const { data: existingPurchase, error: fetchError } = await supabase
       .from('ingredient_purchases')
       .select('id, ingredient_id, quantity, user_id')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (fetchError || !existingPurchase) {
@@ -128,12 +133,12 @@ async function putHandler(
 
     // Update purchase
     const updatePayload: Update<'ingredient_purchases'> = {
-      supplier: body.supplier,
+      ...(body.supplier !== undefined && { supplier: body.supplier }),
       quantity: newQuantity,
-      unit_price: body.unit_price,
+      ...(body.unit_price !== undefined && { unit_price: body.unit_price }),
       total_price: newQuantity * (body.unit_price ?? 0),
-      purchase_date: body.purchase_date,
-      notes: body.notes,
+      ...(body.purchase_date !== undefined && { purchase_date: body.purchase_date }),
+      ...(body.notes !== undefined && { notes: body.notes }),
       updated_at: new Date().toISOString()
     }
 
@@ -141,7 +146,7 @@ async function putHandler(
       .from('ingredient_purchases')
       .update(updatePayload)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select(`
         *,
         ingredient:ingredients (
@@ -180,7 +185,7 @@ async function putHandler(
         total_price: quantityDiff * (body.unit_price ?? 0),
         reference: `PURCHASE-UPDATE-${id}`,
         notes: `Purchase quantity adjusted from ${oldQuantity} to ${newQuantity}`,
-        user_id: user.id
+        user_id: user['id']
       }
 
       const { error: transactionError } = await supabase
@@ -224,7 +229,7 @@ async function deleteHandler(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -244,7 +249,7 @@ async function deleteHandler(
       .from('ingredient_purchases')
       .select('id, ingredient_id, quantity, user_id')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (fetchError || !purchase) {
@@ -266,9 +271,9 @@ async function deleteHandler(
       ingredient_id: purchase.ingredient_id,
       type: 'ADJUSTMENT',
       quantity: -purchase.quantity, // Negative to reduce stock
-      reference: `PURCHASE-DELETE-${purchase.id}`,
+      reference: `PURCHASE-DELETE-${purchase['id']}`,
       notes: `Purchase deleted - reverting stock`,
-      user_id: user.id
+      user_id: user['id']
     }
 
     const { error: transactionError } = await supabase
@@ -288,7 +293,7 @@ async function deleteHandler(
       quantity_after: currentStock - purchase.quantity,
       change_type: 'adjustment',
       reason: 'Purchase deletion',
-      reference_id: purchase.id,
+      reference_id: purchase['id'],
       reference_type: 'ingredient_purchase'
     }
 
@@ -301,7 +306,7 @@ async function deleteHandler(
       .from('ingredient_purchases')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (deleteError) {
       apiLogger.error({ error: deleteError }, 'Error deleting purchase')

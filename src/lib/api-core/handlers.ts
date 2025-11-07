@@ -1,11 +1,13 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import type { z } from 'zod'
-import { validateRequestData, validateRequestOrRespond } from './validation'
+
+import { apiCache } from './cache'
+import { handleAPIError, createAPIErrorResponse } from './errors'
 import { extractPagination } from './pagination'
 import { createErrorResponse, createSuccessResponse } from './responses'
-import { handleAPIError, createAPIErrorResponse } from './errors'
-import { apiCache } from './cache'
+import { validateRequestData, validateRequestOrRespond } from './validation'
+
 import type { RouteHandlerConfig, RouteHandlerContext } from './types'
+import type { z } from 'zod'
 
 /**
  * Route Handlers Module
@@ -34,8 +36,8 @@ export function createRouteHandler<T>(
 
       // Validate request data
       let validatedData: T | undefined
-      if (config.validation?.body) {
-        const result = await validateRequestOrRespond(request, config.validation.body as z.ZodType<T>)
+      if (config.validation?.['body']) {
+        const result = await validateRequestOrRespond(request, config.validation['body'] as z.ZodType<T>)
         if (result instanceof NextResponse) {
           return result
         }
@@ -43,10 +45,10 @@ export function createRouteHandler<T>(
       }
 
       // Validate query params
-      if (config.validation?.query) {
+      if (config.validation?.['query']) {
         const { searchParams } = new URL(request.url)
         const queryData = Object.fromEntries(searchParams.entries())
-        const result = validateRequestData(queryData, config.validation.query as z.ZodType)
+        const result = validateRequestData(queryData, config.validation['query'] as z.ZodType)
         if (!result.success) {
           return createErrorResponse('Query validation failed', 400, result.errors)
         }
@@ -84,8 +86,8 @@ export function createRouteHandler<T>(
         try {
           const responseClone = response.clone()
           const responseData = await responseClone.json()
-          if (responseData.success && responseData.data) {
-            apiCache.set(config.caching.key, responseData.data, config.caching.ttl)
+          if (responseData.success && responseData['data']) {
+            apiCache.set(config.caching.key, responseData['data'], config.caching.ttl)
           }
         } catch (_error) {
           // Ignore cache errors
@@ -93,8 +95,8 @@ export function createRouteHandler<T>(
       }
 
       return response
-    } catch (err) {
-      const apiError = handleAPIError(err)
+    } catch (error) {
+      const apiError = handleAPIError(error)
       return createAPIErrorResponse(apiError)
     }
   }

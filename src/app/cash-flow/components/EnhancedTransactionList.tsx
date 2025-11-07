@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Receipt, ArrowUpCircle, ArrowDownCircle, Trash2, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useMemo } from 'react'
+
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from '@/components/ui/alert-dialog'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from '@/components/ui/alert-dialog'
+
 import type { Transaction } from '../constants'
 
 interface EnhancedTransactionListProps {
@@ -17,8 +19,8 @@ interface EnhancedTransactionListProps {
     loading: boolean
 }
 
-type FilterType = 'all' | 'income' | 'expense'
-type SortBy = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
+type FilterType = 'all' | 'expense' | 'income'
+type SortBy = 'amount-asc' | 'amount-desc' | 'date-asc' | 'date-desc'
 
 const ITEMS_PER_PAGE = 10
 
@@ -41,7 +43,7 @@ const EnhancedTransactionList = ({
 
         // Filter by type
         if (filterType !== 'all') {
-            result = result.filter(t => t.type === filterType)
+            result = result.filter(t => t['type'] === filterType)
         }
 
         // Search
@@ -105,12 +107,12 @@ const EnhancedTransactionList = ({
         {
             value: 'income' as FilterType,
             label: 'Pemasukan',
-            count: transactions.filter(t => t.type === 'income').length
+            count: transactions.filter(t => t['type'] === 'income').length
         },
         {
             value: 'expense' as FilterType,
             label: 'Pengeluaran',
-            count: transactions.filter(t => t.type === 'expense').length
+            count: transactions.filter(t => t['type'] === 'expense').length
         }
     ]
 
@@ -206,15 +208,15 @@ const EnhancedTransactionList = ({
                             <div className="space-y-2">
                                 {paginatedTransactions.map((transaction, index) => (
                                     <div
-                                        key={`${transaction.id}-${index}`}
+                                        key={`${transaction['id']}-${index}`}
                                         className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors group"
                                     >
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                                            <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${transaction.type === 'income'
+                                            <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${transaction['type'] === 'income'
                                                 ? 'bg-gray-100 dark:bg-gray-900'
                                                 : 'bg-red-100 dark:bg-red-900'
                                                 }`}>
-                                                {transaction.type === 'income' ? (
+                                                {transaction['type'] === 'income' ? (
                                                     <ArrowUpCircle className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                                                 ) : (
                                                     <ArrowDownCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -238,9 +240,9 @@ const EnhancedTransactionList = ({
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3 flex-shrink-0">
-                                            <p className={`text-base md:text-lg font-semibold ${transaction.type === 'income' ? 'text-gray-600' : 'text-red-600'
+                                            <p className={`text-base md:text-lg font-semibold ${transaction['type'] === 'income' ? 'text-gray-600' : 'text-red-600'
                                                 }`}>
-                                                {transaction.type === 'income' ? '+' : '-'}
+                                                {transaction['type'] === 'income' ? '+' : '-'}
                                                 {formatCurrency(Math.abs(transaction.amount))}
                                             </p>
                                             <Button

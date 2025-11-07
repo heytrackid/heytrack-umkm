@@ -1,5 +1,6 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Bot, Loader2 } from 'lucide-react'
+
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 export const TypingIndicator = () => (
     <div className="flex gap-3">

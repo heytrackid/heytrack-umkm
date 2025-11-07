@@ -1,14 +1,15 @@
  'use client'
 
+import { Calculator, TrendingUp, AlertCircle, CheckCircle, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
+
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
-import { Label } from '@/components/ui/label'
-import { Calculator, TrendingUp, AlertCircle, CheckCircle, Settings } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
-import { Button } from '@/components/ui/button'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 
 
 /**
@@ -167,7 +168,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
                                 </div>
                                 <Slider
                                     value={[operationalCosts.labor]}
-                                    onValueChange={(value) => updateOperationalCost('labor', value[0])}
+                                    onValueChange={(value) => updateOperationalCost('labor', value[0] ?? 0)}
                                     max={50}
                                     min={5}
                                     step={1}
@@ -186,7 +187,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
                                 </div>
                                 <Slider
                                     value={[operationalCosts.utilities]}
-                                    onValueChange={(value) => updateOperationalCost('utilities', value[0])}
+                                    onValueChange={(value) => updateOperationalCost('utilities', value[0] ?? 0)}
                                     max={20}
                                     min={2}
                                     step={1}
@@ -205,7 +206,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
                                 </div>
                                 <Slider
                                     value={[operationalCosts.packaging]}
-                                    onValueChange={(value) => updateOperationalCost('packaging', value[0])}
+                                    onValueChange={(value) => updateOperationalCost('packaging', value[0] ?? 0)}
                                     max={25}
                                     min={5}
                                     step={1}
@@ -224,7 +225,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
                                 </div>
                                 <Slider
                                     value={[operationalCosts.overhead]}
-                                    onValueChange={(value) => updateOperationalCost('overhead', value[0])}
+                                    onValueChange={(value) => updateOperationalCost('overhead', value[0] ?? 0)}
                                     max={30}
                                     min={2}
                                     step={1}
@@ -243,7 +244,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
                                 </div>
                                 <Slider
                                     value={[operationalCosts.profit]}
-                                    onValueChange={(value) => updateOperationalCost('profit', value[0])}
+                                    onValueChange={(value) => updateOperationalCost('profit', value[0] ?? 0)}
                                     max={50}
                                     min={10}
                                     step={1}

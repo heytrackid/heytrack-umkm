@@ -15,10 +15,10 @@ export function useSimpleLoading(initialValue = false) {
 
   const withLoading = useCallback(async <T>(fn: () => Promise<T>): Promise<T> => {
     try {
-      void setIsLoading(true)
+      setIsLoading(true)
       return await fn()
     } finally {
-      void setIsLoading(false)
+      setIsLoading(false)
     }
   }, [])
 

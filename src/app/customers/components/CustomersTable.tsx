@@ -1,17 +1,19 @@
 'use client'
 
+import { ChevronLeft, ChevronRight, Edit2, Eye, Mail, MoreHorizontal, Phone, Plus, Trash2, Users } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { ChevronLeft, ChevronRight, Edit2, Eye, Mail, MoreHorizontal, Phone, Plus, Trash2, Users } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import type { CustomersTable } from '@/types/database'
 import { useResponsive } from '@/hooks/useResponsive'
+
+import type { CustomersTable } from '@/types/database'
 
 interface CustomersTableProps {
   customers: CustomersTable[]
@@ -158,7 +160,7 @@ const CustomersTable = ({
 
   // Reset to page 1 when customers change
   useMemo(() => {
-    void setCurrentPage(1)
+    setCurrentPage(1)
      
   }, [])
 
@@ -193,7 +195,7 @@ const CustomersTable = ({
           <div className="space-y-4">
             {paginatedCustomers.map((customer) => (
               <MobileCustomerCard
-                key={customer.id}
+                key={customer['id']}
                 customer={customer}
                 onView={onView}
                 onEdit={onEdit}
@@ -223,11 +225,11 @@ const CustomersTable = ({
             </TableHeader>
             <TableBody>
               {paginatedCustomers.map((customer) => (
-                <TableRow key={customer.id} className="hover:bg-gray-50">
+                <TableRow key={customer['id']} className="hover:bg-gray-50">
                   <TableCell>
                     <Checkbox
-                      checked={selectedItems.includes(customer.id.toString())}
-                      onCheckedChange={() => onSelectItem(customer.id.toString())}
+                      checked={selectedItems.includes(customer['id'].toString())}
+                      onCheckedChange={() => onSelectItem(customer['id'].toString())}
                     />
                   </TableCell>
                   <TableCell>
@@ -316,7 +318,7 @@ const CustomersTable = ({
                   <span className="text-sm text-muted-foreground">Show</span>
                   <Select value={pageSize.toString()} onValueChange={(value: string) => {
                     setPageSize(Number(value))
-                    void setCurrentPage(1)
+                    setCurrentPage(1)
                   }}>
                     <SelectTrigger className="w-20 h-8">
                       <SelectValue />

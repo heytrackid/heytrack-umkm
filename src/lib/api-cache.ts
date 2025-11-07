@@ -55,9 +55,9 @@ interface CacheEntry {
 }
 
 class MemoryCache {
-  private cache = new Map<string, CacheEntry>()
-  private maxSize = 100
-  private ttl = 5 * 60 * 1000 // 5 minutes
+  private readonly cache = new Map<string, CacheEntry>()
+  private readonly maxSize = 100
+  private readonly ttl = 5 * 60 * 1000 // 5 minutes
 
   set(key: string, data: unknown, ttl = this.ttl): void {
     // Limit cache size
@@ -87,12 +87,12 @@ class MemoryCache {
     }
 
     // Check if expired
-    if (Date.now() - item.timestamp > item.ttl) {
+    if (Date.now() - item['timestamp'] > item.ttl) {
       this.cache.delete(key)
       return null
     }
 
-    return item.data as T
+    return item['data'] as T
   }
 
   clear(): void {
@@ -108,7 +108,7 @@ class MemoryCache {
     if (!item) {return false}
 
     // Check if expired
-    if (Date.now() - item.timestamp > item.ttl) {
+    if (Date.now() - item['timestamp'] > item.ttl) {
       this.cache.delete(key)
       return false
     }
@@ -128,7 +128,7 @@ export const apiCache = new MemoryCache()
  */
 export function generateCacheKey(
   endpoint: string,
-  params?: Record<string, string | number | boolean | null | undefined>
+  params?: Record<string, boolean | number | string | null | undefined>
 ): string {
   if (!params) {return endpoint}
 

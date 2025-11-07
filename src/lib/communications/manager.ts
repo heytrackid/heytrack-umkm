@@ -1,6 +1,7 @@
-import { WhatsAppService } from './whatsapp'
-import { SmartNotificationSystem } from './notifications'
 import { EmailService } from './email'
+import { SmartNotificationSystem } from './notifications'
+import { WhatsAppService } from './whatsapp'
+
 import type { CommunicationConfig, OrderData, SmartNotification } from './types'
 
 
@@ -12,9 +13,9 @@ import type { CommunicationConfig, OrderData, SmartNotification } from './types'
 
 export class CommunicationsManager {
   private static instance: CommunicationsManager;
-  private whatsapp?: WhatsAppService;
-  private notifications: SmartNotificationSystem;
-  private email?: EmailService;
+  private readonly whatsapp?: WhatsAppService;
+  private readonly notifications: SmartNotificationSystem;
+  private readonly email?: EmailService;
 
   private constructor(config: CommunicationConfig = {}) {
     if (config.whatsapp) {
@@ -51,7 +52,7 @@ export class CommunicationsManager {
   /**
    * Send order notification via appropriate channel
    */
-  sendOrderNotification(orderData: OrderData, type: 'confirmation' | 'reminder' | 'payment' | 'followup'): void {
+  sendOrderNotification(orderData: OrderData, type: 'confirmation' | 'followup' | 'payment' | 'reminder'): void {
     // Send WhatsApp message
     if (this.whatsapp) {
       switch (type) {
@@ -71,8 +72,8 @@ export class CommunicationsManager {
     const notificationData = {
       category: 'orders' as const,
       priority: 'medium' as const,
-      title: `Pesanan ${orderData.id}`,
-      message: `Status pesanan: ${orderData.status}`,
+      title: `Pesanan ${orderData['id']}`,
+      message: `Status pesanan: ${orderData['status']}`,
       data: JSON.parse(JSON.stringify(orderData)) as Record<string, unknown>,
       status: 'sent' as const
     };

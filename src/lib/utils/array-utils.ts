@@ -45,9 +45,9 @@ export function chunk<T>(array: T[], size: number): T[][] {
  */
 export function groupBy<T>(
   array: T[],
-  keyFn: (item: T) => string | number
-): Record<string | number, T[]> {
-  const groups: Record<string | number, T[]> = {}
+  keyFn: (item: T) => number | string
+): Record<number | string, T[]> {
+  const groups: Record<number | string, T[]> = {}
   
   for (const item of array) {
     const key = keyFn(item)
@@ -66,9 +66,9 @@ export function groupBy<T>(
  */
 export function uniqueBy<T>(
   array: T[],
-  keyFn: (item: T) => string | number
+  keyFn: (item: T) => number | string
 ): T[] {
-  const seen = new Set<string | number>()
+  const seen = new Set<number | string>()
   const result: T[] = []
   
   for (const item of array) {
@@ -87,7 +87,7 @@ export function uniqueBy<T>(
  */
 export function sortBy<T>(
   array: T[],
-  ...keyFns: Array<(item: T) => string | number | boolean>
+  ...keyFns: Array<(item: T) => boolean | number | string>
 ): T[] {
   return [...array].sort((a, b) => {
     for (const keyFn of keyFns) {

@@ -1,17 +1,18 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense, lazy } from 'react'
-import PrefetchLink from '@/components/ui/prefetch-link'
-import AppLayout from '@/components/layout/app-layout'
-import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { Button } from '@/components/ui/button'
 import { MessageCircle, Plus } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { useAuth } from '@/hooks'
 import { useRouter } from 'next/navigation'
-import { uiLogger } from '@/lib/client-logger'
-import { type WhatsAppTemplate } from './types'
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react'
+
+import { type WhatsAppTemplate } from '@/app/orders/whatsapp-templates/components/types'
+import AppLayout from '@/components/layout/app-layout'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import PrefetchLink from '@/components/ui/prefetch-link'
+import { useAuth } from '@/hooks'
+import { useToast } from '@/hooks/use-toast'
+import { uiLogger } from '@/lib/client-logger'
 
 // Lazy load heavy components
 const TemplatesTable = lazy(() => import('./TemplatesTable'))
@@ -42,7 +43,7 @@ const WhatsAppTemplatesPage = () => {
                 description: 'Sesi Anda telah berakhir. Silakan login kembali.',
                 variant: 'destructive',
             })
-            void router.push('/auth/login')
+            router.push('/auth/login')
         }
     }, [isAuthLoading, isAuthenticated, router, toast])
 
@@ -53,8 +54,8 @@ const WhatsAppTemplatesPage = () => {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
-                const data: WhatsAppTemplate[] = await response.json()
-                setTemplates(data)
+                const _data = await response.json() as WhatsAppTemplate[]
+                setTemplates(_data)
             } else {
                 toast({
                     title: 'Error',
@@ -94,7 +95,7 @@ const WhatsAppTemplatesPage = () => {
         }
 
         try {
-            const response = await fetch(`/api/whatsapp-templates/${templateToDelete.id}`, {
+            const response = await fetch(`/api/whatsapp-templates/${templateToDelete['id']}`, {
                 method: 'DELETE',
                 credentials: 'include', // Include cookies for authentication
             })
@@ -127,7 +128,7 @@ const WhatsAppTemplatesPage = () => {
 
     const handleToggleDefault = useCallback(async (template: WhatsAppTemplate) => {
         try {
-            const response = await fetch(`/api/whatsapp-templates/${template.id}`, {
+            const response = await fetch(`/api/whatsapp-templates/${template['id']}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -193,14 +194,14 @@ const WhatsAppTemplatesPage = () => {
             })
 
             if (response.ok) {
-                const data = await response.json()
+                const _data = await response.json() as { templates?: unknown[] }
                 toast({
                     title: '🎉 Template Siap Digunakan!',
-                    description: `${data.templates?.length ?? 8} template WhatsApp sudah dibuat dan siap kamu edit!`,
+                    description: `${_data.templates?.length ?? 8} template WhatsApp sudah dibuat dan siap kamu edit!`,
                 })
                 await fetchTemplates()
             } else {
-                const errorBody: { message?: string } = await response.json()
+                const errorBody = await response.json() as { message?: string }
                 toast({
                     title: 'Gagal membuat template',
                     description: errorBody.message ?? 'Terjadi kesalahan',

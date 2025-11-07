@@ -1,12 +1,14 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, AlertTriangle, Calculator, ShoppingBag, Zap, TrendingUp, TrendingDown } from 'lucide-react'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
-import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
+
+import type { RecipeWithCosts } from '@/modules/hpp/hooks/useUnifiedHpp'
 
 
 
@@ -77,7 +79,7 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                         </div>
                         <div className="space-y-2 pl-6">
                             {recipe.ingredients.map((ingredient) => {
-                                const ingredientKey = ingredient.id || `${ingredient.name}-${ingredient.unit}-${ingredient.quantity}`
+                                const ingredientKey = ingredient['id'] || `${ingredient.name}-${ingredient.unit}-${ingredient.quantity}`
 
                                 return (
                                     <div key={ingredientKey} className="flex justify-between items-center text-sm">

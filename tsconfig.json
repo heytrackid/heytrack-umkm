@@ -30,13 +30,13 @@
     "noImplicitThis": true,
     "alwaysStrict": true,
     // Additional Checks (Stricter)
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": false,
+    "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": false,
+    "noPropertyAccessFromIndexSignature": true,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
     "exactOptionalPropertyTypes": false,
@@ -52,6 +52,9 @@
       ],
       "@/shared/*": [
         "./src/shared/*"
+      ],
+      "@/services/*": [
+        "./src/services/*"
       ],
       "@/inventory": [
         "./src/modules/inventory"

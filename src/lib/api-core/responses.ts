@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+
 import type { ApiSuccessResponse, ApiErrorResponse, PaginatedResponse } from './types'
 
 /**

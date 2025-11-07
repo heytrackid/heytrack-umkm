@@ -1,8 +1,9 @@
 'use client'
 
 import { Suspense } from 'react'
-import { EnhancedOperationalCostsPage } from '@/components/operational-costs/EnhancedOperationalCostsPage'
+
 import AppLayout from '@/components/layout/app-layout'
+import { EnhancedOperationalCostsPage } from '@/components/operational-costs/EnhancedOperationalCostsPage'
 import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
 

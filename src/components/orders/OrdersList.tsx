@@ -2,18 +2,6 @@
  
 'use client'
 
-import { memo, useCallback, useEffect, useMemo, useState } from 'react'
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { SwipeActions } from '@/components/ui/mobile-gestures'
-import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { OrderStatusBadge, OrderProgress } from '@/components/orders/OrderStatusBadge'
-import { useCurrency } from '@/hooks/useCurrency'
-import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
-import { getPaymentInfo, getPriorityInfo } from './utils'
 import {
   Clock,
   DollarSign,
@@ -23,6 +11,21 @@ import {
   Trash2,
   Plus
 } from 'lucide-react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+
+import { OrderStatusBadge, OrderProgress } from '@/components/orders/OrderStatusBadge'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { SwipeActions } from '@/components/ui/mobile-gestures'
+import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import { getPaymentInfo, getPriorityInfo } from './utils'
+
+import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 
 interface OrdersListProps {
   orders: Order[]
@@ -51,7 +54,7 @@ const OrdersList = memo(({
 }: OrdersListProps) => {
   const { formatCurrency } = useCurrency()
   const pageSizeOptions = useMemo(() => [10, 25, 50], [])
-  const [rowsPerPage, setRowsPerPage] = useState<number>(pageSizeOptions[0])
+  const [rowsPerPage, setRowsPerPage] = useState<number>(pageSizeOptions[0] ?? 10)
   const [currentPage, setCurrentPage] = useState(1)
 
   const totalOrders = orders.length
@@ -68,19 +71,19 @@ const OrdersList = memo(({
   }, [onUpdateStatus])
 
   useEffect(() => {
-    void setCurrentPage(1)
+    setCurrentPage(1)
   }, [orders, rowsPerPage])
 
   useEffect(() => {
     if (currentPage > totalPages) {
-      void setCurrentPage(totalPages)
+      setCurrentPage(totalPages)
     }
   }, [currentPage, totalPages])
 
   if (loading) {
     return (
       <div className="space-y-4">
-        {[...Array(5)].map((_, i) => (
+        {Array.from({ length: 5 }, (_, i) => (
           <Card key={`skeleton-${i}`} className="animate-pulse">
             <CardContent className="p-4">
               <div className="space-y-3">
@@ -116,7 +119,7 @@ const OrdersList = memo(({
       <div className="md:hidden space-y-4">
         {paginatedOrders.map((order) => (
           <SwipeActions
-            key={order.id}
+            key={order['id']}
             actions={[
               {
                 id: 'view',
@@ -137,7 +140,7 @@ const OrdersList = memo(({
                 label: 'Hapus',
                 color: 'red',
                 icon: <Trash2 className="h-4 w-4" />,
-                onClick: () => onDeleteOrder(order.id)
+                onClick: () => onDeleteOrder(order['id'])
               }
             ]}
           >
@@ -145,18 +148,18 @@ const OrdersList = memo(({
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
-                    <h4 className="font-medium">{order.order_no}</h4>
-                    <p className="text-sm text-muted-foreground">{order.customer_name}</p>
+                    <h4 className="font-medium">{order['order_no']}</h4>
+                    <p className="text-sm text-muted-foreground">{order['customer_name']}</p>
                   </div>
                   <OrderStatusBadge
-                    status={order.status ?? 'PENDING'}
+                    status={order['status'] ?? 'PENDING'}
                     compact
                   />
                 </div>
 
                 {/* Progress indicator */}
                 <div className="mb-3">
-                  <OrderProgress currentStatus={order.status ?? 'PENDING'} />
+                  <OrderProgress currentStatus={order['status'] ?? 'PENDING'} />
                 </div>
 
                 <div className="space-y-2 text-sm">
@@ -201,8 +204,8 @@ const OrdersList = memo(({
           onPageChange={setCurrentPage}
           pageSize={rowsPerPage}
           onPageSizeChange={(size) => {
-            void setRowsPerPage(size)
-            void setCurrentPage(1)
+            setRowsPerPage(size)
+            setCurrentPage(1)
           }}
           totalItems={totalOrders}
           pageStart={pageStart}
@@ -234,10 +237,10 @@ const OrdersList = memo(({
                 </thead>
                 <tbody>
                   {paginatedOrders.map((order) => (
-                    <tr key={order.id} className="border-b hover:bg-muted/50">
+                    <tr key={order['id']} className="border-b hover:bg-muted/50">
                       <td className="py-3">
                         <div>
-                          <div className="font-medium">{order.order_no}</div>
+                          <div className="font-medium">{order['order_no']}</div>
                           <div className="text-sm text-muted-foreground">
                             {(order as OrderWithRelations).items?.length || 0} item
                           </div>
@@ -245,7 +248,7 @@ const OrdersList = memo(({
                       </td>
                       <td className="py-3">
                         <div>
-                          <div className="font-medium">{order.customer_name}</div>
+                          <div className="font-medium">{order['customer_name']}</div>
                           <div className="text-sm text-muted-foreground">
                             {order.customer_phone}
                           </div>
@@ -272,8 +275,8 @@ const OrdersList = memo(({
                       </td>
                       <td className="py-3">
                         <select
-                          value={order.status ?? 'PENDING'}
-                          onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
+                          value={order['status'] ?? 'PENDING'}
+                          onChange={(e) => handleStatusChange(order['id'], e.target.value as OrderStatus)}
                           className="bg-transparent border border-input rounded px-2 py-1 text-sm"
                         >
                           <option value="PENDING">Menunggu</option>
@@ -300,7 +303,7 @@ const OrdersList = memo(({
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => onDeleteOrder(order.id)}
+                            onClick={() => onDeleteOrder(order['id'])}
                             className="text-red-500 hover:text-red-700"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -319,8 +322,8 @@ const OrdersList = memo(({
               onPageChange={setCurrentPage}
               pageSize={rowsPerPage}
               onPageSizeChange={(size) => {
-                void setRowsPerPage(size)
-                void setCurrentPage(1)
+                setRowsPerPage(size)
+                setCurrentPage(1)
               }}
               totalItems={totalOrders}
               pageStart={pageStart}

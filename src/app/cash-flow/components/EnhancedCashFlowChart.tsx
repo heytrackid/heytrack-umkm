@@ -1,13 +1,14 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
 import { TrendingUp, TrendingDown, BarChart3, LineChart as LineChartIcon, Download } from 'lucide-react'
-import { LazyLineChart, LazyBarChart, LazyAreaChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ChartLegend, ResponsiveContainer, Area } from '@/components/charts/LazyCharts'
 import { useState } from 'react'
+
 import { type PeriodType, type ChartDataPoint, periodOptions } from '@/app/cash-flow/constants'
+import { LazyLineChart, LazyBarChart, LazyAreaChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ChartLegend, ResponsiveContainer, Area } from '@/components/charts/LazyCharts'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
 
 interface EnhancedCashFlowChartProps {
     chartData: ChartDataPoint[]
@@ -20,7 +21,7 @@ interface EnhancedCashFlowChartProps {
     isMobile: boolean
 }
 
-type ChartType = 'line' | 'bar' | 'area'
+type ChartType = 'area' | 'bar' | 'line'
 
 interface TooltipPayload {
     [key: string]: unknown;
@@ -94,7 +95,7 @@ const EnhancedCashFlowChart = ({
         const change = recent.net - previous.net
         const percentage = previous.net !== 0 ? (change / Math.abs(previous.net)) * 100 : 0
 
-        let direction: 'up' | 'down' | 'stable'
+        let direction: 'down' | 'stable' | 'up'
         if (change > 0) {
             direction = 'up'
         } else if (change < 0) {
@@ -142,9 +143,9 @@ const EnhancedCashFlowChart = ({
         link.setAttribute('href', url)
         link.setAttribute('download', `grafik-cashflow-${new Date().toISOString().split('T')[0]}.csv`)
         link.style.visibility = 'hidden'
-        document.body.appendChild(link)
+        document['body'].appendChild(link)
         link.click()
-        document.body.removeChild(link)
+        document['body'].removeChild(link)
     }
 
     const formatYAxis = (value: number) => {
@@ -182,14 +183,14 @@ const EnhancedCashFlowChart = ({
                         <Tooltip content={CustomTooltip} />
                         <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
-                            formatter={(value: string) => {
-                                const labels: Record<string, string> = {
-                                    income: 'Pemasukan',
-                                    expense: 'Pengeluaran',
-                                    net: 'Net'
-                                }
-                                return labels[value] || value
-                            }}
+                        formatter={(value: string) => {
+                            const labels: Record<string, string> = {
+                                income: 'Pemasukan',
+                                expense: 'Pengeluaran',
+                                net: 'Net'
+                            }
+                            return labels[value] ?? value
+                        }}
                         />
                         <Bar dataKey="income" fill="#22c55e" radius={[4, 4, 0, 0]} />
                         <Bar dataKey="expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
@@ -220,14 +221,14 @@ const EnhancedCashFlowChart = ({
                         <Tooltip content={CustomTooltip} />
                         <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
-                            formatter={(value: string) => {
-                                const labels: Record<string, string> = {
-                                    income: 'Pemasukan',
-                                    expense: 'Pengeluaran',
-                                    net: 'Net'
-                                }
-                                return labels[value] || value
-                            }}
+                        formatter={(value: string) => {
+                            const labels: Record<string, string> = {
+                                income: 'Pemasukan',
+                                expense: 'Pengeluaran',
+                                net: 'Net'
+                            }
+                            return labels[value] ?? value
+                        }}
                         />
                         <Area type="monotone" dataKey="income" stroke="#22c55e" fillOpacity={1} fill="url(#colorIncome)" />
                         <Area type="monotone" dataKey="expense" stroke="#ef4444" fillOpacity={1} fill="url(#colorExpense)" />
@@ -235,7 +236,7 @@ const EnhancedCashFlowChart = ({
                     </LazyAreaChart>
                 )
 
-            default: // line
+             case 'line':
                 return (
                     <LazyLineChart {...commonProps}>
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -244,14 +245,14 @@ const EnhancedCashFlowChart = ({
                         <Tooltip content={CustomTooltip} />
                         <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
-                            formatter={(value: string) => {
-                                const labels: Record<string, string> = {
-                                    income: 'Pemasukan',
-                                    expense: 'Pengeluaran',
-                                    net: 'Net'
-                                }
-                                return labels[value] || value
-                            }}
+                        formatter={(value: string) => {
+                            const labels: Record<string, string> = {
+                                income: 'Pemasukan',
+                                expense: 'Pengeluaran',
+                                net: 'Net'
+                            }
+                            return labels[value] ?? value
+                        }}
                         />
                         <Line
                             type="monotone"
@@ -277,8 +278,12 @@ const EnhancedCashFlowChart = ({
                             dot={{ fill: '#3b82f6', r: 4 }}
                             activeDot={{ r: 6 }}
                         />
-                    </LazyLineChart>
-                )
+                     </LazyLineChart>
+                 )
+
+            default:
+                // This should never happen due to TypeScript typing
+                throw new Error(`Unsupported chart type: ${chartType as string}`)
         }
     }
 
@@ -421,8 +426,8 @@ const EnhancedCashFlowChart = ({
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground mb-1">Saldo Akhir</p>
-                                    <p className={`text-sm font-semibold ${(chartData[chartData.length - 1]?.net || 0) >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
-                                        Rp {(chartData[chartData.length - 1]?.net || 0).toLocaleString('id-ID', { maximumFractionDigits: 0 })}
+                                    <p className={`text-sm font-semibold ${(chartData[chartData.length - 1]?.net ?? 0) >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
+                                        Rp {(chartData[chartData.length - 1]?.net ?? 0).toLocaleString('id-ID', { maximumFractionDigits: 0 })}
                                     </p>
                                 </div>
                             </div>

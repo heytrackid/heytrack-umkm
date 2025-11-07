@@ -47,7 +47,7 @@ export interface QueryParams {
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
     search?: string;
-    filters?: Record<string, string | number | boolean | null>;
+    filters?: Record<string, boolean | number | string | null>;
 }
 
 /**

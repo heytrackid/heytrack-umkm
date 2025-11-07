@@ -7,7 +7,7 @@ import type { ReactNode } from 'react'
 
 // Chart data interfaces
 export interface ChartDataPoint {
-  [key: string]: string | number | boolean | null | undefined
+  [key: string]: boolean | number | string | null | undefined
 }
 
 export interface TooltipEntry {

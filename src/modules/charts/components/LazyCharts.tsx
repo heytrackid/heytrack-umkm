@@ -1,9 +1,11 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import type { ComponentType, ReactNode } from 'react'
+
 import { serializeError, uiLogger } from '@/lib/logger'
+
 import type { MiniChartProps } from './MiniChart'
+import type { ComponentType, ReactNode } from 'react'
 
 
 

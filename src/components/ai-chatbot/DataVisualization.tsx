@@ -1,11 +1,14 @@
 'use client'
 
-import type { Row } from '@/types/database'
-import dynamic from 'next/dynamic'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DollarSign } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
+import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
+
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import type { Row } from '@/types/database'
 
 type Customer = Row<'customers'>
 type Recipe = Row<'recipes'>
@@ -50,12 +53,12 @@ interface ChartEntry {
   color: string
 }
 
-interface CustomerForViz extends Omit<Customer, 'total_spent' | 'total_orders'> {
+interface CustomerForViz extends Omit<Customer, 'total_orders' | 'total_spent'> {
   total_spent?: number
   total_orders?: number
 }
 
-interface RecipeForViz extends Omit<Recipe, 'total_revenue' | 'times_made'> {
+interface RecipeForViz extends Omit<Recipe, 'times_made' | 'total_revenue'> {
   total_revenue?: number
   times_made?: number
 }
@@ -98,7 +101,7 @@ interface AnalysisData {
 }
 
 interface DataVisualizationProps {
-  type: 'financial' | 'inventory' | 'customers' | 'products' | 'analysis'
+  type: 'analysis' | 'customers' | 'financial' | 'inventory' | 'products'
   data: unknown
   compact?: boolean
 }

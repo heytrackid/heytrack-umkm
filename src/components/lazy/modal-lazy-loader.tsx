@@ -1,6 +1,7 @@
 'use client'
 
 import { lazy, Suspense, useState, useCallback, type ComponentType } from 'react'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -83,10 +84,9 @@ interface LazyModalProps {
   isOpen: boolean
   onClose: () => void
   title: string
-  component: 'ingredient-form' | 'order-form' | 'customer-form' | 'recipe-form' | 'finance-form' |
-  'order-detail' | 'customer-detail' | 'inventory-detail'
+  component: 'customer-detail' | 'customer-form' | 'finance-form' | 'ingredient-form' | 'inventory-detail' | 'order-detail' | 'order-form' | 'recipe-form'
   props?: Record<string, unknown>
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'lg' | 'md' | 'sm' | 'xl'
   mobile?: boolean
 }
 
@@ -137,6 +137,14 @@ export const LazyModal = ({
             // Fallback to avoid runtime crash if caller forgets to pass handler
           }
         }
+      case 'finance-form':
+      case 'order-form':
+      case 'order-detail':
+      case 'ingredient-form':
+      case 'inventory-detail':
+      case 'customer-detail':
+      case 'recipe-form':
+        return {}
       default:
         return {}
     }
@@ -226,8 +234,8 @@ export const useLazyModal = () => {
         onClose={closeModal}
         title={modalState.title}
         component={modalState.component}
-        props={modalState.props}
-        size={modalState.size}
+        {...(modalState.props && { props: modalState.props })}
+        {...(modalState.size && { size: modalState.size })}
       />
     )
   }, [modalState, closeModal])
@@ -290,12 +298,12 @@ export const useConfirmationModal = () => {
   })
 
   const showConfirmation = (newConfig: typeof config) => {
-    void setConfig(newConfig)
-    void setIsOpen(true)
+    setConfig(newConfig)
+    setIsOpen(true)
   }
 
   const hideConfirmation = () => {
-    void setIsOpen(false)
+    setIsOpen(false)
   }
 
   const ConfirmationModalRenderer = () => (

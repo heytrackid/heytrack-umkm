@@ -18,7 +18,7 @@ export interface Currency {
 export interface CurrencyConfig extends Currency {
   thousandsSeparator: string
   decimalSeparator: string
-  symbolPosition: 'before' | 'after'
+  symbolPosition: 'after' | 'before'
   spaceAfterSymbol: boolean
 }
 
@@ -36,8 +36,10 @@ export const currencies: Currency[] = [
   { code: 'PHP', symbol: '₱', name: 'Philippine Peso', decimals: 2 }
 ]
 
+const FALLBACK_CURRENCY: Currency = { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', decimals: 0 }
+
 export const DEFAULT_CURRENCY: Currency =
-  currencies.find((currency) => currency.code === 'IDR') ?? currencies[0]
+  currencies.find((currency) => currency['code'] === 'IDR') ?? FALLBACK_CURRENCY
 
 // Extended currency configurations
 export const currencyConfigs: Record<string, CurrencyConfig> = {
@@ -172,15 +174,15 @@ export function getCurrentCurrency(): Currency {
     if (savedSettings) {
       const parsed = JSON.parse(savedSettings) as { currency?: Partial<Currency> }
       const savedCurrency = parsed?.currency
-      if (savedCurrency && typeof savedCurrency.code === 'string') {
-        const config = currencyConfigs[savedCurrency.code]
+      if (savedCurrency && typeof savedCurrency['code'] === 'string') {
+        const config = currencyConfigs[savedCurrency['code']]
         if (config) {
           return config
         }
       }
     }
-  } catch (_err: unknown) {
-    apiLogger.error({ _err }, 'Error loading currency settings')
+   } catch (_error: unknown) {
+     apiLogger.error({ _error }, 'Error loading currency settings')
   }
 
   return DEFAULT_CURRENCY
@@ -221,7 +223,7 @@ export function formatCurrencyIntl(amount: number, currency: Currency): string {
     return `${currency.symbol} 0`
   }
   
-  const locale = getCurrencyLocale(currency.code)
+  const locale = getCurrencyLocale(currency['code'])
   
   try {
     const formatted = new Intl.NumberFormat(locale, {
@@ -230,9 +232,9 @@ export function formatCurrencyIntl(amount: number, currency: Currency): string {
     }).format(amount)
     
     return `${currency.symbol} ${formatted}`
-  } catch (_err: unknown) {
-    // Fallback to basic formatting
-    return formatCurrency(amount, currency)
+   } catch (_error: unknown) {
+     // Fallback to basic formatting
+     return formatCurrency(amount, currency)
   }
 }
 
@@ -243,7 +245,7 @@ export function parseCurrencyString(currencyString: string, currency: Currency):
   if (!currencyString) {return 0}
   
   // Get config for advanced parsing
-  const config = currencyConfigs[currency.code]
+  const config = currencyConfigs[currency['code']]
   if (!config) {
     // Fallback to simple parsing
     const cleaned = currencyString
@@ -307,9 +309,10 @@ export function formatCurrencyInput(
   }
   
   // Format with decimals for other currencies
-  const formatted = (number / Math.pow(10, config.decimals)).toFixed(config.decimals)
+  const formatted = (number / 10**config.decimals).toFixed(config.decimals)
   const [intPart, decPart] = formatted.split('.')
-  const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, config.thousandsSeparator)
+  const safeIntPart = intPart ?? ''
+  const formattedInt = safeIntPart.replace(/\B(?=(\d{3})+(?!\d))/g, config.thousandsSeparator)
   
   return decPart ? `${formattedInt}${config.decimalSeparator}${decPart}` : formattedInt
 }
@@ -318,14 +321,14 @@ export function formatCurrencyInput(
  * Get currency symbol
  */
 export function getCurrencySymbol(currencyCode: string): string {
-  return currencyConfigs[currencyCode]?.symbol || currencies[0].symbol
+  return currencyConfigs[currencyCode]?.symbol || FALLBACK_CURRENCY.symbol
 }
 
 /**
  * Get currency name
  */
 export function getCurrencyName(currencyCode: string): string {
-  return currencyConfigs[currencyCode]?.name || currencies[0].name
+  return currencyConfigs[currencyCode]?.name || FALLBACK_CURRENCY.name
 }
 
 /**

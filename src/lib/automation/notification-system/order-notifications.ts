@@ -18,7 +18,7 @@ export class OrderNotifications {
     const urgentOrders = orders.filter(order => {
       const deliveryDate = new Date(order.delivery_date)
       const hoursUntilDelivery = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60)
-      return hoursUntilDelivery <= 24 && hoursUntilDelivery > 0 && order.status !== 'DELIVERED'
+      return hoursUntilDelivery <= 24 && hoursUntilDelivery > 0 && order['status'] !== 'DELIVERED'
     })
 
     urgentOrders.forEach(order => {
@@ -44,7 +44,7 @@ export class OrderNotifications {
     // Overdue orders
     const overdueOrders = orders.filter(order => {
       const deliveryDate = new Date(order.delivery_date)
-      return deliveryDate < now && order.status !== 'DELIVERED' && order.status !== 'CANCELLED'
+      return deliveryDate < now && order['status'] !== 'DELIVERED' && order['status'] !== 'CANCELLED'
     })
 
     if (overdueOrders.length > 0) {
@@ -65,8 +65,8 @@ export class OrderNotifications {
       const deliveryDate = new Date(order.delivery_date)
       const today = new Date()
       return deliveryDate.toDateString() === today.toDateString() &&
-        order.status !== 'DELIVERED' &&
-        order.status !== 'CANCELLED'
+        order['status'] !== 'DELIVERED' &&
+        order['status'] !== 'CANCELLED'
     })
 
     if (todayOrders.length > 5) {

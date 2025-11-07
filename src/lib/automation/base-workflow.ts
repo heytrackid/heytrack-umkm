@@ -1,4 +1,5 @@
 import { automationLogger } from '@/lib/logger'
+
 import type { WorkflowEventData, WorkflowContext, WorkflowResult, AutomationConfig } from '@/types/features/automation'
 
 /**
@@ -42,7 +43,7 @@ export abstract class BaseWorkflowAutomation {
     const event: WorkflowEventData = {
       event: eventData.event,
       entityId: eventData.entityId,
-      data: eventData.data ?? {},
+      data: eventData['data'] ?? {},
       timestamp: new Date().toISOString()
     }
 
@@ -101,10 +102,10 @@ export abstract class BaseWorkflowAutomation {
         }, 'Workflow event processing failed')
       }
 
-    } catch (err: unknown) {
+    } catch (error) {
       automationLogger.error({
         event: event.event,
-        error: err instanceof Error ? err.message : String(err)
+        error: error instanceof Error ? error.message : String(error)
       }, 'Error processing workflow event')
     }
   }

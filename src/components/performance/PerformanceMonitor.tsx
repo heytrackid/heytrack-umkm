@@ -1,6 +1,7 @@
 'use client'
 
  import { useEffect } from 'react'
+
 import { BundleMonitor } from '@/lib/bundle-splitting'
 
 /**

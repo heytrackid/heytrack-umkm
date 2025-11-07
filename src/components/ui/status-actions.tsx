@@ -1,7 +1,10 @@
-import type { ComponentType } from 'react'
+import { Pencil, Trash2, Eye, MoreHorizontal, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, Eye, MoreHorizontal, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react'
+
+import type { ComponentType } from 'react'
+
 
 /**
  * Shared Status and Action Components
@@ -84,7 +87,7 @@ interface ActionButtonsProps {
   onDelete?: () => void
   onView?: () => void
   onMore?: () => void
-  size?: 'sm' | 'default' | 'lg'
+  size?: 'default' | 'lg' | 'sm'
   variant?: 'ghost' | 'outline'
   showLabels?: boolean
 }

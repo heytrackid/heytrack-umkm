@@ -3,6 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
@@ -99,11 +100,11 @@ export function useInstantNavigation() {
 
   // Prefetch route data
   const prefetchRoute = useCallback(async (path: string) => {
-    const config = routeConfigs.find(r => r.path === path)
-    if (!config) {return}
+    const _config = routeConfigs.find(r => r.path === path)
+    if (!_config) {return}
 
     // Check if data already in cache
-    const hasCache = config.queryKeys.some(key => 
+    const hasCache = _config.queryKeys.some(key => 
       queryClient.getQueryData(key) !== undefined
     )
 
@@ -112,10 +113,10 @@ export function useInstantNavigation() {
 
     // Prefetch data
     try {
-      for (const queryKey of config.queryKeys) {
+      for (const queryKey of _config.queryKeys) {
         await queryClient.prefetchQuery({
           queryKey,
-          queryFn: config.prefetchFn,
+          queryFn: _config.prefetchFn,
           staleTime: 5 * 60 * 1000, // 5 minutes
         })
       }
@@ -147,7 +148,7 @@ export function useInstantNavigation() {
     const adjacentRoutes = [
       routeConfigs[currentIndex - 1],
       routeConfigs[currentIndex + 1]
-    ].filter(Boolean)
+    ].filter((route): route is RouteConfig => Boolean(route))
 
     adjacentRoutes.forEach(route => {
       void prefetchRoute(route.path)

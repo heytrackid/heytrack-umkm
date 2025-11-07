@@ -15,7 +15,7 @@ export function isRealtimeAvailable(): boolean {
     return false // Server-side
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseUrl = process['env'].NEXT_PUBLIC_SUPABASE_URL
   
   if (!supabaseUrl) {
     dbLogger.warn('Supabase URL not configured')

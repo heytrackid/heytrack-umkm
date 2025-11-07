@@ -1,6 +1,7 @@
 'use client'
 
 import { Calendar, CalendarDays } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -40,14 +41,14 @@ export const DateFilter = ({
     
     if (days === 0) {
       // Today only
-      const todayStr = today.toISOString().split('T')[0]
+      const todayStr = today.toISOString().split('T')[0]!
       onStartDateChange(todayStr)
       onEndDateChange(todayStr)
     } else {
       // Last X days
       start.setDate(today.getDate() - days)
-      onStartDateChange(start.toISOString().split('T')[0])
-      onEndDateChange(today.toISOString().split('T')[0])
+      onStartDateChange(start.toISOString().split('T')[0]!)
+      onEndDateChange(today.toISOString().split('T')[0]!)
     }
     
     onQuickFilter?.(days)

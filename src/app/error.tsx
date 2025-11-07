@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { AlertTriangle } from 'lucide-react'
+import { useEffect } from 'react'
+
+import { Button } from '@/components/ui/button'
 import { uiLogger } from '@/lib/client-logger'
 
 const Error = ({

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import type { LoadingState, UseLoadingReturn } from './types'
 
 
@@ -27,11 +28,11 @@ export function useLoading(initialStates: LoadingState = {}): UseLoadingReturn {
   }, [])
 
   const startLoading = useCallback((key: string) => {
-    void setLoading(key, true)
+    setLoading(key, true)
   }, [setLoading])
 
   const stopLoading = useCallback((key: string) => {
-    void setLoading(key, false)
+    setLoading(key, false)
   }, [setLoading])
 
   const withLoading = useCallback(async <T>(
@@ -39,7 +40,7 @@ export function useLoading(initialStates: LoadingState = {}): UseLoadingReturn {
     fn: () => Promise<T>
   ): Promise<T> => {
     try {
-      void startLoading(key)
+      startLoading(key)
       return await fn()
     } finally {
       stopLoading(key)

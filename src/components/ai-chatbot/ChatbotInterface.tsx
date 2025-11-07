@@ -1,14 +1,17 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, BarChart3, Package, DollarSign, Users, MessageCircle, Minimize2, Maximize2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { useState, useRef, useEffect } from 'react'
+
 import { Badge } from '@/components/ui/badge';
-import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
-import DataVisualization from './DataVisualization';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { createClientLogger } from '@/lib/client-logger'
+
+import DataVisualization from './DataVisualization';
+
+import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 
 const logger = createClientLogger('ChatbotInterface')
 
@@ -18,7 +21,7 @@ const logger = createClientLogger('ChatbotInterface')
 // Extended message type for UI with additional properties
 interface ExtendedChatMessage {
   id: string
-  role: 'user' | 'assistant' | 'system'
+  role: 'assistant' | 'system' | 'user'
   content: string
   timestamp: Date
   actions?: ChatAction[]
@@ -110,10 +113,10 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        throw new Error(`API error: ${response['status']}`);
       }
 
-      const result = await response.json();
+      const result = await response.json() as { message?: string; suggestions?: Array<{ text: string; action: string }>; session_id?: string; error?: string };
 
       if (result.message) {
         // Create assistant message with NLP response
@@ -122,8 +125,8 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
           role: 'assistant' as const,
           content: result.message,
           timestamp: new Date(),
-          actions: result.suggestions?.map((s: { text: string; action: string }) => ({
-            type: s.action,
+          actions: result.suggestions?.map((s) => ({
+            type: s.action as ChatAction['type'],
             label: s.text
           }))
         };
@@ -138,7 +141,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
             conversationHistory: messages
               .filter(m => m.role !== 'system')
               .map(({ role, content, timestamp }) => ({
-                role: role as 'user' | 'assistant',
+                role: role as 'assistant' | 'user',
                 content,
                 timestamp
               })),
@@ -148,8 +151,8 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
         throw new Error(result.error ?? 'Unknown API error');
       }
 
-    } catch (err: unknown) {
-      logger.error({ error: err }, 'Error sending message:');
+    } catch (error) {
+      logger.error({ error }, 'Error sending message:');
       const errorMessage: ExtendedChatMessage = {
         id: `error_${Date.now()}`,
         role: 'assistant' as const,
@@ -175,26 +178,26 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          actionId: action.type,
+          actionId: action['type'],
           contextId: context.sessionId,
           userId
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Action API error: ${response.status}`);
+        throw new Error(`Action API error: ${response['status']}`);
       }
 
-      const apiResult = await response.json();
+      const apiResult = await response.json() as { success: boolean; result?: { message?: string; aiRecommendations?: string; businessInsights?: unknown }; error?: string };
 
       if (apiResult.success) {
         const { result } = apiResult;
 
         // Create system message with enhanced content
-        let content = result.message ?? `Aksi"${action.label}" berhasil dijalankan.`;
+        let content = result?.message ?? `Aksi"${action.label}" berhasil dijalankan.`;
 
         // Add AI recommendations if available
-        if (result.aiRecommendations) {
+        if (result?.aiRecommendations) {
           content += `\n\n🤖 **AI Recommendations:**\n${result.aiRecommendations}`;
         }
 
@@ -205,11 +208,11 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
           timestamp: new Date(),
           data: {
             ...result,
-            actionType: action.type,
-            aiEnhanced: !!(result.aiRecommendations ?? result.businessInsights),
+            actionType: action['type'],
+            aiEnhanced: Boolean(result?.aiRecommendations ?? result?.businessInsights),
             metadata: {
-              actionType: action.type,
-              aiEnhanced: !!(result.aiRecommendations ?? result.businessInsights)
+              actionType: action['type'],
+              aiEnhanced: Boolean(result?.aiRecommendations ?? result?.businessInsights)
             }
           }
         };
@@ -219,8 +222,8 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
         throw new Error(apiResult.error ?? 'Unknown action error');
       }
 
-    } catch (err: unknown) {
-      logger.error({ error: err }, 'Error executing action:');
+    } catch (error) {
+      logger.error({ error }, 'Error executing action:');
       const errorMessage: ExtendedChatMessage = {
         id: `error_${Date.now()}`,
         role: 'assistant' as const,
@@ -286,14 +289,14 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
               <div className="mt-3 flex flex-wrap gap-2">
                 {message.actions.map((action: ChatAction, index: number) => (
                   <Button
-                    key={`${action.type}-${index}`}
+                    key={`${action['type']}-${index}`}
                     variant="secondary"
                     size="sm"
                     onClick={() => handleActionClick(action)}
                     disabled={isLoading}
                     className="text-xs h-8"
                   >
-                    {getActionIcon(action.type)}
+                    {getActionIcon(action['type'])}
                     <span className="ml-1">{action.label}</span>
                   </Button>
                 ))}
@@ -301,20 +304,20 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
             )}
 
             {/* Data visualization */}
-            {message.data && (message.role === 'assistant' || message.role === 'system') && (
+            {message['data'] && (message.role === 'assistant' || message.role === 'system') && (
               <div className="mt-3">
                 {(() => {
                   // Determine visualization type based on message data structure
-                  const data = message.data as Record<string, unknown> | undefined;
-                  if (data?.profitMargin !== undefined) {
+                  const data = message['data'] as Record<string, unknown> | undefined;
+                  if (data?.['profitMargin'] !== undefined) {
                     return <DataVisualization type="financial" data={data} compact />;
-                  } if (data?.criticalItems) {
+                  } if (data?.['criticalItems']) {
                     return <DataVisualization type="inventory" data={data} compact />;
-                  } if (data?.topCustomers) {
+                  } if (data?.['topCustomers']) {
                     return <DataVisualization type="customers" data={data} compact />;
-                  } if (data?.topRecipes) {
+                  } if (data?.['topRecipes']) {
                     return <DataVisualization type="products" data={data} compact />;
-                  } if (data?.analysis) {
+                  } if (data?.['analysis']) {
                     return <DataVisualization type="analysis" data={data} compact />;
                   }
                   return null;
@@ -325,7 +328,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
 
           {/* Timestamp */}
           <div className="text-xs text-gray-500 mt-1">
-            {new Date(message.timestamp).toLocaleTimeString('id-ID', {
+            {new Date(message['timestamp']).toLocaleTimeString('id-ID', {
               hour: '2-digit',
               minute: '2-digit'
             })}
@@ -440,7 +443,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
         <div className="flex-1 overflow-y-auto p-4 min-h-0" style={{ maxHeight: 'calc(100% - 200px)' }}>
           <div className="space-y-4">
             {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
+              <MessageBubble key={message['id']} message={message} />
             ))}
 
             {/* Loading indicator with AI thinking animation */}

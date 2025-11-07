@@ -1,9 +1,11 @@
 'use client'
 
+import { Bell } from 'lucide-react'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
-import { Bell } from 'lucide-react'
+
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 
 

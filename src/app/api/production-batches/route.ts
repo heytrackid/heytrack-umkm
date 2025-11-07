@@ -1,12 +1,17 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
-import { apiLogger } from '@/lib/logger'
-import { cacheInvalidation } from '@/lib/cache'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { NextResponse } from 'next/server'
+
+import { cacheInvalidation } from '@/lib/cache'
+import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Database } from '@/types/database'
+
 
 async function getHandler() {
   try {
@@ -25,11 +30,11 @@ async function getHandler() {
         *,
         recipe:recipes(name, cook_time)
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .order('created_at', { ascending: false });
 
     if (error) {
-      apiLogger.error({ error, userId: user.id }, 'Failed to fetch production batches')
+      apiLogger.error({ error, userId: user['id'] }, 'Failed to fetch production batches')
       throw error
     }
 
@@ -37,7 +42,7 @@ async function getHandler() {
     const mappedBatches = batches?.map(batch => ({
       ...batch,
       recipe_name: batch.recipe?.name, // Extract recipe name from joined data
-      batch_number: batch.id.slice(0, 8).toUpperCase(), // Generate batch number from ID
+      batch_number: batch['id'].slice(0, 8).toUpperCase(), // Generate batch number from ID
       planned_date: batch.created_at, // Use created_at as planned_date
       actual_cost: batch.total_cost, // Map total_cost to actual_cost
       unit: 'pcs', // Default unit since recipes table doesn't have unit column
@@ -65,15 +70,15 @@ export const POST = withSecurity(postHandler, SecurityPresets.enhanced())
     if (authError || !user) {
       throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
-    const body = await request.json();
+    const _body = await request.json() as Record<string, unknown>;
 
     // ✅ Insert with user_id
     const { data: batch, error } = await supabase
       .from('productions')
       .insert([{
-        ...body,
-        user_id: user.id
-      }])
+        ..._body,
+        user_id: user['id']
+      } as Database['public']['Tables']['productions']['Insert']])
       .select(`
         *,
         recipe:recipes(name, cook_time)
@@ -81,7 +86,7 @@ export const POST = withSecurity(postHandler, SecurityPresets.enhanced())
       .single();
 
     if (error) {
-      apiLogger.error({ error, userId: user.id }, 'Failed to create production batch')
+      apiLogger.error({ error, userId: user['id'] }, 'Failed to create production batch')
       throw error
     }
 
@@ -89,7 +94,7 @@ export const POST = withSecurity(postHandler, SecurityPresets.enhanced())
     const mappedBatch = {
       ...batch,
       recipe_name: batch.recipe?.name, // Extract recipe name from joined data
-      batch_number: batch.id.slice(0, 8).toUpperCase(),
+      batch_number: batch['id'].slice(0, 8).toUpperCase(),
       planned_date: batch.created_at,
       actual_cost: batch.total_cost,
       unit: 'pcs', // Default unit since recipes table doesn't have unit column

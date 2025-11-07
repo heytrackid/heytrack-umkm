@@ -1,14 +1,16 @@
 'use client'
 
+import { AlertTriangle, Info, TrendingUp } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { FormField, FormGrid } from '@/components/ui/crud-form'
 import { useSettings } from '@/contexts/settings-context'
+
 import type { SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import type { Row } from '@/types/database'
-import { AlertTriangle, Info, TrendingUp } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
 
 
@@ -18,7 +20,7 @@ type Ingredient = Row<'ingredients'>
 interface EnhancedIngredientFormProps {
     form: UseFormReturn<SimpleIngredientFormData>
     mode: 'create' | 'edit'
-    initialData?: SimpleIngredientFormData & Partial<Ingredient>
+    initialData?: Partial<Ingredient> & SimpleIngredientFormData
 }
 
 export const EnhancedIngredientForm = ({

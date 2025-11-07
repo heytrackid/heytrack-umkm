@@ -1,9 +1,11 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { createClient } from '@/utils/supabase/client'
-import type { Row } from '@/types/database'
+
 import { createClientLogger } from '@/lib/client-logger'
+import { createClient } from '@/utils/supabase/client'
+
+import type { Row } from '@/types/database'
 
 const logger = createClientLogger('Hook')
 import { cachePresets } from '@/providers/QueryProvider'
@@ -15,7 +17,7 @@ export interface DashboardStats {
     today: number
     target: number
     weekly: number
-    trend: 'up' | 'down'
+    trend: 'down' | 'up'
     growth: number
   }
   profit: {
@@ -122,8 +124,8 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     type Customer = Row<'customers'>
 
     // Calculate stats
-    const todayRevenue = todayOrders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
-    const weeklyRevenue = weeklyOrders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
+    const todayRevenue = todayOrders?.reduce((sum: number, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
+    const weeklyRevenue = weeklyOrders?.reduce((sum: number, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
     
     const lowStockItems = inventory?.filter((item: Ingredient) => 
       (item.current_stock ?? 0) <= (item.reorder_point ?? 0)
@@ -134,7 +136,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
 
     // Get recent orders for activity
     const recentOrders = todayOrders?.slice(-3).map((order: Order) => ({
-      customer: order.customer_name ?? 'Unknown',
+      customer: order['customer_name'] ?? 'Unknown',
       amount: order.total_amount ?? 0,
       time: order.created_at ?? ''
     })) || []
@@ -181,8 +183,8 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       },
       lastUpdated: Date.now()
     }
-  } catch (err: unknown) {
-    logger.error({ err }, 'Error fetching dashboard stats:')
+   } catch (error) {
+     logger.error({ error }, 'Error fetching dashboard stats:')
     
     // Return default/empty data on error
     return {
@@ -220,7 +222,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
       if (error) {throw error}
 
       type Order = Row<'orders'>
-      const revenue = orders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
+      const revenue = orders?.reduce((sum: number, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
       
       weekData.push({
         day: date.toLocaleDateString('id-ID', { weekday: 'short' }),
@@ -230,10 +232,10 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
     }
     
     return weekData
-  } catch (err: unknown) {
-    logger.error({ err }, 'Error fetching weekly sales:')
-    return []
-  }
+   } catch (error) {
+     logger.error({ error }, 'Error fetching weekly sales:')
+     return []
+   }
 }
 
 // Fetch top products data
@@ -242,10 +244,10 @@ const fetchTopProducts = (): TopProductsData[] => {
     // This would need to be implemented based on your order_items and recipes schema
     // For now, return empty array since we're removing mock data
     return []
-  } catch (err: unknown) {
-    logger.error({ err }, 'Error fetching top products:')
-    return []
-  }
+   } catch (error) {
+     logger.error({ error }, 'Error fetching top products:')
+     return []
+   }
 }
 
 // Hooks

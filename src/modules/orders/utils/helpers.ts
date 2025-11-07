@@ -1,4 +1,5 @@
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
+
 import type { OrderStatus } from '@/modules/orders/types'
 
 
@@ -29,7 +30,8 @@ export function getPriorityInfo(_priority: string) {
  */
 export function generateOrderNo(): string {
   const today = new Date()
-  const dateStr = today.toISOString().split('T')[0].replace(/-/g, '')
+  const [datePart] = today.toISOString().split('T')
+  const dateStr = (datePart ?? '').replace(/-/g, '')
   const timeStr = Math.floor(Date.now() / 1000).toString().slice(-3)
   return `ORD-${dateStr}-${timeStr}`
 }

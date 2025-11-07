@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
@@ -12,7 +13,7 @@ const logger = createClientLogger('Hook')
 
 
 interface UseConfirmOptions {
-  onConfirm: () => void | Promise<void>
+  onConfirm: () => Promise<void> | void
   title?: string
   description?: string
 }
@@ -23,27 +24,27 @@ export function useConfirm() {
   const [config, setConfig] = useState<UseConfirmOptions | null>(null)
 
   const confirm = useCallback((options: UseConfirmOptions) => {
-    void setConfig(options)
-    void setIsOpen(true)
+    setConfig(options)
+    setIsOpen(true)
   }, [])
 
   const handleConfirm = useCallback(async () => {
     if (!config) {return}
 
     try {
-      void setLoading(true)
+      setLoading(true)
       await config.onConfirm()
-      void setIsOpen(false)
-    } catch (err) {
-      logger.error({ err }, 'Confirmation action failed:')
+      setIsOpen(false)
+    } catch (error) {
+      logger.error({ error }, 'Confirmation action failed:')
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [config])
 
   const handleCancel = useCallback(() => {
-    void setIsOpen(false)
-    void setLoading(false)
+    setIsOpen(false)
+    setLoading(false)
   }, [])
 
   return {

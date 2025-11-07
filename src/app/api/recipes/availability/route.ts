@@ -1,10 +1,14 @@
-import { createClient } from '@/utils/supabase/server'
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 import { type NextRequest, NextResponse } from 'next/server'
+
 import { apiLogger, logError } from '@/lib/logger'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
+import { createClient } from '@/utils/supabase/server'
 
 
-export const runtime = 'nodejs'
 
 // GET /api/recipes/availability?recipe_id=xxx&quantity=10
 export async function GET(request: NextRequest) {
@@ -31,7 +35,7 @@ export async function GET(request: NextRequest) {
     const result = await RecipeAvailabilityService.checkAvailability(recipeId, quantity)
 
     apiLogger.info({ 
-      userId: user.id,
+      userId: user['id'],
       recipeId,
       quantity,
       isAvailable: result.is_available
@@ -53,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    const body = await request.json()
+    }    const body = await request.json() as { recipes?: Array<{ recipe_id: string; quantity: number }> }
     const { recipes } = body
 
     if (!recipes || !Array.isArray(recipes)) {
@@ -66,7 +70,7 @@ export async function POST(request: NextRequest) {
     const results = await RecipeAvailabilityService.checkMultipleRecipes(recipes)
 
     apiLogger.info({ 
-      userId: user.id,
+      userId: user['id'],
       recipeCount: recipes.length,
       availableCount: results.filter(r => r.is_available).length
     }, 'Multiple recipes checked')

@@ -1,8 +1,9 @@
 'use client'
 
+import { useCallback, useEffect, useMemo, useRef, useState, type DependencyList } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 
-import { useCallback, useEffect, useMemo, useRef, useState, type DependencyList } from 'react'
 
 
 /**
@@ -29,7 +30,7 @@ export function useMemoizedArrayOps<T, M = T>(
   }
 ) {
   return useMemo(() => {
-    let result: T[] | M[] = [...array]
+    let result: M[] | T[] = [...array]
 
     if (operations.filter) {
       result = (result).filter(operations.filter)
@@ -101,7 +102,7 @@ export function useVirtualScroll<T>(
   const offsetY = visibleRange.startIndex * itemHeight
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    void setScrollTop(e.currentTarget.scrollTop)
+    setScrollTop(e.currentTarget.scrollTop)
   }, [])
 
   return {
@@ -219,7 +220,7 @@ export function useDebouncedValue<T>(value: T, delay: number): T {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      void setDebouncedValue(value)
+      setDebouncedValue(value)
     }, delay)
 
     return () => {
@@ -294,7 +295,7 @@ export function useLazyLoad(threshold = 0.1) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          void setIsVisible(true)
+          setIsVisible(true)
           observer.disconnect()
         }
       },

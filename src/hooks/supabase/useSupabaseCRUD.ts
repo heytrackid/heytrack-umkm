@@ -1,13 +1,15 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import type { RealtimeChannel } from '@supabase/supabase-js'
+
 import { createClientLogger } from '@/lib/client-logger'
+import { getErrorMessage } from '@/lib/type-guards'
 import { useSupabase } from '@/providers/SupabaseProvider'
+
 import type { Database } from '@/types/database'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 
 const logger = createClientLogger('Hook')
-import { getErrorMessage } from '@/lib/type-guards'
 
 /**
  * Supabase CRUD Hook
@@ -15,15 +17,15 @@ import { getErrorMessage } from '@/lib/type-guards'
  */
 
 
-type TableKey = keyof Database['public']['Tables'] & string
+type TableKey = keyof Database['public']['Tables']
 
 type TableRow<TTable extends TableKey> = Database['public']['Tables'][TTable]['Row']
 type TableInsert<TTable extends TableKey> = Database['public']['Tables'][TTable]['Insert']
 type TableUpdate<TTable extends TableKey> = Database['public']['Tables'][TTable]['Update']
 
-type TableFilters<TTable extends TableKey> = Partial<
-  Record<keyof TableRow<TTable> & string, string | number | boolean | null>
->
+type TableFilters<TTable extends TableKey> = Partial<{
+  [K in keyof TableRow<TTable>]: TableRow<TTable>[K] | null
+}>
 
 interface UseSupabaseCRUDReturn<Row, Insert, Update> {
   data: Row[] | null
@@ -42,7 +44,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
   options?: {
     select?: string
     filter?: TableFilters<TTable>
-    orderBy?: { column: keyof TableRow<TTable> & string; ascending?: boolean }
+    orderBy?: { column: string & keyof TableRow<TTable>; ascending?: boolean }
   }
 ): UseSupabaseCRUDReturn<TableRow<TTable>, TableInsert<TTable>, TableUpdate<TTable>> {
   const [data, setData] = useState<Array<TableRow<TTable>> | null>(null)
@@ -52,62 +54,71 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
   const fetchData = useCallback(async () => {
     try {
-      void setLoading(true)
-      void setError(null)
+      setLoading(true)
+      setError(null)
       
       // Get authenticated user for RLS
       const { data: { user } } = await supabase.auth.getUser()
       
-      let query = supabase.from(table).select(options?.select ?? '*')
+      let _query = supabase.from(table).select(options?.select ?? '*')
 
       // Apply user_id filter for RLS (if user is authenticated)
       if (user) {
-        query = query.eq('user_id' as never, user.id as never)
+        _query = _query.eq('user_id' as never, user['id'] as never)
       }
 
       // Apply filters
       if (options?.filter) {
-        Object.entries(options.filter).forEach(([key, value]) => {
-          if (value === undefined) {return}
-          const column = key
+        Object.entries(options.filter).forEach(([column, value]) => {
+          if (value === undefined) { return }
+          const typedColumn = column as keyof TableRow<TTable>
           if (value === null) {
-            query = query.is(column, null)
+            _query = _query.is(typedColumn as string, null)
           } else {
-            query = query.eq(column, value)
+            _query = _query.eq(
+              typedColumn as string,
+              value as TableRow<TTable>[typeof typedColumn]
+            )
           }
         })
       }
 
       // Apply ordering
       if (options?.orderBy) {
-        query = query.order(options.orderBy.column, {
+        _query = _query.order(options.orderBy.column, {
           ascending: options.orderBy.ascending ?? true
         })
       }
 
-      const { data: result, error: queryError } = await query as { data: Array<TableRow<TTable>> | null; error: Error | null }
+      const { data: result, error: queryError } = await _query as {
+        data: Array<TableRow<TTable>> | null
+        error: Error | null
+      }
 
       if (queryError) {
-        if (process.env.NODE_ENV === 'development') {
+        if (process['env'].NODE_ENV === 'development') {
           logger.error({ table, error: queryError }, 'Error fetching from table')
         }
         throw queryError
       }
 
-      logger.debug({ 
-        table, 
-        rowCount: result?.length ?? 0 
-      }, `Fetched rows from ${table}`)
-      void setData(result)
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        logger.error({ error: err, table }, 'Error in fetchData')
+      logger.debug(
+        {
+          table,
+          rowCount: result?.length ?? 0
+        },
+        `Fetched rows from ${table}`
+      )
+      setData(result)
+    } catch (error) {
+      if (process['env'].NODE_ENV === 'development') {
+        logger.error({ error, table }, 'Error in fetchData')
       }
-      setError(new Error(getErrorMessage(err)))
-     } finally {
-       void setLoading(false)
-     }
-   }, [table, options?.select, options?.filter, options?.orderBy, supabase])
+      setError(new Error(getErrorMessage(error)))
+    } finally {
+      setLoading(false)
+    }
+  }, [table, options?.select, options?.filter, options?.orderBy, supabase])
 
   const read = async (id: string): Promise<TableRow<TTable> | null> => {
     try {
@@ -118,28 +129,31 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         throw new Error('User not authenticated')
       }
 
-      const { data: result, error: readError } = await supabase
+      const {
+        data: result,
+        error: readError
+      } = await supabase
         .from(table)
         .select(options?.select ?? '*')
         .eq('id' as never, id as never)
-        .eq('user_id' as never, user.id as never) // RLS filter
+        .eq('user_id' as never, user['id'] as never) // RLS filter
         .single() as { data: TableRow<TTable> | null; error: Error | null }
 
       if (readError) {
-        if (process.env.NODE_ENV === 'development') {
+        if (process['env'].NODE_ENV === 'development') {
           logger.error({ table, error: readError }, 'Read error')
         }
         throw readError
       }
 
       return result
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        logger.error({ error: err, table }, 'Error in read')
+    } catch (error) {
+      if (process['env'].NODE_ENV === 'development') {
+        logger.error({ error, table }, 'Error in read')
       }
-      const error = new Error(getErrorMessage(err))
-      setError(error)
-      throw error
+      const normalizedError = new Error(getErrorMessage(error))
+      setError(normalizedError)
+      throw normalizedError
     }
   }
 
@@ -156,10 +170,10 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         .from(table)
         .delete()
         .eq('id' as never, id as never)
-        .eq('user_id' as never, user.id as never) // RLS filter
+        .eq('user_id' as never, user['id'] as never) // RLS filter
 
       if (deleteError) {
-        if (process.env.NODE_ENV === 'development') {
+        if (process['env'].NODE_ENV === 'development') {
           logger.error({ table, error: deleteError }, 'Delete error')
         }
         throw deleteError
@@ -167,13 +181,13 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       // Refresh data after delete
       await fetchData()
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        logger.error({ error: err, table }, 'Error in remove')
+    } catch (error) {
+      if (process['env'].NODE_ENV === 'development') {
+        logger.error({ error, table }, 'Error in remove')
       }
-      const error = new Error(getErrorMessage(err))
-      setError(error)
-      throw error
+      const normalizedError = new Error(getErrorMessage(error))
+      setError(normalizedError)
+      throw normalizedError
     }
   }
 
@@ -189,17 +203,20 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       // Add user_id to the data
       const dataWithUser = {
         ...newData,
-        user_id: user.id
+        user_id: user['id']
       }
 
-      const { data: result, error: createError } = await supabase
+      const {
+        data: result,
+        error: createError
+      } = await supabase
         .from(table)
         .insert([dataWithUser] as never)
         .select()
         .single() as { data: TableRow<TTable> | null; error: Error | null }
 
       if (createError) {
-        if (process.env.NODE_ENV === 'development') {
+        if (process['env'].NODE_ENV === 'development') {
           logger.error({ table, error: createError }, 'Create error')
         }
         throw createError
@@ -208,13 +225,13 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       // Refresh data after create
       await fetchData()
       return result
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        logger.error({ error: err, table }, 'Error in create')
+    } catch (error) {
+      if (process['env'].NODE_ENV === 'development') {
+        logger.error({ error, table }, 'Error in create')
       }
-      const error = new Error(getErrorMessage(err))
-      setError(error)
-      throw error
+      const normalizedError = new Error(getErrorMessage(error))
+      setError(normalizedError)
+      throw normalizedError
     }
   }
 
@@ -227,16 +244,19 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         throw new Error('User not authenticated')
       }
 
-      const { data: result, error: updateError } = await supabase
+      const {
+        data: result,
+        error: updateError
+      } = await supabase
         .from(table)
         .update(updateData as never)
         .eq('id' as never, id as never)
-        .eq('user_id' as never, user.id as never) // RLS filter
+        .eq('user_id' as never, user['id'] as never) // RLS filter
         .select()
         .single() as { data: TableRow<TTable> | null; error: Error | null }
 
       if (updateError) {
-        if (process.env.NODE_ENV === 'development') {
+        if (process['env'].NODE_ENV === 'development') {
           logger.error({ table, error: updateError }, 'Update error')
         }
         throw updateError
@@ -245,13 +265,13 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       // Refresh data after update
       await fetchData()
       return result
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        logger.error({ error: err, table }, 'Error in update')
+    } catch (error) {
+      if (process['env'].NODE_ENV === 'development') {
+        logger.error({ error, table }, 'Error in update')
       }
-      const error = new Error(getErrorMessage(err))
-      setError(error)
-      throw error
+      const normalizedError = new Error(getErrorMessage(error))
+      setError(normalizedError)
+      throw normalizedError
     }
   }
 
@@ -275,14 +295,14 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         }
 
         realtimeChannel = supabase
-          .channel(`${table}_realtime_${user.id}`)
+          .channel(`${table}_realtime_${user['id']}`)
           .on(
             'postgres_changes',
             {
               event: '*',
               schema: 'public',
               table,
-              filter: `user_id=eq.${user.id}`
+              filter: `user_id=eq.${user['id']}`
             },
             (payload) => {
               logger.debug({ table, event: payload.eventType }, 'Realtime event received')
@@ -296,8 +316,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
                   case 'INSERT': {
                     const newRecord = payload.new as TableRow<TTable>
                     // Check if already exists
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const exists = currentData.some((item: any) => item.id === (newRecord as any).id)
+                    const exists = currentData.some((item) => item.id === newRecord.id)
                     if (!exists) {
                       return [...currentData, newRecord]
                     }
@@ -305,16 +324,13 @@ export function useSupabaseCRUD<TTable extends TableKey>(
                   }
                   case 'UPDATE': {
                     const updatedRecord = payload.new as TableRow<TTable>
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    return currentData.map((item: any) =>
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      item.id === (updatedRecord as any).id ? updatedRecord : item
+                    return currentData.map((item) =>
+                      item.id === updatedRecord.id ? updatedRecord : item
                     )
                   }
                   case 'DELETE': {
                     const deletedRecord = payload.old as TableRow<TTable>
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    return currentData.filter((item: any) => item.id !== (deletedRecord as any).id)
+                    return currentData.filter((item) => item.id !== deletedRecord.id)
                   }
                   default:
                     return currentData
@@ -330,8 +346,8 @@ export function useSupabaseCRUD<TTable extends TableKey>(
             }
           })
 
-      } catch (err) {
-        logger.error({ error: err, table }, 'Error setting up realtime')
+      } catch (error) {
+        logger.error({ error, table }, 'Error setting up realtime')
       }
     }
 

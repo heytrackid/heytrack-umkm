@@ -1,15 +1,20 @@
 'use client'
 
+import { Download, Loader2, AlertCircle } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { Suspense } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { StatsSkeleton } from '@/components/ui'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import PrefetchLink from '@/components/ui/prefetch-link'
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
-import PrefetchLink from '@/components/ui/prefetch-link'
-import { Download, Loader2, AlertCircle } from 'lucide-react'
-import { StatsSkeleton } from '@/components/ui'
-import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
+
+
 import {
   useProfitData,
   useProductChartData,
@@ -23,8 +28,6 @@ import {
   ProfitBreakdown
 } from './components'
 
-import { PageHeader } from '@/components/layout/PageHeader'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 
 // Loading component for chart
 const LoadingChart = () => (
@@ -337,12 +340,14 @@ const ProfitReportPage = () => {
             />
 
             {/* Summary Cards */}
-            <ProfitSummaryCards
-              summary={summary}
-              trends={profitData?.trends}
-              formatCurrency={formatCurrency}
-              isMobile={isMobile}
-            />
+            {profitData?.trends && (
+              <ProfitSummaryCards
+                summary={summary}
+                trends={profitData.trends}
+                formatCurrency={formatCurrency}
+                isMobile={isMobile}
+              />
+            )}
 
             {/* Product Profitability Chart */}
             <ProductProfitabilityChart

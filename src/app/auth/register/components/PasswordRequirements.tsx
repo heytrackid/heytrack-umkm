@@ -1,4 +1,5 @@
 import { Check, X } from 'lucide-react'
+
 import { usePasswordValidation } from '@/app/auth/register/hooks/usePasswordValidation'
 
 interface PasswordRequirementsProps {

@@ -1,16 +1,20 @@
 'use client'
 
-import { type FormEvent, useEffect } from 'react'
+import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import Link from 'next/link'
+import { type FormEvent, useEffect } from 'react'
+
+import { useRegistration } from '@/app/auth/register/hooks/useRegistration'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
-import { PasswordStrengthIndicator } from './PasswordStrengthIndicator'
+
+
 import { PasswordRequirements } from './PasswordRequirements'
-import { useRegistration } from '@/app/auth/register/hooks/useRegistration'
+import { PasswordStrengthIndicator } from './PasswordStrengthIndicator'
+
 
 
 interface RegistrationFormProps {
@@ -107,7 +111,7 @@ export const RegistrationForm = ({
                 required
                 disabled={isPending}
                 onChange={() => clearFieldError('email')}
-                aria-invalid={!!fieldErrors.email}
+                aria-invalid={Boolean(fieldErrors.email)}
                 aria-describedby={fieldErrors.email ? 'email-error' : undefined}
               />
             </div>
@@ -137,7 +141,7 @@ export const RegistrationForm = ({
                 className={`pl-10 pr-12 h-11 text-base transition-all duration-200 ${fieldErrors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 required
                 disabled={isPending}
-                aria-invalid={!!fieldErrors.password}
+                aria-invalid={Boolean(fieldErrors.password)}
                 aria-describedby={fieldErrors.password ? 'password-error' : undefined}
               />
               <Button
@@ -186,7 +190,7 @@ export const RegistrationForm = ({
                 className={`pl-10 pr-12 h-11 text-base transition-all duration-200 ${fieldErrors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 required
                 disabled={isPending}
-                aria-invalid={!!fieldErrors.confirmPassword}
+                aria-invalid={Boolean(fieldErrors.confirmPassword)}
                 aria-describedby={fieldErrors.confirmPassword ? 'confirm-password-error' : undefined}
               />
               <Button

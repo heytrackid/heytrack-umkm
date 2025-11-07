@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
 
 
 interface ModalProps {
@@ -9,7 +9,7 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  size?: 'full' | 'lg' | 'md' | 'sm' | 'xl';
   showCloseButton?: boolean;
   closeOnBackdropClick?: boolean;
   fullScreenOnMobile?: boolean;
@@ -39,14 +39,14 @@ export const Modal = ({
     if (isOpen) {
       previousFocus.current = document.activeElement as HTMLElement;
       document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document['body'].style.overflow = 'hidden';
 
       // Focus management
       setTimeout(() => {
         modalRef.current?.focus();
       }, 100);
     } else {
-      document.body.style.overflow = 'unset';
+      document['body'].style.overflow = 'unset';
       if (previousFocus.current) {
         previousFocus.current.focus();
       }
@@ -54,7 +54,7 @@ export const Modal = ({
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document['body'].style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 
@@ -168,14 +168,14 @@ export const Drawer = ({
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document['body'].style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset';
+      document['body'].style.overflow = 'unset';
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document['body'].style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 

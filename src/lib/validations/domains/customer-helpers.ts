@@ -1,5 +1,7 @@
 import { z } from 'zod'
+
 import { CustomerInsertSchema } from './customer'
+
 import type { Insert, Update } from '@/types/database'
 
 
@@ -25,7 +27,7 @@ export const customerUniquenessValidation = z.object({
   email: z.string().email().optional(),
 }).refine((data) => 
   // At least one contact method is required
-   !!(data.phone ?? data.email)
+   Boolean(data.phone ?? data.email)
 , {
   message: 'Either phone or email is required for customer identification',
   path: ['phone']
@@ -69,9 +71,9 @@ export class CustomerValidationHelpers {
     try {
       const validatedData = EnhancedCustomerInsertSchema.parse(data)
       return { success: true, data: validatedData as Insert<'customers'> }
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors = error.issues.map(error => `${error.path.join('.')}: ${error.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -85,9 +87,9 @@ export class CustomerValidationHelpers {
     try {
       const validatedData = EnhancedCustomerUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors = error.issues.map(error => `${error.path.join('.')}: ${error.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -126,8 +128,8 @@ export class CustomerValidationHelpers {
 
     customers.forEach((customer, index) => {
       const result = this.validateInsert(customer)
-      if (result.success && result.data) {
-        valid.push(result.data)
+      if (result.success && result['data']) {
+        valid.push(result['data'])
       } else {
         invalid.push({
           index,

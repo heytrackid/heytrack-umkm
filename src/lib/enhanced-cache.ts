@@ -21,8 +21,8 @@ interface EnhancedCacheEntry<T> {
 
 // Enhanced cache class with better memory management
 class EnhancedCache {
-  private cache = new Map<string, EnhancedCacheEntry<unknown>>()
-  private config: EnhancedCacheConfig
+  private readonly cache = new Map<string, EnhancedCacheEntry<unknown>>()
+  private readonly config: EnhancedCacheConfig
   private cleanupInterval: NodeJS.Timeout | null = null
   private totalSize = 0 // Track total cache size
 
@@ -67,7 +67,7 @@ class EnhancedCache {
     // Check if entry is expired
     const now = Date.now()
     const ttlMs = entry.ttl * 1000
-    if (now - entry.timestamp > ttlMs) {
+    if (now - entry['timestamp'] > ttlMs) {
       this.delete(key) // Remove expired entry
       return null
     }
@@ -76,7 +76,7 @@ class EnhancedCache {
     entry.accessCount = (entry.accessCount || 0) + 1
     entry.lastAccessed = now
     
-    return entry.data as T
+    return entry['data'] as T
   }
 
   /**
@@ -89,7 +89,7 @@ class EnhancedCache {
       const jsonString = JSON.stringify(data)
       const { size: blobSize } = new Blob([jsonString])
       size = blobSize
-    } catch (_e) {
+    } catch (error) {
       // If serialization fails, estimate a default size
       size = 100
     }
@@ -178,7 +178,7 @@ class EnhancedCache {
 
     for (const [key, entry] of this.cache.entries()) {
       const ttlMs = entry.ttl * 1000
-      if (now - entry.timestamp > ttlMs) {
+      if (now - entry['timestamp'] > ttlMs) {
         cleanedUpSize += entry.size
         this.cache.delete(key)
       }
@@ -246,7 +246,7 @@ class EnhancedCache {
 // Enhanced cache manager with better organization
 export class EnhancedCacheManager {
   private static instance: EnhancedCacheManager
-  private cache: EnhancedCache
+  private readonly cache: EnhancedCache
   private readonly cacheKeys = {
     hpp: {
       overview: 'hpp:overview',
@@ -415,7 +415,7 @@ export async function withEnhancedCache<T>(
     apiLogger.debug({ key, operation: operationName }, 'Cache miss, fetching fresh data')
 
     // Fetch fresh data
-    const data = await fn()
+    const _data = await fn()
 
     // Store in cache
     enhancedCache.set(key, data, ttl)

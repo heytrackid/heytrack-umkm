@@ -17,7 +17,7 @@ export interface ProjectionResult {
   revenueGrowthRate: number
   expenseGrowthRate: number
   projections: FinancialProjection[]
-  confidence: 'High' | 'Medium' | 'Low'
+  confidence: 'High' | 'Low' | 'Medium'
 }
 
 // Break-even Analysis Types

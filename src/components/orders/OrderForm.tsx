@@ -1,7 +1,10 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
+const logger = createClientLogger('OrderForm')
+import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -11,15 +14,15 @@ import { Textarea } from '@/components/ui/textarea'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
 import { createClientLogger } from '@/lib/client-logger'
-
-const logger = createClientLogger('OrderForm')
 import { isRecipe } from '@/lib/type-guards'
 import { validateOrderData } from '@/lib/validations/form-validations'
-import type { Row } from '@/types/database'
-import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import type { Order, OrderFormData, OrderFormItem, Priority } from './types'
+
+
 import { calculateOrderTotal, normalizePriority } from './utils'
+
+import type { Order, OrderFormData, OrderFormItem, Priority } from './types'
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
+import type { Row } from '@/types/database'
 
 
 type Recipe = Row<'recipes'>
@@ -58,11 +61,11 @@ const OrderForm = ({
   useEffect(() => {
     if (order) {
       setFormData({
-        customer_name: order.customer_name ?? '',
+        customer_name: order['customer_name'] ?? '',
         customer_phone: order.customer_phone ?? '',
         // customer_email: order.customer_email || '', // Field doesn't exist in DB
         customer_address: order.customer_address ?? '',
-        delivery_date: order.delivery_date ? order.delivery_date.split('T')[0] : '',
+        delivery_date: order.delivery_date?.split('T')[0] ?? '',
         delivery_time: order.delivery_time ?? '10:00',
         priority: normalizePriority(order.priority),
         notes: order.notes ?? '',
@@ -88,14 +91,14 @@ const OrderForm = ({
       const response = await fetch('/api/recipes')
       if (!response.ok) { return }
 
-      const payload = await response.json()
+      const payload = await response.json() as unknown
       const recipeList: Recipe[] = Array.isArray(payload)
-        ? payload.filter((item): item is Recipe => isRecipe(item))
+        ? (payload as Recipe[]).filter((item) => isRecipe(item))
         : []
 
-      void setRecipes(recipeList)
-    } catch (err: unknown) {
-      logger.error({ err }, 'Error fetching recipes')
+      setRecipes(recipeList)
+    } catch (error: unknown) {
+      logger.error({ error }, 'Error fetching recipes')
     }
   }
 
@@ -148,13 +151,13 @@ const OrderForm = ({
   const handleRecipeSelect = (index: number, recipeId: string) => {
     if (recipeId === 'placeholder') { return } // Ignore placeholder selection
 
-    const recipe = recipes.find(r => r.id === recipeId)
+    const recipe = recipes.find(r => r['id'] === recipeId)
     if (recipe) {
-      void updateOrderItem(index, 'recipe_id', recipeId)
-      void updateOrderItem(index, 'product_name', recipe.name)
+      updateOrderItem(index, 'recipe_id', recipeId)
+      updateOrderItem(index, 'product_name', recipe.name)
       if (recipe.selling_price) {
-        void updateOrderItem(index, 'unit_price', recipe.selling_price)
-        void updateOrderItem(index, 'total_price', recipe.selling_price * formData.order_items[index].quantity)
+        updateOrderItem(index, 'unit_price', recipe.selling_price ?? 0)
+        updateOrderItem(index, 'total_price', (recipe.selling_price ?? 0) * (formData.order_items[index]?.quantity ?? 0))
       }
     }
   }
@@ -162,7 +165,7 @@ const OrderForm = ({
   const handleSubmit = () => {
     const validationErrors = validateOrderData(formData)
     if (validationErrors.length > 0) {
-      void setErrors(validationErrors)
+      setErrors(validationErrors)
       return
     }
 
@@ -217,7 +220,7 @@ const OrderForm = ({
             <div className="space-y-2">
               <Label>Nama Pelanggan *</Label>
               <Input
-                value={formData.customer_name}
+                value={formData['customer_name']}
                 onChange={(e) => handleInputChange('customer_name', e.target.value)}
                 placeholder=""
               />
@@ -339,7 +342,7 @@ const OrderForm = ({
                             Pilih produk
                           </SelectItem>
                           {recipes.map((recipe) => (
-                            <SelectItem key={recipe.id} value={recipe.id}>
+                            <SelectItem key={recipe['id']} value={recipe['id']}>
                               {recipe.name}
                             </SelectItem>
                           ))}

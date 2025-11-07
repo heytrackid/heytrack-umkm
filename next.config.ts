@@ -4,10 +4,10 @@ import type { NextConfig } from 'next'
 import path from 'path'
 
 const isProd = process.env.NODE_ENV === 'production'
-const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN || ''
+const appDomain = process.env['NEXT_PUBLIC_APP_DOMAIN'] || ''
 
 const withBundleAnalyzer =
-  process.env.ANALYZE === 'true'
+  process.env['ANALYZE'] === 'true'
     ? require('@next/bundle-analyzer')({ enabled: true })
     : (config: NextConfig) => config
 
@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
 
   output: 'standalone',
   generateBuildId: async () =>
-    process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 10) || `build-${Date.now()}`,
+    process.env['VERCEL_GIT_COMMIT_SHA']?.slice(0, 10) || `build-${Date.now()}`,
 
   turbopack: {},
 

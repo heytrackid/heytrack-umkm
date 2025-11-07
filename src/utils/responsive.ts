@@ -1,11 +1,76 @@
-import {
-  type Breakpoint,
-  type ScreenSize,
-  type ResponsiveValue,
-  type ColumnPriority,
-  BREAKPOINTS,
-  DEVICE_BREAKPOINTS
-} from '@/types/responsive';
+// Responsive design types and utilities for mobile-first development
+'use client'
+
+import { useEffect, useState } from 'react'
+
+export type Breakpoint = '2xl' | 'lg' | 'md' | 'sm' | 'xl' | 'xs';
+
+export type ResponsiveValue<T> = Partial<Record<Breakpoint, T>> | T;
+
+// Breakpoint pixel values (matching Tailwind CSS defaults)
+export const BREAKPOINTS = {
+  xs: 0,
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+  '2xl': 1536,
+} as const;
+
+// Media query strings
+export const MEDIA_QUERIES = {
+  xs: `(min-width: ${BREAKPOINTS.xs}px)`,
+  sm: `(min-width: ${BREAKPOINTS.sm}px)`,
+  md: `(min-width: ${BREAKPOINTS.md}px)`,
+  lg: `(min-width: ${BREAKPOINTS.lg}px)`,
+  xl: `(min-width: ${BREAKPOINTS.xl}px)`,
+  '2xl': `(min-width: ${BREAKPOINTS['2xl']}px)`,
+
+  // Max-width media queries
+  'max-xs': `(max-width: ${BREAKPOINTS.sm - 1}px)`,
+  'max-sm': `(max-width: ${BREAKPOINTS.md - 1}px)`,
+  'max-md': `(max-width: ${BREAKPOINTS.lg - 1}px)`,
+  'max-lg': `(max-width: ${BREAKPOINTS.xl - 1}px)`,
+  'max-xl': `(max-width: ${BREAKPOINTS['2xl'] - 1}px)`,
+} as const;
+
+// Device-specific breakpoints
+export const DEVICE_BREAKPOINTS = {
+  mobile: BREAKPOINTS.xs,
+  tablet: BREAKPOINTS.md,
+  desktop: BREAKPOINTS.lg,
+} as const;
+
+// Screen size categories
+export type ScreenSize = 'desktop' | 'mobile' | 'tablet';
+
+// Column priorities for responsive tables
+export type ColumnPriority = 'high' | 'low' | 'medium';
+
+// Hook return types
+export interface UseResponsive {
+  breakpoint: Breakpoint;
+  screenSize: ScreenSize;
+  isMobile: boolean;
+  isTablet: boolean;
+  isDesktop: boolean;
+  width: number;
+  height: number;
+}
+
+export interface UseMediaQuery {
+  matches: boolean;
+  media: string;
+}
+
+export interface ResponsiveState {
+  isMobile: boolean;
+  isTablet: boolean;
+  isDesktop: boolean;
+  current: ScreenSize;
+  width: number;
+  isMobileOrTablet: boolean;
+}
 
 
 // Utility functions for responsive design
@@ -413,9 +478,190 @@ export function getViewportDimensions(): { width: number; height: number } {
   if (typeof window === 'undefined') {
     return { width: 1024, height: 768 };
   }
-  
+
   return {
     width: window.innerWidth,
     height: window.innerHeight,
   };
+}
+
+// React hooks for responsive design
+
+// Removed unused constants: MOBILE_BREAKPOINT, TABLET_BREAKPOINT
+
+/**
+ * Unified responsive hook untuk deteksi breakpoint
+ * @returns Object dengan isMobile, isTablet, isDesktop flags dan current screen size
+ * @example
+ * const { isMobile, isTablet, isDesktop, current } = useResponsive()
+ */
+export function useResponsive(): ResponsiveState {
+  const [breakpoint, setBreakpoint] = useState<ScreenSize>('desktop')
+  const [width, setWidth] = useState<number>(0)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+
+    const updateBreakpoint = () => {
+      const w = window.innerWidth
+
+      if (w < BREAKPOINTS.md) {
+        setBreakpoint('mobile')
+      } else if (w < BREAKPOINTS.lg) {
+        setBreakpoint('tablet')
+      } else {
+        setBreakpoint('desktop')
+      }
+
+      setWidth(w)
+    }
+
+    updateBreakpoint()
+
+    const debounce = (fn: () => void) => {
+      let timeout: NodeJS.Timeout
+      return () => {
+        clearTimeout(timeout)
+        timeout = setTimeout(fn, 150)
+      }
+    }
+
+    const debouncedUpdate = debounce(updateBreakpoint)
+    window.addEventListener('resize', debouncedUpdate)
+
+    return () => window.removeEventListener('resize', debouncedUpdate)
+  }, [])
+
+  if (!mounted) {
+    return {
+      isMobile: false,
+      isTablet: false,
+      isDesktop: true,
+      current: 'desktop',
+      width: 0,
+      isMobileOrTablet: false,
+    }
+  }
+
+  return {
+    isMobile: breakpoint === 'mobile',
+    isTablet: breakpoint === 'tablet',
+    isDesktop: breakpoint === 'desktop',
+    current: breakpoint,
+    width,
+    isMobileOrTablet: breakpoint === 'mobile' || breakpoint === 'tablet',
+  }
+}
+
+/**
+ * Generic media query hook
+ */
+export function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {return}
+
+    const media = window.matchMedia(query)
+    setMatches(media.matches)
+
+    const listener = (event: MediaQueryListEvent) => {
+      setMatches(event.matches)
+    }
+
+    media.addEventListener('change', listener)
+    return () => media.removeEventListener('change', listener)
+  }, [query])
+
+  return matches
+}
+
+/**
+ * Get current screen size in pixels
+ */
+export function useScreenSize(): { width: number; height: number } {
+  const [screenSize, setScreenSize] = useState({
+    width: 0,
+    height: 0,
+  })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {return}
+
+    const updateSize = () => {
+      setScreenSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+
+    updateSize()
+    window.addEventListener('resize', updateSize)
+    return () => window.removeEventListener('resize', updateSize)
+  }, [])
+
+  return screenSize
+}
+
+/**
+ * Check if current screen size is mobile
+ */
+export function useMobile(): { isMobile: boolean } {
+  const { width } = useScreenSize()
+  return { isMobile: isMobile(width) }
+}
+
+/**
+ * Check if current screen size is mobile (alias for useMobile)
+ */
+export function useIsMobile(): boolean {
+  const { isMobile } = useMobile()
+  return isMobile
+}
+
+/**
+ * Detect device orientation
+ */
+export function useOrientation(): 'landscape' | 'portrait' | undefined {
+  const [orientation, setOrientation] = useState<'landscape' | 'portrait' | undefined>(undefined)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {return}
+
+    const updateOrientation = () => {
+      setOrientation(
+        window.innerHeight > window.innerWidth ? 'portrait' : 'landscape'
+      )
+    }
+
+    updateOrientation()
+    window.addEventListener('resize', updateOrientation)
+    window.addEventListener('orientationchange', updateOrientation)
+
+    return () => {
+      window.removeEventListener('resize', updateOrientation)
+      window.removeEventListener('orientationchange', updateOrientation)
+    }
+  }, [])
+
+  return orientation
+}
+
+/**
+ * Detect if device supports touch
+ */
+export function useTouchDevice(): boolean {
+  const [isTouch, setIsTouch] = useState(false)
+
+  useEffect(() => {
+    setIsTouch(() => (
+        typeof window !== 'undefined' &&
+        ('ontouchstart' in window ||
+          navigator.maxTouchPoints > 0 ||
+          ('msMaxTouchPoints' in navigator && (navigator as Navigator & { msMaxTouchPoints: number }).msMaxTouchPoints > 0))
+      ))
+  }, [])
+
+  return isTouch
 }

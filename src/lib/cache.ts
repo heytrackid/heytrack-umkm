@@ -35,7 +35,7 @@ interface CacheEntry<T> {
 }
 
 class MemoryCache {
-  private cache = new Map<string, CacheEntry<unknown>>()
+  private readonly cache = new Map<string, CacheEntry<unknown>>()
 
   set<T>(key: string, data: T, ttl: number): void {
     this.cache.set(key, {
@@ -53,14 +53,14 @@ class MemoryCache {
     }
 
     const now = Date.now()
-    const age = now - entry.timestamp
+    const age = now - entry['timestamp']
 
     if (age > entry.ttl * 1000) {
       this.cache.delete(key)
       return null
     }
 
-    return entry.data as T
+    return entry['data'] as T
   }
 
   delete(key: string): void {

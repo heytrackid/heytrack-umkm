@@ -1,12 +1,14 @@
 'use client'
 
+import { Minus, Plus } from 'lucide-react'
 import { useState } from 'react'
-import { cn } from '@/lib/utils'
+
 import { useResponsive } from '@/hooks/useResponsive'
+import { cn } from '@/lib/utils'
+
+import { Button } from '../button'
 import { Input } from '../input'
 import { Label } from '../label'
-import { Button } from '../button'
-import { Minus, Plus } from 'lucide-react'
 
 /**
  * Mobile Number Input Component
@@ -127,7 +129,7 @@ export const MobileNumberInput = ({
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
-            void setIsFocused(false)
+            setIsFocused(false)
             onBlur?.()
           }}
           disabled={disabled}

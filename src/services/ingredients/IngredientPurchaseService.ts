@@ -1,8 +1,9 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
-import type { Row, Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Row, Insert } from '@/types/database'
 
 type IngredientPurchase = Row<'ingredient_purchases'>
 type IngredientPurchaseInsert = Insert<'ingredient_purchases'>
@@ -128,7 +129,7 @@ export class IngredientPurchaseService {
         quantity_after: newStock,
         quantity_changed: purchaseData.quantity,
         change_type: 'increase',
-        reference_id: purchase.id,
+        reference_id: purchase['id'],
         reference_type: 'ingredient_purchase'
       }
 
@@ -138,9 +139,9 @@ export class IngredientPurchaseService {
 
       return purchase as IngredientPurchase
 
-    } catch (err) {
-      dbLogger.error({ error: err, userId, purchaseData }, 'Failed to create ingredient purchase')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, userId, purchaseData }, 'Failed to create ingredient purchase')
+      throw error
     }
   }
 
@@ -200,9 +201,9 @@ export class IngredientPurchaseService {
 
       return data || []
 
-    } catch (err) {
-      dbLogger.error({ error: err, userId, filters }, 'Failed to get ingredient purchases')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, userId, filters }, 'Failed to get ingredient purchases')
+      throw error
     }
   }
 }

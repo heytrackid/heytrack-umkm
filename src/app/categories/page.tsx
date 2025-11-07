@@ -1,13 +1,14 @@
 'use client'
 
-import { Fragment, useEffect, Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import AppLayout from '@/components/layout/app-layout'
-import { useResponsive } from '@/hooks/useResponsive'
 import { useSearchParams } from 'next/navigation'
-import PrefetchLink from '@/components/ui/prefetch-link'
+import { Fragment, useEffect, Suspense } from 'react'
+
+import AppLayout from '@/components/layout/app-layout'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import PrefetchLink from '@/components/ui/prefetch-link'
 import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { useResponsive } from '@/hooks/useResponsive'
 
 import { useCategories } from './hooks/useCategories'
 
@@ -17,21 +18,23 @@ const CategoryList = dynamic(() => import('./components/CategoryList'), {
   ssr: false
 })
 
-const CategoryForm = dynamic(() => import('./components/CategoryForm').then(mod => ({ default: mod.CategoryForm })), {
-  loading: () => (
-    <div className="space-y-4">
-      <div className="h-16 bg-muted animate-pulse rounded" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-        ))}
-      </div>
-      <div className="flex gap-2">
-        <div className="h-10 bg-muted animate-pulse rounded w-20" />
-        <div className="h-10 bg-muted animate-pulse rounded w-20" />
-      </div>
+const CategoryFormSkeleton = () => (
+  <div className="space-y-4">
+    <div className="h-16 bg-muted animate-pulse rounded" />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-10 bg-muted animate-pulse rounded" />
+      ))}
     </div>
-  ),
+    <div className="flex gap-2">
+      <div className="h-10 bg-muted animate-pulse rounded w-20" />
+      <div className="h-10 bg-muted animate-pulse rounded w-20" />
+    </div>
+  </div>
+)
+
+const CategoryForm = dynamic(() => import('./components/CategoryForm').then(mod => ({ default: mod.CategoryForm })), {
+  loading: () => <CategoryFormSkeleton />,
   ssr: false
 })
 
@@ -145,21 +148,8 @@ const CategoriesPage = () => {
               onClearSelection={() => handleSelectAll()}
             />
           </Suspense>
-        ) : (
-          <Suspense fallback={
-            <div className="space-y-4">
-              <div className="h-16 bg-muted animate-pulse rounded" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <div className="h-10 bg-muted animate-pulse rounded w-20" />
-                <div className="h-10 bg-muted animate-pulse rounded w-20" />
-              </div>
-            </div>
-          }>
+         ) : (
+           <Suspense fallback={<CategoryFormSkeleton />}>
             <CategoryForm
               category={formData}
               currentView={currentView}
@@ -168,7 +158,7 @@ const CategoriesPage = () => {
               onSave={handleSaveCategory}
               onCancel={() => {
                 resetForm()
-                void setCurrentView('list')
+                setCurrentView('list')
               }}
             />
           </Suspense>

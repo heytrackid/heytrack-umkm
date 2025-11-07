@@ -7,7 +7,7 @@ export interface PerformanceOperation {
 }
 
 export class PerformanceMonitor {
-  private operations: Map<string, PerformanceOperation> = new Map();
+  private readonly operations: Map<string, PerformanceOperation> = new Map();
   private static instance: PerformanceMonitor;
 
   static getInstance(): PerformanceMonitor {

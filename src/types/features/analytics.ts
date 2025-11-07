@@ -44,11 +44,7 @@ export interface InventoryAnalysis {
 /**
  * Inventory status categories
  */
-export type InventoryStatus = 
-  | 'critical'      // Below minimum, urgent action needed
-  | 'low'           // Below reorder point
-  | 'adequate'      // Normal levels
-  | 'overstocked'   // Above maximum
+export type InventoryStatus = 'adequate' | 'critical' | 'low' | 'overstocked'
 
 /**
  * Inventory metrics for analysis
@@ -67,8 +63,8 @@ export interface InventoryMetrics {
  * Inventory alert
  */
 export interface InventoryAlert {
-  type: 'low_stock' | 'overstock' | 'expiring' | 'usage_spike'
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  type: 'expiring' | 'low_stock' | 'overstock' | 'usage_spike'
+  severity: 'critical' | 'high' | 'low' | 'medium'
   message: string
   action_required: string
 }
@@ -122,11 +118,11 @@ export interface PricingTier {
  * Pricing recommendation
  */
 export interface PricingRecommendation {
-  type: 'increase' | 'decrease' | 'maintain'
+  type: 'decrease' | 'increase' | 'maintain'
   suggested_price: number
   reason: string
   impact: PricingImpact
-  confidence: 'low' | 'medium' | 'high'
+  confidence: 'high' | 'low' | 'medium'
 }
 
 /**
@@ -144,7 +140,7 @@ export interface PricingImpact {
  */
 export interface MarketComparison {
   average_market_price: number
-  price_position: 'below' | 'at' | 'above'
+  price_position: 'above' | 'at' | 'below'
   price_difference_percentage: number
   competitors: CompetitorPrice[]
 }
@@ -262,7 +258,7 @@ export interface ExpenseCategory {
   category: string
   amount: number
   percentage: number
-  trend: 'increasing' | 'stable' | 'decreasing'
+  trend: 'decreasing' | 'increasing' | 'stable'
 }
 
 /**
@@ -280,8 +276,8 @@ export interface RevenueCategory {
  */
 export interface SystemAlert {
   id: string
-  type: 'info' | 'warning' | 'error' | 'success'
-  priority: 'low' | 'medium' | 'high' | 'critical'
+  type: 'error' | 'info' | 'success' | 'warning'
+  priority: 'critical' | 'high' | 'low' | 'medium'
   title: string
   message: string
   action_url?: string

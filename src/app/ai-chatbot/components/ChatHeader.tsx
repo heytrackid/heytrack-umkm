@@ -1,5 +1,6 @@
-import { Badge } from '@/components/ui/badge'
 import { Bot, Sparkles } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
 
 export const ChatHeader = () => (
     <div className="border-b border-border p-4 flex items-center gap-3">

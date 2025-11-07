@@ -1,10 +1,10 @@
 import type { Settings as SettingsContextState } from '@/contexts/settings-context'
 
 
-export type ThemeOption = 'light' | 'dark' | 'system'
-export type TimeFormatOption = '24h' | '12h'
+export type ThemeOption = 'dark' | 'light' | 'system'
+export type TimeFormatOption = '12h' | '24h'
 export type DateFormatOption = 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD'
-export type LanguageOption = 'id' | 'en'
+export type LanguageOption = 'en' | 'id'
 
 export interface GeneralSettings {
   businessName: string
@@ -155,8 +155,8 @@ export const normalizeSettings = (
   }
 
   if (contextSettings) {
-    general.currency = contextSettings.currency.code
-    ui.currency = contextSettings.currency.code
+    general.currency = contextSettings.currency['code']
+    ui.currency = contextSettings.currency['code']
   }
 
   return {

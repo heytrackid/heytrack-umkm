@@ -2,30 +2,14 @@
  
 
 
-import { useState, useMemo, memo, useCallback } from 'react'
+import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useSettings } from '@/contexts/settings-context'
-import { useIngredients } from '@/hooks'
-import { useSupabaseCRUD } from '@/hooks/supabase'
-import { usePagination } from '@/hooks/usePagination'
-import { useToast } from '@/hooks/use-toast'
-import { useMobile } from '@/hooks/responsive'
-import type { Row } from '@/types/database'
-import { StockBadge } from './StockBadge'
-import { MobileIngredientList } from './MobileIngredientCard'
-import { IngredientFormDialog } from './IngredientFormDialog'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { useState, useMemo, memo, useCallback } from 'react'
+
 import { DeleteModal } from '@/components/ui'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-
-import { SimplePagination } from '@/components/ui/simple-pagination'
-import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X, Plus } from 'lucide-react'
-import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
-import { SimpleFAB } from '@/components/ui/floating-action-button'
-import { undoableToast } from '@/components/ui/enhanced-toast'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -34,6 +18,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { undoableToast } from '@/components/ui/enhanced-toast'
+import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
+import { SimpleFAB } from '@/components/ui/floating-action-button'
+import { Input } from '@/components/ui/input'
 import {
     Select,
     SelectContent,
@@ -41,13 +30,27 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { SimplePagination } from '@/components/ui/simple-pagination'
+import { useSettings } from '@/contexts/settings-context'
+import { useIngredients } from '@/hooks'
+import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useToast } from '@/hooks/use-toast'
+import { usePagination } from '@/hooks/usePagination'
 import {
     genericErrorToast,
 } from '@/lib/ingredients-toast'
+import { useMobile } from '@/utils/responsive'
+
+import { IngredientFormDialog } from './IngredientFormDialog'
+import { MobileIngredientList } from './MobileIngredientCard'
+import { StockBadge } from './StockBadge'
+
+import type { Row } from '@/types/database'
+
 
 type Ingredient = Row<'ingredients'>
-type StockFilter = 'all' | 'normal' | 'low' | 'out'
-type CategoryFilter = 'all' | 'Bahan Kering' | 'Bahan Basah' | 'Bumbu' | 'Protein' | 'Sayuran' | 'Buah' | 'Dairy' | 'Kemasan' | 'Lainnya'
+type StockFilter = 'all' | 'low' | 'normal' | 'out'
+type CategoryFilter = 'all' | 'Bahan Basah' | 'Bahan Kering' | 'Buah' | 'Bumbu' | 'Dairy' | 'Kemasan' | 'Lainnya' | 'Protein' | 'Sayuran'
 
 interface EnhancedIngredientsPageProps {
     onAdd?: () => void
@@ -169,7 +172,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
     }, [])
 
     const handleQuickBuy = useCallback((ingredient: Ingredient) => {
-        router.push(`/ingredients/purchases?ingredient=${ingredient.id}`)
+        router.push(`/ingredients/purchases?ingredient=${ingredient['id']}`)
     }, [router])
 
     const handleConfirmDelete = useCallback(async () => {
@@ -177,7 +180,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
 
         try {
             const deletedItem = selectedIngredient
-            await deleteIngredient(selectedIngredient.id)
+            await deleteIngredient(selectedIngredient['id'])
 
             // Enhanced toast with undo functionality
             undoableToast({
@@ -195,8 +198,8 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
 
             setIsDeleteDialogOpen(false)
             setSelectedIngredient(null)
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal menghapus bahan baku'
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Gagal menghapus bahan baku'
             toast(genericErrorToast('menghapus bahan baku', message))
         }
     }, [selectedIngredient, deleteIngredient, toast])
@@ -226,8 +229,8 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                 <IngredientFormDialog
                     open={showFormDialog}
                     onOpenChange={setShowFormDialog}
-                    ingredient={editingIngredient}
-                    onSuccess={() => refetch?.()}
+                    {...(editingIngredient ? { ingredient: editingIngredient } : {})}
+                    {...(refetch ? { onSuccess: refetch } : {})}
                 />
             </>
         )
@@ -344,7 +347,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                                         const minStock = item.min_stock ?? 0
                                         const totalValue = currentStock * item.price_per_unit
                                         return (
-                                            <tr key={item.id} className="border-b hover:bg-muted/30 transition-colors">
+                                            <tr key={item['id']} className="border-b hover:bg-muted/30 transition-colors">
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-2">
                                                         <div className="font-medium">{item.name}</div>
@@ -498,8 +501,8 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
             <IngredientFormDialog
                 open={showFormDialog}
                 onOpenChange={setShowFormDialog}
-                ingredient={editingIngredient}
-                onSuccess={() => refetch?.()}
+                {...(editingIngredient ? { ingredient: editingIngredient } : {})}
+                {...(refetch ? { onSuccess: refetch } : {})}
             />
 
             {/* Floating Action Button for Mobile */}

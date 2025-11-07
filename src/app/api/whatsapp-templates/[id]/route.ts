@@ -1,15 +1,19 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 // WhatsApp Templates API - Single Template Operations
 // GET: Get single template
 // PUT: Update template
 // DELETE: Delete template
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+
 import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/server'
+
 import type { Update } from '@/types/database'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
 
 type WhatsAppTemplateUpdate = Update<'whatsapp_templates'>
 
@@ -22,7 +26,7 @@ export async function GET(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
 
     // 1. Authentication
     const supabase = await createClient()
@@ -65,7 +69,7 @@ export async function PUT(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
 
     // 1. Authentication
     const supabase = await createClient()
@@ -76,27 +80,35 @@ export async function PUT(
     }
 
     // 2. Parse body
-    const body = await request.json()
+    const _body = await request.json() as {
+      name?: string
+      description?: string
+      category?: string
+      template_content?: string
+      variables?: string[]
+      is_active?: boolean
+      is_default?: boolean
+    }
 
     // 3. If setting as default, unset other defaults in same category
-    if (body.is_default && body.category) {
+    if (_body.is_default && _body.category) {
       await supabase
         .from('whatsapp_templates')
         .update({ is_default: false })
-        .eq('user_id', user.id)
-        .eq('category', body.category)
+        .eq('user_id', user['id'])
+        .eq('category', _body.category)
         .neq('id', id)
     }
 
     // 4. Update template with ownership check
     const updateData: WhatsAppTemplateUpdate = {
-      name: body.name,
-      description: body.description,
-      category: body.category,
-      template_content: body.template_content,
-      variables: body.variables,
-      is_active: body.is_active,
-      is_default: body.is_default,
+      name: _body.name,
+      description: _body.description,
+      category: _body.category,
+      template_content: _body.template_content,
+      variables: _body.variables,
+      is_active: _body.is_active,
+      is_default: _body.is_default,
       updated_at: new Date().toISOString()
     }
 
@@ -113,11 +125,11 @@ export async function PUT(
     }
 
     if (error) {
-      apiLogger.error({ error, userId: user.id, templateId: id }, 'Failed to update template')
+      apiLogger.error({ error, userId: user['id'], templateId: id }, 'Failed to update template')
       throw error
     }
 
-    apiLogger.info({ userId: user.id, templateId: id }, 'WhatsApp template updated')
+    apiLogger.info({ userId: user['id'], templateId: id }, 'WhatsApp template updated')
     return NextResponse.json(data)
 
   } catch (error: unknown) {
@@ -134,7 +146,7 @@ export async function DELETE(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
 
     // 1. Authentication
     const supabase = await createClient()
@@ -160,7 +172,7 @@ export async function DELETE(
       throw error
     }
 
-    apiLogger.info({ userId: user.id, templateId: id }, 'WhatsApp template deleted')
+    apiLogger.info({ userId: user['id'], templateId: id }, 'WhatsApp template deleted')
     return NextResponse.json({ message: 'Template deleted successfully' })
 
   } catch (error: unknown) {

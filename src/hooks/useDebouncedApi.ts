@@ -89,12 +89,12 @@ export function useDebouncedApi<T>(
           setError(null)
           onSuccess?.(result)
         }
-      } catch (err) {
+      } catch (unknownError) {
         // Only update error if still mounted and not aborted
         if (mountedRef.current && !controller.signal.aborted) {
-          const error = err instanceof Error ? err : new Error('API call failed')
-          setError(error)
-          onError?.(error)
+          const normalizedError = unknownError instanceof Error ? unknownError : new Error('API call failed')
+          setError(normalizedError)
+          onError?.(normalizedError)
         }
       } finally {
         // Only update loading if still mounted and not aborted
@@ -120,11 +120,11 @@ export function useDebouncedApi<T>(
         setError(null)
         onSuccess?.(result)
       }
-    } catch (err) {
+    } catch (unknownError) {
       if (mountedRef.current) {
-        const error = err instanceof Error ? err : new Error('API call failed')
-        setError(error)
-        onError?.(error)
+        const normalizedError = unknownError instanceof Error ? unknownError : new Error('API call failed')
+        setError(normalizedError)
+        onError?.(normalizedError)
       }
     } finally {
       if (mountedRef.current) {
@@ -135,7 +135,7 @@ export function useDebouncedApi<T>(
 
   // Execute on dependency change
   useEffect(() => {
-    void executeApi()
+    executeApi()
 
     return () => {
       cancel()

@@ -1,14 +1,18 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger } from '@/lib/logger'
-import type { Row } from '@/types/database'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Row } from '@/types/database'
+
+
 type Recipe = Row<'recipes'>
 
-const getProfitabilityLevel = (marginPercentage: number): 'high' | 'medium' | 'low' => {
+const getProfitabilityLevel = (marginPercentage: number): 'high' | 'low' | 'medium' => {
   if (marginPercentage >= 30) {
     return 'high'
   }
@@ -20,7 +24,7 @@ const getProfitabilityLevel = (marginPercentage: number): 'high' | 'medium' | 'l
   return 'low'
 }
 
-const getEfficiencyLevel = (timesMade: number): 'high' | 'medium' | 'low' => {
+const getEfficiencyLevel = (timesMade: number): 'high' | 'low' | 'medium' => {
   if (timesMade >= 20) {
     return 'high'
   }
@@ -65,7 +69,7 @@ export async function GET(request: NextRequest) {
         last_made_at,
         cost_per_unit
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .eq('is_active', true)
       .gt('cost_per_unit', 0)
 
@@ -93,7 +97,7 @@ export async function GET(request: NextRequest) {
       const efficiency = getEfficiencyLevel(timesMade)
 
       return {
-        id: recipe.id,
+        id: recipe['id'],
         name: recipe.name,
         category: recipe.category ?? 'General',
         hppValue,
@@ -125,8 +129,8 @@ export async function GET(request: NextRequest) {
 
     // Find top and worst performers
     const sortedByMargin = [...comparisonData].sort((a, b) => b.marginPercentage - a.marginPercentage)
-    const topPerformer = sortedByMargin[0] || null
-    const worstPerformer = sortedByMargin[sortedByMargin.length - 1] || null
+    const topPerformer = sortedByMargin[0] ?? null
+    const worstPerformer = sortedByMargin[sortedByMargin.length - 1] ?? null
 
     const benchmark = {
       averageHpp,
@@ -139,7 +143,7 @@ export async function GET(request: NextRequest) {
     }
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       totalRecipes,
       category: category ?? 'all'
     }, 'Recipe comparison data retrieved successfully')
@@ -150,8 +154,8 @@ export async function GET(request: NextRequest) {
       total: totalRecipes
     })
 
-  } catch (err: unknown) {
-    apiLogger.error({ error: err }, 'Error fetching recipe comparison data')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error fetching recipe comparison data')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

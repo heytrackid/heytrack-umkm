@@ -135,7 +135,7 @@ export function isCategoryNameTaken(
   const normalizedName = name.toLowerCase().trim()
   return categories.some(category =>
     category.name.toLowerCase().trim() === normalizedName &&
-    category.id !== excludeId
+    category['id'] !== excludeId
   )
 }
 

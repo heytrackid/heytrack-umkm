@@ -10,7 +10,7 @@ interface RestockSuggestion {
   reorder_point: number
   suggested_order_quantity: number
   lead_time_days: number | null
-  urgency: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
+  urgency: 'CRITICAL' | 'HIGH' | 'LOW' | 'MEDIUM'
   reason: string
 }
 

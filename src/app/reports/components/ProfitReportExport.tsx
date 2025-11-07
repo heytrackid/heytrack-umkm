@@ -2,6 +2,7 @@
 'use client'
 
 import { saveAs } from 'file-saver'
+
 import type { ProfitData } from './ProfitReportTypes'
 
 interface ExportToCSVProps {

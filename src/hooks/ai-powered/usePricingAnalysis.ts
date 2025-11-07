@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import type { AIAnalysisState, PricingAnalysisRequest } from './types'
 
 
@@ -39,7 +40,7 @@ export function usePricingAnalysis() {
         data: result,
         loading: false,
         error: null,
-        confidence: result.metadata?.confidence === 'high' ? 0.9 : 0.7,
+        confidence: result['metadata']?.confidence === 'high' ? 0.9 : 0.7,
         lastUpdated: new Date().toISOString()
       })
 

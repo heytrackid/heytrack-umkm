@@ -1,14 +1,19 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger } from '@/lib/logger'
-import { cacheInvalidation } from '@/lib/cache'
-import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { cacheInvalidation } from '@/lib/cache'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
+import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
+
 // POST /api/hpp/calculate - Calculate HPP for a recipe
-export async function POST(request: NextRequest) {
+async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
 
@@ -22,7 +27,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
+    const body = await request.json() as { recipeId?: string }
     const { recipeId } = body
 
     if (!recipeId) {
@@ -68,7 +73,7 @@ export async function POST(request: NextRequest) {
         )
       `)
       .eq('id', recipeId)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single() as { data: RecipeWithIngredients | null, error: unknown }
 
     if (recipeError || !recipe) {
@@ -77,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     // Use consolidated HPP Calculator Service
     const hppService = new HppCalculatorService()
-    const calculation = await hppService.calculateRecipeHpp(supabase, recipeId, user.id)
+    const calculation = await hppService.calculateRecipeHpp(supabase, recipeId, user['id'])
 
     const materialCost = calculation.material_cost
     const totalHpp = calculation.total_hpp
@@ -91,7 +96,7 @@ export async function POST(request: NextRequest) {
     cacheInvalidation.hpp()
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       recipeId,
       totalHpp,
       costPerUnit
@@ -111,17 +116,13 @@ export async function POST(request: NextRequest) {
       }
     })
 
-  } catch (err: unknown) {
-    apiLogger.error({ error: err }, 'Error calculating HPP')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error: unknown) {
+    return handleAPIError(error, 'POST /api/hpp/calculate')
   }
 }
 
 // POST /api/hpp/calculate/batch - Calculate HPP for all recipes
-export async function PUT(request: NextRequest) {
+async function PUT(request: NextRequest) {
   try {
     const supabase = await createClient()
 
@@ -138,39 +139,42 @@ export async function PUT(request: NextRequest) {
     const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .eq('is_active', true)
 
     if (recipesError) {
       throw recipesError
     }
 
-    let successCount = 0
-    let errorCount = 0
-
-    // Calculate HPP for each recipe
-    for (const recipe of recipes || []) {
-      try {
+    // Calculate HPP for each recipe in parallel
+    const results = await Promise.allSettled(
+      (recipes || []).map(async (recipe) => {
         const response = await fetch(`${request.nextUrl.origin}/api/hpp/calculate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Cookie': request.headers.get('cookie') ?? ''
+            'Cookie': request['headers'].get('cookie') ?? ''
           },
-          body: JSON.stringify({ recipeId: recipe.id })
+          body: JSON.stringify({ recipeId: recipe['id'] })
         })
 
-        if (response.ok) {
-          successCount++
-        } else {
-          errorCount++
+        if (!response.ok) {
+          throw new Error(`Failed to calculate HPP for recipe ${recipe['id']}`)
         }
-      } catch (err: unknown) {
-        const error = err as Error
-        errorCount++
-        apiLogger.error({ error, recipeId: recipe.id }, 'Error calculating HPP for recipe')
+
+        return response
+      })
+    )
+
+    const successCount = results.filter(result => result['status'] === 'fulfilled').length
+    const errorCount = results.filter(result => result['status'] === 'rejected').length
+
+    // Log errors
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        apiLogger.error({ error: result.reason, recipeId: recipes?.[index]?.id }, 'Error calculating HPP for recipe')
       }
-    }
+    })
 
     return NextResponse.json({
       success: true,
@@ -179,11 +183,14 @@ export async function PUT(request: NextRequest) {
       errorCount
     })
 
-  } catch (err: unknown) {
-    apiLogger.error({ error: err }, 'Error in batch HPP calculation')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error: unknown) {
+    return handleAPIError(error, 'PUT /api/hpp/calculate')
   }
 }
+
+// Apply security middleware
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+const securedPUT = withSecurity(PUT, SecurityPresets.enhanced())
+
+// Export secured handlers
+export { securedPOST as POST, securedPUT as PUT }

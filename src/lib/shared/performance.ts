@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ClientFile')
@@ -80,7 +81,7 @@ export function usePerformanceMonitor() {
             }
           ]
 
-          void _setMetrics(prev => [...prev, ...navMetrics])
+          _setMetrics(prev => [...prev, ...navMetrics])
         }
       } catch {
         // Navigation timing not available
@@ -96,7 +97,7 @@ export function usePerformanceMonitor() {
             timestamp: Date.now(),
             type: 'paint'
           }
-          void _setMetrics(prev => [...prev, paintMetric])
+          _setMetrics(prev => [...prev, paintMetric])
         })
       } catch {
         // Paint timing not available
@@ -114,7 +115,7 @@ export function usePerformanceMonitor() {
               type: entry.entryType
             }))
 
-            void _setMetrics(prev => [...prev, ...newMetrics])
+            _setMetrics(prev => [...prev, ...newMetrics])
           })
 
           // Observe different performance entry types
@@ -151,7 +152,7 @@ export function usePerformanceMonitor() {
             type: entry.entryType
           }
 
-          void _setMetrics(prev => [...prev, metric])
+          _setMetrics(prev => [...prev, metric])
           return metric
         }
       } catch {
@@ -171,7 +172,7 @@ export function usePerformanceMonitor() {
           timestamp: Date.now(),
           type: 'mark'
         }
-        void _setMetrics(prev => [...prev, metric])
+        _setMetrics(prev => [...prev, metric])
         return metric
       } catch {
         // Performance mark failed
@@ -294,7 +295,7 @@ export function useMemoryMonitor() {
     }
 
     // Update immediately and then every 5 seconds
-    void updateMemoryInfo()
+    updateMemoryInfo()
     const interval = setInterval(updateMemoryInfo, 5000)
 
     return () => clearInterval(interval)
@@ -351,7 +352,7 @@ export function useNetworkMonitor() {
       })
     }
 
-    void updateNetworkInfo()
+    updateNetworkInfo()
 
     const handleOnline = () => setNetworkInfo(prev => ({ ...prev, isOnline: true }))
     const handleOffline = () => setNetworkInfo(prev => ({ ...prev, isOnline: false }))
@@ -398,7 +399,7 @@ export function useBundleAnalyzer() {
 
   useEffect(() => {
     // Simplified bundle analysis - in real app, load from build artifacts
-    void setBundleInfo(null)
+    setBundleInfo(null)
   }, [])
 
   return bundleInfo

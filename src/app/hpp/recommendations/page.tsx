@@ -1,5 +1,8 @@
 'use client'
 
+import { AlertTriangle, CheckCircle, Lightbulb, Sparkles, TrendingUp } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
@@ -9,8 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
-import { AlertTriangle, CheckCircle, Lightbulb, Sparkles, TrendingUp } from 'lucide-react'
-import { useEffect, useState } from 'react'
 
 const recommendationsBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -40,7 +41,7 @@ const HppRecommendationsPage = () => {
   const { toast } = useToast()
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [loading, setLoading] = useState(true)
-  type RecommendationFilter = 'all' | 'pending' | 'implemented'
+  type RecommendationFilter = 'all' | 'implemented' | 'pending'
 
   const [filter, setFilter] = useState<RecommendationFilter>('pending')
 
@@ -52,7 +53,7 @@ const HppRecommendationsPage = () => {
 
   const loadRecommendations = async () => {
     try {
-      void setLoading(true)
+      setLoading(true)
       const params = new URLSearchParams()
       if (filter === 'pending') {
         params.append('is_implemented', 'false')
@@ -64,18 +65,18 @@ const HppRecommendationsPage = () => {
         credentials: 'include', // Include cookies for authentication
       })
       if (response.ok) {
-        const data = await response.json()
-        void setRecommendations(data.recommendations ?? [])
+        const data = await response.json() as { recommendations?: Recommendation[] }
+        setRecommendations(data.recommendations ?? [])
       }
-    } catch (err: unknown) {
-      dbLogger.error({ err }, 'Failed to load recommendations')
+    } catch (_error) {
+      dbLogger.error({ _error }, 'Failed to load recommendations')
       toast({
         title: 'Error',
         description: 'Failed to load recommendations',
         variant: 'destructive'
       })
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }
 
@@ -86,8 +87,8 @@ const HppRecommendationsPage = () => {
         title: 'Info',
         description: `Implementation tracking for recommendation ${recommendationId} will be available in the API`,
       })
-    } catch (err: unknown) {
-      dbLogger.error({ err }, 'Failed to mark recommendation as implemented')
+    } catch (error) {
+      dbLogger.error({ error }, 'Failed to mark recommendation as implemented')
       toast({
         title: 'Error',
         description: 'Failed to update recommendation',
@@ -256,7 +257,7 @@ const HppRecommendationsPage = () => {
             
             return (
             recommendations.map((rec) => (
-              <Card key={rec.id} className={`transition-all ${rec.is_implemented ? 'opacity-75' : ''}`}>
+              <Card key={rec['id']} className={`transition-all ${rec.is_implemented ? 'opacity-75' : ''}`}>
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4 flex-1">
@@ -306,7 +307,7 @@ const HppRecommendationsPage = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => markAsImplemented(rec.id)}
+                        onClick={() => markAsImplemented(rec['id'])}
                         className="flex items-center gap-2"
                       >
                         <CheckCircle className="h-3 w-3" />

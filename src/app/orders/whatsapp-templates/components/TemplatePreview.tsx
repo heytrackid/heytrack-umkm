@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
 import { MessageCircle, RefreshCw } from 'lucide-react'
-import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, type WhatsAppTemplate } from './types'
+import { useState } from 'react'
+
+import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, type WhatsAppTemplate } from '@/app/orders/whatsapp-templates/components/types'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 
 interface TemplatePreviewProps {
     showPreview: boolean
@@ -36,9 +37,11 @@ const TemplatePreview = ({
         let match
 
         while ((match = variableRegex.exec(content)) !== null) {
-            const variableName = match[1].trim()
-            const exampleValue = getExampleValue(variableName)
-            preview = preview.replace(`{${variableName}}`, exampleValue)
+            const variableName = match[1]?.trim()
+            if (variableName) {
+              const exampleValue = getExampleValue(variableName)
+              preview = preview.replace(`{${variableName}}`, exampleValue)
+            }
         }
 
         return preview

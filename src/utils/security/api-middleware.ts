@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { APISecurity } from './index'
+
 import { apiLogger } from '@/lib/logger'
+
+import { APISecurity } from './index'
 
 
 /* eslint-disable */
@@ -128,12 +130,12 @@ export function withSecurity<Params extends {} = {}>(
 ) {
   return async (req: NextRequest, params: Params): Promise<NextResponse> => {
     const mergedConfig = { ...DEFAULT_SECURITY_CONFIG, ...config }
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+    const clientIP = req['headers'].get('x-forwarded-for') || req['headers'].get('x-real-ip') || 'unknown'
     const {url} = req
     
     // 1. Content-Type validation (only for requests with body)
     if (mergedConfig.validateContentType) {
-      const contentType = req.headers.get('content-type')?.split(';')[0] || ''
+      const contentType = req['headers'].get('content-type')?.split(';')[0] || ''
       // Only validate content-type for methods that typically have a body
       if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
         if (contentType && !mergedConfig.allowedContentTypes?.includes(contentType)) {
@@ -264,7 +266,7 @@ export function withSecurity<Params extends {} = {}>(
       // Create a new request with sanitized body
       processedReq = new NextRequest(req.url, {
         method: req.method,
-        headers: req.headers,
+        headers: req['headers'],
         body: JSON.stringify(sanitizedBody)
       })
     }
@@ -274,9 +276,9 @@ export function withSecurity<Params extends {} = {}>(
       const response = await handler(processedReq, params)
       
       // Add security headers to the response
-      response.headers.set('X-Content-Type-Options', 'nosniff')
-      response.headers.set('X-Frame-Options', 'DENY')
-      response.headers.set('X-XSS-Protection', '1; mode=block')
+      response['headers'].set('X-Content-Type-Options', 'nosniff')
+      response['headers'].set('X-Frame-Options', 'DENY')
+      response['headers'].set('X-XSS-Protection', '1; mode=block')
       
       return response
     } catch (error) {

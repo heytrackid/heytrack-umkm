@@ -1,9 +1,11 @@
 'use client'
 
-import { memo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { ChefHat, Package, DollarSign, Clock, Users, Star, Flame } from 'lucide-react'
+import { memo } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import type { AvailableIngredient } from './types'
 
 // Recipe Preview Card - Shows live preview as user types
@@ -52,7 +54,7 @@ const RecipePreviewCard = memo(({
   const estimatedCost = targetPrice ? parseFloat(targetPrice) * 0.45 : null
   const ingredients = selectedIngredients.length > 0
     ? selectedIngredients
-    : estimatedIngredients[productType] || []
+    : estimatedIngredients[productType] ?? []
 
   if (!hasInput) {
     return (
@@ -121,7 +123,7 @@ const RecipePreviewCard = memo(({
       donuts: { prep: 20, cook: 8 },
       other: { prep: 15, cook: 30 }
     }
-    return times[type] || times.other
+    return times[type] ?? times['other'] ?? { prep: 15, cook: 30 }
   }
 
   const estimatedTime = getEstimatedTime(productType)

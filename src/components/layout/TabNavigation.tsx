@@ -1,18 +1,19 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 import { ChevronDown, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { prefetchRoute } from '@/lib/route-loader'
+
 import { useRoutePreloader } from '@/hooks/use-preloader'
+import { prefetchRoute } from '@/lib/route-loader'
+import { cn } from '@/lib/utils'
 
 interface TabItem {
   label: string
   href?: string
   icon?: LucideIcon
-  badge?: string | number
+  badge?: number | string
   items?: Array<{
     label: string
     href: string
@@ -242,8 +243,8 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
                 <div
                   className="fixed z-50 mt-0 min-w-[200px] rounded-md border border-border bg-popover p-1 shadow-lg"
                   style={{
-                    top: `${dropdownPositions[tab.label]?.top || 0}px`,
-                    left: `${dropdownPositions[tab.label]?.left || 0}px`,
+                    top: `${dropdownPositions[tab.label]?.top ?? 0}px`,
+                    left: `${dropdownPositions[tab.label]?.left ?? 0}px`,
                   }}
                   onMouseEnter={() => handleMouseEnter(tab.label)}
                   onMouseLeave={handleMouseLeave}

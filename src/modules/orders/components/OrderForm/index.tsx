@@ -1,16 +1,19 @@
 'use client'
 
-import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
+import { useQuery } from '@tanstack/react-query'
+import { AlertCircle } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { memo, useState, type FormEvent } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { warningToast } from '@/hooks/use-toast'
 import { ORDER_CONFIG } from '@/modules/orders/constants'
 import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
+
+import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
 import type { Row } from '@/types/database'
-import { useQuery } from '@tanstack/react-query'
-import { AlertCircle } from 'lucide-react'
-import dynamic from 'next/dynamic'
-import { memo, useState, type FormEvent } from 'react'
+
 
 
 
@@ -98,8 +101,8 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 credentials: 'include', // Include cookies for authentication
             })
             if (!response.ok) { throw new Error('Failed to fetch recipes') }
-            const data: Array<Row<'recipes'>> = await response.json()
-            return data.filter(recipe => recipe.is_active)
+            const _data: Array<Row<'recipes'>> = await response.json()
+            return _data.filter(recipe => recipe.is_active)
         },
         staleTime: 5 * 60 * 1000,
     })
@@ -141,7 +144,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         const newItem: OrderItemWithRecipe = {
             id: `temp-${Date.now()}`,
             order_id: '',
-            recipe_id: firstRecipe.id,
+            recipe_id: firstRecipe['id'],
             product_name: firstRecipe.name,
             quantity: 1,
             unit_price: firstRecipe.selling_price ?? 0,
@@ -153,7 +156,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             updated_at: null,
             user_id: '',
             recipe: {
-                id: firstRecipe.id,
+                id: firstRecipe['id'],
                 name: firstRecipe.name,
                 price: firstRecipe.selling_price ?? 0,
                 category: firstRecipe.category ?? 'Uncategorized',
@@ -175,14 +178,14 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             if (!currentItem) { return updated }
 
             if (field === 'recipe_id') {
-                const selectedRecipe = recipesData.find(recipe => recipe.id === value)
+                const selectedRecipe = recipesData.find(recipe => recipe['id'] === value)
                 if (selectedRecipe) {
                     updated[index] = {
                         ...currentItem,
                         recipe_id: value as string,
                         product_name: selectedRecipe.name,
                         recipe: {
-                            id: selectedRecipe.id,
+                            id: selectedRecipe['id'],
                             name: selectedRecipe.name,
                             price: selectedRecipe.selling_price ?? currentItem.unit_price,
                             category: selectedRecipe.category ?? 'Uncategorized',
@@ -225,7 +228,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
 
         const errors: Record<string, string> = {}
 
-        if (!formData.customer_name.trim()) {
+        if (!formData['customer_name'].trim()) {
             errors['customer_name'] = 'Nama pelanggan wajib diisi'
         }
 
@@ -305,7 +308,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 <SwipeableTabsContent value="customer" className="space-y-4">
                     <CustomerSection
                         formData={{
-                            customer_name: formData.customer_name,
+                            customer_name: formData['customer_name'],
                             customer_phone: formData.customer_phone,
                             customer_address: formData.customer_address,
                             order_date: formData.order_date,

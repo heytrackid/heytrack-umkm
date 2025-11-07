@@ -1,5 +1,6 @@
-import type { BusinessContext } from '@/types/features/chat';
 import { logger } from '@/lib/logger';
+
+import type { BusinessContext } from '@/types/features/chat';
 
 
 // AI Fallback Service - Handles AI service failures gracefully
@@ -12,7 +13,7 @@ interface CachedResponse {
 }
 
 export class AIFallbackService {
-  private static responseCache = new Map<string, CachedResponse>();
+  private static readonly responseCache = new Map<string, CachedResponse>();
   private static readonly CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
   /**
@@ -78,7 +79,7 @@ export class AIFallbackService {
 
       if (!cached) {return null;}
 
-      const age = Date.now() - cached.timestamp;
+      const age = Date.now() - cached['timestamp'];
       if (age > this.CACHE_TTL) {
         this.responseCache.delete(key);
         return null;
@@ -392,7 +393,7 @@ export class AIFallbackService {
   private static cleanupCache(): void {
     const now = Date.now();
     for (const [key, cached] of this.responseCache.entries()) {
-      if (now - cached.timestamp > this.CACHE_TTL) {
+      if (now - cached['timestamp'] > this.CACHE_TTL) {
         this.responseCache.delete(key);
       }
     }

@@ -1,13 +1,17 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger } from '@/lib/logger'
-import { cacheInvalidation } from '@/lib/cache'
-import { RECIPE_FIELDS } from '@/lib/database/query-fields'
-import type { Insert } from '@/types/database'
-import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { cacheInvalidation } from '@/lib/cache'
+import { RECIPE_FIELDS } from '@/lib/database/query-fields'
+import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Insert } from '@/types/database'
+
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -19,7 +23,7 @@ export async function GET(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -39,11 +43,11 @@ export async function GET(
       .from('recipes')
       .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
-      .eq('created_by', user.id)
+      .eq('created_by', user['id'])
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Recipe not found' }, { status: 404 })
       }
       throw error
@@ -62,7 +66,7 @@ export async function PUT(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -78,7 +82,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = await request.json() as { recipe_ingredients?: unknown; [key: string]: unknown }
     const { recipe_ingredients, ...recipeData } = body
 
     // Update recipe
@@ -86,12 +90,12 @@ export async function PUT(
       .from('recipes')
       .update(recipeData)
       .eq('id', id)
-      .eq('created_by', user.id)
+      .eq('created_by', user['id'])
       .select('id, name')
       .single()
 
     if (recipeError) {
-      if (recipeError.code === 'PGRST116') {
+      if (recipeError['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Recipe not found' }, { status: 404 })
       }
       apiLogger.error({ error: recipeError }, 'Error updating recipe')
@@ -105,7 +109,7 @@ export async function PUT(
         .from('recipe_ingredients')
         .delete()
         .eq('recipe_id', id)
-        .eq('user_id', user.id)
+        .eq('user_id', user['id'])
 
       if (deleteError) {
         apiLogger.error({ error: deleteError }, 'Error deleting old ingredients')
@@ -129,7 +133,7 @@ export async function PUT(
             quantity: ingredient.quantity ?? ingredient.qty_per_batch ?? 0,
             unit: ingredient.unit ?? 'g',
             notes: ingredient.notes,
-            user_id: user.id
+            user_id: user['id']
           }))
 
         const { error: ingredientsError } = await supabase
@@ -151,7 +155,7 @@ export async function PUT(
       .from('recipes')
       .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
-      .eq('created_by', user.id)
+      .eq('created_by', user['id'])
       .single()
 
     if (fetchError) {
@@ -175,7 +179,7 @@ export async function DELETE(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -196,10 +200,10 @@ export async function DELETE(
       .from('recipes')
       .delete()
       .eq('id', id)
-      .eq('created_by', user.id)
+      .eq('created_by', user['id'])
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Recipe not found' }, { status: 404 })
       }
       throw error

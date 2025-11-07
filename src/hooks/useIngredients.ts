@@ -1,9 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
+
 import type { Row, Insert, Update } from '@/types/database'
 
 /**
@@ -41,7 +43,7 @@ export function useIngredients(options?: UseIngredientsOptions) {
         throw new Error('Failed to fetch ingredients')
       }
       const result = await response.json() as { data?: { ingredients?: Ingredient[]; pagination?: unknown } }
-      return result.data ?? { ingredients: [], pagination: null }
+      return result['data'] ?? { ingredients: [], pagination: null }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,
@@ -67,7 +69,7 @@ export function useIngredient(id: string | null) {
       }
       return response.json()
     },
-    enabled: !!id,
+    enabled: Boolean(id),
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   })
@@ -141,7 +143,7 @@ export function useUpdateIngredient() {
       return response.json()
     },
     onSuccess: (_, variables) => {
-      void queryClient.invalidateQueries({ queryKey: ['ingredient', variables.id] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredient', variables['id']] })
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       
       toast({

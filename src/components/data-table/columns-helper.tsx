@@ -1,5 +1,6 @@
-import type { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
+
+import type { ColumnDef } from '@tanstack/react-table'
 
 /**
  * Data Table Column Helper
@@ -23,7 +24,7 @@ export function createTextColumn<T extends Record<string, unknown>>(
     header,
     cell: ({ getValue }) => getValue(),
     enableSorting: options?.sortable !== false,
-    size: options?.width,
+    ...(options?.width !== undefined && { size: options.width }),
   }
 }
 
@@ -135,8 +136,8 @@ export function createActionColumn<T extends Record<string, unknown>>(
   actions: Array<{
     label: string
     onClick: (row: T) => void
-    variant?: 'default' | 'outline' | 'ghost' | 'destructive'
-    size?: 'sm' | 'default' | 'lg'
+    variant?: 'default' | 'destructive' | 'ghost' | 'outline'
+    size?: 'default' | 'lg' | 'sm'
   }>
 ): ColumnDef<T> {
   return {
@@ -169,14 +170,14 @@ export function createCheckboxColumn<T>(): ColumnDef<T> {
       <input
         type="checkbox"
         checked={table.getIsAllPageRowsSelected()}
-        onChange={(e) => table.toggleAllPageRowsSelected(!!e.target.checked)}
+        onChange={(e) => table.toggleAllPageRowsSelected(Boolean(e.target.checked))}
       />
     ),
     cell: ({ row }) => (
       <input
         type="checkbox"
         checked={row.getIsSelected()}
-        onChange={(e) => row.toggleSelected(!!e.target.checked)}
+        onChange={(e) => row.toggleSelected(Boolean(e.target.checked))}
       />
     ),
   }

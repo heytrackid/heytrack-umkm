@@ -17,7 +17,7 @@ import type { Row } from './database'
 /**
  * Standard error type for catch blocks
  */
-export type CatchError = Error | { message: string; error?: CatchError } | string
+export type CatchError = Error | string | { message: string; error?: CatchError }
 
 /**
  * API Error Response
@@ -25,7 +25,7 @@ export type CatchError = Error | { message: string; error?: CatchError } | strin
 export interface ApiError {
   message: string
   code?: string
-  details?: Record<string, string | number | boolean>
+  details?: Record<string, boolean | number | string>
 }
 
 /* -------------------------------------------------------------------------- */
@@ -35,18 +35,19 @@ export interface ApiError {
 /**
  * Generic record with string keys
  */
-export type StringRecord = Record<string, string | number | boolean | null | undefined>
+export type StringRecord = Record<string, boolean | number | string | null | undefined>
 
+/* eslint-disable @typescript-eslint/sort-type-constituents */
 /**
  * JSON-serializable value
  */
-export type JsonValue = 
-  | string 
-  | number 
-  | boolean 
-  | null 
-  | JsonValue[] 
+export type JsonValue =
   | { [key: string]: JsonValue }
+  | JsonValue[]
+  | boolean
+  | null
+  | number
+  | string
 
 /**
  * Generic data object
@@ -107,7 +108,7 @@ export interface AlertWithIngredient extends InventoryAlert {
 export interface ChartDataPoint {
   label: string
   value: number
-  [key: string]: string | number | boolean | null
+  [key: string]: boolean | number | string | null
 }
 
 /**
@@ -126,12 +127,12 @@ export interface TimeSeriesPoint {
 /**
  * Generic ID parameter (string or number)
  */
-export type IdParam = string | number
+export type IdParam = number | string
 
 /**
  * Generic filter object
  */
-export type FilterObject = Record<string, string | number | boolean | null | undefined>
+export type FilterObject = Record<string, boolean | number | string | null | undefined>
 
 /**
  * Sort direction

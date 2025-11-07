@@ -1,5 +1,8 @@
 'use client'
 
+import { Calendar, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { DateRangePicker } from '@/components/ui/date-range-picker'
 import {
@@ -8,8 +11,7 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Calendar, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react'
-import { useEffect, useState } from 'react'
+
 import type { DateRange } from 'react-day-picker'
 
 interface ChartData {
@@ -18,7 +20,7 @@ interface ChartData {
     label: string
     data: number[]
     borderColor?: string
-    backgroundColor?: string | string[]
+    backgroundColor?: string[] | string
     borderWidth?: number
     fill?: boolean
     tension?: number
@@ -139,7 +141,7 @@ export const InteractiveChart = ({
       </div>
 
       {/* Chart Container */}
-      <div className="h-80 flex items-center justify-center text-muted-foreground">
+      <div className="h-64 sm:h-80 flex items-center justify-center text-muted-foreground">
         Chart visualization for {type} - {data.labels.length} data points
       </div>
 
@@ -161,7 +163,7 @@ export const createChartData = (
   labels,
   datasets: datasets.map((ds, index) => ({
     label: ds.label,
-    data: ds.data,
+    data: ds['data'],
     borderColor: ds.color ?? `hsl(${index * 137.5}, 50%, 50%)`,
     backgroundColor: ds.color ? `${ds.color}80` : `hsla(${index * 137.5}, 50%, 50%, 0.6)`,
     borderWidth: 2,

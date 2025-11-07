@@ -1,5 +1,8 @@
 'use client'
 
+import { BarChart3, Package, Target, TrendingDown, TrendingUp, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader, SharedStatsCards } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
@@ -10,8 +13,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
-import { BarChart3, Package, Target, TrendingDown, TrendingUp, Users } from 'lucide-react'
-import { useEffect, useState } from 'react'
 // No imports needed for now
 
 interface RecipeComparison {
@@ -24,8 +25,8 @@ interface RecipeComparison {
   marginPercentage: number
   timesMade: number
   lastMade: string | null
-  profitability: 'high' | 'medium' | 'low'
-  efficiency: 'high' | 'medium' | 'low'
+  profitability: 'high' | 'low' | 'medium'
+  efficiency: 'high' | 'low' | 'medium'
 }
 
 interface BenchmarkData {
@@ -55,7 +56,7 @@ const ComparisonAnalyticsPage = () => {
 
   const loadComparisonData = async () => {
     try {
-      void setLoading(true)
+      setLoading(true)
 
       // Get recipes with HPP data
       const params = new URLSearchParams()
@@ -67,19 +68,19 @@ const ComparisonAnalyticsPage = () => {
         credentials: 'include', // Include cookies for authentication
       })
       if (response.ok) {
-        const data = await response.json()
-        void setRecipes(data.recipes ?? [])
-        void setBenchmark(data.benchmark ?? null)
+        const data = await response.json() as { recipes?: RecipeComparison[]; benchmark?: BenchmarkData }
+        setRecipes(data.recipes ?? [])
+        setBenchmark(data.benchmark ?? null)
       }
-    } catch (err: unknown) {
-      dbLogger.error({ err }, 'Failed to load comparison data')
+    } catch (_error) {
+      dbLogger.error({ _error }, 'Failed to load comparison data')
       toast({
         title: 'Error',
         description: 'Failed to load comparison data',
         variant: 'destructive'
       })
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }
 
@@ -274,7 +275,7 @@ const ComparisonAnalyticsPage = () => {
                   </TableHeader>
                   <TableBody>
                     {sortedRecipes.map((recipe) => (
-                      <TableRow key={recipe.id}>
+                      <TableRow key={recipe['id']}>
                         <TableCell className="font-medium">{recipe.name}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{recipe.category}</Badge>

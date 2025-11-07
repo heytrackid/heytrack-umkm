@@ -1,9 +1,10 @@
 'use client'
 
+import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
 import { Component, type ComponentType, type ErrorInfo, type ReactNode } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('RouteErrorBoundary')
@@ -58,7 +59,6 @@ export class RouteErrorBoundary extends Component<Props, State> {
   handleRetry = () => {
     this.setState(prevState => ({
       hasError: false,
-      error: undefined,
       retryCount: prevState.retryCount + 1
     }))
   }
@@ -130,7 +130,7 @@ export function withRouteErrorBoundary<P extends object>(
   routeName?: string
 ) {
   const WrappedComponent = (props: P) => (
-    <RouteErrorBoundary routeName={routeName}>
+    <RouteErrorBoundary {...(routeName && { routeName })}>
       <Component {...props} />
     </RouteErrorBoundary>
   )

@@ -1,6 +1,7 @@
+import { useSupabaseQuery } from '@/hooks/supabase'
+
 import type { Row } from '@/types/database'
 
-import { useSupabaseQuery } from '@/hooks/supabase'
 type Recipe = Row<'recipes'>
 
 interface UseRecipesDataOptions {
@@ -14,15 +15,15 @@ export function useRecipesData(options: UseRecipesDataOptions = {}) {
   const filters: Record<string, unknown> = {}
   
   if (options.category && options.category !== 'all') {
-    filters.category = options.category
+    filters['category'] = options.category
   }
   
   if (options.difficulty && options.difficulty !== 'all') {
-    filters.difficulty = options.difficulty
+    filters['difficulty'] = options.difficulty
   }
   
   if (!options.includeInactive) {
-    filters.is_active = true
+    filters['is_active'] = true
   }
 
   // Implement proper data fetching

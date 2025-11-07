@@ -1,9 +1,13 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/server'
 
-export const runtime = 'nodejs'
 
 async function POST(_request: NextRequest) {
   try {
@@ -30,7 +34,7 @@ async function POST(_request: NextRequest) {
         updated_at: new Date().toISOString()
       })
       .eq('is_read', false)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select()
 
     if (error) {

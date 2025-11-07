@@ -1,6 +1,10 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Loader2 } from 'lucide-react'
 import { memo } from 'react'
+import { useForm } from 'react-hook-form'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,21 +13,20 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
-import { useForm } from 'react-hook-form'
-import { FormField } from './shared/FormField'
-import type { Row } from '@/types/database'
 import { getErrorMessage } from '@/lib/type-guards'
 import {
   RecipeFormSchema,
   type RecipeForm as RecipeFormData
 } from '@/lib/validations/domains/recipe'
 
+import { FormField } from './shared/FormField'
+
+import type { Row } from '@/types/database'
+
 type Recipe = Row<'recipes'>
 
 interface RecipeFormProps {
-  initialData?: Partial<RecipeFormData> & Partial<Recipe>
+  initialData?: Partial<Recipe> & Partial<RecipeFormData>
   onSubmit: (data: RecipeFormData) => Promise<void>
   isLoading?: boolean
 }
@@ -40,7 +43,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
       preparation_time: initialData?.preparation_time ?? initialData?.prep_time ?? 30,
       cooking_time: initialData?.cooking_time ?? initialData?.cook_time ?? 0,
       instructions: typeof initialData?.instructions === 'string' ? [] : initialData?.instructions ?? [],
-      difficulty: (initialData?.difficulty as 'EASY' | 'MEDIUM' | 'HARD') || 'MEDIUM',
+      difficulty: (initialData?.difficulty as 'EASY' | 'HARD' | 'MEDIUM') || 'MEDIUM',
       category: initialData?.category ?? '',
       is_active: initialData?.is_active ?? true,
       is_available: initialData?.is_available ?? true,
@@ -138,10 +141,11 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
               error={form.formState.errors.difficulty?.message}
             >
               <Select
-                value={form.watch('difficulty')}
                 onValueChange={(value) => {
-                  form.setValue('difficulty', value as 'EASY' | 'MEDIUM' | 'HARD')
+                  form.setValue('difficulty', value as 'EASY' | 'HARD' | 'MEDIUM')
                 }}
+                {...(form.watch('difficulty') ? { value: form.watch('difficulty') as string } : {})}
+              
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -190,8 +194,8 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              checked={form.watch('is_active')}
-              onCheckedChange={(checked) => form.setValue('is_active', !!checked)}
+              checked={Boolean(form.watch('is_active'))}
+              onCheckedChange={(checked) => form.setValue('is_active', Boolean(checked))}
             />
             <Label>Aktif</Label>
           </div>

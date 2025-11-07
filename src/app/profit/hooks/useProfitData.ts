@@ -1,7 +1,9 @@
-import useSWR from 'swr'
 import { useState } from 'react'
-import { apiLogger } from '@/lib/logger'
+import useSWR from 'swr'
+
 import { useToast } from '@/hooks/use-toast'
+import { apiLogger } from '@/lib/logger'
+
 import type { ProfitData, ProfitFilters, ExportFormat } from '@/app/profit/components/types'
 
 /**
@@ -22,7 +24,7 @@ export function useProfitData() {
   // Calculate date range for SWR key
   const getCalculatedDates = () => {
     const today = new Date()
-    const toISODate = (date: Date): string => date.toISOString().split('T')[0]
+    const toISODate = (date: Date): string => date.toISOString().substring(0, 10)
     const subtractDays = (date: Date, days: number) => {
       const clone = new Date(date.getTime())
       clone.setDate(clone.getDate() - days)
@@ -71,7 +73,7 @@ export function useProfitData() {
       if (!response.ok) {
         throw new Error('Gagal mengambil data laporan laba')
       }
-      return response.json()
+      return await response.json() as ProfitData
     },
     {
       revalidateOnFocus: false,
@@ -100,15 +102,15 @@ export function useProfitData() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
-      document.body.appendChild(a)
+      a.download = `laporan-laba-${new Date().toISOString().substring(0, 10)}.${format}`
+      document['body'].appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-    } catch (err: unknown) {
-      const error = err as Error
-      apiLogger.error({ error }, 'Error exporting report:')
-      toast({
+      document['body'].removeChild(a)
+     } catch (error) {
+       const caughtError = error as Error
+       apiLogger.error({ error: caughtError }, 'Error exporting report:')
+       toast({
         title: 'Gagal',
         description: 'Gagal mengekspor laporan',
         variant: 'destructive',
@@ -118,8 +120,8 @@ export function useProfitData() {
 
   return {
     loading: isLoading,
-    error: error ? error.message : null,
-    profitData,
+    error: error instanceof Error ? error.message : null,
+    profitData: profitData ?? null,
     filters,
     updateFilters,
     refetch: () => mutate(),

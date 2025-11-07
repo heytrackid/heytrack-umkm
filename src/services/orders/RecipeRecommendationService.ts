@@ -1,8 +1,9 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
+
+import type { RecipeOption } from '@/modules/orders/types'
 import type { Row } from '@/types/database'
-import type { RecipeOption } from '../types'
 
 
 
@@ -61,7 +62,7 @@ export class RecipeRecommendationService {
 
       type OrderQueryResult = Order & {
         order_items: Array<OrderItem & {
-          recipe: Array<Pick<Recipe, 'id' | 'name' | 'category' | 'selling_price' | 'cost_per_unit' | 'margin_percentage' | 'prep_time' | 'cook_time'>> | null
+          recipe: Array<Pick<Recipe, 'category' | 'cook_time' | 'cost_per_unit' | 'id' | 'margin_percentage' | 'name' | 'prep_time' | 'selling_price'>> | null
         }> | null
       }
 
@@ -87,14 +88,14 @@ export class RecipeRecommendationService {
           // Supabase returns arrays for joins, get first element
           const recipe = item.recipe?.[0]
           if (recipe) {
-            const existing = recipeFrequency.get(recipe.id)
+            const existing = recipeFrequency.get(recipe['id'])
             if (existing) {
               existing.count += item.quantity
             } else {
-              recipeFrequency.set(recipe.id, {
+              recipeFrequency.set(recipe['id'], {
                 count: item.quantity,
                 recipe: {
-                  id: recipe.id,
+                  id: recipe['id'],
                   name: recipe.name,
                   category: recipe.category,
                   selling_price: recipe.selling_price,
@@ -114,7 +115,7 @@ export class RecipeRecommendationService {
         .sort((a, b) => b[1].count - a[1].count)
         .slice(0, limit)
         .map(([, data]) => ({
-          id: data.recipe.id,
+          id: data.recipe['id'],
           name: data.recipe.name,
           category: data.recipe.category,
           servings: 1, // Default
@@ -127,8 +128,8 @@ export class RecipeRecommendationService {
         } as RecipeOption))
 
       return recommendations
-    } catch (err: unknown) {
-      dbLogger.error({ error: err }, 'Error getting recipe recommendations')
+    } catch (error) {
+      dbLogger.error({ error }, 'Error getting recipe recommendations')
       return []
     }
   }

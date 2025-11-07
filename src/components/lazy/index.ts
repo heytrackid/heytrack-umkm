@@ -196,6 +196,8 @@ export const globalLazyLoadingUtils = {
           case 'financial-summary':
             // preloadPromises.push(preloadChartBundle()) // Use chart preloader if available
             break
+          default:
+            break
         }
       })
     }

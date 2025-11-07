@@ -1,7 +1,8 @@
 'use client'
 
-import { useVirtualScroll } from '@/lib/performance-optimized'
 import { type ReactNode, memo } from 'react'
+
+import { useVirtualScroll } from '@/lib/performance-optimized'
 
 /**
  * Virtualized List Component

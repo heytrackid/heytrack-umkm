@@ -1,41 +1,5 @@
 'use client'
 
-import { PageHeader } from '@/components/layout/PageHeader'
-import { DeleteModal } from '@/components/ui'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { useConfirm } from '@/components/ui/confirm-dialog'
-import { Input } from '@/components/ui/input'
-import { SimplePagination } from '@/components/ui/simple-pagination'
-import { useSettings } from '@/contexts/settings-context'
-import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/supabase'
-import { useToast } from '@/hooks/use-toast'
-import { usePagination } from '@/hooks/usePagination'
-import { useResponsive } from '@/hooks/useResponsive'
-import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState, useCallback } from 'react'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { MobileOperationalCostCard } from './MobileOperationalCostCard'
-import { OperationalCostFormDialog } from './OperationalCostFormDialog'
-import { OperationalCostStats } from './OperationalCostStats'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import type { Row } from '@/types/database'
 import {
     Edit,
     MoreVertical,
@@ -46,17 +10,86 @@ import {
     X,
     Zap,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState, useCallback } from 'react'
+
+import { PageHeader } from '@/components/layout/PageHeader'
+import { DeleteModal } from '@/components/ui'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { useConfirm } from '@/components/ui/confirm-dialog'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { Input } from '@/components/ui/input'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { SimplePagination } from '@/components/ui/simple-pagination'
+import { useSettings } from '@/contexts/settings-context'
+import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/supabase'
+import { useToast } from '@/hooks/use-toast'
+import { usePagination } from '@/hooks/usePagination'
+import { useResponsive } from '@/hooks/useResponsive'
+
+import { MobileOperationalCostCard } from './MobileOperationalCostCard'
+import { OperationalCostFormDialog } from './OperationalCostFormDialog'
+import { OperationalCostStats } from './OperationalCostStats'
+
+import type { Row } from '@/types/database'
 import type { DateRange } from 'react-day-picker'
 
-// Feature Components
-
-// Types
-
 type OperationalCost = Row<'operational_costs'>
-type CategoryFilter = 'all' | 'utilities' | 'rent' | 'staff' | 'transport' | 'communication' | 'insurance' | 'maintenance' | 'other'
+type CategoryFilter =
+    | 'all'
+    | 'communication'
+    | 'insurance'
+    | 'maintenance'
+    | 'other'
+    | 'rent'
+    | 'staff'
+    | 'transport'
+    | 'utilities'
+
+interface QuickSetupErrorPayload {
+    error?: string
+}
+
+interface QuickSetupResultPayload {
+    count?: number
+}
+
+const isQuickSetupErrorPayload = (value: unknown): value is QuickSetupErrorPayload => {
+    if (typeof value !== 'object' || value === null) {
+        return false
+    }
+    const { error } = value as { error?: unknown }
+    return error === undefined || typeof error === 'string'
+}
+
+const isQuickSetupResultPayload = (value: unknown): value is QuickSetupResultPayload => {
+    if (typeof value !== 'object' || value === null) {
+        return false
+    }
+    const { count } = value as { count?: unknown }
+    return count === undefined || typeof count === 'number'
+}
 
 // Constants
-const COST_CATEGORIES = [
+interface CostCategory { id: string; name: string; icon: string; description: string }
+const COST_CATEGORIES: CostCategory[] = [
     { id: 'utilities', name: 'Utilitas', icon: '⚡', description: 'Listrik, air, gas' },
     { id: 'rent', name: 'Sewa & Properti', icon: '🏢', description: 'Sewa tempat, PBB' },
     { id: 'staff', name: 'Gaji Karyawan', icon: '👥', description: 'Gaji, tunjangan' },
@@ -66,6 +99,9 @@ const COST_CATEGORIES = [
     { id: 'maintenance', name: 'Perawatan', icon: '🔧', description: 'Service peralatan' },
     { id: 'other', name: 'Lainnya', icon: '📦', description: 'Biaya lainnya' },
 ]
+const DEFAULT_CATEGORY: CostCategory =
+    COST_CATEGORIES[COST_CATEGORIES.length - 1] ??
+    { id: 'other', name: 'Lainnya', icon: '📦', description: 'Biaya lainnya' }
 
 export const EnhancedOperationalCostsPage = () => {
     const _router = useRouter()
@@ -176,15 +212,15 @@ export const EnhancedOperationalCostsPage = () => {
         if (!selectedCost) { return }
 
         try {
-            await deleteCost(selectedCost.id)
+            await deleteCost(selectedCost['id'])
             toast({
                 title: 'Biaya dihapus',
                 description: `${selectedCost.description} berhasil dihapus`,
             })
             setIsDeleteDialogOpen(false)
             setSelectedCost(null)
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal menghapus biaya'
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Gagal menghapus biaya'
             toast({
                 title: 'Error',
                 description: message,
@@ -212,28 +248,32 @@ export const EnhancedOperationalCostsPage = () => {
             })
 
             if (!response.ok) {
-                const errorData = await response.json()
-                throw new Error(errorData.error ?? 'Failed to setup')
+                const errorPayload: unknown = await response.json()
+                const errorMessage = isQuickSetupErrorPayload(errorPayload) ? errorPayload.error : undefined
+                throw new Error(errorMessage ?? 'Failed to setup')
             }
 
-            const result = await response.json()
+            const resultPayload: unknown = await response.json()
+            const templatesAdded = isQuickSetupResultPayload(resultPayload)
+                ? resultPayload.count ?? COST_CATEGORIES.length
+                : COST_CATEGORIES.length
 
             toast({
                 title: 'Template ditambahkan',
-                description: `${result.count ?? 8} template biaya operasional berhasil ditambahkan`,
+                description: `${templatesAdded} template biaya operasional berhasil ditambahkan`,
             })
 
             // Force refresh page to show new data
-            window.location.reload()
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal menambahkan template'
+            _router.refresh()
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Gagal menambahkan template'
             toast({
                 title: 'Error',
                 description: message,
                 variant: 'destructive',
             })
         }
-    }, [confirm, toast])
+    }, [confirm, toast, _router])
 
     const clearFilters = () => {
         setSearchTerm('')
@@ -241,10 +281,11 @@ export const EnhancedOperationalCostsPage = () => {
         setDateRange(undefined)
     }
 
-    const hasActiveFilters = searchTerm || categoryFilter !== 'all' || dateRange !== undefined
+    const hasActiveFilters = Boolean(searchTerm || categoryFilter !== 'all' || dateRange !== undefined)
 
     // Helper functions
-    const getCategoryInfo = (categoryId: string) => COST_CATEGORIES.find((c) => c.id === categoryId) ?? COST_CATEGORIES[7]
+    const getCategoryInfo = (categoryId: string): CostCategory =>
+        COST_CATEGORIES.find((category) => category.id === categoryId) ?? DEFAULT_CATEGORY
 
     const calculateMonthlyCost = (cost: OperationalCost) => {
         const amount = cost.amount || 0
@@ -257,6 +298,8 @@ export const EnhancedOperationalCostsPage = () => {
                 return amount
             case 'yearly':
                 return amount / 12
+            case null:
+                return amount
             default:
                 return amount
         }
@@ -269,7 +312,7 @@ export const EnhancedOperationalCostsPage = () => {
             monthly: 'Bulanan',
             yearly: 'Tahunan',
         }
-        return labels[frequency] || frequency
+        return labels[frequency] ?? frequency
     }
 
     // Prevent hydration mismatch - wait for client mount
@@ -305,16 +348,10 @@ export const EnhancedOperationalCostsPage = () => {
                 title="Biaya Operasional"
                 description="Kelola semua biaya operasional bisnis Anda"
                 action={
-                    <div className="flex gap-2">
-                        <Button onClick={handleAdd}>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Tambah Biaya
-                        </Button>
-                        <Button variant="outline" onClick={handleQuickSetup}>
-                            <Zap className="h-4 w-4 mr-2" />
-                            Setup Cepat
-                        </Button>
-                    </div>
+                    <Button onClick={handleAdd} hapticFeedback>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Tambah Biaya
+                    </Button>
                 }
             />
 
@@ -376,7 +413,7 @@ export const EnhancedOperationalCostsPage = () => {
                             </Select>
 
                             <DateRangePicker
-                                value={dateRange}
+                                {...(dateRange && { value: dateRange })}
                                 onChange={setDateRange}
                                 className="w-full sm:w-[280px]"
                             />
@@ -387,6 +424,14 @@ export const EnhancedOperationalCostsPage = () => {
                                     Clear
                                 </Button>
                             )}
+                        </div>
+
+                        {/* Preset Button */}
+                        <div className="flex justify-start">
+                            <Button variant="outline" onClick={handleQuickSetup}>
+                                <Zap className="h-4 w-4 mr-2" />
+                                Setup Cepat
+                            </Button>
                         </div>
                     </div>
                 </CardContent>
@@ -402,8 +447,8 @@ export const EnhancedOperationalCostsPage = () => {
             {/* Cost List */}
             {loading && (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {[...Array(6)].map((_, i) => (
-                        <Card key={i}>
+                    {Array.from({ length: 6 }, (_, index) => index).map((skeletonIndex) => (
+                        <Card key={`operational-cost-skeleton-${skeletonIndex}`}>
                             <CardContent className="p-6">
                                 <div className="space-y-3">
                                     <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
@@ -465,7 +510,7 @@ export const EnhancedOperationalCostsPage = () => {
                 <div className="space-y-3">
                     {paginatedData.map((cost: OperationalCost) => (
                         <MobileOperationalCostCard
-                            key={cost.id}
+                            key={cost['id']}
                             cost={cost}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
@@ -485,7 +530,7 @@ export const EnhancedOperationalCostsPage = () => {
                         const monthlyCost = calculateMonthlyCost(cost)
 
                         return (
-                            <Card key={cost.id} className="hover:shadow-md transition-shadow">
+                            <Card key={cost['id']} className="hover:shadow-md transition-shadow">
                                 <CardContent className="p-6">
                                     <div className="space-y-4">
                                         {/* Header */}

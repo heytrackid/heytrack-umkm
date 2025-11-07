@@ -90,12 +90,14 @@ export const performanceConfig: Partial<NextConfig> = {
   },
 
   // Webpack optimizations
-  webpack: (config, { dev, isServer }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  webpack: (config: any, { dev, isServer }: { dev: boolean; isServer: boolean }) => {
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
     // Development optimizations for better HMR
     if (dev) {
       // Ensure module IDs are stable across HMR updates
       config.optimization = {
-        ...config.optimization,
+        ...(config.optimization),
         moduleIds: 'named',
         chunkIds: 'named'
       }
@@ -105,13 +107,13 @@ export const performanceConfig: Partial<NextConfig> = {
     if (!dev && !isServer) {
       // Enable tree shaking
       config.optimization = {
-        ...config.optimization,
+        ...(config.optimization),
         usedExports: true,
         sideEffects: false
       }
 
       // Split chunks for better caching
-      config.optimization.splitChunks = {
+      ;(config.optimization).splitChunks = {
         chunks: 'all',
         cacheGroups: {
           default: false,
@@ -151,6 +153,7 @@ export const performanceConfig: Partial<NextConfig> = {
       }
     }
 
+    /* eslint-disable @typescript-eslint/no-unsafe-return */
     return config
   }
 }

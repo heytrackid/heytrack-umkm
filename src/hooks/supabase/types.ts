@@ -4,8 +4,8 @@ type TablesMap = Database['public']['Tables']
 
 export interface UseSupabaseQueryOptions<T extends keyof TablesMap> {
   select?: string
-  filter?: Partial<Record<keyof TablesMap[T]['Row'] & string, string | number | boolean | null>>
-  orderBy?: { column: keyof TablesMap[T]['Row'] & string; ascending?: boolean }
+  filter?: Partial<Record<string & keyof TablesMap[T]['Row'], boolean | number | string | null>>
+  orderBy?: { column: string & keyof TablesMap[T]['Row']; ascending?: boolean }
   limit?: number
   initial?: Array<TablesMap[T]['Row']>
   refetchOnMount?: boolean
@@ -20,7 +20,7 @@ export interface CRUDOptions {
     update?: string
     delete?: string
   }
-  customErrorHandler?: (error: Error, operation: 'create' | 'update' | 'delete') => void
+  customErrorHandler?: (error: Error, operation: 'create' | 'delete' | 'update') => void
 }
 
 export interface BulkUpdateItem<T extends keyof TablesMap> {

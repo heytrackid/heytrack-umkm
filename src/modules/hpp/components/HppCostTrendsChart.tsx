@@ -1,14 +1,16 @@
 'use client'
 
-import { useMemo } from 'react'
-import { LazyAreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
-import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import clsx from 'clsx'
+import { useMemo } from 'react'
+
+import { LazyAreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatCurrency as formatCurrencyUtil } from '@/lib/currency'
 import { useCurrency } from '@/hooks/useCurrency'
-import type { Currency } from '@/shared'
 import { createClientLogger } from '@/lib/client-logger'
+import { formatCurrency as formatCurrencyUtil } from '@/lib/currency'
+
+import type { Currency } from '@/shared'
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 
 const logger = createClientLogger('ClientFile')
 
@@ -38,7 +40,7 @@ const generateFallbackData = (): HppCostTrendPoint[] => Array.from({ length: 14 
   const averageHpp = 25000 + Math.random() * 8000
   const spread = 2000 + Math.random() * 2000
   return {
-    date: baseDate.toISOString().split('T')[0] || '',
+    date: baseDate.toISOString().split('T')[0] ?? '',
     averageHpp,
     bestHpp: averageHpp - spread,
     worstHpp: averageHpp + spread,

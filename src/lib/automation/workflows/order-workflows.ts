@@ -1,15 +1,17 @@
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { SupabaseClient } from '@supabase/supabase-js'
+
+import { triggerWorkflow } from './index'
+
 import type { Row, Insert, Update, Database } from '@/types/database'
 import type { WorkflowContext, WorkflowResult } from '@/types/features/automation'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Order Workflow Handlers
  * Workflow automation handlers for order-related events
  */
 
-import { triggerWorkflow } from './index'
 
 type CustomerRow = Row<'customers'>
 type OrderRow = Row<'orders'>
@@ -19,7 +21,6 @@ type RecipeIngredientRow = Row<'recipe_ingredients'>
 type IngredientRow = Row<'ingredients'>
 type StockTransactionInsert = Insert<'stock_transactions'>
 type FinancialRecordInsert = Insert<'financial_records'>
-type _IngredientUpdate = Update<'ingredients'>
 type CustomerUpdate = Update<'customers'>
 
 type RecipeIngredientWithIngredient = RecipeIngredientRow & {
@@ -94,19 +95,19 @@ export class OrderWorkflowHandlers {
         await this.updateCustomerStats(order, supabase)
       }
 
-      logger.info({ orderId, orderNo: order.order_no }, 'Order completed workflow finished')
+      logger.info({ orderId, orderNo: order['order_no'] }, 'Order completed workflow finished')
       return {
         success: true,
-        message: `Order ${order.order_no} completed processing`,
-        data: { orderId, orderNo: order.order_no }
+        message: `Order ${order['order_no']} completed processing`,
+        data: { orderId, orderNo: order['order_no'] }
       }
 
-    } catch (err: unknown) {
-      logger.error({ orderId, error: getErrorMessage(err) }, 'Order completed workflow failed')
+    } catch (error) {
+      logger.error({ orderId, error: getErrorMessage(error) }, 'Order completed workflow failed')
       return {
         success: false,
         message: 'Failed to process order completion',
-        error: getErrorMessage(err)
+        error: getErrorMessage(error)
       }
     }
   }
@@ -118,8 +119,8 @@ export class OrderWorkflowHandlers {
   static async handleOrderStatusChanged(context: WorkflowContext): Promise<WorkflowResult> {
     const { event, logger, supabase } = context
 
-    const newStatus = typeof event.data === 'object' && event.data !== null && 'newStatus' in event.data 
-      ? (event.data as { newStatus?: string }).newStatus 
+    const newStatus = typeof event['data'] === 'object' && event['data'] !== null && 'newStatus' in event['data'] 
+      ? (event['data'] as { newStatus?: string }).newStatus 
       : undefined
     
     logger.info({ orderId: event.entityId, status: newStatus }, 'Processing order status change workflow')
@@ -134,12 +135,12 @@ export class OrderWorkflowHandlers {
         success: true,
         message: `Status change processed for order ${event.entityId}`
       }
-    } catch (err: unknown) {
-      logger.error({ orderId: event.entityId, error: getErrorMessage(err) }, 'Order status change workflow failed')
+    } catch (error) {
+      logger.error({ orderId: event.entityId, error: getErrorMessage(error) }, 'Order status change workflow failed')
       return {
         success: false,
         message: 'Failed to process order status change',
-        error: getErrorMessage(err)
+        error: getErrorMessage(error)
       }
     }
   }
@@ -188,11 +189,11 @@ export class OrderWorkflowHandlers {
     for (const item of order.order_items ?? []) {
       if (!item.recipe) {continue}
       
-      const existing = recipeGroups.get(item.recipe.id)
+      const existing = recipeGroups.get(item.recipe['id'])
       if (existing) {
         existing.totalQuantity += Number(item.quantity ?? 0)
       } else {
-        recipeGroups.set(item.recipe.id, {
+        recipeGroups.set(item.recipe['id'], {
           recipe: item.recipe,
           totalQuantity: Number(item.quantity ?? 0)
         })
@@ -201,7 +202,8 @@ export class OrderWorkflowHandlers {
 
     // Create production batch for each recipe
     for (const [recipeId, { recipe, totalQuantity }] of recipeGroups) {
-      const batchNumber = `BATCH-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${orderId.slice(0, 8)}`
+      const orderIdFragment = orderId?.slice(0, 8) ?? 'UNKNOWN'
+      const batchNumber = `BATCH-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${orderIdFragment}`
       
       const productionBatch = {
         recipe_id: recipeId,
@@ -209,7 +211,7 @@ export class OrderWorkflowHandlers {
         cost_per_unit: recipe.cost_per_unit ?? 0,
         total_cost: (recipe.cost_per_unit ?? 0) * totalQuantity,
         status: 'PLANNED' as const,
-        notes: `Auto-created for order ${order.order_no}`,
+        notes: `Auto-created for order ${order['order_no']}`,
         user_id: order.user_id,
         labor_cost: 0,
         batch_status: 'PLANNED' as const,
@@ -232,15 +234,15 @@ export class OrderWorkflowHandlers {
       if (batchData && !order.production_batch_id) {
         await supabase
           .from('orders')
-          .update({ production_batch_id: batchData.id })
+          .update({ production_batch_id: batchData['id'] })
           .eq('id', orderId)
       }
 
       // Reserve ingredients for this batch
       await this.reserveIngredientsForBatch(recipeId, totalQuantity, orderId, order.user_id, supabase, automationLogger)
 
-      logger.info({ 
-        orderId, 
+      logger.info({
+        orderId,
         batchId: batchData?.id,
         recipeId,
         quantity: totalQuantity,
@@ -280,7 +282,7 @@ export class OrderWorkflowHandlers {
       const requiredQuantity = Number(recipeIngredient.quantity ?? 0) * quantity
 
       const reservation = {
-        ingredient_id: recipeIngredient.ingredient.id,
+        ingredient_id: recipeIngredient.ingredient['id'],
         order_id: orderId,
         reserved_quantity: requiredQuantity,
         status: 'ACTIVE' as const,
@@ -301,7 +303,7 @@ export class OrderWorkflowHandlers {
 
       if (reservationError) {
         logger.error({ 
-          ingredientId: recipeIngredient.ingredient.id,
+          ingredientId: recipeIngredient.ingredient['id'],
           error: reservationError 
         }, 'Failed to create stock reservation')
       }
@@ -382,12 +384,12 @@ export class OrderWorkflowHandlers {
         data: { orderId: event.entityId }
       }
 
-    } catch (err: unknown) {
-      logger.error({ orderId: event.entityId, error: getErrorMessage(err) }, 'Order cancelled workflow failed')
+    } catch (error) {
+      logger.error({ orderId: event.entityId, error: getErrorMessage(error) }, 'Order cancelled workflow failed')
       return {
         success: false,
         message: 'Failed to process order cancellation',
-        error: getErrorMessage(err)
+        error: getErrorMessage(error)
       }
     }
   }
@@ -414,14 +416,14 @@ export class OrderWorkflowHandlers {
 
         // ✅ FIX: Only create stock transaction - trigger will auto-update current_stock
         const stockTransaction: StockTransactionInsert = {
-          ingredient_id: ingredient.id,
+          ingredient_id: ingredient['id'],
           quantity: usedQuantity, // Positive value, trigger handles the deduction
-          reference: `ORDER-${order.order_no}`,
+          reference: `ORDER-${order['order_no']}`,
           total_price: usedQuantity * Number(ingredient.price_per_unit || 0),
           type: 'USAGE',
           unit_price: ingredient.price_per_unit || null,
           user_id: transactionUserId,
-          notes: `Used for order ${order.order_no} - ${ingredient.name}`
+          notes: `Used for order ${order['order_no']} - ${ingredient.name}`
         }
 
         const { error: transactionError } = await supabase
@@ -434,7 +436,7 @@ export class OrderWorkflowHandlers {
         }
 
         automationLogger.debug({ 
-          ingredientId: ingredient.id, 
+          ingredientId: ingredient['id'], 
           usedQuantity 
         }, 'Stock transaction created, trigger will update stock')
 
@@ -446,9 +448,9 @@ export class OrderWorkflowHandlers {
         const minStock = Number(ingredient.min_stock ?? 0)
         if (newStock <= minStock && newStock > 0) {
           try {
-            await triggerWorkflow('inventory.low_stock', ingredient.id, {
+            await triggerWorkflow('inventory.low_stock', ingredient['id'], {
               ingredient: {
-                id: ingredient.id,
+                id: ingredient['id'],
                 name: ingredient.name,
                 unit: ingredient.unit || '',
                 min_stock: minStock
@@ -458,15 +460,15 @@ export class OrderWorkflowHandlers {
             })
           } catch (error) {
             // Log but don't fail the main operation
-            automationLogger.error({ error, ingredientId: ingredient.id }, 'Failed to trigger low stock workflow')
+            automationLogger.error({ error, ingredientId: ingredient['id'] }, 'Failed to trigger low stock workflow')
           }
         }
 
         if (newStock <= 0) {
           try {
-            await triggerWorkflow('inventory.out_of_stock', ingredient.id, {
+            await triggerWorkflow('inventory.out_of_stock', ingredient['id'], {
               ingredient: {
-                id: ingredient.id,
+                id: ingredient['id'],
                 name: ingredient.name,
                 unit: ingredient.unit || ''
               },
@@ -474,7 +476,7 @@ export class OrderWorkflowHandlers {
             })
           } catch (error) {
             // Log but don't fail the main operation
-            automationLogger.error({ error, ingredientId: ingredient.id }, 'Failed to trigger out of stock workflow')
+            automationLogger.error({ error, ingredientId: ingredient['id'] }, 'Failed to trigger out of stock workflow')
           }
         }
       }
@@ -502,14 +504,14 @@ export class OrderWorkflowHandlers {
 
         // ✅ FIX: Only create stock transaction - trigger will auto-update current_stock
         const stockTransaction: StockTransactionInsert = {
-          ingredient_id: ingredient.id,
+          ingredient_id: ingredient['id'],
           quantity: restoredQuantity, // Positive ADJUSTMENT increases stock
-          reference: `ORDER-CANCEL-${order.order_no}`,
+          reference: `ORDER-CANCEL-${order['order_no']}`,
           total_price: restoredQuantity * Number(ingredient.price_per_unit || 0),
           type: 'ADJUSTMENT',
           unit_price: ingredient.price_per_unit || null,
           user_id: transactionUserId,
-          notes: `Restored from cancelled order ${order.order_no} - ${ingredient.name}`
+          notes: `Restored from cancelled order ${order['order_no']} - ${ingredient.name}`
         }
 
         const { error: transactionError } = await supabase
@@ -522,7 +524,7 @@ export class OrderWorkflowHandlers {
         }
 
         automationLogger.debug({ 
-          ingredientId: ingredient.id, 
+          ingredientId: ingredient['id'], 
           restoredQuantity 
         }, 'Restoration transaction created, trigger will update stock')
       }
@@ -541,8 +543,8 @@ export class OrderWorkflowHandlers {
       type: 'INCOME',
       category: 'Penjualan',
       amount: order.total_amount ?? 0,
-      description: `Penjualan - Order ${order.order_no}`,
-      reference: `ORDER-${order.order_no}`,
+      description: `Penjualan - Order ${order['order_no']}`,
+      reference: `ORDER-${order['order_no']}`,
       date: new Date().toISOString(),
       user_id: order.user_id
     } as FinancialRecordInsert
@@ -562,8 +564,8 @@ export class OrderWorkflowHandlers {
     if (incomeData) {
       await supabase
         .from('orders')
-        .update({ financial_record_id: incomeData.id })
-        .eq('id', order.id)
+        .update({ financial_record_id: incomeData['id'] })
+        .eq('id', order['id'])
     }
 
     // 2. Calculate total COGS from order items
@@ -582,8 +584,8 @@ export class OrderWorkflowHandlers {
         type: 'EXPENSE',
         category: 'COGS',
         amount: totalCogs,
-        description: `COGS - Order ${order.order_no}`,
-        reference: `ORDER-COGS-${order.order_no}`,
+        description: `COGS - Order ${order['order_no']}`,
+        reference: `ORDER-COGS-${order['order_no']}`,
         date: new Date().toISOString(),
         user_id: order.user_id
       } as FinancialRecordInsert
@@ -600,7 +602,7 @@ export class OrderWorkflowHandlers {
         const profitMargin = order.total_amount ? (profit / order.total_amount) * 100 : 0
         
         automationLogger.info({ 
-          orderNo: order.order_no,
+          orderNo: order['order_no'],
           revenue: order.total_amount,
           cogs: totalCogs,
           profit,

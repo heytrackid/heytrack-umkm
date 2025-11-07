@@ -1,10 +1,6 @@
  
 'use client'
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
 import {
     AlertCircle,
     ArrowLeft,
@@ -18,6 +14,11 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+
 interface ErrorMessageProps {
     title?: string
     message?: string
@@ -25,7 +26,7 @@ interface ErrorMessageProps {
     onRetry?: () => void
     onGoBack?: () => void
     showTechnicalDetails?: boolean
-    variant?: 'inline' | 'card' | 'page'
+    variant?: 'card' | 'inline' | 'page'
     className?: string
 }
 
@@ -303,11 +304,11 @@ export const ErrorMessage = ({
 export function useErrorHandler() {
     const [error, setError] = useState<Error | null>(null)
 
-    const handleError = (err: unknown) => {
-        if (err instanceof Error) {
-            setError(err)
+    const handleError = (error: unknown) => {
+        if (error instanceof Error) {
+            setError(error)
         } else {
-            setError(new Error(String(err)))
+            setError(new Error(String(error)))
         }
     }
 

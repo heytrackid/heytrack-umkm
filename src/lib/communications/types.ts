@@ -17,10 +17,10 @@ export interface CommunicationConfig {
 
 export interface BaseMessage {
   id: string
-  type: 'whatsapp' | 'notification' | 'email'
-  priority: 'low' | 'medium' | 'high' | 'critical'
+  type: 'email' | 'notification' | 'whatsapp'
+  priority: 'critical' | 'high' | 'low' | 'medium'
   timestamp: string
-  status: 'pending' | 'sent' | 'delivered' | 'failed'
+  status: 'delivered' | 'failed' | 'pending' | 'sent'
 }
 
 // ============================================================================
@@ -30,7 +30,7 @@ export interface BaseMessage {
 export interface WhatsAppTemplate {
   id: string;
   name: string;
-  category: 'order_confirmation' | 'order_reminder' | 'delivery_update' | 'payment_reminder' | 'follow_up' | 'custom';
+  category: 'custom' | 'delivery_update' | 'follow_up' | 'order_confirmation' | 'order_reminder' | 'payment_reminder';
   template: string;
   variables: string[];
   description: string;
@@ -62,8 +62,8 @@ export interface OrderData {
 // ============================================================================
 
 export interface SmartNotification extends Omit<BaseMessage, 'type'> {
-  type: 'info' | 'warning' | 'error' | 'success'
-  category: 'inventory' | 'orders' | 'financial' | 'production' | 'customer' | 'system'
+  type: 'error' | 'info' | 'success' | 'warning'
+  category: 'customer' | 'financial' | 'inventory' | 'orders' | 'production' | 'system'
   title: string
   message: string
   data?: Record<string, unknown>
@@ -80,7 +80,7 @@ export interface NotificationRule {
   enabled: boolean
   conditions: Array<{
     metric: string
-    operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'contains'
+    operator: 'contains' | 'eq' | 'gt' | 'gte' | 'lt' | 'lte'
     value: unknown
     timeWindow?: number // minutes
   }>

@@ -1,4 +1,5 @@
 import { apiLogger } from '@/lib/logger'
+
 import { performanceMonitor } from './performance-monitoring'
 
 /**
@@ -22,7 +23,7 @@ interface PerformanceBenchmarkConfig {
 
 class PerformanceBenchmark {
   private results: BenchmarkResult[] = []
-  private config: PerformanceBenchmarkConfig
+  private readonly config: PerformanceBenchmarkConfig
 
   constructor(config: PerformanceBenchmarkConfig = {}) {
     this.config = {
@@ -38,10 +39,11 @@ class PerformanceBenchmark {
    */
   async runBenchmark(
     name: string,
-    benchmarkFn: () => void | Promise<void>
+    benchmarkFn: () => Promise<void> | void
   ): Promise<BenchmarkResult> {
     // Warmup runs
     for (let i = 0; i < (this.config.warmupRuns ?? 2); i++) {
+      // eslint-disable-next-line no-await-in-loop
       await this.executeBenchmark(benchmarkFn)
     }
 
@@ -54,6 +56,7 @@ class PerformanceBenchmark {
       memoryBefore = this.getMemoryInfo()
 
       const startTime = performance.now()
+      // eslint-disable-next-line no-await-in-loop
       await this.executeBenchmark(benchmarkFn)
       const endTime = performance.now()
       
@@ -93,7 +96,7 @@ class PerformanceBenchmark {
   /**
    * Execute a single benchmark run with timeout
    */
-  private executeBenchmark(benchmarkFn: () => void | Promise<void>): Promise<void> {
+  private executeBenchmark(benchmarkFn: () => Promise<void> | void): Promise<void> {
     const timeoutPromise = new Promise<void>((_, reject) => {
       setTimeout(() => reject(new Error('Benchmark timeout')), this.config.timeout)
     })
@@ -180,7 +183,7 @@ class PerformanceBenchmark {
     this.results.forEach(result => {
       report += `Benchmark: ${result.name}\n`
       report += `Duration: ${result.duration.toFixed(2)}ms\n`
-      report += `Date: ${new Date(result.timestamp).toISOString()}\n`
+      report += `Date: ${new Date(result['timestamp']).toISOString()}\n`
       
       if (result.memoryBefore && result.memoryAfter) {
         report += `Memory Change: ${(result.memoryAfter.used - result.memoryBefore.used) / 1024 / 1024} MB\n`
@@ -352,6 +355,7 @@ export class PerformanceMeasurement {
       // Run operations sequentially
       for (const [, op] of operations.entries()) {
         const opStart = performance.now()
+        // eslint-disable-next-line no-await-in-loop
         const result = await Promise.resolve(op())
         const opDuration = performance.now() - opStart
         results.push(result)
@@ -412,10 +416,10 @@ export class PerformanceReporter {
     
     apiLogger.info({
       ...report,
-      memory: report.memory ? {
-        used: `${((report.memory as { usedJSHeapSize: number }).usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
-        total: `${((report.memory as { totalJSHeapSize: number }).totalJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
-        limit: `${((report.memory as { jsHeapSizeLimit: number }).jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB`
+      memory: report['memory'] ? {
+        used: `${((report['memory'] as { usedJSHeapSize: number })['usedJSHeapSize'] / 1024 / 1024).toFixed(2)} MB`,
+        total: `${((report['memory'] as { totalJSHeapSize: number })['totalJSHeapSize'] / 1024 / 1024).toFixed(2)} MB`,
+        limit: `${((report['memory'] as { jsHeapSizeLimit: number })['jsHeapSizeLimit'] / 1024 / 1024).toFixed(2)} MB`
       } : null
     }, 'Performance Report')
   }

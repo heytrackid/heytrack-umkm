@@ -1,11 +1,13 @@
 'use client'
 
 import { useCallback } from 'react'
-import { usePricingAnalysis } from './usePricingAnalysis'
-import { useInventoryOptimization } from './useInventoryOptimization'
+
 import { useCustomerAnalytics } from './useCustomerAnalytics'
 import { useFinancialAnalysis } from './useFinancialAnalysis'
+import { useInventoryOptimization } from './useInventoryOptimization'
+import { usePricingAnalysis } from './usePricingAnalysis'
 import { useSmartInsights } from './useSmartInsights'
+
 import type { AnalysisType } from './types'
 
 
@@ -80,7 +82,7 @@ export function useAIPowered() {
 
     // Computed
     isAnyLoading: pricingAnalysis.loading || inventoryAnalysis.loading || customerAnalysis.loading || financialAnalysis.loading,
-    hasAnyData: !!(pricingAnalysis.data ?? inventoryAnalysis.data ?? customerAnalysis.data ?? financialAnalysis.data),
+    hasAnyData: Boolean(pricingAnalysis['data'] ?? inventoryAnalysis['data'] ?? customerAnalysis['data'] ?? financialAnalysis['data']),
 
     // Helper functions
     getConfidenceLevel: (confidence: number) => {
@@ -92,8 +94,8 @@ export function useAIPowered() {
     formatInsight: (insight: Record<string, unknown>, type: string) => ({
       ...insight,
       type,
-      confidence: (insight.metadata as Record<string, unknown> | undefined)?.confidence as number || 0.7,
-      timestamp: (insight.metadata as Record<string, unknown> | undefined)?.timestamp as string || new Date().toISOString(),
+      confidence: (insight['metadata'] as Record<string, unknown>)?.['confidence'] as number || 0.7,
+      timestamp: (insight['metadata'] as Record<string, unknown>)?.['timestamp'] as string || new Date().toISOString(),
       isAIPowered: true
     })
   }

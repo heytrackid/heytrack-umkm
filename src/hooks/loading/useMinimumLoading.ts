@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import type { UseMinimumLoadingReturn } from './types'
 
 
@@ -17,13 +18,13 @@ export function useMinimumLoading(minDuration = 500): UseMinimumLoadingReturn {
   const [startTime, setStartTime] = useState<number | null>(null)
 
   const startLoading = useCallback(() => {
-    void setIsLoading(true)
+    setIsLoading(true)
     setStartTime(Date.now())
   }, [])
 
   const stopLoading = useCallback(() => {
     if (startTime === null) {
-      void setIsLoading(false)
+      setIsLoading(false)
       return
     }
 
@@ -32,18 +33,18 @@ export function useMinimumLoading(minDuration = 500): UseMinimumLoadingReturn {
 
     if (remaining > 0) {
       setTimeout(() => {
-        void setIsLoading(false)
-        void setStartTime(null)
+        setIsLoading(false)
+        setStartTime(null)
       }, remaining)
     } else {
-      void setIsLoading(false)
-      void setStartTime(null)
+      setIsLoading(false)
+      setStartTime(null)
     }
   }, [startTime, minDuration])
 
   const withLoading = useCallback(async <T>(fn: () => Promise<T>): Promise<T> => {
     try {
-      void startLoading()
+      startLoading()
       return await fn()
     } finally {
       stopLoading()

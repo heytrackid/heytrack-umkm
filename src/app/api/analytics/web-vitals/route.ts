@@ -1,10 +1,13 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
 
 async function postHandler(request: NextRequest) {
   try {
@@ -16,15 +19,15 @@ async function postHandler(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    
+    const body = await request.json() as { name: string; value: number; rating: string; id: string }
+
     // Log web vitals metrics with user context
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       metric: body.name,
       value: body.value,
       rating: body.rating,
-      id: body.id
+      id: body['id']
     }, 'Web Vitals metric recorded')
 
     // In production, you might want to send this to analytics service

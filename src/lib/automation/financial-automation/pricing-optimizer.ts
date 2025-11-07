@@ -1,4 +1,5 @@
 import { formatCurrency } from '@/lib/currency'
+
 import type { PriceOption, PricingOptimizationResult } from './types'
 
 /**

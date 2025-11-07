@@ -1,9 +1,10 @@
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { MessageCircle, Package } from 'lucide-react'
-import { apiLogger } from '@/lib/logger'
+import { useRouter } from 'next/navigation'
+
+import { Card, CardContent } from '@/components/ui/card'
+import { LoadingButton } from '@/components/ui/loading-button'
 
 
 
@@ -11,31 +12,47 @@ interface OrdersQuickActionsProps {
   _t?: unknown
 }
 
-const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => (
+const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
+  const router = useRouter()
+
+  const handleNavigateToTemplates = () => {
+    router.push('/orders/whatsapp-templates')
+  }
+
+  const handleExportOrders = async () => {
+    // TODO: Implement actual export functionality
+  }
+
+  return (
     <Card>
       <CardContent className="p-4">
         <div className="flex flex-wrap gap-2">
-          <Button
+          <LoadingButton
             variant="outline"
             size="sm"
-            onClick={() => window.location.href = '/orders/whatsapp-templates'}
+            onClick={handleNavigateToTemplates}
             className="flex items-center gap-2"
+            hapticFeedback
+            hapticType="light"
           >
             <MessageCircle className="h-4 w-4" />
             WhatsApp Templates
-          </Button>
-          <Button
+          </LoadingButton>
+          <LoadingButton
             variant="outline"
             size="sm"
-            onClick={() => apiLogger.info('Export orders')}
+            onClick={handleExportOrders}
             className="flex items-center gap-2"
+            hapticFeedback
+            hapticType="light"
           >
             <Package className="h-4 w-4" />
-            Informasi
-          </Button>
+            Export Orders
+          </LoadingButton>
         </div>
       </CardContent>
     </Card>
   )
+}
 
 export default OrdersQuickActions

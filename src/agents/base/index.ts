@@ -1,8 +1,9 @@
 import { dbLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/client'
+
 import type { Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ZodType } from 'zod'
-import { createClient } from '@/utils/supabase/client'
 
 /**
  * Structured environment for agent execution
@@ -30,7 +31,7 @@ export interface AgentContext {
 export interface AgentTask {
   id: string
   type: string
-  priority: 'low' | 'medium' | 'high' | 'critical'
+  priority: 'critical' | 'high' | 'low' | 'medium'
   data: Record<string, unknown>
   metadata?: {
     createdAt: Date
@@ -94,21 +95,26 @@ export function createAgentContext(
   userId?: string,
   sessionId?: string
 ): AgentContext {
+  const aiChatbot = process['env']['NEXT_PUBLIC_ENABLE_AI_CHATBOT'] === 'true'
+  const advancedAnalytics = process['env']['NEXT_PUBLIC_ENABLE_ADVANCED_ANALYTICS'] === 'true'
+  const automation = process['env']['NEXT_PUBLIC_ENABLE_AUTOMATION'] === 'true'
+  const supabase = createClient() as unknown as SupabaseClient<Database>
+
   return {
     correlationId,
-    userId,
-    sessionId,
+    ...(userId && { userId }),
+    ...(sessionId && { sessionId }),
     featureFlags: {
-      aiChatbot: process.env.NEXT_PUBLIC_ENABLE_AI_CHATBOT === 'true',
-      advancedAnalytics: process.env.NEXT_PUBLIC_ENABLE_ADVANCED_ANALYTICS === 'true',
-      automation: process.env.NEXT_PUBLIC_ENABLE_AUTOMATION === 'true',
+      aiChatbot,
+      advancedAnalytics,
+      automation
     },
     cache: new Map<string, unknown>(),
     telemetry: {
       startTime: new Date(),
       events: []
     },
-    supabase: createClient() as unknown as SupabaseClient<Database>
+    supabase
   }
 }
 
@@ -118,10 +124,10 @@ export function createAgentContext(
 export function createAgentLogger(agentName: string, correlationId: string) {
   // For now, use dbLogger with correlationId in context
   return {
-    info: (message: string, data?: Record<string, unknown>) => dbLogger.info({ agent: agentName, correlationId, ...data }, message),
+    info: (message: string, data?: Record<string, unknown>) => dbLogger.info({ agent: agentName, correlationId, ...(data ?? {}) }, message),
     error: (data: Record<string, unknown>, message?: string) => dbLogger.error({ agent: agentName, correlationId, ...data }, message),
-    warn: (message: string, data?: Record<string, unknown>) => dbLogger.warn({ agent: agentName, correlationId, ...data }, message),
-    debug: (message: string, data?: Record<string, unknown>) => dbLogger.debug({ agent: agentName, correlationId, ...data }, message)
+    warn: (message: string, data?: Record<string, unknown>) => dbLogger.warn({ agent: agentName, correlationId, ...(data ?? {}) }, message),
+    debug: (message: string, data?: Record<string, unknown>) => dbLogger.debug({ agent: agentName, correlationId, ...(data ?? {}) }, message)
   }
 }
 
@@ -138,13 +144,13 @@ export async function executeAgentTask<T>(
   const startTime = Date.now()
 
   try {
-    logger.info(`Starting agent task ${task.id} of type ${task.type}`)
+    logger.info(`Starting agent task ${task['id']} of type ${task['type']}`)
 
     // Add task start telemetry
     context.telemetry.events.push({
       event: 'agent.task.start',
       timestamp: new Date(),
-      data: { taskId: task.id, type: task.type }
+      data: { taskId: task['id'], type: task['type'] }
     })
 
     const result = await executor(task, context)
@@ -155,10 +161,10 @@ export async function executeAgentTask<T>(
     context.telemetry.events.push({
       event: 'agent.task.complete',
       timestamp: new Date(),
-      data: { taskId: task.id, duration }
+      data: { taskId: task['id'], duration }
     })
 
-    logger.info(`Completed agent task ${task.id} in ${duration}ms`)
+    logger.info(`Completed agent task ${task['id']} in ${duration}ms`)
 
     return {
       success: true,
@@ -166,7 +172,7 @@ export async function executeAgentTask<T>(
       metadata: {
         correlationId: context.correlationId,
         duration,
-        taskId: task.id
+        taskId: task['id']
       }
     }
 
@@ -178,28 +184,28 @@ export async function executeAgentTask<T>(
       event: 'agent.task.error',
       timestamp: new Date(),
       data: {
-        taskId: task.id,
+        taskId: task['id'],
         error: error instanceof Error ? error.message : String(error)
       }
     })
 
     logger.error({
       error,
-      taskId: task.id,
+      taskId: task['id'],
       duration
-    }, `Failed agent task ${task.id}`)
+    }, `Failed agent task ${task['id']}`)
 
     return {
       success: false,
       error: {
-        code: error instanceof AgentError ? error.code : 'UNKNOWN_ERROR',
+        code: error instanceof AgentError ? error['code'] : 'UNKNOWN_ERROR',
         message: error instanceof Error ? error.message : 'Unknown error occurred',
         details: error
       },
       metadata: {
         correlationId: context.correlationId,
         duration,
-        taskId: task.id
+        taskId: task['id']
       }
     }
   }
@@ -212,11 +218,11 @@ export function validateTask<T>(
   task: AgentTask,
   schema: ZodType<T>
 ): T {
-  const result = schema.safeParse(task.data)
+  const result = schema.safeParse(task['data'])
 
   if (!result.success) {
     throw new ValidationError('Invalid task data', result.error.flatten())
   }
 
-  return result.data
+  return result['data']
 }

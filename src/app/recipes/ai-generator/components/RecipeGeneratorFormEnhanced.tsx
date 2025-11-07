@@ -1,19 +1,21 @@
 'use client'
 
 
+import { Sparkles, Info, ChefHat } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Sparkles, Info, ChefHat } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from '@/components/ui/tooltip'
+
 import type { AvailableIngredient } from './types'
 
 // Enhanced Recipe Generator Form with Quick/Complete Mode
 // Improved UX with contextual placeholders and better guidance
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from '@/components/ui/tooltip'
 
 interface RecipeGeneratorFormProps {
   productName: string
@@ -31,7 +33,7 @@ interface RecipeGeneratorFormProps {
   availableIngredients: AvailableIngredient[]
   loading: boolean
   onGenerate: () => void
-  mode: 'quick' | 'complete'
+  mode: 'complete' | 'quick'
 }
 
 const productTypes = [
@@ -78,7 +80,7 @@ const RecipeGeneratorFormEnhanced = ({
     if (dietaryRestrictions.includes(value)) {
       setDietaryRestrictions(dietaryRestrictions.filter(d => d !== value))
     } else {
-      void setDietaryRestrictions([...dietaryRestrictions, value])
+      setDietaryRestrictions([...dietaryRestrictions, value])
     }
   }
 
@@ -86,7 +88,7 @@ const RecipeGeneratorFormEnhanced = ({
     if (selectedIngredients.includes(ingredientName)) {
       setSelectedIngredients(selectedIngredients.filter(i => i !== ingredientName))
     } else {
-      void setSelectedIngredients([...selectedIngredients, ingredientName])
+      setSelectedIngredients([...selectedIngredients, ingredientName])
     }
   }
 
@@ -236,7 +238,7 @@ const RecipeGeneratorFormEnhanced = ({
                 ) : (
                   availableIngredients.slice(0, 20).map((ingredient) => (
                     <label
-                      key={ingredient.id}
+                      key={ingredient['id']}
                       className="flex items-center gap-2 cursor-pointer hover:bg-muted p-2 rounded"
                     >
                       <input

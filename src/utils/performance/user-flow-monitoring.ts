@@ -1,6 +1,7 @@
-import { performanceMonitor } from '@/utils/performance/performance-monitoring'
-import { createClientLogger } from '@/lib/client-logger'
 import { useEffect, useRef, useState, useCallback, createElement } from 'react'
+
+import { createClientLogger } from '@/lib/client-logger'
+import { performanceMonitor } from '@/utils/performance/performance-monitoring'
 
 const perfLogger = createClientLogger('UserFlowMonitoring')
 

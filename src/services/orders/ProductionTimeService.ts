@@ -1,6 +1,7 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
+
 import type { Row } from '@/types/database'
 
 
@@ -36,14 +37,14 @@ export class ProductionTimeService {
 
       if (error) {throw error}
       
-      const recipes = data as Array<Pick<Recipe, 'id' | 'prep_time' | 'cook_time'>>
+      const recipes = data as Array<Pick<Recipe, 'cook_time' | 'id' | 'prep_time'>>
 
       let total_prep_time = 0
       let total_cook_time = 0
       let max_single_recipe_time = 0
 
       items.forEach(item => {
-        const recipe = recipes?.find((r) => r.id === item.recipe_id)
+        const recipe = recipes?.find((r) => r['id'] === item.recipe_id)
         if (recipe) {
           const prep_time = (recipe.prep_time ?? 0) * item.quantity
           const cook_time = (recipe.cook_time ?? 0) * item.quantity
@@ -73,8 +74,8 @@ export class ProductionTimeService {
         estimated_completion,
         parallel_processing_time
       }
-    } catch (err: unknown) {
-      dbLogger.error({ error: err }, 'Error calculating production time')
+    } catch (error) {
+      dbLogger.error({ error }, 'Error calculating production time')
       return {
         total_prep_time: 0,
         total_cook_time: 0,

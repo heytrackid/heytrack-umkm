@@ -1,9 +1,12 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/server'
+
 
 interface HppCalculationSummary {
   recipe_id: string | null
@@ -25,7 +28,7 @@ export async function GET() {
     const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
       .select('id, name, selling_price, is_active')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .eq('is_active', true)
 
     if (recipesError) {throw recipesError}
@@ -34,7 +37,7 @@ export async function GET() {
     const { data: hppCalculations, error: hppError } = await supabase
       .from('hpp_calculations')
       .select('recipe_id, total_hpp, created_at')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .order('created_at', { ascending: false })
 
     if (hppError) {throw hppError}
@@ -43,7 +46,7 @@ export async function GET() {
     const { data: alerts, error: alertsError } = await supabase
       .from('hpp_alerts')
       .select('id, recipe_id, alert_type, is_read, created_at')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .order('created_at', { ascending: false })
 
     if (alertsError) {throw alertsError}
@@ -77,7 +80,7 @@ export async function GET() {
     const recipesWithMargin = recipes?.filter(recipe => recipe.selling_price && recipe.selling_price > 0) || []
     const averageMargin = recipesWithMargin.length > 0
       ? recipesWithMargin.reduce((sum, recipe) => {
-          const hppCalc = recipeHppMap.get(recipe.id)
+          const hppCalc = recipeHppMap.get(recipe['id'])
           const hpp = hppCalc?.total_hpp ?? 0
           const sellingPrice = recipe.selling_price ?? 0
           const margin = sellingPrice > 0 ? ((sellingPrice - hpp) / sellingPrice) * 100 : 0
@@ -87,13 +90,13 @@ export async function GET() {
 
     const topRecipes = recipes
       ?.map(recipe => {
-        const hppCalc = recipeHppMap.get(recipe.id)
+        const hppCalc = recipeHppMap.get(recipe['id'])
         const hpp = hppCalc?.total_hpp ?? 0
         const sellingPrice = recipe.selling_price ?? 0
         const margin = sellingPrice > 0 ? ((sellingPrice - hpp) / sellingPrice) * 100 : 0
         
         return {
-          id: recipe.id,
+          id: recipe['id'],
           name: recipe.name,
           hpp_value: hpp,
           margin_percentage: margin,
@@ -109,7 +112,7 @@ export async function GET() {
       ?.filter(alert => alert.alert_type === 'PRICE_INCREASE' || alert.alert_type === 'PRICE_DECREASE')
       .slice(0, 3)
       .map(alert => {
-        const recipe = recipes?.find(r => r.id === alert.recipe_id)
+        const recipe = recipes?.find(r => r['id'] === alert.recipe_id)
         return {
           recipe_id: alert.recipe_id,
           recipe_name: recipe?.name ?? 'Unknown Recipe',

@@ -1,15 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Row } from '@/types/database'
+
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-
+import { Textarea } from '@/components/ui/textarea'
 import { createClientLogger } from '@/lib/client-logger'
+
+import type { Row } from '@/types/database'
 
 const logger = createClientLogger('WhatsAppFollowup')
 import {
@@ -28,8 +29,6 @@ import {
 
 type Order = Row<'orders'>
 type OrderItem = Row<'order_items'>
-// payment_status is a string field, not an enum
-type _PaymentStatus = string
 type Recipe = Row<'recipes'>
 
 // Extended type for WhatsApp follow-up
@@ -44,7 +43,7 @@ interface OrderForWhatsApp extends Order {
 
 interface WhatsAppFollowUpProps {
   order: OrderForWhatsApp
-  onSent?: (method: 'whatsapp' | 'business', message: string, phone: string) => void
+  onSent?: (method: 'business' | 'whatsapp', message: string, phone: string) => void
 }
 
 interface WhatsAppTemplate {
@@ -75,7 +74,7 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [customMessage, setCustomMessage] = useState('')
   const [phoneNumber, setPhoneNumber] = useState(order.customer_phone ?? '')
-  const [whatsappType, setWhatsappType] = useState<'whatsapp' | 'business'>('whatsapp')
+  const [whatsappType, setWhatsappType] = useState<'business' | 'whatsapp'>('whatsapp')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -87,35 +86,35 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
 
   const fetchTemplates = async () => {
     try {
-      void setLoading(true)
+      setLoading(true)
       const response = await fetch('/api/whatsapp-templates?active=true')
       if (response.ok) {
-        const data = await response.json()
-        void setTemplates(data)
+        const _data = await response.json()
+        setTemplates(_data)
         // Set default template if available
-        const defaultTemplate = data.find((t: WhatsAppTemplate) => t.is_default)
-        if (defaultTemplate && !selectedTemplateId) {
-          void setSelectedTemplateId(defaultTemplate.id)
-        } else if (data.length > 0 && !selectedTemplateId) {
-          void setSelectedTemplateId(data[0].id)
+        const defaultTemplate = _data.find((t: WhatsAppTemplate) => t.is_default)
+        if (defaultTemplate && (selectedTemplateId === undefined || selectedTemplateId === '')) {
+          setSelectedTemplateId(defaultTemplate['id'])
+        } else if (_data.length > 0 && (selectedTemplateId === undefined || selectedTemplateId === '')) {
+          setSelectedTemplateId(_data[0]['id'])
         }
       }
-    } catch (err) {
-      logger.error({ error: err }, 'Error fetching templates:')
+    } catch (error) {
+      logger.error({ error }, 'Error fetching templates:')
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }
 
-  const getCurrentTemplate = () => templates.find(t => t.id === selectedTemplateId)
+  const getCurrentTemplate = () => templates.find(t => t['id'] === selectedTemplateId)
 
   const processTemplate = (templateContent: string, orderData: OrderForWhatsApp): string => {
     let processed = templateContent
 
     // Replace common variables
     const replacements = {
-      'customer_name': orderData.customer_name ?? '',
-      'order_no': orderData.order_no || '',
+      'customer_name': orderData['customer_name'] ?? '',
+      'order_no': orderData['order_no'] || '',
       'order_date': new Date(orderData.order_date ?? new Date()).toLocaleDateString('id-ID'),
       'due_date': orderData.due_date ? new Date(orderData.due_date).toLocaleDateString('id-ID') : '',
       'total_amount': (orderData.total_amount ?? 0).toLocaleString('id-ID'),
@@ -131,13 +130,13 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
 
     // Handle order_items array
     const itemsRegex = /\{\{#each order_items\}\}([\s\S]*?)\{\{\/each\}\}/g
-    processed = processed.replace(itemsRegex, (match, itemTemplate) => orderData.items.map(item => itemTemplate
+    processed = processed.replace(itemsRegex, (_match, itemTemplate) => orderData.items.map(item => itemTemplate
       .replace(/\{\{product_name\}\}/g, item.recipe?.name ?? item.product_name ?? 'Unknown Product')
       .replace(/\{\{quantity\}\}/g, item.quantity.toString())).join(''))
 
     // Handle conditional blocks
     const ifRegex = /\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g
-    processed = processed.replace(ifRegex, (match, condition, content) => {
+    processed = processed.replace(ifRegex, (_match, condition, content) => {
       const value = replacements[condition as keyof typeof replacements]
       return value && value !== '' ? content : ''
     })
@@ -148,11 +147,11 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
   const getCurrentMessage = () => {
     const template = getCurrentTemplate()
     if (!template) {
-      return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_no}...\n\n[Silakan pilih template atau tulis pesan custom]`
+      return customMessage || `Halo ${order['customer_name']}!\n\nTerkait pesanan ${order['order_no']}...\n\n[Silakan pilih template atau tulis pesan custom]`
     }
 
     if (selectedTemplateId === 'custom') {
-      return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_no}...\n\n[Tulis pesan Anda di sini]`
+      return customMessage || `Halo ${order['customer_name']}!\n\nTerkait pesanan ${order['order_no']}...\n\n[Tulis pesan Anda di sini]`
     }
 
     return processTemplate(template.template_content, order)
@@ -178,7 +177,7 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
     return cleaned
   }
 
-  const handleSendWhatsApp = (type: 'whatsapp' | 'business') => {
+  const handleSendWhatsApp = (type: 'business' | 'whatsapp') => {
     const message = getCurrentMessage()
     const formattedPhone = formatPhoneNumber(phoneNumber)
     const encodedMessage = encodeURIComponent(message);
@@ -199,7 +198,7 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
     onSent?.(type, message, formattedPhone)
 
     // Close dialog
-    void setIsDialogOpen(false)
+    setIsDialogOpen(false)
   }
 
   const handleCopyMessage = () => {
@@ -231,7 +230,7 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
-            WhatsApp Follow-up - {order.order_no}
+            WhatsApp Follow-up - {order['order_no']}
           </DialogTitle>
           <DialogDescription>
             Kirim pesan follow-up kepada pelanggan melalui WhatsApp
@@ -252,16 +251,16 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
               <CardContent className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Customer:</span>
-                  <span className="font-medium">{order.customer_name}</span>
+                  <span className="font-medium">{order['customer_name']}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">No. Pesanan:</span>
-                  <span className="font-mono">{order.order_no}</span>
+                  <span className="font-mono">{order['order_no']}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                  <Badge className={getStatusBadgeColor(order.status ?? '')}>
-                    {(order.status ?? '').replace('_', ' ').toUpperCase()}
+                  <Badge className={getStatusBadgeColor(order['status'] ?? '')}>
+                    {(order['status'] ?? '').replace('_', ' ').toUpperCase()}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
@@ -325,15 +324,15 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
                     <>
                       {templates.map((template) => (
                         <button
-                          key={template.id}
-                          onClick={() => setSelectedTemplateId(template.id)}
-                          className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${selectedTemplateId === template.id
+                          key={template['id']}
+                          onClick={() => setSelectedTemplateId(template['id'])}
+                          className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${selectedTemplateId === template['id']
                             ? 'border-gray-500 bg-gray-50 text-gray-900 '
                             : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:'
                             }`}
                         >
                           <div className="flex items-center gap-3">
-                             <div className={`p-2 rounded-full ${selectedTemplateId === template.id ? 'bg-gray-100' : 'bg-gray-100'
+                             <div className={`p-2 rounded-full ${selectedTemplateId === template['id'] ? 'bg-gray-100' : 'bg-gray-100'
                                }`}>
                               {getTemplateIcon(template.category)}
                             </div>
@@ -396,7 +395,7 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
                     <Textarea
                       value={customMessage}
                       onChange={(e) => setCustomMessage(e.target.value)}
-                      placeholder={`Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_no}...\n\n[Tulis pesan Anda di sini]`}
+                      placeholder={`Halo ${order['customer_name']}!\n\nTerkait pesanan ${order['order_no']}...\n\n[Tulis pesan Anda di sini]`}
                       rows={12}
                       className="font-mono text-sm"
                     />
@@ -424,7 +423,7 @@ const WhatsAppFollowUp = ({ order, onSent }: WhatsAppFollowUpProps) => {
                 <CardTitle className="text-sm">Kirim Pesan</CardTitle>
               </CardHeader>
               <CardContent>
-                <SwipeableTabs value={whatsappType} onValueChange={(value) => setWhatsappType(value as 'whatsapp' | 'business')}>
+                <SwipeableTabs value={whatsappType} onValueChange={(value) => setWhatsappType(value as 'business' | 'whatsapp')}>
                   <SwipeableTabsList className="grid w-full grid-cols-2">
                     <SwipeableTabsTrigger value="whatsapp" className="text-sm">WhatsApp Regular</SwipeableTabsTrigger>
                     <SwipeableTabsTrigger value="business" className="text-sm">WhatsApp Business</SwipeableTabsTrigger>

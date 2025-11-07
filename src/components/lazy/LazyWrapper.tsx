@@ -1,8 +1,9 @@
 'use client'
 
 import { lazy, Suspense, type ComponentProps, type ComponentType } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
+
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // Loading skeletons for different components
 export const TableSkeleton = () => (
@@ -72,7 +73,7 @@ export const createLazyComponent = <T extends ComponentType<Record<string, unkno
   return (props: ComponentProps<T>) => (
     <LazyWrapper
       component={LazyComponent as ComponentType<unknown>}
-      loadingComponent={loadingComponent}
+      {...(loadingComponent && { loadingComponent })}
       props={props}
     />
   )

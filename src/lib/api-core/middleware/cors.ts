@@ -1,5 +1,6 @@
-import type { NextRequest, NextResponse } from 'next/server'
 import { createErrorResponse } from '@/lib/api-core/responses'
+
+import type { NextRequest, NextResponse } from 'next/server'
 
 /**
  * CORS Middleware Module
@@ -12,7 +13,7 @@ import { createErrorResponse } from '@/lib/api-core/responses'
  */
 export function withCors(allowedOrigins: string[] = ['*']) {
   return (request: NextRequest): NextResponse | null => {
-    const origin = request.headers.get('origin')
+    const origin = request['headers'].get('origin')
     if (!origin) {return null}
 
     const isAllowed = allowedOrigins.includes('*') || allowedOrigins.includes(origin)

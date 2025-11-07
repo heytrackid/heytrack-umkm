@@ -1,8 +1,8 @@
 # HeyTrack Agent Guidelines
 
 ## Commands
-- **Dev**: `npm run dev` | **Build**: `npm run build` | **Type-check**: `npm run type-check`
-- **Lint**: `npm run lint` | **Lint fix**: `npm run lint:fix` | **Validate**: `npm run validate`
+- **Dev**: `npm run dev` | **Build**: `npm run build` | **Type-check**: `npm run type-check` | **Type-check all**: `npm run type-check:all`
+- **Lint**: `npm run lint` | **Lint all**: `npm run lint:all` | **Lint fix**: `npm run lint:fix` | **Validate**: `npm run validate` | **Validate all**: `npm run validate:all`
 - **Test all**: `npx vitest` | **Single test**: `npx vitest path/to/test.test.ts` | **Watch**: `npx vitest --watch`
 
 ## Code Style

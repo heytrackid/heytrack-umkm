@@ -11,7 +11,7 @@ import { apiLogger } from '@/lib/logger'
 // GENERAL ERROR HANDLING
 // ============================================================================
 
-export type ErrorSeverity = 'fatal' | 'error' | 'warning' | 'info' | 'debug'
+export type ErrorSeverity = 'debug' | 'error' | 'fatal' | 'info' | 'warning'
 
 export interface ErrorContext {
   user?: {
@@ -244,11 +244,11 @@ export function handleDatabaseError(error: unknown): {
   statusCode: number
   code?: string
 } {
-  apiLogger.error({ err: error }, 'Database Error')
+  apiLogger.error({ error }, 'Database Error')
 
   // Handle specific Supabase/Postgres errors
   if (error && typeof error === 'object' && 'code' in error) {
-    const errCode = String((error as { code?: string }).code)
+    const errCode = String((error as { code?: string })['code'])
     switch (errCode) {
       case '23505': // Unique constraint violation
         return {

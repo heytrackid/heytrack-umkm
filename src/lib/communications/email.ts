@@ -11,15 +11,15 @@ import type { EmailConfig } from './types'
 
 
 export class EmailService {
-  private config: EmailConfig;
+  private readonly config: EmailConfig
 
   constructor(config: EmailConfig) {
-    this.config = config;
+    this.config = config
   }
 
   sendEmail(to: string, subject: string, _html: string): boolean {
     // Placeholder for email implementation
-    logger.info({ to, subject }, 'Email sent (placeholder)');
-    return true;
+    logger.info({ to, subject, from: this.config.fromEmail }, 'Email sent (placeholder)')
+    return true
   }
 }

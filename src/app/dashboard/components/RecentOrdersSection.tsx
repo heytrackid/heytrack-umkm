@@ -1,13 +1,15 @@
 'use client'
 
+import { Calendar, Filter, ShoppingCart, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { useCurrency } from '@/hooks/useCurrency'
-import { Calendar, Filter, ShoppingCart, X } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+
 import type { DateRange } from 'react-day-picker'
 
 interface RecentOrdersSectionProps {
@@ -47,7 +49,7 @@ const RecentOrdersSection = ({
   }
 
   const getStatusBadge = (status: string | null) => {
-    const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+    const statusMap: Record<string, { label: string; variant: 'default' | 'destructive' | 'outline' | 'secondary' }> = {
       PENDING: { label: 'Pending', variant: 'secondary' },
       CONFIRMED: { label: 'Dikonfirmasi', variant: 'default' },
       IN_PROGRESS: { label: 'Diproses', variant: 'default' },
@@ -55,7 +57,8 @@ const RecentOrdersSection = ({
       CANCELLED: { label: 'Dibatalkan', variant: 'destructive' }
     }
 
-    const statusInfo = statusMap[status ?? 'PENDING'] ?? statusMap.PENDING
+    const statusInfo = statusMap[status ?? 'PENDING'] ?? statusMap['PENDING']
+    if (!statusInfo) {return <Badge variant="secondary">Unknown</Badge>}
     return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
   }
 
@@ -136,11 +139,11 @@ const RecentOrdersSection = ({
         </div>
         
         {/* Date Range Picker */}
-        {showDateFilter && showDatePicker && (
+        {showDateFilter && showDatePicker && dateRange && (
           <div className="mt-4 p-4 border rounded-lg bg-muted/20">
             <DateRangePicker
-              value={dateRange}
               onChange={handleDateRangeChange}
+              {...(dateRange ? { value: dateRange } : {})}
             />
           </div>
         )}
@@ -200,9 +203,9 @@ const RecentOrdersSection = ({
             <div className="space-y-3">
               {filteredOrders.map((order) => (
                 <div
-                  key={order.id}
+                  key={order['id']}
                   className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted cursor-pointer transition-colors"
-                  onClick={() => router.push(`/orders/${order.id}`)}
+                  onClick={() => router.push(`/orders/${order['id']}`)}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-wrap-mobile">{order.customer}</div>
@@ -220,7 +223,7 @@ const RecentOrdersSection = ({
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    {getStatusBadge(order.status)}
+                    {getStatusBadge(order['status'])}
                   </div>
                 </div>
               ))}

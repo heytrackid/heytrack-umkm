@@ -1,20 +1,23 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import AppLayout from '@/components/layout/app-layout'
-import { useSupabaseCRUD } from '@/hooks/supabase'
-import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
-import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
+import { ArrowLeft, Package } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+
 import { EnhancedIngredientForm } from '@/components/ingredients'
+import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
+import { useSupabaseCRUD } from '@/hooks/supabase'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { ArrowLeft, Package } from 'lucide-react'
+
+
 import type { Insert } from '@/types/database'
 
 
@@ -62,7 +65,7 @@ const NewIngredientPage = () => {
         current_stock: data.current_stock,
         min_stock: data.min_stock ?? 0,
         description: data.description ?? null,
-        user_id: user.id,
+        user_id: user['id'],
         is_active: true,
         weighted_average_cost: 0
       }
@@ -75,8 +78,8 @@ const NewIngredientPage = () => {
       })
 
       router.push('/ingredients')
-    } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Failed to create ingredient:')
+    } catch (error) {
+      apiLogger.error({ error }, 'Failed to create ingredient:')
       toast({
         title: 'Gagal',
         description: 'Gagal menambahkan bahan baku. Silakan coba lagi.',

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
+
 import { performanceMonitor } from './performance-monitoring'
 
 // Performance monitoring hooks for React components with enhanced memory leak prevention
@@ -69,20 +71,20 @@ export const useFunctionPerformance = (context?: Record<string, unknown>) => {
       const result = await fn()
       const duration = performance.now() - start
       
-      performanceMonitor.endOperation(operationId, { 
+      performanceMonitor.endOperation(operationId, {
         ...context,
         duration: duration.toFixed(2)
       })
       
       if (duration > 100) {
-        perfLogger.warn({ 
-          name, 
+        perfLogger.warn({
+          name,
           duration: duration.toFixed(2),
           ...context
         }, 'Slow function execution detected')
       } else {
-        perfLogger.debug({ 
-          name, 
+        perfLogger.debug({
+          name,
           duration: duration.toFixed(2),
           ...context
         }, 'Function executed')
@@ -92,17 +94,17 @@ export const useFunctionPerformance = (context?: Record<string, unknown>) => {
     } catch (error) {
       const duration = performance.now() - start
       
-      performanceMonitor.endOperation(operationId, { 
+      performanceMonitor.endOperation(operationId, {
         ...context,
         duration: duration.toFixed(2),
         error: (error as Error).message
       })
-      
-      perfLogger.error({ 
-        name, 
+
+      perfLogger.error({
+        name,
         duration: duration.toFixed(2),
         ...context,
-        error 
+        error
       }, 'Function execution failed')
       throw error
     }

@@ -6,7 +6,7 @@ export interface Transaction {
   description: string
   category: string
   amount: number
-  type: 'income' | 'expense'
+  type: 'expense' | 'income'
   reference_id?: string
 }
 
@@ -23,7 +23,7 @@ export interface CashFlowData {
   transactions: Transaction[]
 }
 
-export type PeriodType = 'week' | 'month' | 'year' | 'custom'
+export type PeriodType = 'custom' | 'month' | 'week' | 'year'
 
 export interface TransactionFormData {
   description: string
@@ -84,4 +84,4 @@ export const filterPeriodOptions = [
 // Export types
 export type IncomeCategory = typeof incomeCategories[number]
 export type ExpenseCategory = typeof expenseCategories[number]
-export type TransactionCategory = IncomeCategory | ExpenseCategory
+export type TransactionCategory = ExpenseCategory | IncomeCategory

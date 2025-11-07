@@ -1,9 +1,11 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { Row } from '@/types/database'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Package } from 'lucide-react'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+import type { Row } from '@/types/database'
 
 
 
@@ -31,7 +33,7 @@ export const RecipeSelector = ({ recipes, selectedRecipeId, onRecipeSelect, isLo
                 </SelectTrigger>
                 <SelectContent>
                     {recipes.map((r) => (
-                        <SelectItem key={r.id} value={r.id}>
+                        <SelectItem key={r['id']} value={r['id']}>
                             {r.name}
                         </SelectItem>
                     ))}

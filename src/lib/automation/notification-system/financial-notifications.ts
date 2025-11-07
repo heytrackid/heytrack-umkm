@@ -1,4 +1,5 @@
 import { formatCurrency, getCurrentCurrency } from '@/lib/currency'
+
 import type { SmartNotification, FinancialMetrics, AutomationConfig } from './types'
 
 /**

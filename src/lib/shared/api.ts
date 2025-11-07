@@ -164,19 +164,19 @@ export const retryWithBackoff = async <T>(
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await operation()
-    } catch (err) {
-      lastError = err as Error
+    } catch (error) {
+      lastError = error as Error
 
       if (attempt === maxRetries) {
         throw lastError
       }
 
       // Calculate delay with exponential backoff and jitter
-      const exponentialDelay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay)
+      const exponentialDelay = Math.min(baseDelay * 2**attempt, maxDelay)
       const jitter = Math.random() * 0.1 * exponentialDelay
       const delay = exponentialDelay + jitter
 
-      apiLogger.warn({ error: err, attempt: attempt + 1, maxRetries: maxRetries + 1, delay }, 'API call failed, retrying')
+      apiLogger.warn({ error, attempt: attempt + 1, maxRetries: maxRetries + 1, delay }, 'API call failed, retrying')
       await sleep(delay)
     }
   }
@@ -204,12 +204,12 @@ export const apiCache = {
     const cached = apiCache.cache.get(key)
     if (!cached) {return null}
 
-    if (Date.now() - cached.timestamp > cached.ttl) {
+    if (Date.now() - cached['timestamp'] > cached.ttl) {
       apiCache.cache.delete(key)
       return null
     }
 
-    return cached.data as T
+    return cached['data'] as T
   },
 
   clear: (key?: string) => {
@@ -223,7 +223,7 @@ export const apiCache = {
   cleanup: () => {
     const now = Date.now()
     for (const [key, value] of apiCache.cache.entries()) {
-      if (now - value.timestamp > value.ttl) {
+      if (now - value['timestamp'] > value.ttl) {
         apiCache.cache.delete(key)
       }
     }
@@ -258,8 +258,8 @@ export const apiRequest = <T>(
     try {
       // Add authorization header if needed
       const headers = {
-        ...finalConfig.headers,
-        ...options.headers,
+        ...finalConfig['headers'],
+        ...options['headers'],
       }
 
       if (finalConfig.withAuth) {
@@ -281,9 +281,9 @@ export const apiRequest = <T>(
         const errorData = await response.json().catch(() => ({})) as { message?: string; _code?: string; details?: Record<string, unknown> }
 
         throw new ApiErrorClass(
-          errorData.message ?? `HTTP ${response.status}: ${response.statusText}`,
+          errorData.message ?? `HTTP ${response['status']}: ${response.statusText}`,
           errorData._code ?? API_ERROR_CODES.UNKNOWN_ERROR,
-          response.status,
+          response['status'],
           errorData.details
         )
       }
@@ -300,14 +300,14 @@ export const apiRequest = <T>(
       }
 
       return data
-    } catch (err) {
+    } catch (error) {
       clearTimeout(timeoutId)
 
-      if (err instanceof ApiErrorClass) {
-        throw err
+      if (error instanceof ApiErrorClass) {
+        throw error
       }
 
-      if (err instanceof DOMException && err.name === 'AbortError') {
+      if (error instanceof DOMException && error.name === 'AbortError') {
         throw new ApiErrorClass(
           'Request timeout',
           API_ERROR_CODES.TIMEOUT_ERROR,
@@ -315,7 +315,7 @@ export const apiRequest = <T>(
         )
       }
 
-      if (err instanceof TypeError && err.message.includes('fetch')) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new ApiErrorClass(
           'Network error - please check your connection',
           API_ERROR_CODES.NETWORK_ERROR,
@@ -324,7 +324,7 @@ export const apiRequest = <T>(
       }
 
       throw new ApiErrorClass(
-        err instanceof Error ? err.message : 'Unknown error occurred',
+        error instanceof Error ? error.message : 'Unknown error occurred',
         API_ERROR_CODES.UNKNOWN_ERROR,
         HTTP_STATUS.INTERNAL_SERVER_ERROR
       )
@@ -418,14 +418,14 @@ export const responseTransformers = {
       )
     }
 
-    if (!response.data) {
+    if (!response['data']) {
       return createApiResponse.error(
         'No data returned from database',
         HTTP_STATUS.INTERNAL_SERVER_ERROR
       )
     }
 
-    return createApiResponse.success(response.data)
+    return createApiResponse.success(response['data'])
   },
 
   // Transform array response to paginated response

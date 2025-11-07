@@ -1,20 +1,21 @@
 'use client'
 
+import { MoreHorizontal, Edit2, Trash2, Eye } from 'lucide-react'
 import { type ReactNode, memo, useMemo, useCallback } from 'react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Edit2, Trash2, Eye } from 'lucide-react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-interface ColumnDefinition<T extends { id: string | number }> {
-  key: keyof T | string
+interface ColumnDefinition<T extends { id: number | string }> {
+  key: string | keyof T
   label: string
   render?: (value: unknown, item: T) => ReactNode
 }
 
-interface OptimizedTableRowProps<T extends { id: string | number }> {
+interface OptimizedTableRowProps<T extends { id: number | string }> {
   item: T
   columns: Array<ColumnDefinition<T>>
   isSelected: boolean
@@ -25,7 +26,7 @@ interface OptimizedTableRowProps<T extends { id: string | number }> {
   formatValue?: (key: string, value: unknown, item: T) => ReactNode
 }
 
-const OptimizedTableRowComponent = <T extends { id: string | number }>({
+const OptimizedTableRowComponent = <T extends { id: number | string }>({
   item,
   columns,
   isSelected,
@@ -36,8 +37,8 @@ const OptimizedTableRowComponent = <T extends { id: string | number }>({
   formatValue
 }: OptimizedTableRowProps<T>) => {
   const handleSelect = useCallback(() => {
-    onSelect(item.id.toString())
-  }, [onSelect, item.id])
+    onSelect(item['id'].toString())
+  }, [onSelect, item])
 
   const handleEdit = useCallback(() => {
     onEdit?.(item)
@@ -169,7 +170,7 @@ const BulkActionsBar = memo(({
 
 BulkActionsBar.displayName = 'BulkActionsBar'
 
-interface OptimizedTableProps<T extends { id: string | number }> {
+interface OptimizedTableProps<T extends { id: number | string }> {
   data: T[]
   columns: Array<ColumnDefinition<T>>
   selectedItems: string[]
@@ -187,7 +188,7 @@ interface OptimizedTableProps<T extends { id: string | number }> {
   description?: string
 }
 
-const OptimizedTableComponent = <T extends { id: string | number }>({
+const OptimizedTableComponent = <T extends { id: number | string }>({
   data,
   columns,
   selectedItems,
@@ -209,10 +210,10 @@ const OptimizedTableComponent = <T extends { id: string | number }>({
   [selectedItems.length, data.length])
 
   const getPreviewNames = useCallback((items: string[]) => {
-    const selectedData = data.filter(item => items.includes(item.id.toString()))
+    const selectedData = data.filter(item => items.includes(item['id'].toString()))
     const names = selectedData.map(item => {
       const itemRecord = item as Record<string, unknown>
-      return (itemRecord.name as string) || (itemRecord.title as string) || String(item.id)
+      return (itemRecord['name'] as string) || (itemRecord['title'] as string) || String(item['id'])
     }).slice(0, 2)
     return names.join(', ') + (items.length > 2 ? ` +${items.length - 2} lainnya` : '')
   }, [data])
@@ -248,15 +249,15 @@ const OptimizedTableComponent = <T extends { id: string | number }>({
           <TableBody>
             {data.map((item) => (
               <OptimizedTableRow<T>
-                key={item.id}
+                key={item['id']}
                 item={item}
                 columns={columns}
-                isSelected={selectedItems.includes(item.id.toString())}
+                isSelected={selectedItems.includes(item['id'].toString())}
                 onSelect={onSelectItem}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onView={onView}
                 formatValue={formatValue}
+                {...(onEdit && { onEdit })}
+                {...(onDelete && { onDelete })}
+                {...(onView && { onView })}
               />
             ))}
           </TableBody>
@@ -268,6 +269,6 @@ const OptimizedTableComponent = <T extends { id: string | number }>({
 
 OptimizedTableComponent.displayName = 'OptimizedTable'
 
-export const OptimizedTable = memo(OptimizedTableComponent) as <T extends { id: string | number }>(
+export const OptimizedTable = memo(OptimizedTableComponent) as <T extends { id: number | string }>(
   props: OptimizedTableProps<T>
 ) => JSX.Element

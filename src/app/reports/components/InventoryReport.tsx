@@ -1,7 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
 import { Package, PackageCheck, AlertTriangle, ShoppingCart } from 'lucide-react'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
+import { useCurrency } from '@/hooks/useCurrency'
 
 // Inventory Report Component
 // Handles inventory data filtering, calculations, and display
@@ -9,8 +10,8 @@ import { Package, PackageCheck, AlertTriangle, ShoppingCart } from 'lucide-react
 
 interface InventoryReportProps {
   dateRange: {
-    start: string
-    end: string
+    start: string | undefined
+    end: string | undefined
   }
 }
 

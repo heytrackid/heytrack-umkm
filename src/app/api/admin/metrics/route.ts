@@ -1,16 +1,19 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 /**
  * GET /api/admin/metrics
  * Get system metrics for admin dashboard
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+
 import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+import { createClient } from '@/utils/supabase/server'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
 
 export async function GET(_request: NextRequest) {
   try {
@@ -23,7 +26,7 @@ export async function GET(_request: NextRequest) {
     }
 
     // 2. Admin role check
-    const hasAdminAccess = await isAdmin(user.id)
+    const hasAdminAccess = await isAdmin(user['id'])
     if (!hasAdminAccess) {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
     }
@@ -55,7 +58,7 @@ export async function GET(_request: NextRequest) {
     ])
 
     // Calculate total revenue
-    const totalRevenue = revenueSum.data?.reduce(
+    const totalRevenue = revenueSum['data']?.reduce(
       (sum, order) => sum + (order.total_amount ?? 0),
       0
     ) ?? 0
@@ -107,7 +110,7 @@ export async function GET(_request: NextRequest) {
       }
     }
 
-    apiLogger.info({ userId: user.id }, 'Admin metrics fetched')
+    apiLogger.info({ userId: user['id'] }, 'Admin metrics fetched')
 
     return NextResponse.json(metrics)
 

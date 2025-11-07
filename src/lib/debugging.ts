@@ -1,4 +1,5 @@
 import {serializeError } from './logger';
+
 import type pino from 'pino';
 
 
@@ -35,7 +36,7 @@ interface MemoryUsage {
 }
 
 export interface DetailedDebugOptions {
-  level?: 'debug' | 'info' | 'warn' | 'error';
+  level?: 'debug' | 'error' | 'info' | 'warn';
   includeMemory?: boolean;
   includeStack?: boolean;
   includeTimestamp?: boolean;
@@ -46,7 +47,7 @@ export interface DetailedDebugOptions {
 }
 
 class DebugLogger {
-  private logger: pino.Logger;
+  private readonly logger: pino.Logger;
   private context: DebugContext = {};
 
   constructor(context = 'Debug') {
@@ -64,12 +65,12 @@ class DebugLogger {
     additionalData?: Record<string, unknown>
   ): void {
     const logData: DebugContext & { additionalData?: Record<string, unknown> } = {
-      ...this.context,
+      ...this['context'],
       ...additionalData,
     };
 
     if (options.includeTimestamp) {
-      logData.timestamp = new Date().toISOString();
+      logData['timestamp'] = new Date().toISOString();
     }
 
     if (options.includeMemory && typeof process !== 'undefined' && process.memoryUsage) {
@@ -107,7 +108,7 @@ class DebugLogger {
       const duration = Number(end - start) / 1_000_000; // Convert to milliseconds
       
       const logData = {
-        ...this.context,
+        ...this['context'],
         duration,
         ...(options.includeMemory && _startMemory ? { 
           memoryBefore: _startMemory,
@@ -123,7 +124,7 @@ class DebugLogger {
       const duration = Number(end - start) / 1_000_000; // Convert to milliseconds
       
       const logData = {
-        ...this.context,
+        ...this['context'],
         duration,
         error: serializeError(error),
         ...(options.includeMemory && _startMemory ? { 
@@ -148,7 +149,7 @@ class DebugLogger {
       const duration = Number(end - start) / 1_000_000; // Convert to milliseconds
       
       const logData = {
-        ...this.context,
+        ...this['context'],
         duration,
         ...(options.includeMemory && _startMemory ? { 
           memoryBefore: _startMemory,
@@ -164,7 +165,7 @@ class DebugLogger {
       const duration = Number(end - start) / 1_000_000; // Convert to milliseconds
       
       const logData = {
-        ...this.context,
+        ...this['context'],
         duration,
         error: serializeError(error),
         ...(options.includeMemory && _startMemory ? { 

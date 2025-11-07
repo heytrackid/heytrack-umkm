@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import type { AIAnalysisState, FinancialAnalysisRequest } from './types'
 
 
@@ -45,15 +46,15 @@ export function useFinancialAnalysis() {
 
       return result
 
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      setState(prev => ({
-        ...prev,
-        loading: false,
-        error: errorMessage
-      }))
-      throw err
-    }
+     } catch (error) {
+       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+       setState(prev => ({
+         ...prev,
+         loading: false,
+         error: errorMessage
+       }))
+       throw error
+     }
   }, [])
 
   const clearAnalysis = useCallback(() => {

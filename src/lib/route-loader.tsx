@@ -1,6 +1,8 @@
 import dynamic from 'next/dynamic'
 import React, { type ComponentType } from 'react'
 
+import { createClientLogger } from '@/lib/client-logger'
+
 /**
  * Route-based code splitting utility
  * Dynamically imports route components to reduce initial bundle size
@@ -136,8 +138,8 @@ export function createSmartRouteLoader(
 
     React.useEffect(() => {
       const loadTime = performance.now() - startTime
-      // eslint-disable-next-line no-console
-      console.log(`🚀 ${routeName} loaded in ${loadTime.toFixed(2)}ms`)
+      const logger = createClientLogger('RouteLoader')
+      logger.info(`🚀 ${routeName} loaded in ${loadTime.toFixed(2)}ms`)
     }, [startTime])
 
     return <LazyComponent {...props} />

@@ -44,10 +44,11 @@ export function useSwipeableTabs(
   const isTransitioning = useRef(false)
 
   // Handle touch start
-  const handleTouchStart = useCallback((e: TouchEvent | React.TouchEvent) => {
+  const handleTouchStart = useCallback((e: React.TouchEvent | TouchEvent) => {
     if (!enabled || isTransitioning.current) { return }
 
-    const touch = 'touches' in e ? e.touches[0] : e
+    const touch = 'touches' in e ? e.touches[0] : undefined
+    if (!touch) { return }
     setSwipeState({
       isDragging: true,
       startX: touch.clientX,
@@ -57,10 +58,11 @@ export function useSwipeableTabs(
   }, [enabled])
 
   // Handle touch move
-  const handleTouchMove = useCallback((e: TouchEvent | React.TouchEvent) => {
+  const handleTouchMove = useCallback((e: React.TouchEvent | TouchEvent) => {
     if (!enabled || !swipeState.isDragging || isTransitioning.current) { return }
 
-    const touch = 'touches' in e ? e.touches[0] : e
+    const touch = 'touches' in e ? e.touches[0] : undefined
+    if (!touch) { return }
     const currentX = touch.clientX
     let deltaX = currentX - swipeState.startX
 

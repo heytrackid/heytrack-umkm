@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import { useErrorHandler } from './useErrorHandler'
 
 
@@ -38,13 +39,13 @@ export function useAsyncError() {
   const executeAsync = useCallback(
     async (asyncFn: () => Promise<void>) => {
       try {
-        void setIsLoading(true)
+        setIsLoading(true)
         resetError()
         await asyncFn()
-      } catch (err) {
-        void handleErr(err, 'useAsyncError')
+      } catch (error) {
+        void handleErr(error, 'useAsyncError')
       } finally {
-        void setIsLoading(false)
+        setIsLoading(false)
       }
     },
     [handleErr, resetError]

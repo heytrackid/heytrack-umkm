@@ -1,15 +1,16 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useSuppliers } from '@/hooks';
-import { useSupabaseCRUD } from '@/hooks/supabase';
-import { SimpleDataTable, type SimpleColumn } from '@/components/ui/simple-data-table';
-import { SupplierFormSchema, type SupplierForm } from '@/lib/validations/form-validations';
+
 import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields';
 import { CreateModal, EditModal, DeleteModal } from '@/components/ui';
+import { SimpleDataTable, type SimpleColumn } from '@/components/ui/simple-data-table';
+import { useSuppliers } from '@/hooks';
+import { useSupabaseCRUD } from '@/hooks/supabase';
 import { createClientLogger } from '@/lib/client-logger'
+import { SupplierFormSchema, type SupplierForm } from '@/lib/validations/form-validations';
 
 const logger = createClientLogger('SuppliersCRUD')
 import type { Row, Insert, Update } from '@/types/database'
@@ -92,11 +93,11 @@ export const SuppliersCRUD = () => {
       address: '',
       notes: '',
     })
-    void setIsCreateModalOpen(true)
+    setIsCreateModalOpen(true)
   }, [createForm])
 
   const handleEdit = useCallback((supplier: Supplier) => {
-    void setSelectedSupplier(supplier)
+    setSelectedSupplier(supplier)
     editForm.reset({
       name: supplier.name,
       contact_person: supplier.contact_person ?? '',
@@ -105,18 +106,18 @@ export const SuppliersCRUD = () => {
       address: supplier.address ?? '',
       notes: supplier.notes ?? '',
     })
-    void setIsEditModalOpen(true)
+    setIsEditModalOpen(true)
   }, [editForm])
 
   const handleDelete = useCallback((supplier: Supplier) => {
-    void setSelectedSupplier(supplier)
-    void setIsDeleteDialogOpen(true)
+    setSelectedSupplier(supplier)
+    setIsDeleteDialogOpen(true)
   }, [])
 
   const handleSubmitCreate = useCallback(async (data: Record<string, unknown>) => {
     try {
       await createSupplier(data as Insert<'suppliers'>)
-      void setIsCreateModalOpen(false)
+      setIsCreateModalOpen(false)
       createForm.reset({
         name: '',
         contact_person: '',
@@ -125,8 +126,8 @@ export const SuppliersCRUD = () => {
         address: '',
         notes: '',
       })
-    } catch (err: unknown) {
-      logger.error({ err }, 'Failed to create supplier:')
+    } catch (error: unknown) {
+      logger.error({ error }, 'Failed to create supplier:')
     }
   }, [createSupplier, createForm])
 
@@ -134,9 +135,9 @@ export const SuppliersCRUD = () => {
     if (!selectedSupplier) { return }
 
     try {
-      await updateSupplier(selectedSupplier.id, data as Update<'suppliers'>)
-      void setIsEditModalOpen(false)
-      void setSelectedSupplier(null)
+      await updateSupplier(selectedSupplier['id'], data as Update<'suppliers'>)
+      setIsEditModalOpen(false)
+      setSelectedSupplier(null)
       editForm.reset({
         name: '',
         contact_person: '',
@@ -145,8 +146,8 @@ export const SuppliersCRUD = () => {
         address: '',
         notes: '',
       })
-    } catch (err: unknown) {
-      logger.error({ err }, 'Failed to update supplier:')
+    } catch (error: unknown) {
+      logger.error({ error }, 'Failed to update supplier:')
     }
   }, [selectedSupplier, updateSupplier, editForm])
 
@@ -154,11 +155,11 @@ export const SuppliersCRUD = () => {
     if (!selectedSupplier) { return }
 
     try {
-      await deleteSupplier(selectedSupplier.id)
+      await deleteSupplier(selectedSupplier['id'])
       setIsDeleteDialogOpen(false);
       setSelectedSupplier(null);
-    } catch (err: unknown) {
-      logger.error({ err }, 'Failed to delete supplier:');
+    } catch (error: unknown) {
+      logger.error({ error }, 'Failed to delete supplier:');
     }
   }, [selectedSupplier, deleteSupplier])
 

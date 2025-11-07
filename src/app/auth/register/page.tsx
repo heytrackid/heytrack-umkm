@@ -1,7 +1,9 @@
 'use client'
 
-import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useState } from 'react'
+
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+
 import { RegistrationForm, RegistrationSuccess } from './components'
 
 // Force dynamic rendering
@@ -15,7 +17,7 @@ const RegisterPage = () => {
   const [success, setSuccess] = useState(false)
 
   const handleSuccess = () => {
-    void setSuccess(true)
+    setSuccess(true)
   }
 
   if (success) {

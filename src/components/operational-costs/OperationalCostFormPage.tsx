@@ -1,6 +1,10 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 
+import { ArrowLeft, Save } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -16,13 +20,10 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { useSupabaseCRUD } from '@/hooks/supabase'
 import { useToast } from '@/hooks/use-toast'
-import type { Insert, Row, Update } from '@/types/database'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { ArrowLeft, Save } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 
-type _OperationalCost = Row<'operational_costs'>
+import type { Insert, Update } from '@/types/database'
+
 type OperationalCostInsert = Insert<'operational_costs'>
 
 interface OperationalCostFormPageProps {
@@ -81,8 +82,8 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
             } else {
                 throw new Error('Biaya tidak ditemukan')
             }
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal memuat biaya'
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Gagal memuat biaya'
             toast({
                 title: 'Error',
                 description: message,
@@ -127,7 +128,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                 amount: formData.amount,
                 category: formData.category ?? 'utilities',
                 description: formData.description,
-                user_id: user.id,
+                user_id: user['id'],
                 is_active: formData.is_active ?? true,
             }
 
@@ -158,7 +159,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
             } else if (costId) {
                 const updatePayload: Update<'operational_costs'> = {
                     ...basePayload,
-                    user_id: formData.user_id ?? user.id,
+                    user_id: formData.user_id ?? user['id'],
                 }
                 await update(costId, updatePayload)
             }
@@ -169,8 +170,8 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
             })
 
             router.push('/operational-costs')
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal menyimpan biaya'
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Gagal menyimpan biaya'
             toast({
                 title: 'Error',
                 description: message,
@@ -239,7 +240,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                                     </SelectTrigger>
                                     <SelectContent>
                                         {COST_CATEGORIES.map((cat) => (
-                                            <SelectItem key={cat.id} value={cat.id}>
+                                            <SelectItem key={cat['id']} value={cat['id']}>
                                                 {cat.icon} {cat.name}
                                             </SelectItem>
                                         ))}

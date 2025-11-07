@@ -1,3 +1,6 @@
+import { Analytics } from '@vercel/analytics/next';
+import { Geist, Geist_Mono } from "next/font/google";
+
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
@@ -5,11 +8,10 @@ import { getNonce } from '@/lib/nonce';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 import QueryProvider from '@/providers/QueryProvider';
-import { SWRProvider } from '@/providers/SWRProvider';
 import SupabaseProvider from '@/providers/SupabaseProvider';
-import { Analytics } from '@vercel/analytics/next';
+import { SWRProvider } from '@/providers/SWRProvider';
+
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from 'react';
 
 import "./globals.css";
@@ -46,8 +48,8 @@ const RootLayout = async ({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 
         {/* Performance resource hints */}
-        <link rel="preconnect" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} />
+        <link rel="preconnect" href={process['env']['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href={process['env']['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} />
         <link rel="preconnect" href="https://api.openrouter.ai" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.openrouter.ai" />
 

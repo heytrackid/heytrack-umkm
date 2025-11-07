@@ -1,10 +1,13 @@
- import { type NextRequest, NextResponse } from 'next/server'
- import { createClient } from '@/utils/supabase/server'
- import { apiLogger } from '@/lib/logger'
- import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+ import { type NextRequest, NextResponse } from 'next/server'
+
+ import { apiLogger } from '@/lib/logger'
+ import { withSecurity, SecurityPresets } from '@/utils/security'
+ import { createClient } from '@/utils/supabase/server'
+
 
 async function longTasksPOST(request: NextRequest) {
   try {
@@ -16,11 +19,11 @@ async function longTasksPOST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    
+    const body = await request.json() as { duration: number; startTime: number; name: string }
+
     // Log long tasks for performance monitoring with user context
     apiLogger.warn({
-      userId: user.id,
+      userId: user['id'],
       duration: body.duration,
       startTime: body.startTime,
       name: body.name

@@ -1,31 +1,36 @@
 'use client'
 
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, Plus, ShoppingCart, Upload } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+
 import { generateIngredientsTemplate, parseIngredientsCSV } from '@/components/import/csv-helpers'
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { BreadcrumbPatterns, PageBreadcrumb, StatCardPatterns, StatsCards } from '@/components/ui'
 import { Button } from '@/components/ui/button'
-import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks'
+import { useToast } from '@/hooks/use-toast'
 import { useIngredients } from '@/hooks/useIngredients'
+
 import type { Row } from '@/types/database'
-import { AlertTriangle, Plus, ShoppingCart, Upload } from 'lucide-react'
+
 
 // Lazy load heavy components
-const IngredientsCRUD = dynamic(() => import('@/components/ingredients/EnhancedIngredientsPage').then(mod => ({ default: mod.EnhancedIngredientsPage })), {
-  loading: () => (
-    <div className="border rounded-lg p-6">
-      <div className="animate-pulse space-y-4">
-        <div className="h-10 bg-muted rounded" />
-        {[...Array(5)].map((_, i) => (
-          <div key={`row-${i}`} className="h-16 bg-muted rounded" />
-        ))}
-      </div>
+const IngredientsCRUDSkeleton = () => (
+  <div className="border rounded-lg p-6">
+    <div className="animate-pulse space-y-4">
+      <div className="h-10 bg-muted rounded" />
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={`row-${i}`} className="h-16 bg-muted rounded" />
+      ))}
     </div>
-  ),
+  </div>
+)
+
+const IngredientsCRUD = dynamic(() => import('@/components/ingredients/EnhancedIngredientsPage').then(mod => ({ default: mod.EnhancedIngredientsPage })), {
+  loading: () => <IngredientsCRUDSkeleton />,
   ssr: false
 })
 
@@ -151,26 +156,29 @@ const IngredientsPage = () => {
           description="Kelola stok dan harga bahan baku"
           actions={
             <div className="flex flex-col sm:flex-row gap-2 w-full">
-              <Button
-                variant="outline"
-                onClick={() => setImportDialogOpen(true)}
-                className="w-full sm:w-auto"
-              >
+               <Button
+                 variant="outline"
+                 onClick={() => setImportDialogOpen(true)}
+                 className="w-full sm:w-auto"
+                 hapticFeedback
+               >
                 <Upload className="h-4 w-4 mr-2" />
                 Import
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => router.push('/ingredients/purchases')}
-                className="w-full sm:w-auto"
-              >
+               <Button
+                 variant="outline"
+                 onClick={() => router.push('/ingredients/purchases')}
+                 className="w-full sm:w-auto"
+                 hapticFeedback
+               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Pembelian
               </Button>
-              <Button
-                onClick={() => setShowAddDialog(true)}
-                className="w-full sm:w-auto"
-              >
+               <Button
+                 onClick={() => setShowAddDialog(true)}
+                 className="w-full sm:w-auto"
+                 hapticFeedback
+               >
                 <Plus className="h-4 w-4 mr-2" />
                 Tambah
               </Button>
@@ -207,16 +215,7 @@ const IngredientsPage = () => {
         )}
 
         {/* Main Content */}
-        <Suspense fallback={
-          <div className="border rounded-lg p-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-10 bg-muted rounded" />
-              {[...Array(5)].map((_, i) => (
-                <div key={`row-${i}`} className="h-16 bg-muted rounded" />
-              ))}
-            </div>
-          </div>
-        }>
+        <Suspense fallback={<IngredientsCRUDSkeleton />}>
           <IngredientsCRUD onAdd={() => setShowAddDialog(true)} />
         </Suspense>
 
@@ -238,7 +237,7 @@ const IngredientsPage = () => {
                   body: JSON.stringify({ ingredients: data })
                 })
 
-                const result = await response.json()
+                const result = await response.json() as { error?: string; details?: unknown[]; count?: number }
 
                 if (!response.ok) {
                   return {
@@ -249,7 +248,7 @@ const IngredientsPage = () => {
                 }
 
                 // Refresh data
-                window.location.reload()
+                router.refresh()
 
                 return {
                   success: true,
@@ -270,7 +269,7 @@ const IngredientsPage = () => {
           <IngredientFormDialog
             open={showAddDialog}
             onOpenChange={setShowAddDialog}
-            onSuccess={() => window.location.reload()}
+            onSuccess={() => router.refresh()}
           />
         </Suspense>
       </div>

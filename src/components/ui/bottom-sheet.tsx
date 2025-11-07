@@ -1,9 +1,11 @@
  
 'use client'
 
-import { cn } from '@/lib/utils'
 import { X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
+
+import { cn } from '@/lib/utils'
+
 import { Button } from './button'
 
 interface BottomSheetProps {
@@ -28,18 +30,18 @@ export const BottomSheet = ({
   className
 }: BottomSheetProps) => {
   const [snapIndex, _setSnapIndex] = useState(defaultSnap)
-  const currentSnap = snapPoints[snapIndex] ?? snapPoints[0]
+  const currentSnap = snapPoints?.[snapIndex] ?? snapPoints?.[0] ?? 0.5
 
   useEffect(() => {
     if (open) {
       // Prevent body scroll when open
-      document.body.style.overflow = 'hidden'
+      document['body'].style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = ''
+      document['body'].style.overflow = ''
     }
 
     return () => {
-      document.body.style.overflow = ''
+      document['body'].style.overflow = ''
     }
   }, [open])
 

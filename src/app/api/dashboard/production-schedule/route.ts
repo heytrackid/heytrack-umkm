@@ -1,10 +1,14 @@
-import { createClient } from '@/utils/supabase/server'
-import { typed } from '@/types/type-utilities'
-import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger, logError } from '@/lib/logger'
-
-
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger, logError } from '@/lib/logger'
+import { typed } from '@/types/type-utilities'
+import { createClient } from '@/utils/supabase/server'
+
+
 
 // GET /api/dashboard/production-schedule - Get today's production schedule
 export async function GET(request: NextRequest) {
@@ -41,7 +45,7 @@ export async function GET(request: NextRequest) {
           cost_per_unit
         )
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .gte('started_at', today)
       .lt('started_at', tomorrow)
       .order('started_at')
@@ -67,7 +71,7 @@ export async function GET(request: NextRequest) {
           )
         )
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .in('status', ['CONFIRMED', 'IN_PROGRESS'])
       .is('production_batch_id', null)
       .order('delivery_date', { nullsFirst: false })
@@ -82,7 +86,7 @@ export async function GET(request: NextRequest) {
     const { data: lowStock, error: stockError } = await supabase
       .from('inventory_status')
       .select('id, name, current_stock, stock_status')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .in('stock_status', ['LOW_STOCK', 'OUT_OF_STOCK'])
       .order('current_stock')
       .limit(5)
@@ -92,7 +96,7 @@ export async function GET(request: NextRequest) {
     }
 
     apiLogger.info({ 
-      userId: user.id,
+      userId: user['id'],
       batchCount: batches?.length || 0,
       pendingCount: pendingOrders?.length || 0,
       lowStockCount: lowStock?.length ?? 0
@@ -104,9 +108,9 @@ export async function GET(request: NextRequest) {
       low_stock_alerts: lowStock ?? [],
       summary: {
         total_batches_today: batches?.length || 0,
-        planned_batches: (batches?.filter(b => b.status === 'PLANNED') || []).length,
-        in_progress_batches: (batches?.filter(b => b.status === 'IN_PROGRESS') || []).length,
-        completed_batches: (batches?.filter(b => b.status === 'COMPLETED') || []).length,
+        planned_batches: (batches?.filter(b => b['status'] === 'PLANNED') || []).length,
+        in_progress_batches: (batches?.filter(b => b['status'] === 'IN_PROGRESS') || []).length,
+        completed_batches: (batches?.filter(b => b['status'] === 'COMPLETED') || []).length,
         pending_orders_count: pendingOrders?.length || 0,
         urgent_orders: (pendingOrders?.filter(o => o.priority === 'URGENT') || []).length,
         critical_stock_items: (lowStock?.filter(s => s.stock_status === 'OUT_OF_STOCK') ?? []).length

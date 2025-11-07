@@ -1,6 +1,8 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 
+import { AlertTriangle, Package, RefreshCw, ShoppingCart, TrendingUp } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,7 +10,6 @@ import { Progress } from '@/components/ui/progress'
 import { useSettings } from '@/contexts/settings-context'
 import { useInventoryAlerts, useReorderManagement } from '@/hooks'
 import { InventoryAlertsList } from '@/hooks/useInventoryAlerts'
-import { AlertTriangle, Package, RefreshCw, ShoppingCart, TrendingUp } from 'lucide-react'
 
 
 
@@ -36,7 +37,7 @@ export const InventoryDashboard = () => {
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
+          {Array.from({ length: 4 }, (_, i) => (
             <Card key={i} className="animate-pulse">
               <CardContent className="p-6">
                 <div className="h-4 bg-muted rounded w-3/4 mb-2" />
@@ -161,7 +162,7 @@ export const InventoryDashboard = () => {
                   <div key={suggestion.ingredient_id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-sm">{suggestion.ingredient_name}</p>
+                        <p className="font-medium text-sm">{suggestion['ingredient_name']}</p>
                         <Badge
                           variant={
                             suggestion.priority === 'urgent' ? 'destructive' :

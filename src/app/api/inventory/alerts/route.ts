@@ -1,12 +1,15 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
-import { apiLogger } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-import { typed } from '@/types/type-utilities'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
+import { typed } from '@/types/type-utilities'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
 
 /**
  * GET /api/inventory/alerts
@@ -22,7 +25,7 @@ async function GET(__request: NextRequest) {
     }
 
     const alertService = new InventoryAlertService()
-    const alerts = await alertService.getActiveAlerts(user.id)
+    const alerts = await alertService.getActiveAlerts(user['id'])
 
     return NextResponse.json(alerts)
 
@@ -49,7 +52,7 @@ async function POST(__request: NextRequest) {
     }
 
     const alertService = new InventoryAlertService()
-    await alertService.checkLowStockAlerts(user.id)
+    await alertService.checkLowStockAlerts(user['id'])
 
     return NextResponse.json({ 
       message: 'Inventory alerts checked successfully' 

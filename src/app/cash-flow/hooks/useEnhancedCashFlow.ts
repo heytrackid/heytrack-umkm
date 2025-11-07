@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
+
 import { apiLogger } from '@/lib/logger'
+
 import type { 
   Transaction, 
   CashFlowSummary, 
@@ -13,6 +15,16 @@ interface ComparisonData {
   income: number
   expense: number
   net: number
+}
+
+interface CashFlowResponse extends CashFlowData {
+  comparison?: {
+    previous_period?: {
+      total_income: number
+      total_expenses: number
+      net_cash_flow: number
+    }
+  }
 }
 
 interface UseEnhancedCashFlowReturn {
@@ -29,7 +41,7 @@ interface UseEnhancedCashFlowReturn {
 
   // Transaction form
   isAddDialogOpen: boolean
-  transactionType: 'income' | 'expense'
+  transactionType: 'expense' | 'income'
 
   // Computed data
   chartData: ChartDataPoint[]
@@ -41,7 +53,7 @@ interface UseEnhancedCashFlowReturn {
   setStartDate: (date: string) => void
   setEndDate: (date: string) => void
   setIsAddDialogOpen: (open: boolean) => void
-  setTransactionType: (type: 'income' | 'expense') => void
+  setTransactionType: (type: 'expense' | 'income') => void
 
   // API methods
   fetchCashFlowData: () => Promise<void>
@@ -83,11 +95,9 @@ function prepareChartData(transactions: Transaction[]): ChartDataPoint[] {
       month: 'short' 
     })
 
-    if (!dataByDate[date]) {
-      dataByDate[date] = { date, income: 0, expense: 0, net: 0 }
-    }
+    dataByDate[date] ??= { date, income: 0, expense: 0, net: 0 }
 
-    if (transaction.type === 'income') {
+    if (transaction['type'] === 'income') {
       dataByDate[date].income += transaction.amount
     } else {
       dataByDate[date].expense += transaction.amount
@@ -146,7 +156,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
 
   // Transaction form
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('expense')
+  const [transactionType, setTransactionType] = useState<'expense' | 'income'>('expense')
 
   // Fetch cash flow data
   const fetchCashFlowData = useCallback(async () => {
@@ -171,7 +181,8 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
         throw new Error('Gagal mengambil data arus kas')
       }
 
-      const data = await response.json()
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const data: CashFlowResponse = await response.json()
       setCashFlowData(data)
 
       // Calculate comparison if previous period data exists
@@ -187,9 +198,9 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
       } else {
         setComparison(null)
       }
-    } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error fetching cash flow data')
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
+    } catch (error) {
+      apiLogger.error({ error }, 'Error fetching cash flow data')
+      setError(error instanceof Error ? error.message : 'Terjadi kesalahan saat mengambil data')
     } finally {
       setLoading(false)
     }
@@ -219,16 +230,18 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
         })
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error ?? 'Gagal menyimpan transaksi')
-      }
+       if (!response.ok) {
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+         const errorData = await response.json()
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
+         throw new Error(errorData.error ?? 'Gagal menyimpan transaksi')
+       }
 
-      setIsAddDialogOpen(false)
-      await fetchCashFlowData()
-    } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error adding transaction')
-      throw err
+       setIsAddDialogOpen(false)
+       await fetchCashFlowData()
+     } catch (error) {
+       apiLogger.error({ error }, 'Error adding transaction')
+       throw error
     } finally {
       setLoading(false)
     }
@@ -239,22 +252,24 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
     try {
       setLoading(true)
 
-      // Use transaction.id as the reference_id
-      const recordId = transaction.reference_id ?? transaction.id
+      // Use transaction['id'] as the reference_id
+      const recordId = transaction.reference_id ?? transaction['id']
       
       const response = await fetch(`/api/financial/records/${recordId}`, {
         method: 'DELETE'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error ?? 'Gagal menghapus transaksi')
-      }
+       if (!response.ok) {
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+         const errorData = await response.json()
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
+         throw new Error(errorData.error ?? 'Gagal menghapus transaksi')
+       }
 
-      await fetchCashFlowData()
-    } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error deleting transaction')
-      throw err
+       await fetchCashFlowData()
+     } catch (error) {
+       apiLogger.error({ error }, 'Error deleting transaction')
+       throw error
     } finally {
       setLoading(false)
     }

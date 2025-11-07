@@ -1,11 +1,13 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DollarSign, ArrowUpCircle, ArrowDownCircle, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from '@/components/ui/tooltip'
+
 import type { CashFlowSummary } from '../constants'
 
 interface EnhancedSummaryCardsProps {
@@ -170,7 +172,7 @@ const EnhancedSummaryCards = ({
                 <CardContent className="pt-6">
                     <div className="flex items-start gap-4">
                         <div className="p-3 bg-muted rounded-full">
-                            {health.status === 'danger' || health.status === 'warning' ? (
+                            {health['status'] === 'danger' || health['status'] === 'warning' ? (
                                 <AlertCircle className="h-6 w-6 text-muted-foreground" />
                             ) : (
                                 <TrendingUp className="h-6 w-6 text-muted-foreground" />
@@ -214,13 +216,13 @@ const EnhancedSummaryCards = ({
                                     className="h-2"
                                 />
                             </div>
-                            {health.status === 'danger' && (
+                            {health['status'] === 'danger' && (
                                 <p className="text-xs text-destructive flex items-center gap-1">
                                     <AlertCircle className="h-3 w-3" />
                                     Pengeluaran mendekati atau melebihi pemasukan. Pertimbangkan untuk mengurangi biaya.
                                 </p>
                             )}
-                            {health.status === 'warning' && (
+                            {health['status'] === 'warning' && (
                                 <p className="text-xs text-amber-600 flex items-center gap-1">
                                     <AlertCircle className="h-3 w-3" />
                                     Pengeluaran cukup tinggi. Monitor cashflow dengan cermat.

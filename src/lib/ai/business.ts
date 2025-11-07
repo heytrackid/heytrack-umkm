@@ -1,4 +1,5 @@
 import { apiLogger } from '@/lib/logger'
+
 import { PromptBuilder } from './prompt-builder'
 import { AIService } from './service'
 
@@ -136,7 +137,7 @@ ${context.inventory.critical.map(item =>
 
 ${context.orders?.recent?.length ? `PESANAN TERBARU:
 ${context.orders.recent.slice(0, 3).map(order =>
-  `- ${order.status}: Rp ${order.total_amount?.toLocaleString('id-ID') || 0} (${new Date(order.created_at).toLocaleDateString('id-ID')})`
+  `- ${order['status']}: Rp ${order.total_amount?.toLocaleString('id-ID') || 0} (${new Date(order.created_at).toLocaleDateString('id-ID')})`
 ).join('\n')}` : ''}`
       }
 
@@ -256,8 +257,8 @@ BATASAN:
     } catch (error) {
       apiLogger.error({ error, data }, 'Error generating business insights')
       
-      const query = data.query as string || ''
-      const lowerQuery = query.toLowerCase()
+      const _query = data['query'] as string || ''
+      const lowerQuery = _query.toLowerCase()
       
       if (lowerQuery.includes('stok') || lowerQuery.includes('inventory')) {
         return `📦 **Manajemen Stok Bahan Baku**

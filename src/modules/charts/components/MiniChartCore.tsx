@@ -40,7 +40,7 @@ const ResponsiveContainer = dynamic(
 
 interface MiniChartCoreProps {
   data: unknown[]
-  type?: 'line' | 'bar'
+  type?: 'bar' | 'line'
   dataKey: string
   color?: string
   height?: number

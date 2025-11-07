@@ -1,22 +1,7 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { LabelWithTooltip } from '@/components/ui/tooltip-helper'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useResponsive } from '@/hooks/useResponsive'
-import { createClientLogger } from '@/lib/client-logger'
-
 const logger = createClientLogger('EnhancedOrderForm')
-import { isRecipe } from '@/lib/type-guards'
-import { validateOrderData } from '@/lib/validations/form-validations'
-import type { Row } from '@/types/database'
 import {
     AlertCircle,
     ArrowLeft,
@@ -33,8 +18,26 @@ import {
     User
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import type { Order, OrderFormData, OrderFormItem, Priority } from './types'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { LabelWithTooltip } from '@/components/ui/tooltip-helper'
+import { useCurrency } from '@/hooks/useCurrency'
+import { useResponsive } from '@/hooks/useResponsive'
+import { createClientLogger } from '@/lib/client-logger'
+import { isRecipe } from '@/lib/type-guards'
+import { validateOrderData } from '@/lib/validations/form-validations'
+
+
 import { calculateOrderTotal, normalizePriority } from './utils'
+
+import type { Order, OrderFormData, OrderFormItem, Priority } from './types'
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
+import type { Row } from '@/types/database'
 
 interface EnhancedOrderFormProps {
     order?: Order
@@ -75,11 +78,11 @@ const EnhancedOrderForm = ({
     useEffect(() => {
         if (order) {
             setFormData({
-                customer_name: order.customer_name ?? '',
+                customer_name: order['customer_name'] ?? '',
                 customer_phone: order.customer_phone ?? '',
-                // customer_email: order.customer_name || '', // Field doesn't exist in DB
+                // customer_email: order['customer_name'] || '', // Field doesn't exist in DB
                 customer_address: order.customer_address ?? '',
-                delivery_date: order.delivery_date ? order.delivery_date.split('T')[0] : '',
+                delivery_date: order.delivery_date ? (order.delivery_date.split('T')[0] as string) : '',
                 delivery_time: order.delivery_time ?? '10:00',
                 priority: normalizePriority(order.priority),
                 notes: order.notes ?? '',
@@ -118,15 +121,15 @@ const EnhancedOrderForm = ({
             })
             if (!response.ok) { return }
 
-            const payload = await response.json()
+            const payload = await response.json() as unknown
             const recipeList: Recipe[] = Array.isArray(payload)
-                ? payload.filter((item): item is Recipe => isRecipe(item))
+                ? (payload as Recipe[]).filter((item) => isRecipe(item))
                 : []
 
             setRecipes(recipeList)
             setFilteredRecipes(recipeList)
-        } catch (err: unknown) {
-            logger.error({ err }, 'Error fetching recipes')
+        } catch (error: unknown) {
+            logger.error({ error }, 'Error fetching recipes')
         }
     }
 
@@ -158,7 +161,7 @@ const EnhancedOrderForm = ({
 
     const addRecipeToOrder = (recipe: Recipe) => {
         const existingIndex = formData.order_items.findIndex(
-            item => item.recipe_id === recipe.id
+            item => item.recipe_id === recipe['id']
         )
 
         if (existingIndex >= 0) {
@@ -174,7 +177,7 @@ const EnhancedOrderForm = ({
         } else {
             // Add new item
             const newItem: OrderFormItem = {
-                recipe_id: recipe.id,
+                recipe_id: recipe['id'],
                 product_name: recipe.name,
                 quantity: 1,
                 unit_price: recipe.selling_price ?? 0,
@@ -221,7 +224,7 @@ const EnhancedOrderForm = ({
 
     const canProceedToNextStep = () => {
         if (currentStep === 1) {
-            return formData.customer_name && formData.customer_phone
+            return formData['customer_name'] && formData.customer_phone
         }
         if (currentStep === 2) {
             return formData.delivery_date
@@ -249,7 +252,7 @@ const EnhancedOrderForm = ({
                         Nama Pelanggan *
                     </Label>
                     <Input
-                        value={formData.customer_name}
+                        value={formData['customer_name']}
                         onChange={(e) => handleInputChange('customer_name', e.target.value)}
                         placeholder="Masukkan nama pelanggan"
                         className="text-base"
@@ -412,7 +415,7 @@ const EnhancedOrderForm = ({
                         <div className="mt-3 max-h-60 overflow-y-auto space-y-2">
                             {filteredRecipes.map((recipe) => (
                                 <button
-                                    key={recipe.id}
+                                    key={recipe['id']}
                                     onClick={() => addRecipeToOrder(recipe)}
                                     className="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-muted transition-colors text-left"
                                 >

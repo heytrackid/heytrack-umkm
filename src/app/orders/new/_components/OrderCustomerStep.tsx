@@ -4,15 +4,16 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import type { Customer } from '@/types'
+
 import type { OrderFormData } from '@/app/orders/new/hooks/useOrderLogic'
+import type { Customer } from '@/types'
 
 
 
 interface OrderCustomerStepProps {
   formData: OrderFormData
   customers: Customer[]
-  onInputChange: (field: keyof OrderFormData, value: string | number | boolean) => void
+  onInputChange: (field: keyof OrderFormData, value: boolean | number | string) => void
   onSelectCustomer: (customer: Customer) => void
 }
 
@@ -28,7 +29,7 @@ const OrderCustomerStep = ({
       {customers.length > 0 && (
         <Select
           onValueChange={(value) => {
-            const customer = customers.find((c) => c.id === value)
+            const customer = customers.find((c) => c['id'] === value)
             if (customer) {
               onSelectCustomer(customer)
             }
@@ -39,7 +40,7 @@ const OrderCustomerStep = ({
           </SelectTrigger>
           <SelectContent>
             {customers.map((customer) => (
-              <SelectItem key={customer.id} value={customer.id}>
+              <SelectItem key={customer['id']} value={customer['id']}>
                 {customer.name}
               </SelectItem>
             ))}
@@ -53,7 +54,7 @@ const OrderCustomerStep = ({
         <Label htmlFor="customer_name">Nama Pelanggan *</Label>
         <Input
           id="customer_name"
-          value={formData.customer_name}
+          value={formData['customer_name']}
           onChange={(e) => onInputChange('customer_name', e.target.value)}
           required
         />

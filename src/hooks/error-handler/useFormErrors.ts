@@ -48,7 +48,7 @@ export function useFormErrors() {
   }, [])
 
   const clearAllErrors = useCallback(() => {
-    void setFieldErrors({})
+    setFieldErrors({})
   }, [])
 
   const hasErrors = Object.keys(fieldErrors).length > 0

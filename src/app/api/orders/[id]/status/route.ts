@@ -1,11 +1,15 @@
-import 'server-only'
-import { triggerWorkflow } from '@/lib/automation/workflows/index'
-import { createServiceRoleClient } from '@/utils/supabase/service-role'
-import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger } from '@/lib/logger'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import 'server-only'
+import { type NextRequest, NextResponse } from 'next/server'
+
+
+import { triggerWorkflow } from '@/lib/automation/workflows/index'
+import { apiLogger } from '@/lib/logger'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
+
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -17,10 +21,12 @@ export async function PUT(
   context: RouteContext
 ) {
   try {
-    const { id: orderId } = await context.params
+    const { id: orderId } = await context['params']
 
-    const body = await request.json()
+    const body = await request.json() as { status?: string; notes?: string }
     const { status, notes } = body
+
+    type OrderStatus = 'CANCELLED' | 'CONFIRMED' | 'DELIVERED' | 'IN_PROGRESS' | 'PENDING' | 'READY'
 
     // Validate required fields
     if (!status) {
@@ -58,7 +64,7 @@ export async function PUT(
       )
     }
 
-    const previousStatus = currentOrder.status
+    const previousStatus = currentOrder['status']
     let incomeRecordId = null
 
     // If transitioning to DELIVERED, create income record
@@ -69,9 +75,9 @@ export async function PUT(
           type: 'INCOME',
           category: 'Revenue',
           amount: currentOrder.total_amount || 0,
-          date: (currentOrder.delivery_date ?? currentOrder.order_date ?? new Date().toISOString().split('T')[0]),
-          reference: `Order #${currentOrder.order_no || ''}${currentOrder.customer_name ? ` - ${  currentOrder.customer_name}` : ''}`,
-          description: `Income from order ${currentOrder.order_no || ''}`,
+          date: (currentOrder.delivery_date ?? currentOrder.order_date ?? new Date().toISOString().split('T')[0]) as string,
+          reference: `Order #${currentOrder['order_no'] || ''}${currentOrder['customer_name'] ? ` - ${  currentOrder['customer_name']}` : ''}`,
+          description: `Income from order ${currentOrder['order_no'] || ''}`,
           user_id: currentOrder.user_id
         }])
         .select()
@@ -85,15 +91,15 @@ export async function PUT(
         )
       }
 
-      incomeRecordId = incomeRecord.id
-      apiLogger.info(`💰 Income record created for order ${currentOrder.order_no}: ${currentOrder.total_amount}`)
+      incomeRecordId = incomeRecord['id']
+      apiLogger.info(`💰 Income record created for order ${currentOrder['order_no']}: ${currentOrder.total_amount}`)
     }
 
     // Update order status with financial_record_id if income was created
     const { data: updatedOrder, error: updateError } = await supabase
       .from('orders')
       .update({
-        status,
+        status: status as OrderStatus,
         updated_at: new Date().toISOString(),
         ...(notes && { notes }),
         ...(incomeRecordId && { financial_record_id: incomeRecordId })
@@ -117,7 +123,7 @@ export async function PUT(
       )
     }
 
-    apiLogger.info(`🔄 Order ${currentOrder.order_no}: ${previousStatus} → ${status}`)
+    apiLogger.info(`🔄 Order ${currentOrder['order_no']}: ${previousStatus} → ${status}`)
 
     // TRIGGER AUTOMATION WORKFLOWS based on status change
     try {
@@ -150,8 +156,8 @@ export async function PUT(
         notes
       })
 
-    } catch (automationError) {
-      apiLogger.error({ error: automationError }, '⚠️ Automation trigger error (non-blocking):')
+    } catch (error) {
+      apiLogger.error({ error }, '⚠️ Automation trigger error (non-blocking):')
       // Don't fail the status update if automation fails
     }
 
@@ -161,15 +167,15 @@ export async function PUT(
       order: updatedOrder,
       status_change: {
         from: previousStatus ?? '',
-        to: status,
+        to: status as OrderStatus,
         timestamp: new Date().toISOString()
       },
       automation: {
         triggered: status === 'DELIVERED' || status === 'CANCELLED',
-        workflows: getTriggeredWorkflows(status, previousStatus ?? '')
+        workflows: getTriggeredWorkflows(status as OrderStatus, previousStatus ?? '')
       },
       financial: {
-        income_recorded: !!incomeRecordId,
+        income_recorded: Boolean(incomeRecordId),
         income_record_id: incomeRecordId,
         amount: incomeRecordId ? (currentOrder.total_amount ?? 0) : null
       },
@@ -191,7 +197,7 @@ export async function GET(
   context: RouteContext
 ) {
   try {
-    const { id: orderId } = await context.params
+    const { id: orderId } = await context['params']
 
     const supabase = createServiceRoleClient()
 
@@ -212,16 +218,16 @@ export async function GET(
     // Note: Status history would require a separate audit table in production
     // For now, return current status info
     const statusInfo = {
-      current_status: order.status,
-      status_display: order.status ? getStatusDisplay(order.status) : 'Unknown',
-      can_transition_to: order.status ? getValidTransitions(order.status) : [],
-      automation_enabled: order.status ? isAutomationEnabled(order.status) : false,
+      current_status: order['status'],
+      status_display: order['status'] ? getStatusDisplay(order['status']) : 'Unknown',
+      can_transition_to: order['status'] ? getValidTransitions(order['status']) : [],
+      automation_enabled: order['status'] ? isAutomationEnabled(order['status']) : false,
       updated_at: order.updated_at
     }
 
     return NextResponse.json({
-      order_id: order.id,
-      order_no: order.order_no,
+      order_id: order['id'],
+      order_no: order['order_no'],
       status_info: statusInfo
     })
 
@@ -259,7 +265,7 @@ function getStatusDisplay(status: string): string {
     'CANCELLED': 'Dibatalkan'
   }
 
-  return statusMap[status] || status
+  return statusMap[status] ?? status
 }
 
 function getValidTransitions(currentStatus: string): string[] {
@@ -272,7 +278,7 @@ function getValidTransitions(currentStatus: string): string[] {
     'CANCELLED': []  // Final status
   }
 
-  return transitions[currentStatus] || []
+  return transitions[currentStatus] ?? []
 }
 
 function isAutomationEnabled(status: string): boolean {

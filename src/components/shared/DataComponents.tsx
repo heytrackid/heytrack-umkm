@@ -1,13 +1,5 @@
 'use client'
 
-import { useState, useEffect, type ReactNode } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
 import {
   Search,
   Filter,
@@ -20,6 +12,15 @@ import {
   SortAsc,
   SortDesc
 } from 'lucide-react'
+import { useState, useEffect, type ReactNode } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 // Search Component
 interface SearchInputProps {
@@ -42,7 +43,7 @@ export const SearchInput = ({
   const [localValue, setLocalValue] = useState(value)
 
   useEffect(() => {
-    void setLocalValue(value)
+    setLocalValue(value)
   }, [value])
 
   useEffect(() => {
@@ -56,7 +57,7 @@ export const SearchInput = ({
   }, [localValue, value, onChange, debounceMs])
 
   const handleClear = () => {
-    void setLocalValue('')
+    setLocalValue('')
     onChange('')
   }
 

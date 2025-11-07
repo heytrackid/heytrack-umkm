@@ -1,7 +1,8 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { type ReactNode, memo } from 'react'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 /**
  * Memoized Card Components
@@ -12,7 +13,7 @@ import { type ReactNode, memo } from 'react'
 
 interface StatCardProps {
   title: string
-  value: string | number
+  value: number | string
   description?: string
   icon?: ReactNode
   trend?: {

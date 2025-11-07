@@ -1,7 +1,8 @@
+import { CacheInvalidator } from '@/lib/cache/cache-manager'
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+
 import type {WorkflowResult, WorkflowContext } from '@/types/features/automation'
-import { CacheInvalidator } from '@/lib/cache/cache-manager'
 
 /**
  * Financial Workflow Handlers
@@ -16,7 +17,7 @@ export class FinancialWorkflowHandlers {
   static handleIngredientPriceChanged(context: WorkflowContext): WorkflowResult {
     const { event, logger } = context
 
-    if (!event.data || typeof event.data !== 'object') {
+    if (!event['data'] || typeof event['data'] !== 'object') {
       return {
         success: false,
         message: 'Invalid price change event data',
@@ -78,7 +79,7 @@ export class FinancialWorkflowHandlers {
   static handleOperationalCostChanged(context: WorkflowContext): WorkflowResult {
     const { event, logger } = context
 
-    if (!event.data || typeof event.data !== 'object') {
+    if (!event['data'] || typeof event['data'] !== 'object') {
       return {
         success: false,
         message: 'Invalid cost change event data',
@@ -107,7 +108,7 @@ export class FinancialWorkflowHandlers {
       const costChange = ((newAmount - oldAmount) / oldAmount) * 100
 
       // Send notifications
-      void this.sendCostChangeNotification(data, costChange)
+      this.sendCostChangeNotification(data, costChange)
 
       // Trigger pricing reviews for significant changes
       if (Math.abs(costChange) > 10) {
@@ -172,8 +173,8 @@ export class FinancialWorkflowHandlers {
       }
 
       automationLogger.info({ notificationData }, 'Price change notification sent')
-    } catch (err: unknown) {
-      automationLogger.debug({ err: getErrorMessage(err) }, 'Notification system not available')
+    } catch (error) {
+      automationLogger.debug({ error: getErrorMessage(error) }, 'Notification system not available')
     }
   }
 
@@ -214,8 +215,8 @@ export class FinancialWorkflowHandlers {
       }
 
       automationLogger.info({ generalNotification }, 'Cost change notification sent')
-    } catch (err: unknown) {
-      automationLogger.debug({ err: getErrorMessage(err) }, 'Notification system not available')
+    } catch (error) {
+      automationLogger.debug({ error: getErrorMessage(error) }, 'Notification system not available')
     }
   }
 
@@ -226,7 +227,7 @@ export class FinancialWorkflowHandlers {
     const { event, logger } = context
 
     try {
-      logger.info({ eventData: event.data }, 'HPP recalculation workflow triggered')
+      logger.info({ eventData: event['data'] }, 'HPP recalculation workflow triggered')
 
       // Invalidate HPP caches
       const invalidator = new CacheInvalidator()
@@ -234,8 +235,11 @@ export class FinancialWorkflowHandlers {
       void invalidator.execute()
 
       // Trigger HPP recalculation for affected recipes
-      const affectedRecipeIds = event.data && typeof event.data === 'object' && 'affectedRecipeIds' in event.data
-        ? event.data.affectedRecipeIds
+      const eventData = typeof event['data'] === 'object' && event['data'] !== null
+        ? event['data'] as Record<string, unknown>
+        : null
+      const affectedRecipeIds = Array.isArray(eventData?.['affectedRecipeIds'])
+        ? eventData['affectedRecipeIds']
         : undefined
 
       if (affectedRecipeIds && Array.isArray(affectedRecipeIds)) {
@@ -253,9 +257,9 @@ export class FinancialWorkflowHandlers {
           affectedRecipes: (affectedRecipeIds && Array.isArray(affectedRecipeIds)) ? affectedRecipeIds.length : 0
         }
       }
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err)
-      logger.error({ err: errorMessage }, 'HPP recalculation workflow failed')
+    } catch (error) {
+      const errorMessage = getErrorMessage(error)
+      logger.error({ error: errorMessage }, 'HPP recalculation workflow failed')
 
       return {
         success: false,

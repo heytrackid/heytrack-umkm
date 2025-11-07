@@ -1,12 +1,15 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import { apiLogger } from '@/lib/logger'
-import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
-import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
+import { apiLogger } from '@/lib/logger'
+import { PaginationQuerySchema } from '@/lib/validations/domains/common'
+import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
+import { createClient } from '@/utils/supabase/server'
+
 
 // GET /api/hpp/calculations - Get HPP calculations with pagination and filtering
 export async function GET(request: NextRequest) {
@@ -43,13 +46,13 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { page, limit, search, sort_by, sort_order } = queryValidation.data
+    const { page, limit, search, sort_by, sort_order } = queryValidation['data']
     const recipeId = searchParams.get('recipe_id')
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
 
     // Create cache key based on query parameters
-    const cacheKey = `${cacheKeys.hpp.calculations}:${user.id}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${startDate ?? ''}:${endDate ?? ''}`
+    const cacheKey = `${cacheKeys.hpp.calculations}:${user['id']}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${startDate ?? ''}:${endDate ?? ''}`
 
     // Wrap database query with caching
     const getCalculations = async () => {
@@ -63,7 +66,7 @@ export async function GET(request: NextRequest) {
             category
           )
         `, { count: 'exact' })
-        .eq('user_id', user.id)
+        .eq('user_id', user['id'])
 
       // Apply filters
       if (recipeId) {
@@ -110,15 +113,15 @@ export async function GET(request: NextRequest) {
     const result = await withCache(getCalculations, cacheKey, 300) // 5 minutes cache
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       count: result.calculations.length,
       total: result.total
     }, 'HPP calculations retrieved successfully')
 
     return NextResponse.json(result)
 
-  } catch (err: unknown) {
-    apiLogger.error({ error: err }, 'Error fetching HPP calculations')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error fetching HPP calculations')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -143,7 +146,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
+    const body = await request.json() as { recipeId?: string }
     const { recipeId } = body
 
     if (!recipeId) {
@@ -155,13 +158,13 @@ export async function POST(request: NextRequest) {
 
     // Calculate HPP using consolidated service
     const hppService = new HppCalculatorService()
-    const calculationResult = await hppService.calculateRecipeHpp(supabase, recipeId, user.id)
+    const calculationResult = await hppService.calculateRecipeHpp(supabase, recipeId, user['id'])
 
     // Invalidate cache
     cacheInvalidation.hpp()
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       recipeId,
       hppValue: calculationResult.total_hpp
     }, 'HPP calculation created successfully')
@@ -171,8 +174,8 @@ export async function POST(request: NextRequest) {
       calculation: calculationResult
     })
 
-  } catch (err: unknown) {
-    apiLogger.error({ error: err }, 'Error creating HPP calculation')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error creating HPP calculation')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

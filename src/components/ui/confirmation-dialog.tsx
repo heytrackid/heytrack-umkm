@@ -1,7 +1,8 @@
 'use client'
 
-import { Button } from "@/components/ui/button"
 import { AlertTriangle, Trash2, CheckCircle, type LucideIcon } from "lucide-react"
+import { useState } from 'react'
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,6 +13,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
+import { LoadingButton } from "@/components/ui/loading-button"
 
 interface ConfirmationDialogProps {
   open: boolean
@@ -21,7 +24,7 @@ interface ConfirmationDialogProps {
   confirmText?: string
   cancelText?: string
   variant?: 'default' | 'destructive' | 'success' | 'warning'
-  onConfirm: () => void | Promise<void>
+  onConfirm: () => Promise<void> | void
   loading?: boolean
   icon?: LucideIcon
 }
@@ -61,12 +64,21 @@ export const ConfirmationDialog = ({
   loading = false,
   icon
 }: ConfirmationDialogProps) => {
-  const config = variantConfig[variant]
-  const IconComponent = icon ?? config.icon
+   const _config = variantConfig[variant]
+   const IconComponent = icon ?? _config.icon
+  const [internalLoading, setInternalLoading] = useState(false)
+  const isLoading = loading || internalLoading
 
   const handleConfirm = async () => {
-    await onConfirm()
-    onOpenChange(false)
+    try {
+      setInternalLoading(true)
+      await onConfirm()
+      onOpenChange(false)
+    } catch (_error) {
+      // Error handling is done by the caller
+    } finally {
+      setInternalLoading(false)
+    }
   }
 
   const getBgColor = () => {
@@ -82,7 +94,7 @@ export const ConfirmationDialog = ({
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
             <div className={`rounded-full p-2 ${getBgColor()}`}>
-              <IconComponent className={`h-5 w-5 ${config.iconColor}`} />
+              <IconComponent className={`h-5 w-5 ${_config.iconColor}`} />
             </div>
             <AlertDialogTitle className="text-left">{title}</AlertDialogTitle>
           </div>
@@ -92,25 +104,21 @@ export const ConfirmationDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter className="flex flex-row gap-2 justify-end">
           <AlertDialogCancel asChild>
-            <Button variant="outline" disabled={loading}>
+            <Button variant="outline" disabled={isLoading}>
               {cancelText ?? "Batal"}
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
-            <Button
-              className={config.confirmButtonClass}
+            <LoadingButton
+              className={_config.confirmButtonClass}
               onClick={handleConfirm}
-              disabled={loading}
+              loading={isLoading}
+              loadingText="Memproses..."
+              hapticFeedback
+              hapticType="medium"
             >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Informasi
-                </>
-              ) : (
-                confirmText ?? "Konfirmasi"
-              )}
-            </Button>
+              {confirmText ?? "Konfirmasi"}
+            </LoadingButton>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -118,9 +126,58 @@ export const ConfirmationDialog = ({
   )
 }
 
+// Specialized confirmation dialogs for common actions
+export const DeleteConfirmationDialog = ({
+  open,
+  onOpenChange,
+  itemName,
+  onConfirm,
+  loading = false
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  itemName: string
+  onConfirm: () => Promise<void> | void
+  loading?: boolean
+}) => (
+  <ConfirmationDialog
+    open={open}
+    onOpenChange={onOpenChange}
+    title="Hapus Item"
+    description={`Apakah Anda yakin ingin menghapus "${itemName}"? Tindakan ini tidak dapat dibatalkan.`}
+    confirmText="Ya, Hapus"
+    variant="destructive"
+    onConfirm={onConfirm}
+    loading={loading}
+  />
+)
+
+export const CancelConfirmationDialog = ({
+  open,
+  onOpenChange,
+  onConfirm,
+  loading = false
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: () => Promise<void> | void
+  loading?: boolean
+}) => (
+  <ConfirmationDialog
+    open={open}
+    onOpenChange={onOpenChange}
+    title="Batalkan Perubahan"
+    description="Anda memiliki perubahan yang belum disimpan. Apakah Anda yakin ingin membatalkan?"
+    confirmText="Ya, Batalkan"
+    variant="warning"
+    onConfirm={onConfirm}
+    loading={loading}
+  />
+)
+
 // Hook for easy usage
 export function useConfirmationDialog() {
-  const confirm = (options: Omit<ConfirmationDialogProps, 'open' | 'onOpenChange'>) => new Promise<boolean>((resolve) => {
+  const confirm = (options: Omit<ConfirmationDialogProps, 'onOpenChange' | 'open'>) => new Promise<boolean>((resolve) => {
     // Implementation akan menggunakan state management untuk dialog
     // Untuk sekarang, kita akan return Promise yang resolve dengan hasil
     // eslint-disable-next-line no-alert -- Using native confirm as fallback until proper dialog is implemented

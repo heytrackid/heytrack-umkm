@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { enhancedCache } from '@/lib/enhanced-cache'
+
 import { createClientLogger } from '@/lib/client-logger'
+import { enhancedCache } from '@/lib/enhanced-cache'
 
 const cacheLogger = createClientLogger('CacheHook')
 
@@ -101,13 +102,13 @@ export const useAsyncCache = <T>(key: string, fetcher: () => Promise<T>, ttl?: n
           enhancedCache.set(key, freshData, ttl)
           setLoading(false)
         }
-      } catch (err) {
-        const error = err as Error
+      } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error(String(error))
         if (mountedRef.current) {
-          setError(error)
+          setError(normalizedError)
           setLoading(false)
         }
-        cacheLogger.error({ error: error.message, key }, 'Cache fetch error')
+        cacheLogger.error({ error: normalizedError.message, key }, 'Cache fetch error')
         
         // Try to return stale data if available
         try {
@@ -143,13 +144,13 @@ export const useAsyncCache = <T>(key: string, fetcher: () => Promise<T>, ttl?: n
         enhancedCache.set(key, freshData, ttl)
         setLoading(false)
       }
-    } catch (err) {
-      const error = err as Error
+    } catch (error) {
+      const normalizedError = error instanceof Error ? error : new Error(String(error))
       if (mountedRef.current) {
-        setError(error)
+        setError(normalizedError)
         setLoading(false)
       }
-      cacheLogger.error({ error: error.message, key }, 'Cache refresh error')
+      cacheLogger.error({ error: normalizedError.message, key }, 'Cache refresh error')
     }
   }
 

@@ -1,6 +1,6 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/database'
 import type { Recipe, Ingredient, RecipeIngredient } from '@/types'
+import type { Database } from '@/types/database'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export type { Recipe, Ingredient, RecipeIngredient }
 
@@ -58,8 +58,8 @@ export interface SmartPricingResult {
   recommendations: string[]
 }
 
-export type InventoryStatus = 'critical' | 'low' | 'adequate' | 'overstocked'
-export type ReorderUrgency = 'urgent' | 'soon' | 'normal'
+export type InventoryStatus = 'adequate' | 'critical' | 'low' | 'overstocked'
+export type ReorderUrgency = 'normal' | 'soon' | 'urgent'
 
 export interface ReorderRecommendation {
   shouldReorder: boolean
@@ -156,7 +156,7 @@ export interface FinancialTrend {
 }
 
 export interface FinancialAlert {
-  type: 'critical' | 'warning' | 'info'
+  type: 'critical' | 'info' | 'warning'
   message: string
   metric: string
   value: number
@@ -170,9 +170,9 @@ export interface FinancialAnalysis {
   recommendations: string[]
 }
 
-export type NotificationType = 'info' | 'warning' | 'error' | 'success' | 'alert'
-export type NotificationCategory = 'inventory' | 'production' | 'financial' | 'orders' | 'system'
-export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent'
+export type NotificationType = 'alert' | 'error' | 'info' | 'success' | 'warning'
+export type NotificationCategory = 'financial' | 'inventory' | 'orders' | 'production' | 'system'
+export type NotificationPriority = 'high' | 'low' | 'medium' | 'urgent'
 
 export interface SmartNotification {
   type: NotificationType
@@ -181,7 +181,7 @@ export interface SmartNotification {
   title: string
   message: string
   data?: Record<string, unknown>
-  status?: 'pending' | 'sent' | 'failed'
+  status?: 'failed' | 'pending' | 'sent'
 }
 
 export type WorkflowEvent = string
@@ -203,6 +203,6 @@ export interface WorkflowResult {
 export interface WorkflowContext {
   event: WorkflowEventData
   supabase: SupabaseClient<Database> | null
-  logger: Record<'info' | 'warn' | 'error' | 'debug', (...args: unknown[]) => unknown>
+  logger: Record<'debug' | 'error' | 'info' | 'warn', (...args: unknown[]) => unknown>
   config: AutomationConfig
 }

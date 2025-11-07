@@ -1,8 +1,9 @@
 'use client'
 
-import { toast as sonnerToast } from 'sonner'
-import { Button } from '@/components/ui/button'
 import { CheckCircle2, XCircle, AlertCircle, Info, Undo2 } from 'lucide-react'
+import { toast as sonnerToast } from 'sonner'
+
+import { Button } from '@/components/ui/button'
 
 export interface ToastAction {
   label: string
@@ -14,7 +15,7 @@ export interface EnhancedToastOptions {
   description?: string
   action?: ToastAction
   duration?: number
-  type?: 'success' | 'error' | 'warning' | 'info'
+  type?: 'error' | 'info' | 'success' | 'warning'
 }
 
 const getIcon = (type: string) => {
@@ -127,7 +128,7 @@ export function undoableToast({
 }: {
   title: string
   description?: string
-  onUndo: () => void | Promise<void>
+  onUndo: () => Promise<void> | void
   duration?: number
 }) {
   return sonnerToast.custom(

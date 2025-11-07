@@ -1,4 +1,4 @@
-import WhatsAppTemplatesLayout from './components/WhatsAppTemplatesLayout'
+import WhatsAppTemplatesLayout from '@/app/orders/whatsapp-templates/components/WhatsAppTemplatesLayout'
 
 // WhatsApp Templates Page - Order Management
 // Manage WhatsApp message templates for order communication

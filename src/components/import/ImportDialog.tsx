@@ -1,5 +1,9 @@
 'use client'
+import { Upload, Download, FileText, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { useState, useRef } from 'react'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import {
     Dialog,
     DialogContent,
@@ -7,9 +11,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Upload, Download, FileText, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { uiLogger } from '@/lib/logger'
 
@@ -116,9 +117,9 @@ export const ImportDialog = ({
         const link = document.createElement('a')
         link.href = templateUrl
         link.download = templateFilename
-        document.body.appendChild(link)
+        document['body'].appendChild(link)
         link.click()
-        document.body.removeChild(link)
+        document['body'].removeChild(link)
     }
 
     const handleClose = () => {

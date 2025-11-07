@@ -1,10 +1,12 @@
 'use client'
 
-import { useDashboardSchedule } from '@/hooks/useDashboardSchedule'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
 import { AlertCircle, Clock, Package, TrendingUp } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useDashboardSchedule } from '@/hooks/useDashboardSchedule'
+
 
 
 
@@ -123,7 +125,7 @@ export const ProductionScheduleWidget = () => {
                                 }
                                 
                                 return (
-                                <div key={batch.id} className="flex items-center justify-between border-b pb-3 last:border-0">
+                                <div key={batch['id']} className="flex items-center justify-between border-b pb-3 last:border-0">
                                     <div className="flex-1">
                                         <p className="font-medium">{batch.recipe.name}</p>
                                         <p className="text-sm text-muted-foreground">
@@ -152,11 +154,11 @@ export const ProductionScheduleWidget = () => {
                     {pending_orders && pending_orders.length > 0 ? (
                         <div className="space-y-4">
                             {pending_orders.slice(0, 5).map((order) => (
-                                <div key={order.id} className="flex items-center justify-between border-b pb-3 last:border-0">
+                                <div key={order['id']} className="flex items-center justify-between border-b pb-3 last:border-0">
                                     <div className="flex-1">
-                                        <p className="font-medium">{order.order_no}</p>
+                                        <p className="font-medium">{order['order_no']}</p>
                                         <p className="text-sm text-muted-foreground">
-                                            {order.customer_name ?? 'No customer'} • {order.delivery_date ?? 'No date'}
+                                            {order['customer_name'] ?? 'No customer'} • {order.delivery_date ?? 'No date'}
                                         </p>
                                     </div>
                                     {order.production_priority === 'URGENT' && (

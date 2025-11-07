@@ -25,7 +25,7 @@ export function usePasswordValidation(password: string) {
     strengthColors,
     strengthLabels,
     passwordRequirements,
-    currentStrengthColor: strengthColors[passwordStrength - 1] || 'bg-red-500',
-    currentStrengthLabel: strengthLabels[passwordStrength - 1] || 'Sangat Lemah'
+    currentStrengthColor: strengthColors[passwordStrength - 1] ?? 'bg-red-500',
+    currentStrengthLabel: strengthLabels[passwordStrength - 1] ?? 'Sangat Lemah'
   }
 }

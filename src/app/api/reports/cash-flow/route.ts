@@ -1,11 +1,14 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
- import { apiLogger } from '@/lib/logger'
- import { safeParseAmount, safeString } from '@/lib/api-helpers'
- import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+ import { safeParseAmount, safeString } from '@/lib/api-helpers'
+ import { apiLogger } from '@/lib/logger'
+ import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
 
 // Partial type for cash flow queries (only fields we fetch)
 interface FinancialRecordPartial {
@@ -92,7 +95,7 @@ async function getHandler(request: NextRequest) {
     const { data: transactions, error: transError } = await supabase
       .from('financial_records')
       .select('id, date, description, category, amount, reference')
-      .eq('user_id', user.id) // ✅ RLS enforcement
+      .eq('user_id', user['id']) // ✅ RLS enforcement
       .gte('date', startDate)
       .lte('date', endDate)
       .order('date', { ascending: true })
@@ -106,7 +109,7 @@ async function getHandler(request: NextRequest) {
     }
 
     // Separate income and expenses
-    const validTransactions = (transactions || []).filter((t: FinancialRecordPartial) => t.date !== null)
+    const validTransactions = (transactions ?? []).filter((t: FinancialRecordPartial) => t.date !== null)
     const income = validTransactions.filter((t: FinancialRecordPartial) => t.category === 'Revenue')
     const expenses = validTransactions.filter((t: FinancialRecordPartial) => t.category !== 'Revenue')
 
@@ -129,16 +132,16 @@ async function getHandler(request: NextRequest) {
     if (compare) {
       comparison = await calculateComparison(
         supabase,
-        user.id, // ✅ Pass user_id
-        startDate,
-        endDate
+        user['id'], // ✅ Pass user_id
+        startDate ?? '',
+        endDate ?? ''
       )
     }
 
     // Transform transactions for frontend
     const transactionsList = validTransactions.map((t: FinancialRecordPartial) => ({
-      id: t.id,
-      reference_id: t.reference ?? t.id,
+      id: t['id'],
+      reference_id: t.reference ?? t['id'],
       date: t.date ?? '',
       description: safeString(t.description),
       category: safeString(t.category),
@@ -162,7 +165,7 @@ async function getHandler(request: NextRequest) {
         transaction_count: {
           income: income.length,
           expenses: expenses.length,
-          total: transactions?.length || 0
+          total: transactions?.length ?? 0
         }
       },
       transactions: transactionsList,
@@ -177,8 +180,8 @@ async function getHandler(request: NextRequest) {
 
     return NextResponse.json(response)
 
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error generating cash flow report:')
+  } catch (error) {
+    apiLogger.error({ error }, 'Error generating cash flow report:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -209,7 +212,7 @@ function groupByPeriod(transactions: FinancialRecordPartial[], period: string) {
         weekStart.setDate(date.getDate() - date.getDay())
         key = Number.isNaN(weekStart.getTime())
           ? ''
-          : weekStart.toISOString().split('T')[0]
+          : weekStart.toISOString().split('T')[0] ?? ''
         break
       }
       case 'monthly':
@@ -224,17 +227,20 @@ function groupByPeriod(transactions: FinancialRecordPartial[], period: string) {
         key = transaction.date ?? ''
     }
 
-    if (!grouped[key]) {
-      grouped[key] = {
-        period: key,
-        income: 0,
-        expenses: 0,
-        net_cash_flow: 0,
-        transaction_count: 0
-      }
+    grouped[key] ??= {
+      period: key,
+      income: 0,
+      expenses: 0,
+      net_cash_flow: 0,
+      transaction_count: 0
     }
 
-    const currentGroup = grouped[key]
+    const currentGroup = grouped[key] ?? {
+      income: 0,
+      expenses: 0,
+      net_cash_flow: 0,
+      transaction_count: 0
+    }
     const amount = safeParseAmount(transaction.amount)
     if (transaction.category === 'Revenue') {
       currentGroup.income += amount
@@ -258,26 +264,22 @@ function calculateCategoryBreakdown(transactions: FinancialRecordPartial[]) {
     const category = safeString(transaction.category)
     const subcategory = 'Other' // No subcategory in financial_records
 
-    if (!breakdown[category]) {
-      breakdown[category] = {
-        category,
-        total: 0,
-        count: 0,
-        percentage: 0,
-        subcategories: {} as Record<string, Subcategory>
-      }
+    breakdown[category] ??= {
+      category,
+      total: 0,
+      count: 0,
+      percentage: 0,
+      subcategories: {} as Record<string, Subcategory>
     }
 
     const amount = safeParseAmount(transaction.amount)
     breakdown[category].total += amount
     breakdown[category].count++
 
-    if (!breakdown[category].subcategories[subcategory]) {
-      breakdown[category].subcategories[subcategory] = {
-        name: subcategory,
-        total: 0,
-        count: 0
-      }
+    breakdown[category].subcategories[subcategory] ??= {
+      name: subcategory,
+      total: 0,
+      count: 0
     }
     breakdown[category].subcategories[subcategory].total += amount
     breakdown[category].subcategories[subcategory].count++
@@ -308,7 +310,7 @@ function groupByCategory(transactions: FinancialRecordPartial[]) {
   const grouped: Record<string, number> = {}
   transactions.forEach(t => {
     const category = safeString(t.category)
-    grouped[category] = (grouped[category] || 0) + safeParseAmount(t.amount)
+    grouped[category] = (grouped[category] ?? 0) + safeParseAmount(t.amount)
   })
   return grouped
 }
@@ -319,7 +321,7 @@ function calculateTrend(cashFlowByPeriod: PeriodCashFlow[]) {
     return {
       direction: 'stable' as const,
       change_percentage: 0,
-      average_cash_flow: cashFlowByPeriod[0]?.net_cash_flow || 0
+      average_cash_flow: cashFlowByPeriod[0]?.net_cash_flow ?? 0
     }
   }
 
@@ -342,7 +344,7 @@ function calculateTrend(cashFlowByPeriod: PeriodCashFlow[]) {
 
   const avgCashFlow = cashFlowByPeriod.reduce((sum: number, p) => sum + p.net_cash_flow, 0) / cashFlowByPeriod.length
 
-  let direction: 'increasing' | 'decreasing' | 'stable' = 'stable'
+  let direction: 'decreasing' | 'increasing' | 'stable' = 'stable'
   if (change > 0) {
     direction = 'increasing'
   } else if (change < 0) {

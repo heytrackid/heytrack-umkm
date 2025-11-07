@@ -1,11 +1,14 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { isValidUUID, isProductionBatch, extractFirst, isRecord, safeString } from '@/lib/type-guards'
+import { createClient } from '@/utils/supabase/server'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
 
 export async function PUT(
   request: NextRequest,
@@ -27,14 +30,14 @@ export async function PUT(
       throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
-    const body = await request.json()
+    const body = await request.json() as Record<string, unknown>
 
     // ✅ Update with RLS (user_id filter)
     const { data: batch, error } = await supabase
       .from('productions')
       .update(body)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select(`
         *,
         recipe:recipes(name)
@@ -42,10 +45,10 @@ export async function PUT(
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         throw new APIError('Production batch not found', { status: 404, code: 'NOT_FOUND' })
       }
-      apiLogger.error({ error, userId: user.id, batchId: id }, 'Failed to update production batch')
+      apiLogger.error({ error, userId: user['id'], batchId: id }, 'Failed to update production batch')
       throw error
     }
 
@@ -62,7 +65,7 @@ export async function PUT(
     // ✅ Map database columns to expected format
     const mappedBatch = {
       ...batch,
-      batch_number: batch.id.slice(0, 8).toUpperCase(),
+      batch_number: batch['id'].slice(0, 8).toUpperCase(),
       planned_date: batch.created_at,
       actual_cost: batch.total_cost,
       recipe_name: recipeName,
@@ -100,10 +103,10 @@ export async function DELETE(
       .from('productions')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (error) {
-      apiLogger.error({ error, userId: user.id, batchId: id }, 'Failed to delete production batch')
+      apiLogger.error({ error, userId: user['id'], batchId: id }, 'Failed to delete production batch')
       throw error
     }
 

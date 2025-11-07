@@ -1,11 +1,16 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-import { createClient } from '@/utils/supabase/server'
-import type { Row } from '@/types/database'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { NotificationInsertSchema } from '@/lib/validations/domains/notification'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Insert, Json, Row } from '@/types/database'
+
 
 type Notification = Row<'notifications'>
 
@@ -29,7 +34,7 @@ async function GET(request: NextRequest) {
     let query = supabase
       .from('notifications')
       .select('id, user_id, title, message, type, is_read, created_at, updated_at, metadata')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .order('created_at', { ascending: false })
       .limit(limit)
 
@@ -46,10 +51,10 @@ async function GET(request: NextRequest) {
     // Filter out expired notifications
     query = query.or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
 
-    const { data, error } = await query
+    const { data, error } = await query.returns<Notification[]>()
 
     if (error) {
-      apiLogger.error({ error, userId: user.id }, 'Failed to fetch notifications')
+      apiLogger.error({ error, userId: user['id'] }, 'Failed to fetch notifications')
       return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 })
     }
 
@@ -57,13 +62,13 @@ async function GET(request: NextRequest) {
     const { count: unreadCount } = await supabase
       .from('notifications')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .eq('is_read', false)
       .eq('is_dismissed', false)
       .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
 
     return NextResponse.json({
-      notifications: data as Notification[],
+      notifications: data,
       unread_count: unreadCount ?? 0,
     })
 
@@ -81,20 +86,37 @@ async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    const body = await request.json()
+    }
+    const body: unknown = await request.json()
+
+    // Validate request body
+    const validation = NotificationInsertSchema.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: 'Invalid request data',
+          details: validation.error.issues
+        },
+        { status: 400 }
+      )
+    }
 
     // Create notification
+    const { metadata, ...notificationData } = validation['data']
+    const notificationPayload: Insert<'notifications'> = {
+      ...notificationData,
+      user_id: user['id'],
+      metadata: (metadata ?? null) as Json | null
+    }
+
     const { data, error } = await supabase
       .from('notifications')
-      .insert({
-        ...body,
-        user_id: user.id,
-      })
+      .insert(notificationPayload)
       .select()
       .single()
 
     if (error) {
-      apiLogger.error({ error, userId: user.id }, 'Failed to create notification')
+      apiLogger.error({ error, userId: user['id'] }, 'Failed to create notification')
       return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 })
     }
 

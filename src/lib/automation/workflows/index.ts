@@ -1,8 +1,10 @@
-import { automationLogger } from '@/lib/logger'
 import { BaseWorkflowAutomation } from '@/lib/automation/base-workflow'
-import { OrderWorkflowHandlers } from './order-workflows'
-import { InventoryWorkflowHandlers } from './inventory-workflows'
+import { automationLogger } from '@/lib/logger'
+
 import { FinancialWorkflowHandlers } from './financial-workflows'
+import { InventoryWorkflowHandlers } from './inventory-workflows'
+import { OrderWorkflowHandlers } from './order-workflows'
+
 import type { WorkflowEventData, WorkflowResult, AutomationConfig } from '@/types/features/automation'
 
 /**

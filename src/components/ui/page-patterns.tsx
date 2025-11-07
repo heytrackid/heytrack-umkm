@@ -1,7 +1,9 @@
-import type { ComponentType, ReactNode } from 'react'
-import { Button } from '@/components/ui/button'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+
+import { Button } from '@/components/ui/button'
+
+import type { ComponentType, ReactNode } from 'react'
 
 /**
  * Shared Page Patterns
@@ -74,7 +76,7 @@ export const PageActions = ({
 )
 
 interface AlertBannerProps {
-  type?: 'info' | 'warning' | 'error' | 'success'
+  type?: 'error' | 'info' | 'success' | 'warning'
   title?: string
   message: string
   icon?: ComponentType<{ className?: string }>

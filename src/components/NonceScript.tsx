@@ -1,4 +1,5 @@
 import Script from 'next/script'
+
 import { getNonce } from '@/lib/nonce'
 
 
@@ -13,7 +14,7 @@ export const NonceScript = async ({
 }: {
     children: string
     id?: string
-    strategy?: 'beforeInteractive' | 'afterInteractive' | 'lazyOnload'
+    strategy?: 'afterInteractive' | 'beforeInteractive' | 'lazyOnload'
 }) => {
     const nonce = await getNonce()
 

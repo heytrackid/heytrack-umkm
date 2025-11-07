@@ -1,17 +1,18 @@
 'use client'
 
+import { Info, Copy, Check } from 'lucide-react'
 import { useState, useEffect, type FormEvent } from 'react'
+
+import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, type WhatsAppTemplate, type TemplateFormData } from '@/app/orders/whatsapp-templates/components/types'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from '@/components/ui/accordion'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { uiLogger } from '@/lib/client-logger'
-import { Textarea } from '@/components/ui/textarea'
-import { Info, Copy, Check } from 'lucide-react'
-import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, type WhatsAppTemplate, type TemplateFormData } from './types'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from '@/components/ui/accordion'
+import { Textarea } from '@/components/ui/textarea'
+import { uiLogger } from '@/lib/client-logger'
 
 interface TemplateFormProps {
     showDialog: boolean
@@ -68,8 +69,8 @@ const TemplateForm = ({
         let match
 
         while ((match = variableRegex.exec(content)) !== null) {
-            const variable = match[1].trim()
-            variables.add(variable)
+            const variable = match[1]?.trim()
+            if (variable) {variables.add(variable)}
         }
 
         return Array.from(variables)
@@ -108,7 +109,7 @@ const TemplateForm = ({
             }
 
             const url = editingTemplate
-                ? `/api/whatsapp-templates/${editingTemplate.id}`
+                ? `/api/whatsapp-templates/${editingTemplate['id']}`
                 : '/api/whatsapp-templates'
 
             const method = editingTemplate ? 'PUT' : 'POST'

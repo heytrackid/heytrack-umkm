@@ -1,15 +1,19 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 /**
  * AI Chat Sessions API - List sessions
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { ChatSessionService } from '@/lib/services/ChatSessionService'
+
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { safeNumber } from '@/lib/type-guards'
+import { createClient } from '@/utils/supabase/server'
 
-export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,9 +34,9 @@ export async function GET(request: NextRequest) {
     const limit = safeNumber(searchParams.get('limit'), 20)
 
     // List sessions
-    const sessions = await ChatSessionService.listSessions(user.id, limit)
+    const sessions = await ChatSessionService.listSessions(user['id'], limit)
 
-    apiLogger.info({ userId: user.id, count: sessions.length }, 'Sessions listed')
+    apiLogger.info({ userId: user['id'], count: sessions.length }, 'Sessions listed')
 
     return NextResponse.json({ sessions })
   } catch (error: unknown) {

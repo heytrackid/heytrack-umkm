@@ -1,10 +1,13 @@
 'use client'
 
-import { createClient } from '@/utils/supabase/client'
 import { useCallback, useState } from 'react'
+
+import { typed } from '@/types/type-utilities'
+import { createClient } from '@/utils/supabase/client'
+
 import type { CRUDOptions } from './types'
 import type { TableName, Insert, Update } from '@/types/database'
-import { typed } from '@/types/type-utilities'
+
 
 /**
  * CRUD operations for Supabase tables
@@ -23,9 +26,9 @@ export function useSupabaseCRUD<T extends TableName>(
     customErrorHandler
   } = options
 
-  const handleError = useCallback((error: Error, _operation: 'create' | 'update' | 'delete') => {
+  const handleError = useCallback((error: Error, _operation: 'create' | 'delete' | 'update') => {
     const errorMessage = error.message || 'Terjadi kesalahan tak terduga'
-    void setError(errorMessage)
+    setError(errorMessage)
 
     if (customErrorHandler) {
       customErrorHandler(error, _operation)
@@ -34,24 +37,18 @@ export function useSupabaseCRUD<T extends TableName>(
     }
   }, [customErrorHandler, showErrorToast])
 
-  const handleSuccess = useCallback((_operation: 'create' | 'update' | 'delete') => {
-    void setError(null)
+  const handleSuccess = useCallback((_operation: 'create' | 'delete' | 'update') => {
+    setError(null)
 
     if (showSuccessToast) {
-      const _defaultMessages = {
-        create: 'Data berhasil ditambahkan',
-        update: 'Data berhasil diperbarui',
-        delete: 'Data berhasil dihapus'
-      }
-
       // Success toast would be shown here if needed
     }
      
   }, [showSuccessToast])
 
   const createRecord = useCallback(async (data: Insert<T>) => {
-    void setLoading(true)
-    void setError(null)
+    setLoading(true)
+    setError(null)
 
     try {
       const supabase = typed(createClient())
@@ -66,19 +63,19 @@ export function useSupabaseCRUD<T extends TableName>(
         throw new Error((error instanceof Error ? error.message : String(error)))
       }
 
-      void handleSuccess('create')
+      handleSuccess('create')
       return result
     } catch (error: unknown) {
-      void handleError(error as Error, 'create')
+      handleError(error as Error, 'create')
       throw error
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [table, handleError, handleSuccess])
 
   const updateRecord = useCallback(async (id: string, data: Update<T>) => {
-    void setLoading(true)
-    void setError(null)
+    setLoading(true)
+    setError(null)
 
     try {
       const supabase = typed(createClient())
@@ -98,19 +95,19 @@ export function useSupabaseCRUD<T extends TableName>(
         throw new Error('Data tidak ditemukan')
       }
 
-      void handleSuccess('update')
+      handleSuccess('update')
       return result
     } catch (error: unknown) {
-      void handleError(error as Error, 'update')
+      handleError(error as Error, 'update')
       throw error
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [table, handleError, handleSuccess])
 
   const deleteRecord = useCallback(async (id: string) => {
-    void setLoading(true)
-    void setError(null)
+    setLoading(true)
+    setError(null)
 
     try {
       const supabase = typed(createClient())
@@ -124,18 +121,18 @@ export function useSupabaseCRUD<T extends TableName>(
         throw new Error((error instanceof Error ? error.message : String(error)))
       }
 
-      void handleSuccess('delete')
+      handleSuccess('delete')
       return true
     } catch (error: unknown) {
-      void handleError(error as Error, 'delete')
+      handleError(error as Error, 'delete')
       throw error
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [table, handleError, handleSuccess])
 
   const clearError = useCallback(() => {
-    void setError(null)
+    setError(null)
   }, [])
 
   return {

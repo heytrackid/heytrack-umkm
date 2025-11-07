@@ -23,10 +23,10 @@ export interface PurchaseFormData {
 
 export interface PurchaseStats {
   title: string
-  value: string | number
+  value: number | string
   color: string
   bgColor: string
   description: string
 }
 
-export type AvailableIngredient = Pick<Ingredient, 'id' | 'name' | 'unit' | 'current_stock' | 'price_per_unit'>
+export type AvailableIngredient = Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>

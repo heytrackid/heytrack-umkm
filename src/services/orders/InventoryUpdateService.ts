@@ -1,9 +1,11 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { extractFirst } from '@/lib/type-guards'
-import type { Insert, Row } from '@/types/database'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
+
+import type { Insert, Row } from '@/types/database'
+
 
 
 
@@ -17,7 +19,7 @@ type Ingredient = Row<'ingredients'>
  */
 type RecipeIngredientsQueryResult = Recipe & {
   recipe_ingredients: Array<RecipeIngredient & {
-    ingredient: Array<Pick<Ingredient, 'id' | 'current_stock'>>  // Supabase returns arrays
+    ingredient: Array<Pick<Ingredient, 'current_stock' | 'id'>>  // Supabase returns arrays
   }>
 }
 
@@ -28,7 +30,7 @@ function isRecipeIngredientsResult(data: unknown): data is RecipeIngredientsQuer
   if (!data || typeof data !== 'object') {return false}
   const recipe = data as RecipeIngredientsQueryResult
   return (
-    typeof recipe.id === 'string' &&
+    typeof recipe['id'] === 'string' &&
     Array.isArray(recipe.recipe_ingredients)
   )
 }
@@ -86,7 +88,7 @@ export class InventoryUpdateService {
 
             // Create stock transaction record - trigger will auto-update current_stock
             const stockTransaction: Insert<'stock_transactions'> = {
-              ingredient_id: ingredient.id,
+              ingredient_id: ingredient['id'],
               type: 'USAGE',
               quantity: usedQuantity, // Positive value, trigger handles the deduction
               reference: order_id,
@@ -105,9 +107,9 @@ export class InventoryUpdateService {
 
             // Check and create inventory alert if needed (async, don't wait)
             const alertService = new InventoryAlertService()
-            alertService.checkIngredientAlert(ingredient.id, user_id)
-              .catch(err => {
-                dbLogger.error({ error: err }, 'Failed to check inventory alert')
+            alertService.checkIngredientAlert(ingredient['id'], user_id)
+              .catch(error => {
+                dbLogger.error({ error }, 'Failed to check inventory alert')
               })
           }
         }

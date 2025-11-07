@@ -1,6 +1,7 @@
-import { WhatsAppService } from './whatsapp'
-import { SmartNotificationSystem } from './notifications'
 import { CommunicationsManager } from './manager'
+import { SmartNotificationSystem } from './notifications'
+import { WhatsAppService } from './whatsapp'
+
 import type { SmartNotification } from './types'
 
 
@@ -38,7 +39,7 @@ export function sendWhatsAppMessage(to: string, templateId: string, data: Record
 /**
  * Create and send notification (convenience function)
  */
-export function sendNotification(notification: Omit<SmartNotification, 'id' | 'timestamp' | 'isRead' | 'type'>): void {
+export function sendNotification(notification: Omit<SmartNotification, 'id' | 'isRead' | 'timestamp' | 'type'>): void {
   const system = SmartNotificationSystem.getInstance();
   system.addNotification(notification);
 }

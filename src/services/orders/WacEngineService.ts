@@ -1,10 +1,12 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
+
 import type { Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-
+const normalizeError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error(String(error))
 
 // Use type instead of interface for consistency
 interface WacCalculation {
@@ -28,7 +30,7 @@ interface WacUpdateResult {
  * SERVER-ONLY: Uses server client for database operations
  */
 export class WacEngineService {
-  private logger = dbLogger
+  private readonly logger = dbLogger
   private supabase: SupabaseClient<Database> | null = null
 
   private async getSupabase() {
@@ -91,9 +93,10 @@ export class WacEngineService {
       this.logger.info({ ingredientId, currentWac }, 'WAC calculated for ingredient')
       return result
 
-    } catch (err: unknown) {
-      this.logger.error({ error: err }, `Failed to calculate WAC for ingredient ${ingredientId}`)
-      throw err
+    } catch (error) {
+      const normalizedError = normalizeError(error)
+      this.logger.error({ error: normalizedError }, `Failed to calculate WAC for ingredient ${ingredientId}`)
+      throw normalizedError
     }
   }
 
@@ -123,14 +126,15 @@ export class WacEngineService {
       }
 
       // Update ingredient's price_per_unit with new WAC if it differs significantly
-      await this.updateIngredientPriceIfNeeded(ingredientId, oldWac, newWac)
+      await this.updateIngredientPriceIfNeeded(ingredientId, newWac)
 
       this.logger.info({ ingredientId, oldWac, newWac }, 'WAC updated for ingredient')
       return result
 
-    } catch (err: unknown) {
-      this.logger.error({ error: err }, `Failed to update WAC for ingredient ${ingredientId}`)
-      throw err
+    } catch (error) {
+      const normalizedError = normalizeError(error)
+      this.logger.error({ error: normalizedError }, `Failed to update WAC for ingredient ${ingredientId}`)
+      throw normalizedError
     }
   }
 
@@ -147,14 +151,15 @@ export class WacEngineService {
 
       // Map results to ingredient IDs
       ingredientIds.forEach((id, index) => {
-        results[id] = wacResults[index]
+        results[id] = wacResults[index] ?? null
       })
 
       return results
 
-    } catch (err: unknown) {
-      this.logger.error({ error: err }, 'Failed to get batch WAC calculations')
-      throw err
+    } catch (error) {
+      const normalizedError = normalizeError(error)
+      this.logger.error({ error: normalizedError }, 'Failed to get batch WAC calculations')
+      throw normalizedError
     }
   }
 
@@ -163,7 +168,6 @@ export class WacEngineService {
    */
   private async updateIngredientPriceIfNeeded(
     ingredientId: string,
-    oldWac: number,
     newWac: number
   ): Promise<void> {
     try {
@@ -197,14 +201,15 @@ export class WacEngineService {
           .eq('id', ingredientId)
 
         if (updateError) {
-          this.logger.error({ err: updateError }, `Failed to update price for ingredient ${ingredientId}`)
+          this.logger.error({ error: updateError }, `Failed to update price for ingredient ${ingredientId}`)
         } else {
           this.logger.info(`Updated ingredient ${ingredientId} price from ${currentPrice} to ${newWac} (WAC change)`)
         }
       }
 
-    } catch (err: unknown) {
-      this.logger.error({ error: err }, `Failed to update ingredient price for ${ingredientId}`)
+    } catch (error) {
+      const normalizedError = normalizeError(error)
+      this.logger.error({ error: normalizedError }, `Failed to update ingredient price for ${ingredientId}`)
     }
   }
 
@@ -234,9 +239,9 @@ export class WacEngineService {
 
       // Recalculate WAC for each ingredient
       const promises = ingredients.map(ingredient =>
-        this.calculateIngredientWac(ingredient.id).then(wac => {
+        this.calculateIngredientWac(ingredient['id']).then(wac => {
           if (wac) {
-            return this.updateIngredientPriceIfNeeded(ingredient.id, 0, wac.currentWac)
+            return this.updateIngredientPriceIfNeeded(ingredient['id'], wac.currentWac)
           }
           return Promise.resolve()
         })
@@ -246,9 +251,10 @@ export class WacEngineService {
 
       this.logger.info(`WAC recalculated for ${ingredients.length} ingredients`)
 
-    } catch (err: unknown) {
-      this.logger.error({ error: err }, 'Failed to recalculate all WAC values')
-      throw err
+    } catch (error) {
+      const normalizedError = normalizeError(error)
+      this.logger.error({ error: normalizedError }, 'Failed to recalculate all WAC values')
+      throw normalizedError
     }
   }
 
@@ -308,15 +314,16 @@ export class WacEngineService {
         history.push({
           date: transaction.created_at ?? new Date().toISOString(),
           wac,
-          transactionId: transaction.id
+          transactionId: transaction['id']
         })
       }
 
       return history
 
-    } catch (err: unknown) {
-      this.logger.error({ error: err }, `Failed to get WAC history for ingredient ${ingredientId}`)
-      throw err
+    } catch (error) {
+      const normalizedError = normalizeError(error)
+      this.logger.error({ error: normalizedError }, `Failed to get WAC history for ingredient ${ingredientId}`)
+      throw normalizedError
     }
   }
 }

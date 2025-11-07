@@ -1,11 +1,12 @@
 'use client'
-import { useState, useRef, useEffect, type FormEvent } from 'react'
-import { useContextAwareChat } from '@/hooks/useContextAwareChat'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { MessageCircle, Send, Loader2, Plus, History, Sparkles, AlertCircle, Bot, User, X, Minimize2, Maximize2 } from 'lucide-react'
+import { useState, useRef, useEffect, type FormEvent } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { useContextAwareChat } from '@/hooks/useContextAwareChat'
 
 /** 
  * Context-Aware AI Chatbot Component - Enhanced UI/UX 
@@ -141,12 +142,12 @@ export const ContextAwareChatbot = () => {
                 ) : (
                   sessions.map((session) => (
                     <Button
-                      key={session.id}
-                      variant={sessionId === session.id ? 'secondary' : 'ghost'}
+                      key={session['id']}
+                      variant={sessionId === session['id'] ? 'secondary' : 'ghost'}
                       size="sm"
                       className="w-full justify-start text-left hover:bg-secondary/80"
                       onClick={() => {
-                        void loadSession(session.id)
+                        void loadSession(session['id'])
                         setShowSessions(false)
                       }}
                     >
@@ -234,7 +235,7 @@ export const ContextAwareChatbot = () => {
             <div className="space-y-4">
               {messages.map((message) => (
                 <div
-                  key={message.id}
+                  key={message['id']}
                   className={`flex gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.role === 'assistant' && (

@@ -1,12 +1,16 @@
 'use client'
 
-import React, { memo, useMemo } from 'react'
 import { Clock, DollarSign, Phone, Eye, Edit, Trash2 } from 'lucide-react'
+import { memo, useMemo } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { OrderStatusBadge, OrderProgress } from './OrderStatusBadge'
-import { useCurrency } from '@/hooks/useCurrency'
 import { VirtualizedTable } from '@/components/ui/virtualized-table'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import { OrderStatusBadge, OrderProgress } from './OrderStatusBadge'
+
+
 import type { Order } from '@/types'
 
 interface VirtualizedOrdersListProps {
@@ -21,15 +25,15 @@ interface VirtualizedOrdersListProps {
 // Cell renderers defined outside component to avoid unstable nested components
 const renderOrderNoCell = (order: Order) => (
   <div>
-    <div className="font-medium">{order.order_no}</div>
-    <div className="text-sm text-muted-foreground">{order.customer_name}</div>
+    <div className="font-medium">{order['order_no']}</div>
+    <div className="text-sm text-muted-foreground">{order['customer_name']}</div>
   </div>
 )
 
 const renderStatusCell = (order: Order) => (
   <div className="flex flex-col gap-1">
-    <OrderStatusBadge status={order.status ?? 'PENDING'} compact />
-    <OrderProgress currentStatus={order.status ?? 'PENDING'} />
+    <OrderStatusBadge status={order['status'] ?? 'PENDING'} compact />
+    <OrderProgress currentStatus={order['status'] ?? 'PENDING'} />
   </div>
 )
 
@@ -42,7 +46,7 @@ const renderDeliveryDateCell = (order: Order) => (
 
 const renderCustomerCell = (order: Order) => (
   <div>
-    <div>{order.customer_name}</div>
+    <div>{order['customer_name']}</div>
     {order.customer_phone && (
       <div className="flex items-center gap-1 text-sm text-muted-foreground">
         <Phone className="h-3 w-3" />
@@ -88,8 +92,8 @@ const renderActionsCell = (
 ) => (order: Order) => (
   <div className="flex items-center gap-2">
     <select
-      value={order.status ?? 'PENDING'}
-      onChange={(e) => onUpdateStatus(order.id, e.target.value)}
+      value={order['status'] ?? 'PENDING'}
+      onChange={(e) => onUpdateStatus(order['id'], e.target.value)}
       className="bg-transparent border border-input rounded px-2 py-1 text-sm"
     >
       <option value="PENDING">Menunggu</option>
@@ -99,16 +103,16 @@ const renderActionsCell = (
       <option value="DELIVERED">Terkirim</option>
       <option value="CANCELLED">Dibatalkan</option>
     </select>
-    <Button size="sm" variant="outline" onClick={() => onViewOrder(order.id)}>
+    <Button size="sm" variant="outline" onClick={() => onViewOrder(order['id'])}>
       <Eye className="h-4 w-4" />
     </Button>
-    <Button size="sm" variant="outline" onClick={() => onEditOrder(order.id)}>
+    <Button size="sm" variant="outline" onClick={() => onEditOrder(order['id'])}>
       <Edit className="h-4 w-4" />
     </Button>
     <Button
       size="sm"
       variant="outline"
-      onClick={() => onDeleteOrder(order.id)}
+      onClick={() => onDeleteOrder(order['id'])}
       className="text-red-500 hover:text-red-700"
     >
       <Trash2 className="h-4 w-4" />
@@ -171,7 +175,7 @@ const VirtualizedOrdersList = memo(({
       <div className="border rounded-lg p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-4 bg-gray-200 rounded w-1/4" />
-          {[...Array(8)].map((_, i) => (
+          {Array.from({ length: 8 }, (_, i) => (
             <div key={i} className="h-4 bg-gray-200 rounded" />
           ))}
         </div>

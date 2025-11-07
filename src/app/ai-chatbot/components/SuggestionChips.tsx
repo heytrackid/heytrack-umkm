@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
 import { SUGGESTIONS } from '@/app/ai-chatbot/types'
+import { Button } from '@/components/ui/button'
 
 interface SuggestionChipsProps {
   onSuggestionClick: (suggestion: string) => void

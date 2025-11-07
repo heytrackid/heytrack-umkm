@@ -1,11 +1,12 @@
 'use client'
 
+import { Search, X, Filter, SortAsc, SortDesc } from 'lucide-react'
 import { type ReactNode, useEffect, useDeferredValue } from 'react'
-import { Input } from '@/components/ui/input'
+
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Search, X, Filter, SortAsc, SortDesc } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { useDebounce } from '@/hooks/useDebounce'
 
 /**

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import { createClientLogger } from '@/lib/client-logger'
 
@@ -52,7 +53,7 @@ class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBou
   }
 
   resetError = () => {
-    this.setState({ hasError: false, error: undefined, errorId: undefined });
+    this.setState({ hasError: false });
   };
 
   override render() {
@@ -63,7 +64,7 @@ class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBou
         return (
           <FallbackComponent
             error={this.state.error ?? null}
-            errorId={this.state.errorId}
+            {...(this.state.errorId && { errorId: this.state.errorId })}
             resetError={this.resetError}
           />
         );

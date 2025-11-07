@@ -1,8 +1,9 @@
 'use client'
 
+import { X } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export interface FilterBadge {
@@ -29,7 +30,7 @@ export const FilterBadges = ({ filters, onClearAll, className }: FilterBadgesPro
       
       {filters.map((filter) => (
         <Badge
-          key={filter.id}
+          key={filter['id']}
           variant="secondary"
           className="gap-1 pr-1 animate-in fade-in zoom-in"
         >

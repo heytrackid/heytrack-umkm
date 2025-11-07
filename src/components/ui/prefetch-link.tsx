@@ -1,8 +1,9 @@
 'use client'
 
-import { type ComponentProps, type MouseEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { type ComponentProps, type MouseEvent } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('PrefetchLink')
@@ -32,7 +33,7 @@ export const PrefetchLink = ({
   
   // Prefetch on mount if needed
   if (prefetchOnMount && typeof href === 'string') {
-    void router.prefetch(href)
+    router.prefetch(href)
   }
   
   const handleMouseEnter = (e: MouseEvent<HTMLAnchorElement>) => {
@@ -44,8 +45,8 @@ export const PrefetchLink = ({
     // Prefetch on hover
     if (prefetchOnHover && typeof href === 'string') {
       try {
-        void router.prefetch(href)
-      } catch (_err) {
+        router.prefetch(href)
+      } catch (error) {
         // Silently fail - prefetch is enhancement, not critical
         logger.debug(`Prefetch failed for: ${href}`)
       }

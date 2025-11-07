@@ -1,15 +1,17 @@
 'use client'
 
+import { DollarSign, Package, TrendingUp, Upload, Users } from 'lucide-react'
+import { useState } from 'react'
+
 import { SuppliersCRUD } from '@/components/crud/suppliers-crud'
-import { ImportDialog } from '@/components/import/ImportDialog'
 import { generateSuppliersTemplate, parseSuppliersCSV } from '@/components/import/csv-helpers'
+import { ImportDialog } from '@/components/import/ImportDialog'
 import AppLayout from '@/components/layout/app-layout'
 import { BreadcrumbPatterns, PageBreadcrumb, PageHeader, StatsCards } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
+
 import type { Row } from '@/types/database'
-import { DollarSign, Package, TrendingUp, Upload, Users } from 'lucide-react'
-import { useState } from 'react'
 
 const SuppliersPage = () => {
     const { data: suppliers } = useSupabaseCRUD('suppliers')
@@ -101,7 +103,7 @@ const SuppliersPage = () => {
                                 credentials: 'include', // Include cookies for authentication
                             })
 
-                            const result = await response.json()
+                            const result = await response.json() as { error?: string; details?: unknown[]; count?: number }
 
                             if (!response.ok) {
                                 return {

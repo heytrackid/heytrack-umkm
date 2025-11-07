@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
-import { useSupabase } from '@/providers/SupabaseProvider'
+
 import { type Message, SUGGESTIONS } from '@/app/ai-chatbot/types'
+import { useSupabase } from '@/providers/SupabaseProvider'
 
 export function useChatMessages() {
   const { supabase } = useSupabase()
@@ -40,23 +41,23 @@ export function useChatMessages() {
         supabase
           .from('orders')
           .select('id, status, total_amount')
-          .eq('user_id', user.id)
+          .eq('user_id', user['id'])
           .limit(10),
         supabase
           .from('ingredients')
           .select('id, current_stock, min_stock')
-          .eq('user_id', user.id)
+          .eq('user_id', user['id'])
           .limit(50)
       ])
 
       interface OrderRow { id: string; status: string; total_amount: number; created_at: string }
       interface InventoryRow { id: string; current_stock: number; min_stock: number }
       
-      const orders = (ordersResult.data ?? []) as OrderRow[]
-      const inventory = (inventoryResult.data ?? []) as InventoryRow[]
+      const orders = (ordersResult['data'] ?? []) as OrderRow[]
+      const inventory = (inventoryResult['data'] ?? []) as InventoryRow[]
       
       const totalOrders = orders.length
-      const pendingOrders = orders.filter(o => o.status === 'PENDING').length
+      const pendingOrders = orders.filter(o => o['status'] === 'PENDING').length
       const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
       
       const criticalItems = inventory.filter(i =>
@@ -126,11 +127,11 @@ export function useChatMessages() {
   }, [messages])
 
   const addMessage = (message: Message) => {
-    void setMessages(prev => [...prev, message])
+    setMessages(prev => [...prev, message])
   }
 
   const setLoading = (loading: boolean) => {
-    void setIsLoading(loading)
+    setIsLoading(loading)
   }
 
   return {

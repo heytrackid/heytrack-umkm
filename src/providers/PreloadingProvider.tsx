@@ -1,9 +1,10 @@
 'use client'
 
-import { useSimplePreload } from '@/hooks/usePreloading'
-import { createClientLogger } from '@/lib/client-logger'
 import { usePathname } from 'next/navigation'
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+
+import { useSimplePreload } from '@/hooks/usePreloading'
+import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('PreloadingProvider')
 
@@ -104,13 +105,13 @@ export const PreloadingProvider = ({
       if (debug) {
         logger.info(`✅ Preloaded route ${route} in ${(endTime - startTime).toFixed(2)}ms`)
       }
-    } catch (err: unknown) {
+    } catch (error) {
       if (debug) {
-        const errorMsg = err instanceof Error ? err.message : String(err)
+        const errorMsg = error instanceof Error ? error.message : String(error)
         logger.warn(`❌ Failed to preload route ${route}: ${errorMsg}`)
       }
     } finally {
-      void setIsPreloading(false)
+      setIsPreloading(false)
     }
     return Promise.resolve()
   }
@@ -170,7 +171,7 @@ const PreloadingDebugPanel = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'P') {
-        void setShowDebug(prev => !prev)
+        setShowDebug(prev => !prev)
       }
     }
 
@@ -251,7 +252,7 @@ const PreloadingDebugPanel = () => {
 }
 
 // Hook to preload specific page resources
-export const usePagePreloading = (pageType: 'dashboard' | 'orders' | 'finance' | 'inventory' | 'customers') => {
+export const usePagePreloading = (pageType: 'customers' | 'dashboard' | 'finance' | 'inventory' | 'orders') => {
   const { preloadRoute } = usePreloading()
 
   useEffect(() => {

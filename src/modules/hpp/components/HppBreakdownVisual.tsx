@@ -1,14 +1,5 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useToast } from '@/hooks/use-toast'
-import { useMemo, useState } from 'react'
-import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
-import type { RecipeIngredientWithPrice } from '@/modules/hpp/types'
 import {
     ChevronDown,
     ChevronUp,
@@ -19,11 +10,24 @@ import {
     Download,
     Info
 } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import type { RecipeWithCosts } from '@/modules/hpp/hooks/useUnifiedHpp'
+import type { RecipeIngredientWithPrice } from '@/modules/hpp/types'
+
+
 
 interface IngredientDisplay extends RecipeIngredientWithPrice {
     category?: string
@@ -109,7 +113,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
     // Group ingredients by category
     const ingredientsByCategory = ingredients.reduce((acc, item) => {
         const category = item.category ?? 'Lainnya'
-        if (!acc[category]) { acc[category] = [] }
+        acc[category] ??= []
         acc[category].push(item)
         return acc
     }, {} as Record<string, IngredientDisplay[]>)
@@ -260,7 +264,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                                             const itemPercent = ingredientCost > 0 ? (itemCost / ingredientCost) * 100 : 0
 
                                             return (
-                                                <div key={item.id} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
+                                                <div key={item['id']} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2">
                                                             <span>{item.name}</span>

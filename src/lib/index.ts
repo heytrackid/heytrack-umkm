@@ -219,10 +219,7 @@ export {
 // BUSINESS LOGIC
 // ============================================================================
 
-export {
-  // HPPCalculator,
-  // HPPUtils,
-}
+
 
 // HPP functions moved to modules/hpp
 // export {

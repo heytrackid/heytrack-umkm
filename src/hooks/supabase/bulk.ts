@@ -1,9 +1,10 @@
 'use client'
 
-import { createClient } from '@/utils/supabase/client'
-import type { TableName, Row, Insert} from '@/types/database'
 import { typed } from '@/types/type-utilities'
+import { createClient } from '@/utils/supabase/client'
+
 import type { BulkUpdateItem } from './types'
+import type { TableName, Row, Insert} from '@/types/database'
 
 /**
  * Bulk operations for Supabase tables
@@ -37,13 +38,13 @@ export class useSupabaseBulk {
     for (const update of updates) {
       const { data, error } = await supabase
         .from(table)
-        .update(update.data as never)
-        .eq('id', update.id as never)
+        .update(update['data'] as never)
+        .eq('id', update['id'] as never)
         .select('*')
         .single() as { data: Row<T> | null; error: Error | null }
 
       if (error) {
-        throw new Error(`Failed to update record ${update.id}: ${error.message}`)
+        throw new Error(`Failed to update record ${update['id']}: ${error.message}`)
       }
 
       results.push(data as Row<T>)

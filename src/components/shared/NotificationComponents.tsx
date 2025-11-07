@@ -1,13 +1,5 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { cn } from '@/lib/utils'
-import { formatRelativeTime } from '@/lib/shared/utilities'
 import {
   Bell,
   CheckCircle,
@@ -22,11 +14,20 @@ import {
   Settings,
   Activity
 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { formatRelativeTime } from '@/lib/shared/utilities'
+import { cn } from '@/lib/utils'
 
 // Notification Types
 export interface NotificationItem {
   id: string
-  type: 'info' | 'success' | 'warning' | 'error' | 'order' | 'inventory' | 'financial' | 'system'
+  type: 'error' | 'financial' | 'info' | 'inventory' | 'order' | 'success' | 'system' | 'warning'
   title: string
   message: string
   timestamp: Date
@@ -34,7 +35,7 @@ export interface NotificationItem {
   actionUrl?: string
   actionLabel?: string
   metadata?: Record<string, unknown>
-  priority: 'low' | 'medium' | 'high' | 'urgent'
+  priority: 'high' | 'low' | 'medium' | 'urgent'
 }
 
 interface NotificationCenterProps {
@@ -139,7 +140,7 @@ export const NotificationCenter = ({
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {filteredNotifications.map((notification) => (
               <div
-                key={notification.id}
+                key={notification['id']}
                 className={cn(
                   "p-4 rounded-lg border transition-colors",
                   getPriorityColor(notification.priority),
@@ -148,7 +149,7 @@ export const NotificationCenter = ({
               >
                 <div className="flex items-start gap-3">
                   <div className="mt-1">
-                    {getNotificationIcon(notification.type)}
+                    {getNotificationIcon(notification['type'])}
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -164,7 +165,7 @@ export const NotificationCenter = ({
                           {notification.message}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
-                          {formatRelativeTime(notification.timestamp)}
+                          {formatRelativeTime(notification['timestamp'])}
                         </p>
                       </div>
 
@@ -175,7 +176,7 @@ export const NotificationCenter = ({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => onDelete(notification.id)}
+                          onClick={() => onDelete(notification['id'])}
                           className="h-6 w-6 p-0"
                         >
                           <X className="h-3 w-3" />
@@ -188,7 +189,7 @@ export const NotificationCenter = ({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => onMarkAsRead(notification.id)}
+                          onClick={() => onMarkAsRead(notification['id'])}
                         >
                           Mark as Read
                         </Button>
@@ -216,7 +217,7 @@ export const NotificationCenter = ({
 
 // Toast Notification System
 interface ToastNotificationProps {
-  type: 'success' | 'error' | 'warning' | 'info'
+  type: 'error' | 'info' | 'success' | 'warning'
   title: string
   message?: string
   duration?: number
@@ -235,7 +236,7 @@ export const ToastNotification = ({
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
-        void setIsVisible(false)
+        setIsVisible(false)
         onClose?.()
       }, duration)
 
@@ -293,7 +294,7 @@ export const ToastNotification = ({
           variant="ghost"
           size="sm"
           onClick={() => {
-            void setIsVisible(false)
+            setIsVisible(false)
             onClose?.()
           }}
           className="flex-shrink-0 h-6 w-6 p-0"
@@ -320,7 +321,7 @@ export const ToastNotification = ({
 // Activity Feed Component
 interface ActivityItem {
   id: string
-  type: 'user' | 'order' | 'inventory' | 'financial' | 'system'
+  type: 'financial' | 'inventory' | 'order' | 'system' | 'user'
   title: string
   description: string
   timestamp: Date
@@ -392,14 +393,14 @@ export const ActivityFeed = ({
           <div className="space-y-4">
             {activities.map((activity) => (
               <div
-                key={activity.id}
+                key={activity['id']}
                 className={cn(
                   "flex items-start gap-3 p-3 rounded-lg border-l-4 bg-muted/20",
-                  getActivityColor(activity.type)
+                  getActivityColor(activity['type'])
                 )}
               >
                 <div className="flex-shrink-0 mt-1">
-                  {getActivityIcon(activity.type)}
+                  {getActivityIcon(activity['type'])}
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -426,7 +427,7 @@ export const ActivityFeed = ({
                         )}
 
                         <span className="text-xs text-muted-foreground">
-                          {formatRelativeTime(activity.timestamp)}
+                          {formatRelativeTime(activity['timestamp'])}
                         </span>
                       </div>
                     </div>
@@ -453,7 +454,7 @@ export const ActivityFeed = ({
 
 // Alert Banner Component
 interface AlertBannerProps {
-  type: 'info' | 'success' | 'warning' | 'error'
+  type: 'error' | 'info' | 'success' | 'warning'
   title: string
   message?: string
   action?: {

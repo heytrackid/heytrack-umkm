@@ -1,10 +1,14 @@
-import { createClient } from '@/utils/supabase/server'
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 import { type NextRequest, NextResponse } from 'next/server'
+
 import { apiLogger, logError } from '@/lib/logger'
 import { ProductionBatchService } from '@/services/production/ProductionBatchService'
+import { createClient } from '@/utils/supabase/server'
 
 
-export const runtime = 'nodejs'
 
 // GET /api/production/suggestions - Get suggested production batches
 export async function GET(request: NextRequest) {
@@ -17,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     if (authError || !user) {
       logError(apiLogger, authError, 'GET /api/production/suggestions - Unauthorized', {
-        userId: user?.id,
+        userId: user?.id ?? '',
         url: request.url,
       })
       return NextResponse.json(
@@ -26,10 +30,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const suggestions = await ProductionBatchService.getSuggestedBatches(user.id)
+    const suggestions = await ProductionBatchService.getSuggestedBatches(user['id'])
 
     apiLogger.info({ 
-      userId: user.id,
+      userId: user['id'],
       suggestionsCount: suggestions.length
     }, 'GET /api/production/suggestions - Success')
 
@@ -64,15 +68,17 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       logError(apiLogger, authError, 'POST /api/production/suggestions - Unauthorized', {
-        userId: user?.id,
+        userId: user?.id ?? '',
         url: request.url,
       })
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
-    }    const body = await request.json()
-    const { order_ids, planned_date } = body
+    }
+
+    const _body = await request.json() as { order_ids?: string[]; planned_date?: string }
+    const { order_ids, planned_date } = _body
 
     if (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0) {
       return NextResponse.json(
@@ -83,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     const result = await ProductionBatchService.createBatchFromOrders(
       order_ids,
-      user.id,
+      user['id'],
       planned_date
     )
 
@@ -95,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     apiLogger.info({ 
-      userId: user.id,
+      userId: user['id'],
       batchId: result.batch_id,
       orderCount: order_ids.length
     }, 'POST /api/production/suggestions - Batch created')

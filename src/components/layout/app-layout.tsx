@@ -1,24 +1,5 @@
 'use client'
 
-import { TabNavigation } from '@/components/layout/TabNavigation'
-import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
-import { Button } from '@/components/ui/button'
-import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { NotificationCenter } from '@/components/ui/notification-center'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { useNotifications } from '@/hooks/useNotifications'
-import { useResponsive } from '@/hooks/responsive'
-import { uiLogger } from '@/lib/client-logger'
-import { useSupabase } from '@/providers/SupabaseProvider'
-import { useAuth } from '@/providers/AuthProvider'
-import { useInstantNavigation } from '@/hooks/useInstantNavigation'
-
 import {
   BarChart3,
   Calculator,
@@ -40,6 +21,26 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { memo, useEffect, useState, useRef, type ReactNode } from 'react'
+
+import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
+import { TabNavigation } from '@/components/layout/TabNavigation'
+import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
+import { NotificationCenter } from '@/components/ui/notification-center'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { useInstantNavigation } from '@/hooks/useInstantNavigation'
+import { useNotifications } from '@/hooks/useNotifications'
+import { uiLogger } from '@/lib/client-logger'
+import { useAuth } from '@/providers/AuthProvider'
+import { useSupabase } from '@/providers/SupabaseProvider'
+import { useResponsive } from '@/utils/responsive'
+
 
 interface AppLayoutProps {
   children: ReactNode
@@ -145,13 +146,15 @@ const AppLayout = memo(({
     let isHorizontalSwipe = false
 
     const handleTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX
-      startY = e.touches[0].clientY
+      if (e.touches[0]) {
+        startX = e.touches[0].clientX
+        startY = e.touches[0].clientY
+      }
       isHorizontalSwipe = false
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!startX || !startY) {
+      if (!startX || !startY || !e.touches[0]) {
         return
       }
 
@@ -166,7 +169,7 @@ const AppLayout = memo(({
     }
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (!isHorizontalSwipe || !startX) {
+      if (!isHorizontalSwipe || !startX || !e.changedTouches[0]) {
         return
       }
 
@@ -263,9 +266,9 @@ const AppLayout = memo(({
                   const a = document.createElement('a')
                   a.href = url
                   a.download = `heytrack-export-${new Date().toISOString().split('T')[0]}.xlsx`
-                  document.body.appendChild(a)
+                  document['body'].appendChild(a)
                   a.click()
-                  document.body.removeChild(a)
+                  document['body'].removeChild(a)
                   window.URL.revokeObjectURL(url)
                 } else {
                   uiLogger.error('Failed to export data')
@@ -301,7 +304,7 @@ const AppLayout = memo(({
                 <DropdownMenuItem
                   onClick={async () => {
                     await supabase.auth.signOut()
-                    void router.push('/auth/login')
+                    router.push('/auth/login')
                   }}
                   className="text-red-600 focus:text-red-600"
                 >

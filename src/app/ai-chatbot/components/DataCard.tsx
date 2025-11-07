@@ -1,16 +1,17 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { TrendingUp, TrendingDown, Package, ShoppingCart, AlertCircle, DollarSign } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface DataCardProps {
   title: string
   data: Record<string, unknown>
-  type: 'orders' | 'inventory' | 'profit' | 'recipes'
+  type: 'inventory' | 'orders' | 'profit' | 'recipes'
 }
 
 export const DataCard = ({ title, data, type }: DataCardProps): JSX.Element | null => {
   // Orders data
-  if (type === 'orders' && 'total' in data && typeof data.total === 'number') {
+  if (type === 'orders' && 'total' in data && typeof data['total'] === 'number') {
     const ordersData = data as { total: number; pending?: number; revenue?: number }
     return (
       <Card className="mt-3 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-900">
@@ -73,7 +74,7 @@ export const DataCard = ({ title, data, type }: DataCardProps): JSX.Element | nu
   }
 
   // Profit data
-  if (type === 'profit' && 'margin' in data && typeof data.margin === 'number') {
+  if (type === 'profit' && 'margin' in data && typeof data['margin'] === 'number') {
     const profitData = data as { margin: number; total_profit?: number }
     const isPositive = profitData.margin > 0
     return (
@@ -107,7 +108,7 @@ export const DataCard = ({ title, data, type }: DataCardProps): JSX.Element | nu
 
   // Recipes data
   if (type === 'recipes' && 'top_recipes' in data) {
-    const recipes = data.top_recipes as Array<{ name: string; orders: number }>
+    const recipes = data['top_recipes'] as Array<{ name: string; orders: number }>
     return (
       <Card className="mt-3 bg-gradient-to-br from-gray-50 to-pink-100 dark:from-gray-900 dark:to-pink-900">
         <CardHeader className="pb-3">

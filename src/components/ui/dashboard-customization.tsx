@@ -1,9 +1,5 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import {
   BarChart3,
   Eye,
@@ -14,6 +10,11 @@ import {
   Settings
 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 
 interface DashboardWidget {
   id: string
@@ -51,13 +52,13 @@ export const DashboardCustomization = ({
     const savedLayout = localStorage.getItem(layoutKey)
     if (savedLayout) {
       try {
-        const parsed = JSON.parse(savedLayout)
+        const parsed = JSON.parse(savedLayout) as DashboardLayout
         setLayout(parsed)
       } catch {
         // If parsing fails, use default layout
         const defaultLayout: DashboardLayout = {}
         widgets.forEach((widget, index) => {
-          defaultLayout[widget.id] = {
+          defaultLayout[widget['id']] = {
             visible: true,
             position: index
           }
@@ -68,7 +69,7 @@ export const DashboardCustomization = ({
       // Initialize with default layout
       const defaultLayout: DashboardLayout = {}
       widgets.forEach((widget, index) => {
-        defaultLayout[widget.id] = {
+        defaultLayout[widget['id']] = {
           visible: true,
           position: index
         }
@@ -109,14 +110,15 @@ export const DashboardCustomization = ({
       if (draggedPos !== undefined && targetPos !== undefined) {
         // Update positions
         Object.keys(currentLayout).forEach(key => {
-          if (currentLayout[key].position === draggedPos) {
-            currentLayout[key] = { ...currentLayout[key], position: targetPos }
-          } else if (currentLayout[key].position === targetPos) {
-            currentLayout[key] = { ...currentLayout[key], position: draggedPos }
+          const widget = currentLayout[key]
+          if (widget?.position === draggedPos) {
+            currentLayout[key] = { visible: widget.visible, position: targetPos }
+          } else if (widget?.position === targetPos) {
+            currentLayout[key] = { visible: widget.visible, position: draggedPos }
           }
         })
-        
-        setLayout(currentLayout)
+
+        setLayout({ ...currentLayout })
       }
     }
     
@@ -128,8 +130,8 @@ export const DashboardCustomization = ({
     setLayout(prev => ({
       ...prev,
       [widgetId]: {
-        ...prev[widgetId],
-        visible: !prev[widgetId].visible
+        visible: !(prev[widgetId]?.visible ?? true),
+        position: prev[widgetId]?.position ?? 0
       }
     }))
   }
@@ -138,7 +140,7 @@ export const DashboardCustomization = ({
   const resetLayout = () => {
     const defaultLayout: DashboardLayout = {}
     widgets.forEach((widget, index) => {
-      defaultLayout[widget.id] = {
+      defaultLayout[widget['id']] = {
         visible: true,
         position: index
       }
@@ -160,8 +162,8 @@ export const DashboardCustomization = ({
 
   // Get visible widgets sorted by position
   const visibleWidgets = [...widgets]
-    .filter(widget => layout[widget.id]?.visible)
-    .sort((a, b) => (layout[a.id]?.position || 0) - (layout[b.id]?.position || 0))
+    .filter(widget => layout[widget['id']]?.visible)
+                  .sort((a, b) => (layout[a['id']]?.position ?? 0) - (layout[b['id']]?.position ?? 0))
 
   return (
     <div className="space-y-6">
@@ -211,17 +213,17 @@ export const DashboardCustomization = ({
               
               <div className="space-y-3">
                 {widgets
-                  .sort((a, b) => (layout[a.id]?.position || 0) - (layout[b.id]?.position || 0))
+    .sort((a, b) => (layout[a['id']]?.position ?? 0) - (layout[b['id']]?.position ?? 0))
                   .map((widget) => (
                     <div
-                      key={widget.id}
+                      key={widget['id']}
                       className={`flex items-center gap-3 p-3 rounded-lg border ${
-                        draggedWidget === widget.id ? 'bg-primary/10 border-primary' : ''
+                        draggedWidget === widget['id'] ? 'bg-primary/10 border-primary' : ''
                       }`}
                       draggable
-                      onDragStart={(e) => handleDragStart(e, widget.id)}
+                      onDragStart={(e) => handleDragStart(e, widget['id'])}
                       onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, widget.id)}
+                      onDrop={(e) => handleDrop(e, widget['id'])}
                     >
                       <div className="cursor-move opacity-70">
                         <GripVertical className="h-5 w-5" />
@@ -236,11 +238,11 @@ export const DashboardCustomization = ({
                       
                       <div className="flex items-center gap-3">
                         <Switch
-                          id={`toggle-${widget.id}`}
-                          checked={layout[widget.id]?.visible}
-                          onCheckedChange={() => toggleWidgetVisibility(widget.id)}
+                          id={`toggle-${widget['id']}`}
+                          checked={layout[widget['id']]?.visible}
+                          onCheckedChange={() => toggleWidgetVisibility(widget['id'])}
                         />
-                        <Label htmlFor={`toggle-${widget.id}`} className="sr-only">
+                        <Label htmlFor={`toggle-${widget['id']}`} className="sr-only">
                           Toggle visibility
                         </Label>
                         
@@ -248,9 +250,9 @@ export const DashboardCustomization = ({
                           variant="ghost"
                           size="sm"
                           className="h-8 w-8 p-0"
-                          onClick={() => toggleWidgetVisibility(widget.id)}
+                          onClick={() => toggleWidgetVisibility(widget['id'])}
                         >
-                          {layout[widget.id]?.visible ? (
+                          {layout[widget['id']]?.visible ? (
                             <Eye className="h-4 w-4" />
                           ) : (
                             <EyeOff className="h-4 w-4" />
@@ -276,7 +278,7 @@ export const DashboardCustomization = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {visibleWidgets.map((widget) => (
           <div
-            key={widget.id}
+            key={widget['id']}
             className="transition-all duration-200"
           >
             {widget.component}

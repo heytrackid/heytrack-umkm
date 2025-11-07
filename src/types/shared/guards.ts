@@ -40,7 +40,7 @@ type Recipe = RecipesTable;
 type RecipeIngredient = RecipeIngredientsTable;
 type Supplier = SuppliersTable;
 type UserProfile = UserProfilesTable;
-type PaymentStatus = 'unpaid' | 'partial' | 'paid';
+type PaymentStatus = 'paid' | 'partial' | 'unpaid';
 
 /**
  * Check if a value is a non-null object

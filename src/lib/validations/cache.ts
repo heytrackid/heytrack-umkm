@@ -42,7 +42,7 @@ class ValidationCache {
   private generateCacheKey(schemaName: string, data: unknown): string {
     try {
       // Create a deterministic string representation of the data
-      const dataString = JSON.stringify(data, (key, value) => {
+      const dataString = JSON.stringify(data, (_key, value) => {
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
           // Sort object keys for deterministic serialization
           const sortedObj: Record<string, unknown> = {}
@@ -77,7 +77,7 @@ class ValidationCache {
    * Check if cache entry is still valid
    */
   private isValid<T>(entry: ValidationCacheEntry<T>): boolean {
-    return Date.now() - entry.timestamp < entry.ttl
+    return Date.now() - entry['timestamp'] < entry.ttl
   }
 
   /**
@@ -199,9 +199,9 @@ export function withValidationCache<T>(
     try {
       const validatedData = schema.parse(data)
       result = { success: true, data: validatedData }
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors = error.issues.map(error => `${error.path.join('.')}: ${error.message}`)
         result = { success: false, errors }
       } else {
         result = { success: false, errors: ['Validation failed'] }

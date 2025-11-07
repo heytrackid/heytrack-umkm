@@ -1,11 +1,13 @@
 'use client'
 
-import { useRestockSuggestions } from '@/hooks/useRestockSuggestions'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AlertCircle, AlertTriangle, Info, ShoppingCart } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { AlertCircle, AlertTriangle, Info, ShoppingCart } from 'lucide-react'
+import { useRestockSuggestions } from '@/hooks/useRestockSuggestions'
+
 
 
 
@@ -100,7 +102,7 @@ export const RestockSuggestionsPanel = () => {
                                 <div className="flex-1 space-y-2">
                                     <div className="flex items-start justify-between">
                                         <div>
-                                            <p className="font-medium">{suggestion.ingredient_name}</p>
+                                            <p className="font-medium">{suggestion['ingredient_name']}</p>
                                             <p className="text-sm text-muted-foreground">{suggestion.reason}</p>
                                         </div>
                                         <Badge variant={getUrgencyVariant(suggestion.urgency)}>
@@ -112,7 +114,7 @@ export const RestockSuggestionsPanel = () => {
                                         <div>
                                             <p className="text-muted-foreground">Available</p>
                                             <p className="font-medium">
-                                                {suggestion.available_stock} {suggestion.ingredient_name.split(' ')[0]}
+                                                {suggestion.available_stock} {suggestion['ingredient_name'].split(' ')[0]}
                                             </p>
                                         </div>
                                         <div>

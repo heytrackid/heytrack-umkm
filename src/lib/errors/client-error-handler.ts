@@ -39,8 +39,8 @@ export class ApiErrorHandler {
     // Handle specific error types
     if (typeof error === 'object' && error !== null) {
       const errorObj = error as { status?: number; message?: string; code?: string };
-      if (errorObj.status) {
-        switch (errorObj.status) {
+      if (errorObj['status']) {
+        switch (errorObj['status']) {
           case 400:
             message = errorObj.message ?? 'Bad request';
             _code = 'BAD_REQUEST';
@@ -66,8 +66,8 @@ export class ApiErrorHandler {
             _code = 'INTERNAL_ERROR';
             break;
           default:
-            message = errorObj.message ?? `Server error (${errorObj.status})`;
-            _code = `SERVER_ERROR_${errorObj.status}`;
+            message = errorObj.message ?? `Server error (${errorObj['status']})`;
+            _code = `SERVER_ERROR_${errorObj['status']}`;
         }
       }
     }
@@ -98,7 +98,7 @@ export class ApiErrorHandler {
     const errorData = await response.json().catch(() => ({}));
     
     const error = {
-      status: response.status,
+      status: response['status'],
       message: errorData.message ?? response.statusText,
       details: errorData.details,
     };
@@ -115,7 +115,7 @@ export class ApiErrorHandler {
     showNotification = true
   ): Promise<ApiResponse<T>> {
     try {
-      const data = await apiCall();
+      const _data = await apiCall();
       return {
         data,
         success: true,

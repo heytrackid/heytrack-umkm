@@ -1,14 +1,18 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 /**
  * AI Chat Suggestions API
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+
+import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { BusinessContextService } from '@/lib/services/BusinessContextService'
 import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
-import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
+import { createClient } from '@/utils/supabase/server'
 
-export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,7 +33,7 @@ export async function GET(request: NextRequest) {
     const currentPage = searchParams.get('page') ?? undefined
 
     // Load business context
-    const context = await BusinessContextService.loadContext(user.id, currentPage)
+    const context = await BusinessContextService.loadContext(user['id'], currentPage)
 
     // Generate suggestions
     const suggestions = SuggestionEngine.generateSuggestions(context)

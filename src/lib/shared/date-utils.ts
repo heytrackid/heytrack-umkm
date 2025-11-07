@@ -237,7 +237,7 @@ export function createDateRange(
 }
 
 export function getDateRangeForPeriod(
-  period: 'today' | 'yesterday' | 'thisWeek' | 'lastWeek' | 'thisMonth' | 'lastMonth' | 'thisYear' | 'lastYear'
+  period: 'lastMonth' | 'lastWeek' | 'lastYear' | 'thisMonth' | 'thisWeek' | 'thisYear' | 'today' | 'yesterday'
 ): DateRange {
   const now = new Date()
   let start: Date

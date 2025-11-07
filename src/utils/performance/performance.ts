@@ -6,7 +6,7 @@ import { apiLogger } from '@/lib/logger'
 // Performance monitoring utility with enhanced memory leak detection
 export class PerformanceMonitor {
   private static instance: PerformanceMonitor
-  private measurements: Map<string, { start: number; end?: number; active: boolean }> = new Map()
+  private readonly measurements: Map<string, { start: number; end?: number; active: boolean }> = new Map()
 
   private constructor() {}
 
@@ -82,9 +82,9 @@ export class PerformanceMonitor {
 // Cache utility with TTL and memory leak prevention
 export class Cache {
   private static instance: Cache
-  private cache: Map<string, { data: unknown; expiry: number; size?: number }> = new Map()
-  private defaultTTL = 5 * 60 * 1000 // 5 minutes
-  private maxSize = 100 // Maximum number of items to prevent memory bloat
+  private readonly cache: Map<string, { data: unknown; expiry: number; size?: number }> = new Map()
+  private readonly defaultTTL = 5 * 60 * 1000 // 5 minutes
+  private readonly maxSize = 100 // Maximum number of items to prevent memory bloat
 
   private constructor() {
     // Set up regular cleanup to prevent memory leaks
@@ -114,7 +114,7 @@ export class Cache {
     let size = 0
     try {
       size = JSON.stringify(data).length
-    } catch (_e) {
+    } catch (error) {
       // If serialization fails, set a default size
       size = 100
     }
@@ -137,7 +137,7 @@ export class Cache {
     const newExpiry = Date.now() + this.defaultTTL
     this.cache.set(key, { ...item, expiry: newExpiry })
     
-    return item.data as T
+    return item['data'] as T
   }
 
   delete(key: string): void {

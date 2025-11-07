@@ -1,6 +1,10 @@
 /* eslint-disable no-nested-ternary */
 'use client'
 
+import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -15,10 +19,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { uiLogger } from '@/lib/logger'
+
 import type { Row, Database } from '@/types/database'
-import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 
 type RecipeInsert = Row<'recipes'>
 type Ingredient = Row<'ingredients'>
@@ -68,12 +70,12 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
-                const data = await response.json()
+                const data = await response.json() as { ingredients: Ingredient[] }
                 setIngredients(data.ingredients ?? [])
             }
         } catch (error: unknown) {
             // Silent fail - will show empty ingredients list
-            if (process.env.NODE_ENV === 'development') {
+            if (process['env'].NODE_ENV === 'development') {
                 uiLogger.error({ error }, 'Failed to load ingredients')
             }
         }
@@ -93,7 +95,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                 throw new Error('Gagal memuat resep')
             }
 
-            const recipe = await response.json()
+            const recipe = await response.json() as RecipeInsert & { recipe_ingredients: Array<Database['public']['Tables']['recipe_ingredients']['Row']> }
             setFormData(recipe)
 
             // Load recipe ingredients from the response
@@ -108,8 +110,8 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                     }))
                 )
             }
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal memuat resep'
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Gagal memuat resep'
             toast({
                 title: 'Error',
                 description: message,
@@ -176,11 +178,11 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                 })
 
                 if (!response.ok) {
-                    const error = await response.json()
+                    const error = await response.json() as { error?: string }
                     throw new Error(error.error ?? 'Gagal membuat resep')
                 }
 
-                const newRecipe = await response.json()
+                const newRecipe = await response.json() as RecipeInsert
 
                 toast({
                     title: 'Resep dibuat',
@@ -206,7 +208,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                 })
 
                 if (!response.ok) {
-                    const error = await response.json()
+                    const error = await response.json() as { error?: string }
                     throw new Error(error.error ?? 'Gagal memperbarui resep')
                 }
 
@@ -217,8 +219,8 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
 
                 router.push(`/recipes/${recipeId}`)
             }
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal menyimpan resep'
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Gagal menyimpan resep'
             toast({
                 title: 'Error',
                 description: message,
@@ -245,9 +247,22 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
         setRecipeIngredients(recipeIngredients.filter((_, i) => i !== index))
     }
 
-    const updateIngredient = (index: number, field: keyof RecipeIngredientForm, value: string | number) => {
+    const updateIngredient = (index: number, field: keyof RecipeIngredientForm, value: number | string) => {
         const updated = [...recipeIngredients]
-        updated[index] = { ...updated[index], [field]: value }
+        const current = updated[index]
+        if (!current) {return}
+
+        const safeValue = value ?? ''
+
+        const updatedIngredient: RecipeIngredientForm = {
+            id: current['id'],
+            ingredient_id: field === 'ingredient_id' ? String(safeValue) : String(current.ingredient_id || ''),
+            quantity: field === 'quantity' ? Number(safeValue) : Number(current.quantity || 0),
+            unit: field === 'unit' ? String(safeValue) : String(current.unit || 'gram'),
+            notes: field === 'notes' ? String(safeValue) : String(current.notes ?? ''),
+        }
+
+        updated[index] = updatedIngredient
         setRecipeIngredients(updated)
     }
 
@@ -420,7 +435,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {ingredients.map((ing) => (
-                                                    <SelectItem key={ing.id} value={ing.id}>
+                                                    <SelectItem key={ing['id']} value={ing['id']}>
                                                         {ing.name}
                                                     </SelectItem>
                                                 ))}

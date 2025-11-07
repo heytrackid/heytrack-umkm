@@ -1,14 +1,17 @@
 'use client'
 
-import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types/database'
-import { getErrorMessage } from '@/lib/type-guards'
-import { createClientLogger } from '@/lib/client-logger'
 import useSWR, { type SWRConfiguration } from 'swr'
+
+import { createClientLogger } from '@/lib/client-logger'
+import { getErrorMessage } from '@/lib/type-guards'
+import { createClient } from '@/utils/supabase/client'
+
+import type { Database } from '@/types/database'
+
 
 const logger = createClientLogger('SWR')
 
-type TableKey = keyof Database['public']['Tables'] & string
+type TableKey = string & keyof Database['public']['Tables']
 
 type TableRow<TTable extends TableKey> = Database['public']['Tables'][TTable]['Row']
 type TableInsert<TTable extends TableKey> = Database['public']['Tables'][TTable]['Insert']
@@ -28,8 +31,8 @@ export function useSWRSupabaseCRUD<TTable extends TableKey>(
   table: TTable,
   options?: {
     select?: string
-    filter?: Partial<Record<keyof TableRow<TTable> & string, string | number | boolean | null>>
-    orderBy?: { column: keyof TableRow<TTable> & string; ascending?: boolean }
+    filter?: Partial<Record<string & keyof TableRow<TTable>, boolean | number | string | null>>
+    orderBy?: { column: string & keyof TableRow<TTable>; ascending?: boolean }
   },
   config?: SWRConfiguration
 ): UseSWRSupabaseCRUDReturn<TableRow<TTable>, TableInsert<TTable>, TableUpdate<TTable>> {
@@ -44,11 +47,11 @@ export function useSWRSupabaseCRUD<TTable extends TableKey>(
         // Get authenticated user for RLS
         const { data: { user } } = await supabase.auth.getUser()
         
-        let query = supabase.from(table).select(options?.select ?? '*')
+        let _query = supabase.from(table).select(options?.select ?? '*')
 
         // Apply user_id filter for RLS (if user is authenticated)
         if (user) {
-          query = query.eq('user_id' as never, user.id as never)
+          _query = _query.eq('user_id' as never, user['id'] as never)
         }
 
         // Apply filters
@@ -57,21 +60,21 @@ export function useSWRSupabaseCRUD<TTable extends TableKey>(
             if (value === undefined) {return}
             const column = key
             if (value === null) {
-              query = query.is(column, null)
+              _query = _query.is(column, null)
             } else {
-              query = query.eq(column, value)
+              _query = _query.eq(column, value)
             }
           })
         }
 
         // Apply ordering
         if (options?.orderBy) {
-          query = query.order(options.orderBy.column, {
+          _query = _query.order(options.orderBy.column, {
             ascending: options.orderBy.ascending ?? true
           })
         }
 
-        const { data: result, error: queryError } = await query as { data: Array<TableRow<TTable>> | null; error: Error | null }
+        const { data: result, error: queryError } = await _query as { data: Array<TableRow<TTable>> | null; error: Error | null }
 
         if (queryError) {
           logger.error({ table, error: queryError }, 'Error fetching from table')
@@ -84,9 +87,9 @@ export function useSWRSupabaseCRUD<TTable extends TableKey>(
         }, `Fetched rows from ${table}`)
         
         return result ?? []
-      } catch (err) {
-        logger.error({ error: err, table }, 'Error in fetcher')
-        throw new Error(getErrorMessage(err))
+      } catch (error) {
+        logger.error({ error, table }, 'Error in fetcher')
+        throw new Error(getErrorMessage(error))
       }
     },
     {
@@ -110,7 +113,7 @@ export function useSWRSupabaseCRUD<TTable extends TableKey>(
       // Add user_id to the data
       const dataWithUser = {
         ...newData,
-        user_id: user.id
+        user_id: user['id']
       }
 
       const { data: result, error: createError } = await supabase
@@ -131,9 +134,9 @@ export function useSWRSupabaseCRUD<TTable extends TableKey>(
       
       logger.debug({ table, recordId: result?.id }, 'Record created')
       return result
-    } catch (err) {
-      logger.error({ error: err, table }, 'Error in create')
-      throw new Error(getErrorMessage(err))
+    } catch (error) {
+      logger.error({ error, table }, 'Error in create')
+      throw new Error(getErrorMessage(error))
     }
   }
 
@@ -151,7 +154,7 @@ export function useSWRSupabaseCRUD<TTable extends TableKey>(
         .from(table)
         .update(updateData as never)
         .eq('id' as never, id as never)
-        .eq('user_id' as never, user.id as never) // RLS filter
+        .eq('user_id' as never, user['id'] as never) // RLS filter
         .select()
         .single() as { data: TableRow<TTable> | null; error: Error | null }
 
@@ -163,16 +166,16 @@ export function useSWRSupabaseCRUD<TTable extends TableKey>(
       // Optimistically update the cache
       if (result && data) {
         const updatedData = data.map((item: TableRow<TTable>) =>
-          item.id === id ? result : item
+          item['id'] === id ? result : item
         )
         await _mutate(updatedData, false)
       }
       
       logger.debug({ table, recordId: id }, 'Record updated')
       return result
-    } catch (err) {
-      logger.error({ error: err, table }, 'Error in update')
-      throw new Error(getErrorMessage(err))
+    } catch (error) {
+      logger.error({ error, table }, 'Error in update')
+      throw new Error(getErrorMessage(error))
     }
   }
 
@@ -190,7 +193,7 @@ export function useSWRSupabaseCRUD<TTable extends TableKey>(
         .from(table)
         .delete()
         .eq('id' as never, id as never)
-        .eq('user_id' as never, user.id as never) // RLS filter
+        .eq('user_id' as never, user['id'] as never) // RLS filter
 
       if (deleteError) {
         logger.error({ table, error: deleteError }, 'Delete error')
@@ -199,14 +202,14 @@ export function useSWRSupabaseCRUD<TTable extends TableKey>(
 
       // Optimistically update the cache
       if (data) {
-        const updatedData = data.filter((item: TableRow<TTable>) => item.id !== id)
+        const updatedData = data.filter((item: TableRow<TTable>) => item['id'] !== id)
         await _mutate(updatedData, false)
       }
       
       logger.debug({ table, recordId: id }, 'Record deleted')
-    } catch (err) {
-      logger.error({ error: err, table }, 'Error in remove')
-      throw new Error(getErrorMessage(err))
+    } catch (error) {
+      logger.error({ error, table }, 'Error in remove')
+      throw new Error(getErrorMessage(error))
     }
   }
 

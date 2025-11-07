@@ -1,8 +1,9 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
-import type { Row, Insert, Json } from '@/types/database'
 import { typed } from '@/types/type-utilities'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Row, Insert, Json } from '@/types/database'
 
 type Notification = Row<'notifications'>
 
@@ -55,9 +56,9 @@ export class NotificationService {
 
       return data || []
 
-    } catch (err) {
-      dbLogger.error({ error: err, userId, filters }, 'Failed to get notifications')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, userId, filters }, 'Failed to get notifications')
+      throw error
     }
   }
 
@@ -79,8 +80,8 @@ export class NotificationService {
 
       return count ?? 0
 
-    } catch (err) {
-      dbLogger.error({ error: err, userId }, 'Failed to get unread notification count')
+    } catch (error) {
+      dbLogger.error({ error, userId }, 'Failed to get unread notification count')
       return 0
     }
   }
@@ -107,9 +108,9 @@ export class NotificationService {
         user_id: userId,
         title: notificationData.title,
         message: notificationData.message,
-        type: notificationData.type ?? 'info',
+        type: notificationData['type'] ?? 'info',
         category: notificationData.category ?? 'general',
-        ...(notificationData.metadata && { metadata: notificationData.metadata as Json }),
+        ...(notificationData['metadata'] && { metadata: notificationData['metadata'] as Json }),
         ...(notificationData.expires_at && { expires_at: notificationData.expires_at }),
         is_read: false,
         is_dismissed: false
@@ -127,9 +128,9 @@ export class NotificationService {
 
       return data as Notification
 
-    } catch (err) {
-      dbLogger.error({ error: err, userId, notificationData }, 'Failed to create notification')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, userId, notificationData }, 'Failed to create notification')
+      throw error
     }
   }
 
@@ -151,9 +152,9 @@ export class NotificationService {
         throw error
       }
 
-    } catch (err) {
-      dbLogger.error({ error: err, notificationId, userId }, 'Failed to mark notification as read')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, notificationId, userId }, 'Failed to mark notification as read')
+      throw error
     }
   }
 
@@ -175,9 +176,9 @@ export class NotificationService {
         throw error
       }
 
-    } catch (err) {
-      dbLogger.error({ error: err, notificationId, userId }, 'Failed to dismiss notification')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, notificationId, userId }, 'Failed to dismiss notification')
+      throw error
     }
   }
 
@@ -199,9 +200,9 @@ export class NotificationService {
         throw error
       }
 
-    } catch (err) {
-      dbLogger.error({ error: err, notificationId, userId }, 'Failed to delete notification')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, notificationId, userId }, 'Failed to delete notification')
+      throw error
     }
   }
 }

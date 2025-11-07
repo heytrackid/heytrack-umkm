@@ -1,22 +1,24 @@
 'use client'
 
+import {
+  MoreHorizontal,
+  Search,
+  SortAsc,
+  SortDesc} from 'lucide-react'
 import { type ReactNode, useState, useCallback, useMemo, memo } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { useResponsive } from '@/hooks/useResponsive'
-import { cn } from '@/lib/utils'
-import { Input } from './input'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import {
-  MoreHorizontal,
-  Search,
-  SortAsc,
-  SortDesc} from 'lucide-react'
+import { useResponsive } from '@/hooks/useResponsive'
+import { cn } from '@/lib/utils'
+
+import { Input } from './input'
 
 // Types for mobile table
 export interface MobileTableColumn<T extends Record<string, unknown> = Record<string, unknown>> {
@@ -82,14 +84,14 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   const handleSearch = useCallback((query: string) => {
-    void setSearchQuery(query)
+    setSearchQuery(query)
     onSearch?.(query)
   }, [onSearch])
 
   const handleSort = useCallback((key: string) => {
     const newDirection = sortKey === key && sortDirection === 'asc' ? 'desc' : 'asc'
-    void setSortKey(key)
-    void setSortDirection(newDirection)
+    setSortKey(key)
+    setSortDirection(newDirection)
     onSort?.(key, newDirection)
   }, [sortKey, sortDirection, onSort])
 
@@ -362,7 +364,7 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
 }, (prevProps, nextProps) =>
 // Custom comparison function for React.memo
 (
-  prevProps.data === nextProps.data &&
+  prevProps['data'] === nextProps['data'] &&
   prevProps.columns === nextProps.columns &&
   prevProps.actions === nextProps.actions &&
   prevProps.loading === nextProps.loading &&

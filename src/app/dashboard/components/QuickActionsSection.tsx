@@ -1,9 +1,10 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Plus, ChefHat, Package, BarChart3, Users, Calculator, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const QuickActionsSection = () => {
   const router = useRouter()

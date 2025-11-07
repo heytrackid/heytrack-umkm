@@ -1,14 +1,17 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { EnhancedIngredientForm } from './EnhancedIngredientForm'
-import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { useToast } from '@/hooks/use-toast'
-import { Loader2 } from 'lucide-react'
+import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
+
+import { EnhancedIngredientForm } from './EnhancedIngredientForm'
+
+
 import type { Row } from '@/types/database'
 
 
@@ -18,8 +21,8 @@ type Ingredient = Row<'ingredients'>
 interface IngredientFormDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    ingredient?: Ingredient
-    onSuccess?: () => void
+    ingredient?: Ingredient | undefined
+    onSuccess?: () => Promise<void> | undefined | void
 }
 
 export const IngredientFormDialog = ({
@@ -36,7 +39,7 @@ export const IngredientFormDialog = ({
         resolver: zodResolver(IngredientFormSchema),
         defaultValues: ingredient ? {
             name: ingredient.name,
-            unit: ingredient.unit as "g" | "l" | "kg" | "ml" | "pcs" | "dozen",
+            unit: ingredient.unit as "dozen" | "g" | "kg" | "l" | "ml" | "pcs",
             price_per_unit: ingredient.price_per_unit,
             current_stock: ingredient.current_stock ?? 0,
             min_stock: ingredient.min_stock ?? 0,
@@ -54,7 +57,7 @@ export const IngredientFormDialog = ({
     const handleSubmit = async (data: SimpleIngredientFormData) => {
         setIsSubmitting(true)
         try {
-            const url = ingredient ? `/api/ingredients/${ingredient.id}` : '/api/ingredients'
+            const url = ingredient ? `/api/ingredients/${ingredient['id']}` : '/api/ingredients'
             const method = ingredient ? 'PUT' : 'POST'
 
             const response = await fetch(url, {
@@ -64,7 +67,7 @@ export const IngredientFormDialog = ({
             })
 
             if (!response.ok) {
-                const error = await response.json()
+                const error = await response.json() as { error?: string }
                 throw new Error(error.error ?? 'Gagal menyimpan bahan baku')
             }
 
@@ -75,7 +78,7 @@ export const IngredientFormDialog = ({
 
             form.reset()
             onOpenChange(false)
-            onSuccess?.()
+            void onSuccess?.()
         } catch (error: unknown) {
             toast({
                 title: 'Error',
@@ -100,30 +103,39 @@ export const IngredientFormDialog = ({
                     <EnhancedIngredientForm
                         form={form}
                         mode={mode}
-                        initialData={ingredient ? {
-                            name: ingredient.name || '',
-                            unit: ingredient.unit || 'kg',
-                            price_per_unit: ingredient.price_per_unit || 0,
-                            current_stock: ingredient.current_stock ?? 0,
-                            min_stock: ingredient.min_stock ?? 0,
-                            description: ingredient.description ?? '',
-                        } : undefined}
+                        {...(ingredient ? {
+                            initialData: {
+                                name: ingredient.name || '',
+                                unit: ingredient.unit || 'kg',
+                                price_per_unit: ingredient.price_per_unit || 0,
+                                current_stock: ingredient.current_stock ?? 0,
+                                min_stock: ingredient.min_stock ?? 0,
+                                description: ingredient.description ?? '',
+                            }
+                        } : {})}
                     />
 
                     <DialogFooter className="gap-2">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => onOpenChange(false)}
-                            disabled={isSubmitting}
-                        >
-                            Batal
-                        </Button>
-                        <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {mode === 'create' ? 'Tambah Bahan' : 'Simpan Perubahan'}
-                        </Button>
-                    </DialogFooter>
+                         <LoadingButton
+                             type="button"
+                             variant="outline"
+                             onClick={() => onOpenChange(false)}
+                             disabled={isSubmitting}
+                             hapticFeedback
+                             hapticType="light"
+                         >
+                             Batal
+                         </LoadingButton>
+                         <LoadingButton
+                             type="submit"
+                             loading={isSubmitting}
+                             loadingText="Menyimpan..."
+                             hapticFeedback
+                             hapticType="medium"
+                         >
+                             {mode === 'create' ? 'Tambah Bahan' : 'Simpan Perubahan'}
+                         </LoadingButton>
+                     </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>

@@ -3,10 +3,16 @@
 
 'use client'
 
+import { Plus, RefreshCw, Users } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState, useCallback } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useConfirm } from '@/components/ui/confirm-dialog'
+import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/page-breadcrumb'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { CustomersTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { useSettings } from '@/contexts/settings-context'
@@ -16,13 +22,9 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { usePagination } from '@/hooks/usePagination'
 import { useResponsive } from '@/hooks/useResponsive'
 import { apiLogger } from '@/lib/logger'
-import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState, useCallback } from 'react'
 
 // Shared components
-import { PageHeader } from '@/components/layout/PageHeader'
-import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/page-breadcrumb'
-import { Plus, RefreshCw, Users } from 'lucide-react'
+
 
 // Import components normally - they're lightweight
 import CustomerForm from './CustomerForm'
@@ -30,8 +32,8 @@ import CustomerSearchFilters from './CustomerSearchFilters'
 import CustomersTable from './CustomersTable'
 import CustomerStats from './CustomerStats'
 
-import type { CustomersTable as CustomersTableType } from '@/types/database'
 import type { Customer } from './types'
+import type { CustomersTable as CustomersTableType } from '@/types/database'
 
 const CustomersLayout = () => {
   const router = useRouter()
@@ -63,28 +65,28 @@ const CustomersLayout = () => {
         credentials: 'include', // Include cookies for authentication
       })
 
-      if (response.status === 401) {
+      if (response['status'] === 401) {
         toast({
           title: 'Sesi berakhir',
           description: 'Sesi Anda telah berakhir. Silakan login kembali.',
           variant: 'destructive',
         })
-        void router.push('/auth/login')
+        router.push('/auth/login')
         return
       }
 
       if (!response.ok) { throw new Error('Failed to fetch customers') }
-      const data = await response.json()
-      void setCustomers(data)
-    } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error fetching customers:')
+      const data = await response.json() as Customer[]
+      setCustomers(data)
+    } catch (error) {
+      apiLogger.error({ error }, 'Error fetching customers:')
       toast({
         title: 'Terjadi kesalahan',
         description: 'Gagal memuat data pelanggan. Silakan coba lagi.',
         variant: 'destructive',
       })
     } finally {
-      void setLoading(LOADING_KEYS.FETCH_CUSTOMERS, false)
+      setLoading(LOADING_KEYS.FETCH_CUSTOMERS, false)
     }
   }, [toast, router, setLoading])
 
@@ -114,9 +116,9 @@ const CustomersLayout = () => {
   // Bulk action handlers
   const handleSelectAll = useCallback(() => {
     if (selectedItems.length === filteredCustomers.length) {
-      void setSelectedItems([])
+      setSelectedItems([])
     } else {
-      setSelectedItems(filteredCustomers.map(customer => customer.id.toString()))
+      setSelectedItems(filteredCustomers.map(customer => customer['id'].toString()))
     }
   }, [selectedItems.length, filteredCustomers])
 
@@ -132,7 +134,7 @@ const CustomersLayout = () => {
     if (selectedItems.length === 0) { return }
 
     const customerNames = filteredCustomers
-      .filter(customer => selectedItems.includes(customer.id.toString()))
+      .filter(customer => selectedItems.includes(customer['id'].toString()))
       .map(customer => customer.name)
       .join(', ')
 
@@ -157,10 +159,10 @@ const CustomersLayout = () => {
           description: `Berhasil menghapus ${selectedItems.length} pelanggan`,
           variant: 'default',
         })
-        void setSelectedItems([])
+        setSelectedItems([])
         void fetchCustomers()
-      } catch (err: unknown) {
-        apiLogger.error({ error: err }, 'Error:')
+      } catch (error) {
+        apiLogger.error({ error }, 'Error:')
         toast({
           title: 'Gagal',
           description: 'Gagal menghapus pelanggan',
@@ -173,7 +175,7 @@ const CustomersLayout = () => {
   const handleBulkEdit = useCallback(() => {
     if (selectedItems.length === 0) { return }
 
-    const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
+    const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer['id'].toString()))
 
     // Use the selected customers for bulk edit
     toast({
@@ -187,7 +189,7 @@ const CustomersLayout = () => {
   const handleEditCustomer = (customer: Customer) => {
     apiLogger.info({ customer }, 'Edit customer')
     setEditingCustomer(customer)
-    void setCurrentView('edit')
+    setCurrentView('edit')
   }
 
   const handleDeleteCustomer = async (customer: Customer) => {
@@ -200,7 +202,7 @@ const CustomersLayout = () => {
 
     if (confirmed) {
       try {
-        const response = await fetch(`/api/customers/${customer.id}`, {
+        const response = await fetch(`/api/customers/${customer['id']}`, {
           method: 'DELETE',
           credentials: 'include', // Include cookies for authentication
         })
@@ -211,8 +213,8 @@ const CustomersLayout = () => {
           variant: 'default',
         })
         void fetchCustomers()
-      } catch (err: unknown) {
-        apiLogger.error({ error: err }, 'Error:')
+      } catch (error) {
+        apiLogger.error({ error }, 'Error:')
         toast({
           title: 'Gagal',
           description: 'Gagal menghapus pelanggan',
@@ -223,7 +225,7 @@ const CustomersLayout = () => {
   }
 
   const handleViewCustomer = useCallback((customer: Customer) => {
-    void router.push(`/customers/${customer.id}`)
+    router.push(`/customers/${customer['id']}`)
   }, [router])
 
   const handleFormSuccess = useCallback(() => {

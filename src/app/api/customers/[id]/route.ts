@@ -1,16 +1,19 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // API Route: /api/customers/[id]
 // Handles GET, PUT, DELETE operations for individual customer
 
-import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
-import { apiLogger } from '@/lib/logger'
-import type { Update } from '@/types/database'
-import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
-import { withSecurity, SecurityPresets } from '@/utils/security'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
+import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import { CustomerUpdateSchema, type CustomerUpdateInput } from '@/lib/validations/domains/customer'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
+import type { Update } from '@/types/database'
+
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -22,7 +25,7 @@ async function getHandler(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -42,11 +45,11 @@ async function getHandler(
       .from('customers')
       .select('id, user_id, name, email, phone, address, created_at, updated_at')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
       }
       apiLogger.error({ error }, 'Error fetching customer')
@@ -69,7 +72,7 @@ async function putHandler(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -84,12 +87,12 @@ async function putHandler(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const _body = await request.json() as Omit<CustomerUpdateInput, 'user_id'>
 
     // Validate request body
     const validation = CustomerUpdateSchema.safeParse({
-      ...body,
-      user_id: user.id
+      ..._body,
+      user_id: user['id']
     })
 
     if (!validation.success) {
@@ -104,14 +107,14 @@ async function putHandler(
 
     // Prepare update data
     const updateData: Update<'customers'> = {
-      name: validation.data.name,
-      phone: validation.data.phone,
-      email: validation.data.email,
-      address: validation.data.address,
-      customer_type: validation.data.customer_type,
-      discount_percentage: validation.data.discount_percentage,
-      notes: validation.data.notes,
-      is_active: validation.data.is_active,
+      ...(validation['data'].name !== undefined && { name: validation['data'].name }),
+      ...(validation['data'].phone !== undefined && { phone: validation['data'].phone ?? null }),
+      ...(validation['data'].email !== undefined && { email: validation['data'].email ?? null }),
+      ...(validation['data'].address !== undefined && { address: validation['data'].address ?? null }),
+      ...(validation['data'].customer_type !== undefined && { customer_type: validation['data'].customer_type ?? null }),
+      ...(validation['data'].discount_percentage !== undefined && { discount_percentage: validation['data'].discount_percentage ?? null }),
+      ...(validation['data'].notes !== undefined && { notes: validation['data'].notes ?? null }),
+      ...(validation['data'].is_active !== undefined && { is_active: validation['data'].is_active ?? null }),
       updated_at: new Date().toISOString(),
     }
 
@@ -120,15 +123,15 @@ async function putHandler(
       .from('customers')
       .update(updateData)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select()
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
       }
-      if (error.code === '23505') {
+      if (error['code'] === '23505') {
         return NextResponse.json({ error: 'Email already exists' }, { status: 409 })
       }
       apiLogger.error({ error }, 'Error updating customer')
@@ -151,7 +154,7 @@ async function deleteHandler(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -171,7 +174,7 @@ async function deleteHandler(
       .from('orders')
       .select('id')
       .eq('customer_id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .limit(1)
 
     if (ordersError) {
@@ -191,10 +194,10 @@ async function deleteHandler(
       .from('customers')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
       }
       apiLogger.error({ error }, 'Error deleting customer')

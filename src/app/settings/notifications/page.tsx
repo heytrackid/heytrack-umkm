@@ -1,5 +1,9 @@
 'use client'
 
+import { Bell, Clock, Layers, Volume2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+
 import AppLayout from '@/components/layout/app-layout'
 import {
     Breadcrumb,
@@ -19,10 +23,8 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { apiLogger } from '@/lib/logger'
 import { testNotificationSound, testUrgentSound } from '@/lib/notifications/sound'
+
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
-import { Bell, Clock, Layers, Volume2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
 
 const NotificationSettingsPage = () => {
     const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
@@ -45,7 +47,7 @@ const NotificationSettingsPage = () => {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
-                const data = await response.json()
+                const data = await response.json() as NotificationPreferences | null
                 setPreferences(data)
             }
         } catch (error) {
@@ -311,7 +313,7 @@ const NotificationSettingsPage = () => {
                                     </div>
                                     <Slider
                                         value={[toNumber(preferences.sound_volume) * 100]}
-                                        onValueChange={([value]) => updatePreference('sound_volume', value / 100)}
+                                        onValueChange={(values) => updatePreference('sound_volume', (values[0] ?? 50) / 100)}
                                         max={100}
                                         step={5}
                                         className="w-full"
@@ -390,7 +392,7 @@ const NotificationSettingsPage = () => {
                                 <div className="space-y-3">
                                     <Label className="text-wrap-mobile">Jendela Waktu Pengelompokan</Label>
                                     <Select
-                                        value={preferences.group_time_window?.toString()}
+                                        value={(preferences.group_time_window?.toString() ?? '300')}
                                         onValueChange={(value) => updatePreference('group_time_window', parseInt(value))}
                                     >
                                         <SelectTrigger>

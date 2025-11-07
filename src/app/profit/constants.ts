@@ -52,7 +52,7 @@ export interface ChartDataPoint {
   profit: number
 }
 
-export type ProfitPeriodType = 'week' | 'month' | 'quarter' | 'year' | 'custom'
+export type ProfitPeriodType = 'custom' | 'month' | 'quarter' | 'week' | 'year'
 
 // Period options for profit reports
 export const profitPeriodOptions = [

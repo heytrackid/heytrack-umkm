@@ -1,12 +1,15 @@
 'use client'
 
+import { AlertTriangle, Package, ShoppingCart, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { AlertTriangle, Package, ShoppingCart, X } from 'lucide-react'
 import { uiLogger } from '@/lib/logger'
+
 import type { Row } from '@/types/database'
 
 /**
@@ -27,7 +30,19 @@ type InventoryNotification = Row<'notifications'> & {
   }
 }
 
+const isInventoryNotification = (value: unknown): value is InventoryNotification => {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+  const record = value as Record<string, unknown>
+  return typeof record['id'] === 'string'
+}
+
+const isInventoryNotificationArray = (value: unknown): value is InventoryNotification[] =>
+  Array.isArray(value) && value.every(isInventoryNotification)
+
 export const InventoryNotifications = () => {
+  const router = useRouter()
   const [notifications, setNotifications] = useState<InventoryNotification[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -38,22 +53,27 @@ export const InventoryNotifications = () => {
 
   const fetchNotifications = async () => {
     try {
-      void setLoading(true)
+      setLoading(true)
       const response = await fetch('/api/notifications?category=inventory&limit=10')
 
       if (!response.ok) {
         throw new Error('Failed to fetch notifications')
       }
 
-      const data = await response.json()
-      void setNotifications(data)
-    } catch (err: unknown) {
-      const error = err as Error
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      void setError(errorMessage)
-      uiLogger.error({ error }, 'Failed to fetch inventory notifications')
+      const payload: unknown = await response.json()
+      if (isInventoryNotificationArray(payload)) {
+        setNotifications(payload)
+      } else {
+        uiLogger.warn({ payload }, 'Unexpected inventory notification payload')
+        setNotifications([])
+      }
+    } catch (error) {
+      const normalizedError = error instanceof Error ? error : new Error(String(error))
+      const errorMessage = normalizedError.message ?? 'Unknown error'
+      setError(errorMessage)
+      uiLogger.error({ error: normalizedError }, 'Failed to fetch inventory notifications')
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }
 
@@ -67,12 +87,12 @@ export const InventoryNotifications = () => {
 
       if (response.ok) {
         setNotifications(prev =>
-          prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+          prev.map(n => n['id'] === notificationId ? { ...n, is_read: true } : n)
         )
       }
-    } catch (err: unknown) {
-      const error = err as Error
-      uiLogger.error({ error, notificationId }, 'Failed to mark notification as read')
+    } catch (error) {
+      const normalizedError = error instanceof Error ? error : new Error(String(error))
+      uiLogger.error({ error: normalizedError, notificationId }, 'Failed to mark notification as read')
     }
   }
 
@@ -85,33 +105,37 @@ export const InventoryNotifications = () => {
       })
 
       if (response.ok) {
-        setNotifications(prev => prev.filter(n => n.id !== notificationId))
+        setNotifications(prev => prev.filter(n => n['id'] !== notificationId))
       }
-    } catch (err: unknown) {
-      const error = err as Error
-      uiLogger.error({ error, notificationId }, 'Failed to dismiss notification')
+    } catch (error) {
+      const normalizedError = error instanceof Error ? error : new Error(String(error))
+      uiLogger.error({ error: normalizedError, notificationId }, 'Failed to dismiss notification')
     }
   }
 
-  const getPriorityColor = (priority?: string) => {
-    switch (priority) {
+  const getPriorityColor = (priority?: string | null) => {
+    switch (priority ?? 'default') {
       case 'high':
         return 'destructive'
       case 'medium':
         return 'default'
       case 'low':
         return 'secondary'
+      case 'default':
       default:
         return 'outline'
     }
   }
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
+  const getTypeIcon = (type?: string | null) => {
+    switch (type ?? 'default') {
       case 'error':
         return <AlertTriangle className="h-4 w-4 text-red-500" />
       case 'warning':
         return <Package className="h-4 w-4 text-yellow-500" />
+      case 'default':
+      case undefined:
+      case null:
       default:
         return <ShoppingCart className="h-4 w-4 text-gray-500" />
     }
@@ -192,13 +216,13 @@ export const InventoryNotifications = () => {
             <div className="space-y-3">
               {notifications.map((notification) => (
                 <div
-                  key={notification.id}
+                  key={notification['id']}
                   className={`p-4 border rounded-lg ${!notification.is_read ? 'bg-gray-50 dark:bg-gray-950/20 border-gray-300' : 'bg-card'
                     }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 flex-1">
-                      {getTypeIcon(notification.type)}
+                      {getTypeIcon(notification['type'])}
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium text-sm">{notification.title}</h4>
@@ -217,16 +241,16 @@ export const InventoryNotifications = () => {
                           {notification.message}
                         </p>
 
-                        {notification.metadata && (
+                        {notification['metadata'] && (
                           <div className="text-xs text-muted-foreground space-y-1">
-                            {notification.metadata.ingredient_name && (
-                              <p>Item: {notification.metadata.ingredient_name}</p>
+                            {notification['metadata']['ingredient_name'] && (
+                              <p>Item: {notification['metadata']['ingredient_name']}</p>
                             )}
-                            {notification.metadata.current_stock !== undefined && (
-                              <p>Current Stock: {notification.metadata.current_stock}</p>
+                            {notification['metadata'].current_stock !== undefined && (
+                              <p>Current Stock: {notification['metadata'].current_stock}</p>
                             )}
-                            {notification.metadata.recommended_quantity && (
-                              <p>Suggested Order: {notification.metadata.recommended_quantity}</p>
+                            {notification['metadata'].recommended_quantity && (
+                              <p>Suggested Order: {notification['metadata'].recommended_quantity}</p>
                             )}
                           </div>
                         )}
@@ -236,7 +260,7 @@ export const InventoryNotifications = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => markAsRead(notification.id)}
+                              onClick={() => markAsRead(notification['id'])}
                             >
                               Mark Read
                             </Button>
@@ -245,7 +269,14 @@ export const InventoryNotifications = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => window.location.href = notification.action_url ?? ''}
+                              onClick={() => {
+                                const url = notification.action_url ?? ''
+                                if (url.startsWith('/')) {
+                                  router.push(url)
+                                } else {
+                                  window.location.href = url
+                                }
+                              }}
                             >
                               View Details
                             </Button>
@@ -257,7 +288,7 @@ export const InventoryNotifications = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => dismissNotification(notification.id)}
+                      onClick={() => dismissNotification(notification['id'])}
                       className="text-muted-foreground hover:text-foreground"
                     >
                       <X className="h-4 w-4" />

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const perfLogger = createClientLogger('PerformanceMonitoring')
@@ -55,7 +56,7 @@ export function usePerformanceMonitoring() {
   const observersRef = useRef<Set<PerformanceObserver>>(new Set())
   const intervalsRef = useRef<Set<NodeJS.Timeout>>(new Set())
   const eventListenersRef = useRef<Set<{ element: EventTarget; event: string; handler: EventListener }>>(new Set())
-  const startTimeRef = useRef<number>(performance.now())
+  const startTimeRef = useRef<number>(typeof performance !== 'undefined' ? performance.now() : 0)
   const mountedRef = useRef(true)
 
   const cleanupAll = useCallback(() => {
@@ -63,8 +64,8 @@ export function usePerformanceMonitoring() {
     observersRef.current.forEach(observer => {
       try {
         observer.disconnect()
-      } catch (e) {
-        perfLogger.warn({ error: e }, 'Error disconnecting performance observer')
+      } catch (error) {
+        perfLogger.warn({ error }, 'Error disconnecting performance observer')
       }
     })
     observersRef.current.clear()
@@ -79,8 +80,8 @@ export function usePerformanceMonitoring() {
     eventListenersRef.current.forEach(({ element, event, handler }) => {
       try {
         element.removeEventListener(event, handler)
-      } catch (e) {
-        perfLogger.warn({ error: e, event }, 'Error removing event listener')
+      } catch (error) {
+        perfLogger.warn({ error, event }, 'Error removing event listener')
       }
     })
     eventListenersRef.current.clear()
@@ -139,8 +140,8 @@ export function usePerformanceMonitoring() {
       })
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
       observersRef.current.add(lcpObserver)
-    } catch (_e) {
-      perfLogger.warn('LCP observation not supported')
+    } catch (error) {
+      perfLogger.warn({ error }, 'LCP observation not supported')
     }
 
     // First Input Delay (FID)
@@ -159,8 +160,8 @@ export function usePerformanceMonitoring() {
       })
       fidObserver.observe({ entryTypes: ['first-input'] })
       observersRef.current.add(fidObserver)
-    } catch (_e) {
-      perfLogger.warn('FID observation not supported')
+    } catch (error) {
+      perfLogger.warn({ error }, 'FID observation not supported')
     }
 
     // Cumulative Layout Shift (CLS)
@@ -183,8 +184,8 @@ export function usePerformanceMonitoring() {
       })
       clsObserver.observe({ entryTypes: ['layout-shift'] })
       observersRef.current.add(clsObserver)
-    } catch (_e) {
-      perfLogger.warn('CLS observation not supported')
+    } catch (error) {
+      perfLogger.warn({ error }, 'CLS observation not supported')
     }
 
     // First Contentful Paint (FCP)
@@ -202,8 +203,8 @@ export function usePerformanceMonitoring() {
       })
       fcpObserver.observe({ entryTypes: ['paint'] })
       observersRef.current.add(fcpObserver)
-    } catch (_e) {
-      perfLogger.warn('FCP observation not supported')
+    } catch (error) {
+      perfLogger.warn({ error }, 'FCP observation not supported')
     }
   }
 

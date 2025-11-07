@@ -1,5 +1,6 @@
-import type { HistoricalData, ProjectionResult, FinancialProjection } from './types'
 import { TrendAnalyzer } from './trend-analyzer'
+
+import type { HistoricalData, ProjectionResult, FinancialProjection } from './types'
 
 /**
  * Projection Engine Module
@@ -23,15 +24,25 @@ export class ProjectionEngine {
 
     // Simple linear trend analysis
     const recentData = historicalData.slice(-6) // Last 6 months
+    if (recentData.length === 0) {
+      return {
+        error: 'No recent data available for projection'
+      }
+    }
     const revenueGrowth = TrendAnalyzer.calculateGrowthRate(recentData.map(d => d.revenue))
     const expenseGrowth = TrendAnalyzer.calculateGrowthRate(recentData.map(d => d.expenses))
 
     const lastMonth = recentData[recentData.length - 1]
+    if (!lastMonth) {
+      return {
+        error: 'Unable to derive latest month for projection'
+      }
+    }
     const projections: FinancialProjection[] = []
 
     for (let i = 1; i <= projectionMonths; i++) {
-      const projectedRevenue = lastMonth.revenue * Math.pow(1 + revenueGrowth, i)
-      const projectedExpenses = lastMonth.expenses * Math.pow(1 + expenseGrowth, i)
+      const projectedRevenue = lastMonth.revenue * (1 + revenueGrowth)**i
+      const projectedExpenses = lastMonth.expenses * (1 + expenseGrowth)**i
       const projectedProfit = projectedRevenue - projectedExpenses
 
       projections.push({
@@ -62,10 +73,9 @@ export class ProjectionEngine {
     historicalData: HistoricalData[],
     projectionMonths = 12
   ):
-    | (ProjectionResult & {
+    { error: string } | ProjectionResult & {
       seasonalFactors: Record<number, number>
-    })
-    | { error: string } {
+    } {
     const baseProjection = this.projectFinancialPerformance(historicalData, projectionMonths)
     
     if ('error' in baseProjection) {

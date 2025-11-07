@@ -1,10 +1,10 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { authLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/server'
 
 export async function login(formData: FormData) {
     const supabase = await createClient()
@@ -28,9 +28,9 @@ export async function login(formData: FormData) {
     if (error) {
         authLogger.error({ 
             email, 
-            errorCode: error.code,
+            errorCode: error['code'],
             errorMessage: error.message,
-            errorStatus: error.status,
+            errorStatus: error['status'],
             errorName: error.name,
             errorDetails: JSON.stringify(error),
             timestamp: new Date().toISOString()
@@ -59,9 +59,9 @@ export async function login(formData: FormData) {
             authLogger.warn({
                 email,
                 originalError: error.message,
-                errorCode: error.code,
+                errorCode: error['code'],
                 errorName: error.name,
-                errorStatus: error.status,
+                errorStatus: error['status'],
                 errorDetails: error
             }, 'Unknown authentication error encountered')
         }

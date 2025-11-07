@@ -1,10 +1,11 @@
-import type { NextRequest } from 'next/server';
 import { dbLogger } from './logger';
+
+import type { NextRequest } from 'next/server';
 
 // Simple in-memory rate limiter (for development)
 // In production, use Redis or similar
 class InMemoryRateLimiter {
-  private requests = new Map<string, { count: number; resetTime: number }>()
+  private readonly requests = new Map<string, { count: number; resetTime: number }>()
 
   checkLimit(identifier: string, maxRequests: number, windowMs: number): { allowed: boolean; remaining: number; resetTime: number } {
     const now = Date.now()
@@ -61,7 +62,7 @@ class InMemoryRateLimiter {
 
 // Production rate limiter using a more robust approach
 class ProductionRateLimiter {
-  checkLimit(identifier: string, maxRequests: number, windowMs: number, _request?: NextRequest): { allowed: boolean; remaining: number; resetTime: number } {
+  checkLimit(_identifier: string, maxRequests: number, windowMs: number, _request?: NextRequest): { allowed: boolean; remaining: number; resetTime: number } {
     // In production, this would connect to Redis or similar
     // For now, we'll simulate with a simple approach
     const now = Date.now()
@@ -76,7 +77,7 @@ class ProductionRateLimiter {
   }
 }
 
-const rateLimiter = process.env.NODE_ENV === 'production' ? new ProductionRateLimiter() : new InMemoryRateLimiter()
+const rateLimiter = process['env'].NODE_ENV === 'production' ? new ProductionRateLimiter() : new InMemoryRateLimiter()
 
 export interface RateLimitOptions {
   maxRequests: number
@@ -86,8 +87,8 @@ export interface RateLimitOptions {
 
 const defaultKeyGenerator = (request: NextRequest): string => {
   // Generate a key based on IP and path
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 
-             request.headers.get('x-real-ip') ??
+  const ip = request['headers'].get('x-forwarded-for')?.split(',')[0]?.trim() ?? 
+             request['headers'].get('x-real-ip') ??
              'unknown'
   const path = request.nextUrl.pathname
   return `${ip}:${path}`
@@ -100,7 +101,7 @@ export function checkRateLimit(
   
   const key = options.keyGenerator?.(request) ?? defaultKeyGenerator(request)
   
-  if (process.env.NODE_ENV === 'production') {
+  if (process['env'].NODE_ENV === 'production') {
     return Promise.resolve(rateLimiter.checkLimit(key, options.maxRequests, options.windowMs, request))
   }
   return Promise.resolve(rateLimiter.checkLimit(key, options.maxRequests, options.windowMs))
@@ -116,9 +117,9 @@ export function withRateLimit(
 
     if (!allowed) {
       dbLogger.warn({
-        ip: request.headers.get('x-forwarded-for')?.split(',')[0],
+        ip: request['headers'].get('x-forwarded-for')?.split(',')[0],
         path: request.nextUrl.pathname,
-        userAgent: request.headers.get('user-agent')
+        userAgent: request['headers'].get('user-agent')
       }, 'Rate limit exceeded')
       
       return new Response(
@@ -140,15 +141,15 @@ export function withRateLimit(
     const response = await handler(request)
     
     // Clone response to modify headers
-    const modifiedResponse = new Response(response.body, {
-      status: response.status,
+    const modifiedResponse = new Response(response['body'], {
+      status: response['status'],
       statusText: response.statusText,
-      headers: new Headers(response.headers)
+      headers: new Headers(response['headers'])
     })
     
-    modifiedResponse.headers.set('X-RateLimit-Limit', options.maxRequests.toString())
-    modifiedResponse.headers.set('X-RateLimit-Remaining', remaining.toString())
-    modifiedResponse.headers.set('X-RateLimit-Reset', resetTime.toString())
+    modifiedResponse['headers'].set('X-RateLimit-Limit', options.maxRequests.toString())
+    modifiedResponse['headers'].set('X-RateLimit-Remaining', remaining.toString())
+    modifiedResponse['headers'].set('X-RateLimit-Reset', resetTime.toString())
     
     return modifiedResponse
   }

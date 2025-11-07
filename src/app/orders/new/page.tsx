@@ -1,26 +1,28 @@
 'use client'
 
-import PrefetchLink from '@/components/ui/prefetch-link'
-import AppLayout from '@/components/layout/app-layout'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { Badge } from '@/components/ui/badge'
-import { OrderFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
-import { useOrderLogic } from './hooks/useOrderLogic'
+import { ArrowLeft, ShoppingCart, User, CreditCard, Truck, Package, AlertCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
+
+import { useOrderLogic } from '@/app/orders/new/hooks/useOrderLogic'
+import AppLayout from '@/components/layout/app-layout'
+import { Badge } from '@/components/ui/badge'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
-import { ArrowLeft, ShoppingCart, User, CreditCard, Truck, Package, AlertCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import PrefetchLink from '@/components/ui/prefetch-link'
+import { OrderFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+
 
 // Lazy load wizard step components
 const OrderCustomerStep = dynamic(() => import('./_components/OrderCustomerStep'), {
   loading: () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-        ))}
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {Array.from({ length: 4 }, (_, i) => (
+                              <div key={i} className="h-10 bg-muted animate-pulse rounded" />
+                            ))}
       </div>
       <div className="h-32 bg-muted animate-pulse rounded" />
     </div>
@@ -32,7 +34,7 @@ const OrderItemsStep = dynamic(() => import('./_components/OrderItemsStep'), {
     <div className="space-y-4">
       <div className="h-12 bg-muted animate-pulse rounded" />
       <div className="space-y-3">
-        {[...Array(3)].map((_, i) => (
+        {Array.from({ length: 3 }, (_, i) => (
           <div key={i} className="h-16 bg-muted animate-pulse rounded" />
         ))}
       </div>
@@ -44,7 +46,7 @@ const OrderDeliveryStep = dynamic(() => import('./_components/OrderDeliveryStep'
   loading: () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[...Array(6)].map((_, i) => (
+        {Array.from({ length: 4 }, (_, i) => (
           <div key={i} className="h-10 bg-muted animate-pulse rounded" />
         ))}
       </div>
@@ -56,7 +58,7 @@ const OrderPaymentStep = dynamic(() => import('./_components/OrderPaymentStep'),
   loading: () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[...Array(4)].map((_, i) => (
+        {Array.from({ length: 4 }, (_, i) => (
           <div key={i} className="h-10 bg-muted animate-pulse rounded" />
         ))}
       </div>
@@ -74,7 +76,49 @@ const OrderSummary = dynamic(() => import('./_components/OrderSummary'), {
       </div>
     </div>
   )
-}) 
+})
+
+const CustomerStepSkeleton = () => (
+  <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="h-10 bg-muted animate-pulse rounded" />
+      ))}
+    </div>
+    <div className="h-32 bg-muted animate-pulse rounded" />
+  </div>
+)
+
+const ItemsStepSkeleton = () => (
+  <div className="space-y-4">
+    <div className="h-12 bg-muted animate-pulse rounded" />
+    <div className="space-y-3">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="h-16 bg-muted animate-pulse rounded" />
+      ))}
+    </div>
+  </div>
+)
+
+const DeliveryStepSkeleton = () => (
+  <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-10 bg-muted animate-pulse rounded" />
+      ))}
+    </div>
+  </div>
+)
+
+const PaymentStepSkeleton = () => (
+  <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="h-10 bg-muted animate-pulse rounded" />
+      ))}
+    </div>
+  </div>
+) 
 
 const NewOrderPage = () => {
   const {
@@ -86,7 +130,6 @@ const NewOrderPage = () => {
     isSubmitting,
     error,
     activeTab,
-    loading,
 
     // Calculated values
     subtotal,
@@ -108,7 +151,7 @@ const NewOrderPage = () => {
     router
   } = useOrderLogic()
 
-  if (loading) {
+  if (isSubmitting) {
     return (
       <AppLayout>
         <OrderFormSkeleton />
@@ -207,17 +250,8 @@ const NewOrderPage = () => {
                     </div>
                   )}
 
-                   <SwipeableTabsContent value="customer" className="mt-6">
-                     <Suspense fallback={
-                       <div className="space-y-4">
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           {[...Array(4)].map((_, i) => (
-                             <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-                           ))}
-                         </div>
-                         <div className="h-32 bg-muted animate-pulse rounded" />
-                       </div>
-                     }>
+                    <SwipeableTabsContent value="customer" className="mt-6">
+                      <Suspense fallback={<CustomerStepSkeleton />}>
                        <OrderCustomerStep
                          formData={formData}
                          customers={customers}
@@ -227,17 +261,8 @@ const NewOrderPage = () => {
                      </Suspense>
                    </SwipeableTabsContent>
 
-                   <SwipeableTabsContent value="items" className="mt-6">
-                     <Suspense fallback={
-                       <div className="space-y-4">
-                         <div className="h-12 bg-muted animate-pulse rounded" />
-                         <div className="space-y-3">
-                           {[...Array(3)].map((_, i) => (
-                             <div key={i} className="h-16 bg-muted animate-pulse rounded" />
-                           ))}
-                         </div>
-                       </div>
-                     }>
+                    <SwipeableTabsContent value="items" className="mt-6">
+                      <Suspense fallback={<ItemsStepSkeleton />}>
                        <OrderItemsStep
                          orderItems={orderItems}
                          availableRecipes={availableRecipes}
@@ -250,16 +275,8 @@ const NewOrderPage = () => {
                      </Suspense>
                    </SwipeableTabsContent>
 
-                   <SwipeableTabsContent value="delivery" className="mt-6">
-                     <Suspense fallback={
-                       <div className="space-y-4">
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           {[...Array(6)].map((_, i) => (
-                             <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-                           ))}
-                         </div>
-                       </div>
-                     }>
+                    <SwipeableTabsContent value="delivery" className="mt-6">
+                       <Suspense fallback={<DeliveryStepSkeleton />}>
                        <OrderDeliveryStep
                          formData={formData}
                          onInputChange={handleInputChange}
@@ -267,16 +284,8 @@ const NewOrderPage = () => {
                      </Suspense>
                    </SwipeableTabsContent>
 
-                   <SwipeableTabsContent value="payment" className="mt-6">
-                     <Suspense fallback={
-                       <div className="space-y-4">
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           {[...Array(4)].map((_, i) => (
-                             <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-                           ))}
-                         </div>
-                       </div>
-                     }>
+                     <SwipeableTabsContent value="payment" className="mt-6">
+                       <Suspense fallback={<PaymentStepSkeleton />}>
                        <OrderPaymentStep
                          formData={formData}
                          onInputChange={handleInputChange}

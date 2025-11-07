@@ -56,7 +56,7 @@ export function isRecipe(value: unknown): value is Recipe {
   if (!isObject(value)) {return false}
   
   return (
-    isString(value.id) &&
+    isString(value['id']) &&
     isString(value.name) &&
     isString(value.created_by)
   )
@@ -69,7 +69,7 @@ export function isIngredient(value: unknown): value is Ingredient {
   if (!isObject(value)) {return false}
   
   return (
-    isString(value.id) &&
+    isString(value['id']) &&
     isString(value.name) &&
     isString(value.unit) &&
     isString(value.user_id)
@@ -83,8 +83,8 @@ export function isOrder(value: unknown): value is Order {
   if (!isObject(value)) {return false}
   
   return (
-    isString(value.id) &&
-    isString(value.order_no) &&
+    isString(value['id']) &&
+    isString(value['order_no']) &&
     isString(value.user_id)
   )
 }
@@ -96,7 +96,7 @@ export function isCustomer(value: unknown): value is Customer {
   if (!isObject(value)) {return false}
   
   return (
-    isString(value.id) &&
+    isString(value['id']) &&
     isString(value.name) &&
     isString(value.user_id)
   )
@@ -169,7 +169,7 @@ interface SupabaseResponse<T> {
 export function isSuccessResponse<T>(
   response: SupabaseResponse<T>
 ): response is { data: T; error: null } {
-  return response.error === null && response.data !== null
+  return response.error === null && response['data'] !== null
 }
 
 /**

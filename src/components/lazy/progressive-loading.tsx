@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, Suspense, type ReactNode } from 'react'
+
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
 
 
 
@@ -36,7 +37,7 @@ export const ProgressiveLoader = ({
 
     // Simulate loading completion
     const loadTimer = setTimeout(() => {
-      void setIsLoading(false)
+      setIsLoading(false)
     }, Math.random() * 2000 + 500)
 
     return () => {
@@ -46,8 +47,8 @@ export const ProgressiveLoader = ({
   }, [timeout, isLoading])
 
   const handleRetry = () => {
-    void setIsLoading(true)
-    void setHasError(false)
+    setIsLoading(true)
+    setHasError(false)
     setShowTimeout(false)
   }
 
@@ -118,10 +119,10 @@ export const ProgressiveDataTable = <T extends Record<string, ReactNode>>({
   const displayedData = data.slice(0, loadedPages * pageSize)
 
   const loadMore = async () => {
-    void setIsLoadingMore(true)
+    setIsLoadingMore(true)
     await new Promise(resolve => setTimeout(resolve, 500))
-    void setLoadedPages(prev => prev + 1)
-    void setIsLoadingMore(false)
+    setLoadedPages(prev => prev + 1)
+    setIsLoadingMore(false)
   }
 
   if (shouldVirtualize) {
@@ -316,15 +317,14 @@ export function useProgressiveData<T>(
 
   const loadData = async () => {
     try {
-      void setLoading(true)
-      void setError(null)
+      setLoading(true)
+      setError(null)
       const result = await fetchFunction()
-      void setData(result)
-    } catch (err: unknown) {
-      const error = err as Error
-      void setError(error)
+      setData(result)
+    } catch (error) {
+      setError(error as Error)
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }
 

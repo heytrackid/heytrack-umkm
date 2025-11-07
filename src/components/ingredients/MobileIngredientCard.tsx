@@ -1,12 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-import type { Row } from '@/types/database'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { useSettings } from '@/contexts/settings-context'
-import { StockBadge, CompactStockIndicator } from './StockBadge'
-import { cn } from '@/lib/utils'
 import {
     Edit,
     Trash2,
@@ -14,6 +7,16 @@ import {
     ChevronUp,
     ShoppingCart
 } from 'lucide-react'
+import { useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { useSettings } from '@/contexts/settings-context'
+import { cn } from '@/lib/utils'
+
+import { StockBadge, CompactStockIndicator } from './StockBadge'
+
+import type { Row } from '@/types/database'
 
 type Ingredient = Row<'ingredients'>
 
@@ -207,12 +210,12 @@ export const MobileIngredientList = ({
     <div className="space-y-3">
         {ingredients.map((ingredient) => (
             <MobileIngredientCard
-                key={ingredient.id}
+                key={ingredient['id']}
                 ingredient={ingredient}
-                onView={onView}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onQuickBuy={onQuickBuy}
+                {...(onView ? { onView } : {})}
+                {...(onEdit ? { onEdit } : {})}
+                {...(onDelete ? { onDelete } : {})}
+                {...(onQuickBuy ? { onQuickBuy } : {})}
             />
         ))}
     </div>

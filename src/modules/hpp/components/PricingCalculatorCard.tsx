@@ -1,18 +1,19 @@
 'use client'
 
-import { useState, useEffect, type ComponentType } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Slider } from '@/components/ui/slider'
-import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Loader2, CheckCircle, TrendingUp, TrendingDown, DollarSign, Lightbulb } from 'lucide-react'
+import { useState, useEffect, type ComponentType } from 'react'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Slider } from '@/components/ui/slider'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 
 
-type MarginLevel = 'high' | 'medium' | 'low'
+type MarginLevel = 'high' | 'low' | 'medium'
 
 const getMarginLevel = (margin: number): MarginLevel => {
     if (margin >= 50) { return 'high' }
@@ -20,7 +21,7 @@ const getMarginLevel = (margin: number): MarginLevel => {
     return 'low'
 }
 
-const marginVariantMap: Record<MarginLevel, 'default' | 'secondary' | 'destructive'> = {
+const marginVariantMap: Record<MarginLevel, 'default' | 'destructive' | 'secondary'> = {
     high: 'default',
     medium: 'secondary',
     low: 'destructive',

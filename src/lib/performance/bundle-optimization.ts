@@ -51,7 +51,7 @@ export function preloadCriticalResources() {
     const link = document.createElement('link')
     link.rel = 'preload'
     link.as = 'font'
-    link.type = 'font/woff2'
+    link['type'] = 'font/woff2'
     link.crossOrigin = 'anonymous'
     link.href = font
     document.head.appendChild(link)
@@ -139,7 +139,7 @@ export function deferNonCriticalScripts() {
     const script = document.createElement('script')
     script.src = '/analytics.js'
     script.async = true
-    document.body.appendChild(script)
+    document['body'].appendChild(script)
   }, 3000)
 }
 
@@ -148,7 +148,7 @@ export function deferNonCriticalScripts() {
  */
 export function removeUnusedCSS() {
   if (typeof window === 'undefined') {return}
-  if (process.env.NODE_ENV !== 'production') {return}
+  if (process['env'].NODE_ENV !== 'production') {return}
 
   // This would typically be done at build time with PurgeCSS
   // But we can also do runtime cleanup for dynamic content
@@ -201,7 +201,7 @@ function loadThirdPartyScripts() {
  */
 export function monitorBundleSize() {
   if (typeof window === 'undefined') {return}
-  if (process.env.NODE_ENV !== 'development') {return}
+  if (process['env'].NODE_ENV !== 'development') {return}
 
   const resources = performance.getEntriesByType('resource')
   

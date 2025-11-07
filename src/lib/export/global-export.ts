@@ -1,9 +1,11 @@
 import 'server-only'
-import ExcelJS from 'exceljs'
-import { createClient } from '@/utils/supabase/server'
-import type { Row } from '@/types/database'
 import { format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
+import ExcelJS from 'exceljs'
+
+import { createClient } from '@/utils/supabase/server'
+
+import type { Row } from '@/types/database'
 
 
 
@@ -32,12 +34,12 @@ export class GlobalExportService {
     ])
 
     // Create sheets
-    void this.createRecipesSheet(workbook, recipes)
-    void this.createOrdersSheet(workbook, orders)
-    void this.createIngredientsSheet(workbook, ingredients)
-    void this.createCustomersSheet(workbook, customers)
-    void this.createStockTransactionsSheet(workbook, stockTransactions)
-    void this.createSummarySheet(workbook, { recipes, orders, ingredients, customers })
+    this.createRecipesSheet(workbook, recipes)
+    this.createOrdersSheet(workbook, orders)
+    this.createIngredientsSheet(workbook, ingredients)
+    this.createCustomersSheet(workbook, customers)
+    this.createStockTransactionsSheet(workbook, stockTransactions)
+    this.createSummarySheet(workbook, { recipes, orders, ingredients, customers })
 
     // Generate buffer
     const buffer = await workbook.xlsx.writeBuffer()
@@ -176,10 +178,10 @@ export class GlobalExportService {
 
     orders.forEach((order: Order) => {
       sheet.addRow({
-        order_no: order.order_no,
-        customer_name: order.customer_name,
+        order_no: order['order_no'],
+        customer_name: order['customer_name'],
         total_amount: order.total_amount ?? 0,
-        status: this.translateStatus(order.status),
+        status: this.translateStatus(order['status']),
         order_date: order.order_date ? format(new Date(order.order_date), 'dd/MM/yyyy', { locale: localeId }) : '',
         created_at: order.created_at ? format(new Date(order.created_at), 'dd/MM/yyyy', { locale: localeId }) : '',
       })
@@ -285,7 +287,7 @@ export class GlobalExportService {
       const total = (tx.quantity ?? 0) * (tx.unit_price ?? 0)
       sheet.addRow({
         created_at: tx.created_at ? format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm', { locale: localeId }) : '',
-        type: this.translateTransactionType(tx.type),
+        type: this.translateTransactionType(tx['type']),
         quantity: tx.quantity || 0,
         unit_price: tx.unit_price ?? 0,
         total,
@@ -316,9 +318,9 @@ export class GlobalExportService {
     const totalRecipes = data.recipes.length
     const activeRecipes = data.recipes.filter(r => r.is_active).length
     const totalOrders = data.orders.length
-    const completedOrders = data.orders.filter(o => o.status === 'DELIVERED').length
+    const completedOrders = data.orders.filter(o => o['status'] === 'DELIVERED').length
     const totalRevenue = data.orders
-      .filter(o => o.status === 'DELIVERED')
+      .filter(o => o['status'] === 'DELIVERED')
       .reduce((sum, o) => sum + (o.total_amount ?? 0), 0)
     const avgOrderValue = completedOrders > 0 ? totalRevenue / completedOrders : 0
     const totalIngredients = data.ingredients.length

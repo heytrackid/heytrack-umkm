@@ -138,7 +138,7 @@ function isCategoryNameTaken(
   const normalizedName = name.toLowerCase().trim()
   return categories.some(category =>
     category.name.toLowerCase().trim() === normalizedName &&
-    category.id !== excludeId
+    category['id'] !== excludeId
   )
 }
 
@@ -268,7 +268,7 @@ export function useCategories(): UseCategoriesReturn {
       // Update existing category
       const updatedCategory = updateCategoryFromForm(editingCategory, formData)
       setCategories(prev => sortCategories(
-        prev.map(cat => cat.id === editingCategory.id ? updatedCategory : cat)
+        prev.map(cat => cat['id'] === editingCategory['id'] ? updatedCategory : cat)
       ))
       toast.success('Kategori berhasil diperbarui!')
     }
@@ -281,7 +281,7 @@ export function useCategories(): UseCategoriesReturn {
   const handleEditCategory = (category: Category) => {
     void setEditingCategory(category)
     setFormData({
-      id: category.id,
+      id: category['id'],
       name: category.name,
       icon: category.icon,
       description: category.description,
@@ -292,7 +292,7 @@ export function useCategories(): UseCategoriesReturn {
 
   // Handle delete category
   const handleDeleteCategory = (categoryId: string) => {
-    const category = categories.find(c => c.id === categoryId)
+    const category = categories.find(c => c['id'] === categoryId)
     if (!category) {return}
 
     toast.error('Konfirmasi diperlukan. Gunakan komponen UI untuk konfirmasi penghapusan.', { 
@@ -305,7 +305,7 @@ export function useCategories(): UseCategoriesReturn {
     if (selectedItems.length === filteredCategories.length) {
       void setSelectedItems([])
     } else {
-      setSelectedItems(filteredCategories.map(category => category.id))
+      setSelectedItems(filteredCategories.map(category => category['id']))
     }
   }
 
@@ -329,7 +329,7 @@ export function useCategories(): UseCategoriesReturn {
     if (selectedItems.length === 0) {return}
 
     const selectedCategories = filteredCategories.filter(category =>
-      selectedItems.includes(category.id)
+      selectedItems.includes(category['id'])
     )
     
     // Use the selected categories for bulk edit

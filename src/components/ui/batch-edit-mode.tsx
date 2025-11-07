@@ -1,9 +1,11 @@
  
 'use client'
 
-import { cn } from '@/lib/utils'
 import { CheckSquare, Edit, Trash2, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
+
+import { cn } from '@/lib/utils'
+
 import { Badge } from './badge'
 import { Button } from './button'
 import { Checkbox } from './checkbox'
@@ -23,7 +25,7 @@ interface BatchEditModeProps<T> {
 export interface BatchAction {
   icon: ReactNode
   label: string
-  onClick: (selectedIds: string[]) => void | Promise<void>
+  onClick: (selectedIds: string[]) => Promise<void> | void
   variant?: 'default' | 'destructive' | 'outline'
   requiresConfirmation?: boolean
 }

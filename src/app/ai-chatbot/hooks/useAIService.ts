@@ -1,8 +1,9 @@
-import { apiLogger } from '@/lib/logger'
 import { generateAIInsights } from '@/lib/ai'
+import { apiLogger } from '@/lib/logger'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import type { SupabaseClient } from '@supabase/supabase-js'
+
 import type { Database } from '@/types/database'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Fetch business context dari database
@@ -55,7 +56,7 @@ async function fetchBusinessContext(supabase: SupabaseClient<Database>, userId: 
 
     // Calculate business metrics
     const totalOrders = typedOrders.length
-    const pendingOrders = typedOrders.filter(o => o.status === 'PENDING').length
+    const pendingOrders = typedOrders.filter(o => o['status'] === 'PENDING').length
     const totalRevenue = typedOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
     const criticalStock = typedIngredients.filter(i => i.current_stock < i.min_stock)
 
@@ -206,8 +207,8 @@ export function useAIService() {
             'Refresh halaman dan coba lagi',
             'Gunakan fitur manual di dashboard'
           ]
+        }
       }
-    }
       if (lowerQuery.includes('stok') || lowerQuery.includes('bahan') || lowerQuery.includes('inventory')) {
         const criticalStock = businessContext?.inventory?.critical ?? []
         const totalStock = businessContext?.inventory?.total ?? 0

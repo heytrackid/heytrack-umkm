@@ -126,7 +126,7 @@ export type ValueOf<T> = T extends readonly unknown[] ? T[number] : T[keyof T];
  * @template T - The object type
  */
 export type AtLeastOne<T> = {
-    [K in keyof T]: Pick<T, K> & Partial<Omit<T, K>>;
+    [K in keyof T]: Partial<Omit<T, K>> & Pick<T, K>;
 }[keyof T];
 
 /**
@@ -134,5 +134,5 @@ export type AtLeastOne<T> = {
  * @template T - The object type
  */
 export type ExactlyOne<T> = {
-    [K in keyof T]: Pick<T, K> & Partial<Record<Exclude<keyof T, K>, never>>;
+    [K in keyof T]: Partial<Record<Exclude<keyof T, K>, never>> & Pick<T, K>;
 }[keyof T];
