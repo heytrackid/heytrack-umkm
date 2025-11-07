@@ -27,8 +27,8 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         { error: 'Unauthorized' },
         { status: 401 }
       )
-    }    const _body = await request.json() as { description: string; category: string; amount: number; date: string; type: string; source?: string }
-    const { description, category, amount, date, type, source = 'manual_entry' } = _body
+    }    const _body = await request.json() as { description: string; category: string; amount: number; date: string; type: string }
+    const { description, category, amount, date, type } = _body
 
     // Validation
     if (!description || !category || !amount || !date || !type) {
@@ -62,8 +62,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         category: type === 'income' ? 'Revenue' : category,
         amount,
         date,
-        reference: `MANUAL-${Date.now()}`,
-        source
+        reference: `MANUAL-${Date.now()}`
       })
       .select()
       .single()
@@ -115,7 +114,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
     let query = supabase
       .from('financial_records')
-      .select('id, description, category, amount, date, reference, type, source, created_at')
+      .select('id, description, category, amount, date, reference, type, created_at')
       .eq('user_id', user['id'])
       .order('date', { ascending: false })
       .limit(limit)

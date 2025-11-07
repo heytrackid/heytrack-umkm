@@ -252,16 +252,16 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="amount">Jumlah Biaya *</Label>
-                                <Input
-                                    id="amount"
-                                    type="number"
-                                    min="0"
-                                    step="1000"
-                                    value={formData.amount ?? ''}
-                                    onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                                    placeholder="0"
-                                    required
-                                />
+                                 <Input
+                                     id="amount"
+                                     type="number"
+                                     min="0"
+                                     step="1"
+                                     value={formData.amount ?? ''}
+                                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                                     placeholder="0"
+                                     required
+                                 />
                             </div>
 
                             <div className="space-y-2">

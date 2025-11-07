@@ -225,8 +225,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
           category: formData.category,
           amount,
           date: formData.date,
-          type: transactionType,
-          source: 'manual_entry'
+          type: transactionType
         })
       })
 

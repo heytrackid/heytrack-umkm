@@ -40,9 +40,8 @@ interface CategoryTableProps {
   // Actions
   onSelectAll: () => void
   onSelectItem: (itemId: string) => void
-  onEdit: (category: Category) => void
-  onDelete: (categoryId: string) => void
-  onView: (category: Category) => void
+   onEdit: (category: Category) => void
+   onDelete: (categoryId: string) => void
   onPageChange: (page: number) => void
   onPageSizeChange: (size: PageSize) => void
   onBulkEdit: () => void
@@ -64,7 +63,6 @@ export const CategoryTable = ({
   onSelectItem,
   onEdit,
   onDelete,
-  onView,
   onPageChange,
   onPageSizeChange,
   onBulkEdit,
@@ -159,15 +157,8 @@ export const CategoryTable = ({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onView(category)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <DropdownMenu>
+                       <div className="flex items-center gap-2">
+                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
                               <MoreHorizontal className="h-4 w-4" />

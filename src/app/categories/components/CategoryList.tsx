@@ -39,9 +39,8 @@ interface CategoryListProps {
   onSearchChange: (term: string) => void
   onSelectAll: () => void
   onSelectItem: (itemId: string) => void
-  onEdit: (category: Category) => void
-  onDelete: (categoryId: string) => void
-  onView: (category: Category) => void
+   onEdit: (category: Category) => void
+   onDelete: (categoryId: string) => void
   onPageChange: (page: number) => void
   onPageSizeChange: (size: PageSize) => void
   onBulkEdit: () => void
@@ -63,12 +62,11 @@ const CategoryList = ({
   paginationInfo,
   onAddNew,
   onSearchChange,
-  onSelectAll,
-  onSelectItem,
-  onEdit,
-  onDelete,
-  onView,
-  onPageChange,
+   onSelectAll,
+   onSelectItem,
+   onEdit,
+   onDelete,
+   onPageChange,
   onPageSizeChange,
   onBulkEdit,
   onBulkDelete,
@@ -141,7 +139,7 @@ const CategoryList = ({
           onSelectItem={onSelectItem}
           onEdit={onEdit}
           onDelete={onDelete}
-          onView={onView}
+
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
           onBulkEdit={onBulkEdit}
