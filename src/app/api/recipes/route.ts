@@ -1,7 +1,4 @@
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
@@ -9,9 +6,11 @@ import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { PaginationQuerySchema } from '@/lib/validations'
+import { RecipeInsertSchema } from '@/lib/validations/domains/recipe'
 import { createPaginationMeta } from '@/lib/validations/pagination'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
+
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
@@ -165,25 +164,49 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         { error: 'Unauthorized' },
         { status: 401 }
       )
-    }    // The request body is already sanitized by the security middleware
-    const _body = await request.json() as { recipe_ingredients?: unknown[]; name?: string; nama?: string; [key: string]: unknown }
-    const { recipe_ingredients, name, nama, ...recipeData } = _body
+    }
 
-    // Validate required fields
-    if (!name && !nama) {
+    // Parse and validate request body
+    const _body = await request.json() as unknown
+
+    // Support legacy field names for backwards compatibility
+    const bodyWithNormalization = _body as { recipe_ingredients?: unknown[]; ingredients?: unknown[]; name?: string; nama?: string; [key: string]: unknown }
+    
+    // Normalize ingredients field name
+    if (bodyWithNormalization.recipe_ingredients && !bodyWithNormalization.ingredients) {
+      bodyWithNormalization.ingredients = bodyWithNormalization.recipe_ingredients
+    }
+
+    // Normalize name field
+    if (bodyWithNormalization.nama && !bodyWithNormalization.name) {
+      bodyWithNormalization.name = bodyWithNormalization.nama
+    }
+
+    // Validate with Zod schema
+    const validationResult = RecipeInsertSchema.safeParse(bodyWithNormalization)
+    
+    if (!validationResult.success) {
+      apiLogger.warn({ errors: validationResult.error.issues }, 'Recipe validation failed')
       return NextResponse.json(
-        { error: 'Recipe name is required' },
+        { 
+          error: 'Invalid recipe data', 
+          details: validationResult.error.issues.map(issue => ({
+            path: issue.path.join('.'),
+            message: issue.message
+          }))
+        },
         { status: 400 }
       )
     }
+
+    const { ingredients, ...recipeData } = validationResult.data
 
     // Start a transaction by creating the recipe first
     const { data: recipe, error: recipeError } = await supabase
       .from('recipes')
       .insert([{
         ...recipeData,
-        created_by: user['id'],
-        name: name ?? nama
+        created_by: user['id']
       } as Insert<'recipes'>])
       .select('id, name, created_at')
       .single()
@@ -196,45 +219,33 @@ async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    // If ingredients are provided, add them to recipe_ingredients
+    // Add ingredients to recipe_ingredients (already validated by schema)
     const createdRecipe = recipe
-    if (recipe_ingredients && recipe_ingredients.length > 0) {
-      interface RecipeIngredientInput {
-        ingredient_id?: string
-        bahan_id?: string
-        quantity?: number
-        qty_per_batch?: number
-        unit?: string
-      }
+    const recipeIngredientsToInsert: Array<Insert<'recipe_ingredients'>> = ingredients.map((ingredient) => ({
+      recipe_id: createdRecipe['id'],
+      ingredient_id: ingredient.ingredient_id,
+      quantity: ingredient.quantity,
+      unit: ingredient.unit,
+      notes: ingredient.notes ?? null,
+      user_id: user['id']
+    }))
 
-      const recipeIngredientsToInsert: Array<Insert<'recipe_ingredients'>> = recipe_ingredients.map((ingredient) => {
-        const ing = ingredient as RecipeIngredientInput
-        return {
-          recipe_id: createdRecipe['id'],
-          ingredient_id: ing.ingredient_id ?? ing.bahan_id ?? '',
-          quantity: ing.quantity ?? ing.qty_per_batch ?? 0,
-          unit: ing.unit ?? 'g',
-          user_id: user['id']
-        }
-      })
+    const { error: ingredientsError } = await supabase
+      .from('recipe_ingredients')
+      .insert(recipeIngredientsToInsert)
 
-      const { error: ingredientsError } = await supabase
-        .from('recipe_ingredients')
-        .insert(recipeIngredientsToInsert)
-
-      if (ingredientsError) {
-        apiLogger.error({ error: ingredientsError }, 'Error adding recipe ingredients:')
-        // If ingredients fail, we should delete the recipe to maintain consistency
-        await supabase
-          .from('recipes')
-          .delete()
-          .eq('id', createdRecipe['id'])
-          .eq('created_by', user['id'])
-        return NextResponse.json(
-          { error: 'Failed to add recipe ingredients' },
-          { status: 500 }
-        )
-      }
+    if (ingredientsError) {
+      apiLogger.error({ error: ingredientsError }, 'Error adding recipe ingredients:')
+      // If ingredients fail, we should delete the recipe to maintain consistency
+      await supabase
+        .from('recipes')
+        .delete()
+        .eq('id', createdRecipe['id'])
+        .eq('created_by', user['id'])
+      return NextResponse.json(
+        { error: 'Failed to add recipe ingredients' },
+        { status: 500 }
+      )
     }
 
     // Fetch the complete recipe with ingredients for response

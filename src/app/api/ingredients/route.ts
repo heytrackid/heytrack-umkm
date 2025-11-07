@@ -1,8 +1,4 @@
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-
-
-import { type NextRequest } from 'next/server'
 import { z } from 'zod'
 
 import { createSuccessResponse, createErrorResponse, handleAPIError, withQueryValidation, PaginationSchema, calculateOffset, createPaginationMeta } from '@/lib/api-core'
@@ -13,6 +9,8 @@ import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
+
+import type { NextRequest, NextResponse } from 'next/server'
 
 
 
@@ -154,15 +152,9 @@ async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-// Apply security middleware with custom configuration
-// HOTFIX: Explicitly disable SQL/XSS checks to prevent body consumption
+// Apply security middleware with enhanced security for write operations
 const securedGET = withSecurity(GET, SecurityPresets.basic())
-const securedPOST = withSecurity(POST, {
-  ...SecurityPresets.basic(),
-  sanitizeInputs: false, // Disable input sanitization to avoid double body parsing
-  checkForSQLInjection: false, // HOTFIX: Prevent body consumption
-  checkForXSS: false         // HOTFIX: Prevent body consumption
-})
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
 
 // Export secured handlers
 export { securedGET as GET, securedPOST as POST }

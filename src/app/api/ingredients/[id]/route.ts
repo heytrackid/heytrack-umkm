@@ -1,6 +1,4 @@
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-
 import { withValidation } from '@/lib/api-core/middleware'
 import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
@@ -9,20 +7,27 @@ import { apiLogger } from '@/lib/logger'
 import { isValidUUID } from '@/lib/type-guards'
 import { IdParamSchema, IngredientUpdateSchema } from '@/lib/validations'
 import type { Row } from '@/types/database'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
+import { typed } from '@/types/type-utilities'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 import { createClient } from '@/utils/supabase/server'
 
-import type { NextRequest } from 'next/server'
+import type { NextRequest, NextResponse } from 'next/server'
 
 type Ingredient = Row<'ingredients'>
+
+// Context type for dynamic route params
+interface RouteContext {
+  params: Promise<{ id: string }>
+}
 
 // GET /api/ingredients/[id] - Get single bahan baku
 async function getHandler(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ): Promise<NextResponse> {
-  const { id } = params
+  const { id } = await context.params
   try {
     // Validate UUID format first
     if (!isValidUUID(id)) {
@@ -35,7 +40,7 @@ async function getHandler(
       return createErrorResponse('Invalid bahan baku ID format', 400)
     }
 
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -70,9 +75,9 @@ async function getHandler(
 // PUT /api/ingredients/[id] - Update bahan baku
 async function putHandler(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ): Promise<NextResponse> {
-  const { id } = params
+  const { id } = await context.params
   
   // Validate UUID format first
   if (!isValidUUID(id)) {
@@ -94,7 +99,7 @@ async function putHandler(
       return createErrorResponse('Invalid bahan baku ID format', 400)
     }
 
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -194,9 +199,9 @@ async function putHandler(
 // DELETE /api/ingredients/[id] - Delete bahan baku
 async function deleteHandler(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ): Promise<NextResponse> {
-  const { id } = params
+  const { id } = await context.params
   try {
     // Validate UUID format first
     if (!isValidUUID(id)) {
@@ -209,7 +214,7 @@ async function deleteHandler(
       return createErrorResponse('Invalid bahan baku ID format', 400)
     }
 
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -219,7 +224,7 @@ async function deleteHandler(
     // Check if bahan baku exists and belongs to user
     const { data: existing } = await supabase
       .from('ingredients')
-      .select('id')
+      .select('id, name')
       .eq('id', id)
       .eq('user_id', user['id'])
       .single()
@@ -228,21 +233,44 @@ async function deleteHandler(
       return createErrorResponse('Bahan baku tidak ditemukan', 404)
     }
 
-    // Check if bahan baku is used in recipes (recipe_ingredients table with ingredient_id foreign key)
-    const { data: resepItems } = await supabase
-      .from('recipe_ingredients')
-      .select('id')
-      .eq('ingredient_id', id)
-      .limit(1)
+    // Comprehensive foreign key checks to prevent orphaned data
+    const foreignKeyChecks = await Promise.all([
+      // Check recipe_ingredients
+      supabase
+        .from('recipe_ingredients')
+        .select('id', { count: 'exact', head: true })
+        .eq('ingredient_id', id)
+        .limit(1),
+      
+      // Check ingredient_purchases
+      supabase
+        .from('ingredient_purchases')
+        .select('id', { count: 'exact', head: true })
+        .eq('ingredient_id', id)
+        .limit(1),
+    ])
 
-    if (resepItems && resepItems.length > 0) {
+    const [recipeIngredientsCheck, purchasesCheck] = foreignKeyChecks
+
+    // Build error message with details
+    const usageDetails: string[] = []
+    
+    if (recipeIngredientsCheck.count && recipeIngredientsCheck.count > 0) {
+      usageDetails.push(`digunakan dalam ${recipeIngredientsCheck.count} resep`)
+    }
+    
+    if (purchasesCheck.count && purchasesCheck.count > 0) {
+      usageDetails.push(`memiliki ${purchasesCheck.count} riwayat pembelian`)
+    }
+
+    if (usageDetails.length > 0) {
       return createErrorResponse(
-        'Tidak dapat menghapus bahan baku yang digunakan dalam resep',
+        `Tidak dapat menghapus bahan baku "${existing.name}" karena ${usageDetails.join(', ')}. Hapus referensi tersebut terlebih dahulu atau set status menjadi tidak aktif.`,
         409
       )
     }
 
-    // Delete bahan baku
+    // Delete bahan baku (safe after foreign key checks)
     const { error } = await supabase
       .from('ingredients')
       .delete()
@@ -250,6 +278,13 @@ async function deleteHandler(
       .eq('user_id', user['id'])
 
     if (error) {
+      // Handle specific database constraint errors
+      if (error['code'] === '23503') {
+        return createErrorResponse(
+          `Tidak dapat menghapus bahan baku "${existing.name}" karena masih direferensikan oleh data lain`,
+          409
+        )
+      }
       return handleDatabaseError(error)
     }
 
@@ -260,6 +295,9 @@ async function deleteHandler(
   }
 }
 
-export const GET = createSecureHandler(getHandler, 'GET /api/ingredients/[id]', SecurityPresets.enhanced())
-export const PUT = createSecureHandler(putHandler, 'PUT /api/ingredients/[id]', SecurityPresets.enhanced())
-export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/ingredients/[id]', SecurityPresets.enhanced())
+// Apply security middleware
+const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
+const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
+const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
+
+export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }
