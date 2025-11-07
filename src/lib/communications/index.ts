@@ -39,7 +39,7 @@ export function sendWhatsAppMessage(to: string, templateId: string, data: Record
 /**
  * Create and send notification (convenience function)
  */
-export function sendNotification(notification: Omit<SmartNotification, 'id' | 'isRead' | 'timestamp' | 'type'>): void {
+export function sendNotification(notification: Omit<SmartNotification, 'id' | 'isRead' | 'timestamp'>): void {
   const system = SmartNotificationSystem.getInstance();
   system.addNotification(notification);
 }

@@ -1,5 +1,5 @@
 import { CacheInvalidator } from '@/lib/cache/cache-manager'
-import { sendNotification } from '@/lib/communications'
+import { sendNotification } from '@/lib/communications/index'
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 
