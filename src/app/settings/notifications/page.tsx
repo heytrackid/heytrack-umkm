@@ -26,6 +26,54 @@ import { testNotificationSound, testUrgentSound } from '@/lib/notifications/soun
 
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
 
+// Cache utilities for notification preferences
+const CACHE_KEY = 'heytrack-notification-preferences'
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+interface CachedPreferences {
+    data: NotificationPreferences
+    timestamp: number
+}
+
+const getCachedPreferences = (): NotificationPreferences | null => {
+    if (typeof window === 'undefined') {
+        return null
+    }
+
+    try {
+        const cached = localStorage.getItem(CACHE_KEY)
+        if (!cached) {
+            return null
+        }
+
+        const parsed: CachedPreferences = JSON.parse(cached)
+        if (Date.now() - parsed.timestamp > CACHE_DURATION) {
+            localStorage.removeItem(CACHE_KEY)
+            return null
+        }
+
+        return parsed.data
+    } catch {
+        return null
+    }
+}
+
+const setCachedPreferences = (preferences: NotificationPreferences): void => {
+    if (typeof window === 'undefined') {
+        return
+    }
+
+    try {
+        const cached: CachedPreferences = {
+            data: preferences,
+            timestamp: Date.now()
+        }
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cached))
+    } catch {
+        // Ignore localStorage errors
+    }
+}
+
 const NotificationSettingsPage = () => {
     const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -38,23 +86,56 @@ const NotificationSettingsPage = () => {
 
     useEffect(() => {
         void fetchPreferences()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const fetchPreferences = async () => {
         try {
             setIsLoading(true)
+
+            // Try to load from cache first
+            const cached = getCachedPreferences()
+            if (cached) {
+                setPreferences(cached)
+                setIsLoading(false)
+                // Refresh from server in background
+                void refreshFromServer()
+                return
+            }
+
+            // Load from server
             const response = await fetch('/api/notifications/preferences', {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
                 const data = await response.json() as NotificationPreferences | null
-                setPreferences(data)
+                if (data) {
+                    setPreferences(data)
+                    setCachedPreferences(data)
+                }
             }
         } catch (error) {
             apiLogger.error({ error }, 'Failed to fetch preferences')
             toast.error('Gagal memuat pengaturan')
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    const refreshFromServer = async () => {
+        try {
+            const response = await fetch('/api/notifications/preferences', {
+                credentials: 'include',
+            })
+            if (response.ok) {
+                const data = await response.json() as NotificationPreferences | null
+                if (data) {
+                    setPreferences(data)
+                    setCachedPreferences(data)
+                }
+            }
+        } catch (_error) {
+            // Silently fail background refresh
         }
     }
 
@@ -71,6 +152,8 @@ const NotificationSettingsPage = () => {
             })
 
             if (response.ok) {
+                // Update cache with new preferences
+                setCachedPreferences(preferences)
                 toast.success('Pengaturan berhasil disimpan')
             } else {
                 toast.error('Gagal menyimpan pengaturan')

@@ -63,8 +63,9 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
       await deleteCustomer(id)
       toast.success('Pelanggan berhasil dihapus')
       router.push('/customers')
-    } catch (_error) {
-      toast.error('Gagal menghapus pelanggan')
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Gagal menghapus pelanggan'
+      toast.error(errorMessage)
     }
   }
 

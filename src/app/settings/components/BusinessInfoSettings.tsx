@@ -1,7 +1,7 @@
 'use client'
 
 import { Building } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,7 +24,7 @@ interface BusinessInfoSettingsProps {
 /**
  * Business information settings component with Zod validation
  */
-export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfoSettingsProps) => {
+export const BusinessInfoSettings = React.memo(({ settings, onSettingChange }: BusinessInfoSettingsProps) => {
   const { toast } = useToast()
   const [localSettings, setLocalSettings] = useState<BusinessSettingsState>(settings.general)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -196,4 +196,4 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
       </CardContent>
     </Card>
   )
-}
+})

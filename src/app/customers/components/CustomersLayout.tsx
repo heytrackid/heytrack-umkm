@@ -152,16 +152,51 @@ const CustomersLayout = (): JSX.Element => {
             credentials: 'include', // Include cookies for authentication
           })
         )
-        await Promise.all(deletePromises)
-        toast({
-          title: 'Berhasil',
-          description: `Berhasil menghapus ${selectedItems.length} pelanggan`,
-          variant: 'default',
-        })
+
+        const results = await Promise.allSettled(deletePromises)
+        const failedDeletes = results.filter(result => result.status === 'rejected').length
+        const successfulDeletes = selectedItems.length - failedDeletes
+
+        if (failedDeletes > 0) {
+          // Check if any failed due to existing orders
+          const responses = await Promise.allSettled(
+            selectedItems.map(id =>
+              fetch(`/api/customers/${id}`, {
+                method: 'DELETE',
+                credentials: 'include',
+              }).then(res => res.json().catch(() => ({})))
+            )
+          )
+
+          const orderErrors = responses
+            .filter(result => result.status === 'fulfilled' && result.value.error?.includes('existing orders'))
+            .length
+
+          if (orderErrors > 0) {
+            toast({
+              title: 'Beberapa Pelanggan Tidak Dapat Dihapus',
+              description: `${successfulDeletes} pelanggan berhasil dihapus. ${failedDeletes} pelanggan memiliki order aktif dan tidak dapat dihapus.`,
+              variant: 'destructive',
+            })
+          } else {
+            toast({
+              title: 'Gagal Menghapus Beberapa Pelanggan',
+              description: `${successfulDeletes} pelanggan berhasil dihapus. ${failedDeletes} pelanggan gagal dihapus.`,
+              variant: 'destructive',
+            })
+          }
+        } else {
+          toast({
+            title: 'Berhasil',
+            description: `Berhasil menghapus ${selectedItems.length} pelanggan`,
+            variant: 'default',
+          })
+        }
+
         setSelectedItems([])
         void fetchCustomers()
       } catch (error) {
-        apiLogger.error({ error }, 'Error:')
+        apiLogger.error({ error }, 'Error in bulk delete:')
         toast({
           title: 'Gagal',
           description: 'Gagal menghapus pelanggan',
@@ -204,7 +239,14 @@ const CustomersLayout = (): JSX.Element => {
           method: 'DELETE',
           credentials: 'include', // Include cookies for authentication
         })
-        if (!response.ok) { throw new Error('Failed') }
+
+        if (!response.ok) {
+          // Try to get specific error message from API
+          const errorData = await response.json().catch(() => ({}))
+          const errorMessage = errorData.error || 'Gagal menghapus pelanggan'
+          throw new Error(errorMessage)
+        }
+
         toast({
           title: 'Berhasil',
           description: 'Pelanggan berhasil dihapus',
@@ -212,10 +254,11 @@ const CustomersLayout = (): JSX.Element => {
         })
         void fetchCustomers()
       } catch (error) {
-        apiLogger.error({ error }, 'Error:')
+        const errorMessage = error instanceof Error ? error.message : 'Gagal menghapus pelanggan'
+        apiLogger.error({ error }, 'Error deleting customer:')
         toast({
           title: 'Gagal',
-          description: 'Gagal menghapus pelanggan',
+          description: errorMessage,
           variant: 'destructive',
         })
       }

@@ -104,6 +104,7 @@ export const DateRangePicker = ({
   timezone = 'Asia/Jakarta'
 }: DateRangePickerProps) => {
   const { isMobile } = useResponsive()
+  const [isReady, setIsReady] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [range, setRange] = useState<PartialDateRange>(() => {
@@ -132,6 +133,11 @@ export const DateRangePicker = ({
       return timezone
     }
   }, [timezone])
+
+  // Set ready after mount to prevent SSR/client hydration mismatch
+  useEffect(() => {
+    setIsReady(true)
+  }, [])
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -394,6 +400,24 @@ export const DateRangePicker = ({
       <span className="text-xs text-muted-foreground">{timezoneLabel}</span>
     </Button>
   )
+
+  // Prevent SSR/client hydration mismatch by waiting for client-side responsive detection
+  if (!isReady) {
+    return (
+      <Button
+        variant="outline"
+        className="w-full items-center justify-between gap-4 text-left font-normal text-muted-foreground"
+        disabled
+        aria-label="Memuat pemilih rentang tanggal"
+      >
+        <div className="flex flex-col">
+          <span className="text-xs uppercase tracking-wide text-muted-foreground">Rentang tanggal</span>
+          <span className="truncate font-medium">Memuat...</span>
+        </div>
+        <span className="text-xs text-muted-foreground">{timezoneLabel}</span>
+      </Button>
+    )
+  }
 
   if (isMobile) {
     return (
