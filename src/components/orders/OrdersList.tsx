@@ -242,7 +242,7 @@ const OrdersList = memo(({
                         <div>
                           <div className="font-medium">{order['order_no']}</div>
                           <div className="text-sm text-muted-foreground">
-                            {(order as OrderWithRelations).items?.length || 0} item
+                            {(order as OrderWithRelations).items?.length ?? 0} item
                           </div>
                         </div>
                       </td>

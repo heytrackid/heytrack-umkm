@@ -1,16 +1,16 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { isValidUUID, isProductionBatch, extractFirst, isRecord, safeString } from '@/lib/type-guards'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
-
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -78,7 +78,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -115,3 +115,6 @@ export async function DELETE(
     return handleAPIError(error)
   }
 }
+
+export const PUT = createSecureHandler(putHandler, 'PUT /api/production-batches/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/production-batches/[id]', SecurityPresets.enhanced())

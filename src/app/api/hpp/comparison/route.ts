@@ -1,14 +1,13 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import type { Row } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
-
-
 
 type Recipe = Row<'recipes'>
 
@@ -37,7 +36,7 @@ const getEfficiencyLevel = (timesMade: number): 'high' | 'low' | 'medium' => {
 }
 
 // GET /api/hpp/comparison - Get recipe comparison data
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -162,3 +161,5 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/hpp/comparison', SecurityPresets.enhanced())

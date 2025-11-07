@@ -6,6 +6,8 @@ import { NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/database'
 import { typed } from '@/types/type-utilities'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
 type TypedSupabaseClient = ReturnType<typeof typed>
@@ -215,7 +217,7 @@ function buildResponse(
   }
 }
 
-export async function GET(): Promise<NextResponse> {
+async function getHandler(): Promise<NextResponse> {
   try {
     const supabase = await getTypedClient()
     const userId = await requireUserId(supabase)
@@ -232,3 +234,5 @@ export async function GET(): Promise<NextResponse> {
     return NextResponse.json({ error: 'Failed to fetch HPP summary' }, { status: 500 })
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/dashboard/hpp-summary', SecurityPresets.enhanced())

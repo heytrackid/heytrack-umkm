@@ -1,7 +1,6 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 /**
  * AI Chat Suggestions API
  */
@@ -11,10 +10,11 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { BusinessContextService } from '@/lib/services/BusinessContextService'
 import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
+import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
-
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -30,7 +30,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // Get query params
     const { searchParams } = new URL(request.url)
-    const currentPage = searchParams.get('page') ?? undefined
+    const rawPage = searchParams.get('page') ?? undefined
+    const sanitizedPage = rawPage ? InputSanitizer.sanitizeHtml(rawPage).slice(0, 200).trim() : undefined
+    const currentPage = sanitizedPage && sanitizedPage.length > 0 ? sanitizedPage : undefined
 
     // Load business context
     const context = await BusinessContextService.loadContext(user['id'], currentPage)
@@ -43,3 +45,5 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return handleAPIError(error)
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/ai/suggestions', SecurityPresets.enhanced())

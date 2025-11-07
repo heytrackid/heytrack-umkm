@@ -58,7 +58,7 @@ const EditIngredientPage = (): JSX.Element => {
 
                 const { data, error } = await supabase
                     .from('ingredients')
-                    .select('*')
+                    .select('id, name, unit, price_per_unit, current_stock, min_stock, description, category, supplier, weighted_average_cost, created_at, updated_at')
                     .eq('id', id)
                     .single<Ingredient>()
 

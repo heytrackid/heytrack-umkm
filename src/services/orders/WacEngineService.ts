@@ -52,7 +52,7 @@ export class WacEngineService {
       // Get all purchase transactions for this ingredient, ordered by date
       const { data: transactions, error } = await supabase
         .from('stock_transactions')
-        .select('*')
+        .select('quantity, unit_price, total_price')
         .eq('ingredient_id', ingredientId)
         .eq('type', 'PURCHASE')
         .order('created_at', { ascending: true })

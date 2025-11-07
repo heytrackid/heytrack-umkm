@@ -341,8 +341,7 @@ export {
   MobileForm
 } from './mobile-forms'
 
-export { default as WhatsAppFollowUp } from '@/components/orders/WhatsAppFollowUp'
-export { default as WhatsAppFollowup } from '@/components/orders/WhatsAppFollowUp'
+
 
 // ==========================================================
 // CHART COMPONENTS

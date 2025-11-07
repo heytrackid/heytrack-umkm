@@ -1,17 +1,16 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger, logError } from '@/lib/logger'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
-
-
 // GET /api/recipes/availability?recipe_id=xxx&quantity=10
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url)
     const recipeId = searchParams.get('recipe_id')
@@ -49,7 +48,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 }
 
 // POST /api/recipes/availability - Check multiple recipes
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const client = await createClient()
 
@@ -88,3 +87,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/recipes/availability', SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/recipes/availability', SecurityPresets.enhanced())

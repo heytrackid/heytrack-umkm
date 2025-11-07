@@ -1,7 +1,6 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 /**
  * AI Chat Sessions API - Get/Delete specific session
  */
@@ -11,8 +10,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
-import { createClient } from '@/utils/supabase/server'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
 
+import { createClient } from '@/utils/supabase/server'
 
 interface RouteParams {
   params: {
@@ -20,7 +20,7 @@ interface RouteParams {
   }
 }
 
-export async function GET(_request: NextRequest, { params }: RouteParams): Promise<NextResponse> {
+async function getHandler(_request: NextRequest, { params }: RouteParams): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -53,7 +53,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams): Promi
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: RouteParams): Promise<NextResponse> {
+async function deleteHandler(_request: NextRequest, { params }: RouteParams): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -79,3 +79,6 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams): Pr
     return handleAPIError(error)
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/ai/sessions/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/ai/sessions/[id]', SecurityPresets.enhanced())

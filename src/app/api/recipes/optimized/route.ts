@@ -1,7 +1,6 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 /**
  * Optimized Recipes API Route
  * Example of using caching and performance optimizations
@@ -10,12 +9,13 @@ export const runtime = 'nodejs'
 import { createCachedResponse, cachePresets } from '@/lib/api-cache'
 import { dbLogger } from '@/lib/logger'
 import { safeNumber, getErrorMessage } from '@/lib/type-guards'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
 import type { NextRequest } from 'next/server'
 
-
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -102,3 +102,5 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/recipes/optimized', SecurityPresets.enhanced())

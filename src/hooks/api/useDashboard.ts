@@ -91,7 +91,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     // Fetch orders for today and this week
     const { data: todayOrders, error: todayError } = await supabase
       .from('orders')
-      .select('*')
+      .select('total_amount')
       .gte('created_at', todayStart.toISOString())
       .lt('created_at', todayEnd.toISOString())
 
@@ -99,7 +99,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
 
     const { data: weeklyOrders, error: weeklyError } = await supabase
       .from('orders')
-      .select('*')
+      .select('total_amount')
       .gte('created_at', weekStart.toISOString())
       .lt('created_at', todayEnd.toISOString())
 
@@ -108,14 +108,14 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     // Fetch customers
     const { data: customers, error: customersError } = await supabase
       .from('customers')
-      .select('*')
+      .select('customer_type')
 
     if (customersError) {throw customersError}
 
     // Fetch inventory with low stock
     const { data: inventory, error: inventoryError } = await supabase
       .from('ingredients')
-      .select('*')
+      .select('current_stock, reorder_point')
 
     if (inventoryError) {throw inventoryError}
 
@@ -132,7 +132,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     ) || []
     const outOfStockItems = inventory?.filter((item: Ingredient) => item.current_stock === 0) || []
     
-    const vipCustomers = customers?.filter((customer: Customer) => customer.customer_type === 'vip').length || 0
+    const vipCustomers = customers?.filter((customer: Customer) => customer.customer_type === 'vip').length ?? 0
 
     // Get recent orders for activity
     const recentOrders = todayOrders?.slice(-3).map((order: Order) => ({
@@ -169,13 +169,13 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
         lowStock: lowStockItems.length
       },
       orders: {
-        active: todayOrders?.length || 0,
-        today: todayOrders?.length || 0,
-        total: weeklyOrders?.length || 0,
+        active: todayOrders?.length ?? 0,
+        today: todayOrders?.length ?? 0,
+        total: weeklyOrders?.length ?? 0,
         recent: recentOrders
       },
       customers: {
-        total: customers?.length || 0,
+        total: customers?.length ?? 0,
         vip: vipCustomers
       },
       expenses: {
@@ -215,7 +215,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
 
       const { data: orders, error } = await createClient()
         .from('orders')
-        .select('*')
+        .select('total_amount')
         .gte('created_at', dayStart.toISOString())
         .lt('created_at', dayEnd.toISOString())
 

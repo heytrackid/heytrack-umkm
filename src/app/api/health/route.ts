@@ -1,12 +1,12 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { SecurityPresets, withSecurity } from '@/utils/security'
 
-async function handleHealthCheck(): Promise<NextResponse> {
+async function handleHealthCheck(_request: NextRequest): Promise<NextResponse> {
   try {
     // Check environment variables
     const envStatus = {
@@ -49,4 +49,4 @@ async function handleHealthCheck(): Promise<NextResponse> {
   }
 }
 
-export const GET = withSecurity(handleHealthCheck, SecurityPresets.apiRead)
+export const GET = withSecurity(handleHealthCheck, SecurityPresets.basic())

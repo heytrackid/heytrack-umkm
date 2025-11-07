@@ -144,9 +144,9 @@ export function useEnhancedCRUD<TTable extends TableName>(
       // Check if record exists first
       const { data: existingRecord, error: fetchError } = await supabase
         .from(table)
-        .select('*')
+        .select('id')
         .eq('id', id as never)
-        .single() as { data: TRow | null; error: Error | null }
+        .single() as { data: Pick<TRow, 'id'> | null; error: Error | null }
 
       if (fetchError || !existingRecord) {
         throw new Error('Data tidak ditemukan')

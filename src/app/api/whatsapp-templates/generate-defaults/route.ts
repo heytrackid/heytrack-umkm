@@ -1,18 +1,18 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
 
+import { createClient } from '@/utils/supabase/server'
 
 /**
  * Generate default WhatsApp templates for current user
  * POST /api/whatsapp-templates/generate-defaults
  */
-export async function POST(): Promise<NextResponse> {
+async function postHandler(): Promise<NextResponse> {
   try {
     // 1. Authentication
     const supabase = await createClient()
@@ -77,3 +77,5 @@ export async function POST(): Promise<NextResponse> {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const POST = createSecureHandler(postHandler, 'POST /api/whatsapp-templates/generate-defaults', SecurityPresets.enhanced())

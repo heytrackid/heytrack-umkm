@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { type UseFormProps, type UseFormReturn, type FieldValues, useForm, type Resolver } from 'react-hook-form'
+import { type UseFormProps, type UseFormReturn, type FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useToast } from '@/hooks/use-toast'
@@ -18,12 +18,12 @@ export function useFormWithValidation(
   schema: z.ZodTypeAny,
   options: UseFormProps<FieldValues> = {}
 ): UseFormReturn<FieldValues> {
-  return useForm<any>({
-    // @ts-expect-error - zodResolver typing is stricter than required for our use case
-    resolver: zodResolver(schema) as unknown as Resolver<any>,
+  return useForm<FieldValues>({
+    // @ts-expect-error - zodResolver has strict typing but we need flexibility for dynamic schemas
+    resolver: zodResolver(schema),
     mode: 'onChange',
-    ...(options as unknown as Record<string, unknown>)
-  }) as UseFormReturn<FieldValues>
+    ...options
+  })
 }
 
 // Generic form submission handler with toast notifications
@@ -80,7 +80,7 @@ export interface FormFieldProps {
 }
 
 export function getFormFieldClasses(error?: string, className?: string) {
-  return `space-y-2 ${className || ''} ${error ? 'text-destructive' : ''}`
+  return `space-y-2 ${className ?? ''} ${error ? 'text-destructive' : ''}`
 }
 
 // Form validation helpers

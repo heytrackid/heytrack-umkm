@@ -68,7 +68,7 @@ export class ChatSessionService {
 
     const { data, error } = await supabase
       .from('chat_sessions')
-      .select('*')
+      .select('id, user_id, title, context_snapshot, created_at, updated_at, deleted_at')
       .eq('id', sessionId)
       .eq('user_id', userId)
       .is('deleted_at', null)
@@ -235,7 +235,7 @@ export class ChatSessionService {
 
     const { data, error } = await supabase
       .from('chat_messages')
-      .select('*')
+      .select('id, session_id, role, content, metadata, created_at')
       .eq('session_id', sessionId)
       .order('created_at', { ascending: true })
       .limit(limit);

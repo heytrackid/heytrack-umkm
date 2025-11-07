@@ -1,21 +1,20 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import type { Insert } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
-
-
 
 /**
  * POST /api/operational-costs/quick-setup
  * 
  * Creates template operational costs for new users
  */
-export async function POST(): Promise<NextResponse> {
+async function postHandler(): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     
@@ -138,3 +137,5 @@ export async function POST(): Promise<NextResponse> {
     )
   }
 }
+
+export const POST = createSecureHandler(postHandler, 'POST /api/operational-costs/quick-setup', SecurityPresets.enhanced())

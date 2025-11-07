@@ -1,7 +1,6 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 /**
  * GET /api/admin/performance-logs
  * Get recent API performance logs
@@ -12,10 +11,11 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, safeNumber } from '@/lib/type-guards'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
-
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authentication
     const supabase = await createClient()
@@ -58,3 +58,5 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/admin/performance-logs', SecurityPresets.maximum())

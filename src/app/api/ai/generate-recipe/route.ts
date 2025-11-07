@@ -1,7 +1,6 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
@@ -9,6 +8,8 @@ import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
 import type { Row } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
 // Use generated types from database.ts (these are already Row types)
@@ -95,7 +96,7 @@ export const maxDuration = 60
  * AI Recipe Generator API
  * Generates UMKM recipes with accurate ingredient measurements and HPP calculations
  */
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
     try {
         // 1. Authenticate user first
         const supabase = await createClient()
@@ -197,7 +198,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         )
     }
 }
-
 
 /**
  * Sanitize user input to prevent prompt injection
@@ -627,7 +627,6 @@ function parseRecipeResponse(response: string): GeneratedRecipe {
     }
 }
 
-
 /**
  * Find best matching ingredient using fuzzy matching
  */
@@ -768,3 +767,5 @@ async function calculateRecipeHPP(
             : 'Operational cost estimated (30% of material cost)'
     }
 }
+
+export const POST = createSecureHandler(postHandler, 'POST /api/ai/generate-recipe', SecurityPresets.enhanced())

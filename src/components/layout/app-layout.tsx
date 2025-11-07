@@ -103,7 +103,6 @@ const AppLayout = memo(({
   const router = useRouter()
   const mainContentRef = useRef<HTMLDivElement>(null)
 
-  // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true)
   }, [])

@@ -76,10 +76,13 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     // Create pagination metadata
     const pagination = createPaginationMeta(count ?? 0, page, limit)
 
-    return createSuccessResponse({
+    const response = createSuccessResponse({
       ingredients: data,
       pagination
     })
+    // Add caching for ingredients list (2 minutes stale-while-revalidate)
+    response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=300')
+    return response
 
   } catch (error: unknown) {
     const apiError = handleAPIError(error)

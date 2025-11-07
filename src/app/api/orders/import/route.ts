@@ -2,12 +2,14 @@
 export const runtime = 'nodejs'
 
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
+import { z } from 'zod'
 
 import { cacheInvalidation } from '@/lib/cache'
+import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import type { Insert, OrderStatus } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { InputSanitizer, SecurityPresets, createSecureHandler } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
 
@@ -16,62 +18,104 @@ type CustomerInsert = Insert<'customers'>
 type OrderInsert = Insert<'orders'>
 type OrderItemInsert = Omit<Insert<'order_items'>, 'order_id'>
 
-const sanitizeOptionalString = (value?: string | null) => {
-  const trimmed = value?.trim()
-  return trimmed && trimmed.length > 0 ? trimmed : null
-}
+const ORDER_STATUS_VALUES: readonly OrderStatus[] = [
+  'PENDING',
+  'CONFIRMED',
+  'IN_PROGRESS',
+  'READY',
+  'DELIVERED',
+  'CANCELLED'
+]
 
-interface RawImportedOrder {
-  order_no?: string | null
-  customer_name?: string | null
-  recipe_name?: string | null
-  quantity?: number | string | null
-  unit_price?: number | string | null
-  customer_phone?: string | null
-  customer_email?: string | null
-  customer_address?: string | null
-  status?: string | null
-  delivery_date?: string | null
-  notes?: string | null
-}
+const requiredText = (max = 200) =>
+  z.string()
+    .trim()
+    .min(1)
+    .max(max)
+    .transform(value => InputSanitizer.sanitizeHtml(value).trim().slice(0, max))
 
-interface ImportOrdersRequest {
-  orders?: RawImportedOrder[]
-}
+const optionalText = (max = 200, options?: { lowercase?: boolean }) =>
+  z.union([z.string(), z.null(), z.undefined()])
+    .transform((value) => {
+      if (typeof value !== 'string') {return undefined}
+      let sanitized = InputSanitizer.sanitizeHtml(value).trim()
+      if (!sanitized) {return undefined}
+      sanitized = sanitized.slice(0, max)
+      return options?.lowercase ? sanitized.toLowerCase() : sanitized
+    })
 
-const isRawImportedOrder = (value: unknown): value is RawImportedOrder =>
-  typeof value === 'object' && value !== null
-
-const isImportOrdersRequest = (value: unknown): value is ImportOrdersRequest => {
-  if (typeof value !== 'object' || value === null) {
-    return false
+const parseNumberFromInput = (value: unknown): number | undefined => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined
   }
-  const record = value as Record<string, unknown>
-  const { orders } = record
-  if (!Array.isArray(orders)) {
-    return false
+  if (typeof value === 'string') {
+    const normalized = value.replace(/,/g, '').trim()
+    if (!normalized) {return undefined}
+    const parsed = Number(normalized)
+    return Number.isFinite(parsed) ? parsed : undefined
   }
-  return orders.every(isRawImportedOrder)
+  return undefined
 }
+
+const QuantitySchema = z.preprocess(
+  parseNumberFromInput,
+  z.number().positive({ message: 'Jumlah harus lebih dari 0' })
+)
+
+const UnitPriceSchema = z.preprocess(
+  parseNumberFromInput,
+  z.number().min(0, { message: 'Harga satuan harus >= 0' })
+)
+
+const DeliveryDateSchema = z.union([z.string(), z.null(), z.undefined()]).transform((value) => {
+  if (typeof value !== 'string') {return undefined}
+  const trimmed = value.trim()
+  if (!trimmed) {return undefined}
+  const parsed = new Date(trimmed)
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString()
+})
+
+const StatusSchema: z.ZodType<OrderStatus> = z.union([z.string(), z.null(), z.undefined()]).transform((value) => {
+  if (typeof value !== 'string') {return 'PENDING'}
+  const sanitized = InputSanitizer.sanitizeSQLInput(value).trim().toUpperCase()
+  return ORDER_STATUS_VALUES.includes(sanitized as OrderStatus)
+    ? sanitized as OrderStatus
+    : 'PENDING'
+})
+
+const ImportedOrderSchema = z.object({
+  order_no: requiredText(64),
+  customer_name: requiredText(120),
+  recipe_name: requiredText(120),
+  quantity: QuantitySchema,
+  unit_price: UnitPriceSchema,
+  customer_phone: optionalText(30),
+  customer_email: optionalText(320, { lowercase: true }),
+  customer_address: optionalText(255),
+  status: StatusSchema,
+  delivery_date: DeliveryDateSchema,
+  notes: optionalText(500)
+}).strict()
+
+const ImportOrdersSchema = z.object({
+  orders: z.array(ImportedOrderSchema).min(1, 'Minimal satu pesanan untuk import')
+}).strict()
+
+type ImportedOrder = z.infer<typeof ImportedOrderSchema>
 
 async function authenticateUser(supabase: ReturnType<typeof createClient>) {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if (authError || !user) {
-    throw new Error('Unauthorized')
+    throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
   }
 
   return user
 }
 
-async function parseAndValidateRequest(request: NextRequest): Promise<{ orders: RawImportedOrder[] }> {
+async function parseAndValidateRequest(request: NextRequest): Promise<{ orders: ImportedOrder[] }> {
   const body = await request.json() as unknown
-
-  if (!isImportOrdersRequest(body) || !body.orders || body.orders.length === 0) {
-    throw new Error('Data pesanan tidak valid')
-  }
-
-  return { orders: body.orders }
+  return ImportOrdersSchema.parse(body)
 }
 
 async function fetchRecipes(supabase: ReturnType<typeof createClient>, userId: string): Promise<Map<string, string>> {
@@ -82,14 +126,14 @@ async function fetchRecipes(supabase: ReturnType<typeof createClient>, userId: s
 
   if (recipesError) {
     apiLogger.error({ error: recipesError }, 'Failed to fetch recipes')
-    throw new Error('Gagal memuat data resep')
+    throw new APIError('Gagal memuat data resep', { status: 500, code: 'RECIPES_FETCH_FAILED' })
   }
 
   return new Map(recipes.map(r => [r.name.toLowerCase(), r['id']]))
 }
 
 function processOrders(
-  orders: RawImportedOrder[],
+  orders: ImportedOrder[],
   recipeMap: Map<string, string>,
   userId: string
 ): {
@@ -111,77 +155,48 @@ function processOrders(
 
   for (let index = 0; index < orders.length; index++) {
     const order = orders[index]
-    if (!order) { continue }
+    if (!order) {continue}
     const rowNum = index + 2
 
-    // Validate required fields
-    if (!order['order_no']?.trim()) {
-      errors.push({ row: rowNum, error: 'Nomor pesanan wajib diisi' })
-      continue
-    }
-
-    if (!order['customer_name']?.trim()) {
-      errors.push({ row: rowNum, error: 'Nama customer wajib diisi' })
-      continue
-    }
-
-    if (!order['recipe_name']?.trim()) {
-      errors.push({ row: rowNum, error: 'Nama resep wajib diisi' })
-      continue
-    }
-
-    const quantity = Number(order.quantity)
-    if (isNaN(quantity) || quantity <= 0) {
-      errors.push({ row: rowNum, error: 'Jumlah harus angka positif' })
-      continue
-    }
-
-    const unitPrice = Number(order.unit_price)
-    if (isNaN(unitPrice) || unitPrice < 0) {
-      errors.push({ row: rowNum, error: 'Harga satuan harus angka positif' })
-      continue
-    }
-
-    // Find recipe
-    const recipeId = recipeMap.get(order['recipe_name'].toLowerCase())
+    const recipeId = recipeMap.get(order.recipe_name.toLowerCase())
     if (!recipeId) {
-      errors.push({ row: rowNum, error: `Resep "${order['recipe_name']}" tidak ditemukan` })
+      errors.push({ row: rowNum, error: `Resep "${order.recipe_name}" tidak ditemukan` })
       continue
     }
 
     // Prepare customer data (will be created if not exists)
-    const customerKey = order['customer_name'].toLowerCase().trim()
+    const customerKey = order.customer_name.toLowerCase()
     if (!customersToCreate.has(customerKey)) {
       customersToCreate.set(customerKey, {
-        name: order['customer_name'].trim(),
-        phone: sanitizeOptionalString(order.customer_phone),
-        email: sanitizeOptionalString(order.customer_email),
-        address: sanitizeOptionalString(order.customer_address),
+        name: order.customer_name,
+        phone: order.customer_phone ?? null,
+        email: order.customer_email ?? null,
+        address: order.customer_address ?? null,
         user_id: userId,
         is_active: true
       })
     }
 
     // Prepare order data
-    const totalPrice = quantity * unitPrice
+    const totalPrice = order.quantity * order.unit_price
     ordersToCreate.push({
       order: {
-        order_no: order['order_no'].trim(),
-        customer_name: order['customer_name'].trim(),
-        customer_phone: sanitizeOptionalString(order.customer_phone),
-        customer_address: sanitizeOptionalString(order.customer_address),
-        status: (order['status'] ? order['status'].toUpperCase() : 'PENDING') as OrderStatus,
+        order_no: order.order_no,
+        customer_name: order.customer_name,
+        customer_phone: order.customer_phone ?? null,
+        customer_address: order.customer_address ?? null,
+        status: order.status,
         total_amount: totalPrice,
-        delivery_date: order.delivery_date ? new Date(order.delivery_date).toISOString() : null,
-        notes: sanitizeOptionalString(order.notes),
+        delivery_date: order.delivery_date ?? null,
+        notes: order.notes ?? null,
         user_id: userId
       },
       items: [{
         recipe_id: recipeId,
-        quantity,
-        unit_price: unitPrice,
+        quantity: order.quantity,
+        unit_price: order.unit_price,
         total_price: totalPrice,
-        product_name: order['recipe_name'].trim(),
+        product_name: order.recipe_name,
         user_id: userId
       }],
       customerName: customerKey
@@ -191,7 +206,7 @@ function processOrders(
   return { errors, customersToCreate, ordersToCreate }
 }
 
-async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authenticate
     const supabase = await createClient()
@@ -243,7 +258,10 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 
         if (customerError) {
           apiLogger.error({ error: customerError }, 'Failed to create customer')
-          throw new Error(`Gagal membuat customer: ${customerData.name}`)
+          throw new APIError(`Gagal membuat customer: ${customerData.name}`, {
+            status: 500,
+            code: 'CUSTOMER_CREATION_FAILED'
+          })
         }
 
         customerIds.set(customerKey, newCustomer['id'])
@@ -253,10 +271,8 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     try {
       await Promise.all(customerPromises)
     } catch (error) {
-      return NextResponse.json(
-        { error: (error as Error).message },
-        { status: 500 }
-      )
+      const message = error instanceof Error ? error.message : 'Gagal membuat customer baru'
+      throw new APIError(message, { status: 500, code: 'CUSTOMER_CREATION_FAILED' })
     }
 
     // 6. Create orders with items
@@ -325,15 +341,8 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error in POST /api/orders/import')
-    return NextResponse.json(
-      { error: 'Terjadi kesalahan saat import' },
-      { status: 500 }
-    )
+    return handleAPIError(error, 'POST /api/orders/import')
   }
 }
 
-// Apply security middleware
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
-
-// Export secured handler
-export { securedPOST as POST }
+export const POST = createSecureHandler(postHandler, 'POST /api/orders/import', SecurityPresets.enhanced())

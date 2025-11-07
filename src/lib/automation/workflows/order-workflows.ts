@@ -678,7 +678,7 @@ export class OrderWorkflowHandlers {
     // Get current customer data
     const { data: customer } = await supabase
       .from('customers')
-      .select('*')
+      .select('id, total_orders, total_spent')
       .eq('id', order.customer_id)
       .single()
 

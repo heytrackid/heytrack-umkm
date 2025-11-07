@@ -119,12 +119,87 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
     }, {} as Record<string, IngredientDisplay[]>)
 
     const exportToPDF = (): void => {
-        // TODO: Implement PDF export
-        toast({
-            title: 'Fitur akan segera tersedia',
-            description: 'Export PDF akan segera tersedia!',
-            variant: 'default',
-        })
+        try {
+            if (typeof window === 'undefined') {
+                throw new Error('Export hanya tersedia di browser')
+            }
+
+            const summary = `
+                <h1>Ringkasan HPP - ${recipe.name}</h1>
+                <p>Diekspor pada: ${new Date().toLocaleString('id-ID')}</p>
+                <table>
+                    <tr><th>HPP Bahan</th><td>${formatCurrency(ingredientCost)}</td></tr>
+                    <tr><th>Biaya Operasional</th><td>${formatCurrency(totalOperational)}</td></tr>
+                    <tr><th>Total HPP</th><td>${formatCurrency(totalCost)}</td></tr>
+                    <tr><th>Harga Jual</th><td>${formatCurrency(sellingPrice)}</td></tr>
+                    <tr><th>Margin</th><td>${marginPercent.toFixed(2)}%</td></tr>
+                </table>
+                <h2>Komponen Operasional</h2>
+                <ul>
+                    ${Object.entries(opCosts).map(([key, value]) => `<li>${key.toUpperCase()}: ${formatCurrency(value)}</li>`).join('')}
+                </ul>
+            `
+
+            const ingredientRows = ingredients
+                .map((item) => `<tr>
+                    <td>${item.name}</td>
+                    <td>${item.quantity} ${item.unit}</td>
+                    <td>${formatCurrency(item.unit_price)}</td>
+                    <td>${formatCurrency(item.unit_price * item.quantity)}</td>
+                </tr>`)
+                .join('')
+
+            const exportWindow = window.open('', '_blank', 'width=1024,height=768')
+            if (!exportWindow) {
+                throw new Error('Pop-up diblokir oleh browser')
+            }
+
+            exportWindow.document.write(`
+                <html>
+                    <head>
+                        <title>HeyTrack - Ringkasan HPP</title>
+                        <style>
+                            body { font-family: 'Inter', sans-serif; padding: 24px; color: #111827; }
+                            h1, h2 { margin-bottom: 8px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+                            th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
+                            th { background: #f3f4f6; }
+                            ul { padding-left: 20px; }
+                        </style>
+                    </head>
+                    <body>
+                        ${summary}
+                        <h2>Detail Bahan</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Kuantitas</th>
+                                    <th>Harga Satuan</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>${ingredientRows}</tbody>
+                        </table>
+                    </body>
+                </html>
+            `)
+            exportWindow.document.close()
+            exportWindow.focus()
+            exportWindow.print()
+            exportWindow.close()
+
+            toast({
+                title: 'Export siap',
+                description: 'Gunakan dialog cetak untuk menyimpan sebagai PDF.',
+            })
+        } catch (error) {
+            toast({
+                title: 'Gagal mengekspor PDF',
+                description: error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat PDF.',
+                variant: 'destructive',
+            })
+        }
     }
 
     return (

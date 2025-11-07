@@ -1,11 +1,12 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import { PricingAssistantService } from '@/services/orders/PricingAssistantService'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
 interface PricingRecommendation {
@@ -14,7 +15,7 @@ interface PricingRecommendation {
 }
 
 // POST /api/hpp/pricing-assistant - Generate pricing recommendation
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -63,3 +64,5 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     )
   }
 }
+
+export const POST = createSecureHandler(postHandler, 'POST /api/hpp/pricing-assistant', SecurityPresets.enhanced())

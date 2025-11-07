@@ -106,7 +106,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     if (error) {throw error;}
 
     // Get total count
-    let countQuery = supabase.from('financial_records').select('*', { count: 'exact', head: true }).eq('record_type', 'INCOME').eq('user_id', user['id'])
+    let countQuery = supabase.from('financial_records').select('id', { count: 'exact', head: true }).eq('record_type', 'INCOME').eq('user_id', user['id'])
 
     // Apply same filters to count query
     if (search) {

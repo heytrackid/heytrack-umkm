@@ -1,20 +1,19 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 // API Route: Business Context Loading
 
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/logger';
 import { BusinessContextService } from '@/lib/services/BusinessContextService';
+import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server';
-
 
 /**
  * GET /api/ai/context - Load business context for AI chat
  */
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient();
     const {
@@ -26,7 +25,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const {searchParams} = request.nextUrl;
-    const currentPage = searchParams.get('page') ?? undefined;
+    const rawPage = searchParams.get('page') ?? undefined;
+    const sanitizedPage = rawPage ? InputSanitizer.sanitizeHtml(rawPage).slice(0, 200).trim() : undefined;
+    const currentPage = sanitizedPage && sanitizedPage.length > 0 ? sanitizedPage : undefined;
 
     const context = await BusinessContextService.loadContext(
       user['id'],
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 /**
  * DELETE /api/ai/context - Invalidate context cache
  */
-export async function DELETE(): Promise<NextResponse> {
+async function deleteHandler(): Promise<NextResponse> {
   try {
     const supabase = await createClient();
     const {
@@ -74,3 +75,6 @@ export async function DELETE(): Promise<NextResponse> {
     );
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/ai/context', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/ai/context', SecurityPresets.enhanced())

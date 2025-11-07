@@ -73,7 +73,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
             setLoading(true)
             const { data: cost } = await supabase
                 .from('operational_costs')
-                .select('*')
+                .select('id, user_id, category, description, amount, date, frequency, recurring, payment_method, supplier, reference, notes, is_active, created_at, updated_at, created_by, updated_by')
                 .eq('id', costId)
                 .single()
 

@@ -1,22 +1,21 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import { FinancialRecordUpdateSchema, type FinancialRecordUpdate } from '@/lib/validations/domains/finance'
 import type { Update } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
-
-
 
 interface RouteContext {
   params: Promise<{ id: string }>
 }
 
 // GET /api/financial/records/[id] - Get single financial record
-export async function GET(
+async function getHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -57,7 +56,7 @@ export async function GET(
 }
 
 // PUT /api/financial/records/[id] - Update financial record
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -125,7 +124,7 @@ export async function PUT(
 }
 
 // DELETE /api/financial/records/[id] - Delete financial record
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -178,3 +177,7 @@ export async function DELETE(
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/financial/records/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureHandler(putHandler, 'PUT /api/financial/records/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/financial/records/[id]', SecurityPresets.enhanced())

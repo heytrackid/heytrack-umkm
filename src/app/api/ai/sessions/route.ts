@@ -1,7 +1,6 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 /**
  * AI Chat Sessions API - List sessions
  */
@@ -12,10 +11,11 @@ import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { safeNumber } from '@/lib/type-guards'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
-
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -43,3 +43,5 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return handleAPIError(error)
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/ai/sessions', SecurityPresets.enhanced())

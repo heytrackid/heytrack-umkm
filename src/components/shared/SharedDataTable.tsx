@@ -112,8 +112,8 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
   // Hydration fix - prevent SSR/client mismatch
   const [isMounted, setIsMounted] = useState(false)
   useEffect(() => {
-    setIsMounted(true)
-  }, [])
+    setData(data)
+  }, [data])
 
   // State management
   const [searchTerm, setSearchTerm] = useState('')

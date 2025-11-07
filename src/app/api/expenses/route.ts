@@ -101,7 +101,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     if (error) {throw error}
 
     // Get total count for pagination
-    let countQuery = supabase.from('expenses').select('*', { count: 'exact', head: true }).eq('user_id', user['id'])
+    let countQuery = supabase.from('expenses').select('id', { count: 'exact', head: true }).eq('user_id', user['id'])
 
     // Apply same filters to count query
     if (search) {

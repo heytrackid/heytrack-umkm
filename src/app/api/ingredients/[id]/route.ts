@@ -1,7 +1,6 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { withValidation } from '@/lib/api-core/middleware'
 import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
@@ -10,16 +9,16 @@ import { apiLogger } from '@/lib/logger'
 import { isValidUUID } from '@/lib/type-guards'
 import { IdParamSchema, IngredientUpdateSchema } from '@/lib/validations'
 import type { Row } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
 import type { NextRequest } from 'next/server'
 
-
-
 type Ingredient = Row<'ingredients'>
 
 // GET /api/ingredients/[id] - Get single bahan baku
-export async function GET(
+async function getHandler(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -69,7 +68,7 @@ export async function GET(
 }
 
 // PUT /api/ingredients/[id] - Update bahan baku
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -193,7 +192,7 @@ export async function PUT(
 }
 
 // DELETE /api/ingredients/[id] - Delete bahan baku
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -260,3 +259,7 @@ export async function DELETE(
     return handleDatabaseError(error)
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/ingredients/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureHandler(putHandler, 'PUT /api/ingredients/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/ingredients/[id]', SecurityPresets.enhanced())

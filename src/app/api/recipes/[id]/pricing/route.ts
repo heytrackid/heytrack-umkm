@@ -1,15 +1,14 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { PricingAutomation, UMKM_CONFIG } from '@/lib/automation'
 import { apiLogger } from '@/lib/logger'
 import type { Row } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
-
-
 
 type RecipeIngredient = Row<'recipe_ingredients'>
 type Ingredient = Row<'ingredients'>
@@ -31,7 +30,7 @@ interface RecipeIngredientWithIngredient {
   } | null
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
+async function postHandler(request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     const { id: recipeId } = params
@@ -153,3 +152,5 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }, { status: 500 })
   }
 }
+
+export const POST = createSecureHandler(postHandler, 'POST /api/recipes/[id]/pricing', SecurityPresets.enhanced())

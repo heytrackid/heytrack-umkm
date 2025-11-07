@@ -1,5 +1,4 @@
 'use client'
-/* eslint-disable no-nested-ternary */
 
 import { format } from 'date-fns'
 import {
@@ -17,7 +16,7 @@ import {
     RefreshCw,
     Download
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -78,6 +77,16 @@ interface ErrorLog {
     stack_trace: string | null
 }
 
+const getDurationClass = (duration: number): string => {
+    if (duration > 1000) {
+        return 'text-red-500'
+    }
+    if (duration > 500) {
+        return 'text-yellow-500'
+    }
+    return 'text-muted-foreground'
+}
+
 const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
     const [metrics, setMetrics] = useState<SystemMetrics | null>(null)
     const [performanceLogs, setPerformanceLogs] = useState<PerformanceLog[]>([])
@@ -87,12 +96,7 @@ const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
     const { toast } = useToast()
     const { formatCurrency } = useSettings()
 
-    useEffect(() => {
-        void loadMetrics()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    const loadMetrics = async (): Promise<void> => {
+    const fetchMetrics = useCallback(async (): Promise<void> => {
         try {
             setLoading(true)
 
@@ -125,19 +129,23 @@ const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
         } finally {
             setLoading(false)
         }
-    }
+    }, [toast])
 
-    const handleRefresh = async (): Promise<void> => {
+    useEffect(() => {
+        void fetchMetrics()
+    }, [fetchMetrics])
+
+    const handleRefresh = useCallback(async (): Promise<void> => {
         setRefreshing(true)
-        await loadMetrics()
+        await fetchMetrics()
         setRefreshing(false)
         toast({
             title: 'Success',
             description: 'Metrics refreshed'
         })
-    }
+    }, [fetchMetrics, toast])
 
-    const handleExportLogs = async (): Promise<void> => {
+    const handleExportLogs = useCallback(async (): Promise<void> => {
         try {
             const response = await fetch('/api/admin/export-logs')
             if (!response.ok) { throw new Error('Export failed') }
@@ -163,7 +171,7 @@ const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
                 variant: 'destructive'
             })
         }
-    }
+    }, [toast])
 
     if (loading) {
         return (
@@ -352,15 +360,7 @@ const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
                                                 <span className="font-mono">{log.endpoint}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span
-                                                    className={
-                                                        log.duration_ms > 1000
-                                                            ? 'text-red-500'
-                                                            : log.duration_ms > 500
-                                                                ? 'text-yellow-500'
-                                                                : 'text-muted-foreground'
-                                                    }
-                                                >
+                                                <span className={getDurationClass(log.duration_ms)}>
                                                     {log.duration_ms}ms
                                                 </span>
                                                 <span className="text-muted-foreground">

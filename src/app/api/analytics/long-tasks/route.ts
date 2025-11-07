@@ -2,38 +2,45 @@
 export const runtime = 'nodejs'
 
 
- import { type NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
- import { apiLogger } from '@/lib/logger'
- import { withSecurity, SecurityPresets } from '@/utils/security'
- import { createClient } from '@/utils/supabase/server'
+import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
+import { SecurityPresets, createSecureHandler } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
 
+const LongTaskSchema = z.object({
+  duration: z.number().positive(),
+  startTime: z.number().nonnegative(),
+  name: z.string().trim().min(1).max(120),
+  page: z.string().trim().max(200).optional()
+}).strict()
 
 async function longTasksPOST(request: NextRequest): Promise<NextResponse> {
   try {
-    // ✅ Add authentication
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
-    const body = await request.json() as { duration: number; startTime: number; name: string }
+    const body = LongTaskSchema.parse(await request.json())
 
-    // Log long tasks for performance monitoring with user context
     apiLogger.warn({
       userId: user['id'],
       duration: body.duration,
       startTime: body.startTime,
-      name: body.name
+      name: body.name,
+      page: body.page
     }, 'Long task detected')
 
     return NextResponse.json({ success: true })
    } catch (error: unknown) {
      apiLogger.error({ error }, 'Failed to record long task')
-     return NextResponse.json({ error: 'Failed to record task' }, { status: 500 })
+     return handleAPIError(error, 'POST /api/analytics/long-tasks')
    }
 }
 
-export const POST = withSecurity(longTasksPOST, SecurityPresets.enhanced())
+export const POST = createSecureHandler(longTasksPOST, 'POST /api/analytics/long-tasks', SecurityPresets.maximum())

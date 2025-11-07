@@ -1,4 +1,5 @@
 import { CacheInvalidator } from '@/lib/cache/cache-manager'
+import { sendNotification } from '@/lib/communications'
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 
@@ -116,10 +117,7 @@ export class FinancialWorkflowHandlers {
           costChange: costChange.toFixed(1)
         })
 
-        // TODO: Trigger pricing review workflow
-        setTimeout(() => {
-          logger.info('Pricing review triggered for cost change', { costId })
-        }, 3000)
+        this.triggerPricingReviewNotification(context, data, costChange)
       }
 
       return {
@@ -161,7 +159,6 @@ export class FinancialWorkflowHandlers {
     const { priceChange, affectedRecipes } = data
 
     try {
-      // TODO: Import and use notification system
       const notificationData = {
         type: priceChange > 0 ? 'warning' : 'info',
         category: 'financial',
@@ -172,6 +169,10 @@ export class FinancialWorkflowHandlers {
         actionLabel: 'Review Bahan Baku'
       }
 
+      sendNotification({
+        ...notificationData,
+        status: 'sent'
+      })
       automationLogger.info({ notificationData }, 'Price change notification sent')
     } catch (error) {
       automationLogger.debug({ error: getErrorMessage(error) }, 'Notification system not available')
@@ -211,12 +212,47 @@ export class FinancialWorkflowHandlers {
           actionLabel: 'Review Pricing'
         }
 
+        sendNotification({
+          ...reviewNotification,
+          status: 'sent'
+        })
         automationLogger.info({ reviewNotification }, 'Pricing review notification sent')
       }
 
+      sendNotification({
+        ...generalNotification,
+        status: 'sent'
+      })
       automationLogger.info({ generalNotification }, 'Cost change notification sent')
     } catch (error) {
       automationLogger.debug({ error: getErrorMessage(error) }, 'Notification system not available')
+    }
+  }
+
+  private static triggerPricingReviewNotification(
+    context: WorkflowContext,
+    data: { costId: string; costName: string; oldAmount: number; newAmount: number },
+    costChange: number
+  ): void {
+    try {
+      sendNotification({
+        category: 'financial',
+        priority: 'high',
+        title: 'Perlu Review Harga Jual',
+        message: `Biaya ${data.costName} berubah ${costChange.toFixed(1)}%. Pertimbangkan review harga.`,
+        actionUrl: '/hpp-simple?tab=pricing_review',
+        actionLabel: 'Mulai Review',
+        status: 'sent',
+        type: 'warning'
+      })
+      context.logger.info('Pricing review notification dispatched', {
+        costId: data.costId,
+        costChange
+      })
+    } catch (error) {
+      context.logger.error('Failed to dispatch pricing review notification', {
+        error: getErrorMessage(error)
+      })
     }
   }
 

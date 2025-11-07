@@ -1,7 +1,6 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 /**
  * GET /api/admin/metrics
  * Get system metrics for admin dashboard
@@ -14,6 +13,8 @@ import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 
 import type { Database } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -177,7 +178,7 @@ function buildMetricsResponse(
   }
 }
 
-export async function GET(_request: NextRequest): Promise<NextResponse> {
+async function getHandler(_request: NextRequest): Promise<NextResponse> {
   try {
     const { context, statusCode } = await authenticateAdmin()
     if (!context) {
@@ -204,3 +205,5 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/admin/metrics', SecurityPresets.maximum())

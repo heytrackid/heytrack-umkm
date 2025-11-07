@@ -29,7 +29,7 @@ export class WhatsAppTemplateService {
 
       let query = supabase
         .from('whatsapp_templates')
-        .select('*')
+        .select('id, user_id, name, category, template_content, variables, description, is_active, is_default, created_at, updated_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
@@ -43,7 +43,7 @@ export class WhatsAppTemplateService {
         throw error
       }
 
-      return data || []
+      return data ?? []
 
     } catch (error) {
       dbLogger.error({ error, userId, filters }, 'Failed to get WhatsApp templates')
@@ -195,7 +195,7 @@ export class WhatsAppTemplateService {
 
       const { data, error } = await supabase
         .from('whatsapp_templates')
-        .select('*')
+        .select('id, user_id, name, category, template_content, variables, description, is_active, is_default, created_at, updated_at')
         .eq('user_id', userId)
         .eq('category', category)
         .eq('is_default', true)

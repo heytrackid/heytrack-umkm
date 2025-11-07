@@ -183,7 +183,7 @@ const StatsCardsGridSkeleton = (): JSX.Element => (
 
 const Dashboard = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [currentTime] = useState(new Date())
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
@@ -220,49 +220,11 @@ const Dashboard = (): JSX.Element => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthLoading, isAuthenticated])
 
-   useEffect(() => {
-     if (typeof document === 'undefined') {
-       return
-     }
-
-    let timer: ReturnType<typeof setInterval> | null = null
-
-    const tick = (): void => {
-      setCurrentTime(new Date())
+  useEffect(() => {
+    if (isAuthenticated && !user) {
+      router.push('/auth/login')
     }
-
-    const start = () => {
-      if (timer !== null || document.hidden === true) {
-        return
-      }
-      tick()
-      timer = setInterval(tick, 1000)
-    }
-
-    const stop = () => {
-      if (timer === null) {
-        return
-      }
-      clearInterval(timer)
-      timer = null
-    }
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        stop()
-      } else {
-        start()
-      }
-    }
-
-    start()
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    return () => {
-      stop()
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [])
+  }, [isAuthenticated, user, router])
 
   // ✅ FIX: Combine loading states to prevent double skeleton
   const isLoading = isAuthLoading || isDataLoading

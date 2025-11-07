@@ -1,17 +1,17 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema } from '@/lib/validations'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
-
 // GET /api/hpp/recommendations - Get HPP recommendations
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 }
 
 // POST /api/hpp/recommendations - Create new recommendation
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -203,3 +203,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/hpp/recommendations', SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/hpp/recommendations', SecurityPresets.enhanced())

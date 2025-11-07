@@ -1,8 +1,10 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+import { NextResponse, type NextRequest } from 'next/server'
 
-import { NextResponse } from 'next/server'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { SecurityPresets, withSecurity } from '@/utils/security'
 
 interface EnvVarDiagnostics {
   exists: boolean
@@ -89,16 +91,22 @@ function buildDiagnosticsSkeleton(): DiagnosticsPayload {
   }
 }
 
-export async function GET(): Promise<NextResponse> {
-  const diagnostics = buildDiagnosticsSkeleton()
-  diagnostics.supabase_connectivity = await checkSupabaseConnectivity()
-  diagnostics.deployment_status = 'operational'
+async function diagnosticsGET(_request: NextRequest): Promise<NextResponse> {
+  try {
+    const diagnostics = buildDiagnosticsSkeleton()
+    diagnostics.supabase_connectivity = await checkSupabaseConnectivity()
+    diagnostics.deployment_status = 'operational'
 
-  return NextResponse.json(diagnostics, {
-    headers: {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET',
-    },
-  })
+    return NextResponse.json(diagnostics, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET',
+      },
+    })
+  } catch (error) {
+    return handleAPIError(error, 'GET /api/diagnostics')
+  }
 }
+
+export const GET = withSecurity(diagnosticsGET, SecurityPresets.enhanced())

@@ -119,7 +119,6 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
     const { isMobile } = useResponsive()
     const { confirm, ConfirmDialog } = useConfirm()
 
-    // Hydration fix - prevent SSR/client mismatch
     const [isMounted, setIsMounted] = useState(false)
     useEffect(() => {
         setIsMounted(true)
@@ -289,7 +288,7 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
         COST_CATEGORIES.find((category) => category.id === categoryId) ?? DEFAULT_CATEGORY
 
     const calculateMonthlyCost = (cost: OperationalCost) => {
-        const amount = cost.amount || 0
+        const amount = cost.amount ?? 0
         switch (cost.frequency) {
             case 'daily':
                 return amount * 30

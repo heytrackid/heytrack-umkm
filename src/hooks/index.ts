@@ -43,10 +43,10 @@ export { useSimplePreload, useAdvancedLinkPreloading, useAdvancedButtonPreloadin
 
 // API Hooks
 export { useDashboardStats, useWeeklySales, useTopProducts } from './api/useDashboard'
-// export { useHPPAlerts } from './api/useHPPAlerts' // TODO: Implement
-// export { useHPPComparison } from './api/useHPPComparison' // TODO: Implement
-// export { useHPPExport } from './api/useHPPExport' // TODO: Implement
-// export { useHPPSnapshots } from './api/useHPPSnapshots' // TODO: Implement
+export { useHPPAlerts } from './api/useHPPAlerts'
+export { useHPPComparison } from './api/useHPPComparison'
+export { useHPPExport } from './api/useHPPExport'
+export { useHPPSnapshots } from './api/useHPPSnapshots'
 
 // HPP Hooks
 export { useHppOverview } from '@/modules/hpp/hooks/useHppOverview'

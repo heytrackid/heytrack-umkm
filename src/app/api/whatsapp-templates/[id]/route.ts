@@ -1,7 +1,6 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 // WhatsApp Templates API - Single Template Operations
 // GET: Get single template
 // PUT: Update template
@@ -11,9 +10,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import type { Update } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
-
-
 
 type WhatsAppTemplateUpdate = Update<'whatsapp_templates'>
 
@@ -21,7 +20,7 @@ interface RouteContext {
   params: Promise<{ id: string }>
 }
 
-export async function GET(
+async function getHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -64,7 +63,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -141,7 +140,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -183,3 +182,7 @@ export async function DELETE(
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/whatsapp-templates/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureHandler(putHandler, 'PUT /api/whatsapp-templates/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/whatsapp-templates/[id]', SecurityPresets.enhanced())

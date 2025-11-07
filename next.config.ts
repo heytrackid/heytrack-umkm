@@ -2,6 +2,7 @@
 
 import type { NextConfig } from 'next'
 import path from 'path'
+import { performanceConfig } from './next.config.performance'
 
 const isProd = process.env.NODE_ENV === 'production'
 const appDomain = process.env['NEXT_PUBLIC_APP_DOMAIN'] || ''
@@ -12,6 +13,7 @@ const withBundleAnalyzer =
     : (config: NextConfig) => config
 
 const nextConfig: NextConfig = {
+  ...performanceConfig,
   typescript: { ignoreBuildErrors: true },
 
   compiler: { removeConsole: isProd ? { exclude: ['error'] } : false },
@@ -32,6 +34,7 @@ const nextConfig: NextConfig = {
     optimizeCss: true,
     optimizePackageImports: [
       'lucide-react',
+      '@radix-ui/react-icons',
       '@supabase/supabase-js',
       'recharts',
       'date-fns',
@@ -59,20 +62,71 @@ const nextConfig: NextConfig = {
     optimisticClientCache: false,
   },
 
-  // @ts-ignore - formats type issue
   images: {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    dangerouslyAllowSVG: false,
-    contentSecurityPolicy:
-      "default-src 'self'; img-src * data: blob:; media-src * data: blob:; sandbox;",
+    minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; img-src * data: blob:; media-src * data: blob:; sandbox;",
     domains: [],
     remotePatterns: [{ protocol: 'https', hostname: '**.supabase.co' }],
   },
 
   async headers() {
+    const securityHeaders = [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin'
+          }
+        ]
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=60, stale-while-revalidate=300'
+          }
+        ]
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      }
+    ]
+
     return [
+      ...securityHeaders,
       {
         source: '/(.*)',
         headers: [
@@ -119,24 +173,53 @@ const nextConfig: NextConfig = {
   },
 
   webpack: (config: any, { isServer, dev }: { isServer: boolean; dev: boolean }) => {
-    if (!dev && !isServer) {
-      config.optimization = config.optimization || {}
+    // Apply performance optimizations from next.config.performance.ts
+    if (dev) {
+      // Ensure module IDs are stable across HMR updates
+      config.optimization = {
+        ...(config.optimization as Record<string, unknown>),
+        moduleIds: 'named',
+        chunkIds: 'named'
+      }
+    } else if (!isServer) {
+      // Enable tree shaking
+      config.optimization = {
+        ...(config.optimization as Record<string, unknown>),
+        usedExports: true,
+        sideEffects: false
+      }
+
+      // Advanced split chunks
       config.optimization.splitChunks = {
         chunks: 'all',
         cacheGroups: {
-          framework: {
-            test: /[\\/]node_modules[\\/](react|react-dom|next)[\\/]/,
-            name: 'framework',
-            priority: 40,
-            enforce: true,
-          },
+          default: false,
+          vendors: false,
+          // Vendor chunk
           vendor: {
-            test: /[\\/]node_modules[\\/]/,
             name: 'vendor',
-            priority: 20,
-            reuseExistingChunk: true,
+            chunks: 'all',
+            test: /node_modules/,
+            priority: 20
           },
-        },
+          // Common chunk
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+            enforce: true
+          },
+          // UI components chunk
+          ui: {
+            name: 'ui',
+            test: /[\\/]components[\\/]ui[\\/]/,
+            chunks: 'all',
+            priority: 30
+          },
+
+        }
       }
     }
 

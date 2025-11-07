@@ -267,3 +267,4 @@ export class APISecurity {
 
 // Export the middleware functions
 export { withSecurity, SecurityPresets } from './api-middleware'
+export { createSecureHandler } from './secure-handler'

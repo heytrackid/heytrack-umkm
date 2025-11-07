@@ -2,7 +2,7 @@
 
 import { AlertTriangle, Calculator, DollarSign, Target, TrendingDown, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -43,12 +43,7 @@ const HppDashboardWidget = (): JSX.Element => {
   const [data, setData] = useState<HppDashboardData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    void loadHppData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const loadHppData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
 
@@ -73,7 +68,11 @@ const HppDashboardWidget = (): JSX.Element => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    void fetchData()
+  }, [fetchData])
 
   if (loading) {
     return (

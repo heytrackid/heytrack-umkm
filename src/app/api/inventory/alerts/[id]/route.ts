@@ -1,19 +1,19 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
-import { createClient } from '@/utils/supabase/server'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
 
+import { createClient } from '@/utils/supabase/server'
 
 /**
  * PATCH /api/inventory/alerts/[id]
  * Acknowledge an alert
  */
-export async function PUT(
+async function putHandler(
   __request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -42,3 +42,5 @@ export async function PUT(
     )
   }
 }
+
+export const PUT = createSecureHandler(putHandler, 'PUT /api/inventory/alerts/[id]', SecurityPresets.enhanced())

@@ -1,40 +1,34 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import 'server-only'
-import { type NextRequest, NextResponse } from 'next/server'
-
+import { NextResponse, type NextRequest } from 'next/server'
+import { z } from 'zod'
 
 import { triggerWorkflow } from '@/lib/automation/workflows/index'
+import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/database'
+import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
-
-type OrderStatus = 'CANCELLED' | 'CONFIRMED' | 'DELIVERED' | 'IN_PROGRESS' | 'PENDING' | 'READY'
-type OrderRow = Database['public']['Tables']['orders']['Row']
-type TriggerWorkflow = typeof triggerWorkflow
-type ApiLogger = typeof apiLogger
 
 const VALID_STATUSES = [
   'PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'
-]
+] as const
+
+type OrderStatus = (typeof VALID_STATUSES)[number]
+type OrderRow = Database['public']['Tables']['orders']['Row']
+type TriggerWorkflow = typeof triggerWorkflow
+type ApiLogger = typeof apiLogger
 
 interface RouteContext {
   params: Promise<{ id: string }>
 }
 
-function validateStatusInput(status?: string): { isValid: boolean; error?: string } {
-  if (!status) {
-    return { isValid: false, error: 'Status is required' }
-  }
-
-  if (!VALID_STATUSES.includes(status)) {
-    return { isValid: false, error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` }
-  }
-
-  return { isValid: true }
-}
+const UpdateStatusSchema = z.object({
+  status: z.enum(VALID_STATUSES),
+  notes: z.string().trim().max(500).optional()
+}).strict()
 
 async function fetchCurrentOrder(supabase: ReturnType<typeof createServiceRoleClient>, orderId: string): Promise<OrderRow> {
   const { data: currentOrder, error: fetchError } = await supabase
@@ -63,7 +57,7 @@ async function createIncomeRecordIfNeeded(
       .insert([{
         type: 'INCOME',
         category: 'Revenue',
-        amount: currentOrder.total_amount || 0,
+        amount: currentOrder.total_amount ?? 0,
         date: (currentOrder.delivery_date ?? currentOrder.order_date ?? new Date().toISOString().split('T')[0]) as string,
         reference: `Order #${currentOrder['order_no'] || ''}${currentOrder['customer_name'] ? ` - ${currentOrder['customer_name']}` : ''}`,
         description: `Income from order ${currentOrder['order_no'] || ''}`,
@@ -188,24 +182,17 @@ function buildResponse(
 }
 
 // PUT /api/orders/[id]/status - Update order status dengan automatic workflow triggers
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
   try {
     const { id: orderId } = await context['params']
 
-    const body = await request.json() as { status?: string; notes?: string }
-    const { status, notes } = body
-
-    // Validate status input
-    const validation = validateStatusInput(status)
-    if (!validation.isValid) {
-      return NextResponse.json(
-        { error: validation.error },
-        { status: 400 }
-      )
-    }
+    const sanitizedBody = APISecurity.sanitizeRequestBody(await request.json())
+    const { status, notes } = UpdateStatusSchema.parse(sanitizedBody)
+    const safeNotes = notes ? InputSanitizer.sanitizeHtml(notes).slice(0, 500) : undefined
+    const normalizedNotes = safeNotes?.trim().length ? safeNotes.trim() : undefined
 
     const supabase = createServiceRoleClient()
 
@@ -214,39 +201,33 @@ export async function PUT(
     try {
       currentOrder = await fetchCurrentOrder(supabase, orderId)
     } catch (_error) {
-      return NextResponse.json(
-        { error: 'Order not found' },
-        { status: 404 }
-      )
+      throw new APIError('Order not found', { status: 404, code: 'NOT_FOUND' })
     }
 
     const previousStatus = currentOrder['status']
 
     // Create income record if needed
-    const incomeRecordId = await createIncomeRecordIfNeeded(supabase, status!, previousStatus, currentOrder, apiLogger)
+    const incomeRecordId = await createIncomeRecordIfNeeded(supabase, status, previousStatus, currentOrder, apiLogger)
 
     // Update order status
-    const updatedOrder = await updateOrderStatus(supabase, orderId, status!, notes, incomeRecordId, apiLogger)
+    const updatedOrder = await updateOrderStatus(supabase, orderId, status, normalizedNotes, incomeRecordId, apiLogger)
 
     apiLogger.info(`🔄 Order ${currentOrder['order_no']}: ${previousStatus} → ${status}`)
 
     // Trigger automation workflows
-    await triggerWorkflows(triggerWorkflow, orderId, status!, previousStatus, updatedOrder, notes, apiLogger)
+    await triggerWorkflows(triggerWorkflow, orderId, status, previousStatus, updatedOrder, normalizedNotes, apiLogger)
 
     // Return success response
-    return buildResponse(status!, updatedOrder, previousStatus, incomeRecordId, currentOrder)
+    return buildResponse(status, updatedOrder, previousStatus, incomeRecordId, currentOrder)
 
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error in order status update:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return handleAPIError(error, 'PUT /api/orders/[id]/status')
   }
 }
 
 // GET /api/orders/[id]/status - Get order status history (optional)
-export async function GET(
+async function getHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -263,10 +244,7 @@ export async function GET(
       .single()
 
     if (orderError || !order) {
-      return NextResponse.json(
-        { error: 'Order not found' },
-        { status: 404 }
-      )
+      throw new APIError('Order not found', { status: 404, code: 'NOT_FOUND' })
     }
 
     // Note: Status history would require a separate audit table in production
@@ -287,10 +265,7 @@ export async function GET(
 
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error getting order status:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return handleAPIError(error, 'GET /api/orders/[id]/status')
   }
 }
 
@@ -339,3 +314,6 @@ function isAutomationEnabled(status: string): boolean {
   // Automation triggers pada status tertentu
   return ['DELIVERED', 'CANCELLED'].includes(status)
 }
+
+export const PUT = withSecurity(putHandler, SecurityPresets.enhanced())
+export const GET = withSecurity(getHandler, SecurityPresets.enhanced())

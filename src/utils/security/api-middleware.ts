@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { apiLogger } from '@/lib/logger'
 
 import { APISecurity } from './index'
+
+const BaseBodySchema = z.union([
+  z.object({}).passthrough(),
+  z.array(z.unknown()),
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null()
+])
 
 
 /* eslint-disable */
@@ -203,6 +213,14 @@ export function withSecurity<Params extends {} = {}>(
         const clonedReq = req.clone()
         const body = await clonedReq.json()
         sanitizedBody = APISecurity.sanitizeRequestBody(body)
+        try {
+          BaseBodySchema.parse(sanitizedBody)
+        } catch {
+          return NextResponse.json(
+            { error: 'Invalid request body' },
+            { status: 400 }
+          )
+        }
       } catch (e) {
         // If parsing fails, continue without sanitization but log
         apiLogger.warn({ error: 'Failed to parse request body for sanitization' }, 'Body parsing error')
@@ -263,11 +281,11 @@ export function withSecurity<Params extends {} = {}>(
 
     // 6. Add sanitized body to request if it was modified
     if (sanitizedBody !== undefined) {
-      // Create a new request with sanitized body
-      processedReq = new NextRequest(req.url, {
-        method: req.method,
-        headers: req['headers'],
-        body: JSON.stringify(sanitizedBody)
+      const sanitizedJson = JSON.stringify(sanitizedBody)
+      processedReq = new NextRequest(processedReq, {
+        body: sanitizedJson,
+        headers: new Headers(processedReq.headers),
+        method: processedReq.method
       })
     }
 

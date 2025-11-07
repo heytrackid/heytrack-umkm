@@ -1,7 +1,6 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { cacheInvalidation } from '@/lib/cache'
@@ -9,16 +8,16 @@ import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import type { Insert } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
-
-
 
 interface RouteContext {
   params: Promise<{ id: string }>
 }
 
 // GET /api/recipes/[id] - Get single recipe with ingredients
-export async function GET(
+async function getHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -61,7 +60,7 @@ export async function GET(
 }
 
 // PUT /api/recipes/[id] - Update recipe with ingredients
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -174,7 +173,7 @@ export async function PUT(
 }
 
 // DELETE /api/recipes/[id] - Delete recipe
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -218,3 +217,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/recipes/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureHandler(putHandler, 'PUT /api/recipes/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/recipes/[id]', SecurityPresets.enhanced())

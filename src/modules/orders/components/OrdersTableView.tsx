@@ -1,8 +1,7 @@
- 
 'use client'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
 import OrdersTableComponent from '@/components/orders/orders-table'
@@ -16,9 +15,6 @@ import type { OrdersTable as OrdersTableRow } from '@/types/database'
 
 const logger = createClientLogger('OrdersTableView')
 
-
-
-
 type Order = OrdersTableRow
 
 export const OrdersTableView = () => {
@@ -28,14 +24,12 @@ export const OrdersTableView = () => {
   const [editingOrder, setEditingOrder] = useState<OrderWithItems | undefined>(undefined)
   const [showOrderForm, setShowOrderForm] = useState(false)
 
-  // Hydration fix - prevent SSR/client mismatch
-  const [isMounted, setIsMounted] = useState(false)
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
   // ✅ Use TanStack Query for orders
-  const { data: orders = [], isLoading: loading } = useQuery<Order[]>({
+  const {
+    data: orders = [],
+    isLoading: isOrdersLoading,
+    isFetching,
+  } = useQuery<Order[]>({
     queryKey: ['orders', 'table'],
     queryFn: async () => {
       const response = await fetch('/api/orders', {
@@ -57,6 +51,7 @@ export const OrdersTableView = () => {
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
+  const isOrdersRefreshing = isOrdersLoading || isFetching
 
   const handleViewOrder = useCallback((order: Order) => {
     setSelectedOrder(order)
@@ -74,7 +69,10 @@ export const OrdersTableView = () => {
   }, [])
 
   // ✅ Delete mutation
-  const deleteMutation = useMutation({
+  const {
+    mutateAsync: deleteOrder,
+    isPending: isDeleting
+  } = useMutation({
     mutationFn: async (orderId: string) => {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'DELETE',
@@ -97,11 +95,14 @@ export const OrdersTableView = () => {
   })
 
   const handleDeleteOrder = useCallback(async (order: Order) => {
-    await deleteMutation.mutateAsync(order.id)
-  }, [deleteMutation])
+    await deleteOrder(order.id)
+  }, [deleteOrder])
 
   // ✅ Update status mutation
-  const updateStatusMutation = useMutation({
+  const {
+    mutateAsync: updateOrderStatus,
+    isPending: isUpdatingStatus
+  } = useMutation({
     mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: string }) => {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
@@ -134,8 +135,8 @@ export const OrdersTableView = () => {
   })
 
   const handleUpdateStatus = useCallback(async (orderId: string, newStatus: string) => {
-    await updateStatusMutation.mutateAsync({ orderId, newStatus })
-  }, [updateStatusMutation])
+    await updateOrderStatus({ orderId, newStatus })
+  }, [updateOrderStatus])
 
   const handleBulkAction = useCallback(async (action: string, orderIds: string[]) => {
     logger.info({ action, orderCount: orderIds.length }, 'Bulk action triggered')
@@ -181,23 +182,13 @@ export const OrdersTableView = () => {
     }
   }, [handleUpdateStatus, handleDeleteOrder, orders])
 
-  // Prevent hydration mismatch
-  if (!isMounted) {
-    return (
-      <div className="border rounded-lg p-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
-          <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded" />
-        </div>
-      </div>
-    )
-  }
+  const tableLoading = isOrdersRefreshing || isDeleting || isUpdatingStatus
 
   return (
     <>
       <OrdersTableComponent
         orders={orders}
-        loading={loading}
+        loading={tableLoading}
         onViewOrder={handleViewOrder}
         onEditOrder={handleEditOrder}
         onDeleteOrder={handleDeleteOrder}
@@ -227,7 +218,7 @@ export const OrdersTableView = () => {
             order={editingOrder}
             onSubmit={async (data) => {
               // Handle form submission
-               logger.info({ orderNo: data.order_no }, 'Order submitted')
+              logger.info({ orderNo: data.order_no }, 'Order submitted')
               await queryClient.invalidateQueries({ queryKey: ['orders'] })
               setShowOrderForm(false)
               setEditingOrder(undefined)

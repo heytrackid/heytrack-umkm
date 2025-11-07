@@ -1,8 +1,7 @@
 'use client'
 
 import { AlertTriangle, Package, ShoppingCart, X } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -42,16 +41,11 @@ const isInventoryNotificationArray = (value: unknown): value is InventoryNotific
   Array.isArray(value) && value.every(isInventoryNotification)
 
 export const InventoryNotifications = (): JSX.Element => {
-  const router = useRouter()
   const [notifications, setNotifications] = useState<InventoryNotification[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    void fetchNotifications()
-  }, [])
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch('/api/notifications?category=inventory&limit=10')
@@ -75,7 +69,11 @@ export const InventoryNotifications = (): JSX.Element => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    void fetchNotifications()
+  }, [fetchNotifications])
 
   const markAsRead = async (notificationId: string) => {
     try {

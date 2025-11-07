@@ -65,7 +65,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       // Get total count
       let countQuery = supabase
         .from('recipes')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('created_by', user['id'])
 
       if (search) {
@@ -136,7 +136,10 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       total: result.meta.total
     }, 'Recipes fetched (cached)')
 
-    return NextResponse.json(result)
+    const response = NextResponse.json(result)
+    // Add HTTP caching headers (5 minutes stale-while-revalidate)
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
+    return response
 
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/recipes:')

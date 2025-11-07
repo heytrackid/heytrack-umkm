@@ -55,10 +55,10 @@ const CustomersLayout = (): JSX.Element => {
   const { confirm } = useConfirm()
 
   // Fetch customers on mount - auth is handled by middleware
-  useEffect(() => {
-    void fetchCustomers()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    // This is intentional - fetch customers on mount only
+    useEffect(() => {
+      fetchCustomers()
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchCustomers = useCallback(async () => {
     try {

@@ -1,42 +1,53 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+import { NextResponse, type NextRequest } from 'next/server'
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
+import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
+import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
+const OrderItemSchema = z.object({
+  unit_price: z.number().finite().min(0, { message: 'unit_price must be >= 0' }),
+  quantity: z.number().int().positive({ message: 'quantity must be > 0' })
+})
 
-
+const CalculatePriceSchema = z.object({
+  customer_id: z.string().uuid().optional(),
+  items: z.array(OrderItemSchema).min(1, { message: 'At least one item is required' }),
+  delivery_fee: z.number().finite().min(0).optional(),
+  tax_rate: z.number().finite().min(0).max(1).optional(),
+  use_loyalty_points: z.number().int().min(0).optional()
+}).strict()
 
 // POST /api/orders/calculate-price - Calculate order price with discounts
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function calculatePricePOST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/orders/calculate-price')
-    
+
     const client = await createClient()
 
     const { data: { user }, error: authError } = await client.auth.getUser()
 
     if (authError || !user) {
       logError(apiLogger, authError, 'Unauthorized')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    const body = await request.json() as {
-      customer_id?: string
-      items?: Array<{ unit_price: number; quantity: number }>
-      delivery_fee?: number
-      tax_rate?: number
-      use_loyalty_points?: number
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
-    const { customer_id, items, delivery_fee, tax_rate, use_loyalty_points } = body
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { error: 'items array is required' },
-        { status: 400 }
-      )
-    }
+    const sanitizedBody = APISecurity.sanitizeRequestBody(await request.json())
+    const parsedBody = CalculatePriceSchema.parse(sanitizedBody)
+    const {
+      customer_id,
+      items,
+      delivery_fee,
+      tax_rate,
+      use_loyalty_points,
+    } = parsedBody
+
+    const safeCustomerId = customer_id ? InputSanitizer.sanitizeSQLInput(customer_id) : undefined
 
     // Calculate subtotal
     const subtotal = items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0)
@@ -59,12 +70,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       total_amount,
       loyalty_points_earned: Math.floor(total_amount / 10), // Simple calculation
       loyalty_points_used: use_loyalty_points ?? 0,
-      customer_info: customer_id ? { name: '', discount_percentage: 0, loyalty_points: 0 } : undefined
+      customer_info: safeCustomerId
+        ? { id: safeCustomerId, name: '', discount_percentage: 0, loyalty_points: 0 }
+        : undefined
     }
 
-    apiLogger.info({ 
+    apiLogger.info({
       userId: user['id'],
-      customerId: customer_id,
+      customerId: safeCustomerId,
       subtotal: pricing.subtotal,
       total: pricing.total_amount
     }, 'Order price calculated')
@@ -72,6 +85,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(pricing)
   } catch (error) {
     logError(apiLogger, error, 'Failed to calculate order price')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return handleAPIError(error, 'POST /api/orders/calculate-price')
   }
 }
+
+export const POST = withSecurity(calculatePricePOST, SecurityPresets.enhanced())

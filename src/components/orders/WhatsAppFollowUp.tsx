@@ -76,8 +76,8 @@ export const WhatsAppFollowUp = ({
     status: order['status'],
     items: order.order_items?.map((item: OrderItemData) => ({
       name: (item['recipe_name'] ?? item.name) ?? 'Product',
-      quantity: item.quantity || 1,
-      price: item.price_per_unit || 0
+      quantity: item.quantity ?? 1,
+      price: item.price_per_unit ?? 0
     })) ?? [],
     notes: order.notes ?? ''
   });

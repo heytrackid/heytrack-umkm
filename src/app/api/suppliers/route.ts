@@ -67,7 +67,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     if (error) {throw error;}
 
     // Get total count
-    let countQuery = supabase.from('suppliers').select('*', { count: 'exact', head: true }).eq('user_id', user['id'])
+    let countQuery = supabase.from('suppliers').select('id', { count: 'exact', head: true }).eq('user_id', user['id'])
     if (search) {
       countQuery = countQuery.or(`name.ilike.%${search}%,contact_person.ilike.%${search}%,email.ilike.%${search}%`)
     }

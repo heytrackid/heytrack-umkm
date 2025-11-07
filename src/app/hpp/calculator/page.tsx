@@ -234,8 +234,8 @@ const HppCalculatorPage = (): JSX.Element => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-3xl font-bold ${(calculation.wac_adjustment || 0) >= 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                  {(calculation.wac_adjustment || 0) >= 0 ? '+' : ''}{formatCurrency(calculation.wac_adjustment || 0)}
+                <div className={`text-3xl font-bold ${(calculation.wac_adjustment ?? 0) >= 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                  {(calculation.wac_adjustment ?? 0) >= 0 ? '+' : ''}{formatCurrency(calculation.wac_adjustment ?? 0)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   penyesuaian inventory
@@ -269,7 +269,7 @@ const HppCalculatorPage = (): JSX.Element => {
                 {(calculation.wac_adjustment || 0) !== 0 && (
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                     <span className="font-medium">WAC Adjustment</span>
-                    <span className="font-semibold">{formatCurrency(calculation.wac_adjustment || 0)}</span>
+                    <span className="font-semibold">{formatCurrency(calculation.wac_adjustment ?? 0)}</span>
                   </div>
                 )}
                 <Separator />

@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { LoadingButton } from '@/components/ui/loading-button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useToast } from '@/hooks'
 
 import type { Row } from '@/types/database'
 
@@ -35,6 +36,7 @@ const OrdersTableSection = ({
   const [isDeleting, setIsDeleting] = useState(false)
 
   const router = useRouter()
+  const { toast } = useToast()
 
   const ORDER_STATUS_CONFIG: Record<string, { label: string; color: string }> = useMemo(() => ({
     PENDING: { label: "Pending", color: 'bg-gray-100 text-gray-800' },
@@ -72,9 +74,26 @@ const OrdersTableSection = ({
 
     try {
       setIsDeleting(true)
-      // TODO: Implement actual delete API call
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch(`/api/orders/${orderToDelete['id']}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const { error: message } = await response.json().catch(() => ({ error: 'Gagal menghapus pesanan' }))
+        throw new Error(message ?? 'Gagal menghapus pesanan')
+      }
+
+      toast({
+        title: 'Pesanan terhapus',
+        description: `Pesanan ${orderToDelete.order_no} berhasil dihapus.`
+      })
+      router.refresh()
+    } catch (error) {
+      toast({
+        title: 'Gagal menghapus pesanan',
+        description: error instanceof Error ? error.message : 'Terjadi kesalahan saat menghapus pesanan.',
+        variant: 'destructive'
+      })
     } finally {
       setIsDeleting(false)
       setDeleteDialogOpen(false)

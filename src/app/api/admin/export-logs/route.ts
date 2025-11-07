@@ -1,7 +1,6 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 /**
  * GET /api/admin/export-logs
  * Export logs as JSON file
@@ -13,6 +12,8 @@ import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { Database } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -91,7 +92,7 @@ function buildExportPayload(userId: string, perfLogs: unknown[], errLogs: unknow
   }
 }
 
-export async function GET(_request: NextRequest): Promise<NextResponse> {
+async function getHandler(_request: NextRequest): Promise<NextResponse> {
   try {
     const { context, statusCode } = await authenticateAdmin()
 
@@ -119,3 +120,5 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/admin/export-logs', SecurityPresets.maximum())

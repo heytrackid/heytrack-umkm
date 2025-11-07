@@ -104,7 +104,7 @@ export class HppCalculatorService {
 
         const quantity = Number(ri.quantity)
         // Use WAC if available, otherwise use current price
-        const unit_price = Number(validIngredient.weighted_average_cost || validIngredient.price_per_unit || 0)
+        const unit_price = Number(validIngredient.weighted_average_cost ?? validIngredient.price_per_unit ?? 0)
         const total_cost = quantity * unit_price
 
         material_breakdown.push({
@@ -191,7 +191,7 @@ export class HppCalculatorService {
 
       // Calculate weighted average labor cost per unit
       const totalLaborCost = productions.reduce(
-        (sum, p) => sum + Number(p.labor_cost || 0),
+        (sum, p) => sum + Number(p.labor_cost ?? 0),
         0
       )
       const totalQuantity = productions.reduce(
@@ -234,7 +234,7 @@ export class HppCalculatorService {
       }
 
       const totalOverhead = operationalCosts.reduce(
-        (sum, cost) => sum + Number(cost.amount || 0),
+        (sum, cost) => sum + Number(cost.amount ?? 0),
         0
       )
 
@@ -277,7 +277,7 @@ export class HppCalculatorService {
       // Fallback: equal allocation across active recipes
       const { count: recipeCount } = await supabase
         .from('recipes')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
         .eq('is_active', true)
 
@@ -325,7 +325,7 @@ export class HppCalculatorService {
         .order('created_at', { ascending: false })
         .limit(HPP_CONFIG.WAC_LOOKBACK_TRANSACTIONS)
 
-      if (error || !transactions) {
+      if (error ?? !transactions) {
         this.logger.warn({ error }, 'Failed to fetch stock transactions for WAC')
         return 0
       }
@@ -345,7 +345,7 @@ export class HppCalculatorService {
 
         // Calculate weighted average cost from transactions
         const totalQuantity = ingredientTransactions.reduce(
-          (sum, t) => sum + Number(t.quantity || 0),
+          (sum, t) => sum + Number(t.quantity ?? 0),
           0
         )
         const totalValue = ingredientTransactions.reduce(
@@ -356,10 +356,10 @@ export class HppCalculatorService {
         if (totalQuantity === 0) {continue}
 
         const wac = totalValue / totalQuantity
-        const currentPrice = Number(ingredient.price_per_unit || 0)
+        const currentPrice = Number(ingredient.price_per_unit ?? 0)
 
         // Adjustment based on recipe quantity (not transaction quantity!)
-        const recipeQuantity = Number(ri.quantity || 0)
+        const recipeQuantity = Number(ri.quantity ?? 0)
         const adjustment = (wac - currentPrice) * recipeQuantity
 
         totalAdjustment += adjustment

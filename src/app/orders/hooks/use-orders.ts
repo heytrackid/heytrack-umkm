@@ -4,6 +4,8 @@ import { DEFAULT_ORDERS_CONFIG, calculateOrderTotals, type OrdersModuleConfig, t
 import type {
   Order,
   OrderItem,
+  OrderPayment,
+  PaymentMethod,
   CreateOrderData,
   UpdateOrderData,
   OrderFilters,
@@ -49,6 +51,46 @@ const resolveOrderTaxInclusive = (order: Order): boolean => {
   }
 
   return DEFAULT_ORDERS_CONFIG.tax.is_inclusive
+}
+
+const PAYMENT_METADATA_PREFIX = '[PAYMENT_META]'
+const DEFAULT_PAYMENT_METHOD: PaymentMethod = 'CASH'
+
+interface PaymentMetadata {
+  payment_method?: PaymentMethod
+  currency?: string
+  notes?: string
+}
+
+const encodePaymentDescription = (metadata: PaymentMetadata): string => {
+  const payload = JSON.stringify({
+    payment_method: metadata.payment_method ?? DEFAULT_PAYMENT_METHOD,
+    currency: metadata.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
+    notes: metadata.notes?.trim() ?? ''
+  })
+
+  return `${PAYMENT_METADATA_PREFIX}${payload}`
+}
+
+const decodePaymentDescription = (description?: string | null): PaymentMetadata => {
+  if (!description) {
+    return {}
+  }
+
+  if (!description.startsWith(PAYMENT_METADATA_PREFIX)) {
+    return { notes: description }
+  }
+
+  try {
+    const parsed = JSON.parse(description.slice(PAYMENT_METADATA_PREFIX.length)) as PaymentMetadata
+    return {
+      payment_method: parsed.payment_method ?? DEFAULT_PAYMENT_METHOD,
+      currency: parsed.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
+      notes: parsed.notes
+    }
+  } catch {
+    return { notes: description }
+  }
 }
 
 // Main orders hook
@@ -189,21 +231,110 @@ export function useOrderItems(orderId: string) {
   }
 }
 
-// Order payments tracking
-export function useOrderPayments(_orderId: string) {
-  // TODO: Implement when order_payments table is created
-  // For now, return empty data structure
-  const notImplemented = (action: string) => Promise.reject(new Error(`${action} order payments is not yet implemented`))
+// Order payments tracking (stored via financial_records table)
+export function useOrderPayments(orderId?: string | null) {
+  const referenceKey = orderId ? `Order ${orderId}` : null
+
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    create,
+    update,
+    remove,
+  } = useSupabaseCRUD('financial_records', {
+    strategy: 'swr',
+    orderBy: { column: 'date', ascending: false },
+    filter: referenceKey ? { reference: referenceKey, type: 'INCOME', category: 'SALES' } : undefined,
+  })
+
+  const payments: OrderPayment[] = useMemo(() => {
+    if (!Array.isArray(data) || !orderId) {
+      return []
+    }
+
+    return data.map((record) => {
+      const metadata = decodePaymentDescription(record.description)
+
+      return {
+        id: record['id'],
+        order_id: orderId,
+        amount: record.amount,
+        currency: metadata.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
+        payment_method: metadata.payment_method ?? DEFAULT_PAYMENT_METHOD,
+        payment_date: record.date ?? record.created_at ?? new Date().toISOString(),
+        reference_number: record.reference ?? undefined,
+        notes: metadata.notes ?? record.description ?? undefined,
+        created_at: record.created_at ?? new Date().toISOString(),
+      }
+    })
+  }, [data, orderId])
+
+  const ensureOrderId = () => {
+    if (!orderId || !referenceKey) {
+      throw new Error('Order ID is required for payment operations')
+    }
+  }
+
+  const createPayment = async (payment: {
+    amount: number
+    payment_method?: PaymentMethod
+    currency?: string
+    payment_date?: string
+    notes?: string
+    reference_number?: string
+  }): Promise<void> => {
+    ensureOrderId()
+
+    await create({
+      amount: payment.amount,
+      category: 'SALES',
+      type: 'INCOME',
+      date: payment.payment_date ?? new Date().toISOString(),
+      description: encodePaymentDescription({
+        payment_method: payment.payment_method,
+        currency: payment.currency,
+        notes: payment.notes,
+      }),
+      reference: payment.reference_number ?? referenceKey!,
+    })
+  }
+
+  const updatePayment = async (
+    id: string,
+    updates: Partial<Pick<OrderPayment, 'amount' | 'payment_method' | 'currency' | 'payment_date' | 'notes' | 'reference_number'>>
+  ): Promise<void> => {
+    ensureOrderId()
+
+    const existingRecord = data?.find((record) => record['id'] === id)
+    const existingMetadata = decodePaymentDescription(existingRecord?.description)
+
+    await update(id, {
+      amount: updates.amount ?? existingRecord?.amount ?? 0,
+      date: updates.payment_date ?? existingRecord?.date ?? new Date().toISOString(),
+      description: encodePaymentDescription({
+        payment_method: updates.payment_method ?? existingMetadata.payment_method,
+        currency: updates.currency ?? existingMetadata.currency,
+        notes: updates.notes ?? existingMetadata.notes,
+      }),
+      reference: updates.reference_number ?? existingRecord?.reference ?? referenceKey!,
+    })
+  }
+
+  const removePayment = async (id: string): Promise<void> => {
+    await remove(id)
+  }
 
   return {
-    data: [] as never[],
-    payments: [] as never[],
-    loading: false,
-    error: null,
-    create: () => notImplemented('Creating'),
-    update: () => notImplemented('Updating'),
-    remove: () => notImplemented('Removing'),
-    refresh: () => Promise.resolve()
+    data: payments,
+    payments,
+    loading,
+    error,
+    create: createPayment,
+    update: updatePayment,
+    remove: removePayment,
+    refresh: refetch,
   }
 }
 

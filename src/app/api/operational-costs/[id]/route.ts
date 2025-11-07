@@ -1,23 +1,22 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import { OperationalCostUpdateSchema } from '@/lib/validations/domains/finance'
 import type { Update } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
-
-
 
 interface RouteContext {
   params: Promise<{ id: string }>
 }
 
 // GET /api/operational-costs/[id] - Get single operational cost
-export async function GET(
+async function getHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -64,7 +63,7 @@ export async function GET(
 }
 
 // PUT /api/operational-costs/[id] - Update operational cost
-export async function PUT(
+async function putHandler(
   request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -99,7 +98,6 @@ export async function PUT(
     }
 
     const validatedData = validation['data']
-
 
     // Build update object
     const updatePayload: Update<'operational_costs'> = {
@@ -141,7 +139,7 @@ export async function PUT(
 }
 
 // DELETE /api/operational-costs/[id] - Delete operational cost
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -185,3 +183,7 @@ export async function DELETE(
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/operational-costs/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureHandler(putHandler, 'PUT /api/operational-costs/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/operational-costs/[id]', SecurityPresets.enhanced())

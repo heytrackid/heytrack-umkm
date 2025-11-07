@@ -6,6 +6,8 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger, logError } from '@/lib/logger'
 import type { Database } from '@/types/database'
 import { typed } from '@/types/type-utilities'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
 import { createClient } from '@/utils/supabase/server'
 
 type TypedSupabaseClient = ReturnType<typeof typed>
@@ -177,7 +179,7 @@ function buildSummary(
   }
 }
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/dashboard/production-schedule')
 
@@ -214,3 +216,5 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/dashboard/production-schedule', SecurityPresets.enhanced())

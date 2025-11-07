@@ -1,4 +1,0 @@
-
-> heytrack-umkm@1.0.0 lint:all
-> eslint . --max-warnings 0 --cache --cache-location .next/cache/eslint --no-cache
-

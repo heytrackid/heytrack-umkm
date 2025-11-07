@@ -413,9 +413,12 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const recentOrders = buildRecentOrders(dashboardData.orders)
     const popularRecipes = buildPopularRecipes(dashboardData.recipes)
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       buildDashboardResponse(stats, inventory, recentOrders, popularRecipes)
     )
+    // Add caching for dashboard stats (5 minutes stale-while-revalidate)
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
+    return response
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error fetching dashboard stats')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })

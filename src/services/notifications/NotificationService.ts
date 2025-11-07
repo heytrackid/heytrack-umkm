@@ -30,7 +30,7 @@ export class NotificationService {
 
       let query = supabase
         .from('notifications')
-        .select('*')
+        .select('id, user_id, title, message, type, category, priority, action_url, entity_type, entity_id, metadata, is_read, is_dismissed, expires_at, created_at, updated_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(filters?.limit ?? 50)
@@ -54,7 +54,7 @@ export class NotificationService {
         throw error
       }
 
-      return data || []
+      return data ?? []
 
     } catch (error) {
       dbLogger.error({ error, userId, filters }, 'Failed to get notifications')
@@ -72,7 +72,7 @@ export class NotificationService {
 
       const { count } = await supabase
         .from('notifications')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
         .eq('is_read', false)
         .eq('is_dismissed', false)

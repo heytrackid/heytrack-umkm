@@ -104,11 +104,11 @@ const AIRecipeGeneratorPage = () => {
    }, [toast])
 
    const fetchIngredients = useCallback(async () => {
-     const { data, error } = await supabase
-       .from('ingredients')
-       .select('*')
-       .order('name')
-       .returns<Array<Row<'ingredients'>>>()
+      const { data, error } = await supabase
+        .from('ingredients')
+        .select('id, name, unit, price_per_unit, current_stock, min_stock')
+        .order('name')
+        .returns<Array<Row<'ingredients'>>>()
 
      if (!error && data) {
         const ingredients = data.map((item): AvailableIngredient => ({
