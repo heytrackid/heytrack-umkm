@@ -60,7 +60,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
     setOpenDropdown(label)
 
     // Enhanced prefetching with bundle splitting
-    const heavyRoutes = ['/reports', '/orders', '/recipes', '/ai-chatbot', '/categories', '/ingredients', '/admin']
+    const heavyRoutes = ['/reports', '/orders', '/recipes', '/ai-chatbot', '/ingredients', '/admin']
     const tab = tabs.find(t => t.label === label)
     const href = tab?.href
     if (href && heavyRoutes.includes(href)) {

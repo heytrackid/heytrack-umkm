@@ -2,14 +2,15 @@
 export const runtime = 'nodejs'
 
 
-import { type NextRequest, NextResponse } from 'next/server'
-
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID, isRecord, extractFirst } from '@/lib/type-guards'
 import type { IngredientPurchaseUpdate } from '@/lib/validations/database-validations'
 import type { Update, Insert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
+
+import type { NextRequest, NextResponse } from 'next/server'
 
 
 
@@ -27,7 +28,7 @@ async function getHandler(
     
     // Validate UUID format
     if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid purchase ID format' }, { status: 400 })
+      return createErrorResponse('Invalid purchase ID format', 400)
     }
     
     const supabase = await createClient()
@@ -35,7 +36,7 @@ async function getHandler(
     // Authenticate
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return createErrorResponse('Unauthorized', 401)
     }
 
     // Fetch purchase with ingredient details
@@ -57,16 +58,16 @@ async function getHandler(
 
     if (error) {
       if (error['code'] === 'PGRST116') {
-        return NextResponse.json({ error: 'Purchase not found' }, { status: 404 })
+        return createErrorResponse('Purchase not found', 404)
       }
       apiLogger.error({ error }, 'Error fetching purchase')
-      return NextResponse.json({ error: 'Failed to fetch purchase' }, { status: 500 })
+      return createErrorResponse('Failed to fetch purchase', 500)
     }
 
     // ✅ V2: Validate data structure with type guards
     if (!isRecord(data)) {
       apiLogger.error({ data }, 'Invalid purchase data structure')
-      return NextResponse.json({ error: 'Invalid data structure' }, { status: 500 })
+      return createErrorResponse('Invalid data structure', 500)
     }
 
     // ✅ V2: Safe extraction of joined ingredient data
@@ -81,13 +82,10 @@ async function getHandler(
       }
     }
 
-    return NextResponse.json(data)
+    return createSuccessResponse(data)
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/ingredient-purchases/[id]')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
+    return createErrorResponse(getErrorMessage(error), 500)
   }
 }
 
@@ -101,7 +99,7 @@ async function putHandler(
     
     // Validate UUID format
     if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid purchase ID format' }, { status: 400 })
+      return createErrorResponse('Invalid purchase ID format', 400)
     }
     
     const supabase = await createClient()
@@ -109,7 +107,7 @@ async function putHandler(
     // Authenticate
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return createErrorResponse('Unauthorized', 401)
     }
 
     const body = await request.json() as IngredientPurchaseUpdate
@@ -123,7 +121,7 @@ async function putHandler(
       .single()
 
     if (fetchError || !existingPurchase) {
-      return NextResponse.json({ error: 'Purchase not found' }, { status: 404 })
+      return createErrorResponse('Purchase not found', 404)
     }
 
     // Calculate stock adjustment
@@ -161,7 +159,7 @@ async function putHandler(
 
     if (updateError) {
       apiLogger.error({ error: updateError }, 'Error updating purchase')
-      return NextResponse.json({ error: 'Failed to update purchase' }, { status: 500 })
+      return createErrorResponse('Failed to update purchase', 500)
     }
 
     // ✅ FIX: Let database trigger handle stock update
@@ -213,13 +211,10 @@ async function putHandler(
         .insert(stockLog)
     }
 
-    return NextResponse.json(updatedPurchase)
+    return createSuccessResponse(updatedPurchase)
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/ingredient-purchases/[id]')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
+    return createErrorResponse(getErrorMessage(error), 500)
   }
 }
 
@@ -233,7 +228,7 @@ async function deleteHandler(
     
     // Validate UUID format
     if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid purchase ID format' }, { status: 400 })
+      return createErrorResponse('Invalid purchase ID format', 400)
     }
     
     const supabase = await createClient()
@@ -241,7 +236,7 @@ async function deleteHandler(
     // Authenticate
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return createErrorResponse('Unauthorized', 401)
     }
 
     // Get purchase details
@@ -253,7 +248,7 @@ async function deleteHandler(
       .single()
 
     if (fetchError || !purchase) {
-      return NextResponse.json({ error: 'Purchase not found' }, { status: 404 })
+      return createErrorResponse('Purchase not found', 404)
     }
 
     // Get current stock before reversal
@@ -282,7 +277,7 @@ async function deleteHandler(
 
     if (transactionError) {
       apiLogger.error({ error: transactionError }, 'Failed to create reversal transaction')
-      return NextResponse.json({ error: 'Failed to revert stock' }, { status: 500 })
+      return createErrorResponse('Failed to revert stock', 500)
     }
 
     // Log stock reversal for audit trail
@@ -310,16 +305,13 @@ async function deleteHandler(
 
     if (deleteError) {
       apiLogger.error({ error: deleteError }, 'Error deleting purchase')
-      return NextResponse.json({ error: 'Failed to delete purchase' }, { status: 500 })
+      return createErrorResponse('Failed to delete purchase', 500)
     }
 
-    return NextResponse.json({ message: 'Purchase deleted successfully' })
+    return createSuccessResponse(null, 'Purchase deleted successfully')
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/ingredient-purchases/[id]')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
+    return createErrorResponse(getErrorMessage(error), 500)
   }
 }
 

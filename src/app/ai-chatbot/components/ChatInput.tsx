@@ -26,8 +26,8 @@ export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInp
   }
 
   return (
-    <div className="p-4 bg-muted/30">
-      <div className="max-w-4xl mx-auto space-y-3">
+    <div className="border-t border-border bg-background px-4 py-4">
+      <div className="space-y-3">
         {/* Quick Suggestions */}
         <SuggestionChips
           onSuggestionClick={handleSuggestionClick}
@@ -40,7 +40,7 @@ export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInp
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Tanyakan apa saja tentang bisnis UMKM kuliner Anda..."
-            className="flex-1 bg-background"
+            className="flex-1"
             disabled={isLoading}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey && input.trim()) {
@@ -61,7 +61,7 @@ export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInp
             )}
           </Button>
         </form>
-        
+
         <p className="text-xs text-center text-muted-foreground">
           Tekan Enter untuk kirim pesan
         </p>

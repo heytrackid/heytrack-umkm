@@ -60,7 +60,7 @@ export function useInstantNavigation() {
       path: '/ingredients',
       queryKeys: [['ingredients', 'list']],
       prefetchFn: async () => {
-        const response = await fetch('/api/ingredients', {
+        const response = await fetch('/api/ingredients?page=1&limit=10', {
           credentials: 'include', // Include cookies for authentication
         })
         return response.json()

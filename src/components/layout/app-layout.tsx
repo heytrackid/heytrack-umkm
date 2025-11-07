@@ -63,7 +63,6 @@ const mainTabs = [
     label: 'Manajemen',
     icon: Users,
     items: [
-      { label: 'Kategori Produk', href: '/categories', icon: Package },
       { label: 'Pelanggan', href: '/customers', icon: Users }
     ]
   },

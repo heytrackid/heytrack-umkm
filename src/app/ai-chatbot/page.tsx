@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useState, Suspense, useCallback, useEffect } from 'react'
 
 import AppLayout from '@/components/layout/app-layout'
-import { PageHeader } from '@/components/shared'
 import { useAuth } from '@/providers/AuthProvider'
 
 import { useChatMessages, useAIService } from './hooks'
@@ -23,11 +22,7 @@ const MessageList = dynamic(() => import('./components').then(mod => ({ default:
   loading: () => <div className="flex-1 bg-muted animate-pulse" />
 })
 
-const chatbotBreadcrumbs = [
-  { label: 'Dashboard', href: '/' },
-  { label: 'AI Assistant' },
-  { label: 'Chatbot' }
-]
+
 
 const AIChatbotPage = (): JSX.Element => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
@@ -113,51 +108,37 @@ const AIChatbotPage = (): JSX.Element => {
 
   return (
     <AppLayout pageTitle="AI Chatbot">
-      {/* Container utama - full height minus navbar */}
+      {/* Full viewport chat container */}
       <div className="flex flex-col h-[calc(100vh-4rem)]">
-        {/* Header - fixed */}
-        <div className="flex-shrink-0 p-6 pb-0">
-          <PageHeader
-            title="AI Chatbot"
-            description="Asisten AI yang paham bisnis Anda - terhubung langsung dengan data real-time"
-            breadcrumbs={chatbotBreadcrumbs}
-          />
+        {/* Minimal header */}
+        <div className="flex-shrink-0">
+          <Suspense fallback={<div className="h-12 bg-muted animate-pulse" />}>
+            <ChatHeader />
+          </Suspense>
         </div>
 
-        {/* Chat Container - flex-1 untuk take remaining space */}
-        <div className="flex-1 p-6 min-h-0">
-          <div className="flex flex-col rounded-xl border border-border bg-card shadow-sm h-full">
-            {/* Chat Header - fixed */}
-            <div className="flex-shrink-0">
-              <Suspense fallback={<div className="h-16 bg-muted animate-pulse rounded-t-xl" />}>
-                <ChatHeader />
-              </Suspense>
-            </div>
+        {/* Messages area - takes remaining height */}
+        <div className="flex-1 overflow-hidden relative">
+          <Suspense fallback={<div className="flex-1 bg-muted animate-pulse" />}>
+            <MessageList
+              messages={messages}
+              isLoading={isLoading}
+              scrollAreaRef={scrollAreaRef}
+              onSuggestionClick={handleSuggestionClick}
+            />
+          </Suspense>
+        </div>
 
-            {/* Messages area - SCROLLABLE dengan fixed height */}
-            <div className="flex-1 overflow-hidden relative">
-              <Suspense fallback={<div className="flex-1 bg-muted animate-pulse" />}>
-                <MessageList
-                  messages={messages}
-                  isLoading={isLoading}
-                  scrollAreaRef={scrollAreaRef}
-                  onSuggestionClick={handleSuggestionClick}
-                />
-              </Suspense>
-            </div>
-
-            {/* Input area - fixed at bottom */}
-            <div className="flex-shrink-0 border-t">
-              <Suspense fallback={<div className="h-20 bg-muted animate-pulse" />}>
-                <ChatInput
-                  input={input}
-                  setInput={setInput}
-                  onSendMessage={handleSendMessage}
-                  isLoading={isLoading}
-                />
-              </Suspense>
-            </div>
-          </div>
+        {/* Input area - fixed at bottom */}
+        <div className="flex-shrink-0">
+          <Suspense fallback={<div className="h-20 bg-muted animate-pulse" />}>
+            <ChatInput
+              input={input}
+              setInput={setInput}
+              onSendMessage={handleSendMessage}
+              isLoading={isLoading}
+            />
+          </Suspense>
         </div>
       </div>
     </AppLayout>

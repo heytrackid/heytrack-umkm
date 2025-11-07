@@ -39,8 +39,8 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
-import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/supabase'
 import { useToast } from '@/hooks/use-toast'
+import { useOperationalCosts, useDeleteOperationalCost } from '@/hooks/useOperationalCosts'
 import { usePagination } from '@/hooks/usePagination'
 import { useResponsive } from '@/hooks/useResponsive'
 
@@ -109,12 +109,10 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
     const { formatCurrency } = useSettings()
 
     // Use query hook for fetching data
-    const { data: costs, loading, refetch } = useSupabaseQuery('operational_costs', {
-        orderBy: { column: 'created_at', ascending: false },
-    })
+    const { data: costs, isLoading: loading, refetch } = useOperationalCosts()
 
-    // Use CRUD hook for operations
-    const { delete: deleteCost } = useSupabaseCRUD('operational_costs')
+    // Use delete mutation
+    const deleteCostMutation = useDeleteOperationalCost()
     const { toast } = useToast()
     const { isMobile } = useResponsive()
     const { confirm, ConfirmDialog } = useConfirm()
@@ -212,22 +210,13 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
         if (!selectedCost) { return }
 
         try {
-            await deleteCost(selectedCost['id'])
-            toast({
-                title: 'Biaya dihapus',
-                description: `${selectedCost.description} berhasil dihapus`,
-            })
+            await deleteCostMutation.mutateAsync(selectedCost['id'])
             setIsDeleteDialogOpen(false)
             setSelectedCost(null)
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Gagal menghapus biaya'
-            toast({
-                title: 'Error',
-                description: message,
-                variant: 'destructive',
-            })
+        } catch (_error) {
+            // Error handling is done in the mutation hook
         }
-    }, [selectedCost, deleteCost, toast])
+    }, [selectedCost, deleteCostMutation])
 
     const handleQuickSetup = useCallback(async () => {
         try {

@@ -52,6 +52,7 @@ import { useResponsive } from '@/hooks/useResponsive'
 import type { Row } from '@/types/database'
 
 import { MobileRecipeCard } from './MobileRecipeCard'
+import { RecipeFormDialog } from './RecipeFormDialog'
 import { RecipeStatsCards } from './RecipeStatsCards'
 
 
@@ -84,6 +85,8 @@ export const EnhancedRecipesPage = (): JSX.Element => {
     // Modal states
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
+    const [showAddDialog, setShowAddDialog] = useState(false)
+    const [editingRecipe, setEditingRecipe] = useState<Recipe | undefined>(undefined)
 
     // Filter states
     const [searchTerm, setSearchTerm] = useState('')
@@ -168,9 +171,15 @@ export const EnhancedRecipesPage = (): JSX.Element => {
         router.push(`/recipes/${recipe['id']}`)
     }, [router])
 
+    const handleAdd = useCallback(() => {
+        setEditingRecipe(undefined)
+        setShowAddDialog(true)
+    }, [])
+
     const handleEdit = useCallback((recipe: Recipe) => {
-        router.push(`/recipes/${recipe['id']}/edit`)
-    }, [router])
+        setEditingRecipe(recipe)
+        setShowAddDialog(true)
+    }, [])
 
     const handleDelete = useCallback((recipe: Recipe) => {
         setSelectedRecipe(recipe)
@@ -280,7 +289,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                 description="Kelola resep dan hitung HPP dengan sistem otomatis"
                 action={
                     <div className="flex gap-2">
-                        <Button onClick={() => router.push('/recipes/new')}>
+                        <Button onClick={handleAdd}>
                             <Plus className="h-4 w-4 mr-2" />
                             Resep Baru
                         </Button>
@@ -399,7 +408,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                             actions={[
                                 {
                                     label: 'Buat Resep Baru',
-                                    onClick: () => router.push('/recipes/new'),
+                                    onClick: handleAdd,
                                     icon: Plus
                                 },
                                 {
@@ -569,10 +578,17 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                 itemName={selectedRecipe?.name ?? ''}
             />
 
+            {/* Recipe Form Dialog */}
+            <RecipeFormDialog
+                open={showAddDialog}
+                onOpenChange={setShowAddDialog}
+                recipe={editingRecipe}
+            />
+
             {/* Floating Action Button for Mobile */}
             {isMobile && (
                 <SimpleFAB
-                    onClick={() => router.push('/recipes/new')}
+                    onClick={handleAdd}
                     icon={<Plus className="h-6 w-6" />}
                 />
             )}

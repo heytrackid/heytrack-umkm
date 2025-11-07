@@ -27,9 +27,7 @@ import { apiLogger } from '@/lib/logger'
 
 
 // Import components normally - they're lightweight
-import type { CustomersTable as CustomersTableType } from '@/types/database'
-
-import CustomerForm from './CustomerForm'
+import { CustomerDialog } from './CustomerDialog'
 import CustomerSearchFilters from './CustomerSearchFilters'
 import CustomersTable from './CustomersTable'
 import CustomerStats from './CustomerStats'
@@ -40,17 +38,17 @@ const CustomersLayout = (): JSX.Element => {
   const router = useRouter()
   const { isMobile } = useResponsive()
   const { formatCurrency } = useSettings()
-  const [searchTerm, setSearchTerm] = useState('')
-  const debouncedSearchTerm = useDebounce(searchTerm, 300)
-  const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
-  const [selectedItems, setSelectedItems] = useState<string[]>([])
-  const [pageSize, setPageSize] = useState(12)
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
+   const [searchTerm, setSearchTerm] = useState('')
+   const debouncedSearchTerm = useDebounce(searchTerm, 300)
+   const [selectedItems, setSelectedItems] = useState<string[]>([])
+   const [pageSize, setPageSize] = useState(12)
+   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const { setLoading, isLoading } = useLoading({
     [LOADING_KEYS.FETCH_CUSTOMERS]: true
   })
 
-  const [customers, setCustomers] = useState<CustomersTableType[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
   const { toast } = useToast()
   const { confirm } = useConfirm()
 
@@ -186,12 +184,11 @@ const CustomersLayout = (): JSX.Element => {
     })
    }, [selectedItems, filteredCustomers, toast])
 
-  // Individual action handlers
-  const handleEditCustomer = (customer: Customer) => {
-    apiLogger.info({ customer }, 'Edit customer')
-    setEditingCustomer(customer)
-    setCurrentView('edit')
-  }
+   // Individual action handlers
+   const handleEditCustomer = (customer: Customer) => {
+     apiLogger.info({ customer }, 'Edit customer')
+     setEditingCustomer(customer)
+   }
 
   const handleDeleteCustomer = async (customer: Customer) => {
     const confirmed = await confirm({
@@ -229,16 +226,11 @@ const CustomersLayout = (): JSX.Element => {
     router.push(`/customers/${customer['id']}`)
   }, [router])
 
-  const handleFormSuccess = useCallback(() => {
-    setCurrentView('list')
-    setEditingCustomer(null)
-    void fetchCustomers()
-  }, [fetchCustomers])
-
-  const handleFormCancel = useCallback(() => {
-    setCurrentView('list')
-    setEditingCustomer(null)
-  }, [])
+   const handleFormSuccess = useCallback(() => {
+     setIsAddDialogOpen(false)
+     setEditingCustomer(null)
+     void fetchCustomers()
+   }, [fetchCustomers])
 
   // Remove redundant auth loading state - handled by middleware
 
@@ -261,29 +253,15 @@ const CustomersLayout = (): JSX.Element => {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
-              <Button onClick={() => setCurrentView('add')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah Pelanggan
-              </Button>
+               <Button onClick={() => setIsAddDialogOpen(true)}>
+                 <Plus className="h-4 w-4 mr-2" />
+                 Tambah Pelanggan
+               </Button>
             </div>
           }
         />
 
-        {/* View Switcher */}
-        <div className="flex gap-2 mb-4">
-          <Button
-            variant={currentView === 'list' ? 'default' : 'outline'}
-            onClick={() => setCurrentView('list')}
-          >
-            List View
-          </Button>
-          <Button
-            variant={currentView === 'add' ? 'default' : 'outline'}
-            onClick={() => setCurrentView('add')}
-          >
-            Add Customer
-          </Button>
-        </div>
+
 
         {/* Customer Stats - Lazy Loaded */}
         <CustomerStats
@@ -304,46 +282,26 @@ const CustomersLayout = (): JSX.Element => {
           isLoading={isLoading(LOADING_KEYS.FETCH_CUSTOMERS)}
         />
 
-        {/* Conditional rendering based on current view */}
-        {currentView === 'list' && (
-          <>
-            {/* Customers Table */}
-            {isLoading(LOADING_KEYS.FETCH_CUSTOMERS) ? (
-              <CustomersTableSkeleton rows={5} />
-            ) : (
-              <CustomersTable
-                customers={paginatedCustomers}
-                selectedItems={selectedItems}
-                onSelectItem={handleSelectItem}
-                onSelectAll={handleSelectAll}
-                onView={handleViewCustomer}
-                onEdit={handleEditCustomer}
-                onDelete={handleDeleteCustomer}
-                onAddNew={() => setCurrentView('add')}
-                formatCurrency={formatCurrency}
-                isMobile={isMobile}
-              />
-            )}
-          </>
-        )}
+         {/* Customers Table */}
+         {isLoading(LOADING_KEYS.FETCH_CUSTOMERS) ? (
+           <CustomersTableSkeleton rows={5} />
+         ) : (
+           <CustomersTable
+             customers={paginatedCustomers}
+             selectedItems={selectedItems}
+             onSelectItem={handleSelectItem}
+             onSelectAll={handleSelectAll}
+             onView={handleViewCustomer}
+             onEdit={handleEditCustomer}
+             onDelete={handleDeleteCustomer}
+             onAddNew={() => setIsAddDialogOpen(true)}
+             formatCurrency={formatCurrency}
+             isMobile={isMobile}
+           />
+         )}
 
-        {currentView === 'add' && (
-          <CustomerForm
-            onSuccess={handleFormSuccess}
-            onCancel={handleFormCancel}
-          />
-        )}
-
-        {currentView === 'edit' && (
-          <CustomerForm
-            customer={editingCustomer}
-            onSuccess={handleFormSuccess}
-            onCancel={handleFormCancel}
-          />
-        )}
-
-        {/* Pagination */}
-        {currentView === 'list' && filteredCustomers.length > 0 && (
+         {/* Pagination */}
+         {filteredCustomers.length > 0 && (
           <SimplePagination
             page={pagination.page}
             pageSize={pagination.pageSize}
@@ -381,6 +339,24 @@ const CustomersLayout = (): JSX.Element => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Customer Dialogs */}
+        <CustomerDialog
+          open={isAddDialogOpen}
+          onOpenChange={setIsAddDialogOpen}
+          onSuccess={handleFormSuccess}
+        />
+
+        <CustomerDialog
+          open={Boolean(editingCustomer)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingCustomer(null)
+            }
+          }}
+          customer={editingCustomer}
+          onSuccess={handleFormSuccess}
+        />
       </div>
     </AppLayout>
   )

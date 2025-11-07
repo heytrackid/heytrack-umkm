@@ -13,26 +13,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { useResponsive } from '@/hooks/useResponsive'
 
-import type { CustomersTable } from '@/types/database'
+import type { Row } from '@/types/database'
+type CustomerRow = Row<'customers'>
 
 interface CustomersTableProps {
-  customers: CustomersTable[]
+  customers: CustomerRow[]
   selectedItems: string[]
   onSelectItem: (itemId: string) => void
   onSelectAll: () => void
-  onView: (customer: CustomersTable) => void
-  onEdit: (customer: CustomersTable) => void
-  onDelete: (customer: CustomersTable) => void
+  onView: (customer: CustomerRow) => void
+  onEdit: (customer: CustomerRow) => void
+  onDelete: (customer: CustomerRow) => void
   onAddNew: () => void
   formatCurrency: (amount: number) => string
   isMobile: boolean
 }
 
 interface MobileCustomerCardProps {
-  customer: CustomersTable
-  onView: (customer: CustomersTable) => void
-  onEdit: (customer: CustomersTable) => void
-  onDelete: (customer: CustomersTable) => void
+  customer: CustomerRow
+  onView: (customer: CustomerRow) => void
+  onEdit: (customer: CustomerRow) => void
+  onDelete: (customer: CustomerRow) => void
   formatCurrency: (amount: number) => string
 }
 

@@ -19,9 +19,8 @@ export const HEAVY_ROUTES = [
   // Orders pages
   '/orders/whatsapp-templates',
   
-  // Feature-rich pages
-  '/categories',
-  '/customers',
+   // Feature-rich pages
+   '/customers',
   '/finance'
 ] as const
 

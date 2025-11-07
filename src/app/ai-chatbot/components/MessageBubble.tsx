@@ -85,24 +85,38 @@ export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps
 
   return (
     <div className={cn(
-      "flex gap-3",
-      message.role === 'user' ? "justify-end" : "justify-start"
+      "w-full",
+      message.role === 'user' ? "flex justify-end" : "flex justify-start"
     )}>
-      {message.role === 'assistant' && (
-        <Avatar className="w-8 h-8">
-          <AvatarFallback className="bg-primary/10">
-            <Bot className="h-4 w-4 text-primary" />
-          </AvatarFallback>
-        </Avatar>
-      )}
-
       <div className={cn(
-        "max-w-[80%] rounded-lg p-3",
-        message.role === 'user'
-          ? "bg-primary text-primary-foreground"
-          : "bg-muted"
+        "max-w-[80%]",
+        message.role === 'user' ? "ml-12" : "mr-12"
       )}>
-        <p className="text-sm leading-relaxed">{message.content}</p>
+        {message.role === 'assistant' && (
+          <div className="flex items-start gap-3 mb-2">
+            <Avatar className="w-8 h-8 flex-shrink-0">
+              <AvatarFallback className="bg-primary/10">
+                <Bot className="h-4 w-4 text-primary" />
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm leading-relaxed text-foreground">{message.content}</p>
+            </div>
+          </div>
+        )}
+
+        {message.role === 'user' && (
+          <div className="flex items-start gap-3 mb-2 justify-end">
+            <div className="flex-1 min-w-0 text-right">
+              <p className="text-sm leading-relaxed text-foreground">{message.content}</p>
+            </div>
+            <Avatar className="w-8 h-8 flex-shrink-0">
+              <AvatarFallback>
+                <User className="h-4 w-4" />
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        )}
 
         {/* Display data if available */}
         {renderMessageData(message['data'])}
@@ -127,14 +141,6 @@ export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps
           </div>
         )}
       </div>
-
-      {message.role === 'user' && (
-        <Avatar className="w-8 h-8">
-          <AvatarFallback>
-            <User className="h-4 w-4" />
-          </AvatarFallback>
-        </Avatar>
-      )}
     </div>
   )
 }

@@ -28,6 +28,9 @@ type Ingredient = Row<'ingredients'>
 interface RecipeFormPageProps {
     mode: 'create' | 'edit'
     recipeId?: string
+    onSuccess?: () => void
+    onCancel?: () => void
+    isDialog?: boolean
 }
 
 interface RecipeIngredientForm {
@@ -38,7 +41,7 @@ interface RecipeIngredientForm {
     notes?: string
 }
 
-export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
+export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog = false }: RecipeFormPageProps) => {
     const router = useRouter()
     const { toast } = useToast()
 
@@ -189,7 +192,11 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                     description: `${formData.name} berhasil dibuat dengan ${recipeIngredients.length} bahan`,
                 })
 
-                router.push(`/recipes/${newRecipe.id}`)
+                if (isDialog && onSuccess) {
+                    onSuccess()
+                } else {
+                    router.push(`/recipes/${newRecipe.id}`)
+                }
             } else if (recipeId) {
                 // Use API route for update (handles ingredients atomically)
                 const response = await fetch(`/api/recipes/${recipeId}`, {
@@ -217,7 +224,11 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                     description: `${formData.name} berhasil diperbarui dengan ${recipeIngredients.length} bahan`,
                 })
 
-                router.push(`/recipes/${recipeId}`)
+                if (isDialog && onSuccess) {
+                    onSuccess()
+                } else {
+                    router.push(`/recipes/${recipeId}`)
+                }
             }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : 'Gagal menyimpan resep'
@@ -268,33 +279,37 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
 
     return (
         <div className="space-y-6">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <button onClick={() => router.push('/recipes')} className="hover:text-foreground">
-                    Resep Produk
-                </button>
-                <span>/</span>
-                <span className="text-foreground font-medium">
-                    {mode === 'create' ? 'Tambah Resep Baru' : 'Edit Resep'}
-                </span>
-            </div>
+            {!isDialog && (
+                <>
+                    {/* Breadcrumb */}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <button onClick={() => router.push('/recipes')} className="hover:text-foreground">
+                            Resep Produk
+                        </button>
+                        <span>/</span>
+                        <span className="text-foreground font-medium">
+                            {mode === 'create' ? 'Tambah Resep Baru' : 'Edit Resep'}
+                        </span>
+                    </div>
 
-            {/* Header */}
-            <div className="flex items-center gap-3">
-                <Button variant="ghost" size="sm" onClick={() => router.push('/recipes')}>
-                    <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                    <h1 className="text-3xl font-bold">
-                        {mode === 'create' ? 'Tambah Resep Baru' : 'Edit Resep'}
-                    </h1>
-                    <p className="text-muted-foreground mt-1">
-                        {mode === 'create'
-                            ? 'Buat resep baru untuk produk Anda'
-                            : 'Perbarui informasi resep'}
-                    </p>
-                </div>
-            </div>
+                    {/* Header */}
+                    <div className="flex items-center gap-3">
+                        <Button variant="ghost" size="sm" onClick={() => router.push('/recipes')}>
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                        <div>
+                            <h1 className="text-3xl font-bold">
+                                {mode === 'create' ? 'Tambah Resep Baru' : 'Edit Resep'}
+                            </h1>
+                            <p className="text-muted-foreground mt-1">
+                                {mode === 'create'
+                                    ? 'Buat resep baru untuk produk Anda'
+                                    : 'Perbarui informasi resep'}
+                            </p>
+                        </div>
+                    </div>
+                </>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Basic Info */}
@@ -492,14 +507,26 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
 
                 {/* Actions */}
                 <div className="flex justify-end gap-3">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => router.push('/recipes')}
-                        disabled={loading}
-                    >
-                        Batal
-                    </Button>
+                    {!isDialog && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.push('/recipes')}
+                            disabled={loading}
+                        >
+                            Batal
+                        </Button>
+                    )}
+                    {isDialog && onCancel && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onCancel}
+                            disabled={loading}
+                        >
+                            Batal
+                        </Button>
+                    )}
                     <Button type="submit" disabled={loading}>
                         <Save className="h-4 w-4 mr-2" />
                         {loading ? 'Menyimpan...' : mode === 'create' ? 'Buat Resep' : 'Simpan Perubahan'}

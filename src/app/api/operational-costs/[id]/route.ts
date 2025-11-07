@@ -103,13 +103,15 @@ async function putHandler(
     const updatePayload: Update<'operational_costs'> = {
       ...(validatedData.category !== undefined && { category: validatedData.category }),
       ...(validatedData.amount !== undefined && { amount: validatedData.amount }),
-      ...(validatedData.description !== undefined && { description: validatedData.description ?? '' }),
-      ...(validatedData.date !== undefined && { date: validatedData.date ?? null }),
-      ...(validatedData.is_recurring !== undefined && { recurring: validatedData.is_recurring }),
-      ...(validatedData.recurring_frequency !== undefined && { frequency: validatedData.recurring_frequency }),
-      ...(validatedData.vendor_name !== undefined && { supplier: validatedData.vendor_name }),
-      ...(validatedData.invoice_number !== undefined && { reference: validatedData.invoice_number }),
-      ...(validatedData.is_paid !== undefined && { payment_method: validatedData.is_paid ? 'CASH' : null }),
+      ...(validatedData.description !== undefined && { description: validatedData.description }),
+      ...(validatedData.date !== undefined && { date: validatedData.date }),
+      ...(validatedData.recurring !== undefined && { recurring: validatedData.recurring }),
+      ...(validatedData.frequency !== undefined && { frequency: validatedData.frequency }),
+      ...(validatedData.supplier !== undefined && { supplier: validatedData.supplier }),
+      ...(validatedData.reference !== undefined && { reference: validatedData.reference }),
+      ...(validatedData.payment_method !== undefined && { payment_method: validatedData.payment_method }),
+      ...(validatedData.notes !== undefined && { notes: validatedData.notes }),
+      ...(validatedData.is_active !== undefined && { is_active: validatedData.is_active }),
       updated_at: new Date().toISOString()
     }
     const { data, error } = await supabase

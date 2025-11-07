@@ -48,20 +48,20 @@ export const DailySalesSummaryInsertSchema = z.object({
 
 export const DailySalesSummaryUpdateSchema = DailySalesSummaryInsertSchema.partial()
 
-// Operational cost schemas (maps to expenses table)
+// Operational cost schemas (maps to operational_costs table)
 export const OperationalCostInsertSchema = z.object({
-  date: DateStringSchema,
-  category: z.enum(['LABOR', 'UTILITIES', 'RENT', 'MAINTENANCE', 'SUPPLIES', 'MARKETING', 'OTHER']),
-  subcategory: z.string().max(100).optional().nullable(),
   amount: NonNegativeNumberSchema,
-  description: z.string().max(500).optional().nullable(),
-  is_recurring: z.boolean().default(false).optional(),
-  recurring_frequency: z.enum(['daily', 'weekly', 'monthly', 'quarterly', 'yearly']).optional().nullable(),
-  vendor_name: z.string().max(255).optional().nullable(),
-  invoice_number: z.string().max(100).optional().nullable(),
-  payment_due_date: DateStringSchema.optional().nullable(),
-  is_paid: z.boolean().default(false).optional(),
+  category: z.enum(['utilities', 'rent', 'staff', 'transport', 'communication', 'insurance', 'maintenance', 'other']),
+  description: z.string().min(1).max(500),
+  frequency: z.enum(['daily', 'weekly', 'monthly', 'yearly']).optional().nullable(),
+  recurring: z.boolean().optional(),
   notes: z.string().max(1000).optional().nullable(),
+  date: DateStringSchema.optional().nullable(),
+  payment_method: z.string().max(100).optional().nullable(),
+  supplier: z.string().max(255).optional().nullable(),
+  reference: z.string().max(100).optional().nullable(),
+  is_active: z.boolean().optional(),
+  user_id: UUIDSchema,
 })
 
 export const OperationalCostUpdateSchema = OperationalCostInsertSchema.partial()

@@ -14,11 +14,9 @@ import {
   isValid
 } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { CalendarIcon, Loader2 } from 'lucide-react'
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
@@ -57,14 +55,14 @@ interface PartialDateRange {
 
 // Enhanced presets with icons and better organization
 const PRESETS = [
-  { id: 'today', label: 'Hari Ini', icon: '📅', getValue: () => ({ from: new Date(), to: new Date() }) },
-  { id: 'yesterday', label: 'Kemarin', icon: '📅', getValue: () => ({ from: subDays(new Date(), 1), to: subDays(new Date(), 1) }) },
-  { id: 'last7days', label: '7 Hari Terakhir', icon: '📊', getValue: () => ({ from: subDays(new Date(), 6), to: new Date() }) },
-  { id: 'last30days', label: '30 Hari Terakhir', icon: '📊', getValue: () => ({ from: subDays(new Date(), 29), to: new Date() }) },
-  { id: 'thisWeek', label: 'Minggu Ini', icon: '📅', getValue: () => ({ from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: endOfWeek(new Date(), { weekStartsOn: 1 }) }) },
-  { id: 'thisMonth', label: 'Bulan Ini', icon: '📅', getValue: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) }) },
-  { id: 'lastMonth', label: 'Bulan Lalu', icon: '📅', getValue: () => ({ from: startOfMonth(subMonths(new Date(), 1)), to: endOfMonth(subMonths(new Date(), 1)) }) },
-  { id: 'custom', label: 'Custom Range', icon: '⚙️', getValue: () => undefined }
+  { id: 'today', label: 'Hari Ini', getValue: () => ({ from: new Date(), to: new Date() }) },
+  { id: 'yesterday', label: 'Kemarin', getValue: () => ({ from: subDays(new Date(), 1), to: subDays(new Date(), 1) }) },
+  { id: 'last7days', label: '7 Hari Terakhir', getValue: () => ({ from: subDays(new Date(), 6), to: new Date() }) },
+  { id: 'last30days', label: '30 Hari Terakhir', getValue: () => ({ from: subDays(new Date(), 29), to: new Date() }) },
+  { id: 'thisWeek', label: 'Minggu Ini', getValue: () => ({ from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: endOfWeek(new Date(), { weekStartsOn: 1 }) }) },
+  { id: 'thisMonth', label: 'Bulan Ini', getValue: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) }) },
+  { id: 'lastMonth', label: 'Bulan Lalu', getValue: () => ({ from: startOfMonth(subMonths(new Date(), 1)), to: endOfMonth(subMonths(new Date(), 1)) }) },
+  { id: 'custom', label: 'Custom Range', getValue: () => undefined }
 ]
 
 // Default range: 7 hari terakhir
@@ -103,7 +101,7 @@ export const DateRangePicker = ({
   className,
   pageKey,
   maxPastMonths = 12,
-  timezone: _timezone = 'Asia/Jakarta'
+  timezone = 'Asia/Jakarta'
 }: DateRangePickerProps) => {
   const { isMobile } = useResponsive()
   const [isOpen, setIsOpen] = useState(false)
@@ -122,6 +120,18 @@ export const DateRangePicker = ({
   const [endDateStr, setEndDateStr] = useState('')
   const [errors, setErrors] = useState<{ start?: string; end?: string }>({})
   const [lastUsedPreset, setLastUsedPreset] = useState<string | null>(null)
+  const timezoneLabel = useMemo(() => {
+    try {
+      const formatter = new Intl.DateTimeFormat('id-ID', {
+        timeZone: timezone,
+        timeZoneName: 'short'
+      })
+      const tzPart = formatter.formatToParts(new Date()).find(part => part.type === 'timeZoneName')
+      return tzPart?.value ?? timezone
+    } catch {
+      return timezone
+    }
+  }, [timezone])
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -370,18 +380,18 @@ export const DateRangePicker = ({
       id="date-range-picker"
       variant="outline"
       className={cn(
-        'w-full justify-start text-left font-normal',
+        'w-full items-center justify-between gap-4 text-left font-normal',
         !range?.from && 'text-muted-foreground'
       )}
       aria-label="Pilih rentang tanggal"
       aria-expanded={isOpen}
       aria-haspopup="dialog"
     >
-      <CalendarIcon className="mr-2 h-4 w-4" />
-      <span className="truncate">{formatRangeDisplay()}</span>
-      <Badge variant="outline" className="ml-auto text-xs">
-        UTC+7
-      </Badge>
+      <div className="flex flex-col">
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">Rentang tanggal</span>
+        <span className="truncate font-medium text-foreground">{formatRangeDisplay()}</span>
+      </div>
+      <span className="text-xs text-muted-foreground">{timezoneLabel}</span>
     </Button>
   )
 
@@ -401,8 +411,8 @@ export const DateRangePicker = ({
           </SheetHeader>
 
           {/* Preset Chips - Horizontal Scroll */}
-          <div className="flex gap-2 overflow-x-auto pb-2 px-1" role="tablist">
-            {orderedPresets.map(({ id, icon, label }) => (
+          <div className="flex gap-2 overflow-x-auto pb-3 px-1" role="tablist">
+            {orderedPresets.map(({ id, label }) => (
               <Button
                 key={id}
                 variant={selectedPreset === id ? "default" : "outline"}
@@ -412,14 +422,13 @@ export const DateRangePicker = ({
                 role="tab"
                 aria-selected={selectedPreset === id}
               >
-                <span className="mr-1">{icon}</span>
                 {label}
               </Button>
             ))}
           </div>
 
           {/* Calendar */}
-          <div className="flex-1 overflow-y-auto" ref={calendarRef}>
+          <div className="flex-1 overflow-y-auto rounded-xl border bg-background p-3" ref={calendarRef}>
             <Calendar
               mode="range"
               numberOfMonths={1}
@@ -433,9 +442,10 @@ export const DateRangePicker = ({
           </div>
 
           {/* Input Controls */}
-          <div className="space-y-2 py-4 border-t">
-            <div className="grid grid-cols-2 gap-2">
-              <div>
+          <div className="space-y-3 py-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-muted-foreground">Mulai</span>
                 <Input
                   placeholder="Mulai"
                   value={startDateStr}
@@ -450,7 +460,8 @@ export const DateRangePicker = ({
                   </p>
                 )}
               </div>
-              <div>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-muted-foreground">Selesai</span>
                 <Input
                   placeholder="Selesai"
                   value={endDateStr}
@@ -469,8 +480,8 @@ export const DateRangePicker = ({
           </div>
 
           {/* Footer */}
-          <SheetFooter className="flex-row gap-2">
-            <Button variant="ghost" onClick={handleReset} disabled={isLoading}>
+          <SheetFooter className="flex-row justify-between gap-2">
+            <Button variant="ghost" onClick={handleReset} disabled={isLoading} className="flex-1">
               Reset
             </Button>
             <Button
@@ -478,14 +489,7 @@ export const DateRangePicker = ({
               disabled={!range?.from || !range?.to || Object.keys(errors).length > 0 || isLoading}
               className="flex-1"
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Menerapkan...
-                </>
-              ) : (
-                'Terapkan'
-              )}
+              {isLoading ? 'Menerapkan…' : 'Terapkan'}
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -500,42 +504,46 @@ export const DateRangePicker = ({
         <PopoverTrigger asChild>
           {triggerButton}
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <div className="flex">
+        <PopoverContent className="w-[min(90vw,740px)] p-4" align="start">
+          <div className="flex flex-col gap-4 md:grid md:grid-cols-[220px_minmax(320px,1fr)]">
             {/* Preset Sidebar */}
-            <div className="w-48 border-r p-4">
-              <h4 className="font-medium text-sm mb-3">Preset Cepat</h4>
-              <div className="space-y-2">
-                {orderedPresets.map(({ id, icon, label }) => (
+            <div className="rounded-2xl border bg-muted/30 p-3">
+              <h4 className="font-medium text-sm mb-2">Preset Cepat</h4>
+              <div className="flex flex-col gap-2">
+                {orderedPresets.map(({ id, label }) => (
                   <Button
                     key={id}
                     variant={selectedPreset === id ? "default" : "ghost"}
-                    className="w-full justify-start"
+                    className="w-full justify-between"
                     onClick={() => handlePresetSelect(id)}
                     aria-pressed={selectedPreset === id}
                   >
-                    <span className="mr-2">{icon}</span>
-                    {label}
+                    <span className="truncate">{label}</span>
+                    {selectedPreset === id && <span className="text-xs font-semibold">Dipilih</span>}
                   </Button>
                 ))}
               </div>
             </div>
 
-            {/* Calendar Area */}
-            <div className="p-4" ref={calendarRef}>
-              <Calendar
-                mode="range"
-                numberOfMonths={2}
-                selected={calendarRange}
-                onSelect={handleCalendarSelect}
-                locale={idLocale}
-                disabled={(date) => maxPastMonths ? isBefore(date, subMonths(new Date(), maxPastMonths)) : false}
-                aria-label="Kalender pemilihan rentang tanggal"
-              />
+            {/* Calendar + Controls */}
+            <div className="flex flex-col gap-4" ref={calendarRef}>
+              <div className="rounded-2xl border bg-background p-4 overflow-x-auto">
+                <Calendar
+                  mode="range"
+                  numberOfMonths={2}
+                  selected={calendarRange}
+                  onSelect={handleCalendarSelect}
+                  locale={idLocale}
+                  disabled={(date) => maxPastMonths ? isBefore(date, subMonths(new Date(), maxPastMonths)) : false}
+                  aria-label="Kalender pemilihan rentang tanggal"
+                  className="mx-auto"
+                />
+              </div>
 
               {/* Input Controls */}
-              <div className="flex gap-2 mt-4">
-                <div className="flex-1">
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-muted-foreground">Mulai</span>
                   <Input
                     placeholder="Mulai"
                     value={startDateStr}
@@ -545,12 +553,13 @@ export const DateRangePicker = ({
                     aria-describedby={errors.start ? "start-error" : undefined}
                   />
                   {errors.start && (
-                    <p id="start-error" className="text-xs text-red-600 mt-1" role="alert">
+                    <p id="start-error" className="text-xs text-red-600" role="alert">
                       {errors.start}
                     </p>
                   )}
                 </div>
-                <div className="flex-1">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-muted-foreground">Selesai</span>
                   <Input
                     placeholder="Selesai"
                     value={endDateStr}
@@ -560,7 +569,7 @@ export const DateRangePicker = ({
                     aria-describedby={errors.end ? "end-error" : undefined}
                   />
                   {errors.end && (
-                    <p id="end-error" className="text-xs text-red-600 mt-1" role="alert">
+                    <p id="end-error" className="text-xs text-red-600" role="alert">
                       {errors.end}
                     </p>
                   )}
@@ -568,7 +577,7 @@ export const DateRangePicker = ({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end gap-2 mt-4">
+              <div className="flex flex-wrap items-center justify-end gap-2">
                 <Button variant="ghost" onClick={handleReset} disabled={isLoading}>
                   Reset
                 </Button>
@@ -576,14 +585,7 @@ export const DateRangePicker = ({
                   onClick={handleApply}
                   disabled={!range?.from || !range?.to || Object.keys(errors).length > 0 || isLoading}
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Menerapkan...
-                    </>
-                  ) : (
-                    'Terapkan'
-                  )}
+                  {isLoading ? 'Menerapkan…' : 'Terapkan'}
                 </Button>
               </div>
             </div>

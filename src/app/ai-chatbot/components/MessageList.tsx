@@ -63,7 +63,7 @@ export const MessageList = ({
           // Virtual scrolling for long conversations
           <div
             ref={virtualizerRef}
-            className="h-full overflow-auto p-6 max-w-4xl mx-auto"
+            className="h-full overflow-auto px-4 py-6"
             style={{ contain: 'strict' }}
           >
             <div
@@ -112,7 +112,7 @@ export const MessageList = ({
           </div>
         ) : (
           // Regular rendering for short conversations
-          <div ref={scrollAreaRef} className="p-6 space-y-6 max-w-4xl mx-auto">
+          <div ref={scrollAreaRef} className="px-4 py-6 space-y-6">
             {messages.map((message) => (
               <MessageBubble
                 key={message.id}

@@ -17,45 +17,64 @@ export function useProfitData() {
   
   const [filters, setFilters] = useState<ProfitFilters>({
     selectedPeriod: 'month',
-    startDate: '',
-    endDate: ''
+    dateRange: undefined
   })
 
   // Calculate date range for SWR key
   const getCalculatedDates = () => {
     const today = new Date()
     const toISODate = (date: Date): string => date.toISOString().substring(0, 10)
-    const subtractDays = (date: Date, days: number) => {
-      const clone = new Date(date.getTime())
-      clone.setDate(clone.getDate() - days)
-      return clone
-    }
 
-    let calculatedStartDate: string = filters.startDate || ''
-    const calculatedEndDate: string = filters.endDate || toISODate(today)
-
-    if (!filters.startDate) {
-      switch (filters.selectedPeriod) {
-        case 'week':
-          calculatedStartDate = toISODate(subtractDays(today, 7))
-          break
-        case 'month':
-          calculatedStartDate = toISODate(new Date(today.getFullYear(), today.getMonth(), 1))
-          break
-        case 'quarter': {
-          const quarter = Math.floor(today.getMonth() / 3)
-          calculatedStartDate = toISODate(new Date(today.getFullYear(), quarter * 3, 1))
-          break
-        }
-        case 'year':
-          calculatedStartDate = toISODate(new Date(today.getFullYear(), 0, 1))
-          break
-        default:
-          calculatedStartDate = toISODate(subtractDays(today, 30))
+    // If custom dateRange is set, use it
+    if (filters.dateRange?.from && filters.dateRange?.to) {
+      return {
+        calculatedStartDate: toISODate(filters.dateRange.from),
+        calculatedEndDate: toISODate(filters.dateRange.to)
       }
     }
 
-    return { calculatedStartDate, calculatedEndDate }
+    // Otherwise, calculate based on selectedPeriod
+    switch (filters.selectedPeriod) {
+      case 'week': {
+        const weekStart = new Date(today)
+        weekStart.setDate(today.getDate() - today.getDay() + 1) // Monday
+        return {
+          calculatedStartDate: toISODate(weekStart),
+          calculatedEndDate: toISODate(today)
+        }
+      }
+      case 'month': {
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
+        return {
+          calculatedStartDate: toISODate(monthStart),
+          calculatedEndDate: toISODate(today)
+        }
+      }
+      case 'quarter': {
+        const quarterStartMonth = Math.floor(today.getMonth() / 3) * 3
+        const quarterStart = new Date(today.getFullYear(), quarterStartMonth, 1)
+        return {
+          calculatedStartDate: toISODate(quarterStart),
+          calculatedEndDate: toISODate(today)
+        }
+      }
+      case 'year': {
+        const yearStart = new Date(today.getFullYear(), 0, 1)
+        return {
+          calculatedStartDate: toISODate(yearStart),
+          calculatedEndDate: toISODate(today)
+        }
+      }
+      default: {
+        // Default to last 30 days
+        const thirtyDaysAgo = new Date(today)
+        thirtyDaysAgo.setDate(today.getDate() - 30)
+        return {
+          calculatedStartDate: toISODate(thirtyDaysAgo),
+          calculatedEndDate: toISODate(today)
+        }
+      }
+    }
   }
 
   // Get dates for the SWR key
@@ -94,9 +113,10 @@ export function useProfitData() {
 
   const exportReport = async (format: ExportFormat) => {
     try {
+      const { calculatedStartDate, calculatedEndDate } = getCalculatedDates()
       const params = new URLSearchParams()
-      if (filters.startDate) {params.append('start_date', filters.startDate)}
-      if (filters.endDate) {params.append('end_date', filters.endDate)}
+      params.append('start_date', calculatedStartDate)
+      params.append('end_date', calculatedEndDate)
       params.append('export', format)
 
       const response = await fetch(`/api/reports/profit?${params.toString()}`)
