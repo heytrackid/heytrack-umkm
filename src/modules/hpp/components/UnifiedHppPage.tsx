@@ -50,8 +50,9 @@ export const UnifiedHppPage = memo(() => {
   // Set initial margin from recipe data (only when recipe ID changes)
   const prevRecipeId = useRef<string | null>(null)
   useEffect(() => {
-    if (recipe?.margin_percentage && recipe.id && recipe.id !== prevRecipeId.current) {
-      setTimeout(() => setMarginPercentage(recipe.margin_percentage), 0)
+    if (recipe && recipe.margin_percentage !== null && recipe.id !== prevRecipeId.current) {
+      const margin = recipe.margin_percentage as number
+      setTimeout(() => setMarginPercentage(margin), 0)
       prevRecipeId.current = recipe.id
     }
   }, [recipe?.id, recipe?.margin_percentage])  

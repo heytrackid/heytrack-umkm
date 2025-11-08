@@ -127,9 +127,10 @@ export function useApi<T = unknown >(
       const timer = setTimeout(() => {
         void fetch()
       }, 0)
-      
+
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [autoLoad, fetch])
 
   return {

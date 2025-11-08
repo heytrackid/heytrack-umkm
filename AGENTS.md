@@ -1,14 +1,14 @@
 # HeyTrack Agent Guidelines
 
 ## Commands
-- **Development**: `npm run dev` (with Turbo), `npm run dev:clean` (clear cache), `npm run dev:verbose` (with tracing)
-- **Build**: `npm run build`, `npm run build:fast`, `npm run build:validate`, `npm run build:analyze` (bundle analysis)
-- **Type Checking**: `npm run type-check` (current), `npm run type-check:all` (full project)
-- **Linting**: `npm run lint` (current), `npm run lint:all` (full), `npm run lint:fix` (auto-fix)
-- **Validation**: `npm run validate` (type + lint), `npm run validate:all` (full project)
+- **Development**: `pnpm run dev` (with Turbo), `pnpm run dev:clean` (clear cache), `pnpm run dev:verbose` (with tracing)
+- **Build**: `pnpm run build`, `pnpm run build:fast`, `pnpm run build:validate`, `pnpm run build:analyze` (bundle analysis)
+- **Type Checking**: `pnpm run type-check` (current), `pnpm run type-check:all` (full project)
+- **Linting**: `pnpm run lint` (current), `pnpm run lint:all` (full), `pnpm run lint:fix` (auto-fix)
+- **Validation**: `pnpm run validate` (type + lint), `pnpm run validate:all` (full project), `pnpm run validate:quick` (quick check)
 - **Testing**: `npx vitest` (all), `npx vitest path/to/test.test.ts` (single), `npx vitest --watch` (watch mode), `npx vitest --coverage` (with coverage)
-- **Database**: `npm run supabase:types` (generate types), `npm run supabase:types:remote` (from remote)
-- **Maintenance**: `npm run clean` (cache), `npm run clean:all` (full reset)
+- **Database**: `pnpm run supabase:types` (generate types), `pnpm run supabase:types:remote` (from remote)
+- **Maintenance**: `pnpm run clean` (cache), `pnpm run clean:all` (full reset)
 
 ## Code Style & Conventions
 

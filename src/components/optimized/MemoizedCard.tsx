@@ -99,14 +99,14 @@ export const MemoizedListCard = memo(<T,>({
     )
   }
 
-  return (
-    <div className="space-y-2">
-      {items.map((item, index) => (
-        <div key={keyExtractor(item)}>{renderItem(item, index)}</div>
-      ))}
-    </div>
-  )
-}) as <T>(props: ListCardProps<T>) => JSX.Element
+   return (
+     <div className="space-y-2">
+       {items.map((item, index) => (
+         <div key={keyExtractor(item)}>{renderItem(item, index)}</div>
+       ))}
+     </div>
+   )
+ })
 
 MemoizedListCard.displayName = 'MemoizedListCard'
 
