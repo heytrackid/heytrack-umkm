@@ -1,15 +1,11 @@
 'use client'
 
-import { type ReactNode, createContext, useContext } from 'react'
+import { type ReactNode, createContext, useContext, useEffect, useState } from 'react'
 
 import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-
-
-
-
 
 interface SupabaseContext {
   supabase: SupabaseClient<Database>
@@ -26,10 +22,52 @@ const Context = createContext<SupabaseContext | undefined>(undefined)
  * </SupabaseProvider>
  */
 const SupabaseProvider = ({ children }: { children: ReactNode }) => {
-  const supabase = createClient()
+  const [supabase, setSupabase] = useState<SupabaseClient<Database> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const initializeClient = async () => {
+      try {
+        const client = await createClient()
+        setSupabase(client as unknown as SupabaseClient<Database>)
+      } catch (error) {
+        console.error('Failed to initialize Supabase client:', error)
+        // Fallback: create client synchronously for critical functionality
+        // This is a temporary measure - ideally handle errors properly
+        setSupabase(null as any)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void initializeClient()
+  }, [])
+
+  // Show loading state while client initializes
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-sm text-muted-foreground">Initializing...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If client failed to initialize, provide null (components should handle this)
+  if (!supabase) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-sm text-red-500">Failed to initialize Supabase client</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <Context.Provider value={{ supabase: supabase as unknown as SupabaseClient<Database> }}>
+    <Context.Provider value={{ supabase }}>
       {children}
     </Context.Provider>
   )
