@@ -78,7 +78,7 @@ interface OnboardingWizardProps {
   onOpenChange: (open: boolean) => void
 }
 
-export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) => {
+const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) => {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<string[]>([])
@@ -264,3 +264,5 @@ function getStepTip(stepId: string): string {
   }
   return tips[stepId] ?? 'Ikuti langkah-langkah untuk setup yang optimal.'
 }
+
+export default OnboardingWizard

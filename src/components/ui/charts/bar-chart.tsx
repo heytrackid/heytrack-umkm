@@ -8,13 +8,13 @@ import { MobileTooltip } from './mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from './types'
 
 // Lazy load recharts components
-const Bar = lazy(() => import('recharts').then(mod => ({ default: mod.Bar })))
-const BarChart = lazy(() => import('recharts').then(mod => ({ default: mod.BarChart })))
-const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
-const ResponsiveContainer = lazy(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
-const Tooltip = lazy(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
-const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
-const YAxis = lazy(() => import('recharts').then(mod => ({ default: mod.YAxis })))
+const Bar = lazy(() => import('recharts').then(mod => mod.Bar))
+const BarChart = lazy(() => import('recharts').then(mod => mod.BarChart))
+const CartesianGrid = lazy(() => import('recharts').then(mod => mod.CartesianGrid))
+const ResponsiveContainer = lazy(() => import('recharts').then(mod => mod.ResponsiveContainer))
+const Tooltip = lazy(() => import('recharts').then(mod => mod.Tooltip))
+const XAxis = lazy(() => import('recharts').then(mod => mod.XAxis))
+const YAxis = lazy(() => import('recharts').then(mod => mod.YAxis))
 
 /**
  * Mobile Bar Chart Component
@@ -37,7 +37,7 @@ interface MobileBarChartProps extends BaseMobileChartProps {
  * MobileBarChart - Optimized with React.memo
  * Prevents unnecessary re-renders when data hasn't changed
  */
-export const MobileBarChart = memo(({
+const MobileBarChart = memo(({
   data,
   xKey,
   bars,
@@ -95,3 +95,5 @@ export const MobileBarChart = memo(({
     </BaseMobileChart>
   )
 }, (prevProps: MobileBarChartProps, nextProps: MobileBarChartProps) => prevProps['data'] === nextProps['data'] && prevProps.bars === nextProps.bars)
+
+export default MobileBarChart

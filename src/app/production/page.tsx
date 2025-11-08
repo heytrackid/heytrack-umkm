@@ -2,11 +2,11 @@
 
 import dynamic from 'next/dynamic'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 
 // Dynamically import the production page to optimize initial load
 const EnhancedProductionPage = dynamic(
-  () => import('./components/EnhancedProductionPage').then(mod => mod.EnhancedProductionPage),
+  () => import('./components/EnhancedProductionPage'),
   {
     loading: () => (
       <div className="space-y-6 p-6">
@@ -53,7 +53,7 @@ const EnhancedProductionPage = dynamic(
   }
 )
 
-const ProductionListPage = () => (
+const ProductionListPage = (): JSX.Element => (
   <AppLayout pageTitle="Production Tracking">
     <EnhancedProductionPage />
   </AppLayout>

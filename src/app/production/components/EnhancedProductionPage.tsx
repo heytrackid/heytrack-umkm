@@ -83,7 +83,7 @@ const STATUS_CONFIG = {
     }
 }
 
-export const EnhancedProductionPage = () => {
+const EnhancedProductionPage = () => {
     const { formatCurrency } = useCurrency()
     const { isMobile } = useResponsive()
     const [productions, setProductions] = useState<ProductionWithRecipe[]>([])
@@ -680,3 +680,5 @@ const ProductionCard = ({
         </CardContent>
     </Card>
 )
+
+export default EnhancedProductionPage

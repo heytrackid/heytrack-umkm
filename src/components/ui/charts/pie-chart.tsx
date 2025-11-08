@@ -9,12 +9,12 @@ import { type BaseMobileChartProps, CHART_COLORS } from './types'
 import type { PieLabelRenderProps } from 'recharts'
 
 // Lazy load recharts components
-const Pie = lazy(() => import('recharts').then(mod => ({ default: mod.Pie })))
-const PieChart = lazy(() => import('recharts').then(mod => ({ default: mod.PieChart })))
-const Cell = lazy(() => import('recharts').then(mod => ({ default: mod.Cell })))
-const Tooltip = lazy(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
-const Legend = lazy(() => import('recharts').then(mod => ({ default: mod.Legend })))
-const ResponsiveContainer = lazy(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
+const Pie = lazy(() => import('recharts').then(mod => mod.Pie))
+const PieChart = lazy(() => import('recharts').then(mod => mod.PieChart))
+const Cell = lazy(() => import('recharts').then(mod => mod.Cell))
+const Tooltip = lazy(() => import('recharts').then(mod => mod.Tooltip))
+const Legend = lazy(() => import('recharts').then(mod => mod.Legend))
+const ResponsiveContainer = lazy(() => import('recharts').then(mod => mod.ResponsiveContainer))
 
 /**
  * Mobile Pie Chart Component
@@ -34,7 +34,7 @@ interface MobilePieChartProps extends BaseMobileChartProps {
  * MobilePieChart - Optimized with React.memo
  * Prevents unnecessary re-renders when data hasn't changed
  */
-export const MobilePieChart = memo(({
+const MobilePieChart = memo(({
   data,
   valueKey,
   _nameKey,
@@ -108,3 +108,5 @@ export const MobilePieChart = memo(({
     </BaseMobileChart>
   )
 }, (prevProps: MobilePieChartProps, nextProps: MobilePieChartProps) => prevProps['data'] === nextProps['data'] && prevProps.valueKey === nextProps.valueKey)
+
+export default MobilePieChart
