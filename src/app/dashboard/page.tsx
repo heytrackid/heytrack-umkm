@@ -13,13 +13,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { LoadingButton } from '@/components/ui/loading-button'
 import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { StatsCardsGridSkeleton } from './components/dashboard-helpers'
 import { useAuth } from '@/hooks'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { queryLogger } from '@/lib/client-logger'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
 
-import { StatsCardsGridSkeleton } from './components/dashboard-helpers'
+
 
 // Lazy load OnboardingWizard - only needed for new users
 const OnboardingWizard = dynamic(
@@ -215,7 +216,7 @@ const renderErrorState = (router: ReturnType<typeof useRouter>): JSX.Element => 
   )
 }
 
-const renderEmptyState = (_showOnboarding: boolean, _setShowOnboarding: (show: boolean) => void, _router: ReturnType<typeof useRouter>): JSX.Element => (
+const renderEmptyState = (): JSX.Element => (
   <Card className="border-dashed border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
     <CardContent className="pt-8 pb-8">
       <div className="text-center space-y-6">
@@ -389,7 +390,7 @@ const renderQuickActions = (router: ReturnType<typeof useRouter>): JSX.Element =
 
 const Dashboard = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
-  const [currentTime] = useState(new Date())
+  const [currentTime, setCurrentTime] = useState(new Date())
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
@@ -412,6 +413,15 @@ const Dashboard = (): JSX.Element => {
 
   // Enable smart preloading for dashboard
   usePagePreloading('dashboard')
+
+  // Update current time every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 60000) // Update every minute
+
+    return () => clearInterval(interval)
+  }, [])
 
   // Handle session expiry
   useEffect(() => {
@@ -441,20 +451,22 @@ const Dashboard = (): JSX.Element => {
     if (dashboardData?.stats === undefined || dashboardData?.stats === null) {
       return false
     }
-    return (dashboardData.stats.totalOrders ?? 0) === 0 &&
+    return (dashboardData.stats.totalSales ?? 0) === 0 &&
+      (dashboardData.stats.totalOrders ?? 0) === 0 &&
       (dashboardData.stats.totalIngredients ?? 0) === 0 &&
       (dashboardData.stats.totalCustomers ?? 0) === 0
   }, [dashboardData])
 
   // Show onboarding for new users - MUST be before any conditional returns
   useEffect(() => {
-    if (hasNoData && !isLoading) {
-      const hasSkipped = localStorage.getItem('heytrack_onboarding_skipped')
-      const hasCompleted = localStorage.getItem('heytrack_onboarding_completed')
-      if (hasSkipped === null && hasCompleted === null) {
-        setShowOnboarding(true)
-      }
-    }
+    if (!hasNoData || isLoading) return
+
+    const hasSkipped = localStorage.getItem('heytrack_onboarding_skipped')
+    const hasCompleted = localStorage.getItem('heytrack_onboarding_completed')
+
+    if (hasSkipped !== null || hasCompleted !== null) return
+
+    setShowOnboarding(true)
   }, [hasNoData, isLoading])
 
   // Show loading state while initializing
@@ -489,36 +501,34 @@ const Dashboard = (): JSX.Element => {
 
 
         {/* Enhanced Empty State - Show when user has no data */}
-        {hasNoData && renderEmptyState(showOnboarding, setShowOnboarding, router)}
+        {hasNoData && renderEmptyState()}
 
         {/* Main Dashboard Content - Individual Suspense boundaries for each section */}
         <div className="space-y-6">
           {/* Stats Cards */}
           <Suspense fallback={<StatsCardsGridSkeleton />}>
-            {dashboardData?.stats && (
-              <StatsCardsSection
-                stats={{
-                  revenue: {
-                    total: dashboardData.stats.totalSales ?? 0,
-                    growth: dashboardData.stats.salesGrowth?.toString() ?? '0',
-                    trend: (dashboardData.stats.salesGrowth ?? 0) >= 0 ? 'up' : 'down'
-                  },
-                  orders: {
-                    total: dashboardData.stats.totalOrders ?? 0,
-                    active: dashboardData.stats.totalOrders ?? 0
-                  },
-                  customers: {
-                    total: dashboardData.stats.totalCustomers ?? 0,
-                    vip: 0
-                  },
-                  inventory: {
-                    total: dashboardData.stats.totalIngredients ?? 0,
-                    lowStock: dashboardData.stats.ingredientsLow ?? 0
-                  }
-                }}
-                formatCurrency={formatCurrency}
-              />
-            )}
+            <StatsCardsSection
+              stats={{
+                revenue: {
+                  total: dashboardData?.stats?.totalSales ?? 0,
+                  growth: dashboardData?.stats?.salesGrowth?.toString() ?? '0',
+                  trend: (dashboardData?.stats?.salesGrowth ?? 0) >= 0 ? 'up' : 'down'
+                },
+                orders: {
+                  total: dashboardData?.stats?.totalOrders ?? 0,
+                  active: dashboardData?.stats?.totalOrders ?? 0
+                },
+                customers: {
+                  total: dashboardData?.stats?.totalCustomers ?? 0,
+                  vip: 0
+                },
+                inventory: {
+                  total: dashboardData?.stats?.totalIngredients ?? 0,
+                  lowStock: dashboardData?.stats?.ingredientsLow ?? 0
+                }
+              }}
+              formatCurrency={formatCurrency}
+            />
           </Suspense>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

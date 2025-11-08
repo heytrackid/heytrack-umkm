@@ -38,22 +38,30 @@ export const UnifiedHppPage = memo(() => {
   const [marginPercentage, setMarginPercentage] = useState(60)
   const [suggestedPrice, setSuggestedPrice] = useState(0)
 
-  // Calculate suggested price whenever recipe cost or margin percentage changes  
+  // Calculate suggested price whenever recipe cost or margin percentage changes
   useEffect(() => {
     if (recipe) {
       const price = recipe.total_cost * (1 + marginPercentage / 100)
       const roundedPrice = Math.round(price / 100) * 100 // Round to nearest 100
-      setTimeout(() => setSuggestedPrice(roundedPrice), 0)
+      const timeoutId = setTimeout(() => setSuggestedPrice(roundedPrice), 0)
+      return () => clearTimeout(timeoutId)
     }
-  }, [recipe, recipe?.total_cost, marginPercentage])  
+    return () => {
+      // Cleanup if no recipe
+    }
+  }, [recipe, recipe?.total_cost, marginPercentage])
   
   // Set initial margin from recipe data (only when recipe ID changes)
   const prevRecipeId = useRef<string | null>(null)
   useEffect(() => {
     if (recipe && recipe.margin_percentage !== null && recipe.id !== prevRecipeId.current) {
       const margin = recipe.margin_percentage as number
-      setTimeout(() => setMarginPercentage(margin), 0)
+      const timeoutId = setTimeout(() => setMarginPercentage(margin), 0)
       prevRecipeId.current = recipe.id
+      return () => clearTimeout(timeoutId)
+    }
+    return () => {
+      // Cleanup if no recipe or no change
     }
   }, [recipe?.id, recipe?.margin_percentage])  
 

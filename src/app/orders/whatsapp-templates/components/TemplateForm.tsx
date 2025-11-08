@@ -1,7 +1,7 @@
 'use client'
 
 import { Info, Copy, Check } from 'lucide-react'
-import { useState, useLayoutEffect, type FormEvent } from 'react'
+import { useState, useLayoutEffect, useRef, type FormEvent } from 'react'
 
 import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, type WhatsAppTemplate, type TemplateFormData } from '@/app/orders/whatsapp-templates/components/types'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from '@/components/ui/accordion'
@@ -27,6 +27,7 @@ const TemplateForm = ({
     editingTemplate,
     onSuccess
 }: TemplateFormProps) => {
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const [formData, setFormData] = useState<TemplateFormData>(() => {
         if (editingTemplate) {
             const vars = Array.isArray(editingTemplate.variables)
@@ -87,8 +88,13 @@ const TemplateForm = ({
             is_active: true,
             is_default: false
         }
-        
-        setTimeout(() => setFormData(newFormData), 0)
+
+        timeoutRef.current = setTimeout(() => setFormData(newFormData), 0)
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
+        }
     }, [editingTemplate])
 
     // Form data is initialized in useState above
@@ -113,7 +119,7 @@ const TemplateForm = ({
     const copyVariable = (variableName: string) => {
         void navigator.clipboard.writeText(`{${variableName}}`)
         setCopiedVariable(variableName)
-        setTimeout(() => setCopiedVariable(null), 2000)
+        timeoutRef.current = setTimeout(() => setCopiedVariable(null), 2000)
     }
 
     const loadDefaultTemplate = (template: (typeof DEFAULT_TEMPLATES)[number]) => {

@@ -1,7 +1,7 @@
 'use client'
 
 import { Settings, RotateCcw } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,7 @@ interface RegionalSettingsProps {
 export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettingsProps) => {
   const { settings: contextSettings, currencies, updateCurrency, resetToDefault } = useSettings()
   const [isResetting, setIsResetting] = useState(false)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Safety check for currencies
   if (!currencies || !Array.isArray(currencies) || currencies.length === 0) {
@@ -45,7 +46,7 @@ export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettings
   const handleResetCurrency = () => {
     setIsResetting(true)
     resetToDefault()
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setIsResetting(false)
     }, 500)
   }

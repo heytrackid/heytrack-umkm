@@ -1,7 +1,7 @@
 'use client'
 
 import { DollarSign, Package, RefreshCw, TrendingUp } from 'lucide-react'
-import { useEffect as _useEffect, useState } from 'react'
+import { useEffect as _useEffect, useRef, useState } from 'react'
 
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/shared'
@@ -20,12 +20,22 @@ import type { Row as _Row } from '@/types/database'
 const WacEnginePage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
    // Use ingredients hook with caching
    const { data: ingredients = [], isLoading: loading } = useIngredients({ limit: 1000 })
    const [selectedIngredient, setSelectedIngredient] = useState<string>('')
    const [calculating, setCalculating] = useState(false)
    const [recalculating, setRecalculating] = useState(false)
+
+  // Cleanup timeout on unmount
+  _useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
 
   // Calculate WAC for selected ingredient
   const calculateWac = () => {
@@ -68,7 +78,7 @@ const WacEnginePage = (): JSX.Element => {
       })
 
       // Simulate recalculation
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setRecalculating(false)
         toast({
           title: 'Success',

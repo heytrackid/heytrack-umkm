@@ -25,6 +25,7 @@ export const MessageList = ({
 }: MessageListProps): React.JSX.Element => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const virtualizerRef = useRef<HTMLDivElement>(null)
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Use virtual scrolling for long conversations (>20 messages)
   const useVirtualScrolling = messages.length > 20
@@ -46,12 +47,17 @@ export const MessageList = ({
       const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
       if (viewport) {
         // Smooth scroll to bottom with delay untuk ensure render selesai
-        setTimeout(() => {
+        scrollTimeoutRef.current = setTimeout(() => {
           viewport.scrollTo({
             top: viewport.scrollHeight,
             behavior: 'smooth'
           })
         }, 150)
+      }
+    }
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
       }
     }
   }, [messages, isLoading, scrollAreaRef, useVirtualScrolling, virtualizer])

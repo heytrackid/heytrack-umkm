@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 
 import { DEFAULT_APP_SETTINGS, normalizeSettings, type AppSettingsState, type SettingsUpdateHandler, } from '@/app/settings/types'
 import { useSettings } from '@/contexts/settings-context'
 
 export function useSettingsManager() {
   const { settings: contextSettings } = useSettings()
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const mergedDefaults = useMemo(
     () => normalizeSettings(DEFAULT_APP_SETTINGS, contextSettings),
@@ -48,7 +49,7 @@ export function useSettingsManager() {
       // Simplified save logic - in real implementation would save to Supabase
       setIsUnsavedChanges(false)
       // In a real implementation, this would save to the database
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setIsSaving(false)
       }, 500) // Simulate save delay
 

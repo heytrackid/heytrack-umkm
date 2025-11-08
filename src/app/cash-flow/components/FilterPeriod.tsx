@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Calendar } from 'lucide-react'
 
 import { type PeriodType } from '@/app/cash-flow/constants'
@@ -35,11 +36,15 @@ const FilterPeriod = ({
   loading,
   isMobile
 }: FilterPeriodProps): JSX.Element => {
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const handlePresetClick = (period: PeriodType): void => {
     onPeriodChange(period)
     if (period !== 'custom') {
       // Auto-apply for preset periods
-      setTimeout(() => onApplyFilters(), 100)
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+      timeoutRef.current = setTimeout(() => onApplyFilters(), 100)
     }
   }
 

@@ -49,17 +49,30 @@ interface OpenRouterError {
   }
 }
 
+// Recipe instruction structure
+interface RecipeInstruction {
+  step: number
+  title: string
+  description: string
+  duration_minutes?: number
+  temperature?: string
+}
+
 // Generated recipe from AI (before saving to DB)
 interface GeneratedRecipe {
   name: string
   ingredients: RecipeIngredient[]
-  instructions: string[]
+  instructions: RecipeInstruction[]
   servings?: number
-  prep_time?: number
-  cook_time?: number
+  prep_time_minutes?: number
+  bake_time_minutes?: number
+  total_time_minutes?: number
   difficulty?: string
   category?: string
-  notes?: string
+  description?: string
+  tips?: string[]
+  storage?: string
+  shelf_life?: string
 }
 
 // Raw AI response structure (before validation)
@@ -68,11 +81,15 @@ interface RawRecipeResponse {
   ingredients?: unknown
   instructions?: unknown
   servings?: unknown
-  prep_time?: unknown
-  cook_time?: unknown
+  prep_time_minutes?: unknown
+  bake_time_minutes?: unknown
+  total_time_minutes?: unknown
   difficulty?: unknown
   category?: unknown
-  notes?: unknown
+  description?: unknown
+  tips?: unknown
+  storage?: unknown
+  shelf_life?: unknown
 }
 
 // interface AIGeneratedRecipe {
@@ -185,8 +202,14 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
             success: true,
             recipe: {
                 ...recipe,
-                hpp: hppCalculation.totalHPP,
-                hppDetails: hppCalculation
+                hpp: {
+                    totalMaterialCost: hppCalculation.totalMaterialCost,
+                    estimatedOperationalCost: hppCalculation.operationalCost,
+                    totalHPP: hppCalculation.totalHPP,
+                    hppPerUnit: hppCalculation.hppPerUnit,
+                    suggestedSellingPrice: hppCalculation.suggestedSellingPrice,
+                    estimatedMargin: hppCalculation.estimatedMargin,
+                }
             }
         })
 
@@ -600,10 +623,30 @@ function parseRecipeResponse(response: string): GeneratedRecipe {
             }
         })
 
-        // Validate instructions
-        rawRecipe.instructions.forEach((instruction: unknown, index: number) => {
-            if (typeof instruction !== 'string' || !instruction.trim()) {
-                throw new Error(`Invalid instruction at index ${index}: must be a non-empty string`)
+        // Validate and convert instructions
+        const instructions: RecipeInstruction[] = rawRecipe.instructions.map((instruction: unknown, index: number) => {
+            if (typeof instruction === 'string') {
+                // Convert string to object format
+                return {
+                    step: index + 1,
+                    title: `Langkah ${index + 1}`,
+                    description: instruction.trim(),
+                }
+            } else if (typeof instruction === 'object' && instruction !== null) {
+                // Handle object format from AI
+                const instObj = instruction as Record<string, unknown>
+                if (!instObj['description'] || typeof instObj['description'] !== 'string' || !(instObj['description'] as string).trim()) {
+                    throw new Error(`Invalid instruction object at index ${index}: missing or invalid description`)
+                }
+                return {
+                    step: typeof instObj['step'] === 'number' ? instObj['step'] as number : index + 1,
+                    title: typeof instObj['title'] === 'string' ? instObj['title'] as string : `Langkah ${index + 1}`,
+                    description: instObj['description'] as string,
+                    duration_minutes: typeof instObj['duration_minutes'] === 'number' ? instObj['duration_minutes'] as number : undefined,
+                    temperature: typeof instObj['temperature'] === 'string' ? instObj['temperature'] as string : undefined,
+                }
+            } else {
+                throw new Error(`Invalid instruction at index ${index}: must be a string or object`)
             }
         })
 
@@ -611,13 +654,17 @@ function parseRecipeResponse(response: string): GeneratedRecipe {
         const recipe: GeneratedRecipe = {
             name: rawRecipe.name,
             ingredients: rawRecipe.ingredients as RecipeIngredient[],
-            instructions: rawRecipe.instructions as string[],
+            instructions,
             ...(typeof rawRecipe.servings === 'number' ? { servings: rawRecipe.servings } : {}),
-            ...(typeof rawRecipe.prep_time === 'number' ? { prep_time: rawRecipe.prep_time } : {}),
-            ...(typeof rawRecipe.cook_time === 'number' ? { cook_time: rawRecipe.cook_time } : {}),
+            ...(typeof rawRecipe.prep_time_minutes === 'number' ? { prep_time_minutes: rawRecipe.prep_time_minutes } : {}),
+            ...(typeof rawRecipe.bake_time_minutes === 'number' ? { bake_time_minutes: rawRecipe.bake_time_minutes } : {}),
+            ...(typeof rawRecipe.total_time_minutes === 'number' ? { total_time_minutes: rawRecipe.total_time_minutes } : {}),
             ...(typeof rawRecipe.difficulty === 'string' ? { difficulty: rawRecipe.difficulty } : {}),
             ...(typeof rawRecipe.category === 'string' ? { category: rawRecipe.category } : {}),
-            ...(typeof rawRecipe.notes === 'string' ? { notes: rawRecipe.notes } : {}),
+            ...(typeof rawRecipe.description === 'string' ? { description: rawRecipe.description } : {}),
+            ...(Array.isArray(rawRecipe.tips) ? { tips: rawRecipe.tips as string[] } : {}),
+            ...(typeof rawRecipe.storage === 'string' ? { storage: rawRecipe.storage } : {}),
+            ...(typeof rawRecipe.shelf_life === 'string' ? { shelf_life: rawRecipe.shelf_life } : {}),
         }
 
         return recipe

@@ -136,7 +136,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     const { data: insertedData, error } = await supabase
       .from('ingredients')
       .insert(ingredientData)
-      .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, supplier_id, notes, created_at, updated_at')
+      .select('id, name, description, unit, price_per_unit, current_stock, min_stock, supplier, created_at, updated_at, category, max_stock, is_active, weighted_average_cost, user_id')
       .single()
 
     if (error) {

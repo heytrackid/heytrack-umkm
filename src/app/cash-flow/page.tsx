@@ -1,7 +1,7 @@
 'use client'
 
-import { AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
-import { Suspense } from 'react'
+import { AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle, Settings } from 'lucide-react'
+import { Suspense, useState } from 'react'
 
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -15,6 +15,7 @@ import { useResponsive } from '@/hooks/useResponsive'
 
 // Import components directly - no lazy loading for better parallel loading
 import CategoryBreakdown from './components/CategoryBreakdown'
+import CategoryManagementDialog from './components/CategoryManagementDialog'
 import EnhancedCashFlowChart from './components/EnhancedCashFlowChart'
 import EnhancedSummaryCards from './components/EnhancedSummaryCards'
 import EnhancedTransactionForm from './components/EnhancedTransactionForm'
@@ -32,6 +33,7 @@ const SummaryCardsSkeleton = (): JSX.Element[] => (
 const CashFlowPage = (): JSX.Element => {
   const { formatCurrency } = useSettings()
   const { isMobile } = useResponsive()
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
 
   // Use the enhanced hook for all cash flow logic
   const {
@@ -113,13 +115,23 @@ const CashFlowPage = (): JSX.Element => {
           title="Arus Kas"
           description="Kelola semua transaksi pemasukan dan pengeluaran"
           action={
-            <Button
-              onClick={() => setIsAddDialogOpen(true)}
-              disabled={loading}
-            >
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Tambah Transaksi
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setIsAddDialogOpen(true)}
+                disabled={loading}
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Tambah Transaksi
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsCategoryDialogOpen(true)}
+                disabled={loading}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Kelola Kategori
+              </Button>
+            </div>
           }
         />
 
@@ -152,6 +164,12 @@ const CashFlowPage = (): JSX.Element => {
             onTransactionTypeChange={setTransactionType}
             onSubmit={handleAddTransaction}
             loading={loading}
+          />
+
+          {/* Category Management Dialog */}
+          <CategoryManagementDialog
+            isOpen={isCategoryDialogOpen}
+            onOpenChange={setIsCategoryDialogOpen}
           />
 
           {/* Quick Actions for Mobile */}

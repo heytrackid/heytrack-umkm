@@ -110,7 +110,7 @@ export function generateIngredientsTemplate(): string {
   
   const rows = [
     headers.join(','),
-    ...examples.map(row => row['map'](escapeCSV).join(','))
+    ...examples.map(row => row.map(escapeCSV).join(','))
   ]
   
   return rows.join('\n')
@@ -147,7 +147,7 @@ export function generateSuppliersTemplate(): string {
 
   const rows = [
     headers.join(','),
-    ...examples.map(row => row['map'](escapeCSV).join(','))
+    ...examples.map(row => row.map(escapeCSV).join(','))
   ]
 
   return rows.join('\n')
@@ -187,7 +187,7 @@ export function generateOrdersTemplate(): string {
   
   const rows = [
     headers.join(','),
-    ...examples.map(row => row['map'](escapeCSV).join(','))
+    ...examples.map(row => row.map(escapeCSV).join(','))
   ]
   
   return rows.join('\n')
