@@ -47,7 +47,7 @@ const OrderDeliveryStep = ({
             min="0"
             value={formData.delivery_fee}
             onChange={(e) => {
-              const parsedValue = Number.parseFloat(e.target.value)
+              const parsedValue = Number.parseFloat(e.target.value.replace(',', '.'))
               onInputChange('delivery_fee', Number.isNaN(parsedValue) ? 0 : parsedValue)
             }}
           />

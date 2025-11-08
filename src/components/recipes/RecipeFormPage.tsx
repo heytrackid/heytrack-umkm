@@ -464,7 +464,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                                             placeholder="Jumlah"
                                             value={ri.quantity || ''}
                                             onChange={(e) =>
-                                                updateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)
+                                                updateIngredient(index, 'quantity', parseFloat(e.target.value.replace(',', '.')) || 0)
                                             }
                                         />
 

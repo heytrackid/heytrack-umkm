@@ -37,6 +37,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
 
   const form = useForm({
     resolver: zodResolver(RecipeFormSchema),
+    mode: 'onBlur',
     defaultValues: {
       name: initialData?.name ?? '',
       description: initialData?.description ?? '',

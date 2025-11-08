@@ -258,7 +258,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                                      min="0"
                                      step="1"
                                      value={formData.amount ?? ''}
-                                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value.replace(',', '.')) || 0 })}
                                      placeholder="0"
                                      required
                                  />

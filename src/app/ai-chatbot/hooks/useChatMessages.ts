@@ -84,9 +84,9 @@ export function useChatMessages(): UseChatMessagesResult {
       setCurrentSessionId(newSession.id)
     } catch (error) {
       console.error('Failed to initialize chat session:', error)
-      // Continue without session persistence for now
-    }
-  }, [])
+       // Continue without session persistence for now
+     }
+   }, [supabase])
 
   const saveMessageToSession = useCallback(async (message: Message): Promise<void> => {
     if (!currentSessionId) return

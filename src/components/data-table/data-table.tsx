@@ -48,6 +48,7 @@ interface DataTableProps<TData, TValue> {
 
 /**
  * DataTable - Reusable table component with sorting, filtering, pagination
+ * Note: Use LazyDataTable for better performance in pages
  */
 export const DataTable = <TData, TValue>({
   columns,

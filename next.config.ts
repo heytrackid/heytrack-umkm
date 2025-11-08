@@ -29,18 +29,22 @@ const nextConfig: NextConfig = {
       },
       optimizeCss: true,
       optimizePackageImports: [
+      // UI Libraries
       'lucide-react',
       '@radix-ui/react-icons',
       'recharts',
-      'date-fns',
+
+      // Radix UI Components (used)
       '@radix-ui/react-accordion',
       '@radix-ui/react-alert-dialog',
       '@radix-ui/react-avatar',
       '@radix-ui/react-checkbox',
+      '@radix-ui/react-collapsible',
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
       '@radix-ui/react-label',
       '@radix-ui/react-popover',
+      '@radix-ui/react-progress',
       '@radix-ui/react-radio-group',
       '@radix-ui/react-scroll-area',
       '@radix-ui/react-select',
@@ -49,17 +53,23 @@ const nextConfig: NextConfig = {
       '@radix-ui/react-switch',
       '@radix-ui/react-tabs',
       '@radix-ui/react-toast',
+      '@radix-ui/react-toggle',
       '@radix-ui/react-tooltip',
-      'zod',
-      // 🚀 BUNDLE OPTIMIZATION: Added heavy packages
+
+      // Data & State Management
       '@tanstack/react-table',
+      '@tanstack/react-virtual',
       '@supabase/supabase-js',
       '@tanstack/react-query',
       'zustand',
+
+      // Utilities
+      'date-fns',
+      'zod',
       'dompurify',
       'react-hook-form',
-      'zod',
-      'date-fns',
+      'react-window',
+      'react-resizable-panels',
       'react-hot-toast',
       'sonner',
       'cmdk',

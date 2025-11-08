@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import { incomeCategories, expenseCategories } from '../constants'
 
@@ -13,31 +13,24 @@ interface CategoryItem {
 const STORAGE_KEY = 'custom_categories'
 
 export function useCategories() {
-  const [categories, setCategories] = useState<CategoryItem[]>([])
-
-  // Load categories from localStorage on mount
-  useEffect(() => {
+  const getInitialCategories = (): CategoryItem[] => {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        const parsed = JSON.parse(stored)
-        setCategories(parsed)
+        return JSON.parse(stored)
       } catch (error) {
         // Silent fail for category parsing - use default categories
-        initializeDefaultCategories()
       }
-    } else {
-      initializeDefaultCategories()
     }
-  }, [])
 
-  const initializeDefaultCategories = () => {
-    const defaultCategories: CategoryItem[] = [
+    // Default categories
+    return [
       ...incomeCategories.map(name => ({ id: `income-${name}`, name, type: 'income' as CategoryType })),
       ...expenseCategories.map(name => ({ id: `expense-${name}`, name, type: 'expense' as CategoryType }))
     ]
-    setCategories(defaultCategories)
   }
+
+  const [categories, setCategories] = useState<CategoryItem[]>(getInitialCategories)
 
   const getIncomeCategories = (): string[] => {
     return categories.filter(cat => cat.type === 'income').map(cat => cat.name)
@@ -51,17 +44,7 @@ export function useCategories() {
     incomeCategories: getIncomeCategories(),
     expenseCategories: getExpenseCategories(),
     refreshCategories: () => {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored)
-          setCategories(parsed)
-        } catch (error) {
-          initializeDefaultCategories()
-        }
-      } else {
-        initializeDefaultCategories()
-      }
+      setCategories(getInitialCategories())
     }
   }
 }

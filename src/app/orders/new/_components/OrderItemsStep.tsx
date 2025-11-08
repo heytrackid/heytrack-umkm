@@ -140,7 +140,7 @@ const OrderItemsStep = ({
                       min="0"
                       step="1000"
                       value={item.unit_price}
-                      onChange={(e) => onUpdateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
+                      onChange={(e) => onUpdateItem(index, 'unit_price', parseFloat(e.target.value.replace(',', '.')) || 0)}
                       placeholder="0"
                     />
                   </div>

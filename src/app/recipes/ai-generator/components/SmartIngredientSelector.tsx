@@ -316,7 +316,7 @@ export const SmartIngredientSelector = ({
                                                 min="0"
                                                 step="0.1"
                                                 value={quantity}
-                                                onChange={(e) => updateQuantity(ingredientId, parseFloat(e.target.value) || 0)}
+                                                onChange={(e) => updateQuantity(ingredientId, parseFloat(e.target.value.replace(',', '.')) || 0)}
                                                 className="w-20 h-8 text-sm"
                                                 placeholder="Qty"
                                             />

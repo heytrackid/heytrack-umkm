@@ -315,7 +315,7 @@ const OrderForm = ({
                       <Input
                         type="number"
                         value={item.unit_price}
-                        onChange={(e) => updateOrderItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
+                        onChange={(e) => updateOrderItem(index, 'unit_price', parseFloat(e.target.value.replace(',', '.')) || 0)}
                         min="0"
                       />
                     </div>

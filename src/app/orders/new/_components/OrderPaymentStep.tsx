@@ -47,7 +47,7 @@ const OrderPaymentStep = ({
           min="0"
           value={formData.discount_amount}
           onChange={(e) => {
-            const parsedDiscount = Number.parseFloat(e.target.value)
+            const parsedDiscount = Number.parseFloat(e.target.value.replace(',', '.'))
             onInputChange('discount_amount', Number.isNaN(parsedDiscount) ? 0 : parsedDiscount)
           }}
         />
@@ -63,7 +63,7 @@ const OrderPaymentStep = ({
           step="0.1"
           value={formData.tax_rate}
           onChange={(e) => {
-            const parsedTax = Number.parseFloat(e.target.value)
+            const parsedTax = Number.parseFloat(e.target.value.replace(',', '.'))
             onInputChange('tax_rate', Number.isNaN(parsedTax) ? 0 : parsedTax)
           }}
         />

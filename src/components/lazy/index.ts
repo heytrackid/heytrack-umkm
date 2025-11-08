@@ -15,9 +15,11 @@ export {
 } from './chart-lazy-loader'
 
 // Table Lazy Loading
+export { LazyDataTable } from './lazy-data-table'
+
 // Temporarily disabled due to syntax errors in table-lazy-loader.tsx
 // export {
-//   CRUDTableWithSuspense, DataTableWithSuspense, FinanceTableWithSuspense, InventoryTableWithSuspense, LazyCRUDTable, LazyDataTable, LazyFinanceTable, LazyInventoryTable, LazyOrdersTable, LazyVirtualizedTable, OrdersTableWithSuspense, preloadTableBundle, TableContainer, useRowVirtualization, useTableIntersectionObserver, useTablePerformance, VirtualizedTableWithSuspense, type TableType
+//   CRUDTableWithSuspense, DataTableWithSuspense, FinanceTableWithSuspense, InventoryTableWithSuspense, LazyCRUDTable, LazyFinanceTable, LazyInventoryTable, LazyOrdersTable, LazyVirtualizedTable, OrdersTableWithSuspense, preloadTableBundle, TableContainer, useRowVirtualization, useTableIntersectionObserver, useTablePerformance, VirtualizedTableWithSuspense, type TableType
 // } from './table-lazy-loader'
 
 // Modal Lazy Loading

@@ -50,7 +50,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
 
   const form = useForm<CustomerFormData>({
     resolver: zodResolver(CustomerFormSchema),
-    mode: 'onChange',
+    mode: 'onBlur',
     defaultValues: {
       name: initialData?.name ?? '',
       email: initialData?.email ?? null,

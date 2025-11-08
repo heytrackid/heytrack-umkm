@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 
+import { useDebounce } from '@/hooks/useDebounce'
 import { useSupabaseQuery } from '@/hooks'
 
 interface UseHPPAlertsOptions {
@@ -16,7 +17,8 @@ export function useHPPAlerts(options: UseHPPAlertsOptions = {}) {
     realtime: true
   })
 
-  const alerts = useMemo(() => data ?? [], [data])
+  const rawAlerts = useMemo(() => data ?? [], [data])
+  const alerts = useDebounce(rawAlerts, 500) // Debounce updates to prevent too frequent re-renders
 
   return {
     alerts,

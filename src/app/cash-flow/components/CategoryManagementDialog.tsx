@@ -26,27 +26,29 @@ interface CategoryItem {
 const STORAGE_KEY = 'custom_categories'
 
 const CategoryManagementDialog = ({ isOpen, onOpenChange }: CategoryManagementDialogProps): JSX.Element => {
-  const [categories, setCategories] = useState<CategoryItem[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
   const [newCategoryName, setNewCategoryName] = useState('')
   const [activeTab, setActiveTab] = useState<CategoryType>('income')
 
-  // Load categories from localStorage on mount
-  useEffect(() => {
+  const getInitialCategories = (): CategoryItem[] => {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        const parsed = JSON.parse(stored)
-        setCategories(parsed)
+        return JSON.parse(stored)
       } catch (error) {
         console.error('Failed to parse stored categories:', error)
-        initializeDefaultCategories()
       }
-    } else {
-      initializeDefaultCategories()
     }
-  }, [])
+
+    // Default categories
+    return [
+      ...incomeCategories.map(name => ({ id: `income-${name}`, name, type: 'income' as CategoryType })),
+      ...expenseCategories.map(name => ({ id: `expense-${name}`, name, type: 'expense' as CategoryType }))
+    ]
+  }
+
+  const [categories, setCategories] = useState<CategoryItem[]>(getInitialCategories)
 
   // Save to localStorage whenever categories change
   useEffect(() => {
@@ -54,14 +56,6 @@ const CategoryManagementDialog = ({ isOpen, onOpenChange }: CategoryManagementDi
       localStorage.setItem(STORAGE_KEY, JSON.stringify(categories))
     }
   }, [categories])
-
-  const initializeDefaultCategories = () => {
-    const defaultCategories: CategoryItem[] = [
-      ...incomeCategories.map(name => ({ id: `income-${name}`, name, type: 'income' as CategoryType })),
-      ...expenseCategories.map(name => ({ id: `expense-${name}`, name, type: 'expense' as CategoryType }))
-    ]
-    setCategories(defaultCategories)
-  }
 
   const addCategory = (type: CategoryType) => {
     if (!newCategoryName.trim()) return

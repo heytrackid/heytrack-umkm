@@ -85,7 +85,7 @@ export const FormField = (props: FormFieldProps) => {
     let newValue: unknown = e.target.value;
 
     if (type === 'number') {
-      newValue = e.target.value === '' ? '' : parseFloat(e.target.value) || 0;
+      newValue = e.target.value === '' ? '' : parseFloat(e.target.value.replace(',', '.')) || 0;
     }
 
     if (propOnChange !== undefined) {
