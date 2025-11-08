@@ -22,13 +22,13 @@ const nextConfig: NextConfig = {
   // 🔥 Turbopack: aktifkan
   turbopack: {},
 
-  experimental: {
-    typedEnv: true,
-    serverActions: {
-      allowedOrigins: ['localhost:3000', '127.0.0.1:3000', appDomain].filter(Boolean),
-    },
-    optimizeCss: true,
-    optimizePackageImports: [
+    experimental: {
+      typedEnv: true,
+      serverActions: {
+        allowedOrigins: ['localhost:3000', '127.0.0.1:3000', appDomain].filter(Boolean),
+      },
+      optimizeCss: true,
+      optimizePackageImports: [
       'lucide-react',
       '@radix-ui/react-icons',
       'recharts',
@@ -51,6 +51,19 @@ const nextConfig: NextConfig = {
       '@radix-ui/react-toast',
       '@radix-ui/react-tooltip',
       'zod',
+      // 🚀 BUNDLE OPTIMIZATION: Added heavy packages
+      '@tanstack/react-table',
+      '@supabase/supabase-js',
+      '@tanstack/react-query',
+      'zustand',
+      'dompurify',
+      'react-hook-form',
+      'zod',
+      'date-fns',
+      'react-hot-toast',
+      'sonner',
+      'cmdk',
+      'input-otp',
     ],
     optimisticClientCache: false,
   },
