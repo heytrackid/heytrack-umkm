@@ -199,9 +199,41 @@ export class ProductionServices {
 
   private async reserveIngredientsForProduction(recipeId: string, quantity: number): Promise<void> {
     try {
-      // TODO: implement ingredient reservation logic
+      const { createServerClient } = await import('@/utils/supabase/client-safe')
+      const supabase = await createServerClient()
 
-      // Reserve ingredients logic here
+      // Get recipe ingredients
+      const { data: recipe, error: recipeError } = await supabase
+        .from('recipes')
+        .select('ingredients')
+        .eq('id', recipeId)
+        .single()
+
+      if (recipeError || !recipe) {
+        throw new Error(`Recipe not found: ${recipeId}`)
+      }
+
+      // Reserve each ingredient
+      for (const ingredient of recipe.ingredients || []) {
+        const requiredAmount = ingredient.quantity * quantity
+
+        // Create reservation record
+        const { error: reservationError } = await supabase
+          .from('ingredient_reservations')
+          .insert({
+            ingredient_id: ingredient.ingredient_id,
+            recipe_id: recipeId,
+            quantity: requiredAmount,
+            status: 'reserved',
+            created_at: new Date().toISOString()
+          })
+
+        if (reservationError) {
+          productionLogger.error({ reservationError, ingredient: ingredient.ingredient_id }, 'Failed to reserve ingredient')
+          throw reservationError
+        }
+      }
+
       productionLogger.info({ recipeId, quantity }, 'Ingredients reserved for production')
     } catch (error) {
       productionLogger.error({ error, recipeId }, 'Error reserving ingredients')
@@ -275,7 +307,17 @@ export class ProductionServices {
         return
       }
 
-      // TODO: implement releaseIngredientsForProduction
+      // Release reserved ingredients
+      const { error: releaseError } = await supabase
+        .from('ingredient_reservations')
+        .update({ status: 'released', updated_at: new Date().toISOString() })
+        .eq('recipe_id', batch.recipe_id)
+        .eq('status', 'reserved')
+
+      if (releaseError) {
+        productionLogger.error({ releaseError, batchId }, 'Failed to release ingredient reservations')
+        // Don't throw here - continue with batch cancellation
+      }
 
       const { error: updateError } = await supabase
         .from('production_batches')

@@ -3,6 +3,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useEffect, useRef, type RefObject } from 'react'
 
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 import type { Message } from '@/app/ai-chatbot/types'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -63,75 +64,88 @@ export const MessageList = ({
   }, [messages, isLoading, scrollAreaRef, useVirtualScrolling, virtualizer])
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      <ScrollArea className="h-full w-full">
-        {useVirtualScrolling ? (
-          // Virtual scrolling for long conversations
-          <div
-            ref={virtualizerRef}
-            className="h-full overflow-auto px-4 py-6"
-            style={{ contain: 'strict' }}
-          >
-            <div
-              style={{
-                height: `${virtualizer.getTotalSize()}px`,
-                width: '100%',
-                position: 'relative',
-              }}
-            >
-              {virtualizer.getVirtualItems().map((virtualItem) => {
-                const message = messages[virtualItem.index]
-                if (!message) {return null}
-                return (
-                  <div
-                    key={message?.['id'] ?? 'temp-key'}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      transform: `translateY(${virtualItem.start}px)`,
-                    }}
-                  >
-                    <div className="mb-6">
-                      <MessageBubble
-                        message={message}
-                        onSuggestionClick={onSuggestionClick}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
-              {isLoading ? (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: virtualizer.getTotalSize(),
-                    left: 0,
-                    width: '100%',
-                  }}
-                >
-                  <TypingIndicator />
-                </div>
-              ) : null}
+    <ErrorBoundary
+      fallback={
+        <div className="flex items-center justify-center h-full p-4">
+          <div className="text-center">
+            <div className="text-red-500 mb-2">⚠️ Terjadi kesalahan saat memuat pesan</div>
+            <div className="text-sm text-muted-foreground">
+              Silakan refresh halaman atau coba lagi nanti
             </div>
           </div>
-        ) : (
-          // Regular rendering for short conversations
-          <div ref={scrollAreaRef} className="px-4 py-6 space-y-6">
-            {messages.map((message) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                onSuggestionClick={onSuggestionClick}
-              />
-            ))}
+        </div>
+      }
+    >
+      <div className="absolute inset-0 overflow-hidden">
+        <ScrollArea className="h-full w-full mobile-scroll">
+          {useVirtualScrolling ? (
+            // Virtual scrolling for long conversations
+            <div
+              ref={virtualizerRef}
+              className="h-full overflow-auto px-4 py-6"
+              style={{ contain: 'strict' }}
+            >
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {virtualizer.getVirtualItems().map((virtualItem) => {
+                  const message = messages[virtualItem.index]
+                  if (!message) {return null}
+                  return (
+                    <div
+                      key={message?.['id'] ?? 'temp-key'}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                    >
+                      <div className="mb-6">
+                        <MessageBubble
+                          message={message}
+                          onSuggestionClick={onSuggestionClick}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+                {isLoading ? (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: virtualizer.getTotalSize(),
+                      left: 0,
+                      width: '100%',
+                    }}
+                  >
+                    <TypingIndicator />
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            // Regular rendering for short conversations
+            <div ref={scrollAreaRef} className="px-4 py-6 space-y-6">
+              {messages.map((message) => (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  onSuggestionClick={onSuggestionClick}
+                />
+              ))}
 
-            {isLoading ? <TypingIndicator /> : null}
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </ScrollArea>
-    </div>
+              {isLoading ? <TypingIndicator /> : null}
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </ScrollArea>
+      </div>
+    </ErrorBoundary>
   )
 }

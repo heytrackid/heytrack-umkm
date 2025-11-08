@@ -3,11 +3,11 @@ import { useSupabase } from '@/providers/SupabaseProvider'
 
 
 
-export function useAIService(): { processAIQuery: (query: string) => Promise<{ message: string; suggestions: string[]; data?: { businessContext: unknown } }> } {
+export function useAIService(sessionId?: string | null): { processAIQuery: (query: string) => Promise<{ message: string; suggestions: string[]; data?: Record<string, unknown> }> } {
   const { supabase } = useSupabase()
 
 
-  const processAIQuery = async (query: string): Promise<{ message: string; suggestions: string[]; data?: { businessContext: unknown } }> => {
+  const processAIQuery = async (query: string): Promise<{ message: string; suggestions: string[]; data?: Record<string, unknown> }> => {
     // Get current user ID for database filtering
     const { data: { user } } = await supabase.auth.getUser()
     const userId = user?.id
@@ -20,6 +20,8 @@ export function useAIService(): { processAIQuery: (query: string) => Promise<{ m
       }
     }
 
+    const startTime = Date.now()
+
     try {
       const response = await fetch('/api/ai/chat-enhanced', {
         method: 'POST',
@@ -29,8 +31,11 @@ export function useAIService(): { processAIQuery: (query: string) => Promise<{ m
         body: JSON.stringify({
           message: query,
           currentPage: window.location.pathname,
+          session_id: sessionId,
         }),
       })
+
+      const responseTime = Date.now() - startTime
 
       if (!response.ok) {
         throw new Error(`API request failed: ${response.status}`)
@@ -40,14 +45,37 @@ export function useAIService(): { processAIQuery: (query: string) => Promise<{ m
 
       return {
         message: data.message,
-        suggestions: data.suggestions || [],
-        data: data.metadata ? { businessContext: data.metadata } : undefined,
+        suggestions: (data.suggestions || []).map((s: any) => typeof s === 'string' ? s : s.text),
+        data: {
+          businessContext: data.metadata,
+          responseTimeMs: responseTime
+        },
       }
     } catch (error) {
-      apiLogger.error({ error, query }, 'AI Chatbot API call failed')
+      const responseTime = Date.now() - startTime
+      apiLogger.error({ error, query, responseTime }, 'AI Chatbot API call failed')
+
+      // Provide context-aware error messages
+      let errorMessage = 'Maaf, saya mengalami kesulitan memproses permintaan Anda.'
+      let suggestions = ['Coba lagi', 'Refresh halaman']
+
+      if (error instanceof Error) {
+        if (error.message.includes('rate limit') || error.message.includes('429')) {
+          errorMessage = '🤖 Saya sedang sibuk menjawab banyak pertanyaan. Silakan tunggu sebentar ya!'
+          suggestions = ['Tunggu 1 menit', 'Coba pertanyaan yang berbeda']
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = '📡 Sepertinya ada masalah koneksi. Periksa internet Anda dan coba lagi.'
+          suggestions = ['Periksa koneksi internet', 'Coba lagi dalam beberapa saat']
+        } else if (error.message.includes('timeout')) {
+          errorMessage = '⏰ Respons saya terlalu lama. Mari coba dengan pertanyaan yang lebih spesifik.'
+          suggestions = ['Buat pertanyaan lebih singkat', 'Tanyakan hal spesifik']
+        }
+      }
+
       return {
-        message: 'Maaf, saya mengalami kesulitan memproses permintaan Anda. Silakan coba lagi.',
-        suggestions: ['Coba lagi', 'Refresh halaman']
+        message: `${errorMessage}\n\n💡 **Alternatif**: Anda juga bisa cek langsung di menu yang relevan atau hubungi support jika urgent.`,
+        suggestions,
+        data: { responseTimeMs: responseTime }
       }
     }
   }

@@ -42,7 +42,7 @@ const RootLayout = async ({
   const nonce = await getNonce()
 
   return (
-    <html lang="id" suppressHydrationWarning className="dark h-full">
+    <html lang="id" suppressHydrationWarning className="dark h-full" nonce={nonce ?? undefined}>
       <head>
         {/* Mobile viewport with safe area support */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -52,11 +52,6 @@ const RootLayout = async ({
         <link rel="dns-prefetch" href={process['env']['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} />
         <link rel="preconnect" href="https://api.openrouter.ai" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.openrouter.ai" />
-
-        {/* CSP nonce for Next.js inline scripts */}
-        {nonce !== null && (
-          <meta property="csp-nonce" content={nonce} />
-        )}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100svh] m-0 p-0 w-full`}

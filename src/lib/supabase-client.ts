@@ -198,8 +198,8 @@ export async function typedSelect<T extends TableName>(
 /**
  * Get Supabase client instance (client-side)
  */
-export function getSupabaseClient() {
-  return createClient()
+export async function getSupabaseClient() {
+  return await createClient()
 }
 
 /**
@@ -216,7 +216,7 @@ export { updateSession } from '@/utils/supabase/middleware'
  */
 export async function isAuthenticated() {
   try {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
     return Boolean(user)
   } catch (_error) {
@@ -229,7 +229,7 @@ export async function isAuthenticated() {
  */
 export async function getCurrentUser() {
   try {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) {throw error}
     return user
@@ -243,7 +243,7 @@ export async function getCurrentUser() {
  */
 export async function signOut() {
   try {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
     const { error } = await supabase.auth.signOut()
     if (error) {throw error}
     return { success: true }

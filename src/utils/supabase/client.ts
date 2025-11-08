@@ -4,7 +4,7 @@ import { createClientLogger } from '@/lib/client-logger'
 
 let browserClient: ReturnType<typeof createBrowserClient> | null = null
 
-export function createClient() {
+export async function createClient() {
   // Return existing client if already created to prevent multiple instances
   if (browserClient) {
     return browserClient

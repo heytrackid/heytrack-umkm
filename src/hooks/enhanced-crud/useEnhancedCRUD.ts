@@ -73,7 +73,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
     setError(null)
 
     try {
-      const supabase = typed(createSupabaseClient())
+      const supabase = typed(await createSupabaseClient())
 
       const { data: result, error } = await supabase
         .from(table)
@@ -105,7 +105,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
     setError(null)
 
     try {
-      const supabase = typed(createSupabaseClient())
+      const supabase = typed(await createSupabaseClient())
 
       const { data: result, error } = await supabase
         .from(table)
@@ -139,7 +139,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
     setError(null)
 
     try {
-      const supabase = typed(createSupabaseClient())
+      const supabase = typed(await createSupabaseClient())
 
       // Check if record exists first
       const { data: existingRecord, error: fetchError } = await supabase
@@ -178,7 +178,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
     setError(null)
 
     try {
-      const supabase = typed(createSupabaseClient())
+      const supabase = typed(await createSupabaseClient())
 
       const { data: result, error } = await supabase
         .from(table)
@@ -217,7 +217,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
     setError(null)
 
     try {
-      const supabase = typed(createSupabaseClient())
+      const supabase = typed(await createSupabaseClient())
       const results: TRow[] = []
 
       for (const update of updates) {
@@ -262,7 +262,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
     setError(null)
 
     try {
-      const supabase = typed(createSupabaseClient())
+      const supabase = typed(await createSupabaseClient())
 
       const { error } = await supabase
         .from(table)

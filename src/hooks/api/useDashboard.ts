@@ -86,7 +86,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000)
 
     // Create Supabase client
-    const supabase = createClient()
+    const supabase = await createClient()
     
     // Fetch orders for today and this week
     const { data: todayOrders, error: todayError } = await supabase
@@ -213,7 +213,8 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
 
-      const { data: orders, error } = await createClient()
+      const supabase = await createClient()
+      const { data: orders, error } = await supabase
         .from('orders')
         .select('total_amount')
         .gte('created_at', dayStart.toISOString())

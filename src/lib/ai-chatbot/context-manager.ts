@@ -1,7 +1,10 @@
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ClientFile')
+import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import type { ChatContext } from './types'
+import type { Database } from '@/types/database'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Context Manager
@@ -28,11 +31,50 @@ export class ContextManager {
   async initializeSession(): Promise<void> {
     try {
       this['context'].conversationHistory = []
+
+      // Load existing conversation history if session exists
+      if (this['context'].sessionId) {
+        try {
+          // Note: This needs supabase client - should be passed from caller
+          // For now, assuming it's called from client with browser client
+          const { createClient } = await import('@/utils/supabase/client')
+          const supabase = await createClient()
+          const messages = await ChatSessionService.getMessages(
+            supabase as unknown as SupabaseClient<Database>,
+            this['context'].sessionId,
+            this['context'].userId,
+            20 // Load last 20 messages for context
+          )
+
+          // Convert to internal format
+          this['context'].conversationHistory = messages.map(msg => ({
+            role: msg.role as 'user' | 'assistant' | 'system',
+            content: msg.content,
+            timestamp: new Date(msg.created_at),
+            metadata: msg.metadata
+          }))
+
+          logger.info(
+            {
+              userId: this['context'].userId,
+              sessionId: this['context'].sessionId,
+              messageCount: messages.length
+            },
+            'Loaded conversation history for AI context'
+          )
+        } catch (error) {
+          logger.warn(
+            { error, userId: this['context'].userId, sessionId: this['context'].sessionId },
+            'Failed to load conversation history, starting fresh'
+          )
+          // Continue without history - don't fail the session
+        }
+      }
+
       logger.info(
         { userId: this['context']['userId'], sessionId: this['context'].sessionId },
         'AI session initialized'
       )
-      await Promise.resolve()
     } catch (error) {
       logger.error({ error }, 'Error initializing AI session')
       throw error

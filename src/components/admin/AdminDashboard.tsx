@@ -77,6 +77,17 @@ interface ErrorLog {
     stack_trace: string | null
 }
 
+interface ChatbotAnalytics {
+    totalSessions: number
+    totalMessages: number
+    avgSessionLength: number
+    topTopics: Array<{ topic: string; count: number }>
+    responseTimes: { avg: number; min: number; max: number }
+    userSatisfaction: number
+    fallbackUsage: number
+    popularSuggestions: Array<{ suggestion: string; usage: number }>
+}
+
 const getDurationClass = (duration: number): string => {
     if (duration > 1000) {
         return 'text-red-500'
@@ -91,6 +102,7 @@ const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
     const [metrics, setMetrics] = useState<SystemMetrics | null>(null)
     const [performanceLogs, setPerformanceLogs] = useState<PerformanceLog[]>([])
     const [errorLogs, setErrorLogs] = useState<ErrorLog[]>([])
+    const [chatbotAnalytics, setChatbotAnalytics] = useState<ChatbotAnalytics | null>(null)
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
     const { toast } = useToast()
@@ -119,6 +131,13 @@ const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
             if (errorRes.ok) {
                 const data = await errorRes.json() as ErrorLog[]
                 setErrorLogs(data)
+            }
+
+            // Load chatbot analytics
+            const chatbotRes = await fetch('/api/admin/chatbot-analytics?days=30')
+            if (chatbotRes.ok) {
+                const data = await chatbotRes.json() as ChatbotAnalytics
+                setChatbotAnalytics(data)
             }
         } catch (_error) {
             toast({
@@ -286,9 +305,10 @@ const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
 
             {/* Detailed Tabs */}
             <SwipeableTabs defaultValue="performance" className="w-full">
-                <SwipeableTabsList className="grid w-full grid-cols-4">
+                <SwipeableTabsList className="grid w-full grid-cols-5">
                     <SwipeableTabsTrigger value="performance">Performance</SwipeableTabsTrigger>
                     <SwipeableTabsTrigger value="database">Database</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="chatbot">Chatbot</SwipeableTabsTrigger>
                     <SwipeableTabsTrigger value="errors">Errors</SwipeableTabsTrigger>
                     <SwipeableTabsTrigger value="business">Business</SwipeableTabsTrigger>
                 </SwipeableTabsList>
@@ -441,6 +461,108 @@ const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
                                         </Alert>
                                     )}
                                 </>
+                            )}
+                        </CardContent>
+                    </Card>
+                </SwipeableTabsContent>
+
+                {/* Chatbot Tab */}
+                <SwipeableTabsContent value="chatbot" className="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Activity className="h-5 w-5" />
+                                AI Chatbot Analytics
+                            </CardTitle>
+                            <CardDescription>
+                                Chatbot usage statistics and performance metrics
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {chatbotAnalytics ? (
+                                <>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="p-3 bg-muted rounded-lg">
+                                            <div className="text-xs text-muted-foreground">Total Sessions</div>
+                                            <div className="text-lg font-bold">
+                                                {chatbotAnalytics.totalSessions}
+                                            </div>
+                                        </div>
+                                        <div className="p-3 bg-muted rounded-lg">
+                                            <div className="text-xs text-muted-foreground">Total Messages</div>
+                                            <div className="text-lg font-bold">
+                                                {chatbotAnalytics.totalMessages}
+                                            </div>
+                                        </div>
+                                        <div className="p-3 bg-muted rounded-lg">
+                                            <div className="text-xs text-muted-foreground">Avg Session Length</div>
+                                            <div className="text-lg font-bold">
+                                                {chatbotAnalytics.avgSessionLength.toFixed(1)}
+                                            </div>
+                                        </div>
+                                        <div className="p-3 bg-muted rounded-lg">
+                                            <div className="text-xs text-muted-foreground">User Satisfaction</div>
+                                            <div className="text-lg font-bold">
+                                                {chatbotAnalytics.userSatisfaction.toFixed(1)}/5
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <h4 className="font-semibold text-sm">Top Topics</h4>
+                                            <div className="space-y-1">
+                                                {chatbotAnalytics.topTopics.slice(0, 5).map((topic, index) => (
+                                                    <div key={topic.topic} className="flex justify-between text-sm">
+                                                        <span>{index + 1}. {topic.topic}</span>
+                                                        <span className="text-muted-foreground">{topic.count}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <h4 className="font-semibold text-sm">Response Times</h4>
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between text-sm">
+                                                    <span>Average</span>
+                                                    <span>{chatbotAnalytics.responseTimes.avg}ms</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span>Min</span>
+                                                    <span>{chatbotAnalytics.responseTimes.min}ms</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span>Max</span>
+                                                    <span>{chatbotAnalytics.responseTimes.max}ms</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {chatbotAnalytics.popularSuggestions.length > 0 && (
+                                        <div className="space-y-2">
+                                            <h4 className="font-semibold text-sm">Popular Suggestions</h4>
+                                            <div className="space-y-1">
+                                                {chatbotAnalytics.popularSuggestions.slice(0, 5).map((suggestion, index) => (
+                                                    <div key={suggestion.suggestion} className="flex justify-between text-sm">
+                                                        <span>{index + 1}. {suggestion.suggestion}</span>
+                                                        <span className="text-muted-foreground">{suggestion.usage}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="flex items-center justify-center py-8">
+                                    <div className="text-center">
+                                        <Activity className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                        <p className="text-sm text-muted-foreground">
+                                            Loading chatbot analytics...
+                                        </p>
+                                    </div>
+                                </div>
                             )}
                         </CardContent>
                     </Card>

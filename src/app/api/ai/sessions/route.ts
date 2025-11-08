@@ -34,7 +34,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     const limit = safeNumber(searchParams.get('limit'), 20)
 
     // List sessions
-    const sessions = await ChatSessionService.listSessions(user['id'], limit)
+    const sessions = await ChatSessionService.listSessions(supabase, user['id'], limit)
 
     apiLogger.info({ userId: user['id'], count: sessions.length }, 'Sessions listed')
 

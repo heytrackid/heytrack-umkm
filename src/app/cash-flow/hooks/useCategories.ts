@@ -23,7 +23,7 @@ export function useCategories() {
         const parsed = JSON.parse(stored)
         setCategories(parsed)
       } catch (error) {
-        console.error('Failed to parse stored categories:', error)
+        // Silent fail for category parsing - use default categories
         initializeDefaultCategories()
       }
     } else {

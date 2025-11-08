@@ -40,8 +40,8 @@ async function getHandler(_request: NextRequest, context: RouteContext): Promise
 
     // Get session and messages
     const [session, messages] = await Promise.all([
-      ChatSessionService.getSession(sessionId, user['id']),
-      ChatSessionService.getMessages(sessionId, user['id']),
+      ChatSessionService.getSession(supabase, sessionId, user['id']),
+      ChatSessionService.getMessages(supabase, sessionId, user['id']),
     ])
 
     apiLogger.info(
@@ -76,7 +76,7 @@ async function deleteHandler(_request: NextRequest, context: RouteContext): Prom
     const sessionId = id
 
     // Delete session
-    await ChatSessionService.deleteSession(sessionId, user['id'])
+    await ChatSessionService.deleteSession(supabase, sessionId, user['id'])
 
     apiLogger.info({ userId: user['id'], sessionId }, 'Session deleted')
 

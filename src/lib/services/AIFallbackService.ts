@@ -15,6 +15,7 @@ interface CachedResponse {
 export class AIFallbackService {
   private static readonly responseCache = new Map<string, CachedResponse>();
   private static readonly CACHE_TTL = 60 * 60 * 1000; // 1 hour
+  private static readonly MAX_CACHE_SIZE = 1000; // Prevent memory leaks
 
   /**
    * Get response with fallback strategy
@@ -56,17 +57,24 @@ export class AIFallbackService {
   }
 
   /**
-   * Cache a successful response
+   * Cache a successful response with size management
    */
   private static cacheResponse(query: string, response: string): void {
     const key = this.normalizeQuery(query);
+
+    // Prevent caching very long responses (memory optimization)
+    if (response.length > 10000) {
+      logger.debug('Skipping cache for long response');
+      return;
+    }
+
     this.responseCache.set(key, {
       query,
       response,
       timestamp: Date.now(),
     });
 
-    // Clean up old cache entries
+    // Clean up old cache entries and enforce size limits
     this.cleanupCache();
   }
 
@@ -388,14 +396,29 @@ export class AIFallbackService {
   }
 
   /**
-   * Clean up expired cache entries
+   * Clean up expired cache entries and enforce size limits
    */
   private static cleanupCache(): void {
     const now = Date.now();
+
+    // Remove expired entries
     for (const [key, cached] of this.responseCache.entries()) {
       if (now - cached['timestamp'] > this.CACHE_TTL) {
         this.responseCache.delete(key);
       }
+    }
+
+    // If still too large, remove oldest entries (LRU-style)
+    if (this.responseCache.size > this.MAX_CACHE_SIZE) {
+      const entries = Array.from(this.responseCache.entries());
+      entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+
+      const toRemove = entries.slice(0, this.responseCache.size - this.MAX_CACHE_SIZE + 50);
+      for (const [key] of toRemove) {
+        this.responseCache.delete(key);
+      }
+
+      logger.debug(`Cache cleanup: removed ${toRemove.length} old entries`);
     }
   }
 }

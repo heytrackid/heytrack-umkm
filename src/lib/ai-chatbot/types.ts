@@ -22,7 +22,7 @@ export interface ChatContext {
   userId: string
   sessionId?: string
   conversationHistory?: Array<{
-    role: 'assistant' | 'user'
+    role: 'assistant' | 'user' | 'system'
     content: string
     timestamp: Date
   }>

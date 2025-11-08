@@ -100,6 +100,14 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
   })
   const [dateError, setDateError] = useState<string>('')
 
+  // Helper function for responsive tab labels
+  const getTabLabel = (full: string, short: string) => (
+    <>
+      <span className="hidden sm:inline">{full}</span>
+      <span className="sm:hidden">{short}</span>
+    </>
+  )
+
   const validateDateRange = (start: string | undefined, end: string | undefined): boolean => {
     if (!start || !end) {return false}
     const startDate = new Date(start)
@@ -366,25 +374,26 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
         </Card>
 
         {/* Reports Tabs */}
-        <SwipeableTabs defaultValue="profit" className="space-y-4">
-          <SwipeableTabsList className="h-12">
-            <SwipeableTabsTrigger value="profit" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Profit & Loss
-            </SwipeableTabsTrigger>
-            <SwipeableTabsTrigger value="sales" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Penjualan
-            </SwipeableTabsTrigger>
-            <SwipeableTabsTrigger value="inventory" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
-              <Package className="h-4 w-4 mr-2" />
-              Inventory
-            </SwipeableTabsTrigger>
-            <SwipeableTabsTrigger value="financial" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
-              <DollarSign className="h-4 w-4 mr-2" />
-              Keuangan
-            </SwipeableTabsTrigger>
-          </SwipeableTabsList>
+        <div className="w-full overflow-hidden">
+          <SwipeableTabs defaultValue="profit" className="space-y-4">
+            <SwipeableTabsList className="h-12 w-full">
+              <SwipeableTabsTrigger value="profit" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                {getTabLabel('Profit & Loss', 'Profit')}
+              </SwipeableTabsTrigger>
+              <SwipeableTabsTrigger value="sales" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                {getTabLabel('Penjualan', 'Sales')}
+              </SwipeableTabsTrigger>
+              <SwipeableTabsTrigger value="inventory" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
+                <Package className="h-4 w-4 mr-2" />
+                {getTabLabel('Inventory', 'Inv')}
+              </SwipeableTabsTrigger>
+              <SwipeableTabsTrigger value="financial" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
+                <DollarSign className="h-4 w-4 mr-2" />
+                {getTabLabel('Keuangan', 'Fin')}
+              </SwipeableTabsTrigger>
+            </SwipeableTabsList>
 
           <SwipeableTabsContent value="profit">
             <EnhancedProfitReport dateRange={dateRange} />
@@ -402,6 +411,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
             <FinancialReport dateRange={dateRange} />
           </SwipeableTabsContent>
         </SwipeableTabs>
+        </div>
 
         {children}
       </div>

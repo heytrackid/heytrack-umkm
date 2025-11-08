@@ -1,10 +1,10 @@
 export interface Message {
   id: string
-  role: 'assistant' | 'user'
+  role: 'assistant' | 'user' | 'system'
   content: string
   timestamp: Date
   suggestions?: string[]
-  data?: Record<string, unknown> | unknown[] | boolean | number | string | null
+  data?: Record<string, unknown>
 }
 
 export interface ChatSuggestion {

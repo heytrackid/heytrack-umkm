@@ -91,8 +91,9 @@ function validateAndSanitizeMessage(message: string, userId: string): string {
     throw new APIError('Message cannot be empty', { status: 400 })
   }
 
-  // Detect potential prompt injection attempts
+  // Enhanced input validation and security checks
   const suspiciousPatterns = [
+    // Prompt injection patterns
     /ignore\s+(previous|all|above)\s+instructions?/i,
     /forget\s+(everything|all|previous)/i,
     /you\s+are\s+now/i,
@@ -101,6 +102,24 @@ function validateAndSanitizeMessage(message: string, userId: string): string {
     /\[SYSTEM\]/i,
     /<\|im_start\|>/i,
     /<\|im_end\|>/i,
+    // Additional security patterns
+    /override.*settings/i,
+    /bypass.*security/i,
+    /admin.*mode/i,
+    /root.*access/i,
+    /sudo/i,
+    /eval\s*\(/i,
+    /exec\s*\(/i,
+    /require\s*\(/i,
+    /import\s*\(/i,
+    // SQL injection patterns
+    /union\s+select/i,
+    /drop\s+table/i,
+    /alter\s+table/i,
+    /script.*alert/i,
+    /javascript:/i,
+    /onload\s*=/i,
+    /onerror\s*=/i,
   ]
 
   const containsSuspiciousPattern = suspiciousPatterns.some(pattern => pattern.test(sanitizedMessage))
@@ -108,20 +127,48 @@ function validateAndSanitizeMessage(message: string, userId: string): string {
   if (containsSuspiciousPattern) {
     logger.warn(
       { userId, message: sanitizedMessage.substring(0, 100) },
-      'Potential prompt injection attempt detected'
+      'Potential security threat detected in AI chat input'
     )
-    // Don't reject, but log for monitoring
+    throw new APIError('Input mengandung konten yang tidak diizinkan.', { status: 400, code: 'INVALID_INPUT' })
+  }
+
+  // Content quality checks
+  const spamPatterns = [
+    /(.)\1{10,}/, // Repeated characters
+    /\b(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+\.[a-z]{2,}(?:\/\S*)?/gi, // URLs
+    /\b\d{10,}\b/g, // Long numbers (potentially phone numbers)
+  ]
+
+  const containsSpam = spamPatterns.some(pattern => pattern.test(sanitizedMessage))
+  if (containsSpam) {
+    logger.warn({ userId }, 'Potential spam content detected')
+    throw new APIError('Input terdeteksi sebagai spam.', { status: 400, code: 'SPAM_DETECTED' })
+  }
+
+  // Length and content validation
+  if (sanitizedMessage.length < 2) {
+    throw new APIError('Pertanyaan terlalu pendek. Minimal 2 karakter.', { status: 400 })
+  }
+
+  if (sanitizedMessage.length > 2000) {
+    throw new APIError('Pertanyaan terlalu panjang. Maksimal 2000 karakter.', { status: 400 })
+  }
+
+  // Check for meaningful content (not just symbols/numbers)
+  const meaningfulContent = sanitizedMessage.replace(/[^\w\s]/g, '').trim()
+  if (meaningfulContent.length < 1) {
+    throw new APIError('Pertanyaan harus mengandung kata yang bermakna.', { status: 400 })
   }
 
   return sanitizedMessage
 }
 
-async function handleSession(userId: string, sessionId: string | undefined, message: string, currentPage?: string): Promise<string> {
+async function handleSession(supabase: SupabaseClient, userId: string, sessionId: string | undefined, message: string, currentPage?: string): Promise<string> {
   if (sessionId) {return sessionId}
 
   const context = await BusinessContextService.loadContext(userId, currentPage)
   const title = ChatSessionService.generateTitle(message)
-  const session = await ChatSessionService.createSession(userId, title, context)
+  const session = await ChatSessionService.createSession(supabase, userId, title, context)
   return session['id']
 }
 
@@ -168,14 +215,14 @@ async function chatEnhancedPOST(request: NextRequest): Promise<NextResponse> {
         })()
       : undefined
 
-    const sessionId = await handleSession(userId, safeSessionId, sanitizedMessage, safeCurrentPage)
+    const sessionId = await handleSession(supabase, userId, safeSessionId, sanitizedMessage, safeCurrentPage)
 
-    await ChatSessionService.addMessage(sessionId, 'user', sanitizedMessage)
+    await ChatSessionService.addMessage(supabase, sessionId, 'user', sanitizedMessage)
 
     const { aiResponse, fallbackUsed } = await processAIResponse(userId, sessionId, sanitizedMessage, safeCurrentPage)
 
     const responseTime = Date.now() - startTime
-    await ChatSessionService.addMessage(sessionId, 'assistant', aiResponse, {
+    await ChatSessionService.addMessage(supabase, sessionId, 'assistant', aiResponse, {
       response_time_ms: responseTime,
       fallback_used: fallbackUsed,
     })
@@ -188,7 +235,7 @@ async function chatEnhancedPOST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({
       message: aiResponse,
       session_id: sessionId,
-      suggestions,
+      suggestions: suggestions.map(s => s.text),
       metadata: {
         response_time_ms: responseTime,
         fallback_used: fallbackUsed,

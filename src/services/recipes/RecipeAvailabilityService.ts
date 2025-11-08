@@ -226,7 +226,22 @@ export class RecipeAvailabilityService {
         const price = recipe.selling_price ?? 0
         const estimatedMargin = 0.3
 
-        const isAvailable = true // TODO: implement checkIngredientAvailability
+        // Check ingredient availability based on recipe_ingredients data
+        let isAvailable = true
+        const insufficientIngredients: string[] = []
+
+        for (const recipeIngredient of recipe.recipe_ingredients || []) {
+          const ingredient = recipeIngredient.ingredient
+          if (!ingredient) continue
+
+          const requiredAmount = recipeIngredient.quantity * (recipe.servings ?? 1)
+          const availableStock = ingredient.current_stock ?? 0
+
+          if (availableStock < requiredAmount) {
+            isAvailable = false
+            insufficientIngredients.push(`${ingredient.name}: perlu ${requiredAmount}, tersedia ${availableStock}`)
+          }
+        }
 
         return {
           id: recipe['id'],

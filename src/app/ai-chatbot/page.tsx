@@ -27,8 +27,8 @@ const MessageList = dynamic(() => import('./components').then(mod => ({ default:
 const AIChatbotPage = (): JSX.Element => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
-  const { messages, isLoading, scrollAreaRef, addMessage, setLoading } = useChatMessages()
-  const { processAIQuery } = useAIService()
+  const { messages, isLoading, scrollAreaRef, addMessage, setLoading, currentSessionId } = useChatMessages()
+  const { processAIQuery } = useAIService(currentSessionId)
   const [input, setInput] = useState('')
 
   // Redirect if not authenticated
@@ -107,8 +107,8 @@ const AIChatbotPage = (): JSX.Element => {
 
   return (
     <AppLayout pageTitle="AI Chatbot">
-      {/* Full viewport chat container */}
-      <div className="flex flex-col h-[calc(100vh-4rem)]">
+      {/* Full viewport chat container with mobile optimizations */}
+      <div className="flex flex-col h-[calc(100vh-4rem)] safe-top">
         {/* Minimal header */}
         <div className="flex-shrink-0">
           <Suspense fallback={<div className="h-12 bg-muted animate-pulse" />}>
@@ -117,7 +117,7 @@ const AIChatbotPage = (): JSX.Element => {
         </div>
 
         {/* Messages area - takes remaining height */}
-        <div className="flex-1 overflow-hidden relative">
+        <div className="flex-1 overflow-hidden relative min-h-0">
           <Suspense fallback={<div className="flex-1 bg-muted animate-pulse" />}>
             <MessageList
               messages={messages}
@@ -128,7 +128,7 @@ const AIChatbotPage = (): JSX.Element => {
           </Suspense>
         </div>
 
-        {/* Input area - fixed at bottom */}
+        {/* Input area - fixed at bottom with safe area */}
         <div className="flex-shrink-0">
           <Suspense fallback={<div className="h-20 bg-muted animate-pulse" />}>
             <ChatInput

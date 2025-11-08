@@ -63,17 +63,12 @@ const SwipeableTabsList = ({
   ...props
 }: SwipeableTabsListProps) => {
   const [isMobile, setIsMobile] = useState(false)
-  const [isScrollable, setIsScrollable] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const childrenArray = React.Children.toArray(children)
 
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768)
-      if (containerRef.current) {
-        // Check if content overflows the container
-        setIsScrollable(containerRef.current.scrollWidth > containerRef.current.clientWidth)
-      }
     }
 
     checkIfMobile()
@@ -93,11 +88,11 @@ const SwipeableTabsList = ({
     }
   }
 
-  // Only show scroll buttons on mobile when content is scrollable
-  const showScrollButtons = isMobile && isScrollable && enableSwipe
+  // Always show scroll buttons on mobile for better UX, regardless of scrollable state
+  const showScrollButtons = isMobile && enableSwipe
 
   return (
-    <div className="relative">
+    <div className="relative w-full overflow-hidden">
       {showScrollButtons && (
         <Button
           variant="ghost"
