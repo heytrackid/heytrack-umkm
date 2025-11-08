@@ -26,7 +26,16 @@ const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps) => {
   const { data: ingredients } = useSupabaseCRUD<'ingredients'>('ingredients')
 
   // Calculate inventory report
-  const ingredientList = ingredients ?? []
+  const ingredientList = (ingredients ?? []).filter(ingredient => {
+    if (!_dateRange.start || !_dateRange.end) {
+      return true
+    }
+    const updatedAt = ingredient.updated_at
+    if (!updatedAt) {
+      return true
+    }
+    return updatedAt >= _dateRange.start && updatedAt <= _dateRange.end
+  })
 
   const inventoryStats = ingredientList.reduce<InventoryStats>(
     (stats, ingredient) => {

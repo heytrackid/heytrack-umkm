@@ -15,11 +15,25 @@ export function getStatusInfo(status: string) {
  * Get priority information for an order
  */
 export function getPriorityInfo(_priority: string) {
-  // Simplified - return default
-  return {
-    label: 'Normal',
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-100'
+  switch (_priority.toLowerCase()) {
+    case 'high':
+      return {
+        label: 'High',
+        color: 'text-red-600',
+        bgColor: 'bg-red-100'
+      }
+    case 'low':
+      return {
+        label: 'Low',
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-100'
+      }
+    default:
+      return {
+        label: 'Normal',
+        color: 'text-gray-600',
+        bgColor: 'bg-gray-100'
+      }
   }
 }
 

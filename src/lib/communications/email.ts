@@ -19,7 +19,7 @@ export class EmailService {
 
   sendEmail(to: string, subject: string, _html: string): boolean {
     // Placeholder for email implementation
-    logger.info({ to, subject, from: this.config.fromEmail }, 'Email sent (placeholder)')
+    logger.info({ to, subject, html: _html, from: this.config.fromEmail }, 'Email sent (placeholder)')
     return true
   }
 }

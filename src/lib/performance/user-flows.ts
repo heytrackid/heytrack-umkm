@@ -234,6 +234,7 @@ export const trackUserInteraction = (
  */
 export const useComponentPerformance = (_componentName: string) => {
   const [performanceData, setPerformanceData] = useState({
+    componentName: _componentName,
     renderCount: 0,
     avgRenderTime: 0,
     totalRenderTime: 0,

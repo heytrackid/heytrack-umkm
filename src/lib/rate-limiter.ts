@@ -1,6 +1,8 @@
 import { dbLogger } from './logger';
 
-import type { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server'
+
+import { logger } from '@/lib/logger'
 
 // Simple in-memory rate limiter (for development)
 // In production, use Redis or similar
@@ -65,6 +67,7 @@ class ProductionRateLimiter {
   checkLimit(_identifier: string, maxRequests: number, windowMs: number, _request?: NextRequest): { allowed: boolean; remaining: number; resetTime: number } {
     // In production, this would connect to Redis or similar
     // For now, we'll simulate with a simple approach
+    logger.info({ identifier: _identifier }, 'Rate limit check')
     const now = Date.now()
     const windowEnd = now + windowMs
     

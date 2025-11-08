@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 
 import { RoutePreloader } from '@/lib/bundle-splitting'
+import { createClientLogger } from '@/lib/client-logger'
 
 /**
  * Hook for preloading routes on user interaction
@@ -20,10 +21,12 @@ export function useRoutePreloader() {
  * Hook for preloading components on visibility
  */
 export function useComponentPreloader() {
+  const logger = createClientLogger('ComponentPreloader')
+
   const preloadComponent = useCallback((_componentId: string, importFunc: () => Promise<unknown>) =>
     importFunc().catch(() => {
-      // Silently handle preload failures
-    }), [])
+      logger.warn({ componentId: _componentId }, 'Failed to preload component')
+    }), [logger])
 
   return { preloadComponent }
 }
