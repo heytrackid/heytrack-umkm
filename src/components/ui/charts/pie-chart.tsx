@@ -88,7 +88,7 @@ export const MobilePieChart = memo(({
               fill="#8884d8"
               dataKey={valueKey}
             >
-              {data.map((_entry, _index) => (
+              {data.map((_, _index) => (
                 <Cell
                   key={`cell-${_index}`}
                   fill={colors[_index % colors.length]}

@@ -471,8 +471,12 @@ export function useBatchStatus(batchId: string) {
   const updateStatus = async (newStatus: ProductionStatus, _reason?: string) => {
     try {
       // Use the status value directly as it matches the database enum type
-      const updateData: UpdateBatchData = { 
+      const updateData: UpdateBatchData = {
         status: newStatus
+      }
+
+      if (_reason) {
+        updateData.notes = _reason
       }
 
       // Add timestamps for specific status changes

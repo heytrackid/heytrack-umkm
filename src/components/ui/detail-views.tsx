@@ -84,16 +84,27 @@ interface DetailFieldProps {
   copyable?: boolean
 }
 
-export const DetailField = ({ label, value, className, copyable: _copyable }: DetailFieldProps) => (
-  <div className={`flex justify-between items-start py-2 ${className ?? ''}`}>
-    <span className="text-sm font-medium text-gray-600 min-w-0 flex-1">
-      {label}
-    </span>
-    <span className="text-sm text-gray-900 ml-4 text-right">
-      {value}
-    </span>
-  </div>
-)
+export const DetailField = ({ label, value, className, copyable: _copyable }: DetailFieldProps) => {
+  const handleCopy = () => {
+    if (_copyable && typeof value === 'string') {
+      navigator.clipboard.writeText(value)
+    }
+  }
+
+  return (
+    <div className={`flex justify-between items-start py-2 ${className ?? ''}`}>
+      <span className="text-sm font-medium text-gray-600 min-w-0 flex-1">
+        {label}
+      </span>
+      <span
+        className={`text-sm text-gray-900 ml-4 text-right ${_copyable ? 'cursor-pointer hover:text-blue-600' : ''}`}
+        onClick={handleCopy}
+      >
+        {value}
+      </span>
+    </div>
+  )
+}
 
 // Detail grid for multiple fields
 interface DetailGridProps {
