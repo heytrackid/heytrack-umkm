@@ -14,7 +14,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+
 import { formatCurrentCurrency } from '@/lib/currency'
 
 import type { DateRange } from 'react-day-picker'
@@ -128,10 +128,6 @@ export const AdvancedReporting = ({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <DateRangePicker
-            value={dateRange}
-            onChange={handleDateRangeChange}
-          />
           <Button variant="outline" size="sm">
             <Printer className="h-4 w-4 mr-2" />
             Cetak

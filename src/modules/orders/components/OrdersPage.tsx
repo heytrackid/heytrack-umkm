@@ -13,7 +13,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -25,7 +25,7 @@ import { getErrorMessage } from '@/lib/type-guards'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
 
-import type { DateRange } from 'react-day-picker'
+
 
 
 const logger = createClientLogger('OrdersPage')
@@ -159,7 +159,6 @@ const OrdersPage = (_props: OrdersPageProps) => {
   const [showOrderForm, setShowOrderForm] = useState(false)
   const [showOrderDetail, setShowOrderDetail] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
 
   const handleCreateOrder = useCallback(() => {
     setSelectedOrder(null)
@@ -490,18 +489,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                     </SelectContent>
                   </Select>
 
-                   <DateRangePicker
-                     value={dateRange}
-                     onChange={(newDateRange) => {
-                       setDateRange(newDateRange)
-                        setFilters(prev => ({
-                          ...prev,
-                          date_from: newDateRange?.from ? newDateRange.from.toISOString().split('T')[0] : '',
-                          date_to: newDateRange?.to ? newDateRange.to.toISOString().split('T')[0] : ''
-                        } as OrderFilters))
-                     }}
-                     className="w-full sm:w-[240px]"
-                   />
+
 
                    <Button variant="outline">
                      <Filter className="h-4 w-4 mr-2" />

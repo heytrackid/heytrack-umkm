@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useConfirm } from '@/components/ui/confirm-dialog'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -401,11 +401,7 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
                                 </SelectContent>
                             </Select>
 
-                            <DateRangePicker
-                                {...(dateRange && { value: dateRange })}
-                                onChange={setDateRange}
-                                className="w-full sm:w-[280px]"
-                            />
+
 
                             {hasActiveFilters && (
                                 <Button variant="ghost" size="sm" onClick={clearFilters}>

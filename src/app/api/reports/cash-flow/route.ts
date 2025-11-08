@@ -4,7 +4,7 @@ export const runtime = 'nodejs'
 
 import { type NextRequest, NextResponse } from 'next/server'
 
- import { safeParseAmount, safeString } from '@/lib/api-helpers'
+
  import { apiLogger } from '@/lib/logger'
  import { withSecurity, SecurityPresets } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
@@ -114,8 +114,8 @@ async function getHandler(request: NextRequest) {
     const expenses = validTransactions.filter((t: FinancialRecordPartial) => t.category !== 'Revenue')
 
     // Calculate totals
-    const totalIncome = income.reduce((sum: number, t: FinancialRecordPartial) => sum + safeParseAmount(t.amount), 0)
-    const totalExpenses = expenses.reduce((sum: number, t: FinancialRecordPartial) => sum + safeParseAmount(t.amount), 0)
+    const totalIncome = income.reduce((sum: number, t: FinancialRecordPartial) => sum + (t.amount ?? 0), 0)
+    const totalExpenses = expenses.reduce((sum: number, t: FinancialRecordPartial) => sum + (t.amount ?? 0), 0)
     const netCashFlow = totalIncome - totalExpenses
 
     // Group by period
@@ -142,10 +142,10 @@ async function getHandler(request: NextRequest) {
     const transactionsList = validTransactions.map((t: FinancialRecordPartial) => ({
       id: t['id'],
       reference_id: t.reference ?? t['id'],
-      date: t.date ?? '',
-      description: safeString(t.description),
-      category: safeString(t.category),
-      amount: safeParseAmount(t.amount),
+       date: t.date ?? '',
+       description: String(t.description),
+       category: String(t.category),
+       amount: t.amount ?? 0,
       type: t.category === 'Revenue' ? 'income' : 'expense'
     }))
 
@@ -241,7 +241,7 @@ function groupByPeriod(transactions: FinancialRecordPartial[], period: string) {
       net_cash_flow: 0,
       transaction_count: 0
     }
-    const amount = safeParseAmount(transaction.amount)
+    const amount = transaction.amount ?? 0
     if (transaction.category === 'Revenue') {
       currentGroup.income += amount
     } else {
@@ -261,7 +261,7 @@ function calculateCategoryBreakdown(transactions: FinancialRecordPartial[]) {
   const breakdown: Record<string, CategoryBreakdownProcessing> = {}
 
   transactions.forEach(transaction => {
-    const category = safeString(transaction.category)
+    const category = String(transaction.category)
     const subcategory = 'Other' // No subcategory in financial_records
 
     breakdown[category] ??= {
@@ -272,7 +272,7 @@ function calculateCategoryBreakdown(transactions: FinancialRecordPartial[]) {
       subcategories: {} as Record<string, Subcategory>
     }
 
-    const amount = safeParseAmount(transaction.amount)
+    const amount = transaction.amount ?? 0
     breakdown[category].total += amount
     breakdown[category].count++
 
@@ -309,8 +309,8 @@ function calculateCategoryBreakdown(transactions: FinancialRecordPartial[]) {
 function groupByCategory(transactions: FinancialRecordPartial[]) {
   const grouped: Record<string, number> = {}
   transactions.forEach(t => {
-    const category = safeString(t.category)
-    grouped[category] = (grouped[category] ?? 0) + safeParseAmount(t.amount)
+    const category = String(t.category)
+    grouped[category] = (grouped[category] ?? 0) + (t.amount ?? 0)
   })
   return grouped
 }
@@ -388,8 +388,8 @@ async function calculateComparison(supabase: Awaited<ReturnType<typeof createCli
   const prevIncome = prevTransactions.filter((t: LimitedRecord) => t.category === 'Revenue')
   const prevExpenses = prevTransactions.filter((t: LimitedRecord) => t.category !== 'Revenue')
 
-  const prevTotalIncome = prevIncome.reduce((sum: number, t: LimitedRecord) => sum + safeParseAmount(t.amount), 0)
-  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: LimitedRecord) => sum + safeParseAmount(t.amount), 0)
+  const prevTotalIncome = prevIncome.reduce((sum: number, t: LimitedRecord) => sum + (value => value ?? 0)(t.amount), 0)
+  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: LimitedRecord) => sum + (value => value ?? 0)(t.amount), 0)
   const prevNetCashFlow = prevTotalIncome - prevTotalExpenses
 
   return {
@@ -406,12 +406,12 @@ async function calculateComparison(supabase: Awaited<ReturnType<typeof createCli
 // Helper: Get top transactions
 function getTopTransactions(transactions: FinancialRecordPartial[], limit: number) {
   return transactions
-    .sort((a, b) => safeParseAmount(b.amount) - safeParseAmount(a.amount))
+    .sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0))
     .slice(0, limit)
     .map(t => ({
-      description: safeString(t.description),
-      amount: safeParseAmount(t.amount),
+      description: String(t.description),
+      amount: t.amount ?? 0,
       date: t.date,
-      category: safeString(t.category)
+      category: String(t.category)
     }))
 }

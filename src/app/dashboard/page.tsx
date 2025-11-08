@@ -1,15 +1,15 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Plus, Users, Filter } from 'lucide-react'
+import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Plus, Users } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
 
-import { DateRangePicker } from '@/components/date-range/DateRangePicker'
-import { AppLayout } from '@/components/layout/app-layout'
+import AppLayout from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { LoadingButton } from '@/components/ui/loading-button'
 import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useAuth } from '@/hooks'
@@ -501,31 +501,7 @@ const Dashboard = (): JSX.Element => {
           })}${user?.email ? `, Selamat datang kembali, ${user.email.split('@')[0] ?? 'User'}! 👋` : ''}`}
         />
 
-        {/* Date Range Filter Card */}
-        <Card className="border-0 shadow-sm">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
-                Filter Tanggal
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <DateRangePicker
-                defaultPresetId="this_month"
-                onRangeChange={(_range) => {
-                  // Handle date range change - likely need to refetch dashboard data
-                }}
-                onFetch={(_range) => {
-                  // This would trigger the dashboard data refetch with the new date range
-                }}
-                maxDays={365}
-              />
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Enhanced Empty State - Show when user has no data */}
         {hasNoData && renderEmptyState(showOnboarding, setShowOnboarding, router)}

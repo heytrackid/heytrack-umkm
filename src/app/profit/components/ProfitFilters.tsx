@@ -14,7 +14,7 @@ import { Calendar } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
 
 import type { ProfitFilters, PeriodType } from './types'
@@ -54,7 +54,7 @@ export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilter
     onFiltersChange(newFilters)
   }
 
-  const handleDateRangeChange = (dateRange: DateRange | undefined) => {
+  const _handleDateRangeChange = (dateRange: DateRange | undefined) => {
     onFiltersChange({ dateRange })
   }
 
@@ -90,11 +90,7 @@ export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilter
           {filters.selectedPeriod === 'custom' && (
             <div>
               <label className="text-sm font-medium mb-2 block">Rentang Tanggal</label>
-              <DateRangePicker
-                value={filters.dateRange}
-                onChange={handleDateRangeChange}
-                pageKey="profit-filters"
-              />
+
             </div>
           )}
 

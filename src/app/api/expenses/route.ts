@@ -4,10 +4,10 @@ export const runtime = 'nodejs'
 
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { safeParseAmount, safeString } from '@/lib/api-helpers'
+
 import { formatCurrency } from '@/lib/currency'
 import { apiLogger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/type-guards'
+import { safeString, getErrorMessage } from '@/lib/type-guards'
 import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/domains/common'
 import { FinancialRecordInsertSchema, type FinancialRecordInsert } from '@/lib/validations/domains/finance'
 import type { Insert } from '@/types/database'
@@ -139,14 +139,14 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     interface ExpensePartial { amount: number; category: string }
     
     const todayTotal = (todayExpenses ?? []).reduce((sum: number, exp: ExpensePartial) =>
-      sum + safeParseAmount(exp.amount), 0)
+      sum + (value => value ?? 0)(exp.amount), 0)
     const monthTotal = (monthExpenses ?? []).reduce((sum: number, exp: ExpensePartial) =>
-      sum + safeParseAmount(exp.amount), 0)
+      sum + (value => value ?? 0)(exp.amount), 0)
 
     // Category breakdown
     const categoryBreakdown = monthExpenses?.reduce((acc: Record<string, number>, exp: ExpensePartial) => {
       const category = safeString(exp.category, 'Uncategorized')
-      acc[category] = (acc[category] ?? 0) + safeParseAmount(exp.amount)
+      acc[category] = (acc[category] ?? 0) + (value => value ?? 0)(exp.amount)
       return acc
     }, {} as Record<string, number>) ?? {}
 
@@ -214,7 +214,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     if (error) {throw error}
 
     // Create notification for large expenses
-    const expenseAmount = safeParseAmount(validatedData.amount)
+    const expenseAmount = (value => value ?? 0)(validatedData.amount)
     if (expenseAmount > 1000000 && expense) { // More than 1M IDR
       const notificationPayload: Insert<'notifications'> = {
         user_id: expense.user_id,

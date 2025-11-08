@@ -35,7 +35,6 @@ export {
 export {
   SearchInput,
   AdvancedFilters,
-  DateRangePicker,
   SortableColumn,
   ExportActions,
   BulkActions,

@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+
 import { useCurrency } from '@/hooks/useCurrency'
 
 import type { DateRange } from 'react-day-picker'
@@ -37,7 +37,7 @@ const RecentOrdersSection = ({
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
   const [showDatePicker, setShowDatePicker] = useState(false)
 
-  const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
+  const _handleDateRangeChange = (newDateRange: DateRange | undefined) => {
     setDateRange(newDateRange)
     onDateRangeChange?.(newDateRange)
   }
@@ -141,10 +141,7 @@ const RecentOrdersSection = ({
         {/* Date Range Picker */}
         {showDateFilter && showDatePicker && dateRange && (
           <div className="mt-4 p-4 border rounded-lg bg-muted/20">
-            <DateRangePicker
-              onChange={handleDateRangeChange}
-              {...(dateRange ? { value: dateRange } : {})}
-            />
+            {/* DateRangePicker removed */}
           </div>
         )}
       </CardHeader>

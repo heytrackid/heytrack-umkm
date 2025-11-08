@@ -665,6 +665,7 @@ export default [
     ignores: [
       "node_modules/**",
       ".next/**",
+      ".tmp/**",
       "out/**",
       "build/**",
       "dist/**",

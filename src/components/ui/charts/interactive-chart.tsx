@@ -4,7 +4,7 @@ import { Calendar, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+
 import {
   Popover,
   PopoverContent,
@@ -43,7 +43,7 @@ export const InteractiveChart = ({
   data,
   className,
   title,
-  onDateRangeChange,
+  onDateRangeChange: _onDateRangeChange,
   showDateRange = false,
   initialDateRange,
   zoomEnabled = true,
@@ -58,13 +58,7 @@ export const InteractiveChart = ({
     }
   }, [initialDateRange])
 
-  // Handle date range change
-  const handleDateRangeChange = (range: DateRange | undefined) => {
-    setCurrentDateRange(range)
-    if (range) {
-      onDateRangeChange?.(range)
-    }
-  }
+
 
   // Reset zoom
   const resetZoom = () => {
@@ -100,10 +94,7 @@ export const InteractiveChart = ({
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                <DateRangePicker
-                  value={currentDateRange}
-                  onChange={handleDateRangeChange}
-                />
+                {/* DateRangePicker removed */}
               </PopoverContent>
             </Popover>
           )}

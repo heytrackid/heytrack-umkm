@@ -3,9 +3,9 @@ export const runtime = 'nodejs'
 
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { safeParseAmount, safeParseInt, safeString, safeTimestamp, isInArray } from '@/lib/api-helpers'
+
 import { apiLogger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/type-guards'
+import { safeString, getErrorMessage } from '@/lib/type-guards'
 import type { Database, OrderStatus } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 import { withSecurity, SecurityPresets } from '@/utils/security'
@@ -252,23 +252,23 @@ async function fetchDashboardData(
 }
 
 function calculateStats(data: DashboardFetchResult): DashboardStats {
-  const revenue = data.orders.reduce((sum, order) => sum + safeParseAmount(order.total_amount), 0)
-  const currentRevenue = data.currentPeriodOrders.reduce((sum, order) => sum + safeParseAmount(order.total_amount), 0)
+  const revenue = data.orders.reduce((sum, order) => sum + (value => value ?? 0)(order.total_amount), 0)
+  const currentRevenue = data.currentPeriodOrders.reduce((sum, order) => sum + (value => value ?? 0)(order.total_amount), 0)
   const activeOrders = data.orders.filter(order =>
-    isInArray(order.status, ['PENDING', 'CONFIRMED', 'IN_PROGRESS'] as const)
+    ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(order.status)
   ).length
 
   const totalCustomers = data.customers.length
   const vipCustomers = data.customers.filter(customer => safeString(customer.customer_type) === 'vip').length
 
   const lowStockItems = data.ingredients.filter(ingredient => {
-    const currentStock = safeParseAmount(ingredient.current_stock)
-    const threshold = safeParseAmount(ingredient.reorder_point ?? ingredient.min_stock)
+    const currentStock = (value => value ?? 0)(ingredient.current_stock)
+    const threshold = (value => value ?? 0)(ingredient.reorder_point ?? ingredient.min_stock)
     return currentStock <= threshold
   }).length
 
-  const expensesTotal = data.expenses.reduce((sum, expense) => sum + safeParseAmount(expense.amount), 0)
-  const comparisonRevenue = data.comparisonOrders.reduce((sum, order) => sum + safeParseAmount(order.total_amount), 0)
+  const expensesTotal = data.expenses.reduce((sum, expense) => sum + (value => value ?? 0)(expense.amount), 0)
+  const comparisonRevenue = data.comparisonOrders.reduce((sum, order) => sum + (value => value ?? 0)(order.total_amount), 0)
 
   return {
     totalRevenue: revenue,
@@ -295,15 +295,15 @@ function buildInventoryOverview(ingredients: IngredientRow[]): InventoryOverview
 
   const lowStockAlerts = ingredients
     .filter(ingredient => {
-      const currentStock = safeParseAmount(ingredient.current_stock)
-      const reorderPoint = safeParseAmount(ingredient.reorder_point ?? ingredient.min_stock)
+      const currentStock = (value => value ?? 0)(ingredient.current_stock)
+      const reorderPoint = (value => value ?? 0)(ingredient.reorder_point ?? ingredient.min_stock)
       return currentStock <= reorderPoint
     })
     .map(ingredient => ({
       id: ingredient.id,
       name: safeString(ingredient.name, 'Unknown'),
-      currentStock: safeParseAmount(ingredient.current_stock),
-      reorderPoint: safeParseAmount(ingredient.reorder_point ?? ingredient.min_stock)
+      currentStock: (value => value ?? 0)(ingredient.current_stock),
+      reorderPoint: (value => value ?? 0)(ingredient.reorder_point ?? ingredient.min_stock)
     }))
 
   return { categoryBreakdown, lowStockAlerts }
@@ -319,7 +319,7 @@ function buildRecentOrders(
   time: string | null
 }> {
   return [...orders]
-    .sort((a, b) => safeTimestamp(b.created_at) - safeTimestamp(a.created_at))
+    .sort((a, b) => (value => new Date(value || 0).getTime())(b.created_at) - (value => new Date(value || 0).getTime())(a.created_at))
     .slice(0, 5)
     .map(order => ({
       id: order.id,
@@ -334,7 +334,7 @@ function buildPopularRecipes(
   recipes: RecipeRow[]
 ): Array<Pick<RecipeRow, 'id' | 'name' | 'times_made'>> {
   return [...recipes]
-    .sort((a, b) => safeParseInt(b.times_made) - safeParseInt(a.times_made))
+    .sort((a, b) => (value => Math.floor(value ?? 0))(b.times_made) - (value => Math.floor(value ?? 0))(a.times_made))
     .slice(0, 3)
 }
 
@@ -450,9 +450,9 @@ async function fetchTodaySummary(
   const orderIds = orders.map(order => order.id)
   const todayItems = orderItems.filter(item => orderIds.includes(item.order_id))
 
-  const totalRevenue = orders.reduce((sum, order) => sum + safeParseAmount(order.total_amount), 0)
-  const totalItemsSold = todayItems.reduce((sum, item) => sum + safeParseInt(item.quantity), 0)
-  const totalExpenses = expenses.reduce((sum, expense) => sum + safeParseAmount(expense.amount), 0)
+  const totalRevenue = orders.reduce((sum, order) => sum + (value => value ?? 0)(order.total_amount), 0)
+  const totalItemsSold = todayItems.reduce((sum, item) => sum + (value => Math.floor(value ?? 0))(item.quantity), 0)
+  const totalExpenses = expenses.reduce((sum, expense) => sum + (value => value ?? 0)(expense.amount), 0)
 
   return {
     totalRevenue,

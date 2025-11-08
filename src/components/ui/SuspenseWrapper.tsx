@@ -11,7 +11,6 @@ import {
   AvatarSkeleton
 } from '@/components/ui/skeletons'
 
-import { globalLazyLoadingUtils } from '@/components/lazy'
 
 // Type for window with lazy loading metrics
 interface WindowWithMetrics extends Window {

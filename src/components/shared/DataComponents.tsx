@@ -4,7 +4,6 @@ import {
   Search,
   Filter,
   X,
-  Calendar,
   Download,
   Settings,
   ChevronDown,
@@ -175,66 +174,9 @@ export const AdvancedFilters = ({
   )
 }
 
-// Date Range Picker Component
-interface DateRange {
-  from: Date | undefined
-  to: Date | undefined
-}
 
-interface DateRangePickerProps {
-  value: DateRange
-  onChange: (range: DateRange) => void
-  placeholder?: string
-  className?: string
-}
 
-export const DateRangePicker = ({
-  value,
-  onChange: _onChange,
-  placeholder = "Pick a date range",
-  className = ""
-}: DateRangePickerProps) => {
-  const [isOpen, setIsOpen] = useState(false)
 
-  const formatRange = () => {
-    if (!value.from && !value.to) { return placeholder }
-    if (value.from && !value.to) { return value.from.toLocaleDateString() }
-    if (!value.from && value.to) { return `Until ${value.to.toLocaleDateString()}` }
-    return `${value.from?.toLocaleDateString()} - ${value.to?.toLocaleDateString()}`
-  }
-
-  return (
-    <div className={cn("relative", className)}>
-      <Button
-        variant="outline"
-        onClick={() => setIsOpen(!isOpen)}
-        className="justify-start text-left font-normal"
-      >
-        <Calendar className="mr-2 h-4 w-4" />
-        {formatRange()}
-      </Button>
-
-      {isOpen && (
-        <Card className="absolute top-full mt-2 z-50 w-80">
-          <CardContent className="p-4">
-            {/* Date picker implementation would go here */}
-            <p className="text-sm text-muted-foreground">
-              Date range picker implementation
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsOpen(false)}
-              className="mt-2"
-            >
-              Close
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  )
-}
 
 // Sortable Column Header
 interface SortableColumnProps {

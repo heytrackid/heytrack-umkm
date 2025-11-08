@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic'
 
-import { AppLayout } from '@/components/layout/app-layout'
+import AppLayout from '@/components/layout/app-layout'
 
 // Dynamically import the production page to optimize initial load
 const EnhancedProductionPage = dynamic(

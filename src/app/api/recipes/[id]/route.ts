@@ -90,7 +90,7 @@ async function putHandler(
     const ingredientsField = body.ingredients ?? body.recipe_ingredients
 
     // Extract recipe data (without ingredients) - explicitly exclude these fields from recipe update
-    const { recipe_ingredients, ingredients, ...recipeData } = body
+    const { recipe_ingredients: _recipe_ingredients, ingredients: _ingredients, ...recipeData } = body
 
     // Validate recipe data if provided
     if (Object.keys(recipeData).length > 0) {
