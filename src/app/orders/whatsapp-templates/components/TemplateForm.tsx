@@ -1,7 +1,7 @@
 'use client'
 
 import { Info, Copy, Check } from 'lucide-react'
-import { useState, useEffect, type FormEvent } from 'react'
+import { useState, useLayoutEffect, type FormEvent } from 'react'
 
 import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, type WhatsAppTemplate, type TemplateFormData } from '@/app/orders/whatsapp-templates/components/types'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from '@/components/ui/accordion'
@@ -27,25 +27,12 @@ const TemplateForm = ({
     editingTemplate,
     onSuccess
 }: TemplateFormProps) => {
-    const [formData, setFormData] = useState<TemplateFormData>({
-        name: '',
-        description: '',
-        category: 'order_confirmation',
-        template_content: '',
-        variables: [],
-        is_active: true,
-        is_default: false
-    })
-    const [copiedVariable, setCopiedVariable] = useState<string | null>(null)
-
-    useEffect(() => {
+    const [formData, setFormData] = useState<TemplateFormData>(() => {
         if (editingTemplate) {
-            // Convert variables to array format if it's an object
             const vars = Array.isArray(editingTemplate.variables)
                 ? editingTemplate.variables
                 : Object.keys(editingTemplate.variables ?? {})
-
-            setFormData({
+            return {
                 name: editingTemplate.name,
                 description: editingTemplate.description ?? '',
                 category: editingTemplate.category,
@@ -53,11 +40,58 @@ const TemplateForm = ({
                 variables: vars,
                 is_active: editingTemplate.is_active ?? true,
                 is_default: editingTemplate.is_default ?? false
-            })
-        } else {
-            resetForm()
+            }
         }
+        return {
+            name: '',
+            description: '',
+            category: 'order_confirmation',
+            template_content: '',
+            variables: [],
+            is_active: true,
+            is_default: false
+        }
+    })
+    const [copiedVariable, setCopiedVariable] = useState<string | null>(null)
+
+    const resetForm = () => {
+        setFormData({
+            name: '',
+            description: '',
+            category: 'order_confirmation',
+            template_content: '',
+            variables: [],
+            is_active: true,
+            is_default: false
+        })
+    }
+
+    // Update form data when editingTemplate changes
+    useLayoutEffect(() => {
+        const newFormData = editingTemplate ? {
+            name: editingTemplate.name,
+            description: editingTemplate.description ?? '',
+            category: editingTemplate.category,
+            template_content: editingTemplate.template_content,
+            variables: Array.isArray(editingTemplate.variables)
+                ? editingTemplate.variables
+                : Object.keys(editingTemplate.variables ?? {}),
+            is_active: editingTemplate.is_active ?? true,
+            is_default: editingTemplate.is_default ?? false
+        } : {
+            name: '',
+            description: '',
+            category: 'order_confirmation',
+            template_content: '',
+            variables: [],
+            is_active: true,
+            is_default: false
+        }
+        
+        setTimeout(() => setFormData(newFormData), 0)
     }, [editingTemplate])
+
+    // Form data is initialized in useState above
 
     const handleInputChange = <K extends keyof TemplateFormData>(field: K, value: TemplateFormData[K]) => {
         setFormData(prev => ({ ...prev, [field]: value }))
@@ -130,18 +164,6 @@ const TemplateForm = ({
         } catch (error: unknown) {
             uiLogger.error({ error: String(error) }, 'Error saving template')
         }
-    }
-
-    const resetForm = () => {
-        setFormData({
-            name: '',
-            description: '',
-            category: 'order_confirmation',
-            template_content: '',
-            variables: [],
-            is_active: true,
-            is_default: false
-        })
     }
 
     return (

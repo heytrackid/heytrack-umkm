@@ -26,7 +26,7 @@ type Supplier = Row<'suppliers'>
 
 export const SuppliersCRUD = (): JSX.Element => {
   const { data: suppliersData, loading, error } = useSuppliers();
-  const { create: createSupplier, update: updateSupplier, delete: deleteSupplier } = useSupabaseCRUD('suppliers');
+  const { create: createSupplier, update: updateSupplier, remove: deleteSupplier } = useSupabaseCRUD('suppliers');
   const suppliers = suppliersData || [];
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

@@ -69,7 +69,7 @@ export const BatchEditMode = <T,>({
     const selectedIds = Array.from(selectedItems)
     
     if (action.requiresConfirmation) {
-      // eslint-disable-next-line no-alert
+       
       if (!confirm(`Yakin ingin melakukan aksi ini pada ${selectedCount} item?`)) {
         return
       }
@@ -189,7 +189,7 @@ export const BatchEditMode = <T,>({
 }
 
 // Hook untuk batch edit state
-export function useBatchEdit(): JSX.Element {
+export function useBatchEdit() {
   const [isActive, setIsActive] = useState(false)
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
 

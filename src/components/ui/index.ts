@@ -346,20 +346,11 @@ export {
 // ==========================================================
 
 export {
-  MobilePieChart
-} from './charts/pie-chart'
-
-export {
-  MobileBarChart
-} from './charts/bar-chart'
-
-export {
-  MobileLineChart
-} from './charts/line-chart'
-
-export {
+  MobilePieChart,
+  MobileBarChart,
+  MobileLineChart,
   MobileAreaChart
-} from './charts/area-chart'
+} from './charts'
 
 // ==========================================================
 // FORM COMPONENTS (ADDITIONAL)

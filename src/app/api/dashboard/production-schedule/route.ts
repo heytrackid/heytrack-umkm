@@ -14,7 +14,7 @@ type TypedSupabaseClient = ReturnType<typeof typed>
 
 type ProductionRow = Database['public']['Tables']['productions']['Row']
 type OrderRow = Database['public']['Tables']['orders']['Row']
-type InventoryStatusRow = Database['public']['Tables']['inventory_status']['Row']
+
 
 interface ProductionBatch extends Pick<ProductionRow, 'id' | 'quantity' | 'status' | 'started_at' | 'completed_at'> {
   recipe: {
@@ -33,7 +33,12 @@ interface PendingOrder extends Pick<OrderRow, 'id' | 'order_no' | 'customer_name
   }> | null
 }
 
-type LowStockItem = Pick<InventoryStatusRow, 'id' | 'name' | 'current_stock' | 'stock_status'>
+interface LowStockItem {
+  id: string
+  name: string
+  current_stock: number | null
+  stock_status: string
+}
 
 interface ProductionSummary {
   total_batches_today: number
@@ -143,18 +148,22 @@ async function fetchLowStockAlerts(
   userId: string
 ): Promise<LowStockItem[]> {
   const { data, error } = await supabase
-    .from('inventory_status')
-    .select('id, name, current_stock, stock_status')
+    .from('ingredients')
+    .select('id, name, current_stock, min_stock')
     .eq('user_id', userId)
-    .in('stock_status', ['LOW_STOCK', 'OUT_OF_STOCK'])
     .order('current_stock')
-    .limit(5)
+    .limit(10)
 
   if (error) {
     throw error
   }
 
-  return (data ?? []) as LowStockItem[]
+  return (data ?? []).map(item => ({
+    id: item.id,
+    name: item.name,
+    current_stock: item.current_stock,
+    stock_status: (item.current_stock ?? 0) <= (item.min_stock ?? 0) ? 'LOW_STOCK' : 'IN_STOCK'
+  })) as any
 }
 
 function buildSummary(

@@ -1,5 +1,4 @@
 'use client'
-'use client'
 
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { formatDistanceToNow } from 'date-fns'

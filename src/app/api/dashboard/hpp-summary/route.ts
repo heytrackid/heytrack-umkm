@@ -4,7 +4,7 @@ export const runtime = 'nodejs'
 import { NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/database'
+
 import { typed } from '@/types/type-utilities'
 import { createSecureHandler, SecurityPresets } from '@/utils/security'
 
@@ -12,9 +12,7 @@ import { createClient } from '@/utils/supabase/server'
 
 type TypedSupabaseClient = ReturnType<typeof typed>
 
-type RecipeRow = Database['public']['Tables']['recipes']['Row']
-type HppCalculationRow = Database['public']['Tables']['hpp_calculations']['Row']
-type AlertRow = Database['public']['Tables']['hpp_alerts']['Row']
+
 
 interface HppSummaryResponse {
   totalRecipes: number
@@ -54,7 +52,7 @@ async function requireUserId(supabase: TypedSupabaseClient): Promise<string> {
 async function fetchRecipes(
   supabase: TypedSupabaseClient,
   userId: string
-): Promise<RecipeRow[]> {
+): Promise<Array<{ id: string; name: string; selling_price: number | null; is_active: boolean | null }>> {
   const { data, error } = await supabase
     .from('recipes')
     .select('id, name, selling_price, is_active')
@@ -64,13 +62,13 @@ async function fetchRecipes(
   if (error) {
     throw error
   }
-  return data ?? []
+  return (data ?? []) as any
 }
 
 async function fetchHppCalculations(
   supabase: TypedSupabaseClient,
   userId: string
-): Promise<HppCalculationRow[]> {
+): Promise<Array<{ recipe_id: string | null; total_hpp: number; created_at: string | null }>> {
   const { data, error } = await supabase
     .from('hpp_calculations')
     .select('recipe_id, total_hpp, created_at')
@@ -80,13 +78,13 @@ async function fetchHppCalculations(
   if (error) {
     throw error
   }
-  return data ?? []
+  return (data ?? []) as any
 }
 
 async function fetchAlerts(
   supabase: TypedSupabaseClient,
   userId: string
-): Promise<AlertRow[]> {
+): Promise<Array<{ id: string; recipe_id: string; alert_type: string; is_read: boolean | null; created_at: string | null }>> {
   const { data, error } = await supabase
     .from('hpp_alerts')
     .select('id, recipe_id, alert_type, is_read, created_at')
@@ -96,18 +94,18 @@ async function fetchAlerts(
   if (error) {
     throw error
   }
-  return data ?? []
+  return (data ?? []) as any
 }
 
-function buildHppTrends(calculations: HppCalculationRow[]): Array<{ date: string | null; value: number | null }> {
+function buildHppTrends(calculations: Array<{ recipe_id: string | null; total_hpp: number; created_at: string | null }>): Array<{ date: string | null; value: number | null }> {
   return calculations.slice(0, 10).map(calc => ({
     date: calc.created_at,
     value: calc.total_hpp ?? null
   }))
 }
 
-function buildRecipeHppMap(calculations: HppCalculationRow[]): Map<string, HppCalculationRow> {
-  const map = new Map<string, HppCalculationRow>()
+function buildRecipeHppMap(calculations: Array<{ recipe_id: string | null; total_hpp: number; created_at: string | null }>): Map<string, { recipe_id: string | null; total_hpp: number; created_at: string | null }> {
+  const map = new Map<string, { recipe_id: string | null; total_hpp: number; created_at: string | null }>()
   calculations.forEach(calc => {
     if (calc.recipe_id && !map.has(calc.recipe_id)) {
       map.set(calc.recipe_id, calc)
@@ -116,7 +114,7 @@ function buildRecipeHppMap(calculations: HppCalculationRow[]): Map<string, HppCa
   return map
 }
 
-function calculateAverageHpp(calculations: HppCalculationRow[]): number {
+function calculateAverageHpp(calculations: Array<{ recipe_id: string | null; total_hpp: number; created_at: string | null }>): number {
   const valid = calculations.filter(calc => typeof calc.total_hpp === 'number' && (calc.total_hpp ?? 0) > 0)
   if (valid.length === 0) {
     return 0
@@ -125,7 +123,7 @@ function calculateAverageHpp(calculations: HppCalculationRow[]): number {
   return total / valid.length
 }
 
-function calculateAverageMargin(recipes: RecipeRow[], hppMap: Map<string, HppCalculationRow>): number {
+function calculateAverageMargin(recipes: Array<{ id: string; name: string; selling_price: number | null; is_active: boolean | null }>, hppMap: Map<string, { recipe_id: string | null; total_hpp: number; created_at: string | null }>): number {
   const candidates = recipes.filter(recipe => (recipe.selling_price ?? 0) > 0)
   if (candidates.length === 0) {
     return 0
@@ -143,8 +141,8 @@ function calculateAverageMargin(recipes: RecipeRow[], hppMap: Map<string, HppCal
 }
 
 function buildTopRecipes(
-  recipes: RecipeRow[],
-  hppMap: Map<string, HppCalculationRow>
+  recipes: Array<{ id: string; name: string; selling_price: number | null; is_active: boolean | null }>,
+  hppMap: Map<string, { recipe_id: string | null; total_hpp: number; created_at: string | null }>
 ): Array<{
   id: string
   name: string
@@ -173,8 +171,8 @@ function buildTopRecipes(
 }
 
 function buildRecentChanges(
-  alerts: AlertRow[],
-  recipes: RecipeRow[]
+  alerts: Array<{ id: string; recipe_id: string; alert_type: string; is_read: boolean | null; created_at: string | null }>,
+  recipes: Array<{ id: string; name: string; selling_price: number | null; is_active: boolean | null }>
 ): Array<{
   recipe_id: string | null
   recipe_name: string
@@ -196,9 +194,9 @@ function buildRecentChanges(
 }
 
 function buildResponse(
-  recipes: RecipeRow[],
-  calculations: HppCalculationRow[],
-  alerts: AlertRow[]
+  recipes: Array<{ id: string; name: string; selling_price: number | null; is_active: boolean | null }>,
+  calculations: Array<{ recipe_id: string | null; total_hpp: number; created_at: string | null }>,
+  alerts: Array<{ id: string; recipe_id: string; alert_type: string; is_read: boolean | null; created_at: string | null }>
 ): HppSummaryResponse {
   const hppMap = buildRecipeHppMap(calculations)
   const recipesWithHpp = new Set(calculations.map(calc => calc.recipe_id).filter(Boolean)).size

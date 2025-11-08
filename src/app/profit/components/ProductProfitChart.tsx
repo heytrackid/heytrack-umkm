@@ -22,8 +22,8 @@ interface ProductProfitChartProps {
 }
 
 // Tooltip component extracted to avoid defining components during render
-const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) =>
-  ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { name: string } }> }) => {
+const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) => {
+  const TooltipComponent = ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { name: string } }> }) => {
     if (active && payload?.length) {
       return (
         <div className="bg-background border rounded-lg p-3 shadow-lg">
@@ -47,6 +47,13 @@ const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) =
     }
     return null
   }
+  TooltipComponent.displayName = 'ProductProfitChartTooltip'
+  return TooltipComponent
+}
+
+ProductProfitChartTooltip.displayName = 'ProductProfitChartTooltip'
+
+ProductProfitChartTooltip.displayName = 'ProductProfitChartTooltip'
 
 export const ProductProfitChart = ({
   chartData,

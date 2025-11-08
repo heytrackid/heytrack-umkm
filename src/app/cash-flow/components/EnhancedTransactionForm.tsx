@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowUpCircle, ArrowDownCircle, AlertCircle, Loader2, Calendar } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import { incomeCategories, expenseCategories, type TransactionFormData } from '@/app/cash-flow/constants'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -40,9 +40,8 @@ const EnhancedTransactionForm = ({
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [touched, setTouched] = useState<Record<string, boolean>>({})
 
-    // Reset form when dialog opens/closes
-    useEffect(() => {
-        if (!isOpen) {
+    const handleOpenChange = (open: boolean) => {
+        if (!open) {
             setFormData({
                 description: '',
                 category: '',
@@ -52,7 +51,8 @@ const EnhancedTransactionForm = ({
             setErrors({})
             setTouched({})
         }
-    }, [isOpen])
+        onOpenChange(open)
+    }
 
     // Validate field
     const validateField = (name: string, value: string): string => {
@@ -148,7 +148,7 @@ const EnhancedTransactionForm = ({
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-wrap-mobile">

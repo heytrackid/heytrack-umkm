@@ -6,7 +6,7 @@ import type { WorkflowContext, WorkflowResult } from '@/types/features/automatio
 
 export class HPPWorkflowHandlers {
   static async handleHppRecalculation(context: WorkflowContext): Promise<WorkflowResult> {
-    const { supabase, event, config, logger } = context
+    const { supabase, event, logger } = context
 
     if (!supabase) {
       return {
@@ -28,7 +28,7 @@ export class HPPWorkflowHandlers {
     }
 
     try {
-      const automation = new HppAutomation(config)
+      const automation = new HppAutomation()
       const calculation = await automation.recalculateRecipe(supabase, recipeId, userId)
 
       logger.info('HPP recalculated via workflow', {

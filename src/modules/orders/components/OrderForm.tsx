@@ -799,3 +799,5 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     </form>
   )
 })
+
+OrderForm.displayName = 'OrderForm'

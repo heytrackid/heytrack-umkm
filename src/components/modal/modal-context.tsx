@@ -84,7 +84,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
 /**
  * Hook to use modal context
  */
-export function useModal(): JSX.Element {
+export function useModal(): ModalContextType {
   const context = useContext(ModalContext)
   if (!context) {
     throw new Error('useModal must be used within ModalProvider')
@@ -109,10 +109,10 @@ const ModalRenderer = () => {
     <>
       {Array.from(modals.values()).map((modal) => (
         <Dialog
-          key={modal['id']}
+          key={modal.id}
           open
           onOpenChange={(open) => {
-            if (!open) { closeModal(modal['id']) }
+            if (!open) { closeModal(modal.id) }
           }}
         >
           <DialogContent className={sizeClasses[modal.size ?? 'md']}>

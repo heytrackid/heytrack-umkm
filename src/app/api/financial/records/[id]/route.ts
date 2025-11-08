@@ -10,17 +10,13 @@ import { createSecureHandler, SecurityPresets } from '@/utils/security'
 
 import { createClient } from '@/utils/supabase/server'
 
-interface RouteContext {
-  params: Promise<{ id: string }>
-}
-
 // GET /api/financial/records/[id] - Get single financial record
 async function getHandler(
   _request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const { id } = await context['params']
+    const { id } = params
     const supabase = await createClient()
 
     // Authenticate
@@ -58,10 +54,10 @@ async function getHandler(
 // PUT /api/financial/records/[id] - Update financial record
 async function putHandler(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const { id } = await context['params']
+    const { id } = params
     const supabase = await createClient()
 
     // Authenticate
@@ -126,10 +122,10 @@ async function putHandler(
 // DELETE /api/financial/records/[id] - Delete financial record
 async function deleteHandler(
   _request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const { id } = await context['params']
+    const { id } = params
     const supabase = await createClient()
 
     // Authenticate
@@ -178,6 +174,6 @@ async function deleteHandler(
   }
 }
 
-export const GET = createSecureHandler(getHandler, 'GET /api/financial/records/[id]', SecurityPresets.enhanced())
-export const PUT = createSecureHandler(putHandler, 'PUT /api/financial/records/[id]', SecurityPresets.enhanced())
-export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/financial/records/[id]', SecurityPresets.enhanced())
+export const GET = createSecureHandler(getHandler as any, 'GET /api/financial/records/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureHandler(putHandler as any, 'PUT /api/financial/records/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler as any, 'DELETE /api/financial/records/[id]', SecurityPresets.enhanced())

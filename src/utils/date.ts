@@ -4,7 +4,7 @@ export const formatDate = (date: Date, format: string): string => {
   
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
+  const year = String(date.getFullYear());
   
   // Replace format tokens with actual values
   return format
@@ -18,14 +18,16 @@ export const parseDate = (dateString: string): Date => {
   if (!dateString || dateString.length !== 10) {
     throw new Error('Invalid date format');
   }
-  
+
   const parts = dateString.split('/');
   if (parts.length !== 3) {
     throw new Error('Invalid date format');
   }
-  
-  const [day, month, year] = parts.map(Number);
-  
+
+  const day = parseInt(parts[0]!, 10);
+  const month = parseInt(parts[1]!, 10);
+  const year = parseInt(parts[2]!, 10);
+
   // Validate day, month, year
   if (isNaN(day) || isNaN(month) || isNaN(year)) {
     throw new Error('Invalid date format');

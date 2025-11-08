@@ -60,7 +60,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
     const router = useRouter()
     const { formatCurrency } = useSettings()
     const { data: ingredients, loading, refetch } = useIngredients({ realtime: true })
-    const { delete: deleteIngredient } = useSupabaseCRUD('ingredients')
+    const { remove: deleteIngredient } = useSupabaseCRUD('ingredients')
     const { toast } = useToast()
     const { isMobile } = useMobile()
 

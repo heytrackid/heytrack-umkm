@@ -1,6 +1,6 @@
 'use client'
 
-/* eslint-disable */
+ 
 import dynamic from 'next/dynamic'
 import { Legend } from 'recharts'
 import {

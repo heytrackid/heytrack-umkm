@@ -1,9 +1,8 @@
 'use client'
-'use client'
 
 import { Bell, X, Check, ExternalLink } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 
 import {
   Popover,
@@ -49,19 +48,15 @@ export const NotificationCenter = ({
     return n.priority === filterPriority
   })
 
-  const handleNotificationClick = (notification: Notification) => {
+  const handleNotificationClick = useCallback((notification: Notification) => {
     onMarkAsRead(notification['id'])
     onNotificationClick?.(notification)
-    
+
     // Navigate if has action URL
     if (notification.actionUrl) {
-      if (notification.actionUrl.startsWith('/')) {
-        router.push(notification.actionUrl)
-      } else {
-        window.location.href = notification.actionUrl
-      }
+      router.push(notification.actionUrl)
     }
-  }
+  }, [onMarkAsRead, onNotificationClick, router])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

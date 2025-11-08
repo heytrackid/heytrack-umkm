@@ -1,4 +1,4 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
 import { AlertTriangle, Package, RefreshCw, ShoppingCart, TrendingUp } from 'lucide-react'

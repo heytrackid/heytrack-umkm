@@ -20,8 +20,8 @@ type CustomerRow = Database['public']['Tables']['customers']['Row']
 type IngredientRow = Database['public']['Tables']['ingredients']['Row'] & { reorder_point?: number | null }
 type RecipeRow = Database['public']['Tables']['recipes']['Row'] & { times_made?: number | null }
 type ExpenseRow = Database['public']['Tables']['expenses']['Row']
-type DailySalesSummaryInsert = Database['public']['Tables']['daily_sales_summary']['Insert']
-type OrdersQueryBuilder = ReturnType<TypedSupabaseClient['from']>
+
+
 
 interface DateFilters {
   startDate?: string
@@ -33,13 +33,13 @@ interface DateFilters {
 }
 
 interface DashboardFetchResult {
-  orders: OrderRow[]
-  currentPeriodOrders: OrderRow[]
+  orders: Array<Pick<OrderRow, 'id' | 'total_amount' | 'status' | 'order_date' | 'customer_name' | 'created_at'>>
+  currentPeriodOrders: Array<Pick<OrderRow, 'id' | 'total_amount' | 'status' | 'order_date' | 'customer_name' | 'created_at'>>
   comparisonOrders: Array<{ total_amount: number | null }>
-  customers: CustomerRow[]
-  ingredients: IngredientRow[]
-  recipes: RecipeRow[]
-  expenses: ExpenseRow[]
+  customers: Array<Pick<CustomerRow, 'id' | 'customer_type'>>
+  ingredients: Array<Pick<IngredientRow, 'id' | 'name' | 'current_stock' | 'min_stock' | 'category' | 'reorder_point'>>
+  recipes: Array<Pick<RecipeRow, 'id' | 'name' | 'times_made'>>
+  expenses: Array<Pick<ExpenseRow, 'amount'>>
 }
 
 interface DashboardStats {
@@ -83,7 +83,7 @@ interface DashboardResponse {
       customer: string
       amount: number | null
       status: OrderStatus | null
-      time: string | null
+      created_at: string | null
     }>
   }
   customers: {
@@ -133,80 +133,94 @@ function normalizeDate(value: string | null): string | undefined {
 }
 
 function calculateComparisonRange(startDate?: string, endDate?: string): { comparisonStartDate?: string; comparisonEndDate?: string } {
+  const result: { comparisonStartDate?: string; comparisonEndDate?: string } = {}
   if (!startDate || !endDate) {
-    return { comparisonStartDate: undefined, comparisonEndDate: undefined }
+    return result
   }
 
   const start = new Date(startDate)
   const end = new Date(endDate)
-  const diffDays = Math.abs(Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)))
+  const diffTime = end.getTime() - start.getTime()
 
-  const comparisonEnd = new Date(start)
-  comparisonEnd.setDate(comparisonEnd.getDate() - 1)
-  const comparisonStart = new Date(comparisonEnd)
-  comparisonStart.setDate(comparisonStart.getDate() - diffDays)
+  const comparisonStart = new Date(start.getTime() - diffTime - (24 * 60 * 60 * 1000))
+  const comparisonEnd = new Date(end.getTime() - diffTime - (24 * 60 * 60 * 1000))
 
-  return {
-    comparisonStartDate: comparisonStart.toISOString().split('T')[0],
-    comparisonEndDate: comparisonEnd.toISOString().split('T')[0]
-  }
+  result.comparisonStartDate = comparisonStart.toISOString().split('T')[0] as string
+  result.comparisonEndDate = comparisonEnd.toISOString().split('T')[0] as string
+
+  return result
 }
 
 function buildDateFilters(searchParams: URLSearchParams): DateFilters {
   const startParam = normalizeDate(searchParams.get('start_date'))
   const endParam = normalizeDate(searchParams.get('end_date'))
-  const { comparisonStartDate, comparisonEndDate } = calculateComparisonRange(startParam, endParam)
+  const comparisonRange = calculateComparisonRange(startParam, endParam)
 
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0] ?? ''
   const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
 
-  return {
-    startDate: startParam,
-    endDate: endParam,
-    comparisonStartDate,
-    comparisonEndDate,
+  const result: DateFilters = {
     today: todayStr,
     yesterday: yesterday.toISOString().split('T')[0] ?? ''
   }
+
+  if (startParam !== undefined) {
+    result.startDate = startParam
+  }
+  if (endParam !== undefined) {
+    result.endDate = endParam
+  }
+  if (comparisonRange.comparisonStartDate !== undefined) {
+    result.comparisonStartDate = comparisonRange.comparisonStartDate
+  }
+  if (comparisonRange.comparisonEndDate !== undefined) {
+    result.comparisonEndDate = comparisonRange.comparisonEndDate
+  }
+
+  return result
 }
 
 function buildCurrentPeriodQuery(
   supabase: TypedSupabaseClient,
   userId: string,
   filters: DateFilters
-): OrdersQueryBuilder {
-  const query = supabase
+) {
+  let query = supabase
     .from('orders')
-    .select('id, total_amount, status, customer_name, created_at')
+    .select('id, total_amount, status, order_date, customer_name, created_at')
     .eq('user_id', userId)
 
   if (filters.startDate && filters.endDate) {
-    return query
+    query = query
       .gte('order_date', filters.startDate)
       .lte('order_date', filters.endDate)
+  } else {
+    query = query.eq('order_date', filters.today)
   }
 
-  return query.eq('order_date', filters.today)
+  return query
 }
 
 function buildComparisonQuery(
   supabase: TypedSupabaseClient,
   userId: string,
   filters: DateFilters
-): OrdersQueryBuilder {
-  const query = supabase
+) {
+  let query = supabase
     .from('orders')
     .select('total_amount')
     .eq('user_id', userId)
 
-  if (filters.startDate && filters.endDate && filters.comparisonStartDate && filters.comparisonEndDate) {
-    return query
+  if (filters.comparisonStartDate && filters.comparisonEndDate) {
+    query = query
       .gte('order_date', filters.comparisonStartDate)
       .lte('order_date', filters.comparisonEndDate)
+  } else {
+    query = query.eq('order_date', filters.yesterday)
   }
 
-  return query.eq('order_date', filters.yesterday)
+  return query
 }
 
 async function fetchDashboardData(
@@ -255,7 +269,7 @@ function calculateStats(data: DashboardFetchResult): DashboardStats {
   const revenue = data.orders.reduce((sum, order) => sum + (value => value ?? 0)(order.total_amount), 0)
   const currentRevenue = data.currentPeriodOrders.reduce((sum, order) => sum + (value => value ?? 0)(order.total_amount), 0)
   const activeOrders = data.orders.filter(order =>
-    ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(order.status)
+    order.status && ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(order.status)
   ).length
 
   const totalCustomers = data.customers.length
@@ -286,7 +300,7 @@ function calculateStats(data: DashboardFetchResult): DashboardStats {
   }
 }
 
-function buildInventoryOverview(ingredients: IngredientRow[]): InventoryOverview {
+function buildInventoryOverview(ingredients: DashboardFetchResult['ingredients']): InventoryOverview {
   const categoryBreakdown = ingredients.reduce<Record<string, number>>((acc, ingredient) => {
     const category = safeString(ingredient.category, 'General')
     acc[category] = (acc[category] ?? 0) + 1
@@ -310,28 +324,28 @@ function buildInventoryOverview(ingredients: IngredientRow[]): InventoryOverview
 }
 
 function buildRecentOrders(
-  orders: OrderRow[]
+  orders: DashboardFetchResult['orders']
 ): Array<{
   id: string
   customer: string
   amount: number | null
   status: OrderStatus | null
-  time: string | null
+  created_at: string | null
 }> {
   return [...orders]
     .sort((a, b) => (value => new Date(value || 0).getTime())(b.created_at) - (value => new Date(value || 0).getTime())(a.created_at))
     .slice(0, 5)
     .map(order => ({
       id: order.id,
-      customer: safeString(order.customer_name, 'Walk-in customer'),
+       customer: order.customer_name || 'Walk-in customer',
       amount: order.total_amount,
       status: order.status,
-      time: order.created_at ?? null
+      created_at: order.created_at ?? null
     }))
 }
 
 function buildPopularRecipes(
-  recipes: RecipeRow[]
+  recipes: DashboardFetchResult['recipes']
 ): Array<Pick<RecipeRow, 'id' | 'name' | 'times_made'>> {
   return [...recipes]
     .sort((a, b) => (value => Math.floor(value ?? 0))(b.times_made) - (value => Math.floor(value ?? 0))(a.times_made))
@@ -425,86 +439,6 @@ async function GET(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-interface DailySummaryResult {
-  totalRevenue: number
-  totalItemsSold: number
-  totalExpenses: number
-  orderCount: number
-}
-
-async function fetchTodaySummary(
-  supabase: TypedSupabaseClient,
-  userId: string,
-  today: string
-): Promise<DailySummaryResult> {
-  const [ordersResult, orderItemsResult, expensesResult] = await Promise.all([
-    supabase.from('orders').select('id, total_amount').eq('user_id', userId).eq('order_date', today),
-    supabase.from('order_items').select('order_id, quantity').eq('user_id', userId),
-    supabase.from('expenses').select('amount').eq('user_id', userId).eq('expense_date', today)
-  ])
-
-  const orders = ordersResult.data ?? []
-  const orderItems = orderItemsResult.data ?? []
-  const expenses = expensesResult.data ?? []
-
-  const orderIds = orders.map(order => order.id)
-  const todayItems = orderItems.filter(item => orderIds.includes(item.order_id))
-
-  const totalRevenue = orders.reduce((sum, order) => sum + (value => value ?? 0)(order.total_amount), 0)
-  const totalItemsSold = todayItems.reduce((sum, item) => sum + (value => Math.floor(value ?? 0))(item.quantity), 0)
-  const totalExpenses = expenses.reduce((sum, expense) => sum + (value => value ?? 0)(expense.amount), 0)
-
-  return {
-    totalRevenue,
-    totalItemsSold,
-    totalExpenses,
-    orderCount: orders.length
-  }
-}
-
-function buildDailySummaryPayload(
-  today: string,
-  userId: string,
-  summary: DailySummaryResult
-): DailySalesSummaryInsert {
-  const averageOrderValue = summary.orderCount > 0 ? summary.totalRevenue / summary.orderCount : 0
-
-  return {
-    sales_date: today,
-    user_id: userId,
-    total_orders: summary.orderCount,
-    total_revenue: summary.totalRevenue,
-    total_items_sold: summary.totalItemsSold,
-    average_order_value: averageOrderValue,
-    expenses_total: summary.totalExpenses,
-    profit_estimate: summary.totalRevenue - summary.totalExpenses
-  }
-}
-
-async function POST(): Promise<NextResponse> {
-  try {
-    const supabase = await getTypedSupabase()
-    const userId = await requireUserId(supabase)
-    const today = new Date().toISOString().split('T')[0] ?? ''
-
-    const summary = await fetchTodaySummary(supabase, userId, today)
-    const payload = buildDailySummaryPayload(today, userId, summary)
-
-    const { error } = await supabase
-      .from('daily_sales_summary')
-      .upsert([payload], { onConflict: 'sales_date,user_id' })
-
-    if (error) {
-      throw error
-    }
-
-    return NextResponse.json({ success: true, message: 'Daily summary updated' })
-  } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error updating daily summary')
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
-  }
-}
-
 const securedGET = withSecurity(GET, SecurityPresets.enhanced())
 
-export { securedGET as GET, POST }
+export { securedGET as GET }

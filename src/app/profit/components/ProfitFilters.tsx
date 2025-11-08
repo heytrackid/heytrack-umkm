@@ -1,62 +1,32 @@
 'use client'
 
-import {
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-  startOfQuarter,
-  endOfQuarter,
-  startOfYear,
-  endOfYear
-} from 'date-fns'
 import { Calendar } from 'lucide-react'
+
+import { calculateProfitDateRange } from '@/app/profit/utils'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
+import type { PeriodType, ProfitFilters, ProfitFiltersProps } from './types'
 
-import type { ProfitFilters, PeriodType } from './types'
-import type { DateRange } from 'react-day-picker'
 
-interface ProfitFiltersProps {
-  filters: ProfitFilters
-  onFiltersChange: (filters: Partial<ProfitFilters>) => void
-  onApplyFilters: () => void
-  isMobile: boolean
-}
-
-const getDateRangeForPeriod = (period: PeriodType): DateRange | undefined => {
-  const now = new Date()
-  switch (period) {
-    case 'week':
-      return { from: startOfWeek(now, { weekStartsOn: 1 }), to: endOfWeek(now, { weekStartsOn: 1 }) }
-    case 'month':
-      return { from: startOfMonth(now), to: endOfMonth(now) }
-    case 'quarter':
-      return { from: startOfQuarter(now), to: endOfQuarter(now) }
-    case 'year':
-      return { from: startOfYear(now), to: endOfYear(now) }
-    default:
-      return undefined
-  }
-}
 
 export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilters, isMobile }: ProfitFiltersProps) => {
   const handlePeriodChange = (value: PeriodType) => {
     const newFilters: Partial<ProfitFilters> = { selectedPeriod: value }
     if (value !== 'custom') {
-      newFilters.dateRange = getDateRangeForPeriod(value)
+      const { startDate, endDate } = calculateProfitDateRange(value)
+      if (startDate) {newFilters.startDate = startDate}
+      if (endDate) {newFilters.endDate = endDate}
+      newFilters.dateRange = null
     } else {
-      newFilters.dateRange = undefined
+      newFilters.dateRange = null
     }
     onFiltersChange(newFilters)
   }
 
-  const _handleDateRangeChange = (dateRange: DateRange | undefined) => {
-    onFiltersChange({ dateRange })
-  }
+
 
   return (
     <Card>

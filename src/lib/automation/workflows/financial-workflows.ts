@@ -159,10 +159,12 @@ export class FinancialWorkflowHandlers {
     const { priceChange, affectedRecipes } = data
 
     try {
+      const type = priceChange > 0 ? 'warning' as const : 'info' as const
+      const priority = Math.abs(priceChange) > 20 ? 'critical' as const : 'high' as const
       const notificationData = {
-        type: priceChange > 0 ? 'warning' : 'info',
-        category: 'financial',
-        priority: Math.abs(priceChange) > 20 ? 'critical' : 'high',
+        type,
+        category: 'financial' as const,
+        priority,
         title: `Harga Bahan Baku ${priceChange > 0 ? 'NAIK' : 'TURUN'} Signifikan`,
         message: `Perubahan ${Math.abs(priceChange).toFixed(1)}% mempengaruhi ${affectedRecipes?.length ?? 0} resep.`,
         actionUrl: '/ingredients',
@@ -191,9 +193,9 @@ export class FinancialWorkflowHandlers {
     try {
       // Send general notification
       const generalNotification = {
-        type: 'info',
-        category: 'financial',
-        priority: 'medium',
+        type: 'info' as const,
+        category: 'financial' as const,
+        priority: 'medium' as const,
         title: 'Biaya Operasional Diperbarui',
         message: `${costName} berubah dari Rp${oldAmount.toLocaleString()} ke Rp${newAmount.toLocaleString()}.`,
         actionUrl: '/operational-costs',
@@ -203,9 +205,9 @@ export class FinancialWorkflowHandlers {
       // Send review notification for significant changes
       if (Math.abs(costChange) > 10) {
         const reviewNotification = {
-          type: 'warning',
-          category: 'financial',
-          priority: 'high',
+          type: 'warning' as const,
+          category: 'financial' as const,
+          priority: 'high' as const,
           title: 'Review Pricing Strategy Disarankan',
           message: `Perubahan biaya operasional ${Math.abs(costChange).toFixed(1)}% mempengaruhi seluruh profitabilitas. Pertimbangkan review harga jual.`,
           actionUrl: '/hpp-simple?tab=pricing_review',

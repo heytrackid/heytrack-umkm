@@ -501,7 +501,9 @@ export function useResponsive(): ResponsiveState {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    const timer = setTimeout(() => {
+      setMounted(true)
+    }, 0)
 
     const updateBreakpoint = () => {
       const w = window.innerWidth
@@ -530,7 +532,10 @@ export function useResponsive(): ResponsiveState {
     const debouncedUpdate = debounce(updateBreakpoint)
     window.addEventListener('resize', debouncedUpdate)
 
-    return () => window.removeEventListener('resize', debouncedUpdate)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('resize', debouncedUpdate)
+    }
   }, [])
 
   if (!mounted) {
@@ -564,7 +569,7 @@ export function useMediaQuery(query: string): boolean {
     if (typeof window === 'undefined') {return}
 
     const media = window.matchMedia(query)
-    setMatches(media.matches)
+    setTimeout(() => setMatches(media.matches), 0)
 
     const listener = (event: MediaQueryListEvent) => {
       setMatches(event.matches)
@@ -655,12 +660,16 @@ export function useTouchDevice(): boolean {
   const [isTouch, setIsTouch] = useState(false)
 
   useEffect(() => {
-    setIsTouch(() => (
-        typeof window !== 'undefined' &&
-        ('ontouchstart' in window ||
-          navigator.maxTouchPoints > 0 ||
-          ('msMaxTouchPoints' in navigator && (navigator as Navigator & { msMaxTouchPoints: number }).msMaxTouchPoints > 0))
-      ))
+    const timer = setTimeout(() => {
+      setIsTouch(() => (
+          typeof window !== 'undefined' &&
+          ('ontouchstart' in window ||
+            navigator.maxTouchPoints > 0 ||
+            ('msMaxTouchPoints' in navigator && (navigator as Navigator & { msMaxTouchPoints: number }).msMaxTouchPoints > 0))
+        ))
+    }, 0)
+    
+    return () => clearTimeout(timer)
   }, [])
 
   return isTouch

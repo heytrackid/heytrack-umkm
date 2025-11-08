@@ -504,7 +504,7 @@ const OrdersTable = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Pesanan</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus pesanan "{orderToDelete?.order_no}"? Tindakan ini tidak dapat dibatalkan.
+              Apakah Anda yakin ingin menghapus pesanan &#34;{orderToDelete?.order_no}&#34;? Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

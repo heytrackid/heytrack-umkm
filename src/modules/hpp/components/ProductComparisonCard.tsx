@@ -1,5 +1,5 @@
 'use client'
-/* eslint-disable no-nested-ternary */
+ 
 
 import { Info, BarChart3, TrendingUp, CheckCircle, AlertTriangle, Lightbulb, ArrowRight, TrendingDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'

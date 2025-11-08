@@ -118,7 +118,7 @@ export const ConfirmDialog = ({
 }
 
 // Hook untuk mudah pakai
-export function useConfirm(): JSX.Element {
+export function useConfirm() {
   const [state, setState] = useState<{
     open: boolean
     title: string
@@ -131,7 +131,9 @@ export function useConfirm(): JSX.Element {
     open: false,
     title: '',
     description: '',
-    onConfirm: undefined
+    confirmText: 'Confirm',
+    cancelText: 'Cancel',
+    variant: 'default'
   })
 
   const confirm = (options: Omit<typeof state, 'onConfirm' | 'open'>) => new Promise<boolean>((resolve) => {

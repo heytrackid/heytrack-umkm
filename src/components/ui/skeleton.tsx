@@ -1,5 +1,8 @@
+'use client'
+
 import { cn } from "@/lib/utils"
 
+import { useMemo } from 'react'
 import type { ComponentProps, HTMLAttributes } from 'react'
 
 
@@ -99,14 +102,17 @@ const SkeletonTable = ({ rows = 5, cols = 4, className, ...props }: SkeletonProp
     </div>
   )
 
-const SkeletonChart = ({ className, ...props }: ComponentProps<'div'>) => (
+const SkeletonChart = ({ className, ...props }: ComponentProps<'div'>) => {
+  const heights = useMemo(() => [40, 80, 60, 100, 50, 90, 70], [])
+
+  return (
     <div className={cn("space-y-3", className)} {...props}>
       <div className="flex justify-between items-end h-40 px-4">
-        {Array.from({ length: 7 }, (_, i) => (
-          <Skeleton 
-            key={i} 
+        {heights.map((height, i) => (
+          <Skeleton
+            key={i}
             className="w-8 rounded-t"
-            style={{ height: `${Math.floor(Math.random() * 120) + 20}px` }}
+            style={{ height: `${height}px` }}
           />
         ))}
       </div>
@@ -117,6 +123,7 @@ const SkeletonChart = ({ className, ...props }: ComponentProps<'div'>) => (
       </div>
     </div>
   )
+}
 
 const SkeletonForm = ({ className, ...props }: SkeletonProps) => (
     <div className={cn("space-y-4", className)} {...props}>

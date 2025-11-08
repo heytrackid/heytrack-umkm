@@ -1,7 +1,7 @@
 'use client'
 
 import { Building } from 'lucide-react'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useLayoutEffect } from 'react'
 
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,15 +24,16 @@ interface BusinessInfoSettingsProps {
 /**
  * Business information settings component with Zod validation
  */
-export const BusinessInfoSettings = React.memo(({ settings, onSettingChange }: BusinessInfoSettingsProps) => {
+function BusinessInfoSettingsComponent({ settings, onSettingChange }: BusinessInfoSettingsProps) {
   const { toast } = useToast()
   const [localSettings, setLocalSettings] = useState<BusinessSettingsState>(settings.general)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Update local state when settings change
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalSettings(settings.general)
-  }, [settings.general])
+  }, [settings])
 
   const handleChange = (field: string, value: string) => {
     const newSettings: BusinessSettingsState = { ...localSettings, [field]: value }
@@ -44,7 +45,8 @@ export const BusinessInfoSettings = React.memo(({ settings, onSettingChange }: B
       setErrors({})
       // If validation passes, update parent
       onSettingChange('general', field, validatedData[field as keyof typeof validatedData] ?? value)
-    } catch (error) {      // Don't update parent if validation fails, but allow user to continue typing
+    } catch (error) {
+      // Don't update parent if validation fails, but allow user to continue typing
       if (error instanceof Error) {
         // Extract field-specific errors if possible
         const errorMessage = error.message
@@ -170,9 +172,9 @@ export const BusinessInfoSettings = React.memo(({ settings, onSettingChange }: B
             value={localSettings.website || ''}
             onChange={(e) => handleChange('website', e.target.value)}
             onBlur={() => handleBlur('website')}
-            placeholder="https://www.bisnisanda.com"
+             placeholder="https://www.bisnisanda.com"
              className={errors['website'] ? 'border-red-500' : ''}
-          />
+           />
            {errors['website'] && (
              <p className="text-sm text-red-600 mt-1">{errors['website']}</p>
            )}
@@ -186,9 +188,9 @@ export const BusinessInfoSettings = React.memo(({ settings, onSettingChange }: B
             onChange={(e) => handleChange('description', e.target.value)}
             onBlur={() => handleBlur('description')}
             placeholder="Deskripsikan bisnis Anda..."
-            rows={4}
+             rows={4}
              className={errors['description'] ? 'border-red-500' : ''}
-          />
+           />
            {errors['description'] && (
              <p className="text-sm text-red-600 mt-1">{errors['description']}</p>
            )}
@@ -196,4 +198,10 @@ export const BusinessInfoSettings = React.memo(({ settings, onSettingChange }: B
       </CardContent>
     </Card>
   )
-})
+}
+
+const BusinessInfoSettings = React.memo(BusinessInfoSettingsComponent)
+
+BusinessInfoSettings.displayName = 'BusinessInfoSettings'
+
+export { BusinessInfoSettings }

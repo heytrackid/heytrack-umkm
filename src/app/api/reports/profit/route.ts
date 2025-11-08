@@ -2,7 +2,7 @@
 export const runtime = 'nodejs'
 
 
-/* eslint-disable */
+ 
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import type { Row } from '@/types/database'

@@ -8,9 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 interface FilterPeriodProps {
   selectedPeriod: PeriodType
   onPeriodChange: (period: PeriodType) => void
-  startDate: string
+  startDate?: string
   onStartDateChange: (date: string) => void
-  endDate: string
+  endDate?: string
   onEndDateChange: (date: string) => void
   onApplyFilters: () => void
   loading: boolean
@@ -93,7 +93,7 @@ const FilterPeriod = ({
                   <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
                   <input
                     type="date"
-                    value={startDate}
+                    value={startDate || ''}
                     onChange={(e) => onStartDateChange(e.target.value)}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   />
@@ -102,7 +102,7 @@ const FilterPeriod = ({
                   <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
                   <input
                     type="date"
-                    value={endDate}
+                    value={endDate || ''}
                     onChange={(e) => onEndDateChange(e.target.value)}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   />

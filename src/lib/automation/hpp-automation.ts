@@ -3,7 +3,7 @@ import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
 import type { Database } from '@/types/database'
 
-import type { AutomationConfig } from './types'
+
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
@@ -13,7 +13,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 export class HppAutomation {
   private readonly calculator = new HppCalculatorService()
 
-  constructor(private readonly config: AutomationConfig) {}
+  constructor() {}
 
   async recalculateRecipe(
     supabase: SupabaseClient<Database>,

@@ -106,7 +106,11 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     const notificationPayload: Insert<'notifications'> = {
       ...notificationData,
       user_id: user['id'],
-      metadata: (metadata ?? null) as Json | null
+      entity_id: notificationData.entity_id ?? null,
+      entity_type: notificationData.entity_type ?? null,
+      metadata: (metadata ?? null) as Json | null,
+      action_url: notificationData.action_url ?? null,
+      expires_at: notificationData.expires_at ?? null
     }
 
     const { data, error } = await supabase

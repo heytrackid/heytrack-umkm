@@ -176,11 +176,11 @@ export const CancelConfirmationDialog = ({
 )
 
 // Hook for easy usage
-export function useConfirmationDialog(): JSX.Element {
+export function useConfirmationDialog(): { confirm: (options: Omit<ConfirmationDialogProps, 'onOpenChange' | 'open'>) => Promise<boolean> } {
   const confirm = (options: Omit<ConfirmationDialogProps, 'onOpenChange' | 'open'>) => new Promise<boolean>((resolve) => {
     // Implementation akan menggunakan state management untuk dialog
     // Untuk sekarang, kita akan return Promise yang resolve dengan hasil
-    // eslint-disable-next-line no-alert -- Using native confirm as fallback until proper dialog is implemented
+     
     const result = window.confirm(`${options.title}\n\n${options.description}`)
     resolve(result)
   })

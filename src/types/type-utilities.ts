@@ -422,7 +422,7 @@ export type TypedSupabaseClient = SupabaseClient<Database>
  */
  
 export function typed(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   client: SupabaseClient<Database, any, any>
 ): TypedSupabaseClient {
   return client as unknown as TypedSupabaseClient

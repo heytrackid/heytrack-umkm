@@ -36,8 +36,8 @@ interface UseEnhancedCashFlowReturn {
 
   // Filters
   selectedPeriod: PeriodType
-  startDate: string
-  endDate: string
+  startDate: string | undefined
+  endDate: string | undefined
 
   // Transaction form
   isAddDialogOpen: boolean
@@ -63,24 +63,25 @@ interface UseEnhancedCashFlowReturn {
 }
 
 // Utility: Calculate date range
-function calculateDateRange(period: PeriodType, startDate?: string, endDate?: string): { startDate: string | undefined; endDate: string } {
+function calculateDateRange(period: PeriodType, startDate?: string, endDate?: string): { startDate: string | undefined; endDate: string | undefined } {
   const today = new Date()
-  let calculatedStartDate = startDate
-  const calculatedEndDate = endDate ?? today.toISOString().split('T')[0]
+  const calcEndDate = endDate !== undefined ? endDate : today.toISOString().split('T')[0]
+  let calcStartDate: string | undefined = startDate
 
   if (!startDate) {
     if (period === 'week') {
       const weekAgo = new Date(today)
       weekAgo.setDate(weekAgo.getDate() - 7)
-      calculatedStartDate = weekAgo.toISOString().split('T')[0]
+       calcStartDate = weekAgo.toISOString().split('T')[0]
     } else if (period === 'month') {
-      calculatedStartDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
+      calcStartDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
     } else if (period === 'year') {
-      calculatedStartDate = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
+      calcStartDate = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
     }
+    // for custom, leave undefined
   }
 
-  return { startDate: calculatedStartDate, endDate: calculatedEndDate }
+  return { startDate: calcStartDate, endDate: calcEndDate }
 }
 
 // Utility: Prepare chart data
@@ -151,8 +152,8 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
 
   // Filters
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const [startDate, setStartDate] = useState<string | undefined>('')
+  const [endDate, setEndDate] = useState<string | undefined>('')
 
   // Transaction form
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)

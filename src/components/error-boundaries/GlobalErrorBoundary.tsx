@@ -68,7 +68,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
   }
 
   handleRetry = (): void => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined })
+    this.setState({ hasError: false })
   }
 
   handleGoHome = (): void => {

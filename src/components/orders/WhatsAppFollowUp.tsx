@@ -1,4 +1,4 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
 import { Check, Copy, MessageCircle, Send } from 'lucide-react';

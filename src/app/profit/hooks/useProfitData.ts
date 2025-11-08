@@ -16,8 +16,7 @@ export function useProfitData() {
   const { toast } = useToast()
   
   const [filters, setFilters] = useState<ProfitFilters>({
-    selectedPeriod: 'month',
-    dateRange: undefined
+    selectedPeriod: 'month'
   })
 
   // Calculate date range for SWR key

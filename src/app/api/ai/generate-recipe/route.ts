@@ -185,7 +185,8 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
             success: true,
             recipe: {
                 ...recipe,
-                hpp: hppCalculation
+                hpp: hppCalculation.totalHPP,
+                hppDetails: hppCalculation
             }
         })
 
@@ -413,7 +414,7 @@ async function callAIServiceWithRetry(prompt: string, maxRetries = 3): Promise<s
     while (attempt <= maxRetries) {
         try {
             apiLogger.info({ attempt, maxRetries }, 'Calling AI service')
-            const result = await callAIService(prompt) // eslint-disable-line no-await-in-loop
+            const result = await callAIService(prompt)  
             apiLogger.info({ attempt }, 'AI service call successful')
             return result
         } catch (error: unknown) {
@@ -424,7 +425,7 @@ async function callAIServiceWithRetry(prompt: string, maxRetries = 3): Promise<s
                 // Exponential backoff: wait 2^attempt seconds
                 const waitTime = 2**attempt * 1000
                 apiLogger.info({ waitTime }, 'Waiting before retry')
-                // eslint-disable-next-line no-await-in-loop
+                 
                 await new Promise(resolve => setTimeout(resolve, waitTime))
             }
         }
@@ -611,12 +612,12 @@ function parseRecipeResponse(response: string): GeneratedRecipe {
             name: rawRecipe.name,
             ingredients: rawRecipe.ingredients as RecipeIngredient[],
             instructions: rawRecipe.instructions as string[],
-            servings: typeof rawRecipe.servings === 'number' ? rawRecipe.servings : undefined,
-            prep_time: typeof rawRecipe.prep_time === 'number' ? rawRecipe.prep_time : undefined,
-            cook_time: typeof rawRecipe.cook_time === 'number' ? rawRecipe.cook_time : undefined,
-            difficulty: typeof rawRecipe.difficulty === 'string' ? rawRecipe.difficulty : undefined,
-            category: typeof rawRecipe.category === 'string' ? rawRecipe.category : undefined,
-            notes: typeof rawRecipe.notes === 'string' ? rawRecipe.notes : undefined,
+            ...(typeof rawRecipe.servings === 'number' ? { servings: rawRecipe.servings } : {}),
+            ...(typeof rawRecipe.prep_time === 'number' ? { prep_time: rawRecipe.prep_time } : {}),
+            ...(typeof rawRecipe.cook_time === 'number' ? { cook_time: rawRecipe.cook_time } : {}),
+            ...(typeof rawRecipe.difficulty === 'string' ? { difficulty: rawRecipe.difficulty } : {}),
+            ...(typeof rawRecipe.category === 'string' ? { category: rawRecipe.category } : {}),
+            ...(typeof rawRecipe.notes === 'string' ? { notes: rawRecipe.notes } : {}),
         }
 
         return recipe
@@ -663,10 +664,28 @@ function findBestIngredientMatch(
  * Calculate HPP for the generated recipe
  */
 async function calculateRecipeHPP(
-    recipe: GeneratedRecipe, 
-    availableIngredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>, 
+    recipe: GeneratedRecipe,
+    availableIngredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>,
     userId: string
-): Promise<number> {
+): Promise<{
+    totalMaterialCost: number
+    operationalCost: number
+    totalHPP: number
+    hppPerUnit: number
+    servings: number
+    ingredientBreakdown: Array<{
+        name: string
+        quantity: number
+        unit: string
+        pricePerUnit: number
+        totalCost: number
+        percentage: number
+    }>
+    breakdown: Record<string, number>
+    suggestedSellingPrice: number
+    estimatedMargin: number
+    note: string
+}> {
     let totalMaterialCost = 0
     const ingredientBreakdown: Array<{
         name: string

@@ -2,9 +2,9 @@
 
 import { useCallback, useState } from 'react'
 
-import { createClientLogger } from '@/lib/client-logger'
 
-const logger = createClientLogger('Hook')
+
+
 
 /**
  * useConfirm Hook
@@ -13,39 +13,42 @@ const logger = createClientLogger('Hook')
 
 
 interface UseConfirmOptions {
-  onConfirm: () => Promise<void> | void
   title?: string
   description?: string
+  confirmText?: string
+  variant?: 'default' | 'destructive'
 }
 
 export function useConfirm() {
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [config, setConfig] = useState<UseConfirmOptions | null>(null)
+  const [resolvePromise, setResolvePromise] = useState<((value: boolean) => void) | null>(null)
 
-  const confirm = useCallback((options: UseConfirmOptions) => {
-    setConfig(options)
-    setIsOpen(true)
-  }, [])
+  const confirm = useCallback((options: UseConfirmOptions): Promise<boolean> =>
+    new Promise((resolve) => {
+      setResolvePromise(() => resolve)
+      setConfig(options)
+      setIsOpen(true)
+    }), [])
 
-  const handleConfirm = useCallback(async () => {
-    if (!config) {return}
+  const handleConfirm = useCallback(() => {
+    if (!resolvePromise) {return}
 
-    try {
-      setLoading(true)
-      await config.onConfirm()
-      setIsOpen(false)
-    } catch (error) {
-      logger.error({ error }, 'Confirmation action failed:')
-    } finally {
-      setLoading(false)
-    }
-  }, [config])
+    resolvePromise(true)
+    setIsOpen(false)
+    setResolvePromise(null)
+    setLoading(false)
+  }, [resolvePromise])
 
   const handleCancel = useCallback(() => {
+    if (resolvePromise) {
+      resolvePromise(false)
+      setResolvePromise(null)
+    }
     setIsOpen(false)
     setLoading(false)
-  }, [])
+  }, [resolvePromise])
 
   return {
     isOpen,

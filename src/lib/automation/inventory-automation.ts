@@ -1,4 +1,4 @@
-/* eslint-disable no-nested-ternary */
+ 
 import type {
     AutomationConfig,
     Ingredient,

@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertTriangle, Package, ShoppingCart, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -44,6 +45,7 @@ export const InventoryNotifications = (): JSX.Element => {
   const [notifications, setNotifications] = useState<InventoryNotification[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   const fetchNotifications = useCallback(async () => {
     try {

@@ -18,6 +18,16 @@ const VALID_STATUSES = [
 
 type OrderStatus = (typeof VALID_STATUSES)[number]
 type OrderRow = Database['public']['Tables']['orders']['Row']
+interface PartialOrderRow {
+  id: string;
+  order_no: string;
+  status: string | null;
+  total_amount: number | null;
+  delivery_date: string | null;
+  order_date: string | null;
+  customer_name: string | null;
+  user_id: string;
+}
 type TriggerWorkflow = typeof triggerWorkflow
 type ApiLogger = typeof apiLogger
 
@@ -30,7 +40,16 @@ const UpdateStatusSchema = z.object({
   notes: z.string().trim().max(500).optional()
 }).strict()
 
-async function fetchCurrentOrder(supabase: ReturnType<typeof createServiceRoleClient>, orderId: string): Promise<OrderRow> {
+async function fetchCurrentOrder(supabase: ReturnType<typeof createServiceRoleClient>, orderId: string): Promise<{
+  id: string;
+  order_no: string;
+  status: string | null;
+  total_amount: number | null;
+  delivery_date: string | null;
+  order_date: string | null;
+  customer_name: string | null;
+  user_id: string;
+}> {
   const { data: currentOrder, error: fetchError } = await supabase
     .from('orders')
     .select('id, order_no, status, total_amount, delivery_date, order_date, customer_name, user_id')
@@ -48,7 +67,7 @@ async function createIncomeRecordIfNeeded(
   supabase: ReturnType<typeof createServiceRoleClient>,
   status: string,
   previousStatus: string | null,
-  currentOrder: OrderRow,
+  currentOrder: PartialOrderRow,
   apiLoggerInstance: ApiLogger
 ): Promise<string | null> {
   if (status === 'DELIVERED' && previousStatus !== 'DELIVERED' && currentOrder.total_amount !== null && currentOrder.total_amount > 0) {
@@ -158,7 +177,7 @@ function buildResponse(
   updatedOrder: OrderRow,
   previousStatus: string | null,
   incomeRecordId: string | null,
-  currentOrder: OrderRow
+  currentOrder: PartialOrderRow
 ) {
   return NextResponse.json({
     success: true,
@@ -197,7 +216,7 @@ async function putHandler(
     const supabase = createServiceRoleClient()
 
     // Get current order to check previous status
-    let currentOrder: OrderRow
+    let currentOrder: Awaited<ReturnType<typeof fetchCurrentOrder>>
     try {
       currentOrder = await fetchCurrentOrder(supabase, orderId)
     } catch (_error) {

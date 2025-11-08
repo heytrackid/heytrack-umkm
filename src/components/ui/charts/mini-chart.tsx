@@ -1,4 +1,7 @@
+'use client'
+
 import { memo } from 'react'
+import { useMemo } from 'react'
 import { Line, LineChart, Area, AreaChart, Bar, BarChart, ResponsiveContainer } from 'recharts'
 
 import { cn } from '@/lib/utils'
@@ -32,12 +35,11 @@ export const MiniChart = memo(({
   className,
   height = 60
 }: MiniChartProps) => {
-  const getChartComponent = () => {
-    if (type === 'line') {return LineChart}
-    if (type === 'area') {return AreaChart}
+  const ChartComponent = useMemo(() => {
+    if (type === 'line') return LineChart
+    if (type === 'area') return AreaChart
     return BarChart
-  }
-  const ChartComponent = getChartComponent()
+  }, [type])
 
   return (
     <div className={cn("w-full", className)} style={{ height }}>
@@ -78,5 +80,7 @@ export const MiniChart = memo(({
     </div>
   )
 }, (prevProps: MiniChartProps, nextProps: MiniChartProps) => prevProps['data'] === nextProps['data'] && prevProps['type'] === nextProps['type'])
+
+MiniChart.displayName = 'MiniChart'
 
 export default memo(MiniChart)

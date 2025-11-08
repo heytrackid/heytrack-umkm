@@ -79,7 +79,7 @@ export function useSupabaseQuery<T extends TableName>(
       if (queryError) {
         throw queryError
       }
-      const typedResult = (result ?? []) as Array<Row<T>>
+      const typedResult = (result ?? []) as unknown as Row<T>[]
       setData(typedResult)
     } catch (error) {
       if (fetchIdRef.current !== currentFetchId) {

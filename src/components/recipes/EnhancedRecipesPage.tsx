@@ -1,4 +1,4 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
 import {
@@ -78,7 +78,7 @@ type DifficultyFilter = 'all' | 'easy' | 'hard' | 'medium'
 export const EnhancedRecipesPage = (): JSX.Element => {
     const router = useRouter()
     const { data: recipes, loading } = useRecipes({ realtime: true })
-    const { delete: deleteRecipe } = useSupabaseCRUD('recipes')
+    const { remove: deleteRecipe } = useSupabaseCRUD('recipes')
     const { toast } = useToast()
     const { isMobile } = useResponsive()
 

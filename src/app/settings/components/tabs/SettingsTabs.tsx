@@ -1,9 +1,16 @@
 import { Suspense, lazy } from 'react'
 
+import { BusinessSettings } from '@/app/settings/components/BusinessSettings'
+import { DangerZone } from '@/app/settings/components/DangerZone'
+import { DateTimeSettings } from '@/app/settings/components/DateTimeSettings'
+import { NotificationSettings } from '@/app/settings/components/NotificationSettings'
+import { NumberCurrencySettings } from '@/app/settings/components/NumberCurrencySettings'
+import { ProfileSettings } from '@/app/settings/components/ProfileSettings'
+import { SecuritySettings } from '@/app/settings/components/SecuritySettings'
 import { SettingsLoadingSkeleton } from '@/app/settings/components/SettingsLoadingSkeleton'
+import { UIThemeSettings } from '@/app/settings/components/UIThemeSettings'
 import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-
 
 // Lazy load settings components only when tabs are accessed (smart code splitting)
 const BusinessInfoSettings = lazy(() => import('@/app/settings/components/BusinessInfoSettings').then(mod => ({ default: mod.BusinessInfoSettings })))

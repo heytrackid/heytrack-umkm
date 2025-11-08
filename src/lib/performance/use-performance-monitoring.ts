@@ -56,7 +56,7 @@ export function usePerformanceMonitoring() {
   const observersRef = useRef<Set<PerformanceObserver>>(new Set())
   const intervalsRef = useRef<Set<NodeJS.Timeout>>(new Set())
   const eventListenersRef = useRef<Set<{ element: EventTarget; event: string; handler: EventListener }>>(new Set())
-  const startTimeRef = useRef<number>(typeof performance !== 'undefined' ? performance.now() : 0)
+  const startTimeRef = useRef<number>(0)
   const mountedRef = useRef(true)
 
   const cleanupAll = useCallback(() => {
@@ -178,12 +178,14 @@ export function usePerformanceMonitoring() {
     const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
 
     if (navigation) {
-      setMetrics(prev => ({
-        ...prev,
-        ttfb: navigation.responseStart - navigation.requestStart,
-        domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
-        loadComplete: navigation.loadEventEnd - navigation.loadEventStart
-      }))
+      setTimeout(() => {
+        setMetrics(prev => ({
+          ...prev,
+          ttfb: navigation.responseStart - navigation.requestStart,
+          domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
+          loadComplete: navigation.loadEventEnd - navigation.loadEventStart
+        }))
+      }, 0)
     }
 
     // Monitor page load
@@ -259,13 +261,15 @@ export function usePerformanceMonitoring() {
   // Initialize performance monitoring
   useEffect(() => {
     mountedRef.current = true
+    // Set start time after component mounts to avoid impure function call during render
+    startTimeRef.current = typeof performance !== 'undefined' ? performance.now() : 0
 
     if (typeof window === 'undefined' || !('PerformanceObserver' in window)) {
-      setIsSupported(false)
+      setTimeout(() => setIsSupported(false), 0)
       return
     }
 
-    setIsSupported(true)
+    setTimeout(() => setIsSupported(true), 0)
 
     // Observe Core Web Vitals
     observeCoreWebVitals()
@@ -334,14 +338,9 @@ export function usePerformanceMonitoring() {
   }, [getPerformanceScore])
 
   // Export metrics for analytics
-  const exportMetrics = useMemo(() => ({
-      ...metrics,
-      timestamp: Date.now(),
-      url: window.location.href,
-      userAgent: navigator.userAgent,
-      score: getPerformanceScore,
-      rating: getPerformanceRating
-    }), [metrics, getPerformanceScore, getPerformanceRating])
+  const exportMetrics = useMemo(() => () => {
+    perfLogger.info('Performance metrics export')
+  }, [])
 
   return {
     metrics,

@@ -24,7 +24,7 @@ export interface OrderPayment {
   currency: string
   payment_method: PaymentMethod
   payment_date: string
-  reference_number?: string // Bank transfer reference, etc.
+  reference_number?: string | null // Bank transfer reference, etc.
   notes?: string
   created_at: string
 }

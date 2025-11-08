@@ -11,7 +11,7 @@ import {
   Trash2,
   Plus
 } from 'lucide-react'
-import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { OrderStatusBadge, OrderProgress } from '@/components/orders/OrderStatusBadge'
@@ -59,7 +59,8 @@ const OrdersList = memo(({
 
   const totalOrders = orders.length
   const totalPages = Math.max(1, Math.ceil(totalOrders / rowsPerPage))
-  const pageStart = totalOrders === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1
+  const effectivePage = Math.min(currentPage, totalPages)
+  const pageStart = totalOrders === 0 ? 0 : (effectivePage - 1) * rowsPerPage + 1
   const pageEnd = totalOrders === 0 ? 0 : Math.min(pageStart + rowsPerPage - 1, totalOrders)
   const paginatedOrders = useMemo(
     () => totalOrders === 0 ? [] : orders.slice(pageStart - 1, pageEnd),
@@ -69,16 +70,6 @@ const OrdersList = memo(({
   const handleStatusChange = useCallback((orderId: string, newStatus: OrderStatus) => {
     onUpdateStatus(orderId, newStatus)
   }, [onUpdateStatus])
-
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [orders, rowsPerPage])
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages)
-    }
-  }, [currentPage, totalPages])
 
   if (loading) {
     return (
@@ -343,5 +334,7 @@ const OrdersList = memo(({
   prevProps.loading === nextProps.loading
 )
 )
+
+OrdersList.displayName = 'OrdersList'
 
 export default OrdersList

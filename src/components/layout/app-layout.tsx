@@ -20,7 +20,7 @@ import {
   Wallet
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { memo, useEffect, useState, useRef, type ReactNode } from 'react'
+import { memo, useEffect, useLayoutEffect, useState, useRef, type ReactNode } from 'react'
 
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
 import { TabNavigation } from '@/components/layout/TabNavigation'
@@ -98,24 +98,29 @@ const AppLayout = memo(({
 }: AppLayoutProps) => {
   const { user, isLoading: loading, isAuthenticated } = useAuth()
   const { prefetchRoute } = useInstantNavigation()
-  const [mounted, setMounted] = useState(false)
   const router = useRouter()
-  const mainContentRef = useRef<HTMLDivElement>(null)
+   const mainContentRef = useRef<HTMLDivElement>(null)
+   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+    // Set mounted state to prevent hydration mismatch
+    useLayoutEffect(() => {
+      const timer = setTimeout(() => {
+        setMounted(true)
+      }, 0)
+      
+      return () => clearTimeout(timer)
+    }, [])
 
-  // Prefetch critical routes on mount for faster navigation
+   // Prefetch critical routes on mount for faster navigation
   useEffect(() => {
-    if (mounted && user) {
+    if (user) {
       // Prefetch common routes after user loads
       const criticalRoutes = ['/dashboard', '/orders', '/customers', '/ingredients']
       criticalRoutes.forEach(route => {
         void prefetchRoute(route)
       })
     }
-  }, [mounted, user, prefetchRoute])
+  }, [user, prefetchRoute])
 
   // Responsive detection
   const { isMobile } = useResponsive()
@@ -222,7 +227,7 @@ const AppLayout = memo(({
       mainContent.removeEventListener('touchmove', handleTouchMove)
       mainContent.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [isMobile, mounted, router])
+  }, [isMobile, router, mounted])
 
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {

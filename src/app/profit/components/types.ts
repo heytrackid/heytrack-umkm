@@ -42,7 +42,16 @@ import type { DateRange } from 'react-day-picker'
 
 export interface ProfitFilters {
   selectedPeriod: PeriodType
-  dateRange?: DateRange
+  dateRange?: DateRange | null
+  startDate?: string
+  endDate?: string
+}
+
+export interface ProfitFiltersProps {
+  filters: ProfitFilters
+  onFiltersChange: (filters: Partial<ProfitFilters>) => void
+  onApplyFilters: () => void
+  isMobile: boolean
 }
 
 export interface ProductChartData {

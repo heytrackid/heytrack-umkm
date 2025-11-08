@@ -257,13 +257,13 @@ export const useDashboardStats = (): UseQueryResult<DashboardStats> => useQuery<
     ...cachePresets.dashboard,
   })
 
-export const useWeeklySales = (): UseQueryResult<WeeklySalesData> => useQuery<WeeklySalesData, Error>({
+export const useWeeklySales = (): UseQueryResult<WeeklySalesData[]> => useQuery<WeeklySalesData[], Error>({
     queryKey: ['dashboard', 'weekly-sales'],
     queryFn: fetchWeeklySales,
     ...cachePresets.analytics,
   })
 
-export const useTopProducts = (): UseQueryResult<TopProductsData> => useQuery<TopProductsData, Error>({
+export const useTopProducts = (): UseQueryResult<TopProductsData[]> => useQuery<TopProductsData[], Error>({
     queryKey: ['dashboard', 'top-products'],
     queryFn: fetchTopProducts,
     ...cachePresets.analytics,

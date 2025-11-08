@@ -8,6 +8,7 @@ export const runtime = 'nodejs'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 
+
 import { ContextAwareAI } from '@/lib/ai-chatbot-enhanced'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { logger } from '@/lib/logger'
@@ -16,8 +17,11 @@ import { BusinessContextService } from '@/lib/services/BusinessContextService'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { RateLimiter, RATE_LIMITS } from '@/lib/services/RateLimiter'
 import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
+import type { Database } from '@/types/database'
 import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
+
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export const maxDuration = 30
 
@@ -33,7 +37,7 @@ const ChatRequestSchema = z.object({
   currentPage: z.string().trim().max(200).optional()
 }).strict()
 
-async function authenticateUser(supabase: ReturnType<typeof createClient>): Promise<{ userId: string }> {
+async function authenticateUser(supabase: SupabaseClient<Database>): Promise<{ userId: string }> {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if (authError || !user) {

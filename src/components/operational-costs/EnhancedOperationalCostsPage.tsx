@@ -616,7 +616,7 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
             <OperationalCostFormDialog
                 open={showFormDialog}
                 onOpenChange={setShowFormDialog}
-                cost={editingCost}
+                {...(editingCost && { cost: editingCost })}
                 onSuccess={() => refetch?.()}
             />
 

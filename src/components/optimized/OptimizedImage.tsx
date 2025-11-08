@@ -43,9 +43,9 @@ export const OptimizedImage = ({
         style={{ width, height }}
       >
         <span className="text-muted-foreground text-sm">Failed to load image</span>
-      </div>
-    )
-  }
+     </div>
+   );
+}
 
   const resolvedWidth = width ?? 1
   const resolvedHeight = height ?? 1

@@ -6,7 +6,7 @@ import { getErrorMessage } from '@/shared'
 import type { ZodSchema } from 'zod'
 
 
-/* eslint-disable */
+ 
 /**
  * Shared API Utilities
  * Common API response patterns and utilities

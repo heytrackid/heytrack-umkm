@@ -124,7 +124,11 @@ export function useApi<T = unknown >(
    */
   useEffect(() => {
     if (autoLoad) {
-      void fetch()
+      const timer = setTimeout(() => {
+        void fetch()
+      }, 0)
+      
+      return () => clearTimeout(timer)
     }
   }, [autoLoad, fetch])
 

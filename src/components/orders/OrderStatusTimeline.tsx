@@ -1,4 +1,4 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
 import { CheckCircle2, Clock, Package, Truck, XCircle } from 'lucide-react'

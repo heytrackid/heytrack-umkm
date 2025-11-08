@@ -10,25 +10,23 @@ const cacheLogger = createClientLogger('CacheHook')
  */
 export const useCache = <T>(key: string, initialValue?: T) => {
   const mountedRef = useRef(true)
-  const [value, setValue] = useState<T | null>(null)
+  const [value, setValue] = useState<T | null>(() => {
+    const cachedValue = enhancedCache.get<T>(key)
+    if (cachedValue) {
+      return cachedValue
+    } else if (initialValue !== undefined) {
+      enhancedCache.set(key, initialValue)
+      return initialValue
+    }
+    return null
+  })
 
   useEffect(() => {
     mountedRef.current = true
-    
-    // Load cached value
-    const cachedValue = enhancedCache.get<T>(key)
-    if (cachedValue) {
-      setValue(cachedValue)
-    } else if (initialValue !== undefined) {
-      setValue(initialValue)
-      // Store initial value in cache
-      enhancedCache.set(key, initialValue)
-    }
-    
     return () => {
       mountedRef.current = false
     }
-  }, [key, initialValue])
+  }, [])
 
   const setCachedValue = (newValue: T, ttl?: number) => {
     if (!mountedRef.current) {return}

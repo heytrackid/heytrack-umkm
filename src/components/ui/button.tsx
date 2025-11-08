@@ -17,14 +17,14 @@ const triggerHapticFeedback = (type: 'heavy' | 'light' | 'medium' = 'light') => 
         }
         navigator.vibrate(patterns[type] ?? [10])
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       else if ('hapticFeedback' in (window as Record<string, any>)) {
         const hapticTypes: Record<string, string> = {
           light: 'impactLight',
           medium: 'impactMedium',
           heavy: 'impactHeavy'
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         ;(window as Record<string, any>)['hapticFeedback'].impact(hapticTypes[type])
       }
     } catch {

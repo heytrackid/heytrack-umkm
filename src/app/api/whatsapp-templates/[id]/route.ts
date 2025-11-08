@@ -16,16 +16,15 @@ import { createClient } from '@/utils/supabase/server'
 
 type WhatsAppTemplateUpdate = Update<'whatsapp_templates'>
 
-interface RouteContext {
-  params: Promise<{ id: string }>
-}
-
 async function getHandler(
   _request: NextRequest,
-  context: RouteContext
+  { params }: { params: Record<string, string> }
 ): Promise<NextResponse> {
   try {
-    const { id } = await context['params']
+    const { id } = params
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
 
     // 1. Authentication
     const supabase = await createClient()
@@ -65,10 +64,13 @@ async function getHandler(
 
 async function putHandler(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: Record<string, string> }
 ): Promise<NextResponse> {
   try {
-    const { id } = await context['params']
+    const { id } = params
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
 
     // 1. Authentication
     const supabase = await createClient()
@@ -101,13 +103,13 @@ async function putHandler(
 
     // 4. Update template with ownership check
     const updateData: WhatsAppTemplateUpdate = {
-      name: _body.name,
-      description: _body.description,
-      category: _body.category,
-      template_content: _body.template_content,
-      variables: _body.variables,
-      is_active: _body.is_active,
-      is_default: _body.is_default,
+      ...(typeof _body.name === 'string' && { name: _body.name }),
+      ...(typeof _body.description === 'string' && { description: _body.description }),
+      ...(typeof _body.category === 'string' && { category: _body.category }),
+      ...(typeof _body.template_content === 'string' && { template_content: _body.template_content }),
+      ...(Array.isArray(_body.variables) && { variables: _body.variables }),
+      ...(typeof _body.is_active === 'boolean' && { is_active: _body.is_active }),
+      ...(typeof _body.is_default === 'boolean' && { is_default: _body.is_default }),
       updated_at: new Date().toISOString()
     }
 
@@ -142,10 +144,13 @@ async function putHandler(
 
 async function deleteHandler(
   _request: NextRequest,
-  context: RouteContext
+  { params }: { params: Record<string, string> }
 ): Promise<NextResponse> {
   try {
-    const { id } = await context['params']
+    const { id } = params
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
 
     // 1. Authentication
     const supabase = await createClient()

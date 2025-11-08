@@ -98,11 +98,12 @@ const buildSchedulingResult = (batches: ProductionBatchWithDetails[]): Schedulin
     timeline,
     resource_utilization: {
       oven_utilization: Math.min(100, utilizationMultiplier * 12),
-      mixer_utilization: Math.min(100, utilizationMultiplier * 9),
-      decorator_utilization: Math.min(100, utilizationMultiplier * 7),
-      packaging_utilization: Math.min(100, utilizationMultiplier * 5)
+      mixer_utilization: Math.min(100, utilizationMultiplier * 8),
+      decorator_utilization: Math.min(100, utilizationMultiplier * 10),
+      packaging_utilization: Math.min(100, utilizationMultiplier * 6)
     },
-    warnings: []
+    warnings: [],
+    optimization_suggestions: []
   }
 }
 

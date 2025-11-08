@@ -20,7 +20,6 @@ export function useChatMessages(): UseChatMessagesResult {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [hasShownWelcome, setHasShownWelcome] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   const fetchBusinessStats = useCallback(async (userId: string): Promise<BusinessStats> => {
@@ -98,21 +97,10 @@ export function useChatMessages(): UseChatMessagesResult {
     return welcomeMessage
   }, [])
 
-  // Mark component as mounted to prevent hydration mismatch
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-
-
-
-
-
-
   // Show personalized welcome message on mount
-   
+
   useEffect(() => {
-    if (!isMounted || hasShownWelcome) { return }
+    if (hasShownWelcome) { return }
 
     const showWelcomeMessage = async (): Promise<void> => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -137,7 +125,7 @@ export function useChatMessages(): UseChatMessagesResult {
     }
 
     void showWelcomeMessage()
-  }, [isMounted, hasShownWelcome, supabase, createWelcomeMessage, fetchBusinessStats])
+  }, [hasShownWelcome, supabase, createWelcomeMessage, fetchBusinessStats])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

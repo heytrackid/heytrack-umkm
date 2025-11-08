@@ -57,9 +57,9 @@ const PAYMENT_METADATA_PREFIX = '[PAYMENT_META]'
 const DEFAULT_PAYMENT_METHOD: PaymentMethod = 'CASH'
 
 interface PaymentMetadata {
-  payment_method?: PaymentMethod
-  currency?: string
-  notes?: string
+  payment_method: PaymentMethod
+  currency: string
+  notes: string
 }
 
 const encodePaymentDescription = (metadata: PaymentMetadata): string => {
@@ -74,22 +74,34 @@ const encodePaymentDescription = (metadata: PaymentMetadata): string => {
 
 const decodePaymentDescription = (description?: string | null): PaymentMetadata => {
   if (!description) {
-    return {}
+    return {
+      payment_method: DEFAULT_PAYMENT_METHOD,
+      currency: DEFAULT_ORDERS_CONFIG.currency.default,
+      notes: ''
+    }
   }
 
   if (!description.startsWith(PAYMENT_METADATA_PREFIX)) {
-    return { notes: description }
+    return {
+      payment_method: DEFAULT_PAYMENT_METHOD,
+      currency: DEFAULT_ORDERS_CONFIG.currency.default,
+      notes: description
+    }
   }
 
   try {
-    const parsed = JSON.parse(description.slice(PAYMENT_METADATA_PREFIX.length)) as PaymentMetadata
+    const parsed = JSON.parse(description.slice(PAYMENT_METADATA_PREFIX.length)) as Partial<PaymentMetadata>
     return {
       payment_method: parsed.payment_method ?? DEFAULT_PAYMENT_METHOD,
       currency: parsed.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
-      notes: parsed.notes
+      notes: parsed.notes ?? ''
     }
   } catch {
-    return { notes: description }
+    return {
+      payment_method: DEFAULT_PAYMENT_METHOD,
+      currency: DEFAULT_ORDERS_CONFIG.currency.default,
+      notes: description
+    }
   }
 }
 
@@ -110,7 +122,7 @@ export function useOrders(filters?: OrderFilters) {
   const {
     create: createRecord,
     update: updateRecord,
-    delete: deleteRecord,
+    remove: deleteRecord,
     loading: crudLoading,
     error: crudError,
     clearError
@@ -216,7 +228,7 @@ export function useOrderItems(orderId: string) {
   const {
     create,
     update,
-    delete: deleteItem
+    remove: deleteItem
   } = useSupabaseCRUD('order_items')
 
   return {
@@ -243,10 +255,13 @@ export function useOrderPayments(orderId?: string | null) {
     create,
     update,
     remove,
-  } = useSupabaseCRUD('financial_records', {
+  } = useSupabaseCRUD('financial_records', referenceKey ? {
     strategy: 'swr',
     orderBy: { column: 'date', ascending: false },
-    filter: referenceKey ? { reference: referenceKey, type: 'INCOME', category: 'SALES' } : undefined,
+    filter: { reference: referenceKey, type: 'INCOME', category: 'SALES' },
+  } : {
+    strategy: 'swr',
+    orderBy: { column: 'date', ascending: false },
   })
 
   const payments: OrderPayment[] = useMemo(() => {
@@ -264,7 +279,7 @@ export function useOrderPayments(orderId?: string | null) {
         currency: metadata.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
         payment_method: metadata.payment_method ?? DEFAULT_PAYMENT_METHOD,
         payment_date: record.date ?? record.created_at ?? new Date().toISOString(),
-        reference_number: record.reference ?? undefined,
+        reference_number: record.reference,
         notes: metadata.notes ?? record.description ?? undefined,
         created_at: record.created_at ?? new Date().toISOString(),
       }
@@ -293,9 +308,9 @@ export function useOrderPayments(orderId?: string | null) {
       type: 'INCOME',
       date: payment.payment_date ?? new Date().toISOString(),
       description: encodePaymentDescription({
-        payment_method: payment.payment_method,
-        currency: payment.currency,
-        notes: payment.notes,
+        payment_method: payment.payment_method ?? DEFAULT_PAYMENT_METHOD,
+        currency: payment.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
+        notes: payment.notes ?? '',
       }),
       reference: payment.reference_number ?? referenceKey!,
     })
@@ -314,9 +329,9 @@ export function useOrderPayments(orderId?: string | null) {
       amount: updates.amount ?? existingRecord?.amount ?? 0,
       date: updates.payment_date ?? existingRecord?.date ?? new Date().toISOString(),
       description: encodePaymentDescription({
-        payment_method: updates.payment_method ?? existingMetadata.payment_method,
-        currency: updates.currency ?? existingMetadata.currency,
-        notes: updates.notes ?? existingMetadata.notes,
+        payment_method: updates.payment_method ?? existingMetadata.payment_method ?? DEFAULT_PAYMENT_METHOD,
+        currency: updates.currency ?? existingMetadata.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
+        notes: updates.notes ?? existingMetadata.notes ?? '',
       }),
       reference: updates.reference_number ?? existingRecord?.reference ?? referenceKey!,
     })

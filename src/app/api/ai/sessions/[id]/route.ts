@@ -10,17 +10,15 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureRouteHandler, SecurityPresets } from '@/utils/security'
 
 import { createClient } from '@/utils/supabase/server'
 
-interface RouteParams {
-  params: {
-    id: string
-  }
+interface RouteContext {
+  params: Promise<Record<string, string>>
 }
 
-async function getHandler(_request: NextRequest, { params }: RouteParams): Promise<NextResponse> {
+async function getHandler(_request: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -34,7 +32,11 @@ async function getHandler(_request: NextRequest, { params }: RouteParams): Promi
       throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
-    const sessionId = params['id']
+    const { id } = await context.params
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
+    const sessionId = id
 
     // Get session and messages
     const [session, messages] = await Promise.all([
@@ -53,7 +55,7 @@ async function getHandler(_request: NextRequest, { params }: RouteParams): Promi
   }
 }
 
-async function deleteHandler(_request: NextRequest, { params }: RouteParams): Promise<NextResponse> {
+async function deleteHandler(_request: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -67,7 +69,11 @@ async function deleteHandler(_request: NextRequest, { params }: RouteParams): Pr
       throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
-    const sessionId = params['id']
+    const { id } = await context.params
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
+    const sessionId = id
 
     // Delete session
     await ChatSessionService.deleteSession(sessionId, user['id'])
@@ -80,5 +86,5 @@ async function deleteHandler(_request: NextRequest, { params }: RouteParams): Pr
   }
 }
 
-export const GET = createSecureHandler(getHandler, 'GET /api/ai/sessions/[id]', SecurityPresets.enhanced())
-export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/ai/sessions/[id]', SecurityPresets.enhanced())
+export const GET = createSecureRouteHandler(getHandler, 'GET /api/ai/sessions/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureRouteHandler(deleteHandler, 'DELETE /api/ai/sessions/[id]', SecurityPresets.enhanced())

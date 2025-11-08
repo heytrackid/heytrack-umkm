@@ -145,12 +145,14 @@ export const withPerformanceTracking = <P extends Record<string, unknown>>(
   componentName: string
 ): React.ComponentType<P> => {
   const TrackedComponent = (props: P) => {
-    const startTime = useRef(performance.now())
+    const startTime = useRef(0)
     const [renderTime, setRenderTime] = useState<number | null>(null)
     const [interactionCount, setInteractionCount] = useState(0)
 
     // Track component mount and render time
     useEffect(() => {
+      // Set start time after component mounts to avoid impure function call during render
+      startTime.current = performance.now()
       const mountStartTime = startTime.current
       const mountTime = performance.now() - mountStartTime
       setRenderTime(mountTime)
@@ -242,10 +244,14 @@ export const useComponentPerformance = (_componentName: string) => {
   })
 
   useEffect(() => {
-    setPerformanceData(prev => ({
-      ...prev,
-      renderCount: prev.renderCount + 1
-    }))
+    const timer = setTimeout(() => {
+      setPerformanceData(prev => ({
+        ...prev,
+        renderCount: prev.renderCount + 1
+      }))
+    }, 0)
+    
+    return () => clearTimeout(timer)
   }, [])
 
   const trackRender = (renderTime: number) => {

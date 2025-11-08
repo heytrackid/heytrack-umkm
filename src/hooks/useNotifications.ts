@@ -26,26 +26,33 @@ export function useNotifications() {
   // Load saved notifications from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setNotifications(parsed.map((n: Notification) => ({
-          ...n,
-          timestamp: new Date(n['timestamp'])
-        })))
-      } catch (_error) {
-        // Invalid data, ignore
-      }
-    }
-
     const savedPrefs = localStorage.getItem(PREFERENCES_KEY)
-    if (savedPrefs) {
-      try {
-        setPreferences(JSON.parse(savedPrefs))
-      } catch (_error) {
-        // Invalid data, use defaults
+    
+    const loadNotifications = () => {
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          setNotifications(parsed.map((n: Notification) => ({
+            ...n,
+            timestamp: new Date(n['timestamp'])
+          })))
+        } catch (_error) {
+          // Invalid data, ignore
+        }
+      }
+
+      if (savedPrefs) {
+        try {
+          setPreferences(JSON.parse(savedPrefs))
+        } catch (_error) {
+          // Invalid data, use defaults
+        }
       }
     }
+    
+    const timer = setTimeout(loadNotifications, 0)
+    
+    return () => clearTimeout(timer)
   }, [])
 
   // Save notifications to localStorage

@@ -168,6 +168,8 @@ export const OrderStatusBadge = memo(({
     )
 })
 
+OrderStatusBadge.displayName = 'OrderStatusBadge'
+
 // Progress indicator component
 interface OrderProgressProps {
     currentStatus: DatabaseOrderStatus | OrderStatus
@@ -246,6 +248,8 @@ export const OrderProgress = memo(({ currentStatus, className }: OrderProgressPr
         </div>
     )
 })
+
+OrderProgress.displayName = 'OrderProgress'
 
 // Status change confirmation dialog helper
 export function getStatusChangeConfirmation(fromStatus: DatabaseOrderStatus | OrderStatus, toStatus: DatabaseOrderStatus | OrderStatus) {

@@ -89,12 +89,14 @@ export const StockBadge = memo(({
                 {showIcon && <Icon className={cn('w-3 h-3 mr-1', config.iconColor)} />}
                 {config.label}
             </Badge>
-            <span className="text-sm text-gray-600">
-                {currentStock} / {minStock} {unit}
-            </span>
-        </div>
-    )
-})
+             <span className="text-sm text-gray-600">
+                 {currentStock} / {minStock} {unit}
+             </span>
+         </div>
+     )
+ })
+
+StockBadge.displayName = 'StockBadge'
 
 /**
  * Compact Stock Indicator for Mobile
@@ -126,3 +128,5 @@ export const CompactStockIndicator = memo(({
         </div>
     )
 })
+
+CompactStockIndicator.displayName = 'CompactStockIndicator'

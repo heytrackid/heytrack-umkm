@@ -301,7 +301,7 @@ export const ErrorMessage = ({
 }
 
 // Hook for easy error handling
-export function useErrorHandler(): JSX.Element {
+export function useErrorHandler(): { error: Error | null; handleError: (error: unknown) => void; clearError: () => void } {
     const [error, setError] = useState<Error | null>(null)
 
     const handleError = (error: unknown) => {

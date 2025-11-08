@@ -38,7 +38,7 @@ export function useProductionBatches(filters?: ProductionFilters) {
   const {
     create: createBatchRecord,
     update: updateBatchRecord,
-    delete: deleteBatchRecord
+    remove: deleteBatchRecord
   } = useSupabaseCRUD('production_batches')
 
   // Filter batches based on criteria
@@ -186,7 +186,7 @@ export function useQualityChecks(batchId: string) {
   const {
     create: createCheck,
     update: updateCheckRecord,
-    delete: deleteCheck
+    remove: deleteCheck
   } = useSupabaseCRUD('app_settings')
 
   // Transform to expected type
@@ -239,7 +239,7 @@ export function useProductionEquipment(filters?: { type?: string; status?: strin
    const {
      create: createEquipment,
     update: updateEquipmentRecord,
-    delete: deleteEquipment
+    remove: deleteEquipment
   } = useSupabaseCRUD('app_settings')
 
   // Transform to expected type
@@ -292,7 +292,7 @@ export function useProductionStaff(filters?: { role?: string; active?: boolean }
    const {
      create: createStaff,
     update: updateStaffRecord,
-    delete: deleteStaff
+    remove: deleteStaff
   } = useSupabaseCRUD('app_settings')
 
   // Transform to expected type
@@ -335,7 +335,7 @@ export function useIngredientAllocations(batchId: string) {
   const {
     create: createAllocation,
     update: updateAllocationRecord,
-    delete: deleteAllocation
+    remove: deleteAllocation
   } = useSupabaseCRUD('stock_transactions')
 
   // Transform to expected type

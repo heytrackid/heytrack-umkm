@@ -78,7 +78,7 @@ const createActionsCell = <T extends Record<string, unknown>>(
     return undefined
   }
 
-  return (item: T) => (
+  const ActionsCell = (item: T) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm">
@@ -112,6 +112,10 @@ const createActionsCell = <T extends Record<string, unknown>>(
       </DropdownMenuContent>
     </DropdownMenu>
   )
+  
+  ActionsCell.displayName = 'ActionsCell'
+  
+  return ActionsCell
 }
 
 export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[keyof T]>({

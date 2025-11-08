@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense, type ReactNode } from 'react'
+import Image from 'next/image'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -294,9 +295,11 @@ export const ProgressiveImage = ({
         <Skeleton className="w-full h-full absolute inset-0" />
       )}
       {hasError && fallback && fallback}
-      <img
+      <Image
         src={src}
         alt={alt}
+        width={400}
+        height={300}
         className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity`}
         onLoad={() => setIsLoading(false)}
         onError={() => setHasError(true)}

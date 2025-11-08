@@ -11,17 +11,13 @@ import { createSecureHandler, SecurityPresets } from '@/utils/security'
 
 import { createClient } from '@/utils/supabase/server'
 
-interface RouteContext {
-  params: Promise<{ id: string }>
-}
-
 // GET /api/operational-costs/[id] - Get single operational cost
 async function getHandler(
   _request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const { id } = await context['params']
+    const { id } = params
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -65,10 +61,10 @@ async function getHandler(
 // PUT /api/operational-costs/[id] - Update operational cost
 async function putHandler(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const { id } = await context['params']
+    const { id } = params
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -143,10 +139,10 @@ async function putHandler(
 // DELETE /api/operational-costs/[id] - Delete operational cost
 async function deleteHandler(
   _request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const { id } = await context['params']
+    const { id } = params
     
     // Validate UUID format
     if (!isValidUUID(id)) {

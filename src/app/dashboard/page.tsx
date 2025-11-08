@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Plus, Users } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
 
@@ -103,7 +104,7 @@ interface DashboardData {
       customer: string
       amount: number | null
       status: string | null
-      time: string | null
+      created_at: string | null
     }>
   }
   inventory: {
@@ -125,7 +126,7 @@ interface DashboardAPIResponse {
       customer: string
       amount: number | null
       status: string | null
-      time: string | null
+      created_at: string | null
     }>
   }
   customers?: { total?: number }
@@ -214,7 +215,7 @@ const renderErrorState = (router: ReturnType<typeof useRouter>): JSX.Element => 
   )
 }
 
-const renderEmptyState = (showOnboarding: boolean, setShowOnboarding: (show: boolean) => void, _router: ReturnType<typeof useRouter>): JSX.Element => (
+const renderEmptyState = (_showOnboarding: boolean, _setShowOnboarding: (show: boolean) => void, _router: ReturnType<typeof useRouter>): JSX.Element => (
   <Card className="border-dashed border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
     <CardContent className="pt-8 pb-8">
       <div className="text-center space-y-6">
@@ -234,38 +235,22 @@ const renderEmptyState = (showOnboarding: boolean, setShowOnboarding: (show: boo
           </p>
         </div>
 
-        {/* Primary CTA */}
-        <div className="flex flex-col items-center gap-3 pt-2">
-          <LoadingButton
-            size="lg"
-            onClick={() => setShowOnboarding(true)}
-            className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-            hapticFeedback
-            hapticType="medium"
-          >
-            <Sparkles className="h-5 w-5" />
-            Mulai Setup (5 menit)
-          </LoadingButton>
 
-          <p className="text-xs text-muted-foreground">
-            Atau langsung ke:
-          </p>
-        </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
-          <LoadingButton variant="outline" asChild className="h-24 flex-col gap-2">
-            <a href="/ingredients">
+          <Link href="/ingredients">
+            <LoadingButton variant="outline" className="h-24 flex-col gap-2">
               <Package className="h-6 w-6 text-muted-foreground" />
               <span className="text-sm font-medium">Bahan Baku</span>
-            </a>
-          </LoadingButton>
-          <LoadingButton variant="outline" asChild className="h-24 flex-col gap-2">
-            <a href="/recipes">
+            </LoadingButton>
+          </Link>
+          <Link href="/recipes">
+            <LoadingButton variant="outline" className="h-24 flex-col gap-2">
               <ChefHat className="h-6 w-6 text-muted-foreground" />
               <span className="text-sm font-medium">Resep</span>
-            </a>
-          </LoadingButton>
+            </LoadingButton>
+          </Link>
           <LoadingButton variant="outline" asChild className="h-24 flex-col gap-2">
             <a href="/hpp">
               <Calculator className="h-6 w-6 text-muted-foreground" />

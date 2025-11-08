@@ -8,6 +8,7 @@ import { apiLogger, logError } from '@/lib/logger';
 import { prepareUpdate } from '@/lib/supabase/insert-helpers';
 import { getErrorMessage, isValidUUID, isRecord, extractFirst, safeString } from '@/lib/type-guards';
 import { UpdateExpenseSchema } from '@/lib/validations/api-schemas';
+import type { Database } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security';
 import { createClient } from '@/utils/supabase/server'
 
@@ -130,7 +131,9 @@ async function putHandler(
       );
     }
 
-    const updatePayload = prepareUpdate('financial_records', validation.data)
+    const updatePayload = prepareUpdate('financial_records', Object.fromEntries(
+      Object.entries(validation.data).filter(([_, value]) => value !== undefined)
+    ) as Database['public']['Tables']['financial_records']['Update'])
 
     // ✅ Use financial_records table
     const { data: expense, error } = await supabase

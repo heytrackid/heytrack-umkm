@@ -1,4 +1,4 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
 import { AlertTriangle, ArrowRight, CheckCircle, Download, FileText, Upload, X } from 'lucide-react'

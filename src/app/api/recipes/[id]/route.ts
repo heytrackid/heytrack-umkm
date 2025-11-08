@@ -177,10 +177,10 @@ async function putHandler(
             if ('data' in v) {
               return {
                 recipe_id: id,
-                ingredient_id: v.data.ingredient_id,
-                quantity: v.data.quantity,
-                unit: v.data.unit,
-                notes: v.data.notes ?? null,
+                ingredient_id: v.data!.ingredient_id,
+                quantity: v.data!.quantity,
+                unit: v.data!.unit,
+                notes: v.data!.notes ?? null,
                 user_id: user['id']
               }
             }
@@ -211,7 +211,7 @@ async function putHandler(
 
     if (fetchError) {
       apiLogger.error({ error: fetchError }, 'Error fetching complete recipe')
-      return NextResponse.json(recipe)
+      return NextResponse.json({ error: 'Failed to fetch updated recipe' }, { status: 500 })
     }
 
     // Invalidate cache

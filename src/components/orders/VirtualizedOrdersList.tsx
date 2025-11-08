@@ -57,14 +57,20 @@ const renderCustomerCell = (order: Order) => (
   </div>
 )
 
-const renderAmountCell = (formatCurrency: (amount: number) => string) => (order: Order) => (
-  <div className="flex items-center gap-2">
-    <DollarSign className="h-4 w-4 text-muted-foreground" />
-    <span className="font-medium">
-      {formatCurrency(order.total_amount ?? 0)}
-    </span>
-  </div>
-)
+const renderAmountCell = (formatCurrency: (amount: number) => string) => {
+  const CellComponent = (order: Order) => (
+    <div className="flex items-center gap-2">
+      <DollarSign className="h-4 w-4 text-muted-foreground" />
+      <span className="font-medium">
+        {formatCurrency(order.total_amount ?? 0)}
+      </span>
+    </div>
+  )
+  
+  CellComponent.displayName = 'renderAmountCell'
+  
+  return CellComponent
+}
 
 const renderPriorityCell = (order: Order) => {
   const getPriorityInfo = (priority: string) => {
@@ -90,36 +96,42 @@ const renderActionsCell = (
   onEditOrder: (orderId: string) => void,
   onDeleteOrder: (orderId: string) => void,
   onUpdateStatus: (orderId: string, status: string) => void
-) => (order: Order) => (
-  <div className="flex items-center gap-2">
-    <select
-      value={order['status'] ?? 'PENDING'}
-      onChange={(e) => onUpdateStatus(order['id'], e.target.value)}
-      className="bg-transparent border border-input rounded px-2 py-1 text-sm"
-    >
-      <option value="PENDING">Menunggu</option>
-      <option value="CONFIRMED">Dikonfirmasi</option>
-      <option value="IN_PROGRESS">Dalam Proses</option>
-      <option value="READY">Siap</option>
-      <option value="DELIVERED">Terkirim</option>
-      <option value="CANCELLED">Dibatalkan</option>
-    </select>
-    <Button size="sm" variant="outline" onClick={() => onViewOrder(order['id'])}>
-      <Eye className="h-4 w-4" />
-    </Button>
-    <Button size="sm" variant="outline" onClick={() => onEditOrder(order['id'])}>
-      <Edit className="h-4 w-4" />
-    </Button>
-    <Button
-      size="sm"
-      variant="outline"
-      onClick={() => onDeleteOrder(order['id'])}
-      className="text-red-500 hover:text-red-700"
-    >
-      <Trash2 className="h-4 w-4" />
-    </Button>
-  </div>
-)
+) => {
+  const CellComponent = (order: Order) => (
+    <div className="flex items-center gap-2">
+      <select
+        value={order['status'] ?? 'PENDING'}
+        onChange={(e) => onUpdateStatus(order['id'], e.target.value)}
+        className="bg-transparent border border-input rounded px-2 py-1 text-sm"
+      >
+        <option value="PENDING">Menunggu</option>
+        <option value="CONFIRMED">Dikonfirmasi</option>
+        <option value="IN_PROGRESS">Dalam Proses</option>
+        <option value="READY">Siap</option>
+        <option value="DELIVERED">Terkirim</option>
+        <option value="CANCELLED">Dibatalkan</option>
+      </select>
+      <Button size="sm" variant="outline" onClick={() => onViewOrder(order['id'])}>
+        <Eye className="h-4 w-4" />
+      </Button>
+      <Button size="sm" variant="outline" onClick={() => onEditOrder(order['id'])}>
+        <Edit className="h-4 w-4" />
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => onDeleteOrder(order['id'])}
+        className="text-red-500 hover:text-red-700"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    </div>
+  )
+  
+  CellComponent.displayName = 'renderActionsCell'
+  
+  return CellComponent
+}
 
 // ✅ PERFORMANCE: Progressive enhancement for large lists using VirtualizedTable
 const VirtualizedOrdersList = memo(({

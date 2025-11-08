@@ -42,16 +42,11 @@ export const DashboardCustomization = ({
   layoutKey = 'heytrack_dashboard_layout'
 }: DashboardCustomizationProps) => {
   const [isCustomizing, setIsCustomizing] = useState(false)
-  const [layout, setLayout] = useState<DashboardLayout>({})
-  const [draggedWidget, setDraggedWidget] = useState<string | null>(null)
-
-  // Load saved layout from localStorage
-  useEffect(() => {
+  const [layout, setLayout] = useState<DashboardLayout>(() => {
     const savedLayout = localStorage.getItem(layoutKey)
     if (savedLayout) {
       try {
-        const parsed = JSON.parse(savedLayout) as DashboardLayout
-        setLayout(parsed)
+        return JSON.parse(savedLayout) as DashboardLayout
       } catch {
         // If parsing fails, use default layout
         const defaultLayout: DashboardLayout = {}
@@ -61,7 +56,7 @@ export const DashboardCustomization = ({
             position: index
           }
         })
-        setLayout(defaultLayout)
+        return defaultLayout
       }
     } else {
       // Initialize with default layout
@@ -72,9 +67,12 @@ export const DashboardCustomization = ({
           position: index
         }
       })
-      setLayout(defaultLayout)
+      return defaultLayout
     }
-  }, [layoutKey, widgets])
+  })
+  const [draggedWidget, setDraggedWidget] = useState<string | null>(null)
+
+  // Layout is initialized in useState above
 
   // Save layout to localStorage when it changes
   useEffect(() => {

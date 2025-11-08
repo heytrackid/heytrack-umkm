@@ -38,29 +38,6 @@ const AIChatbotPage = (): JSX.Element => {
     }
   }, [authLoading, isAuthenticated, router])
 
-  // Show loading while checking auth
-  if (authLoading) {
-    return (
-      <AppLayout pageTitle="AI Chatbot">
-        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        </div>
-      </AppLayout>
-    )
-  }
-
-  // Don't render if not authenticated (should redirect)
-  if (!isAuthenticated || !user) {
-    return (
-      <AppLayout pageTitle="AI Chatbot">
-        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
-          <div className="text-muted-foreground">Redirecting to login...</div>
-        </div>
-      </AppLayout>
-    )
-  }
-
-
   const handleSendMessage = useCallback(async (messageText?: string) => {
     const textToSend = (messageText ?? input).trim()
     if (textToSend.length === 0 || isLoading) { return }
@@ -105,6 +82,28 @@ const AIChatbotPage = (): JSX.Element => {
   const handleSuggestionClick = useCallback((suggestion: string) => {
     void handleSendMessage(suggestion)
   }, [handleSendMessage])
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <AppLayout pageTitle="AI Chatbot">
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </div>
+      </AppLayout>
+    )
+  }
+
+  // Don't render if not authenticated (should redirect)
+  if (!isAuthenticated || !user) {
+    return (
+      <AppLayout pageTitle="AI Chatbot">
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <div className="text-muted-foreground">Redirecting to login...</div>
+        </div>
+      </AppLayout>
+    )
+  }
 
   return (
     <AppLayout pageTitle="AI Chatbot">

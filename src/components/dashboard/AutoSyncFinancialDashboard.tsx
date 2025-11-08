@@ -1,5 +1,5 @@
 'use client'
-/* eslint-disable no-nested-ternary */
+ 
 
 
 import { CheckCircle2, AlertTriangle, XCircle, TrendingUp, TrendingDown, DollarSign, Activity, Clock, Zap, Info, RefreshCw, Eye, ArrowRight } from 'lucide-react'

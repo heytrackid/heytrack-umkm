@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -96,7 +96,7 @@ export function generateBlurDataURL(width = 10, height = 10): string {
 export function useLazyImage(ref: React.RefObject<HTMLElement>) {
     const [isVisible, setIsVisible] = useState(false)
 
-    useState(() => {
+    useEffect(() => {
         if (!ref.current) {return}
 
         const observer = new IntersectionObserver(
@@ -112,7 +112,7 @@ export function useLazyImage(ref: React.RefObject<HTMLElement>) {
         observer.observe(ref.current)
 
         return () => observer.disconnect()
-    })
+    }, [ref])
 
     return isVisible
 }

@@ -237,7 +237,11 @@ export function useThrottledCallback<T extends (...args: Parameters<T>) => Retur
   callback: T,
   delay: number
 ): T {
-  const lastRun = useRef(Date.now())
+  const lastRun = useRef(0)
+
+  useEffect(() => {
+    lastRun.current = Date.now()
+  }, [])
 
   return useCallback(
     (...args: Parameters<T>) => {

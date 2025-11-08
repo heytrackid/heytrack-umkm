@@ -1,7 +1,7 @@
 'use client'
 
 import { Calendar, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 
@@ -48,15 +48,10 @@ export const InteractiveChart = ({
   initialDateRange,
   zoomEnabled = true,
 }: InteractiveChartProps) => {
-  const [currentDateRange, setCurrentDateRange] = useState<DateRange | undefined>(initialDateRange)
+   const currentDateRange = initialDateRange
   const [isZoomed, setIsZoomed] = useState(false)
 
-  // Update date range if provided
-  useEffect(() => {
-    if (initialDateRange) {
-      setCurrentDateRange(initialDateRange)
-    }
-  }, [initialDateRange])
+  // Date range is initialized in useState above
 
 
 

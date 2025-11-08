@@ -206,8 +206,9 @@ async function POST(request: NextRequest): Promise<NextResponse> {
       .from('recipes')
       .insert([{
         ...recipeData,
-        created_by: user['id']
-      } as Insert<'recipes'>])
+        created_by: user['id'],
+        user_id: user['id']
+      } as any])
       .select('id, name, created_at')
       .single()
 

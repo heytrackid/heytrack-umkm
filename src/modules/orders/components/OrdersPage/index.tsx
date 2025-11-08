@@ -1,5 +1,4 @@
 'use client'
-'use client'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Calendar, MessageCircle, Plus, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'

@@ -56,16 +56,16 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     const insertPayload: Insert<'expenses'> = {
       user_id: user['id'],
       category: validatedData.category,
-       subcategory: validatedData.subcategory ?? null,
       amount: validatedData.amount,
-      description: validatedData.description ?? '',
-      expense_date: validatedData.date,
-       supplier: validatedData.vendor_name ?? null,
-      payment_method: 'CASH',
-      status: validatedData.is_paid ? 'paid' : 'pending',
-       receipt_number: validatedData.invoice_number ?? null,
-       is_recurring: validatedData.is_recurring ?? null,
-       recurring_frequency: validatedData.recurring_frequency ?? null,
+      description: validatedData.description,
+      expense_date: validatedData.date ?? null,
+      supplier: validatedData.supplier ?? null,
+      payment_method: validatedData.payment_method ?? 'CASH',
+      reference_id: null,
+      reference_type: null,
+      status: 'pending',
+      is_recurring: validatedData.recurring ?? false,
+      recurring_frequency: validatedData.frequency ?? null,
       tags: []
     }
 

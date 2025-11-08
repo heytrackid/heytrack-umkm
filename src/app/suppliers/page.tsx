@@ -109,13 +109,13 @@ const SuppliersPage = (): JSX.Element => {
                                 return {
                                     success: false,
                                     error: result.error ?? 'Import gagal',
-                                    details: result.details
+                                    details: result.details || []
                                 }
                             }
 
                             return {
                                 success: true,
-                                count: result.count
+                                ...(result.count !== undefined && { count: result.count })
                             }
                         } catch (_error) {
                             return {

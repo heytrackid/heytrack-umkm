@@ -45,8 +45,6 @@ export const renderErrorState = (router: ReturnType<typeof useRouter>): JSX.Elem
 )
 
 export const renderEmptyState = (
-  showOnboarding: boolean,
-  setShowOnboarding: (show: boolean) => void,
   _router: ReturnType<typeof useRouter>
 ): JSX.Element => (
   <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
@@ -55,9 +53,7 @@ export const renderEmptyState = (
       <p className="text-gray-600 mb-6">
         Mari mulai mengelola bisnis kuliner Anda dengan HeyTrack.
       </p>
-      <LoadingButton onClick={() => setShowOnboarding(true)}>
-        Mulai Onboarding
-      </LoadingButton>
+
     </div>
   </div>
 )

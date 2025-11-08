@@ -92,34 +92,38 @@ export const usePerformanceMonitoring = (componentName: string) => {
  * Custom hook for optimized rendering with performance tracking
  */
 export const useOptimizedRender = (dependencies: unknown[], componentName: string) => {
-  const renderCount = useRef(0)
+  const [renderCount, setRenderCount] = useState(0)
   const prevDeps = useRef<unknown[]>([])
   const startTime = useRef<number>(0)
 
   useEffect(() => {
-    renderCount.current += 1
-    startTime.current = performance.now()
+    const timer = setTimeout(() => {
+      setRenderCount(prev => prev + 1)
+      startTime.current = performance.now()
+
+      // Check if dependencies actually changed
+      const depsChanged = dependencies.some((dep, index) =>
+        dep !== prevDeps.current[index]
+      )
+
+      // Track expensive renders
+      const renderTime = performance.now() - startTime.current
+      if (renderTime > 16.67) { // More than one frame at 60fps
+        perfLogger.warn({
+          componentName,
+          renderTime: renderTime.toFixed(2),
+          renderCount: renderCount + 1,
+          depsChanged
+        }, 'Expensive render detected')
+      }
+
+      prevDeps.current = [...dependencies]
+    }, 0)
     
-    // Check if dependencies actually changed
-    const depsChanged = dependencies.some((dep, index) => 
-      dep !== prevDeps.current[index]
-    )
-    
-    // Track expensive renders
-    const renderTime = performance.now() - startTime.current
-    if (renderTime > 16.67) { // More than one frame at 60fps
-      perfLogger.warn({
-        componentName,
-        renderTime: renderTime.toFixed(2),
-        renderCount: renderCount.current,
-        depsChanged
-      }, 'Expensive render detected')
-    }
-    
-    prevDeps.current = [...dependencies]
+    return () => clearTimeout(timer)
   })
 
-  return { renderCount: renderCount.current }
+  return { renderCount }
 }
 
 /**
@@ -187,10 +191,10 @@ export const useDebounce = <T extends (...args: unknown[]) => unknown>(
       }
     }, [])
   
-  return useCallback(((...args: Parameters<T>): void => {
+  return ((...args: Parameters<T>): void => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
     }
     timeoutRef.current = setTimeout(() => callbackRef.current(...args), delay)
-  }) as T, [delay])
+  }) as T
 }

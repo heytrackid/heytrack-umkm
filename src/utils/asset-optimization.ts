@@ -37,7 +37,7 @@ export const lazyLoadWithPerf = async <T extends Record<string, unknown>>(
 ): Promise<T> => {
   const start = performance.now()
   try {
-    const module = await importFn()
+    const importedModule = await importFn()
     const duration = performance.now() - start
 
     apiLogger.debug({ componentName, duration: duration.toFixed(2) }, `Lazy load took ${duration.toFixed(2)}ms`)
@@ -46,7 +46,7 @@ export const lazyLoadWithPerf = async <T extends Record<string, unknown>>(
       apiLogger.warn({ componentName, duration: duration.toFixed(2) }, `Slow lazy load detected`)
     }
 
-    return module
+    return importedModule
   } catch (error) {
     apiLogger.error({ componentName, error }, 'Error lazy loading component')
     throw error

@@ -1,7 +1,7 @@
 'use client'
 
 import { Loader2, CheckCircle, TrendingUp, TrendingDown, DollarSign, Lightbulb } from 'lucide-react'
-import { useState, useEffect, type ComponentType } from 'react'
+import { useState, useEffect, useRef, type ComponentType } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -58,12 +58,20 @@ export const PricingCalculatorCard = ({
     const [mode, setMode] = useState<'auto' | 'manual'>('auto')
     const [manualPrice, setManualPrice] = useState(suggestedPrice)
 
-    // Update manual price when suggested price changes (only in auto mode)
+    // Update manual price when mode changes to auto
+    const prevModeRef = useRef(mode)
+    const suggestedPriceRef = useRef(suggestedPrice)
+    
     useEffect(() => {
-        if (mode === 'auto') {
-            setManualPrice(suggestedPrice)
+        suggestedPriceRef.current = suggestedPrice
+    }, [suggestedPrice])
+    
+    useEffect(() => {
+        if (prevModeRef.current !== mode && mode === 'auto') { // mode changed to auto
+            setManualPrice(suggestedPriceRef.current)
         }
-    }, [suggestedPrice, mode])
+        prevModeRef.current = mode
+    }, [mode])
 
     const displayPrice = mode === 'manual' ? manualPrice : suggestedPrice
     const profit = displayPrice - totalCost

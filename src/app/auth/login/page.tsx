@@ -1,5 +1,4 @@
 'use client'
-'use client'
 
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import Link from 'next/link'

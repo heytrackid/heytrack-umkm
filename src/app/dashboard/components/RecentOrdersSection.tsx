@@ -18,8 +18,7 @@ interface RecentOrdersSectionProps {
     customer: string
     amount: number | null
     status: string | null
-    time: string | null
-    created_at?: string
+    created_at: string | null
   }>
   onDateRangeChange?: (dateRange: DateRange | undefined) => void
   showDateFilter?: boolean
@@ -37,10 +36,7 @@ const RecentOrdersSection = ({
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
   const [showDatePicker, setShowDatePicker] = useState(false)
 
-  const _handleDateRangeChange = (newDateRange: DateRange | undefined) => {
-    setDateRange(newDateRange)
-    onDateRangeChange?.(newDateRange)
-  }
+
 
   const clearDateFilter = () => {
     setDateRange(undefined)

@@ -1,4 +1,4 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
 import { ArrowLeft, Save } from 'lucide-react'

@@ -59,7 +59,7 @@ const securityHeaders = [
  * Apply development webpack optimizations
  */
  
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function applyDevOptimizations(config: any): void {
   // Ensure module IDs are stable across HMR updates
   config.optimization = {
@@ -73,7 +73,7 @@ function applyDevOptimizations(config: any): void {
  * Apply production webpack optimizations
  */
  
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function applyProdOptimizations(config: any): void {
   // Enable tree shaking
   config.optimization = {
@@ -84,7 +84,7 @@ function applyProdOptimizations(config: any): void {
 
   // Enable bundle analyzer if requested
   if (process.env['ANALYZE'] === 'true') {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     (config as any).plugins = [
       ...(config.plugins as unknown[] || []),
       // Bundle analyzer plugin would go here

@@ -31,8 +31,8 @@ const validateData = (data: unknown): Record<string, unknown> | null => {
 }
 
 const hasValidData = (contextObj: Record<string, unknown>): boolean => {
-  const hasOrdersData = contextObj['orders'] && typeof contextObj['orders'] === 'object'
-  const hasInventoryData = contextObj['inventory'] && typeof contextObj['inventory'] === 'object'
+  const hasOrdersData = Boolean(contextObj['orders'] && typeof contextObj['orders'] === 'object')
+  const hasInventoryData = Boolean(contextObj['inventory'] && typeof contextObj['inventory'] === 'object')
   return hasOrdersData || hasInventoryData
 }
 

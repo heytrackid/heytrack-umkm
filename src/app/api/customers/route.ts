@@ -87,7 +87,7 @@ function validateCustomerPayload(body: Record<string, unknown>, userId: string):
   })
 }
 
-function buildCustomerInsert(userId: string, data: CustomerInsertSchema['_output']): Insert<'customers'> {
+function buildCustomerInsert(userId: string, data: any): Insert<'customers'> {
   return typedInsert<'customers'>({
     user_id: userId,
     name: data.name,

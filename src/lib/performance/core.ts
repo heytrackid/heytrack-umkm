@@ -108,7 +108,11 @@ export function useIntersectionObserver(
  */
 export function useRenderTime(componentName: string) {
   const renderCount = useRef(0)
-  const startTime = useRef(performance.now())
+  const startTime = useRef(0)
+
+  useEffect(() => {
+    startTime.current = performance.now()
+  }, [])
 
   useEffect(() => {
     renderCount.current += 1

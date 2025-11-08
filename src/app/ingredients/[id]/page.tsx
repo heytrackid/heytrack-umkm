@@ -26,7 +26,7 @@ import type { Row, Update } from '@/types/database'
 type Ingredient = Row<'ingredients'>
 type IngredientUpdate = Update<'ingredients'>
 
-const EditIngredientPage = (): JSX.Element => {
+const EditIngredientPage = (): JSX.Element | null => {
     const router = useRouter()
     const params = useParams()
     const id = params['id'] as string

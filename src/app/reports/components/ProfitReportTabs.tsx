@@ -343,7 +343,7 @@ const ComparisonTab: React.FC<{
             <CardHeader>
                 <CardTitle>Perbandingan Revenue vs COGS vs Profit</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                    Aktifkan "Compare Periods" untuk melihat perbandingan dengan periode sebelumnya
+                    Aktifkan &#34;Compare Periods&#34; untuk melihat perbandingan dengan periode sebelumnya
                 </p>
             </CardHeader>
             <CardContent>

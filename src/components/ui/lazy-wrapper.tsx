@@ -1,7 +1,5 @@
 'use client'
 
-'use client'
-
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Suspense, lazy, Component, type ComponentType, type ReactNode, useEffect, type FC } from 'react'

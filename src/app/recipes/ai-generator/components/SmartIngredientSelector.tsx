@@ -370,7 +370,7 @@ export const SmartIngredientSelector = ({
                                 <div className="font-semibold mb-1">Pilih minimal 3 bahan</div>
                                 <div>
                                     AI butuh minimal 3 bahan untuk generate resep yang bagus.
-                                    Klik "Pilih Semua Saran" untuk quick start!
+                                    Klik &#34;Pilih Semua Saran&#34; untuk quick start!
                                 </div>
                             </div>
                         </div>

@@ -102,7 +102,7 @@ export const EnhancedEmptyState = ({
                     <ol className="text-sm text-gray-800 space-y-2">
                         <li className="flex items-start">
                             <span className="font-semibold mr-2">1.</span>
-                            <span>Klik tombol "Tambah Bahan Baku"</span>
+                            <span>Klik tombol &#34;Tambah Bahan Baku&#34;</span>
                         </li>
                         <li className="flex items-start">
                             <span className="font-semibold mr-2">2.</span>

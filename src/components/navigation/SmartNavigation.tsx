@@ -33,7 +33,7 @@ const triggerHapticFeedback = (type: 'heavy' | 'light' | 'medium' = 'light') => 
         navigator.vibrate(patterns[type] ?? [10])
       }
       // Fallback for iOS devices with haptic feedback
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       else if ('hapticFeedback' in (window as any)) {
         const hapticTypes: Record<string, string> = {
           light: 'impactLight',
@@ -69,7 +69,6 @@ export const SmartLink = ({
   preloadDelay = 100,
   onClick,
   style,
-  ...props
 }: SmartLinkProps) => {
   const pathname = usePathname()
   const linkPreloading = useAdvancedLinkPreloading()
@@ -110,9 +109,7 @@ export const SmartLink = ({
       style={style}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onFocus={() => linkPreloading.onFocus(href)}
-      {...(onClick && { onClick: handleClick })}
-      {...props}
+      onClick={handleClick}
     >
       {children}
     </Link>

@@ -217,7 +217,7 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({ currentData, p
     if (!previousData) {
         return (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground border rounded-lg">
-                Enable "Compare Periods" to see comparison with previous period
+                Enable &#34;Compare Periods&#34; to see comparison with previous period
             </div>
         )
     }

@@ -75,16 +75,11 @@ const EnhancedTransactionList = ({
 
     // Pagination
     const totalPages = Math.ceil(processedTransactions.length / ITEMS_PER_PAGE)
+    const effectivePage = Math.min(currentPage, totalPages || 1)
     const paginatedTransactions = processedTransactions.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
+        (effectivePage - 1) * ITEMS_PER_PAGE,
+        effectivePage * ITEMS_PER_PAGE
     )
-
-    // Reset page when filters change
-    useMemo(() => {
-        setCurrentPage(1)
-         
-    }, [])
 
     const handleDeleteClick = (transaction: Transaction): void => {
         setTransactionToDelete(transaction)
@@ -193,7 +188,7 @@ const EnhancedTransactionList = ({
                             {transactions.length === 0 ? (
                                 <>
                                     <p className="font-medium mb-1">Belum ada transaksi di periode ini</p>
-                                    <p className="text-sm">Klik "Tambah Transaksi" untuk memulai</p>
+                                    <p className="text-sm">Klik &quot;Tambah Transaksi&quot; untuk memulai</p>
                                 </>
                             ) : (
                                 <>

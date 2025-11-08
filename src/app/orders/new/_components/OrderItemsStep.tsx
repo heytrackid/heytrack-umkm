@@ -69,7 +69,7 @@ const OrderItemsStep = ({
         <div className="text-center py-8 text-muted-foreground">
           <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
           <p>Belum ada item ditambahkan</p>
-          <p className="text-sm">Klik "Tambah Item" untuk memulai</p>
+          <p className="text-sm">Klik &quot;Tambah Item&quot; untuk memulai</p>
         </div>
       ) : (
         <div className="space-y-4">

@@ -19,7 +19,7 @@ type TableUpdate<TTable extends keyof TablesMap> = TablesMap[TTable]['Update']
 
  
 export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable) {
-  const { create: createRecord, update: updateRecord, delete: deleteRecord } = useSupabaseCRUD(tableName)
+  const { create: createRecord, update: updateRecord, remove: deleteRecord } = useSupabaseCRUD(tableName)
   const { toast } = useToast()
 
   const [loading, setLoading] = useState(false)

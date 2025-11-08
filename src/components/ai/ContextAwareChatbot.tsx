@@ -350,7 +350,7 @@ export const ContextAwareChatbot = (): JSX.Element => {
               <Sparkles className="h-2 w-2 text-white" />
             </div>
             <p>
-              Aku inget semua obrolan kita kok! Jadi bisa tanya follow-up kayak "terus gimana?" atau "kasih contohnya dong" 😊
+              Aku inget semua obrolan kita kok! Jadi bisa tanya follow-up kayak &#34;terus gimana?&#34; atau &#34;kasih contohnya dong&#34; 😊
             </p>
           </div>
         </div>

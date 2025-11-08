@@ -8,9 +8,11 @@ import { z } from 'zod'
 import { cacheInvalidation } from '@/lib/cache'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import type { Insert, OrderStatus } from '@/types/database'
+import type { Database, Insert, OrderStatus } from '@/types/database'
 import { InputSanitizer, SecurityPresets, createSecureHandler } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
+
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 
 
@@ -103,7 +105,7 @@ const ImportOrdersSchema = z.object({
 
 type ImportedOrder = z.infer<typeof ImportedOrderSchema>
 
-async function authenticateUser(supabase: ReturnType<typeof createClient>) {
+async function authenticateUser(supabase: SupabaseClient<Database>) {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if (authError || !user) {
@@ -118,7 +120,7 @@ async function parseAndValidateRequest(request: NextRequest): Promise<{ orders: 
   return ImportOrdersSchema.parse(body)
 }
 
-async function fetchRecipes(supabase: ReturnType<typeof createClient>, userId: string): Promise<Map<string, string>> {
+async function fetchRecipes(supabase: SupabaseClient<Database>, userId: string): Promise<Map<string, string>> {
   const { data: recipes, error: recipesError } = await supabase
     .from('recipes')
     .select('id, name')
@@ -129,7 +131,7 @@ async function fetchRecipes(supabase: ReturnType<typeof createClient>, userId: s
     throw new APIError('Gagal memuat data resep', { status: 500, code: 'RECIPES_FETCH_FAILED' })
   }
 
-  return new Map(recipes.map(r => [r.name.toLowerCase(), r['id']]))
+  return new Map(recipes?.map((r: { id: string; name: string }) => [r.name.toLowerCase(), r.id]) ?? [])
 }
 
 function processOrders(

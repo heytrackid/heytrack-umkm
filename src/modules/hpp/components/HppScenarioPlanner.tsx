@@ -1,7 +1,7 @@
 'use client'
 
 import { AlertTriangle, Calculator, Sparkles, TrendingDown, TrendingUp } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,14 @@ import { useCurrency } from '@/hooks/useCurrency'
 
 import type { RecipeWithCosts } from '@/modules/hpp/hooks/useUnifiedHpp'
 
+interface ScenarioImpact {
+    newCost: number
+    costDiff: number
+    costDiffPercent: number
+    newMargin: number
+    marginDiff: number
+}
+
 interface Scenario {
     id: string
     name: string
@@ -27,13 +35,7 @@ interface Scenario {
         type: 'price' | 'quantity'
         change: number // percentage
     }>
-    impact: {
-        newCost: number
-        costDiff: number
-        costDiffPercent: number
-        newMargin: number
-        marginDiff: number
-    }
+    impact: ScenarioImpact
 }
 
 interface HppScenarioPlannerProps {
@@ -46,6 +48,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
     const [selectedIngredient, setSelectedIngredient] = useState('')
     const [changeType, setChangeType] = useState<'price' | 'quantity'>('price')
     const [changePercent, setChangePercent] = useState(10)
+    const scenarioIdCounter = useRef(0)
 
     const currentCost = recipe.total_cost
     const sellingPrice = recipe.selling_price ?? 0
@@ -55,7 +58,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
         ingredientId: string,
         type: 'price' | 'quantity',
         changePercent: number
-    ): Scenario | null => {
+    ): ScenarioImpact | null => {
         const ingredient = recipe.ingredients.find((item) => item['id'] === ingredientId)
         if (!ingredient) { return null }
 
@@ -131,7 +134,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
         const newMargin = sellingPrice > 0 ? ((sellingPrice - totalNewCost) / sellingPrice) * 100 : 0
 
         const newScenario: Scenario = {
-            id: Date.now().toString(),
+            id: `scenario_${++scenarioIdCounter.current}`, // Using only counter ref for unique IDs
             name: `Semua bahan ${type === 'price' ? 'harga' : 'qty'} ${change > 0 ? '+' : ''}${change}%`,
             changes: allIngredients.map(ri => ({
                 ingredient: ri.name,
@@ -162,7 +165,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
                         <div>
                             <div>Scenario Planning</div>
                             <p className="text-sm font-normal text-muted-foreground mt-0.5">
-                                Simulasi "What-If" untuk antisipasi perubahan biaya
+                                Simulasi &quot;What-If&quot; untuk antisipasi perubahan biaya
                             </p>
                         </div>
                     </CardTitle>

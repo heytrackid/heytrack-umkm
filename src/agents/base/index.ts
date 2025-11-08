@@ -10,8 +10,8 @@
  */
 export interface AgentContext {
   correlationId: string
-  userId?: string
-  sessionId?: string
+  userId?: string | undefined
+  sessionId?: string | undefined
   featureFlags: Record<string, boolean>
   cache: Map<string, unknown>
   telemetry: {
@@ -100,22 +100,29 @@ export function createAgentContext(
   const automation = process['env']['NEXT_PUBLIC_ENABLE_AUTOMATION'] === 'true'
   const supabase = createClient() as unknown as SupabaseClient<Database>
 
-  return {
+  const context: AgentContext = {
     correlationId,
-    ...(userId !== null ? { userId } : {}),
-    ...(sessionId !== null ? { sessionId } : {}),
     featureFlags: {
       aiChatbot,
       advancedAnalytics,
       automation
     },
-    cache: new Map<string, unknown>(),
+    cache: new Map(),
     telemetry: {
       startTime: new Date(),
       events: []
     },
     supabase
   }
+
+  if (userId !== null) {
+    context.userId = userId
+  }
+  if (sessionId !== null) {
+    context.sessionId = sessionId
+  }
+
+  return context
 }
 
 /**

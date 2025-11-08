@@ -1,4 +1,4 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
 import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
@@ -435,7 +435,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                     <CardContent className="space-y-4">
                         {recipeIngredients.length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground">
-                                <p>Belum ada bahan. Klik "Tambah Bahan" untuk mulai.</p>
+                                <p>Belum ada bahan. Klik &#34;Tambah Bahan&#34; untuk mulai.</p>
                             </div>
                         ) : (
                             recipeIngredients.map((ri, index) => (

@@ -14,8 +14,8 @@ interface EnhancedCashFlowChartProps {
     chartData: ChartDataPoint[]
     selectedPeriod: PeriodType
     onPeriodChange: (period: PeriodType) => void
-    startDate: string
-    endDate: string
+    startDate?: string
+    endDate?: string
     onStartDateChange: (date: string) => void
     onEndDateChange: (date: string) => void
     isMobile: boolean

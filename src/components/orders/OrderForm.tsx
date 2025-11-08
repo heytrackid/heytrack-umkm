@@ -1,8 +1,8 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
 import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { useOrderItemsController } from '@/components/orders/hooks/useOrderItemsController'
@@ -38,26 +38,11 @@ const OrderForm = ({
 }: OrderFormProps) => {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
-  const [formData, setFormData] = useState<OrderFormData>({
-    customer_name: '',
-    customer_phone: '',
-    // customer_email: '', // Field doesn't exist in DB
-    customer_address: '',
-    delivery_date: '',
-    delivery_time: '10:00',
-    priority: 'normal',
-    notes: '',
-    order_items: []
-  })
-  const [errors, setErrors] = useState<string[]>([])
-
-  // Load form data for editing
-  useEffect(() => {
+  const [formData, setFormData] = useState<OrderFormData>(() => {
     if (order) {
-      setFormData({
+      return {
         customer_name: order['customer_name'] ?? '',
         customer_phone: order.customer_phone ?? '',
-        // customer_email: order.customer_email || '', // Field doesn't exist in DB
         customer_address: order.customer_address ?? '',
         delivery_date: order.delivery_date?.split('T')[0] ?? '',
         delivery_time: order.delivery_time ?? '10:00',
@@ -70,10 +55,23 @@ const OrderForm = ({
           unit_price: item.unit_price,
           total_price: item.total_price,
           special_requests: item.special_requests ?? null
-        })) || []
-      })
+        })) ?? []
+      }
     }
-  }, [order])
+    return {
+      customer_name: '',
+      customer_phone: '',
+      customer_address: '',
+      delivery_date: '',
+      delivery_time: '10:00',
+      priority: 'normal',
+      notes: '',
+      order_items: []
+    }
+  })
+  const [errors, setErrors] = useState<string[]>([])
+
+  // Form data is initialized in useState above
 
   const createEmptyOrderItem = useCallback((): OrderFormItem => ({
     recipe_id: '',
@@ -273,7 +271,7 @@ const OrderForm = ({
           {formData.order_items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>Belum ada item ditambahkan</p>
-              <p className="text-sm">Klik "Tambah Item" untuk mulai membuat pesanan</p>
+              <p className="text-sm">Klik &#34;Tambah Item&#34; untuk mulai membuat pesanan</p>
             </div>
           ) : (
             <div className="space-y-4">

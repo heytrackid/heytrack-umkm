@@ -1,5 +1,5 @@
 'use client'
-/* eslint-disable no-nested-ternary */
+ 
 
 import { AlertTriangle, Calculator, CheckCircle, Lightbulb, Target, Zap } from 'lucide-react'
 import { useCallback, useEffect, useState, type FC } from 'react'

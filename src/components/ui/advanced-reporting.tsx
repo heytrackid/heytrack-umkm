@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { formatCurrentCurrency } from '@/lib/currency'
 
-import type { DateRange } from 'react-day-picker'
+
 
 interface ReportData {
   totalSales: number
@@ -30,17 +30,13 @@ interface ReportData {
 }
 
 interface AdvancedReportingProps {
-  initialDateRange?: DateRange
-  onDateRangeChange?: (range: DateRange) => void
   reportData?: ReportData
 }
 
 export const AdvancedReporting = ({
-  initialDateRange,
-  onDateRangeChange,
   reportData
 }: AdvancedReportingProps) => {
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(initialDateRange)
+
   const [activeReport, setActiveReport] = useState<'orders' | 'profit' | 'sales'>('sales')
   const [isExporting, setIsExporting] = useState(false)
 
@@ -85,12 +81,7 @@ export const AdvancedReporting = ({
     ]
   }
 
-  const handleDateRangeChange = (range: DateRange | undefined) => {
-    setDateRange(range)
-    if (range) {
-      onDateRangeChange?.(range)
-    }
-  }
+
 
   const handleExport = (format: 'csv' | 'excel' | 'pdf') => {
     setIsExporting(true)

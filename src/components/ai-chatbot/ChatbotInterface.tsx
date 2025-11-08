@@ -125,10 +125,12 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
           role: 'assistant' as const,
           content: result.message,
           timestamp: new Date(),
-          actions: result.suggestions?.map((s) => ({
-            type: s.action as ChatAction['type'],
-            label: s.text
-          }))
+          ...(result.suggestions && {
+            actions: result.suggestions.map((s) => ({
+              type: s.action as ChatAction['type'],
+              label: s.text
+            }))
+          })
         };
 
         setMessages(prev => [...prev, assistantMessage]);
@@ -251,7 +253,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
   };
 
   // Message bubble component
-  // eslint-disable-next-line react/no-unstable-nested-components
+   
   const MessageBubble = ({ message }: { message: ExtendedChatMessage }): JSX.Element => {
     const isUser = message.role === 'user';
     const isSystem = message.role === 'system';
@@ -339,7 +341,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
   };
 
   // Quick action buttons with smart suggestions
-  // eslint-disable-next-line react/no-unstable-nested-components
+   
   const QuickActions = (): JSX.Element => (
     <div className="p-3 bg-gradient-to-r from-gray-50 to-gray-100 border-t">
       <p className="text-xs font-medium text-gray-700 mb-2">💡 Coba tanyakan:</p>

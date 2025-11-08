@@ -2,7 +2,7 @@
 
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback } from 'react'
 
 import { Button } from '@/components/ui/button'
 
@@ -11,11 +11,7 @@ import { Button } from '@/components/ui/button'
 
 export const ThemeToggle = (): JSX.Element => {
   const { theme, setTheme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = true
 
   const handleToggle = useCallback(() => {
     // If current theme is system, switch based on resolved theme

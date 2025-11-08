@@ -1,3 +1,5 @@
+'use client'
+
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { Clock, CheckCircle, Package, XCircle } from 'lucide-react'
 import { memo, useRef, type ComponentType } from 'react'
@@ -60,6 +62,7 @@ export const VirtualizedOrderCards = memo(({
     overscan: 5, // Render 5 extra items outside visible area
   })
 
+VirtualizedOrderCards.displayName = 'VirtualizedOrderCards'
   return (
     <div
       ref={parentRef}

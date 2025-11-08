@@ -62,7 +62,7 @@ function mapUpdatePayload(data: CustomerUpdateInput): Update<'customers'> {
   setters.forEach(({ key, map }) => {
     const value = data[key]
     if (value !== undefined) {
-      payload[key as keyof Update<'customers'>] = map(value) as Update<'customers'>[keyof Update<'customers'>]
+      ;(payload as any)[key as keyof Update<'customers'>] = map(value)
     }
   })
 

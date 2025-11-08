@@ -2,7 +2,7 @@
 
 import { useSupabaseQuery } from './core'
 
-import type { UseSupabaseQueryResult } from './types'
+import type { UseSupabaseQueryResult, UseSupabaseQueryOptions } from './types'
 
 /**
  * Entity-specific hooks for common database operations
@@ -10,10 +10,13 @@ import type { UseSupabaseQueryResult } from './types'
 
 // Ingredients
 export function useIngredients(options?: { realtime?: boolean }): UseSupabaseQueryResult<'ingredients'> {
-  return useSupabaseQuery('ingredients', {
+  const queryOptions: UseSupabaseQueryOptions<'ingredients'> = {
     orderBy: { column: 'name' },
-    realtime: options?.realtime,
-  })
+  }
+  if (options?.realtime !== undefined) {
+    queryOptions.realtime = options.realtime
+  }
+  return useSupabaseQuery('ingredients', queryOptions)
 }
 
 // Recipes
@@ -21,7 +24,7 @@ export function useRecipes(options?: { realtime?: boolean }): UseSupabaseQueryRe
   return useSupabaseQuery('recipes', {
     filter: { is_active: true },
     orderBy: { column: 'name' },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
@@ -29,7 +32,7 @@ export function useRecipes(options?: { realtime?: boolean }): UseSupabaseQueryRe
 export function useOrders(options?: { realtime?: boolean }): UseSupabaseQueryResult<'orders'> {
   return useSupabaseQuery('orders', {
     orderBy: { column: 'created_at', ascending: false },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
@@ -37,7 +40,7 @@ export function useOrders(options?: { realtime?: boolean }): UseSupabaseQueryRes
 export function useCustomers(options?: { realtime?: boolean }): UseSupabaseQueryResult<'customers'> {
   return useSupabaseQuery('customers', {
     orderBy: { column: 'name' },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
@@ -45,7 +48,7 @@ export function useCustomers(options?: { realtime?: boolean }): UseSupabaseQuery
 export function useSuppliers(options?: { realtime?: boolean }): UseSupabaseQueryResult<'suppliers'> {
   return useSupabaseQuery('suppliers', {
     orderBy: { column: 'name' },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
@@ -53,7 +56,7 @@ export function useSuppliers(options?: { realtime?: boolean }): UseSupabaseQuery
 export function useExpenses(options?: { realtime?: boolean }): UseSupabaseQueryResult<'expenses'> {
   return useSupabaseQuery('expenses', {
     orderBy: { column: 'expense_date', ascending: false },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
@@ -61,24 +64,19 @@ export function useExpenses(options?: { realtime?: boolean }): UseSupabaseQueryR
 export function useOperationalCosts(options?: { realtime?: boolean }): UseSupabaseQueryResult<'operational_costs'> {
   return useSupabaseQuery('operational_costs', {
     orderBy: { column: 'created_at', ascending: false },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
 // Financial Records
-export function useFinancialRecords(options?: {
-  startDate?: string
-  endDate?: string
-  type?: 'EXPENSE' | 'INCOME' | 'INVESTMENT' | 'WITHDRAWAL'
-  realtime?: boolean
-}): UseSupabaseQueryResult<'financial_records'> {
-  const filter: Record<string, unknown> = {}
-  if (options?.type) {filter['type'] = options.type}
-
+export function useFinancialRecords(
+  filter?: Record<string, unknown>,
+  options?: { realtime?: boolean }
+): UseSupabaseQueryResult<'financial_records'> {
   return useSupabaseQuery('financial_records', {
     filter,
     orderBy: { column: 'created_at', ascending: false },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
@@ -86,6 +84,9 @@ export function useFinancialRecords(options?: {
 export function useProductions(options?: { realtime?: boolean }): UseSupabaseQueryResult<'productions'> {
   return useSupabaseQuery('productions', {
     orderBy: { column: 'created_at', ascending: false },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
+
+
+

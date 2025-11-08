@@ -1,9 +1,8 @@
 'use client'
-'use client'
 
 import { BarChart3, Calculator, TrendingUp, Bell } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState, useRef } from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
@@ -39,20 +38,23 @@ export const UnifiedHppPage = memo(() => {
   const [marginPercentage, setMarginPercentage] = useState(60)
   const [suggestedPrice, setSuggestedPrice] = useState(0)
 
-  // Auto-calculate when recipe or margin changes
+  // Calculate suggested price whenever recipe cost or margin percentage changes  
   useEffect(() => {
     if (recipe) {
       const price = recipe.total_cost * (1 + marginPercentage / 100)
-      setSuggestedPrice(Math.round(price / 100) * 100) // Round to nearest 100
+      const roundedPrice = Math.round(price / 100) * 100 // Round to nearest 100
+      setTimeout(() => setSuggestedPrice(roundedPrice), 0)
     }
-  }, [recipe, marginPercentage])
-
+  }, [recipe, recipe?.total_cost, marginPercentage])  
+  
   // Set initial margin from recipe data (only when recipe ID changes)
+  const prevRecipeId = useRef<string | null>(null)
   useEffect(() => {
-    if (recipe?.margin_percentage && recipe.id) {
-      setMarginPercentage(recipe.margin_percentage)
+    if (recipe?.margin_percentage && recipe.id && recipe.id !== prevRecipeId.current) {
+      setTimeout(() => setMarginPercentage(recipe.margin_percentage), 0)
+      prevRecipeId.current = recipe.id
     }
-  }, [recipe?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [recipe?.id, recipe?.margin_percentage])  
 
   const handleRecipeSelect = useCallback((recipeId: string) => {
     if (recipeId === 'new') {
@@ -178,3 +180,5 @@ export const UnifiedHppPage = memo(() => {
     </TooltipProvider>
   )
 })
+
+UnifiedHppPage.displayName = 'UnifiedHppPage'

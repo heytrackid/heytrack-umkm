@@ -70,11 +70,17 @@ export const createLazyComponent = <T extends ComponentType<Record<string, unkno
 ) => {
   const LazyComponent = lazy(importFunc)
 
-  return (props: ComponentProps<T>) => (
+  const LazyComponentWrapper = (props: ComponentProps<T>) => (
     <LazyWrapper
       component={LazyComponent as ComponentType<unknown>}
       {...(loadingComponent && { loadingComponent })}
       props={props}
     />
   )
+
+  LazyComponentWrapper.displayName = 'LazyComponentWrapper'
+
+  LazyComponentWrapper.displayName = 'LazyComponentWrapper'
+
+  return LazyComponentWrapper
 }

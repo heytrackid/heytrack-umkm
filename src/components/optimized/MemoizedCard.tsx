@@ -22,7 +22,7 @@ interface StatCardProps {
   }
 }
 
-export const MemoizedStatCard = memo(({
+const MemoizedStatCard = memo(({
   title,
   value,
   description,
@@ -50,6 +50,8 @@ export const MemoizedStatCard = memo(({
     </Card>
   ))
 
+MemoizedStatCard.displayName = 'MemoizedStatCard'
+
 interface DataCardProps {
   title: string
   children: ReactNode
@@ -57,7 +59,7 @@ interface DataCardProps {
   className?: string
 }
 
-export const MemoizedDataCard = memo(({
+const MemoizedDataCard = memo(({
   title,
   children,
   actions,
@@ -73,6 +75,8 @@ export const MemoizedDataCard = memo(({
       <CardContent>{children}</CardContent>
     </Card>
   ))
+
+MemoizedDataCard.displayName = 'MemoizedDataCard'
 
 interface ListCardProps<T> {
   items: T[]
@@ -103,3 +107,8 @@ export const MemoizedListCard = memo(<T,>({
     </div>
   )
 }) as <T>(props: ListCardProps<T>) => JSX.Element
+
+MemoizedListCard.displayName = 'MemoizedListCard'
+
+export { MemoizedStatCard, MemoizedDataCard }
+

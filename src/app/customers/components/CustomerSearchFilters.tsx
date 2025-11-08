@@ -15,7 +15,7 @@ interface CustomerSearchFiltersProps {
   filteredCustomers: Customer[]
   selectedItems: string[]
   onClearSelection: () => void
-  onBulkEdit: () => void
+  onBulkEdit?: () => void
   onBulkDelete: () => void
   isLoading: boolean
 }
@@ -69,14 +69,16 @@ const CustomerSearchFilters = ({
             >
               Batal
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onBulkEdit}
-            >
-              <Edit2 className="h-4 w-4 mr-2" />
-              Edit Semua
-            </Button>
+            {onBulkEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onBulkEdit}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit Semua
+              </Button>
+            )}
             <Button
               variant="destructive"
               size="sm"

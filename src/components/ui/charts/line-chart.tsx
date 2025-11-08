@@ -7,14 +7,14 @@ import { MobileTooltip } from './mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from './types'
 
 // Lazy load recharts components
-const Line = lazy(() => import('recharts').then(mod => mod.Line))
-const LineChart = lazy(() => import('recharts').then(mod => mod.LineChart))
-const CartesianGrid = lazy(() => import('recharts').then(mod => mod.CartesianGrid))
-const XAxis = lazy(() => import('recharts').then(mod => mod.XAxis))
-const YAxis = lazy(() => import('recharts').then(mod => mod.YAxis))
-const Tooltip = lazy(() => import('recharts').then(mod => mod.Tooltip))
-const Legend = lazy(() => import('recharts').then(mod => mod.Legend))
-const ResponsiveContainer = lazy(() => import('recharts').then(mod => mod.ResponsiveContainer))
+const Line = lazy(() => import('recharts').then(mod => ({ default: mod.Line })))
+const LineChart = lazy(() => import('recharts').then(mod => ({ default: mod.LineChart })))
+const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
+const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
+const YAxis = lazy(() => import('recharts').then(mod => ({ default: mod.YAxis })))
+const Tooltip = lazy(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
+const Legend = lazy(() => import('recharts').then(mod => ({ default: mod.Legend })))
+const ResponsiveContainer = lazy(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
 
 /**
  * Mobile Line Chart Component
@@ -107,5 +107,7 @@ const MobileLineChart = memo(({
     </BaseMobileChart>
   )
 }, (prevProps: MobileLineChartProps, nextProps: MobileLineChartProps) => prevProps['data'] === nextProps['data'] && prevProps.lines === nextProps.lines)
+
+MobileLineChart.displayName = 'MobileLineChart'
 
 export default MobileLineChart

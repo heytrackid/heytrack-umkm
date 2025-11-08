@@ -66,7 +66,7 @@ class ClientLogger {
     }
 
     // Use appropriate console method
-    /* eslint-disable no-console, heytrack/no-console-usage */
+     
     const getConsoleMethod = () => {
       if (level === 'error') {return console.error}
       if (level === 'warn') {return console.warn}
@@ -74,7 +74,7 @@ class ClientLogger {
       return console.log
     }
     const consoleMethod = getConsoleMethod()
-    /* eslint-enable no-console */
+     
 
     if (isDevelopment()) {
       try {

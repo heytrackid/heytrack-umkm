@@ -1,6 +1,6 @@
 'use client'
 
-import { type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes, forwardRef } from 'react'
+import { type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes, forwardRef, useId } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -124,7 +124,7 @@ interface FormSelectProps extends FormFieldProps {
  */
 export const FormSelect = forwardRef<HTMLButtonElement, FormSelectProps>(
   ({ label, error, required, helperText, className, options, onValueChange, placeholder, value, disabled }, ref) => {
-    const id = `select-${Math.random().toString(36).substr(2, 9)}`
+    const id = useId()
     return (
       <div className={cn('space-y-2', className)}>
         {label && (

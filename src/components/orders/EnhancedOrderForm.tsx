@@ -1,4 +1,4 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
 import {
@@ -16,9 +16,8 @@ import {
     Trash2,
     User
 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { useOrderItemsController } from '@/components/orders/hooks/useOrderItemsController'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -56,46 +55,37 @@ const EnhancedOrderForm = ({
     const { isMobile } = useResponsive()
     const { formatCurrency } = useCurrency()
 
-    const [formData, setFormData] = useState<OrderFormData>({
-        customer_name: '',
-        customer_phone: '',
-        // customer_email: '', // Field doesn't exist in DB
-        customer_address: '',
-        delivery_date: '',
-        delivery_time: '10:00',
-        priority: 'normal',
-        notes: '',
-        order_items: []
-    })
-
-    const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([])
-    const [searchTerm, setSearchTerm] = useState('')
-    const [errors, setErrors] = useState<string[]>([])
-    const [currentStep, setCurrentStep] = useState(1)
-
-    useEffect(() => {
+    const [formData, setFormData] = useState<OrderFormData>(() => {
         if (order) {
-            setFormData({
+            return {
                 customer_name: order['customer_name'] ?? '',
                 customer_phone: order.customer_phone ?? '',
-                // customer_email: order['customer_name'] || '', // Field doesn't exist in DB
                 customer_address: order.customer_address ?? '',
                 delivery_date: order.delivery_date ? (order.delivery_date.split('T')[0] as string) : '',
                 delivery_time: order.delivery_time ?? '10:00',
                 priority: normalizePriority(order.priority),
                 notes: order.notes ?? '',
-                order_items: (order as OrderWithRelations).items?.map(item => ({
-                    recipe_id: item.recipe_id,
-                    product_name: item.product_name ?? null,
-                    quantity: item.quantity,
-                    unit_price: item.unit_price,
-                    total_price: item.total_price,
-                    special_requests: item.special_requests ?? null
-                })) || []
-            })
-            setCurrentStep(3) // Skip to items if editing
+                order_items: []
+            }
         }
-    }, [order])
+        return {
+            customer_name: '',
+            customer_phone: '',
+            customer_address: '',
+            delivery_date: '',
+            delivery_time: '10:00',
+            priority: 'normal',
+            notes: '',
+            order_items: []
+        }
+    })
+
+
+    const [searchTerm, setSearchTerm] = useState('')
+    const [errors, setErrors] = useState<string[]>([])
+    const [currentStep, setCurrentStep] = useState(1)
+
+
 
     const createEmptyOrderItem = useCallback((): OrderFormItem => ({
         recipe_id: '',
@@ -125,14 +115,13 @@ const EnhancedOrderForm = ({
         }
     })
 
-    useEffect(() => {
+    const filteredRecipes = useMemo(() => {
         if (searchTerm) {
-            const filtered = recipes.filter(r =>
+            return recipes.filter(r =>
                 r.name.toLowerCase().includes(searchTerm.toLowerCase())
             )
-            setFilteredRecipes(filtered)
         } else {
-            setFilteredRecipes(recipes)
+            return recipes
         }
     }, [searchTerm, recipes])
 
@@ -203,313 +192,16 @@ const EnhancedOrderForm = ({
     const totalItems = formData.order_items.reduce((sum, item) => sum + item.quantity, 0)
 
     // Step 1: Customer Info
-    // eslint-disable-next-line react/no-unstable-nested-components
-    const CustomerInfoStep = () => (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Informasi Pelanggan
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Nama Pelanggan *
-                    </Label>
-                    <Input
-                        value={formData['customer_name']}
-                        onChange={(e) => handleInputChange('customer_name', e.target.value)}
-                        placeholder="Masukkan nama pelanggan"
-                        className="text-base"
-                    />
-                </div>
+     
 
-                <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        Nomor Telepon *
-                    </Label>
-                    <Input
-                        value={formData.customer_phone}
-                        onChange={(e) => handleInputChange('customer_phone', e.target.value)}
-                        placeholder="08xx xxxx xxxx"
-                        className="text-base"
-                    />
-                </div>
-
-                {/* Email field removed - not in database schema */}
-
-                <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        Alamat Pengiriman (Opsional)
-                    </Label>
-                    <Textarea
-                        value={formData.customer_address ?? ''}
-                        onChange={(e) => handleInputChange('customer_address', e.target.value)}
-                        placeholder="Masukkan alamat lengkap"
-                        rows={3}
-                        className="text-base"
-                    />
-                </div>
-            </CardContent>
-        </Card>
-    )
 
     // Step 2: Delivery Info
-    // eslint-disable-next-line react/no-unstable-nested-components
-    const DeliveryInfoStep = () => (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Informasi Pengiriman
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <LabelWithTooltip
-                            label="Tanggal Pengiriman"
-                            tooltip="Kapan pesanan ini harus dikirim ke pelanggan"
-                            required
-                        />
-                    </div>
-                    <Input
-                        type="date"
-                        value={formData.delivery_date}
-                        onChange={(e) => handleInputChange('delivery_date', e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                        className="text-base"
-                    />
-                </div>
+     
 
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        <LabelWithTooltip
-                            label="Waktu Pengiriman"
-                            tooltip="Jam berapa pesanan harus sampai ke pelanggan"
-                        />
-                    </div>
-                    <Input
-                        type="time"
-                        value={formData.delivery_time}
-                        onChange={(e) => handleInputChange('delivery_time', e.target.value)}
-                        className="text-base"
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4" />
-                        <LabelWithTooltip
-                            label="Tingkat Prioritas"
-                            tooltip="Tingkat kepentingan pesanan: Rendah (biasa), Normal (standar), Tinggi (penting/mendesak)"
-                        />
-                    </div>
-                    <Select
-                        value={formData.priority ?? 'normal'}
-                        onValueChange={(value: Priority) => handleInputChange('priority', value)}
-                    >
-                        <SelectTrigger className="text-base">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="low">
-                                <div className="flex items-center gap-2">
-                                    <div className="h-2 w-2 rounded-full bg-gray-400" />
-                                    Biasa
-                                </div>
-                            </SelectItem>
-                            <SelectItem value="normal">
-                                <div className="flex items-center gap-2">
-                                    <div className="h-2 w-2 rounded-full bg-blue-400" />
-                                    Standar
-                                </div>
-                            </SelectItem>
-                            <SelectItem value="high">
-                                <div className="flex items-center gap-2">
-                                    <div className="h-2 w-2 rounded-full bg-red-400" />
-                                    Penting/Mendesak
-                                </div>
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Catatan Pesanan (Opsional)</Label>
-                    <Textarea
-                        value={formData.notes ?? ''}
-                        onChange={(e) => handleInputChange('notes', e.target.value)}
-                        placeholder="Tambahkan catatan khusus untuk pesanan ini"
-                        rows={3}
-                        className="text-base"
-                    />
-                </div>
-            </CardContent>
-        </Card>
-    )
 
     // Step 3: Order Items
-    // eslint-disable-next-line react/no-unstable-nested-components
-    const OrderItemsStep = () => (
-        <div className="space-y-4">
-            {/* Product Search */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Search className="h-5 w-5" />
-                        Cari Produk
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Cari produk..."
-                            className="pl-10 text-base"
-                        />
-                    </div>
+     
 
-                    {searchTerm && filteredRecipes.length > 0 && (
-                        <div className="mt-3 max-h-60 overflow-y-auto space-y-2">
-                            {filteredRecipes.map((recipe) => (
-                                <button
-                                    key={recipe['id']}
-                                    onClick={() => addRecipeToOrder(recipe)}
-                                    className="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-muted transition-colors text-left"
-                                >
-                                    <div>
-                                        <p className="font-medium">{recipe.name}</p>
-                                        {recipe.category && (
-                                            <p className="text-sm text-muted-foreground">{recipe.category}</p>
-                                        )}
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="font-medium">{formatCurrency(recipe.selling_price ?? 0)}</p>
-                                        <Plus className="h-4 w-4 text-primary ml-auto" />
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-
-            {/* Order Items List */}
-            <Card>
-                <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <CardTitle className="flex items-center gap-2">
-                            <ShoppingCart className="h-5 w-5" />
-                            Item Pesanan ({formData.order_items.length})
-                        </CardTitle>
-                        <Button onClick={addOrderItem} size="sm" variant="outline">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Tambah Manual
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    {formData.order_items.length === 0 ? (
-                        <div className="text-center py-12">
-                            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                            <p className="text-muted-foreground mb-2">Belum ada item ditambahkan</p>
-                            <p className="text-sm text-muted-foreground">
-                                Cari produk di atas atau tambah manual
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {formData.order_items.map((item, index) => (
-                                <div key={index} className="border rounded-lg p-4 space-y-3">
-                                    <div className="flex justify-between items-start gap-3">
-                                        <div className="flex-1">
-                                            <p className="font-medium">{item.product_name ?? 'Produk belum dipilih'}</p>
-                                            <div className="flex items-center gap-4 mt-2">
-                                                <div className="flex items-center gap-2">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => updateOrderItem(index, 'quantity', Math.max(1, item.quantity - 1))}
-                                                    >
-                                                        -
-                                                    </Button>
-                                                    <span className="w-12 text-center font-medium">{item.quantity}</span>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => updateOrderItem(index, 'quantity', item.quantity + 1)}
-                                                    >
-                                                        +
-                                                    </Button>
-                                                </div>
-                                                <div className="text-sm text-muted-foreground">
-                                                    × {formatCurrency(item.unit_price)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-bold text-lg">
-                                                {formatCurrency(item.unit_price * item.quantity)}
-                                            </p>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => removeOrderItem(index)}
-                                                className="text-red-500 hover:text-red-700 mt-1"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-sm">Catatan Item (Opsional)</Label>
-                                        <Input
-                                            value={item.special_requests ?? ''}
-                                            onChange={(e) => updateOrderItem(index, 'special_requests', e.target.value)}
-                                            placeholder="Contoh: Tanpa gula, extra pedas"
-                                            className="text-sm"
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-
-            {/* Order Summary */}
-            {formData.order_items.length > 0 && (
-                <Card className="border-primary">
-                    <CardContent className="pt-6">
-                        <div className="space-y-3">
-                            <div className="flex justify-between text-muted-foreground">
-                                <span>Total Item</span>
-                                <span>{totalItems} item</span>
-                            </div>
-                            <div className="flex justify-between text-muted-foreground">
-                                <span>Subtotal</span>
-                                <span>{formatCurrency(totalAmount)}</span>
-                            </div>
-                            <div className="border-t pt-3 flex justify-between text-xl font-bold">
-                                <span>Total</span>
-                                <span className="text-primary">{formatCurrency(totalAmount)}</span>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
-        </div>
-    )
 
     return (
         <div className="space-y-6">
@@ -572,9 +264,306 @@ const EnhancedOrderForm = ({
             )}
 
             {/* Form Steps */}
-            {(currentStep === 1 || order) && <CustomerInfoStep />}
-            {(currentStep === 2 || order) && <DeliveryInfoStep />}
-            {(currentStep === 3 || order) && <OrderItemsStep />}
+            {(currentStep === 1 || order) && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <User className="h-5 w-5" />
+                            Informasi Pelanggan
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                Nama Pelanggan *
+                            </Label>
+                            <Input
+                                value={formData['customer_name']}
+                                onChange={(e) => handleInputChange('customer_name', e.target.value)}
+                                placeholder="Masukkan nama pelanggan"
+                                className="text-base"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                <Phone className="h-4 w-4" />
+                                Nomor Telepon *
+                            </Label>
+                            <Input
+                                value={formData.customer_phone}
+                                onChange={(e) => handleInputChange('customer_phone', e.target.value)}
+                                placeholder="08xx xxxx xxxx"
+                                className="text-base"
+                            />
+                        </div>
+
+                        {/* Email field removed - not in database schema */}
+
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4" />
+                                Alamat Pengiriman (Opsional)
+                            </Label>
+                            <Textarea
+                                value={formData.customer_address ?? ''}
+                                onChange={(e) => handleInputChange('customer_address', e.target.value)}
+                                placeholder="Masukkan alamat lengkap"
+                                rows={3}
+                                className="text-base"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+            {(currentStep === 2 || order) && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Calendar className="h-5 w-5" />
+                            Informasi Pengiriman
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4" />
+                                <LabelWithTooltip
+                                    label="Tanggal Pengiriman"
+                                    tooltip="Kapan pesanan ini harus dikirim ke pelanggan"
+                                    required
+                                />
+                            </div>
+                            <Input
+                                type="date"
+                                value={formData.delivery_date}
+                                onChange={(e) => handleInputChange('delivery_date', e.target.value)}
+                                min={new Date().toISOString().split('T')[0]}
+                                className="text-base"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4" />
+                                <LabelWithTooltip
+                                    label="Waktu Pengiriman"
+                                    tooltip="Jam berapa pesanan harus sampai ke pelanggan"
+                                />
+                            </div>
+                            <Input
+                                type="time"
+                                value={formData.delivery_time}
+                                onChange={(e) => handleInputChange('delivery_time', e.target.value)}
+                                className="text-base"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <AlertCircle className="h-4 w-4" />
+                                <LabelWithTooltip
+                                    label="Tingkat Prioritas"
+                                    tooltip="Tingkat kepentingan pesanan: Rendah (biasa), Normal (standar), Tinggi (penting/mendesak)"
+                                />
+                            </div>
+                            <Select
+                                value={formData.priority ?? 'normal'}
+                                onValueChange={(value: Priority) => handleInputChange('priority', value)}
+                            >
+                                <SelectTrigger className="text-base">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="low">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-2 rounded-full bg-gray-400" />
+                                            Biasa
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="normal">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-2 rounded-full bg-blue-400" />
+                                            Standar
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="high">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-2 rounded-full bg-red-400" />
+                                            Penting/Mendesak
+                                        </div>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Catatan Pesanan (Opsional)</Label>
+                            <Textarea
+                                value={formData.notes ?? ''}
+                                onChange={(e) => handleInputChange('notes', e.target.value)}
+                                placeholder="Tambahkan catatan khusus untuk pesanan ini"
+                                rows={3}
+                                className="text-base"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+            {(currentStep === 3 || order) && (
+                <div className="space-y-4">
+                    {/* Product Search */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Search className="h-5 w-5" />
+                                Cari Produk
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Cari produk..."
+                                    className="pl-10 text-base"
+                                />
+                            </div>
+
+                            {searchTerm && filteredRecipes.length > 0 && (
+                                <div className="mt-3 max-h-60 overflow-y-auto space-y-2">
+                                    {filteredRecipes.map((recipe) => (
+                                        <button
+                                            key={recipe['id']}
+                                            onClick={() => addRecipeToOrder(recipe)}
+                                            className="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-muted transition-colors text-left"
+                                        >
+                                            <div>
+                                                <p className="font-medium">{recipe.name}</p>
+                                                {recipe.category && (
+                                                    <p className="text-sm text-muted-foreground">{recipe.category}</p>
+                                                )}
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-medium">{formatCurrency(recipe.selling_price ?? 0)}</p>
+                                                <Plus className="h-4 w-4 text-primary ml-auto" />
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Order Items List */}
+                    <Card>
+                        <CardHeader>
+                            <div className="flex justify-between items-center">
+                                <CardTitle className="flex items-center gap-2">
+                                    <ShoppingCart className="h-5 w-5" />
+                                    Item Pesanan ({formData.order_items.length})
+                                </CardTitle>
+                                <Button onClick={addOrderItem} size="sm" variant="outline">
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Tambah Manual
+                                </Button>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {formData.order_items.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                    <p className="text-muted-foreground mb-2">Belum ada item ditambahkan</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Cari produk di atas atau tambah manual
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {formData.order_items.map((item, index) => (
+                                        <div key={index} className="border rounded-lg p-4 space-y-3">
+                                            <div className="flex justify-between items-start gap-3">
+                                                <div className="flex-1">
+                                                    <p className="font-medium">{item.product_name ?? 'Produk belum dipilih'}</p>
+                                                    <div className="flex items-center gap-4 mt-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => updateOrderItem(index, 'quantity', Math.max(1, item.quantity - 1))}
+                                                            >
+                                                                -
+                                                            </Button>
+                                                            <span className="w-12 text-center font-medium">{item.quantity}</span>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => updateOrderItem(index, 'quantity', item.quantity + 1)}
+                                                            >
+                                                                +
+                                                            </Button>
+                                                        </div>
+                                                        <div className="text-sm text-muted-foreground">
+                                                            × {formatCurrency(item.unit_price)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-bold text-lg">
+                                                        {formatCurrency(item.unit_price * item.quantity)}
+                                                    </p>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => removeOrderItem(index)}
+                                                        className="text-red-500 hover:text-red-700 mt-1"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label className="text-sm">Catatan Item (Opsional)</Label>
+                                                <Input
+                                                    value={item.special_requests ?? ''}
+                                                    onChange={(e) => updateOrderItem(index, 'special_requests', e.target.value)}
+                                                    placeholder="Contoh: Tanpa gula, extra pedas"
+                                                    className="text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Order Summary */}
+                    {formData.order_items.length > 0 && (
+                        <Card className="border-primary">
+                            <CardContent className="pt-6">
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-muted-foreground">
+                                        <span>Total Item</span>
+                                        <span>{totalItems} item</span>
+                                    </div>
+                                    <div className="flex justify-between text-muted-foreground">
+                                        <span>Subtotal</span>
+                                        <span>{formatCurrency(totalAmount)}</span>
+                                    </div>
+                                    <div className="border-t pt-3 flex justify-between text-xl font-bold">
+                                        <span>Total</span>
+                                        <span className="text-primary">{formatCurrency(totalAmount)}</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            )}
 
             {/* Navigation Buttons */}
             <div className="flex gap-3">

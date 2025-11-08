@@ -21,7 +21,7 @@ interface CustomersTableProps {
   selectedItems: string[]
   onSelectItem: (itemId: string) => void
   onSelectAll: () => void
-  onView: (customer: CustomerRow) => void
+  onView?: (customer: CustomerRow) => void
   onEdit: (customer: CustomerRow) => void
   onDelete: (customer: CustomerRow) => void
   onAddNew: () => void
@@ -31,7 +31,7 @@ interface CustomersTableProps {
 
 interface MobileCustomerCardProps {
   customer: CustomerRow
-  onView: (customer: CustomerRow) => void
+  onView?: (customer: CustomerRow) => void
   onEdit: (customer: CustomerRow) => void
   onDelete: (customer: CustomerRow) => void
   formatCurrency: (amount: number) => string
@@ -64,10 +64,12 @@ const MobileCustomerCard = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onView(customer)}>
-                  <Eye className="h-4 w-4 mr-2" />
-                  Lihat
-                </DropdownMenuItem>
+                {onView && (
+                  <DropdownMenuItem onClick={() => onView(customer)}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Lihat
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => onEdit(customer)}>
                   <Edit2 className="h-4 w-4 mr-2" />
                   Edit
@@ -151,19 +153,14 @@ const CustomersTable = ({
   // Calculate pagination
   const totalItems = customers.length
   const totalPages = Math.ceil(totalItems / pageSize)
+  const effectivePage = Math.min(currentPage, totalPages || 1)
 
   // Get paginated data
   const paginatedCustomers = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize
+    const startIndex = (effectivePage - 1) * pageSize
     const endIndex = startIndex + pageSize
     return customers.slice(startIndex, endIndex)
-  }, [customers, currentPage, pageSize])
-
-  // Reset to page 1 when customers change
-  useMemo(() => {
-    setCurrentPage(1)
-     
-  }, [])
+  }, [customers, effectivePage, pageSize])
 
   if (customers.length === 0) {
     return (
@@ -198,7 +195,7 @@ const CustomersTable = ({
               <MobileCustomerCard
                 key={customer['id']}
                 customer={customer}
-                onView={onView}
+                onView={onView || (() => {})}
                 onEdit={onEdit}
                 onDelete={onDelete}
                 formatCurrency={formatCurrency}
@@ -270,13 +267,15 @@ const CustomersTable = ({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onView(customer)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                       {onView && (
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => onView(customer)}
+                         >
+                           <Eye className="h-4 w-4" />
+                         </Button>
+                       )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">

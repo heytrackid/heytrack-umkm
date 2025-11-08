@@ -110,8 +110,12 @@ export const LazyModal = ({
       case 'order-detail': return LazyOrderDetail
       case 'customer-detail': return LazyCustomerDetail
       case 'inventory-detail': return LazyInventoryDetail
-      // eslint-disable-next-line react/no-unstable-nested-components
-      default: return () => <div>Informasi</div>
+       
+      default: {
+        const DefaultComponent = () => <div>Informasi</div>
+        Object.defineProperty(DefaultComponent, 'displayName', { value: 'DefaultComponent' })
+        return DefaultComponent
+      }
     }
   }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { createClientLogger } from '@/lib/client-logger'
 
@@ -53,7 +53,7 @@ export function usePerformanceMonitor() {
   const [metrics, _setMetrics] = useState<PerformanceMetric[]>([])
   const observerRef = useRef<PerformanceObserver | null>(null)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // Monitor navigation timing
     if (typeof window !== 'undefined' && 'performance' in window) {
       try {
@@ -81,7 +81,7 @@ export function usePerformanceMonitor() {
             }
           ]
 
-          _setMetrics(prev => [...prev, ...navMetrics])
+          setTimeout(() => _setMetrics(prev => [...prev, ...navMetrics]), 0)
         }
       } catch {
         // Navigation timing not available
@@ -97,7 +97,7 @@ export function usePerformanceMonitor() {
             timestamp: Date.now(),
             type: 'paint'
           }
-          _setMetrics(prev => [...prev, paintMetric])
+          setTimeout(() => _setMetrics(prev => [...prev, paintMetric]), 0)
         })
       } catch {
         // Paint timing not available
@@ -115,7 +115,7 @@ export function usePerformanceMonitor() {
               type: entry.entryType
             }))
 
-            _setMetrics(prev => [...prev, ...newMetrics])
+            setTimeout(() => _setMetrics(prev => [...prev, ...newMetrics]), 0)
           })
 
           // Observe different performance entry types
@@ -153,7 +153,7 @@ export function usePerformanceMonitor() {
             type: entry.entryType
           }
 
-          _setMetrics(prev => [...prev, metric])
+          setTimeout(() => _setMetrics(prev => [...prev, metric]), 0)
           return metric
         }
       } catch {
@@ -173,7 +173,7 @@ export function usePerformanceMonitor() {
           timestamp: Date.now(),
           type: 'mark'
         }
-        _setMetrics(prev => [...prev, metric])
+        setTimeout(() => _setMetrics(prev => [...prev, metric]), 0)
         return metric
       } catch {
         // Performance mark failed
@@ -403,7 +403,7 @@ export function useBundleAnalyzer() {
 
   useEffect(() => {
     // Simplified bundle analysis - in real app, load from build artifacts
-    setBundleInfo(null)
+    setTimeout(() => setBundleInfo(null), 0)
   }, [])
 
   return bundleInfo

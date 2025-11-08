@@ -24,7 +24,7 @@ import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/supabase'
 import { useCurrency } from '@/hooks/useCurrency'
 
 // Helper function to get status variant
-const getStatusVariant = (status: string): string => {
+const getStatusVariant = (status: string): "default" | "destructive" | "secondary" => {
   switch (status) {
     case 'DELIVERED':
       return 'default'
@@ -50,7 +50,7 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
   const customer = customers?.[0]
 
   // CRUD operations
-  const { delete: deleteCustomer } = useSupabaseCRUD('customers')
+  const { remove: deleteCustomer } = useSupabaseCRUD('customers')
 
   // Fetch customer orders
   const { data: orders, loading: ordersLoading } = useSupabaseQuery('orders', {

@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 
 
 
@@ -64,26 +64,22 @@ const defaultSettings: Settings = {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
 export const SettingsProvider = ({ children }: { children: ReactNode }): JSX.Element => {
-  const [settings, setSettings] = useState<Settings>(defaultSettings)
-
-  const loadSettings = useCallback(() => {
+  const [settings, setSettings] = useState<Settings>(() => {
     if (typeof window === 'undefined') {
-      return
+      return defaultSettings
     }
     try {
       const stored = localStorage.getItem('heytrack-settings')
       if (stored) {
-        const parsed = JSON.parse(stored) as Settings
-        setSettings(parsed)
+        return JSON.parse(stored) as Settings
       }
     } catch {
       // ignore corrupted data
     }
-  }, [])
+    return defaultSettings
+  })
 
-  useEffect(() => {
-    loadSettings()
-  }, [loadSettings])
+  // Settings are loaded in useState initializer
 
   const persistSettings = useCallback((updater: (prev: Settings) => Settings) => {
     setSettings(prev => {

@@ -8,7 +8,6 @@ import {
   CheckCircle,
   TrendingUp
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -30,16 +29,11 @@ export const PerformanceMonitor = (): JSX.Element | null => {
     exportMetrics
   } = usePerformanceMonitoring()
 
-  const [isVisible, setIsVisible] = useState(false)
+  const shouldShow =
+    process['env'].NODE_ENV === 'development' ||
+    (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('perf') === 'true')
 
-  useEffect(() => {
-    // Show monitor only in development or when ?perf=true is in URL
-    const shouldShow = 
-      process['env'].NODE_ENV === 'development' || 
-      new URLSearchParams(window.location.search).get('perf') === 'true'
-    
-    setIsVisible(shouldShow)
-  }, [])
+   const isVisible = shouldShow
 
   if (!isVisible || !isSupported) {
     return null
@@ -212,7 +206,7 @@ interface MetricRowProps {
   value: string
   threshold: { good: number; poor: number }
   currentValue: number | null
-  icon: React.ComponentType<{ className?: string }>
+  icon: React.ComponentType<{ className?: string | undefined }>
 }
 
 const MetricRow = ({ label, value, threshold, currentValue, icon: Icon }: MetricRowProps): JSX.Element => {
@@ -234,7 +228,7 @@ const MetricRow = ({ label, value, threshold, currentValue, icon: Icon }: Metric
   return (
     <div className="flex items-center justify-between text-sm">
       <div className="flex items-center gap-2">
-        {icons[status]}
+        {icons[status as keyof typeof icons]}
         <span className="text-xs text-gray-600">{label}</span>
       </div>
       <span className="font-medium text-xs">{value}</span>

@@ -43,7 +43,7 @@ const normalizeDateValue = (value?: string | null) => {
 }
 
 // ✅ PERFORMANCE: Optimized function with caching
-/* eslint-disable require-await */
+ 
 const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: FetchOrdersParams) => {
   const { page, limit, search, sort_by, sort_order, status, user_id } = params
 
@@ -85,7 +85,7 @@ const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: 
     return { data: mappedData, count }
   }, cacheKey, 5 * 60 * 1000) // Cache for 5 minutes
 }
-/* eslint-enable require-await */
+ 
 
 // GET /api/orders - Get all orders with caching
 async function GET(request: NextRequest): Promise<NextResponse> {

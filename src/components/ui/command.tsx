@@ -26,7 +26,7 @@ const Command = forwardRef<
 ))
 Command.displayName = CommandPrimitive.displayName
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- Extending DialogProps for future customization
+ 
 interface CommandDialogProps extends DialogProps {}
 
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => (
