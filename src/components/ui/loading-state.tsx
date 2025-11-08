@@ -1,9 +1,10 @@
-import { cn } from '@/lib/utils'
 import { Loader2 } from 'lucide-react'
+
+import { cn } from '@/lib/utils'
 
 interface LoadingStateProps {
   message?: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'lg' | 'md' | 'sm'
   className?: string
 }
 

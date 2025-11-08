@@ -1,12 +1,15 @@
 'use client'
 
+import { AlertCircle } from 'lucide-react'
+import { useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { AlertCircle } from 'lucide-react'
+
 import type { Row } from '@/types/database'
-import { useState } from 'react'
+
 
 
 /**
@@ -86,7 +89,7 @@ export const CustomerSection = ({
                                     )
                                     .map(customer => (
                                         <div
-                                            key={customer.id}
+                                            key={customer['id']}
                                             className="p-2 hover:bg-muted cursor-pointer"
                                             onClick={() => selectCustomer(customer)}
                                         >
@@ -107,14 +110,14 @@ export const CustomerSection = ({
                     <Input
                         id="customerName"
                         placeholder="Contoh: Ibu Siti"
-                        value={formData.customer_name}
+                        value={formData['customer_name']}
                         onChange={(e) => {
                             onInputChange('customer_name', e.target.value)
                             if (fieldErrors['customer_name']) { onClearError('customer_name') }
                         }}
                         required
                         className={`mt-1 ${fieldErrors['customer_name'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                        aria-invalid={!!fieldErrors['customer_name']}
+                        aria-invalid={Boolean(fieldErrors['customer_name'])}
                     />
                     {fieldErrors['customer_name'] && (
                         <div className="flex items-center gap-2 text-sm text-destructive mt-1">

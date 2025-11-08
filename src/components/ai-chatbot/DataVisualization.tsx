@@ -1,11 +1,14 @@
 'use client'
 
-import type { Row } from '@/types/database'
-import dynamic from 'next/dynamic'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DollarSign } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
+import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
+
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import type { Row } from '@/types/database'
 
 type Customer = Row<'customers'>
 type Recipe = Row<'recipes'>
@@ -50,12 +53,12 @@ interface ChartEntry {
   color: string
 }
 
-interface CustomerForViz extends Omit<Customer, 'total_spent' | 'total_orders'> {
+interface CustomerForViz extends Omit<Customer, 'total_orders' | 'total_spent'> {
   total_spent?: number
   total_orders?: number
 }
 
-interface RecipeForViz extends Omit<Recipe, 'total_revenue' | 'times_made'> {
+interface RecipeForViz extends Omit<Recipe, 'times_made' | 'total_revenue'> {
   total_revenue?: number
   times_made?: number
 }
@@ -98,7 +101,7 @@ interface AnalysisData {
 }
 
 interface DataVisualizationProps {
-  type: 'financial' | 'inventory' | 'customers' | 'products' | 'analysis'
+  type: 'analysis' | 'customers' | 'financial' | 'inventory' | 'products'
   data: unknown
   compact?: boolean
 }
@@ -108,7 +111,7 @@ const FinancialChart = ({ data, compact = false, formatCurrency, colors }: {
   compact?: boolean
   formatCurrency: (value: number) => string
   colors: string[]
-}) => {
+}): JSX.Element => {
   const chartData: ChartEntry[] = useMemo(() => [
     { name: 'Revenue', value: data.revenue, color: colors[0] ?? '#10B981' },
     { name: 'Costs', value: data.costs, color: colors[1] ?? '#EF4444' },
@@ -198,7 +201,7 @@ const AnalysisChart = ({ data: _data, compact: _compact }: { data: AnalysisData;
   <Card><CardContent className="p-4"><div className="text-sm text-gray-500">Analysis visualization</div></CardContent></Card>
 )
 
-const DataVisualization = ({ type, data, compact = false }: DataVisualizationProps) => {
+const DataVisualization = ({ type, data, compact = false }: DataVisualizationProps): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const colors = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']
 

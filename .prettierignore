@@ -38,3 +38,20 @@ pnpm-lock.yaml
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Additional excludes for large projects like HeyTrack
+node_modules/**
+dist/**
+.git/**
+pnpm-lock.yaml
+eslint.config.js
+src/types/supabase-generated.ts
+**/*.config.*
+**/*.test.*
+**/__tests__/**
+scripts/**
+supabase/**
+workers/**
+.kiro/**
+docs/**
+public/**

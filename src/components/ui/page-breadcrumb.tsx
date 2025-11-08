@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
+
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -8,6 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
 
 /**
  * Shared Page Breadcrumb Component
@@ -67,6 +68,12 @@ export const BreadcrumbPatterns = {
     { label: 'Dashboard', href: '/' },
     { label: 'Bahan Baku', href: '/ingredients' },
     { label: 'Tambah Bahan Baku' }
+  ],
+
+  ingredientPurchases: [
+    { label: 'Dashboard', href: '/' },
+    { label: 'Bahan Baku', href: '/ingredients' },
+    { label: 'Pembelian' }
   ],
 
   recipes: [

@@ -3,6 +3,12 @@
 
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FileText, Loader2, Mail, MapPin, Percent, Phone, Save, Tag, User, X } from 'lucide-react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -12,12 +18,8 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+
 import type { Row } from '@/types/database'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { FileText, Loader2, Mail, MapPin, Percent, Phone, Save, Tag, User, X } from 'lucide-react'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 
 type Customer = Row<'customers'>
 
@@ -66,10 +68,10 @@ interface CustomerFormProps {
     onCancel: () => void
 }
 
-const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
+const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX.Element => {
     const { toast } = useToast()
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const isEditMode = !!customer
+    const isEditMode = Boolean(customer)
 
     const form = useForm<CustomerFormData>({
         resolver: zodResolver(CustomerFormSchema),
@@ -78,7 +80,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
             phone: customer?.phone ?? '',
             email: customer?.email ?? '',
             address: customer?.address ?? '',
-            customer_type: (customer?.customer_type as 'retail' | 'wholesale' | 'vip' | 'regular') || 'regular',
+            customer_type: (customer?.customer_type as 'regular' | 'retail' | 'vip' | 'wholesale') || 'regular',
             discount_percentage: customer?.discount_percentage?.toString() ?? '',
             notes: customer?.notes ?? '',
             is_active: customer?.is_active ?? true,
@@ -105,7 +107,11 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
                 is_active: data.is_active,
             }
 
-            const url = isEditMode ? `/api/customers/${customer.id}` : '/api/customers'
+            const customerId = customer?.id
+            if (isEditMode && !customerId) {
+              throw new Error('Customer ID required for edit')
+            }
+            const url = isEditMode ? `/api/customers/${customerId}` : '/api/customers'
             const method = isEditMode ? 'PUT' : 'POST'
 
             const response = await fetch(url, {
@@ -116,7 +122,7 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
             })
 
             if (!response.ok) {
-                const errorData = await response.json()
+                const errorData = await response.json() as { error?: string }
                 throw new Error(errorData.error ?? 'Gagal menyimpan data pelanggan')
             }
 
@@ -244,8 +250,8 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
                                     Tipe Pelanggan
                                 </Label>
                                 <Select
-                                    value={customerType}
-                                    onValueChange={(value) => setValue('customer_type', value as 'retail' | 'wholesale' | 'vip' | 'regular')}
+                                    value={customerType ?? 'regular'}
+                                    onValueChange={(value) => setValue('customer_type', value as 'regular' | 'retail' | 'vip' | 'wholesale')}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Pilih tipe pelanggan" />

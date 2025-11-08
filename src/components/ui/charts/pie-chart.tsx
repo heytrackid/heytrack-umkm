@@ -1,8 +1,11 @@
 import { memo, lazy, Suspense } from 'react'
+
 import { useResponsive } from '@/hooks/useResponsive'
+
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from './types'
+
 import type { PieLabelRenderProps } from 'recharts'
 
 // Lazy load recharts components
@@ -31,7 +34,7 @@ interface MobilePieChartProps extends BaseMobileChartProps {
  * MobilePieChart - Optimized with React.memo
  * Prevents unnecessary re-renders when data hasn't changed
  */
-export const MobilePieChart = memo(({
+const MobilePieChart = memo(({
   data,
   valueKey,
   _nameKey,
@@ -104,4 +107,8 @@ export const MobilePieChart = memo(({
       </Suspense>
     </BaseMobileChart>
   )
-}, (prevProps: MobilePieChartProps, nextProps: MobilePieChartProps) => prevProps.data === nextProps.data && prevProps.valueKey === nextProps.valueKey)
+}, (prevProps: MobilePieChartProps, nextProps: MobilePieChartProps) => prevProps['data'] === nextProps['data'] && prevProps.valueKey === nextProps.valueKey)
+
+MobilePieChart.displayName = 'MobilePieChart'
+
+export default MobilePieChart

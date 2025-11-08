@@ -8,7 +8,7 @@
  */
 
 // UI Hooks
-export { useResponsive, useMobile, useIsMobile, useMediaQuery, useScreenSize, useOrientation, useTouchDevice } from './responsive'
+export { useResponsive, useMobile, useIsMobile, useMediaQuery, useScreenSize, useOrientation, useTouchDevice } from '@/utils/responsive'
 
 // export { useLoading } from './useLoading'
 export { useConfirm } from './useConfirm'
@@ -18,7 +18,7 @@ export { useToast } from './use-toast'
 // export { useErrorHandler, useAsyncError, useFormErrors, useRetry } from './useErrorHandler'
 
 // Auth Hooks
-export { useAuth } from './useAuth'
+export { useAuth } from '@/providers/AuthProvider'
 
 // Database Hooks
 export {
@@ -43,10 +43,10 @@ export { useSimplePreload, useAdvancedLinkPreloading, useAdvancedButtonPreloadin
 
 // API Hooks
 export { useDashboardStats, useWeeklySales, useTopProducts } from './api/useDashboard'
-// export { useHPPAlerts } from './api/useHPPAlerts' // TODO: Implement
-// export { useHPPComparison } from './api/useHPPComparison' // TODO: Implement
-// export { useHPPExport } from './api/useHPPExport' // TODO: Implement
-// export { useHPPSnapshots } from './api/useHPPSnapshots' // TODO: Implement
+export { useHPPAlerts } from './api/useHPPAlerts'
+export { useHPPComparison } from './api/useHPPComparison'
+export { useHPPExport } from './api/useHPPExport'
+export { useHPPSnapshots } from './api/useHPPSnapshots'
 
 // HPP Hooks
 export { useHppOverview } from '@/modules/hpp/hooks/useHppOverview'
@@ -60,4 +60,4 @@ export { useReorderManagement, usePurchaseOrderGenerator } from './useReorderMan
 // export { useHPPAutomation, useRecipeHPPAnalysis } from './useHPPAutomation'
 
 // Performance Hooks
-export { usePerformanceMonitoring } from '../utils/performance/usePerformanceMonitoring'
+export { usePerformanceMonitoring } from '@/lib/performance'

@@ -1,7 +1,10 @@
 import { dbLogger } from '@/lib/logger'
-import { executeTransaction, createOperation, type TransactionOperation } from './transactions'
-import type { SupabaseClient } from '@supabase/supabase-js'
+
 import type { Insert, Database } from '@/types/database'
+
+import { executeTransaction, createOperation, type TransactionOperation } from './transactions'
+
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 
 /**
@@ -53,7 +56,7 @@ export async function createOrderWithTransaction(
         if (error) {throw error}
         if (!order) {throw new Error('Order creation returned no data')}
 
-        orderId = order.id
+        orderId = order['id']
         dbLogger.info({ orderId }, 'Order created')
         return order
       },
@@ -90,7 +93,7 @@ export async function createOrderWithTransaction(
         if (error) {throw error}
         if (!items) {throw new Error('Order items creation returned no data')}
 
-        orderItemIds = items.map(item => item.id)
+        orderItemIds = items.map(item => item['id'])
         dbLogger.info({ orderId, itemCount: items.length }, 'Order items created')
         return items
       },
@@ -119,7 +122,7 @@ export async function createOrderWithTransaction(
           amount: data.order.total_amount ?? 0,
           date: data.order.order_date ?? new Date().toISOString(),
           reference: `Order ${orderId}`,
-          description: `Income from order ${data.order.order_no}`,
+          description: `Income from order ${data.order['order_no']}`,
         }
 
         const { data: record, error } = await supabase
@@ -131,7 +134,7 @@ export async function createOrderWithTransaction(
         if (error) {throw error}
         if (!record) {throw new Error('Financial record creation returned no data')}
 
-        financialRecordId = record.id
+        financialRecordId = record['id']
         dbLogger.info({ orderId, financialRecordId }, 'Financial record created')
         return record
       },

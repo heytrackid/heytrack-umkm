@@ -2,7 +2,13 @@
 
 import { useCallback, useState } from 'react'
 
-
+interface UseFormErrorsReturn {
+  fieldErrors: Record<string, string>
+  setFieldError: (field: string, message: string) => void
+  clearFieldError: (field: string) => void
+  clearAllErrors: () => void
+  hasErrors: boolean
+}
 
 /**
  * Hook untuk handle form validation errors per field
@@ -29,7 +35,7 @@ import { useCallback, useState } from 'react'
  *   </>
  * )
  */
-export function useFormErrors() {
+export function useFormErrors(): UseFormErrorsReturn {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const setFieldError = useCallback((field: string, message: string) => {
@@ -48,7 +54,7 @@ export function useFormErrors() {
   }, [])
 
   const clearAllErrors = useCallback(() => {
-    void setFieldErrors({})
+    setFieldErrors({})
   }, [])
 
   const hasErrors = Object.keys(fieldErrors).length > 0

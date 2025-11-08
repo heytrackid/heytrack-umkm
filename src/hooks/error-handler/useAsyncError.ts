@@ -1,9 +1,18 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import { useErrorHandler } from './useErrorHandler'
 
+import type { AppError } from './types'
 
+interface UseAsyncErrorReturn {
+  executeAsync: (asyncFn: () => Promise<void>) => Promise<void>
+  error: AppError | null
+  isError: boolean
+  isLoading: boolean
+  resetError: () => void
+}
 
 /**
  * Hook untuk handle async operations dengan error handling dan loading state
@@ -31,20 +40,20 @@ import { useErrorHandler } from './useErrorHandler'
  *   </button>
  * )
  */
-export function useAsyncError() {
+export function useAsyncError(): UseAsyncErrorReturn {
   const [isLoading, setIsLoading] = useState(false)
   const { error, isError, handleError: handleErr, resetError } = useErrorHandler()
 
   const executeAsync = useCallback(
     async (asyncFn: () => Promise<void>) => {
       try {
-        void setIsLoading(true)
+        setIsLoading(true)
         resetError()
         await asyncFn()
-      } catch (err) {
-        void handleErr(err, 'useAsyncError')
+      } catch (error) {
+        void handleErr(error, 'useAsyncError')
       } finally {
-        void setIsLoading(false)
+        setIsLoading(false)
       }
     },
     [handleErr, resetError]

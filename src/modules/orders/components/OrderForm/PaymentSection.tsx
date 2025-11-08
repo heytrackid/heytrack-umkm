@@ -1,11 +1,13 @@
 'use client'
 
+import { AlertCircle } from 'lucide-react'
+
+import type { PaymentMethod } from '@/app/orders/types/orders-db.types'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCurrency } from '@/hooks/useCurrency'
-import { AlertCircle } from 'lucide-react'
 import { safeNumber } from '@/lib/type-guards'
-import type { PaymentMethod } from '@/app/orders/types/orders-db.types'
+
 
 
 
@@ -102,7 +104,7 @@ export const PaymentSection = ({
                         min="0"
                         step="1000"
                         className={`mt-1 ${fieldErrors['paid_amount'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                        aria-invalid={!!fieldErrors['paid_amount']}
+                        aria-invalid={Boolean(fieldErrors['paid_amount'])}
                     />
                     {fieldErrors['paid_amount'] && (
                         <div className="flex items-center gap-2 text-sm text-destructive mt-1">

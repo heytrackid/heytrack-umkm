@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useRef, type ReactNode } from 'react'
-import { cn } from '@/lib/utils'
 import { Edit, Trash2 } from 'lucide-react'
+import { useState, useRef, type ReactNode } from 'react'
+
+import { cn } from '@/lib/utils'
 
 export interface SwipeAction {
   icon: ReactNode
   label: string
   onClick: () => void
-  color: 'blue' | 'red' | 'green' | 'yellow'
+  color: 'blue' | 'green' | 'red' | 'yellow'
   side: 'left' | 'right'
 }
 
@@ -44,13 +45,13 @@ export const SwipeableCard = ({
   const rightActions = actions.filter(a => a.side === 'right')
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (disabled) {return}
+    if (disabled || !e.touches[0]) {return}
     startX.current = e.touches[0].clientX
     currentX.current = e.touches[0].clientX
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (disabled) {return}
+    if (disabled || !e.touches[0]) {return}
     currentX.current = e.touches[0].clientX
     const diff = currentX.current - startX.current
     

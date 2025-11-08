@@ -49,10 +49,10 @@ export function formatNumber(
  * Date and time utilities
  */
 export function formatDate(
-  date: string | Date | number,
+  date: Date | number | string,
   options: {
     locale?: string
-    format?: 'short' | 'medium' | 'long' | 'full'
+    format?: 'full' | 'long' | 'medium' | 'short'
     includeTime?: boolean
   } = {}
 ): string {
@@ -73,7 +73,7 @@ export function formatDate(
 }
 
 export function formatTime(
-  date: string | Date | number,
+  date: Date | number | string,
   locale = 'id-ID'
 ): string {
   const dateObj = new Date(date)
@@ -83,7 +83,7 @@ export function formatTime(
 }
 
 export function formatRelativeTime(
-  date: string | Date | number,
+  date: Date | number | string,
   locale = 'id-ID'
 ): string {
   const dateObj = new Date(date)
@@ -221,7 +221,7 @@ export function isValidPhone(phone: string): boolean {
 /**
  * Array and object utilities
  */
-export function groupBy<T, K extends string | number | symbol>(
+export function groupBy<T, K extends number | string | symbol>(
   array: T[],
   keyFn: (item: T) => K
 ): Record<K, T[]> {
@@ -237,7 +237,7 @@ export function groupBy<T, K extends string | number | symbol>(
 
 export function sortBy<T>(
   array: T[],
-  keyFn: (item: T) => string | number | boolean | Date,
+  keyFn: (item: T) => Date | boolean | number | string,
   direction: 'asc' | 'desc' = 'asc'
 ): T[] {
   return [...array].sort((a, b) => {
@@ -269,7 +269,7 @@ export function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
  * Local storage utilities with error handling
  */
 export function safeLocalStorage() {
-  const isAvailable = typeof window !== 'undefined' && !!window.localStorage
+  const isAvailable = typeof window !== 'undefined' && Boolean(window.localStorage)
 
   return {
     get: <T>(key: string, defaultValue: T | null = null): T | null => {
@@ -324,7 +324,7 @@ export function formatFileSize(bytes: number): string {
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
 
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))  } ${  sizes[i]}`
+  return `${parseFloat((bytes / k**i).toFixed(1))  } ${  sizes[i]}`
 }
 
 export function getFileExtension(filename: string): string {

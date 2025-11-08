@@ -1,6 +1,8 @@
 'use client'
 
 import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from 'react'
+
+import { globalLazyLoadingUtils } from '@/components/lazy'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import {
   DataTableSkeleton,
@@ -8,7 +10,7 @@ import {
   DashboardCardSkeleton,
   AvatarSkeleton
 } from '@/components/ui/skeletons'
-import { globalLazyLoadingUtils } from '../lazy'
+
 
 // Type for window with lazy loading metrics
 interface WindowWithMetrics extends Window {
@@ -120,7 +122,7 @@ export const SuspenseWrapper = ({
   loadingType = 'default',
   errorFallback
 }: SuspenseWrapperProps) => {
-  const LoadingComponent = loadingComponents[loadingType]
+  const LoadingComponent = loadingComponents[loadingType] ?? DataTableSkeleton
 
   return (
     <ErrorBoundary fallback={errorFallback}>
@@ -190,7 +192,7 @@ export function createTrackedLazyComponent(
   } = {}
 ) {
   const LazyComponent = lazy(() =>
-    import(`../path/to/component/${componentName}`).then(module => {
+    import(componentName).then((module: { default: React.ComponentType<unknown> }) => {
       // Track component load time
       const startTime = performance.now()
       setTimeout(() => {
@@ -198,6 +200,7 @@ export function createTrackedLazyComponent(
           (window as WindowWithMetrics).LazyLoadingMetrics?.trackComponentLoad(componentName, startTime)
         }
       }, 0)
+       
       return module
     })
   )

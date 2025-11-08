@@ -10,7 +10,7 @@ export interface GeneratedRecipe {
   prep_time_minutes: number
   bake_time_minutes: number
   total_time_minutes: number
-  difficulty: 'easy' | 'medium' | 'hard'
+  difficulty: 'easy' | 'hard' | 'medium'
   ingredients: RecipeIngredient[]
   instructions: RecipeInstruction[]
   tips: string[]

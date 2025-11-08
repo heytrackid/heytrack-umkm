@@ -1,10 +1,14 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger, logError } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
-
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger, logError } from '@/lib/logger'
+import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
 
 interface RestockSuggestion {
   ingredient_id: string
@@ -15,12 +19,12 @@ interface RestockSuggestion {
   reorder_point: number
   suggested_order_quantity: number
   lead_time_days: number | null
-  urgency: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
+  urgency: 'CRITICAL' | 'HIGH' | 'LOW' | 'MEDIUM'
   reason: string
 }
 
 // GET /api/inventory/restock-suggestions
-async function getHandler(request: NextRequest) {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/inventory/restock-suggestions')
     
@@ -33,10 +37,10 @@ async function getHandler(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const suggestions = await RecipeAvailabilityService.getRestockSuggestions(user.id)
+    const suggestions = await RecipeAvailabilityService.getRestockSuggestions(user['id'])
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       suggestionsCount: suggestions.length,
       criticalCount: suggestions.filter((s: RestockSuggestion) => s.urgency === 'CRITICAL').length
     }, 'Restock suggestions fetched')

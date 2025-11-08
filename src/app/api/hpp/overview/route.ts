@@ -1,10 +1,14 @@
-// import { cacheKeys } from '@/lib/cache' // Unused for now
-import { apiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
 
 // Type for alerts with recipe relation
 interface AlertWithRecipe {
@@ -21,7 +25,7 @@ interface AlertWithRecipe {
 }
 
 // GET /api/hpp/overview - Get comprehensive HPP overview data in one request
-export async function GET(_request: NextRequest) {
+async function GET(_request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -35,21 +39,39 @@ export async function GET(_request: NextRequest) {
       )
     }
 
-    const getOverviewData = async () => {
+    const getOverviewData = async (): Promise<{
+      totalRecipes: number
+      recipesWithHpp: number
+      averageHpp: number
+      totalAlerts: number
+      unreadAlerts: number
+      recentAlerts: Array<{
+        id: string
+        recipe_id: string
+        recipe_name: string
+        alert_type: string
+        title: string
+        message: string
+        severity: string
+        is_read: boolean | null
+        new_value: number | null
+        created_at: string | null
+      }>
+    }> => {
       // Parallel queries for better performance
       const [recipesResult, calculationsResult, alertsResult] = await Promise.all([
         // Get recipes count
         supabase
           .from('recipes')
           .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id)
+          .eq('user_id', user['id'])
           .eq('is_active', true),
 
         // Get recipes with their costs
         supabase
           .from('recipes')
           .select('id, cost_per_unit, selling_price, margin_percentage')
-          .eq('user_id', user.id)
+          .eq('user_id', user['id'])
           .eq('is_active', true)
           .gt('cost_per_unit', 0),
 
@@ -70,14 +92,14 @@ export async function GET(_request: NextRequest) {
               name
             )
           `)
-          .eq('user_id', user.id)
+          .eq('user_id', user['id'])
           .order('created_at', { ascending: false })
           .limit(10)
       ])
 
       const totalRecipes = recipesResult.count ?? 0
-      const recipesWithCost = calculationsResult.data ?? []
-      const alertsData: AlertWithRecipe[] = alertsResult.data ?? []
+      const recipesWithCost = calculationsResult['data'] ?? []
+      const alertsData: AlertWithRecipe[] = alertsResult['data'] ?? []
 
       // Calculate average HPP
       const averageHpp = recipesWithCost.length > 0
@@ -91,7 +113,7 @@ export async function GET(_request: NextRequest) {
       const unreadAlerts = alertsData.filter(alert => !alert.is_read).length
 
       const recentAlerts = alertsData.map(alert => ({
-        id: alert.id,
+        id: alert['id'],
         recipe_id: alert.recipe_id,
         recipe_name: alert.recipes?.name ?? 'Unknown Recipe',
         alert_type: alert.alert_type,
@@ -117,18 +139,20 @@ export async function GET(_request: NextRequest) {
     const result = await getOverviewData()
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       totalRecipes: result.totalRecipes,
       recipesWithHpp: result.recipesWithHpp
     }, 'HPP overview retrieved successfully')
 
     return NextResponse.json(result)
 
-  } catch (err: unknown) {
-    apiLogger.error({ error: err }, 'Error fetching HPP overview')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error: unknown) {
+    return handleAPIError(error, 'GET /api/hpp/overview')
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+
+// Export secured handlers
+export { securedGET as GET }

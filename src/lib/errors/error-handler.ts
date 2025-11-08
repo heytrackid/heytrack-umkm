@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { apiLogger } from '../logger';
+
+import { apiLogger } from '@/lib/logger'
+
 import {
   AppError,
   ValidationError,
@@ -29,12 +31,12 @@ export function createErrorResponse(
     return NextResponse.json(
       {
         error: error.message,
-        code: error.code,
-        status: error.status,
+        code: error['code'],
+        status: error['status'],
         details: error.details,
-        timestamp: error.timestamp,
+        timestamp: error['timestamp'],
       },
-      { status: error.status }
+      { status: error['status'] }
     );
   }
 
@@ -45,7 +47,7 @@ export function createErrorResponse(
         error: 'Validation failed',
         code: 'VALIDATION_ERROR',
         status: 400,
-        details: error.issues?.map((issue: { path?: Array<string | number>; message: string }) => ({
+        details: error.issues?.map((issue: { path?: Array<number | string>; message: string }) => ({
           field: issue.path?.join('.'),
           message: issue.message,
         })),
@@ -62,14 +64,14 @@ export function createErrorResponse(
       {
         error: supabaseError.message || 'Database error occurred',
         code: 'DATABASE_ERROR',
-        status: supabaseError.status ?? 500,
+        status: supabaseError['status'] ?? 500,
         details: {
           hint: supabaseError.hint,
           details: supabaseError.details,
         },
         timestamp: new Date().toISOString(),
       },
-      { status: supabaseError.status ?? 500 }
+      { status: supabaseError['status'] ?? 500 }
     );
   }
 
@@ -223,10 +225,10 @@ export function logError(error: unknown, context?: string): void {
   if (error instanceof AppError) {
     apiLogger.error({
       error: error.message,
-      code: error.code,
-      status: error.status,
+      code: error['code'],
+      status: error['status'],
       details: error.details,
-      timestamp: error.timestamp,
+      timestamp: error['timestamp'],
       context,
     });
   } else if (error instanceof Error) {

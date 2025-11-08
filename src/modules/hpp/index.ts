@@ -8,8 +8,6 @@
 // Components
 export { UnifiedHppPage } from './components/UnifiedHppPage'
 export { HppCostTrendsChart } from './components/HppCostTrendsChart'
-// export { HppQuickStats } from './components/HppQuickStats' // File doesn't exist
-// export { RecentSnapshotsTable } from './components/RecentSnapshotsTable' // File doesn't exist
 
 // Services
 // NOTE: Server-only services are NOT exported from this barrel file

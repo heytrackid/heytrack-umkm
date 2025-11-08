@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { 
 
 
@@ -16,9 +17,9 @@ import {
   OrderStatusUpdateSchema
 } from './domains/order'
 
-// ============================================
+// ==================================
 // Base Schemas
-// ============================================
+// ==================================
 
 export const UUIDSchema = z.string().uuid('Invalid UUID format')
 
@@ -35,9 +36,9 @@ export const PhoneSchema = z.string().regex(
   'Invalid phone number format'
 ).optional()
 
-// ============================================
+// ==================================
 // Ingredient Schemas
-// ============================================
+// ==================================
 
 export const CreateIngredientSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
@@ -66,9 +67,9 @@ export const IngredientPurchaseSchema = z.object({
   notes: z.string().max(1000).optional(),
 })
 
-// ============================================
+// ==================================
 // Recipe Schemas
-// ============================================
+// ==================================
 
 export const RecipeIngredientSchema = z.object({
   ingredient_id: UUIDSchema,
@@ -96,9 +97,9 @@ export const UpdateRecipeSchema = CreateRecipeSchema.partial().extend({
   ingredients: z.array(RecipeIngredientSchema).optional(),
 })
 
-// ============================================
+// ==================================
 // Customer Schemas
-// ============================================
+// ==================================
 
 export const CreateCustomerSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
@@ -113,9 +114,9 @@ export const CreateCustomerSchema = z.object({
 
 export const UpdateCustomerSchema = CreateCustomerSchema.partial()
 
-// ============================================
+// ==================================
 // Order Schemas
-// ============================================
+// ==================================
 // Using domain schemas as source of truth for consistency
 
 export const CreateOrderSchema = OrderInsertSchema
@@ -125,9 +126,9 @@ export const UpdateOrderStatusSchema = OrderStatusUpdateSchema
 // Re-export for backward compatibility
 export { OrderItemInsertSchema as OrderItemSchema } from './domains/order'
 
-// ============================================
+// ==================================
 // Operational Cost Schemas
-// ============================================
+// ==================================
 
 export const CreateOperationalCostSchema = z.object({
   category: z.string().min(1).max(100),
@@ -144,9 +145,9 @@ export const CreateOperationalCostSchema = z.object({
 
 export const UpdateOperationalCostSchema = CreateOperationalCostSchema.partial()
 
-// ============================================
+// ==================================
 // Expense Schemas
-// ============================================
+// ==================================
 
 export const CreateExpenseSchema = z.object({
   category: z.string().min(1).max(100),
@@ -167,9 +168,9 @@ export const CreateExpenseSchema = z.object({
 
 export const UpdateExpenseSchema = CreateExpenseSchema.partial()
 
-// ============================================
+// ==================================
 // Production Schemas
-// ============================================
+// ==================================
 
 export const CreateProductionBatchSchema = z.object({
   recipe_id: UUIDSchema,
@@ -184,9 +185,9 @@ export const CreateProductionBatchSchema = z.object({
 
 export const UpdateProductionBatchSchema = CreateProductionBatchSchema.partial()
 
-// ============================================
+// ==================================
 // Supplier Schemas
-// ============================================
+// ==================================
 
 export const CreateSupplierSchema = z.object({
   name: z.string().min(1).max(255),
@@ -205,9 +206,9 @@ export const CreateSupplierSchema = z.object({
 
 export const UpdateSupplierSchema = CreateSupplierSchema.partial()
 
-// ============================================
+// ==================================
 // HPP Automation Schemas
-// ============================================
+// ==================================
 
 export const HPPAutomationSchema = z.object({
   action: z.enum(['ingredient_price_changed', 'operational_cost_changed', 'recipe_hpp_calculate', 'batch_hpp_recalculate', 'all']),
@@ -215,9 +216,9 @@ export const HPPAutomationSchema = z.object({
   force: z.boolean().default(false),
 })
 
-// ============================================
+// ==================================
 // AI Recipe Generation Schemas
-// ============================================
+// ==================================
 
 export const AIRecipeGenerationSchema = z.object({
   name: z.string().min(1, 'Recipe name is required').max(255),
@@ -229,18 +230,18 @@ export const AIRecipeGenerationSchema = z.object({
   complexity: z.enum(['simple', 'moderate', 'complex']).optional(),
 })
 
-// ============================================
+// ==================================
 // Automation Task Schemas
-// ============================================
+// ==================================
 
 export const AutomationTaskSchema = z.object({
   task: z.enum(['reorder', 'notifications', 'engine', 'cleanup', 'all']),
   force: z.boolean().default(false),
 })
 
-// ============================================
+// ==================================
 // Error Logging Schemas
-// ============================================
+// ==================================
 
 export const ErrorLogSchema = z.object({
   message: z.string().min(1),
@@ -251,9 +252,9 @@ export const ErrorLogSchema = z.object({
   timestamp: DateStringSchema.optional(),
 })
 
-// ============================================
+// ==================================
 // Export all schemas
-// ============================================
+// ==================================
 
 export const APISchemas = {
   // Ingredients

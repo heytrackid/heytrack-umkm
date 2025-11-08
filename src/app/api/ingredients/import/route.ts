@@ -1,14 +1,17 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
-import type { Insert } from '@/types/database'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import type { Insert } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
+import { createClient } from '@/utils/supabase/server'
+
 type IngredientInsert = Insert<'ingredients'>
 
-const sanitizeString = (value?: string | null, fallback?: string | null) => {
+const sanitizeString = (value?: string | null, fallback?: string | null): string | null => {
   const trimmed = value?.trim()
   if (trimmed && trimmed.length > 0) {
     return trimmed
@@ -21,7 +24,7 @@ const sanitizeString = (value?: string | null, fallback?: string | null) => {
   return null
 }
 
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authenticate
     const supabase = await createClient()
@@ -30,8 +33,8 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }    // 2. Parse CSV data from request
-    const body = await request.json()
-    const { ingredients } = body as { ingredients: Array<Partial<IngredientInsert>> }
+    const body = await request.json() as { ingredients: Array<Partial<IngredientInsert>> }
+    const { ingredients } = body
 
     if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
       return NextResponse.json(
@@ -83,7 +86,7 @@ export async function POST(request: NextRequest) {
         description: sanitizeString(ing.description),
         category: sanitizeString(ing.category, 'General'),
         supplier: sanitizeString(ing.supplier),
-        user_id: user.id,
+        user_id: user['id'],
         is_active: true
       })
     })
@@ -108,7 +111,7 @@ export async function POST(request: NextRequest) {
       .select()
 
     if (error) {
-      apiLogger.error({ error, userId: user.id }, 'Failed to import ingredients')
+      apiLogger.error({ error, userId: user['id'] }, 'Failed to import ingredients')
       return NextResponse.json(
         { error: 'Gagal menyimpan data bahan baku' },
         { status: 500 }
@@ -116,7 +119,7 @@ export async function POST(request: NextRequest) {
     }
 
     apiLogger.info(
-      { userId: user.id, count: data.length },
+      { userId: user['id'], count: data.length },
       'Ingredients imported successfully'
     )
 
@@ -134,3 +137,5 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export const POST = createSecureHandler(postHandler, 'POST /api/ingredients/import', SecurityPresets.enhanced())

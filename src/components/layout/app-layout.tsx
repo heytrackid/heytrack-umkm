@@ -1,22 +1,5 @@
 'use client'
 
-import { TabNavigation } from '@/components/layout/TabNavigation'
-import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
-import { Button } from '@/components/ui/button'
-import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { NotificationCenter } from '@/components/ui/notification-center'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { useNotifications } from '@/hooks/useNotifications'
-import { useResponsive } from '@/hooks/responsive'
-import { uiLogger } from '@/lib/logger'
-import { useSupabase } from '@/providers/SupabaseProvider'
-import type { User as SupabaseUser } from '@supabase/supabase-js'
 import {
   BarChart3,
   Calculator,
@@ -37,7 +20,27 @@ import {
   Wallet
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { memo, useEffect, useState, useRef, type ReactNode } from 'react'
+import { memo, useEffect, useLayoutEffect, useState, useRef, type ReactNode } from 'react'
+
+import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
+import { TabNavigation } from '@/components/layout/TabNavigation'
+import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
+import { NotificationCenter } from '@/components/ui/notification-center'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { useInstantNavigation } from '@/hooks/useInstantNavigation'
+import { useNotifications } from '@/hooks/useNotifications'
+import { uiLogger } from '@/lib/client-logger'
+import { useAuth } from '@/providers/AuthProvider'
+import { useSupabase } from '@/providers/SupabaseProvider'
+import { useResponsive } from '@/utils/responsive'
+
 
 interface AppLayoutProps {
   children: ReactNode
@@ -60,7 +63,6 @@ const mainTabs = [
     label: 'Manajemen',
     icon: Users,
     items: [
-      { label: 'Kategori Produk', href: '/categories', icon: Package },
       { label: 'Pelanggan', href: '/customers', icon: Users }
     ]
   },
@@ -94,16 +96,31 @@ const mainTabs = [
 const AppLayout = memo(({
   children
 }: AppLayoutProps) => {
-  const [user, setUser] = useState<SupabaseUser | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [mounted, setMounted] = useState(false)
+  const { user, isLoading: loading, isAuthenticated } = useAuth()
+  const { prefetchRoute } = useInstantNavigation()
   const router = useRouter()
-  const mainContentRef = useRef<HTMLDivElement>(null)
+   const mainContentRef = useRef<HTMLDivElement>(null)
+   const [mounted, setMounted] = useState(false)
 
-  // Prevent hydration mismatch
+    // Set mounted state to prevent hydration mismatch
+    useLayoutEffect(() => {
+      const timer = setTimeout(() => {
+        setMounted(true)
+      }, 0)
+      
+      return () => clearTimeout(timer)
+    }, [])
+
+   // Prefetch critical routes on mount for faster navigation
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    if (user) {
+      // Prefetch common routes after user loads
+      const criticalRoutes = ['/dashboard', '/orders', '/customers', '/ingredients']
+      criticalRoutes.forEach(route => {
+        void prefetchRoute(route)
+      })
+    }
+  }, [user, prefetchRoute])
 
   // Responsive detection
   const { isMobile } = useResponsive()
@@ -114,32 +131,7 @@ const AppLayout = memo(({
   // Supabase client
   const { supabase } = useSupabase()
 
-  // Check auth state on mount
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        void setUser(user)
-      } catch (err: unknown) {
-        const error = err as Error
-        uiLogger.error({ error }, 'Error getting user:')
-      } finally {
-        void setLoading(false)
-      }
-    }
 
-    void getUser()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        void setUser(session?.user ?? null)
-        void setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
 
   // Swipe gesture support for mobile navigation
   useEffect(() => {
@@ -157,13 +149,15 @@ const AppLayout = memo(({
     let isHorizontalSwipe = false
 
     const handleTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX
-      startY = e.touches[0].clientY
+      if (e.touches[0]) {
+        startX = e.touches[0].clientX
+        startY = e.touches[0].clientY
+      }
       isHorizontalSwipe = false
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!startX || !startY) {
+      if (!startX || !startY || !e.touches[0]) {
         return
       }
 
@@ -178,7 +172,7 @@ const AppLayout = memo(({
     }
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (!isHorizontalSwipe || !startX) {
+      if (!isHorizontalSwipe || !startX || !e.changedTouches[0]) {
         return
       }
 
@@ -233,7 +227,7 @@ const AppLayout = memo(({
       mainContent.removeEventListener('touchmove', handleTouchMove)
       mainContent.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [isMobile, mounted, router])
+  }, [isMobile, router, mounted])
 
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
@@ -275,9 +269,9 @@ const AppLayout = memo(({
                   const a = document.createElement('a')
                   a.href = url
                   a.download = `heytrack-export-${new Date().toISOString().split('T')[0]}.xlsx`
-                  document.body.appendChild(a)
+                  document['body'].appendChild(a)
                   a.click()
-                  document.body.removeChild(a)
+                  document['body'].removeChild(a)
                   window.URL.revokeObjectURL(url)
                 } else {
                   uiLogger.error('Failed to export data')
@@ -313,7 +307,7 @@ const AppLayout = memo(({
                 <DropdownMenuItem
                   onClick={async () => {
                     await supabase.auth.signOut()
-                    void router.push('/auth/login')
+                    router.push('/auth/login')
                   }}
                   className="text-red-600 focus:text-red-600"
                 >
@@ -323,7 +317,7 @@ const AppLayout = memo(({
             </DropdownMenu>
           )}
 
-          {!loading && !user && (
+          {!loading && !user && !isAuthenticated && (
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" onClick={() => router.push('/auth/login')}>
                 Masuk
@@ -346,7 +340,7 @@ const AppLayout = memo(({
        {/* Main Content */}
        <main
          ref={mainContentRef}
-         className={`flex-1 overflow-auto bg-background ${isMobile ? 'pb-20' : ''}`}
+          className={`flex-1 overflow-auto bg-background ${isMobile ? 'pb-[calc(56px+env(safe-area-inset-bottom))]' : ''}`}
        >
          <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-8">
            {children}

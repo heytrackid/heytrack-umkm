@@ -24,7 +24,7 @@ export interface OrderPayment {
   currency: string
   payment_method: PaymentMethod
   payment_date: string
-  reference_number?: string // Bank transfer reference, etc.
+  reference_number?: string | null // Bank transfer reference, etc.
   notes?: string
   created_at: string
 }
@@ -42,10 +42,10 @@ export interface OrderPayment {
 //   | 'cancelled'
 //   | 'refunded'
 
-export type OrderPriority = 
+export type OrderPriority =
+  | 'high'
   | 'low'
   | 'normal'
-  | 'high'
   | 'urgent'
 
 // export type PaymentMethod = 
@@ -95,7 +95,7 @@ export interface CreateOrderItemData {
 
 export interface UpdateOrderData extends Partial<CreateOrderData> {
   status?: OrderStatus
-  payment_status?: 'unpaid' | 'partial' | 'paid' | 'refunded'
+  payment_status?: 'paid' | 'partial' | 'refunded' | 'unpaid'
 }
 
 // Order summary for dashboards with multi-currency support
@@ -121,7 +121,7 @@ export interface OrderFilters {
   priority?: OrderPriority[]
   customer_id?: string
   currency?: string[]
-  payment_status?: Array<'unpaid' | 'partial' | 'paid' | 'refunded'>
+  payment_status?: Array<'paid' | 'partial' | 'refunded' | 'unpaid'>
   payment_method?: PaymentMethod[]
   date_from?: string
   date_to?: string
@@ -210,9 +210,9 @@ export interface InvoiceData {
   totals_breakdown: OrderTotalsBreakdown
   payment_terms: string
   due_date: string
-  invoice_number: string
-  notes?: string
-}
+   invoice_number: string
+   notes?: string | null | undefined
+ }
 
 // Order validation errors
 export interface OrderValidationError {
@@ -222,7 +222,7 @@ export interface OrderValidationError {
 }
 
 // Order export formats
-export type OrderExportFormat = 'csv' | 'excel' | 'pdf' | 'json'
+export type OrderExportFormat = 'csv' | 'excel' | 'json' | 'pdf'
 
 export interface OrderExportOptions {
   format: OrderExportFormat

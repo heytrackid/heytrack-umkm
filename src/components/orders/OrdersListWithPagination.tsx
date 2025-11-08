@@ -1,5 +1,6 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
+import { CheckCircle, Clock, Package, Plus, Search, XCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 
@@ -15,13 +16,15 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
-import { VirtualizedOrderCards } from './VirtualizedOrderCards'
 import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
+
+
 import type { PaginatedResponse } from '@/lib/validations/pagination'
 import type { Row, OrderStatus } from '@/types/database'
-import { CheckCircle, Clock, Package, Plus, Search, XCircle } from 'lucide-react'
+
+import { VirtualizedOrderCards } from './VirtualizedOrderCards'
 
 type Order = Row<'orders'>
 
@@ -35,7 +38,7 @@ interface OrderWithItems extends Order {
     }>
 }
 
-export const OrdersListWithPagination = () => {
+export const OrdersListWithPagination = (): JSX.Element => {
     const router = useRouter()
     const { toast } = useToast()
     const { formatCurrency } = useSettings()
@@ -80,9 +83,9 @@ export const OrdersListWithPagination = () => {
                 throw new Error('Failed to fetch orders')
             }
 
-            const result: PaginatedResponse<OrderWithItems> = await response.json()
+            const result = await response.json() as PaginatedResponse<OrderWithItems>
 
-            setOrders(result.data)
+            setOrders(result['data'])
             setTotalItems(result.meta.total)
         } catch (_error) {
             toast({
@@ -114,21 +117,21 @@ export const OrdersListWithPagination = () => {
 
     const getStatusBadge = (status: OrderStatus) => {
         const statusConfig: Record<OrderStatus, { label: string; icon: React.ComponentType<{ className?: string }>; className: string }> = {
-            PENDING: { label: 'Pending', icon: Clock, className: 'bg-gray-100 text-gray-700' },
-            CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle, className: 'bg-gray-100 text-gray-700' },
-            IN_PROGRESS: { label: 'Sedang Diproses', icon: Package, className: 'bg-gray-100 text-gray-700' },
-            READY: { label: 'Siap', icon: CheckCircle, className: 'bg-gray-100 text-gray-700' },
-            DELIVERED: { label: 'Terkirim', icon: CheckCircle, className: 'bg-gray-100 text-gray-700' },
-            CANCELLED: { label: 'Dibatalkan', icon: XCircle, className: 'bg-gray-100 text-gray-700' },
+            PENDING: { label: 'Pending', icon: Clock as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
+            CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
+            IN_PROGRESS: { label: 'Sedang Diproses', icon: Package as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
+            READY: { label: 'Siap', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
+            DELIVERED: { label: 'Terkirim', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
+            CANCELLED: { label: 'Dibatalkan', icon: XCircle as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
         }
 
-        const config = statusConfig[status] || statusConfig.PENDING
-        const Icon = config.icon
+        const _config = statusConfig[status] || statusConfig.PENDING
+        const Icon = _config.icon
 
         return (
-            <Badge className={config.className}>
+            <Badge className={_config.className}>
                 <Icon className="h-3 w-3 mr-1" />
-                {config.label}
+                {_config.label}
             </Badge>
         )
     }
@@ -186,7 +189,7 @@ export const OrdersListWithPagination = () => {
             {/* Orders List */}
             {loading ? (
                 <div className="space-y-3">
-                    {[...Array(5)].map((_, i) => (
+                    {Array.from({ length: 5 }, (_, i) => (
                         <Card key={i}>
                             <CardContent className="p-6">
                                 <div className="space-y-3">
@@ -220,19 +223,19 @@ export const OrdersListWithPagination = () => {
                  <div className="space-y-3">
                      {orders.map((order) => (
                          <Card
-                             key={order.id}
+                             key={order['id']}
                              className="hover:shadow-md transition-shadow cursor-pointer"
-                             onClick={() => router.push(`/orders/${order.id}`)}
+                             onClick={() => router.push(`/orders/${order['id']}`)}
                          >
                              <CardContent className="p-6">
                                  <div className="flex flex-col sm:flex-row justify-between gap-4">
                                      <div className="flex-1 space-y-2">
                                          <div className="flex items-center gap-3">
-                                             <h3 className="font-semibold text-lg">#{order.order_no}</h3>
-                                             {getStatusBadge(order.status ?? 'PENDING')}
+                                             <h3 className="font-semibold text-lg">#{order['order_no']}</h3>
+                                             {getStatusBadge(order['status'] ?? 'PENDING')}
                                          </div>
                                          <div className="text-sm text-muted-foreground space-y-1">
-                                             <p>Pelanggan: {order.customer_name}</p>
+                                             <p>Pelanggan: {order['customer_name']}</p>
                                              <p>Tanggal: {order.order_date ? new Date(order.order_date).toLocaleDateString('id-ID') : 'No date set'}</p>
                                              {order.delivery_date && (
                                                  <p>Pengiriman: {new Date(order.delivery_date).toLocaleDateString('id-ID')}</p>

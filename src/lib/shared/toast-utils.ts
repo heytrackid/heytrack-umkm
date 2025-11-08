@@ -143,7 +143,7 @@ export function showWarningToast(
 // CRUD operation helpers
 export function showCrudSuccessToast(
   toast: ReturnType<typeof useToast>['toast'],
-  operation: 'create' | 'update' | 'delete',
+  operation: 'create' | 'delete' | 'update',
   entityName: string
 ) {
   const operationMap = {
@@ -161,7 +161,7 @@ export function showCrudSuccessToast(
 
 export function showCrudErrorToast(
   toast: ReturnType<typeof useToast>['toast'],
-  operation: 'create' | 'update' | 'delete',
+  operation: 'create' | 'delete' | 'update',
   entityName: string
 ) {
   const operationMap = {
@@ -246,15 +246,15 @@ export async function withToastFeedback<T>(
 
     onSuccess?.(result)
     return result
-  } catch (err) {
+  } catch (error) {
     // Dismiss loading toast
     loadingToast.dismiss()
 
     // Show error toast
-    const errorMsg = err instanceof Error ? err.message : errorMessage
+    const errorMsg = error instanceof Error ? error.message : errorMessage
     showErrorToast(toast, 'Error', errorMsg)
 
-    onError?.(err as Error)
+    onError?.(error as Error)
     return null
   }
 }

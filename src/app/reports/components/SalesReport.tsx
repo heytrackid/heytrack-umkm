@@ -1,8 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
-import type { Row } from '@/types/database'
 import { ShoppingCart, DollarSign, CheckCircle, Clock } from 'lucide-react'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import type { Row } from '@/types/database'
 
 // Sales Report Component
 // Handles sales data filtering, calculations, and display
@@ -12,8 +14,8 @@ type Order = Row<'orders'>
 
 interface SalesReportProps {
   dateRange: {
-    start: string
-    end: string
+    start: string | undefined
+    end: string | undefined
   }
 }
 
@@ -23,8 +25,9 @@ const SalesReport = ({ dateRange }: SalesReportProps) => {
 
   // Calculate sales report
   const salesData = (orders ?? []).filter((order): order is Order & { created_at: string } => {
-    if (!order.created_at) { return false }
+    if (!order.created_at || !dateRange.start || !dateRange.end) { return false }
     const orderDate = new Date(order.created_at).toISOString().split('T')[0]
+    if (!orderDate) {return false}
     return orderDate >= dateRange.start && orderDate <= dateRange.end
   })
 
@@ -33,11 +36,11 @@ const SalesReport = ({ dateRange }: SalesReportProps) => {
       stats.totalOrders += 1
       stats.totalRevenue += order.total_amount ?? 0
 
-      if (order.status === 'DELIVERED') {
+      if (order['status'] === 'DELIVERED') {
         stats.completedOrders += 1
       }
 
-      if (order.status === 'PENDING' || order.status === 'CONFIRMED') {
+      if (order['status'] === 'PENDING' || order['status'] === 'CONFIRMED') {
         stats.pendingOrders += 1
       }
 
@@ -119,7 +122,7 @@ const SalesReport = ({ dateRange }: SalesReportProps) => {
             {salesData.length > 0 ? (
               salesData.slice(0, 10).map((order) => (
                 <div 
-                  key={order.id} 
+                  key={order['id']} 
                   className="flex justify-between items-center p-4 border rounded-lg hover:bg-muted/20 transition-colors"
                 >
                   <div className="flex items-center gap-3">
@@ -127,18 +130,18 @@ const SalesReport = ({ dateRange }: SalesReportProps) => {
                       <ShoppingCart className="h-4 w-4 text-blue-600" />
                     </div>
                     <div>
-                      <p className="font-medium">{order.order_no}</p>
+                      <p className="font-medium">{order['order_no']}</p>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <span>{new Date(order.created_at).toLocaleDateString('id-ID')}</span>
                         <span>•</span>
-                        <span className="capitalize">{order.status?.toLowerCase()}</span>
+                        <span className="capitalize">{order['status']?.toLowerCase()}</span>
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">{formatCurrency(order.total_amount ?? 0)}</p>
                     <span className="text-xs text-muted-foreground">
-                       {order.customer_name ?? 'Pelanggan'}
+                       {order['customer_name'] ?? 'Pelanggan'}
                     </span>
                   </div>
                 </div>

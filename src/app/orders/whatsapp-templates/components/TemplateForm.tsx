@@ -1,17 +1,18 @@
 'use client'
 
-import { useState, useEffect, type FormEvent } from 'react'
+import { Info, Copy, Check } from 'lucide-react'
+import { useState, useLayoutEffect, type FormEvent } from 'react'
+
+import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, type WhatsAppTemplate, type TemplateFormData } from '@/app/orders/whatsapp-templates/components/types'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from '@/components/ui/accordion'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { uiLogger } from '@/lib/client-logger'
-import { Textarea } from '@/components/ui/textarea'
-import { Info, Copy, Check } from 'lucide-react'
-import { TEMPLATE_CATEGORIES, AVAILABLE_VARIABLES, DEFAULT_TEMPLATES, type WhatsAppTemplate, type TemplateFormData } from './types'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, } from '@/components/ui/accordion'
+import { Textarea } from '@/components/ui/textarea'
+import { uiLogger } from '@/lib/client-logger'
 
 interface TemplateFormProps {
     showDialog: boolean
@@ -26,25 +27,12 @@ const TemplateForm = ({
     editingTemplate,
     onSuccess
 }: TemplateFormProps) => {
-    const [formData, setFormData] = useState<TemplateFormData>({
-        name: '',
-        description: '',
-        category: 'order_confirmation',
-        template_content: '',
-        variables: [],
-        is_active: true,
-        is_default: false
-    })
-    const [copiedVariable, setCopiedVariable] = useState<string | null>(null)
-
-    useEffect(() => {
+    const [formData, setFormData] = useState<TemplateFormData>(() => {
         if (editingTemplate) {
-            // Convert variables to array format if it's an object
             const vars = Array.isArray(editingTemplate.variables)
                 ? editingTemplate.variables
                 : Object.keys(editingTemplate.variables ?? {})
-
-            setFormData({
+            return {
                 name: editingTemplate.name,
                 description: editingTemplate.description ?? '',
                 category: editingTemplate.category,
@@ -52,11 +40,58 @@ const TemplateForm = ({
                 variables: vars,
                 is_active: editingTemplate.is_active ?? true,
                 is_default: editingTemplate.is_default ?? false
-            })
-        } else {
-            resetForm()
+            }
         }
+        return {
+            name: '',
+            description: '',
+            category: 'order_confirmation',
+            template_content: '',
+            variables: [],
+            is_active: true,
+            is_default: false
+        }
+    })
+    const [copiedVariable, setCopiedVariable] = useState<string | null>(null)
+
+    const resetForm = () => {
+        setFormData({
+            name: '',
+            description: '',
+            category: 'order_confirmation',
+            template_content: '',
+            variables: [],
+            is_active: true,
+            is_default: false
+        })
+    }
+
+    // Update form data when editingTemplate changes
+    useLayoutEffect(() => {
+        const newFormData = editingTemplate ? {
+            name: editingTemplate.name,
+            description: editingTemplate.description ?? '',
+            category: editingTemplate.category,
+            template_content: editingTemplate.template_content,
+            variables: Array.isArray(editingTemplate.variables)
+                ? editingTemplate.variables
+                : Object.keys(editingTemplate.variables ?? {}),
+            is_active: editingTemplate.is_active ?? true,
+            is_default: editingTemplate.is_default ?? false
+        } : {
+            name: '',
+            description: '',
+            category: 'order_confirmation',
+            template_content: '',
+            variables: [],
+            is_active: true,
+            is_default: false
+        }
+        
+        setTimeout(() => setFormData(newFormData), 0)
     }, [editingTemplate])
+
+    // Form data is initialized in useState above
 
     const handleInputChange = <K extends keyof TemplateFormData>(field: K, value: TemplateFormData[K]) => {
         setFormData(prev => ({ ...prev, [field]: value }))
@@ -68,8 +103,8 @@ const TemplateForm = ({
         let match
 
         while ((match = variableRegex.exec(content)) !== null) {
-            const variable = match[1].trim()
-            variables.add(variable)
+            const variable = match[1]?.trim()
+            if (variable) {variables.add(variable)}
         }
 
         return Array.from(variables)
@@ -108,7 +143,7 @@ const TemplateForm = ({
             }
 
             const url = editingTemplate
-                ? `/api/whatsapp-templates/${editingTemplate.id}`
+                ? `/api/whatsapp-templates/${editingTemplate['id']}`
                 : '/api/whatsapp-templates'
 
             const method = editingTemplate ? 'PUT' : 'POST'
@@ -129,18 +164,6 @@ const TemplateForm = ({
         } catch (error: unknown) {
             uiLogger.error({ error: String(error) }, 'Error saving template')
         }
-    }
-
-    const resetForm = () => {
-        setFormData({
-            name: '',
-            description: '',
-            category: 'order_confirmation',
-            template_content: '',
-            variables: [],
-            is_active: true,
-            is_default: false
-        })
     }
 
     return (

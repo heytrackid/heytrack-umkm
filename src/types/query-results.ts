@@ -77,7 +77,7 @@ export function isOrderWithItems(data: unknown): data is OrderWithItems {
   if (!data || typeof data !== 'object') {return false}
   const order = data as OrderWithItems
   return (
-    typeof order.id === 'string' &&
+    typeof order['id'] === 'string' &&
     Array.isArray(order.order_items)
   )
 }
@@ -86,7 +86,7 @@ export function isRecipeWithIngredients(data: unknown): data is RecipeWithIngred
   if (!data || typeof data !== 'object') {return false}
   const recipe = data as RecipeWithIngredients
   return (
-    typeof recipe.id === 'string' &&
+    typeof recipe['id'] === 'string' &&
     typeof recipe.name === 'string' &&
     Array.isArray(recipe.recipe_ingredients)
   )
@@ -96,7 +96,7 @@ export function isOrderWithRelations(data: unknown): data is OrderWithRelations 
   if (!data || typeof data !== 'object') {return false}
   const order = data as OrderWithRelations
   return (
-    typeof order.id === 'string' &&
+    typeof order['id'] === 'string' &&
     Array.isArray(order.order_items) &&
     (order.customer === null || typeof order.customer === 'object')
   )

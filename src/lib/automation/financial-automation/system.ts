@@ -1,16 +1,3 @@
-import { MetricsCalculator } from './metrics-calculator'
-import { TrendAnalyzer } from './trend-analyzer'
-import { AlertGenerator } from './alert-generator'
-import { RecommendationEngine } from './recommendation-engine'
-import { BreakEvenAnalyzer } from './break-even-analyzer'
-import { ProjectionEngine } from './projection-engine'
-import { PricingOptimizer } from './pricing-optimizer'
-
-/**
- * Financial Automation System Orchestrator
- * Main coordinator for financial automation functionality
- */
-
 import type {
   AutomationConfig,
   SaleData,
@@ -18,6 +5,20 @@ import type {
   Ingredient,
   FinancialAnalysis
 } from '@/lib/automation/types'
+
+import { AlertGenerator } from './alert-generator'
+import { BreakEvenAnalyzer } from './break-even-analyzer'
+import { MetricsCalculator } from './metrics-calculator'
+import { PricingOptimizer } from './pricing-optimizer'
+import { ProjectionEngine } from './projection-engine'
+import { RecommendationEngine } from './recommendation-engine'
+import { TrendAnalyzer } from './trend-analyzer'
+
+/**
+ * Financial Automation System Orchestrator
+ * Main coordinator for financial automation functionality
+ */
+
 import type {
   BreakEvenResult,
   ROIResult,
@@ -27,7 +28,7 @@ import type {
 } from './types'
 
 export class FinancialAutomation {
-  constructor(private config: AutomationConfig) {}
+  constructor(private readonly config: AutomationConfig) {}
 
   /**
    * 💰 FINANCIAL AUTOMATION: Smart Financial Insights
@@ -90,7 +91,7 @@ export class FinancialAutomation {
     let npv = -initialInvestment
 
     for (let year = 1; year <= timeHorizonYears; year++) {
-      npv += expectedAnnualBenefit / Math.pow(1 + discountRate, year)
+      npv += expectedAnnualBenefit / (1 + discountRate)**year
     }
 
     const paybackPeriod = initialInvestment / expectedAnnualBenefit

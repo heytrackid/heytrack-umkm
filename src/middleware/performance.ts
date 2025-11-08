@@ -1,7 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { PerformanceMonitor } from '@/utils/performance/performance-monitoring'
-import { Cache } from '@/utils/performance/performance'
 import { apiLogger } from '@/lib/logger'
+import { Cache, PerformanceMonitor } from '@/lib/performance'
+
+import type { NextApiRequest, NextApiResponse } from 'next'
+
+
 
 interface PerformanceApiRequest extends NextApiRequest {
   performanceStart?: number
@@ -12,7 +14,7 @@ export const performanceMiddleware = (
   req: PerformanceApiRequest,
   res: NextApiResponse,
   next?: () => void
-) => {
+): void => {
   req.performanceStart = Date.now()
   
   // Continue with the request
@@ -65,8 +67,8 @@ export const withCache = async <T>(
     return cached
   }
   
-  const data = await fetcher()
-  cache.set(cacheKey, data, ttl)
-  
-  return data
+   const data = await fetcher()
+   cache.set(cacheKey, data, ttl)
+
+   return data
 }

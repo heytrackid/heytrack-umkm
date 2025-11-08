@@ -1,5 +1,9 @@
+'use client'
+
 import dynamic from 'next/dynamic'
 import React, { type ComponentType } from 'react'
+
+import { createClientLogger } from '@/lib/client-logger'
 
 /**
  * Route-based code splitting utility
@@ -132,13 +136,18 @@ export function createSmartRouteLoader(
 
   // Wrap with performance monitoring
   const SmartComponent = (props: Record<string, unknown>) => {
-    const startTime = performance.now()
+    const startTimeRef = React.useRef<number>(0)
 
     React.useEffect(() => {
-      const loadTime = performance.now() - startTime
-      // eslint-disable-next-line no-console
-      console.log(`🚀 ${routeName} loaded in ${loadTime.toFixed(2)}ms`)
-    }, [startTime])
+      // Initialize start time when component mounts
+      startTimeRef.current = performance.now()
+    }, [])
+
+    React.useEffect(() => {
+      const loadTime = performance.now() - startTimeRef.current
+      const logger = createClientLogger('RouteLoader')
+      logger.info(`🚀 ${routeName} loaded in ${loadTime.toFixed(2)}ms`)
+    }, [])
 
     return <LazyComponent {...props} />
   }

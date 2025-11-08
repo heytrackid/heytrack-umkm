@@ -1,5 +1,5 @@
-import type { NextRequest } from 'next/server'
 import type { PaginationParams, PaginationState } from './types'
+import type { NextRequest } from 'next/server'
 
 /**
  * Pagination Module

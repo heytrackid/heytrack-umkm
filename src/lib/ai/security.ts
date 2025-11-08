@@ -42,7 +42,7 @@ export class AISecurity {
   /**
    * Rate limiting for AI requests
    */
-  private static requestCounts = new Map<string, { count: number; resetTime: number }>()
+  private static readonly requestCounts = new Map<string, { count: number; resetTime: number }>()
 
   static checkRateLimit(identifier: string, maxRequests = 10, windowMs = 60000): boolean {
     const now = Date.now()

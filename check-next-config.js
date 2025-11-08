@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint-disable no-undef */
+ 
 /**
  * Script to inspect the Next.js ESLint plugin configuration
  */

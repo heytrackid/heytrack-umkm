@@ -1,9 +1,10 @@
 'use client'
 
-import { Component, type ReactNode, type ErrorInfo, type ComponentType } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { Component, type ReactNode, type ErrorInfo, type ComponentType } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ErrorBoundary')
@@ -126,7 +127,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <p className="text-muted-foreground">
-                  We're sorry, but something unexpected happened. Our team has been notified and is working on a fix.
+                  We&apos;re sorry, but something unexpected happened. Our team has been notified and is working on a fix.
                 </p>
 
                 {this.props.showErrorDetails && this.state.error && (
@@ -181,17 +182,21 @@ export function withErrorBoundary<P extends object>(
   Component: ComponentType<P>,
   errorBoundaryProps?: Omit<ErrorBoundaryProps, 'children'>
 ) {
-  return (props: P) => (
+  const WrappedComponent = (props: P) => (
     <ErrorBoundary {...errorBoundaryProps}>
       <Component {...props} />
     </ErrorBoundary>
   )
+
+  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`
+
+  return WrappedComponent
 }
 
 /**
  * Hook-based error boundary for functional components
  */
-export function useErrorHandler() {
+export function useErrorHandler(): (error: Error, errorInfo?: ErrorInfo) => void {
   return (error: Error, errorInfo?: ErrorInfo) => {
     logger.error({
       error: error.toString(),

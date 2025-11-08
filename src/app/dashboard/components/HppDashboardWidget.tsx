@@ -1,5 +1,9 @@
 'use client'
 
+import { AlertTriangle, Calculator, DollarSign, Target, TrendingDown, TrendingUp } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,9 +11,6 @@ import { QuickActionsSkeleton, StatsCardSkeleton } from '@/components/ui/skeleto
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { createClientLogger } from '@/lib/client-logger'
-import { AlertTriangle, Calculator, DollarSign, Target, TrendingDown, TrendingUp } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 
 const logger = createClientLogger('HppDashboardWidget') 
 
@@ -31,23 +32,18 @@ interface HppDashboardData {
     recipe_id: string
     recipe_name: string
     change_percentage: number
-    direction: 'increase' | 'decrease'
+    direction: 'decrease' | 'increase'
   }>
 }
 
-const HppDashboardWidget = () => {
+const HppDashboardWidget = (): JSX.Element | null => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const router = useRouter()
   const [data, setData] = useState<HppDashboardData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    void loadHppData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const loadHppData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
 
@@ -60,7 +56,7 @@ const HppDashboardWidget = () => {
         throw new Error('Failed to fetch HPP dashboard data')
       }
 
-      const realData: HppDashboardData = await response.json()
+      const realData = await response.json() as HppDashboardData
       setData(realData)
     } catch (error: unknown) {
       logger.error({ error }, 'Failed to load HPP dashboard data')
@@ -72,7 +68,11 @@ const HppDashboardWidget = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    void fetchData()
+  }, [fetchData])
 
   if (loading) {
     return (
@@ -158,7 +158,7 @@ const HppDashboardWidget = () => {
           </div>
           <div className="space-y-2">
             {data.topRecipes.map((recipe) => (
-              <div key={recipe.id} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+              <div key={recipe['id']} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                 <div>
                   <div className="font-medium">{recipe.name}</div>
                   <div className="text-sm text-muted-foreground">
@@ -186,7 +186,7 @@ const HppDashboardWidget = () => {
               {data.recentChanges.map((change, index) => (
                 <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                   <div>
-                    <div className="font-medium">{change.recipe_name}</div>
+                    <div className="font-medium">{change['recipe_name']}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     {change.direction === 'increase' ? (

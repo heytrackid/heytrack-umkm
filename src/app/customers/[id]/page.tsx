@@ -1,11 +1,12 @@
 'use client'
 
+import { ArrowLeft, Edit, Mail, MapPin, Phone, ShoppingCart, Trash2, TrendingUp, User } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { use, useState } from 'react'
+import { toast } from 'react-hot-toast'
+
 import AppLayout from '@/components/layout/app-layout'
-import type { Order } from '@/types'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -14,11 +15,16 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage
 } from '@/components/ui/breadcrumb'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/supabase'
+import { useCurrency } from '@/hooks/useCurrency'
 
 // Helper function to get status variant
-const getStatusVariant = (status: string) => {
+const getStatusVariant = (status: string): "default" | "destructive" | "secondary" => {
   switch (status) {
     case 'DELIVERED':
       return 'default'
@@ -28,14 +34,10 @@ const getStatusVariant = (status: string) => {
       return 'secondary'
   }
 }
-import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/supabase'
-import { ArrowLeft, Edit, Mail, MapPin, Phone, ShoppingCart, Trash2, TrendingUp, User } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { use, useState } from 'react'
-import { toast } from 'react-hot-toast'
 
-const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
+import type { Order } from '@/types'
+
+const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JSX.Element => {
   const { id } = use(params)
   const router = useRouter()
   const { formatCurrency } = useCurrency()
@@ -48,7 +50,7 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }) => 
   const customer = customers?.[0]
 
   // CRUD operations
-  const { delete: deleteCustomer } = useSupabaseCRUD('customers')
+  const { remove: deleteCustomer } = useSupabaseCRUD('customers')
 
   // Fetch customer orders
   const { data: orders, loading: ordersLoading } = useSupabaseQuery('orders', {
@@ -56,13 +58,14 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }) => 
     orderBy: { column: 'created_at', ascending: false }
   })
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<void> => {
     try {
       await deleteCustomer(id)
       toast.success('Pelanggan berhasil dihapus')
-      void router.push('/customers')
-    } catch (_err) {
-      toast.error('Gagal menghapus pelanggan')
+      router.push('/customers')
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Gagal menghapus pelanggan'
+      toast.error(errorMessage)
     }
   }
 
@@ -245,20 +248,20 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }) => 
                   <div className="space-y-3">
                     {orders.map((order: Order) => (
                       <div
-                        key={order.id}
+                        key={order['id']}
                         className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                        onClick={() => router.push(`/orders/${order.id}`)}
+                        onClick={() => router.push(`/orders/${order['id']}`)}
                       >
                         <div>
-                          <p className="font-medium">{order.order_no}</p>
+                          <p className="font-medium">{order['order_no']}</p>
                           <p className="text-sm text-muted-foreground">
                             {new Date(order.created_at ?? '').toLocaleDateString('id-ID')}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="font-semibold">{formatCurrency(order.total_amount ?? 0)}</p>
-                          <Badge variant={getStatusVariant(order.status ?? 'PENDING')}>
-                            {order.status ?? 'PENDING'}
+                          <Badge variant={getStatusVariant(order['status'] ?? 'PENDING')}>
+                            {order['status'] ?? 'PENDING'}
                           </Badge>
                         </div>
                       </div>

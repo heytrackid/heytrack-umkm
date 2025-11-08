@@ -13,7 +13,7 @@ export interface IngredientSuggestion {
   name: string
   typical_quantity: number
   unit: string
-  priority: 'essential' | 'recommended' | 'optional'
+  priority: 'essential' | 'optional' | 'recommended'
 }
 
 /**
@@ -140,7 +140,7 @@ export const matchIngredientsWithTemplate = (
     )
 
     if (found) {
-      matched.push(found.id)
+      matched.push(found['id'])
     }
   })
 
@@ -150,7 +150,7 @@ export const matchIngredientsWithTemplate = (
 /**
  * Get recipe difficulty color
  */
-export const getDifficultyColor = (difficulty: 'easy' | 'medium' | 'hard'): string => {
+export const getDifficultyColor = (difficulty: 'easy' | 'hard' | 'medium'): string => {
   const colors = {
     easy: 'text-green-600 bg-green-50 dark:bg-green-900/20',
     medium: 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20',
@@ -202,7 +202,7 @@ export const saveDraft = (draft: {
     localStorage.setItem('recipe-generator-draft', JSON.stringify(draftData))
   } catch (error: unknown) {
     // Silent fail - draft saving is non-critical
-    if (process.env.NODE_ENV === 'development') {
+    if (process['env'].NODE_ENV === 'development') {
       logger.error({ error }, 'Failed to save draft')
     }
   }
@@ -226,12 +226,12 @@ export const loadDraft = (): {
     const draft = JSON.parse(saved)
 
     // Check if draft is recent (< 24 hours)
-    const isRecent = Date.now() - draft.timestamp < 24 * 60 * 60 * 1000
+    const isRecent = Date.now() - draft['timestamp'] < 24 * 60 * 60 * 1000
 
     return isRecent ? draft : null
   } catch (error: unknown) {
     // Silent fail - draft loading is non-critical
-    if (process.env.NODE_ENV === 'development') {
+    if (process['env'].NODE_ENV === 'development') {
       logger.error({ error }, 'Failed to load draft')
     }
     return null
@@ -246,7 +246,7 @@ export const clearDraft = () => {
     localStorage.removeItem('recipe-generator-draft')
   } catch (error: unknown) {
     // Silent fail - draft clearing is non-critical
-    if (process.env.NODE_ENV === 'development') {
+    if (process['env'].NODE_ENV === 'development') {
       logger.error({ error }, 'Failed to clear draft')
     }
   }

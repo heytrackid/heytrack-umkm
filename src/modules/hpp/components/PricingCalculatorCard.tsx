@@ -1,18 +1,19 @@
 'use client'
 
-import { useState, useEffect, type ComponentType } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Slider } from '@/components/ui/slider'
-import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Loader2, CheckCircle, TrendingUp, TrendingDown, DollarSign, Lightbulb } from 'lucide-react'
+import { useState, useEffect, useRef, type ComponentType } from 'react'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Slider } from '@/components/ui/slider'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 
 
-type MarginLevel = 'high' | 'medium' | 'low'
+type MarginLevel = 'high' | 'low' | 'medium'
 
 const getMarginLevel = (margin: number): MarginLevel => {
     if (margin >= 50) { return 'high' }
@@ -20,7 +21,7 @@ const getMarginLevel = (margin: number): MarginLevel => {
     return 'low'
 }
 
-const marginVariantMap: Record<MarginLevel, 'default' | 'secondary' | 'destructive'> = {
+const marginVariantMap: Record<MarginLevel, 'default' | 'destructive' | 'secondary'> = {
     high: 'default',
     medium: 'secondary',
     low: 'destructive',
@@ -57,12 +58,20 @@ export const PricingCalculatorCard = ({
     const [mode, setMode] = useState<'auto' | 'manual'>('auto')
     const [manualPrice, setManualPrice] = useState(suggestedPrice)
 
-    // Update manual price when suggested price changes (only in auto mode)
+    // Update manual price when mode changes to auto
+    const prevModeRef = useRef(mode)
+    const suggestedPriceRef = useRef(suggestedPrice)
+    
     useEffect(() => {
-        if (mode === 'auto') {
-            setManualPrice(suggestedPrice)
+        suggestedPriceRef.current = suggestedPrice
+    }, [suggestedPrice])
+    
+    useEffect(() => {
+        if (prevModeRef.current !== mode && mode === 'auto') { // mode changed to auto
+            setManualPrice(suggestedPriceRef.current)
         }
-    }, [suggestedPrice, mode])
+        prevModeRef.current = mode
+    }, [mode])
 
     const displayPrice = mode === 'manual' ? manualPrice : suggestedPrice
     const profit = displayPrice - totalCost
@@ -261,7 +270,7 @@ export const PricingCalculatorCard = ({
                 <Button
                     onClick={() => onSavePrice(displayPrice, displayMargin)}
                     className="w-full"
-                    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+                     
                     disabled={Boolean(isSaving || displayPrice === currentPrice || (mode === 'manual' && manualPrice < totalCost))}
                 >
                     {actionContent}

@@ -1,23 +1,27 @@
- import { createClient } from '@/utils/supabase/server'
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
  import { type NextRequest, NextResponse } from 'next/server'
- import { apiLogger, logError } from '@/lib/logger'
  import { z } from 'zod'
+
+ import { apiLogger, logError } from '@/lib/logger'
  import { withSecurity, SecurityPresets } from '@/utils/security'
+ import { createClient } from '@/utils/supabase/server'
 
 // ✅ Force Node.js runtime
-export const runtime = 'nodejs'
 
 const LoginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 })
 
-async function loginPOST(request: NextRequest) {
+async function loginPOST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/auth/login - Request received')
 
-    const body = await request.json()
-    const validation = LoginSchema.safeParse(body)
+    const _body = await request.json() as { email: string; password: string }
+    const validation = LoginSchema.safeParse(_body)
 
     if (!validation.success) {
       return NextResponse.json(

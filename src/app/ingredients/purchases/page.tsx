@@ -4,6 +4,6 @@ import IngredientPurchasesLayout from './components/IngredientPurchasesLayout'
 // This page now uses lazy-loaded components for better performance
 
 
-const IngredientPurchasesPage = () => <IngredientPurchasesLayout />
+const IngredientPurchasesPage = (): JSX.Element => <IngredientPurchasesLayout />
 
 export default IngredientPurchasesPage

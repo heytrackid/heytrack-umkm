@@ -1,12 +1,12 @@
 'use client'
 
 import AppLayout from '@/components/layout/app-layout'
-import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
-import { UnifiedHppPage } from '@/modules/hpp'
-import { TooltipHelper, UMKM_TOOLTIPS } from '@/components/ui/tooltip-helper'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
+import { TooltipHelper, UMKM_TOOLTIPS } from '@/components/ui/tooltip-helper'
+import { UnifiedHppPage } from '@/modules/hpp'
 
-const HppPage = () => (
+const HppPage = (): JSX.Element => (
     <AppLayout>
       <div className="space-y-6 p-6">
         <PageBreadcrumb items={BreadcrumbPatterns.hpp} />

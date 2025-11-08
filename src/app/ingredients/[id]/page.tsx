@@ -1,20 +1,23 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import AppLayout from '@/components/layout/app-layout'
-import { useSupabaseCRUD } from '@/hooks/supabase'
-import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
-import { PageBreadcrumb } from '@/components/ui/page-breadcrumb'
+import { ArrowLeft, Package, Loader2 } from 'lucide-react'
+import { useRouter, useParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+
 import { EnhancedIngredientForm } from '@/components/ingredients'
+import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { PageBreadcrumb } from '@/components/ui/page-breadcrumb'
+import { useSupabaseCRUD } from '@/hooks/supabase'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { ArrowLeft, Package, Loader2 } from 'lucide-react'
+
+
 import type { Row, Update } from '@/types/database'
 
 
@@ -23,10 +26,10 @@ import type { Row, Update } from '@/types/database'
 type Ingredient = Row<'ingredients'>
 type IngredientUpdate = Update<'ingredients'>
 
-const EditIngredientPage = () => {
+const EditIngredientPage = (): JSX.Element | null => {
     const router = useRouter()
     const params = useParams()
-    const id = params.id as string
+    const id = params['id'] as string
     const { update: updateIngredient } = useSupabaseCRUD('ingredients')
     const { toast } = useToast()
     const { supabase } = useSupabase()
@@ -55,7 +58,7 @@ const EditIngredientPage = () => {
 
                 const { data, error } = await supabase
                     .from('ingredients')
-                    .select('*')
+                    .select('id, name, unit, price_per_unit, current_stock, min_stock, description, category, supplier, weighted_average_cost, created_at, updated_at')
                     .eq('id', id)
                     .single<Ingredient>()
 
@@ -65,15 +68,15 @@ const EditIngredientPage = () => {
                     setIngredient(data)
                     form.reset({
                         name: data.name,
-                        unit: data.unit as 'kg' | 'g' | 'l' | 'ml' | 'pcs' | 'dozen',
+                        unit: data.unit as 'dozen' | 'g' | 'kg' | 'l' | 'ml' | 'pcs',
                         price_per_unit: data.price_per_unit,
                         current_stock: data.current_stock ?? 0,
                         min_stock: data.min_stock ?? 0,
                         description: data.description ?? ''
                     })
                 }
-            } catch (err: unknown) {
-                apiLogger.error({ error: err }, 'Failed to fetch ingredient:')
+            } catch (error) {
+                apiLogger.error({ error }, 'Failed to fetch ingredient:')
                 toast({
                     title: 'Gagal',
                     description: 'Gagal memuat data bahan baku',
@@ -111,8 +114,8 @@ const EditIngredientPage = () => {
             })
 
             router.push('/ingredients')
-        } catch (err: unknown) {
-            apiLogger.error({ error: err }, 'Failed to update ingredient:')
+        } catch (error) {
+            apiLogger.error({ error }, 'Failed to update ingredient:')
             toast({
                 title: 'Gagal',
                 description: 'Gagal memperbarui bahan baku. Silakan coba lagi.',
@@ -182,7 +185,7 @@ const EditIngredientPage = () => {
                                     mode="edit"
                                     initialData={{
                                         name: ingredient.name,
-                                        unit: ingredient.unit as 'kg' | 'g' | 'l' | 'ml' | 'pcs' | 'dozen',
+                                        unit: ingredient.unit as 'dozen' | 'g' | 'kg' | 'l' | 'ml' | 'pcs',
                                         price_per_unit: ingredient.price_per_unit,
                                         current_stock: ingredient.current_stock ?? 0,
                                         min_stock: ingredient.min_stock ?? 0,

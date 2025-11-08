@@ -12,7 +12,7 @@ export class AlertGenerator {
    */
   static generateFinancialAlerts(
     metrics: FinancialMetrics,
-    inventory: Ingredient[],
+    _inventory: Ingredient[],
     config: AutomationConfig
   ): FinancialAlert[] {
     const alerts: FinancialAlert[] = []
@@ -65,7 +65,7 @@ export class AlertGenerator {
     }
 
     // Sort by severity
-    const severityOrder: Record<'critical' | 'warning' | 'info', number> = {
+    const severityOrder: Record<'critical' | 'info' | 'warning', number> = {
       critical: 3,
       warning: 2,
       info: 1
@@ -74,7 +74,7 @@ export class AlertGenerator {
     const getSeverity = (type: FinancialAlert['type']): number =>
       severityOrder[type] ?? 0
 
-    return alerts.sort((a, b) => getSeverity(b.type) - getSeverity(a.type))
+    return alerts.sort((a, b) => getSeverity(b['type']) - getSeverity(a['type']))
   }
 
   /**
@@ -118,6 +118,10 @@ export class AlertGenerator {
             threshold: 30
           })
         }
+        break
+
+      default:
+        // No alerts for unknown scenarios
         break
     }
 

@@ -1,15 +1,18 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import { apiLogger } from '@/lib/logger'
-import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
-import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
+import { apiLogger } from '@/lib/logger'
+import { PaginationQuerySchema } from '@/lib/validations/domains/common'
+import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
+import { createClient } from '@/utils/supabase/server'
+
 // GET /api/hpp/calculations - Get HPP calculations with pagination and filtering
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -43,16 +46,41 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { page, limit, search, sort_by, sort_order } = queryValidation.data
+    const { page, limit, search, sort_by, sort_order } = queryValidation['data']
     const recipeId = searchParams.get('recipe_id')
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
 
     // Create cache key based on query parameters
-    const cacheKey = `${cacheKeys.hpp.calculations}:${user.id}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${startDate ?? ''}:${endDate ?? ''}`
+    const cacheKey = `${cacheKeys.hpp.calculations}:${user['id']}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${startDate ?? ''}:${endDate ?? ''}`
 
     // Wrap database query with caching
-    const getCalculations = async () => {
+    const getCalculations = async (): Promise<{
+      calculations: Array<{
+        id: string
+        recipe_id: string | null
+        calculation_date: string | null
+        material_cost: number
+        labor_cost: number
+        overhead_cost: number
+        total_hpp: number
+        cost_per_unit: number
+        production_quantity: number | null
+        wac_adjustment: number | null
+        notes: string | null
+        created_at: string | null
+        user_id: string | null
+        recipes: {
+          id: string
+          name: string
+          category: string | null
+        } | null
+      }>
+      total: number
+      page: number
+      limit: number
+      totalPages: number
+    }> => {
       let query = supabase
         .from('hpp_calculations')
         .select(`
@@ -63,7 +91,7 @@ export async function GET(request: NextRequest) {
             category
           )
         `, { count: 'exact' })
-        .eq('user_id', user.id)
+        .eq('user_id', user['id'])
 
       // Apply filters
       if (recipeId) {
@@ -99,7 +127,7 @@ export async function GET(request: NextRequest) {
       }
 
       return {
-        calculations: data || [],
+        calculations: data ?? [],
         total: count ?? 0,
         page,
         limit,
@@ -110,15 +138,15 @@ export async function GET(request: NextRequest) {
     const result = await withCache(getCalculations, cacheKey, 300) // 5 minutes cache
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       count: result.calculations.length,
       total: result.total
     }, 'HPP calculations retrieved successfully')
 
     return NextResponse.json(result)
 
-  } catch (err: unknown) {
-    apiLogger.error({ error: err }, 'Error fetching HPP calculations')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error fetching HPP calculations')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -127,7 +155,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/hpp/calculations - Create new HPP calculation
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -143,7 +171,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
+    const body = await request.json() as { recipeId?: string }
     const { recipeId } = body
 
     if (!recipeId) {
@@ -155,13 +183,13 @@ export async function POST(request: NextRequest) {
 
     // Calculate HPP using consolidated service
     const hppService = new HppCalculatorService()
-    const calculationResult = await hppService.calculateRecipeHpp(supabase, recipeId, user.id)
+    const calculationResult = await hppService.calculateRecipeHpp(supabase, recipeId, user['id'])
 
     // Invalidate cache
     cacheInvalidation.hpp()
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       recipeId,
       hppValue: calculationResult.total_hpp
     }, 'HPP calculation created successfully')
@@ -171,11 +199,14 @@ export async function POST(request: NextRequest) {
       calculation: calculationResult
     })
 
-  } catch (err: unknown) {
-    apiLogger.error({ error: err }, 'Error creating HPP calculation')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error creating HPP calculation')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/hpp/calculations', SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/hpp/calculations', SecurityPresets.enhanced())

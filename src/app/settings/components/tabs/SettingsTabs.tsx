@@ -1,19 +1,20 @@
 import { Suspense, lazy } from 'react'
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
-import { SettingsLoadingSkeleton } from '@/app/settings/components/SettingsLoadingSkeleton'
 
-// Lazy load all settings components
+import { BusinessSettings } from '@/app/settings/components/BusinessSettings'
+import { DangerZone } from '@/app/settings/components/DangerZone'
+import { DateTimeSettings } from '@/app/settings/components/DateTimeSettings'
+import { NotificationSettings } from '@/app/settings/components/NotificationSettings'
+import { NumberCurrencySettings } from '@/app/settings/components/NumberCurrencySettings'
+import { ProfileSettings } from '@/app/settings/components/ProfileSettings'
+import { SecuritySettings } from '@/app/settings/components/SecuritySettings'
+import { SettingsLoadingSkeleton } from '@/app/settings/components/SettingsLoadingSkeleton'
+import { UIThemeSettings } from '@/app/settings/components/UIThemeSettings'
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+
+// Lazy load settings components only when tabs are accessed (smart code splitting)
 const BusinessInfoSettings = lazy(() => import('@/app/settings/components/BusinessInfoSettings').then(mod => ({ default: mod.BusinessInfoSettings })))
-const BusinessSettings = lazy(() => import('@/app/settings/components/BusinessSettings').then(mod => ({ default: mod.BusinessSettings })))
-const NotificationSettings = lazy(() => import('@/app/settings/components/NotificationSettings').then(mod => ({ default: mod.NotificationSettings })))
-const ProfileSettings = lazy(() => import('@/app/settings/components/ProfileSettings').then(mod => ({ default: mod.ProfileSettings })))
 const RegionalSettings = lazy(() => import('@/app/settings/components/RegionalSettings').then(mod => ({ default: mod.RegionalSettings })))
-const SecuritySettings = lazy(() => import('@/app/settings/components/SecuritySettings').then(mod => ({ default: mod.SecuritySettings })))
-const UIThemeSettings = lazy(() => import('@/app/settings/components/UIThemeSettings').then(mod => ({ default: mod.UIThemeSettings })))
-const DateTimeSettings = lazy(() => import('@/app/settings/components/DateTimeSettings').then(mod => ({ default: mod.DateTimeSettings })))
-const NumberCurrencySettings = lazy(() => import('@/app/settings/components/NumberCurrencySettings').then(mod => ({ default: mod.NumberCurrencySettings })))
-const DangerZone = lazy(() => import('@/app/settings/components/DangerZone').then(mod => ({ default: mod.DangerZone })))
 
 
 // Import existing components

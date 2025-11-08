@@ -1,13 +1,17 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
-import { GlobalExportService } from '@/lib/export/global-export'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { GlobalExportService } from '@/lib/export/global-export'
+import { apiLogger } from '@/lib/logger'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
 export const dynamic = 'force-dynamic'
 
-async function GET(_request: NextRequest) {
+async function GET(_request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authenticate
     const supabase = await createClient()
@@ -17,10 +21,10 @@ async function GET(_request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    apiLogger.info({ userId: user.id }, 'Starting global export')
+    apiLogger.info({ userId: user['id'] }, 'Starting global export')
 
     // 2. Generate export
-    const buffer = await GlobalExportService.generateExport(user.id)
+    const buffer = await GlobalExportService.generateExport(user['id'])
 
     // 3. Return file
     const filename = `HeyTrack_Export_${new Date().toISOString().split('T')[0]}.xlsx`

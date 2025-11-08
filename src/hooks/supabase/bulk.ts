@@ -1,8 +1,9 @@
 'use client'
 
-import { createClient } from '@/utils/supabase/client'
-import type { TableName, Row, Insert} from '@/types/database'
+import type { Insert, Row, TableName } from '@/types/database'
 import { typed } from '@/types/type-utilities'
+import { createClient } from '@/utils/supabase/client'
+
 import type { BulkUpdateItem } from './types'
 
 /**
@@ -12,7 +13,7 @@ export class useSupabaseBulk {
   static async createMultiple<T extends TableName>(
     table: T,
     records: Array<Insert<T>>
-  ) {
+  ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
 
     const { data, error } = await supabase
@@ -30,20 +31,20 @@ export class useSupabaseBulk {
   static async updateMultiple<T extends TableName>(
     table: T,
     updates: Array<BulkUpdateItem<T>>
-  ) {
+  ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
-    const results = []
+    const results: Array<Row<T>> = []
 
     for (const update of updates) {
       const { data, error } = await supabase
         .from(table)
-        .update(update.data as never)
-        .eq('id', update.id as never)
+        .update(update['data'] as never)
+        .eq('id', update['id'] as never)
         .select('*')
         .single() as { data: Row<T> | null; error: Error | null }
 
       if (error) {
-        throw new Error(`Failed to update record ${update.id}: ${error.message}`)
+        throw new Error(`Failed to update record ${update['id']}: ${error.message}`)
       }
 
       results.push(data as Row<T>)
@@ -55,7 +56,7 @@ export class useSupabaseBulk {
   static async deleteMultiple<T extends TableName>(
     table: T,
     ids: string[]
-  ) {
+  ): Promise<boolean> {
     const supabase = typed(createClient())
 
     const { error } = await supabase
@@ -74,7 +75,7 @@ export class useSupabaseBulk {
     table: T,
     records: Array<Insert<T>>,
     conflictColumns: string[] = ['id']
-  ) {
+  ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
 
     const { data, error } = await supabase

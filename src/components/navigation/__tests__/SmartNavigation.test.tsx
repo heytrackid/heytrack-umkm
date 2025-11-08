@@ -8,6 +8,14 @@ import { LayoutDashboard } from 'lucide-react'
 // Mock Next.js navigation
 vi.mock('next/navigation', () => ({
   usePathname: vi.fn(),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+  })),
 }))
 
 // Mock the preloading hooks
@@ -19,6 +27,14 @@ vi.mock('@/hooks/usePreloading', () => ({
   useAdvancedButtonPreloading: vi.fn(() => ({
     preloadModalOnHover: vi.fn(),
     preloadChartOnHover: vi.fn(),
+  })),
+}))
+
+// Mock useInstantNavigation
+vi.mock('@/hooks/useInstantNavigation', () => ({
+  useInstantNavigation: vi.fn(() => ({
+    navigateInstant: vi.fn(),
+    prefetchRoute: vi.fn(),
   })),
 }))
 

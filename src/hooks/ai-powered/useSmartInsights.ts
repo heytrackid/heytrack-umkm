@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
@@ -41,7 +42,9 @@ interface IngredientData {
 export function useSmartInsights({
   analyzePricing,
   optimizeInventory
-}: UseSmartInsightsProps) {
+}: UseSmartInsightsProps): {
+  generateSmartInsights: (businessData: SmartInsightsRequest) => Promise<AIInsight[]>
+} {
 
   const generateSmartInsights = useCallback(async (businessData: SmartInsightsRequest): Promise<AIInsight[]> => {
     const insights: AIInsight[] = []
@@ -50,7 +53,7 @@ export function useSmartInsights({
       // Generate pricing insights if recipes available
       if (businessData.recipes && Array.isArray(businessData.recipes)) {
         const topRecipes = (businessData.recipes as RecipeWithIngredients[]).slice(0, 3)
-        for (const recipe of topRecipes) {
+        const pricingPromises = topRecipes.map(async (recipe) => {
           if (recipe.recipe_ingredients && Array.isArray(recipe.recipe_ingredients)) {
             const ingredients = recipe.recipe_ingredients.map(ri => ({
               name: ri.ingredient?.name ?? 'Unknown',
@@ -65,17 +68,21 @@ export function useSmartInsights({
                 currentPrice: recipe.selling_price ?? undefined
               })
 
-              insights.push({
-                type: 'pricing',
+              return {
+                type: 'pricing' as const,
                 productName: recipe.name ?? 'Unknown Recipe',
                 analysis: pricingAnalysis,
-                priority: 'high'
-              })
-            } catch (err: unknown) {
-              logger.warn({ err }, `Pricing analysis failed for ${recipe.name ?? 'unknown'}`)
+                priority: 'high' as const
+              }
+            } catch (error) {
+              logger.warn({ error }, `Pricing analysis failed for ${recipe.name ?? 'unknown'}`)
+              return null
             }
           }
-        }
+          return null
+        })
+        const pricingResults = await Promise.all(pricingPromises)
+        insights.push(...(pricingResults.filter(Boolean) as AIInsight[]))
       }
 
       // Generate inventory insights if ingredients available
@@ -97,17 +104,17 @@ export function useSmartInsights({
             analysis: inventoryOptimization,
             priority: 'medium'
           })
-        } catch (err: unknown) {
-          logger.warn({ err }, 'Inventory optimization failed')
-        }
+        } catch (error) {
+           logger.warn({ error }, 'Inventory optimization failed')
+         }
       }
 
       return insights
 
-    } catch (err: unknown) {
-      logger.error({ err }, 'Smart insights generation failed')
-      return []
-    }
+     } catch (error) {
+       logger.error({ error }, 'Smart insights generation failed')
+       return []
+     }
   }, [analyzePricing, optimizeInventory])
 
   return {

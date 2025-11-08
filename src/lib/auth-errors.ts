@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { authLogger } from '@/lib/logger'
 
 /**
@@ -7,9 +8,9 @@ import { authLogger } from '@/lib/logger'
  */
 
 
-// ============================================================================
+// ==========================================================
 // AUTH ERROR MESSAGES
-// ============================================================================
+// ==========================================================
 
 export const AUTH_ERROR_MESSAGES = {
   // Sign up errors
@@ -67,14 +68,14 @@ export const AUTH_ERROR_MESSAGES = {
 
 } as const
 
-// ============================================================================
+// ==========================================================
 // AUTH ERROR MESSAGE GETTER
-// ============================================================================
+// ==========================================================
 
 /**
  * Extract error message from error object
  */
-function extractErrorMessage(error: string | Error | { message?: string }): string {
+function extractErrorMessage(error: Error | string | { message?: string }): string {
   if (typeof error === 'string') {
     return error
   }
@@ -90,11 +91,11 @@ function extractErrorMessage(error: string | Error | { message?: string }): stri
 /**
  * Get user-friendly error message for authentication errors
  */
-export function getAuthErrorMessage(error: string | Error | { message?: string }): string {
+export function getAuthErrorMessage(error: Error | string | { message?: string }): string {
   const errorMessage = extractErrorMessage(error)
 
   // Check for exact matches in our error messages
-  if (AUTH_ERROR_MESSAGES[errorMessage as keyof typeof AUTH_ERROR_MESSAGES]) {
+  if (errorMessage in AUTH_ERROR_MESSAGES) {
     return AUTH_ERROR_MESSAGES[errorMessage as keyof typeof AUTH_ERROR_MESSAGES]
   }
 
@@ -129,8 +130,15 @@ export function getAuthErrorMessage(error: string | Error | { message?: string }
   }
 
   // Log the unknown error for debugging
-  authLogger.warn({ 
-    originalError: typeof error === 'string' ? error : error?.message ?? 'Unknown auth error',
+  let originalError = 'Unknown auth error'
+  if (typeof error === 'string') {
+    originalError = error
+  } else if (error && typeof error === 'object' && 'message' in error) {
+    originalError = (error as { message?: string }).message ?? 'Unknown auth error'
+  }
+
+  authLogger.warn({
+    originalError,
     errorType: typeof error
   }, 'Unknown authentication error received')
   
@@ -138,9 +146,9 @@ export function getAuthErrorMessage(error: string | Error | { message?: string }
   return 'Terjadi kesalahan. Silakan coba lagi.'
 }
 
-// ============================================================================
+// ==========================================================
 // EMAIL VALIDATION
-// ============================================================================
+// ==========================================================
 
 /**
  * Email validation schema using Zod
@@ -175,9 +183,9 @@ export function validateEmail(email: string): {
   }
 }
 
-// ============================================================================
+// ==========================================================
 // PASSWORD VALIDATION
-// ============================================================================
+// ==========================================================
 
 /**
  * Password validation schema
@@ -193,13 +201,13 @@ export const PasswordSchema = z
 export function validatePassword(password: string): {
   isValid: boolean
   error?: string
-  strength?: 'weak' | 'medium' | 'strong'
+  strength?: 'medium' | 'strong' | 'weak'
 } {
   try {
     PasswordSchema.parse(password)
 
     // Check password strength
-    let strength: 'weak' | 'medium' | 'strong' = 'weak'
+    let strength: 'medium' | 'strong' | 'weak' = 'weak'
     if (password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /\d/.test(password)) {
       strength = 'strong'
     } else if (password.length >= 6 && (/[A-Z]/.test(password) || /[a-z]/.test(password) || /\d/.test(password))) {
@@ -207,11 +215,11 @@ export function validatePassword(password: string): {
     }
 
     return { isValid: true, strength }
-  } catch (err) {
-    if (err instanceof z.ZodError) {
+  } catch (error) {
+    if (error instanceof z.ZodError) {
       return {
         isValid: false,
-        error: err.issues[0]?.message || 'Password tidak valid'
+        error: error.issues[0]?.message || 'Password tidak valid'
       }
     }
     return {
@@ -221,9 +229,9 @@ export function validatePassword(password: string): {
   }
 }
 
-// ============================================================================
+// ==========================================================
 // AUTH FORM VALIDATION
-// ============================================================================
+// ==========================================================
 
 /**
  * Login form validation schema
@@ -263,9 +271,9 @@ export const UpdatePasswordSchema = z.object({
   path: ['confirmPassword'],
 })
 
-// ============================================================================
+// ==========================================================
 // UTILITY FUNCTIONS
-// ============================================================================
+// ==========================================================
 
 /**
  * Extract error message from various error formats

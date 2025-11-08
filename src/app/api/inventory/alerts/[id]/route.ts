@@ -1,19 +1,22 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
-import { apiLogger } from '@/lib/logger'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
+import { createClient } from '@/utils/supabase/server'
 
 /**
  * PATCH /api/inventory/alerts/[id]
  * Acknowledge an alert
  */
-export async function PUT(
+async function putHandler(
   __request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const { id } = params
   
   try {
@@ -25,7 +28,7 @@ export async function PUT(
     }
 
     const alertService = new InventoryAlertService()
-    await alertService.acknowledgeAlert(id, user.id)
+    await alertService.acknowledgeAlert(id, user['id'])
 
     return NextResponse.json({ 
       message: 'Alert acknowledged successfully' 
@@ -39,3 +42,5 @@ export async function PUT(
     )
   }
 }
+
+export const PUT = createSecureHandler(putHandler, 'PUT /api/inventory/alerts/[id]', SecurityPresets.enhanced())

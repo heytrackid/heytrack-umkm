@@ -4,9 +4,7 @@
  * Type definitions for loading state management
  */
 
-export interface LoadingState {
-  [key: string]: boolean
-}
+export type LoadingState = Record<string, boolean>;
 
 export interface UseLoadingReturn {
   loading: LoadingState

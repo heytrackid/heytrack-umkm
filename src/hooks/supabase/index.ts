@@ -1,7 +1,7 @@
 
 // Core functionality
 export { useSupabaseQuery } from './core'
-export { useSupabaseCRUD } from './crud'
+export { useSupabaseCRUD } from './useSupabaseCRUD'
 export { useSupabaseBulk } from './bulk'
 
 // Entity-specific hooks
@@ -10,9 +10,10 @@ export * from './entities'
 // Types
 export type {
   UseSupabaseQueryOptions,
-  CRUDOptions,
+  UseSupabaseQueryResult,
   BulkUpdateItem
 } from './types'
+export type { UseSupabaseCRUDOptions } from './useSupabaseCRUD'
 
 // Validation utilities
 export {

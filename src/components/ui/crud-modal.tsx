@@ -1,10 +1,13 @@
+import { Pencil, Trash2 } from 'lucide-react'
+
+import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { CrudForm, FormActions } from '@/components/ui/crud-form'
+import { Modal } from '@/components/ui/modal'
+
 import type { ReactNode } from 'react'
 import type { UseFormReturn, FieldValues } from 'react-hook-form'
-import { Modal } from '@/components/ui/modal'
-import { CrudForm, FormActions } from '@/components/ui/crud-form'
-import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { Button } from '@/components/ui/button'
-import { Pencil, Trash2 } from 'lucide-react'
+
 
 /**
  * Shared CRUD Modal Components
@@ -16,7 +19,7 @@ interface CrudModalProps {
   isOpen: boolean
   onClose: () => void
   title: string
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'lg' | 'md' | 'sm' | 'xl'
   fullScreenOnMobile?: boolean
   children: ReactNode
 }
@@ -148,7 +151,7 @@ export const DeleteModal = ({
 interface CrudActionButtonsProps {
   onEdit?: () => void
   onDelete?: () => void
-  size?: 'sm' | 'default' | 'lg'
+  size?: 'default' | 'lg' | 'sm'
   variant?: 'ghost' | 'outline'
 }
 

@@ -1,11 +1,15 @@
 'use client'
 
-import React, { type ComponentProps, useState, useEffect, useRef } from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { cn } from '@/lib/utils'
-import { Button } from './button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import React, { type ComponentProps, useState, useEffect, useRef } from 'react'
+
 import { useSwipeableTabs } from '@/hooks/useSwipeableTabs'
+import { cn } from '@/lib/utils'
+
+import { Button } from './button'
+
+
 
 interface SwipeableTabsProps extends ComponentProps<typeof TabsPrimitive.Root> {
   children: React.ReactNode
@@ -181,7 +185,10 @@ const SwipeableTabsContentContainer = ({
     currentIndex,
     tabValues.length,
     (newIndex) => {
-      onValueChange(tabValues[newIndex])
+      const newValue = tabValues[newIndex]
+      if (newValue !== undefined) {
+        onValueChange(newValue)
+      }
     },
     {
       threshold: 50,

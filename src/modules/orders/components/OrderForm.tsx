@@ -1,21 +1,25 @@
  
 'use client'
 
-import type { Row } from '@/types/database'
+import { useQuery } from '@tanstack/react-query'
+import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
+import { memo, useCallback, useMemo, useState, type FormEvent } from 'react'
+
+import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
+import { useOrderItemsController } from '@/components/orders/hooks/useOrderItemsController'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { useCurrency } from '@/hooks/useCurrency'
-import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
-import { memo, useState, type FormEvent } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { ORDER_CONFIG, ORDER_PRIORITIES } from '@/lib/constants'
-import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
-import { calculateOrderTotals, generateOrderNo } from '../utils/helpers'
 import { warningToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
+import { ORDER_CONFIG, ORDER_PRIORITIES } from '@/lib/constants'
 import { safeNumber } from '@/lib/type-guards'
+import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
+
+import type { Row } from '@/types/database'
 
 
 type Customer = Row<'customers'>
@@ -48,10 +52,10 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     customer_name: order?.customer_name ?? '',
     customer_phone: order?.customer_phone ?? '',
     customer_address: order?.customer_address ?? '',
-    order_date: order?.order_date ?? new Date().toISOString().split('T')[0],
+    order_date: order?.order_date ?? (new Date().toISOString().split('T')[0] ?? ''),
     delivery_date: order?.delivery_date ?? '',
     delivery_time: order?.delivery_date?.includes('T')
-      ? order.delivery_date.split('T')[1]?.slice(0, 5) || ''
+      ? order.delivery_date.split('T')[1]?.slice(0, 5) ?? ''
       : '',
     delivery_fee: order?.delivery_fee ?? ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
     discount: order?.discount ?? 0,
@@ -82,8 +86,8 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) { throw new Error('Failed to fetch recipes') }
-      const data: Array<Row<'recipes'>> = await response.json()
-      return data.filter(recipe => recipe.is_active)
+      const _data = await response.json() as Array<Row<'recipes'>>
+      return _data.filter(recipe => recipe.is_active)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
@@ -102,8 +106,90 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
   })
 
   // Use data directly from query (no need for local state)
-  const availableRecipes = recipesData || []
-  const availableCustomers = customersData || []
+  const availableRecipes = useMemo(() => recipesData || [], [recipesData])
+  const availableCustomers = useMemo(() => customersData || [], [customersData])
+
+  const createEmptyOrderItem = useCallback((): OrderItemWithRecipe => {
+    const firstRecipe = availableRecipes[0]
+    const unitPrice = firstRecipe?.selling_price ?? 0
+    const cost = firstRecipe?.cost_per_unit ?? 0
+
+    return {
+      id: `temp-${Date.now()}`,
+      order_id: order?.id ?? '',
+      recipe_id: firstRecipe?.['id'] ?? '',
+      product_name: firstRecipe?.name ?? null,
+      quantity: 1,
+      unit_price: unitPrice,
+      total_price: unitPrice,
+      special_requests: null,
+      hpp_at_order: cost,
+      profit_amount: unitPrice - cost,
+      profit_margin: unitPrice > 0 ? (((unitPrice - cost) / unitPrice) * 100) : 0,
+      updated_at: null,
+      user_id: order?.user_id ?? '',
+      recipe: firstRecipe
+        ? {
+            id: firstRecipe['id'],
+            name: firstRecipe.name,
+            price: unitPrice,
+            category: firstRecipe.category ?? 'Uncategorized',
+            servings: firstRecipe.servings ?? 0,
+            description: firstRecipe.description ?? undefined
+          }
+        : undefined
+    }
+  }, [availableRecipes, order?.id, order?.user_id])
+
+  const {
+    addItem: pushOrderItem,
+    updateItem: applyOrderItemUpdate,
+    removeItem: removeOrderItem,
+    selectRecipe: handleRecipeSelect
+  } = useOrderItemsController<OrderItemWithRecipe>({
+    items: orderItems,
+    onItemsChange: setOrderItems,
+    createEmptyItem: createEmptyOrderItem,
+    availableRecipes,
+    onRecipeSelected: (recipe, currentItem) => {
+      const unitPrice = recipe.selling_price ?? currentItem.unit_price
+      const cost = recipe.cost_per_unit ?? currentItem.hpp_at_order ?? 0
+
+      return {
+        ...currentItem,
+        recipe_id: recipe['id'],
+        product_name: recipe.name,
+        recipe: {
+          id: recipe['id'],
+          name: recipe.name,
+          price: unitPrice,
+          category: recipe.category ?? 'Uncategorized',
+          servings: recipe.servings ?? 0,
+          description: recipe.description ?? undefined
+        },
+        unit_price: unitPrice,
+        total_price: unitPrice * currentItem.quantity,
+        hpp_at_order: cost,
+        profit_amount: unitPrice - cost,
+        profit_margin: unitPrice > 0 ? (((unitPrice - cost) / unitPrice) * 100) : 0
+      }
+    },
+    deriveItemTotals: (item) => {
+      const quantity = Number(item.quantity) || 0
+      const unitPrice = Number(item.unit_price) || 0
+      const cost = Number(item.hpp_at_order ?? 0)
+      const total = quantity * unitPrice
+      const profit = unitPrice - cost
+
+      return {
+        ...item,
+        total_price: total,
+        profit_amount: profit,
+        profit_margin: unitPrice > 0 ? ((profit / unitPrice) * 100) : 0
+      }
+    }
+  })
+
   let submitButtonLabel = 'Simpan Pesanan'
   if (order) {
     submitButtonLabel = 'Update Pesanan'
@@ -132,89 +218,26 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
       warningToast('Resep tidak tersedia', 'Tambahkan resep baru sebelum membuat item pesanan')
       return
     }
-
-    const firstRecipe = availableRecipes[0]
-    if (!firstRecipe) { return }
-
-    const newItem = {
-      recipe_id: firstRecipe.id,
-      product_name: firstRecipe.name,
-      quantity: 1,
-      unit_price: firstRecipe.selling_price ?? 0,
-      total_price: firstRecipe.selling_price ?? 0,
-      special_requests: null
-    }
-    setOrderItems(prev => [...prev, newItem as OrderItemWithRecipe])
+    pushOrderItem()
   }
 
-  const updateOrderItem = <K extends keyof {
-    recipe_id: string
-    product_name: string | null
-    quantity: number
-    unit_price: number
-    total_price: number
-    special_requests: string | null
-  }>(
+  const updateOrderItem = <K extends keyof OrderItemWithRecipe>(
     index: number,
     field: K,
-    value: {
-      recipe_id: string
-      product_name: string | null
-      quantity: number
-      unit_price: number
-      total_price: number
-      special_requests: string | null
-    }[K] | string
+    value: OrderItemWithRecipe[K] | string
   ) => {
-    setOrderItems(prev => {
-      const updated = [...prev]
-      const currentItem = updated[index]
-      if (!currentItem) { return updated }
+    if (field === 'recipe_id') {
+      handleRecipeSelect(index, value as string)
+      return
+    }
 
-      if (field === 'recipe_id') {
-        const selectedRecipe = availableRecipes.find(recipe => recipe.id === value)
-        if (selectedRecipe) {
-          updated[index] = {
-            ...currentItem,
-            recipe_id: value as string,
-            product_name: selectedRecipe.name,
-            recipe: {
-              id: selectedRecipe.id,
-              name: selectedRecipe.name,
-              price: selectedRecipe.selling_price ?? currentItem.unit_price,
-              category: selectedRecipe.category ?? 'Uncategorized',
-              servings: selectedRecipe.servings ?? 0,
-              description: selectedRecipe.description ?? undefined
-            },
-            unit_price: selectedRecipe.selling_price ?? currentItem.unit_price,
-            total_price: (selectedRecipe.selling_price ?? currentItem.unit_price) * currentItem.quantity
-          }
-        }
-      } else if (field === 'quantity') {
-        const parsedQty = Number.parseInt(value as string, 10)
-        const qty = Number.isNaN(parsedQty) ? 0 : parsedQty
-        updated[index] = {
-          ...currentItem,
-          quantity: qty,
-          total_price: currentItem.unit_price * qty
-        }
-      } else if (field === 'unit_price') {
-        const parsedPrice = Number.parseFloat(value as string)
-        const price = Number.isNaN(parsedPrice) ? 0 : parsedPrice
-        updated[index] = {
-          ...currentItem,
-          unit_price: price,
-          total_price: price * currentItem.quantity
-        }
-      } else {
-        updated[index] = { ...currentItem, [field]: value }
-      }
-      return updated
-    })
-  }
+    let nextValue = value
 
-  const removeOrderItem = (index: number) => {
-    setOrderItems(prev => prev.filter((_, i) => i !== index))
+    if (typeof value === 'string' && (field === 'quantity' || field === 'unit_price')) {
+      nextValue = Number(value) as OrderItemWithRecipe[K]
+    }
+
+    applyOrderItemUpdate(index, field, nextValue as OrderItemWithRecipe[K])
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -223,7 +246,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     // Validate form
     const errors: Record<string, string> = {}
 
-    if (!formData.customer_name.trim()) {
+    if (!formData['customer_name'].trim()) {
       errors['customer_name'] = 'Nama pelanggan wajib diisi'
     }
 
@@ -324,7 +347,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                       )
                       .map(customer => (
                         <div
-                          key={customer.id}
+                          key={customer['id']}
                           className="p-2 hover:bg-muted cursor-pointer"
                           onClick={() => selectCustomer(customer)}
                         >
@@ -345,7 +368,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               <Input
                 id="customerName"
                 placeholder="Contoh: Ibu Siti"
-                value={formData.customer_name}
+                value={formData['customer_name']}
                 onChange={(e) => {
                   handleInputChange('customer_name', e.target.value)
                   if (fieldErrors['customer_name']) {
@@ -358,7 +381,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 }}
                 required
                 className={`mt-1 ${fieldErrors['customer_name'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                aria-invalid={!!fieldErrors['customer_name']}
+                aria-invalid={Boolean(fieldErrors['customer_name'])}
               />
               {fieldErrors['customer_name'] && (
                 <div className="flex items-center gap-2 text-sm text-destructive mt-1">
@@ -461,7 +484,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
           ) : (
             <div className="space-y-3">
               {orderItems.map((item, index: number) => {
-                const itemKey = item.id ?? `${item.recipe_id ?? 'recipe'}-${item.product_name ?? 'product'}-${item.total_price ?? '0'}-${item.special_requests ?? 'none'}`
+                const itemKey = item['id'] ?? `${item.recipe_id ?? 'recipe'}-${item.product_name ?? 'product'}-${item.total_price ?? '0'}-${item.special_requests ?? 'none'}`
                 return (
                   <div key={itemKey} className="border rounded-lg overflow-hidden">
                     <div className="block sm:hidden">
@@ -472,10 +495,10 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                             <select
                               className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
                               value={item.recipe_id}
-                              onChange={(e) => updateOrderItem(index, 'recipe_id', e.target.value)}
+                              onChange={(e) => handleRecipeSelect(index, e.target.value)}
                             >
                               {availableRecipes.map(recipe => (
-                                <option key={recipe.id} value={recipe.id}>
+                                <option key={recipe['id']} value={recipe['id']}>
                                   {recipe.name}
                                 </option>
                               ))}
@@ -534,10 +557,10 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                           <select
                             className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
                             value={item.recipe_id}
-                            onChange={(e) => updateOrderItem(index, 'recipe_id', e.target.value)}
+                            onChange={(e) => handleRecipeSelect(index, e.target.value)}
                           >
                             {availableRecipes.map(recipe => (
-                              <option key={recipe.id} value={recipe.id}>
+                              <option key={recipe['id']} value={recipe['id']}>
                                 {recipe.name}
                               </option>
                             ))}
@@ -716,7 +739,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 min="0"
                 step="1000"
                 className={`mt-1 ${fieldErrors['paid_amount'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                aria-invalid={!!fieldErrors['paid_amount']}
+                aria-invalid={Boolean(fieldErrors['paid_amount'])}
               />
               {fieldErrors['paid_amount'] && (
                 <div className="flex items-center gap-2 text-sm text-destructive mt-1">
@@ -768,11 +791,13 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
           <Button type="button" variant="outline" onClick={onCancel} className="order-2 sm:order-1">
             Batalkan
           </Button>
-          <Button type="submit" disabled={loading} className="order-1 sm:order-2">
+          <LoadingButton type="submit" loading={loading} hapticFeedback className="order-1 sm:order-2">
             {submitButtonLabel}
-          </Button>
+          </LoadingButton>
         </div>
       </SwipeableTabs>
     </form>
   )
 })
+
+OrderForm.displayName = 'OrderForm'

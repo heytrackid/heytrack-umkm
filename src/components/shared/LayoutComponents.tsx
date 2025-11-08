@@ -1,13 +1,13 @@
 'use client'
 
+import {
+  Menu,
+  Grid,
+  List,
+  Table,
+} from 'lucide-react'
 import { Fragment, useState, type ReactNode } from 'react'
-import { Button } from '@/components/ui/button'
 
-import { Separator } from '@/components/ui/separator'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
-import { cn } from '@/lib/utils'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,12 +16,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import {
-  Menu,
-  Grid,
-  List,
-  Table,
-} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { cn } from '@/lib/utils'
 
 interface BreadcrumbItem {
   label: string
@@ -43,13 +43,13 @@ interface PageLayoutProps {
   footer?: ReactNode
   children: ReactNode
   className?: string
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  maxWidth?: 'full' | 'lg' | 'md' | 'sm' | 'xl'
 }
 
 interface ContentGridProps {
   children: ReactNode
   columns?: 1 | 2 | 3 | 4 | 6 | 12
-  gap?: 'sm' | 'md' | 'lg' | 'xl'
+  gap?: 'lg' | 'md' | 'sm' | 'xl'
   className?: string
 }
 
@@ -62,7 +62,7 @@ interface CardGridProps {
     lg?: number
     xl?: number
   }
-  gap?: 'sm' | 'md' | 'lg'
+  gap?: 'lg' | 'md' | 'sm'
   className?: string
 }
 
@@ -73,7 +73,7 @@ interface SectionProps {
   actions?: ReactNode
   children: ReactNode
   className?: string
-  variant?: 'default' | 'card' | 'bordered'
+  variant?: 'bordered' | 'card' | 'default'
 }
 
 interface DataViewProps {
@@ -418,8 +418,8 @@ export const DataView = ({
  */
 interface ContainerProps {
   children: ReactNode
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
-  padding?: 'none' | 'sm' | 'md' | 'lg'
+  size?: 'full' | 'lg' | 'md' | 'sm' | 'xl'
+  padding?: 'lg' | 'md' | 'none' | 'sm'
   className?: string
 }
 

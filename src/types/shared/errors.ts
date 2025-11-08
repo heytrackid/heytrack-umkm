@@ -29,7 +29,7 @@ export class TypedError extends Error {
      */
     toApiError() {
         return {
-            code: this.code,
+            code: this['code'],
             message: this.message,
             details: this.details,
         };
@@ -170,10 +170,10 @@ export function isAuthorizationError(error: unknown): error is AuthorizationErro
 export function handleError(error: unknown) {
     if (isTypedError(error)) {
         return {
-            code: error.code,
+            code: error['code'],
             message: (error instanceof Error ? error.message : String(error)),
             details: error.details,
-            statusCode: error.statusCode,
+            statusCode: error['statusCode'],
         };
     }
 
@@ -212,7 +212,7 @@ export function getErrorMessage(error: unknown): string {
  */
 export function getErrorCode(error: unknown): string {
     if (isTypedError(error)) {
-        return error.code;
+        return error['code'];
     }
 
     return 'UNKNOWN_ERROR';

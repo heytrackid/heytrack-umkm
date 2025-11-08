@@ -1,6 +1,9 @@
 'use client'
  
 
+import { AlertTriangle, Calculator, CheckCircle, DollarSign, Lightbulb, Target, TrendingUp } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
 import { PageHeader, SharedStatsCards } from '@/components/shared'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -12,9 +15,8 @@ import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { dbLogger } from '@/lib/logger'
+
 import type { Row } from '@/types/database'
-import { AlertTriangle, Calculator, CheckCircle, DollarSign, Lightbulb, Target, TrendingUp } from 'lucide-react'
-import { useEffect, useState } from 'react'
 
 type Recipe = Row<'recipes'>
 
@@ -36,17 +38,17 @@ interface PricingRecommendation {
   confidence: number
   marketFactors: {
     competitorPrices: number[]
-    demandLevel: 'low' | 'medium' | 'high'
+    demandLevel: 'high' | 'low' | 'medium'
     seasonality: 'low' | 'normal' | 'peak'
     category: string
   }
   riskAssessment: {
-    riskLevel: 'low' | 'medium' | 'high'
+    riskLevel: 'high' | 'low' | 'medium'
     riskFactors: string[]
   }
 }
 
-const PricingAssistantPage = () => {
+const PricingAssistantPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -59,23 +61,23 @@ const PricingAssistantPage = () => {
   useEffect(() => {
     const loadRecipes = async () => {
       try {
-        void setLoading(true)
+        setLoading(true)
         const response = await fetch('/api/recipes?limit=1000', {
           credentials: 'include', // Include cookies for authentication
         })
-        if (response.ok) {
-          const data = await response.json()
-          void setRecipes(data.recipes ?? [])
-        }
-      } catch (err: unknown) {
-        dbLogger.error({ err }, 'Failed to load recipes')
+      if (response.ok) {
+        const data = await response.json() as { recipes?: Recipe[] }
+        setRecipes(data.recipes ?? [])
+      }
+    } catch (_error) {
+      dbLogger.error({ _error }, 'Failed to load recipes')
         toast({
           title: 'Error',
           description: 'Failed to load recipes',
           variant: 'destructive'
         })
       } finally {
-        void setLoading(false)
+        setLoading(false)
       }
     }
 
@@ -94,7 +96,7 @@ const PricingAssistantPage = () => {
     }
 
     try {
-      void setAnalyzing(true)
+      setAnalyzing(true)
       const response = await fetch('/api/hpp/pricing-assistant', {
         method: 'POST',
         headers: {
@@ -105,8 +107,8 @@ const PricingAssistantPage = () => {
       })
 
       if (response.ok) {
-        const data = await response.json()
-        void setRecommendation(data.recommendation)
+        const data = await response.json() as { recommendation?: PricingRecommendation }
+        setRecommendation(data.recommendation ?? null)
 
         toast({
           title: 'Success',
@@ -115,15 +117,15 @@ const PricingAssistantPage = () => {
       } else {
         throw new Error('Failed to generate recommendation')
       }
-    } catch (err: unknown) {
-      dbLogger.error({ err }, 'Failed to generate pricing recommendation')
+    } catch (_error) {
+      dbLogger.error({ _error }, 'Failed to generate pricing recommendation')
       toast({
         title: 'Error',
         description: 'Failed to generate pricing recommendation',
         variant: 'destructive'
       })
     } finally {
-      void setAnalyzing(false)
+      setAnalyzing(false)
     }
   }
 
@@ -199,7 +201,7 @@ const PricingAssistantPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {recipes.map((recipe) => (
-                      <SelectItem key={recipe.id} value={recipe.id}>
+                      <SelectItem key={recipe['id']} value={recipe['id']}>
                         {recipe.name}
                       </SelectItem>
                     ))}

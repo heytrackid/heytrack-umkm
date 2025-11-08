@@ -1,9 +1,11 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { memo } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+
 
 
 
@@ -16,7 +18,7 @@ interface StockBadgeProps {
     className?: string
 }
 
-type StockStatus = 'out' | 'low' | 'normal'
+type StockStatus = 'low' | 'normal' | 'out'
 
 /**
  * Stock Badge Component
@@ -87,12 +89,14 @@ export const StockBadge = memo(({
                 {showIcon && <Icon className={cn('w-3 h-3 mr-1', config.iconColor)} />}
                 {config.label}
             </Badge>
-            <span className="text-sm text-gray-600">
-                {currentStock} / {minStock} {unit}
-            </span>
-        </div>
-    )
-})
+             <span className="text-sm text-gray-600">
+                 {currentStock} / {minStock} {unit}
+             </span>
+         </div>
+     )
+ })
+
+StockBadge.displayName = 'StockBadge'
 
 /**
  * Compact Stock Indicator for Mobile
@@ -101,7 +105,7 @@ export const CompactStockIndicator = memo(({
     currentStock,
     minStock,
     unit
-}: Omit<StockBadgeProps, 'showIcon' | 'compact' | 'className'>) => {
+}: Omit<StockBadgeProps, 'className' | 'compact' | 'showIcon'>) => {
     const getStatus = () => {
         if (currentStock <= 0) {return 'out'}
         if (currentStock <= minStock) {return 'low'}
@@ -124,3 +128,5 @@ export const CompactStockIndicator = memo(({
         </div>
     )
 })
+
+CompactStockIndicator.displayName = 'CompactStockIndicator'

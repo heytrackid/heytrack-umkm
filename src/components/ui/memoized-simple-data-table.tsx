@@ -1,7 +1,8 @@
 import { memo } from 'react'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-type CellValue = string | number | boolean | null | undefined
+type CellValue = boolean | number | string | null | undefined
 
 interface SimpleDataTableProps {
   headers: string[]

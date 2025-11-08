@@ -1,24 +1,29 @@
-import type { ComponentType } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+'use client'
+
+import { AlertTriangle, FileX, Search, Package, Users, ShoppingCart, Calculator, RefreshCw, Plus, Home } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { /** * Shared Empty and Error States * Reusable empty states and error displays */ AlertTriangle, FileX, Search, Package, Users, ShoppingCart, Calculator, RefreshCw, Plus, Home } from 'lucide-react' 
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+
+import type { ComponentType } from 'react' 
 
 // Empty state for different contexts
 interface EmptyStateProps {
-  icon?: ComponentType<{ className?: string }>
+    icon?: ComponentType<{ className?: string }>
   title: string
   description: string
   action?: {
     label: string
     onClick: () => void
-    icon?: ComponentType<{ className?: string }>
-  }
+  icon?: ComponentType<{ className?: string }>
+  } | undefined
   secondaryAction?: {
     label: string
     onClick: () => void
   }
-  variant?: 'default' | 'minimal' | 'card'
+  variant?: 'card' | 'default' | 'minimal'
 }
 
 export const EmptyState = ({
@@ -195,11 +200,11 @@ export const EmptyStates = {
 
 // Error state components
 interface ErrorStateProps {
-  title?: string
+  title?: string | undefined
   message: string
-  onRetry?: () => void
-  showHomeButton?: boolean
-  variant?: 'page' | 'section' | 'inline'
+  onRetry?: (() => void) | undefined
+  showHomeButton?: boolean | undefined
+  variant?: 'inline' | 'page' | 'section' | undefined
 }
 
 export const ErrorState = ({
@@ -209,6 +214,7 @@ export const ErrorState = ({
   showHomeButton = false,
   variant = 'page'
 }: ErrorStateProps) => {
+  const router = useRouter()
   const content = (
     <div className="text-center">
       <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
@@ -230,7 +236,7 @@ export const ErrorState = ({
         )}
 
         {showHomeButton && (
-          <Button variant="outline" onClick={() => window.location.href = '/'}>
+          <Button variant="outline" onClick={() => router.push('/')}>
             <Home className="h-4 w-4 mr-2" />
             Kembali ke Beranda
           </Button>

@@ -1,14 +1,5 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useToast } from '@/hooks/use-toast'
-import { useMemo, useState } from 'react'
-import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
-import type { RecipeIngredientWithPrice } from '@/modules/hpp/types'
 import {
     ChevronDown,
     ChevronUp,
@@ -19,11 +10,24 @@ import {
     Download,
     Info
 } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import type { RecipeWithCosts } from '@/modules/hpp/hooks/useUnifiedHpp'
+import type { RecipeIngredientWithPrice } from '@/modules/hpp/types'
+
+
 
 interface IngredientDisplay extends RecipeIngredientWithPrice {
     category?: string
@@ -39,12 +43,12 @@ interface HppBreakdownVisualProps {
     }
 }
 
-export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVisualProps) => {
+export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVisualProps): JSX.Element => {
     const { toast } = useToast()
     const { formatCurrency } = useCurrency()
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['ingredients']))
 
-    const toggleSection = (section: string) => {
+    const toggleSection = (section: string): void => {
         const newExpanded = new Set(expandedSections)
         if (newExpanded.has(section)) {
             newExpanded.delete(section)
@@ -109,18 +113,93 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
     // Group ingredients by category
     const ingredientsByCategory = ingredients.reduce((acc, item) => {
         const category = item.category ?? 'Lainnya'
-        if (!acc[category]) { acc[category] = [] }
+        acc[category] ??= []
         acc[category].push(item)
         return acc
     }, {} as Record<string, IngredientDisplay[]>)
 
-    const exportToPDF = () => {
-        // TODO: Implement PDF export
-        toast({
-            title: 'Fitur akan segera tersedia',
-            description: 'Export PDF akan segera tersedia!',
-            variant: 'default',
-        })
+    const exportToPDF = (): void => {
+        try {
+            if (typeof window === 'undefined') {
+                throw new Error('Export hanya tersedia di browser')
+            }
+
+            const summary = `
+                <h1>Ringkasan HPP - ${recipe.name}</h1>
+                <p>Diekspor pada: ${new Date().toLocaleString('id-ID')}</p>
+                <table>
+                    <tr><th>HPP Bahan</th><td>${formatCurrency(ingredientCost)}</td></tr>
+                    <tr><th>Biaya Operasional</th><td>${formatCurrency(totalOperational)}</td></tr>
+                    <tr><th>Total HPP</th><td>${formatCurrency(totalCost)}</td></tr>
+                    <tr><th>Harga Jual</th><td>${formatCurrency(sellingPrice)}</td></tr>
+                    <tr><th>Margin</th><td>${marginPercent.toFixed(2)}%</td></tr>
+                </table>
+                <h2>Komponen Operasional</h2>
+                <ul>
+                    ${Object.entries(opCosts).map(([key, value]) => `<li>${key.toUpperCase()}: ${formatCurrency(value)}</li>`).join('')}
+                </ul>
+            `
+
+            const ingredientRows = ingredients
+                .map((item) => `<tr>
+                    <td>${item.name}</td>
+                    <td>${item.quantity} ${item.unit}</td>
+                    <td>${formatCurrency(item.unit_price)}</td>
+                    <td>${formatCurrency(item.unit_price * item.quantity)}</td>
+                </tr>`)
+                .join('')
+
+            const exportWindow = window.open('', '_blank', 'width=1024,height=768')
+            if (!exportWindow) {
+                throw new Error('Pop-up diblokir oleh browser')
+            }
+
+            exportWindow.document.write(`
+                <html>
+                    <head>
+                        <title>HeyTrack - Ringkasan HPP</title>
+                        <style>
+                            body { font-family: 'Inter', sans-serif; padding: 24px; color: #111827; }
+                            h1, h2 { margin-bottom: 8px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+                            th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
+                            th { background: #f3f4f6; }
+                            ul { padding-left: 20px; }
+                        </style>
+                    </head>
+                    <body>
+                        ${summary}
+                        <h2>Detail Bahan</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Kuantitas</th>
+                                    <th>Harga Satuan</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>${ingredientRows}</tbody>
+                        </table>
+                    </body>
+                </html>
+            `)
+            exportWindow.document.close()
+            exportWindow.focus()
+            exportWindow.print()
+            exportWindow.close()
+
+            toast({
+                title: 'Export siap',
+                description: 'Gunakan dialog cetak untuk menyimpan sebagai PDF.',
+            })
+        } catch (error) {
+            toast({
+                title: 'Gagal mengekspor PDF',
+                description: error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat PDF.',
+                variant: 'destructive',
+            })
+        }
     }
 
     return (
@@ -260,7 +339,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                                             const itemPercent = ingredientCost > 0 ? (itemCost / ingredientCost) * 100 : 0
 
                                             return (
-                                                <div key={item.id} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
+                                                <div key={item['id']} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2">
                                                             <span>{item.name}</span>

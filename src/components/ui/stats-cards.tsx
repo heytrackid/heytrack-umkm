@@ -1,6 +1,7 @@
-import type { ComponentType } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+import type { ComponentType } from 'react'
 
 /**
  * Shared Stats Cards Components
@@ -10,14 +11,14 @@ import { Badge } from '@/components/ui/badge'
 
 export interface StatCardData {
   title: string
-  value: string | number
+  value: number | string
   description?: string
-  icon?: ComponentType<{ className?: string }>
+  icon?: ComponentType<{ className?: string | undefined }>
   trend?: {
     value: number
     isPositive: boolean
   }
-  variant?: 'default' | 'secondary' | 'destructive'
+  variant?: 'default' | 'destructive' | 'secondary'
 }
 
 interface StatsCardsProps {

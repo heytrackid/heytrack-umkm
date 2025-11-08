@@ -1,14 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Package, Search, Sparkles, AlertCircle } from 'lucide-react'
-import { getSmartIngredientSuggestions } from '@/lib/utils/recipe-helpers'
+import { useEffect, useState } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
 import { useCurrency } from '@/hooks/useCurrency'
+import { getSmartIngredientSuggestions } from '@/lib/utils/recipe-helpers'
 
 
 /**
@@ -56,7 +57,7 @@ export const SmartIngredientSelector = ({
                 )
 
                 if (match && suggestion.priority === 'essential') {
-                    suggestedIds.push(match.id)
+                    suggestedIds.push(match['id'])
                 }
             })
 
@@ -94,7 +95,7 @@ export const SmartIngredientSelector = ({
         } else {
             onSelectionChange([...selectedIngredients, id])
             // Set default quantity when selected
-            const ingredient = availableIngredients.find(ing => ing.id === id)
+            const ingredient = availableIngredients.find(ing => ing['id'] === id)
             if (ingredient) {
                 setIngredientQuantities(prev => ({
                     ...prev,
@@ -122,7 +123,7 @@ export const SmartIngredientSelector = ({
     }
 
     const selectAllSuggested = () => {
-        const allSuggestedIds = suggestedIngredients.map(ing => ing.id)
+        const allSuggestedIds = suggestedIngredients.map(ing => ing['id'])
         const newSelection = [...new Set([...selectedIngredients, ...allSuggestedIds])]
         onSelectionChange(newSelection)
     }
@@ -209,18 +210,18 @@ export const SmartIngredientSelector = ({
                         <div className="space-y-1 max-h-64 overflow-y-auto">
                             {suggestedIngredients.map(ingredient => {
                                 const stockStatus = getStockStatus(ingredient)
-                                const isSelected = selectedIngredients.includes(ingredient.id)
+                                const isSelected = selectedIngredients.includes(ingredient['id'])
 
                                 return (
                                     <div
-                                        key={ingredient.id}
+                                        key={ingredient['id']}
                                         className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border'
                                             }`}
-                                        onClick={() => toggleIngredient(ingredient.id)}
+                                        onClick={() => toggleIngredient(ingredient['id'])}
                                     >
                                         <Checkbox
                                             checked={isSelected}
-                                            onCheckedChange={() => toggleIngredient(ingredient.id)}
+                                            onCheckedChange={() => toggleIngredient(ingredient['id'])}
                                         />
 
                                         <div className="flex-1 min-w-0">
@@ -254,18 +255,18 @@ export const SmartIngredientSelector = ({
                         <div className="space-y-1 max-h-48 overflow-y-auto">
                             {otherIngredients.map(ingredient => {
                                 const stockStatus = getStockStatus(ingredient)
-                                const isSelected = selectedIngredients.includes(ingredient.id)
+                                const isSelected = selectedIngredients.includes(ingredient['id'])
 
                                 return (
                                     <div
-                                        key={ingredient.id}
+                                        key={ingredient['id']}
                                         className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border'
                                             }`}
-                                        onClick={() => toggleIngredient(ingredient.id)}
+                                        onClick={() => toggleIngredient(ingredient['id'])}
                                     >
                                         <Checkbox
                                             checked={isSelected}
-                                            onCheckedChange={() => toggleIngredient(ingredient.id)}
+                                            onCheckedChange={() => toggleIngredient(ingredient['id'])}
                                         />
 
                                         <div className="flex-1 min-w-0">
@@ -294,10 +295,10 @@ export const SmartIngredientSelector = ({
 
                         <div className="space-y-2">
                             {selectedIngredients.map(ingredientId => {
-                                const ingredient = availableIngredients.find(ing => ing.id === ingredientId)
+                                const ingredient = availableIngredients.find(ing => ing['id'] === ingredientId)
                                 if (!ingredient) {return null}
 
-                                const quantity = ingredientQuantities[ingredientId] || getDefaultQuantity(ingredient.unit)
+                                const quantity = ingredientQuantities[ingredientId] ?? getDefaultQuantity(ingredient.unit)
                                 const totalCost = quantity * ingredient.price_per_unit
 
                                 return (
@@ -369,7 +370,7 @@ export const SmartIngredientSelector = ({
                                 <div className="font-semibold mb-1">Pilih minimal 3 bahan</div>
                                 <div>
                                     AI butuh minimal 3 bahan untuk generate resep yang bagus.
-                                    Klik "Pilih Semua Saran" untuk quick start!
+                                    Klik &#34;Pilih Semua Saran&#34; untuk quick start!
                                 </div>
                             </div>
                         </div>

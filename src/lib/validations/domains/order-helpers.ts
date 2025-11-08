@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { OrderInsertSchema, type OrderInsert, type OrderUpdate } from './order'
 
 
@@ -86,9 +87,9 @@ export class OrderValidationHelpers {
     try {
       const validatedData = EnhancedOrderInsertSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors = error.issues.map(error => `${error.path.join('.')}: ${error.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -102,9 +103,9 @@ export class OrderValidationHelpers {
     try {
       const validatedData = EnhancedOrderUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors = error.issues.map(error => `${error.path.join('.')}: ${error.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -202,8 +203,8 @@ export class OrderValidationHelpers {
 
     orders.forEach((order, index) => {
       const result = this.validateInsert(order)
-      if (result.success && result.data) {
-        valid.push(result.data)
+      if (result.success && result['data']) {
+        valid.push(result['data'])
       } else {
         invalid.push({
           index,

@@ -1,24 +1,23 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { OperationalCostUpdateSchema } from '@/lib/validations/domains/finance'
-import type { Update } from '@/types/database'
-import { apiLogger } from '@/lib/logger'
-import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-interface RouteContext {
-  params: Promise<{ id: string }>
-}
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import { OperationalCostUpdateSchema } from '@/lib/validations/domains/finance'
+import type { Update } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
+import { createClient } from '@/utils/supabase/server'
 
 // GET /api/operational-costs/[id] - Get single operational cost
-export async function GET(
+async function getHandler(
   _request: NextRequest,
-  context: RouteContext
-) {
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = params
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -38,11 +37,11 @@ export async function GET(
       .from('operational_costs')
       .select('id, user_id, name, amount, frequency, category, created_at, updated_at')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Operational cost not found' }, { status: 404 })
       }
       apiLogger.error({ error }, 'Error fetching operational cost')
@@ -60,12 +59,12 @@ export async function GET(
 }
 
 // PUT /api/operational-costs/[id] - Update operational cost
-export async function PUT(
+async function putHandler(
   request: NextRequest,
-  context: RouteContext
-) {
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = params
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -80,7 +79,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = await request.json() as unknown
 
     // Validate request body
     const validation = OperationalCostUpdateSchema.safeParse(body)
@@ -94,32 +93,33 @@ export async function PUT(
       )
     }
 
-    const validatedData = validation.data
-
+    const validatedData = validation['data']
 
     // Build update object
     const updatePayload: Update<'operational_costs'> = {
-      category: validatedData.category ?? undefined,
-      amount: validatedData.amount,
-      description: validatedData.description ?? undefined,
-      date: validatedData.date,
-      recurring: validatedData.is_recurring,
-      frequency: validatedData.recurring_frequency,
-      supplier: validatedData.vendor_name,
-      reference: validatedData.invoice_number,
-      payment_method: validatedData.is_paid ? 'CASH' : undefined,
+      ...(validatedData.category !== undefined && { category: validatedData.category }),
+      ...(validatedData.amount !== undefined && { amount: validatedData.amount }),
+      ...(validatedData.description !== undefined && { description: validatedData.description }),
+      ...(validatedData.date !== undefined && { date: validatedData.date }),
+      ...(validatedData.recurring !== undefined && { recurring: validatedData.recurring }),
+      ...(validatedData.frequency !== undefined && { frequency: validatedData.frequency }),
+      ...(validatedData.supplier !== undefined && { supplier: validatedData.supplier }),
+      ...(validatedData.reference !== undefined && { reference: validatedData.reference }),
+      ...(validatedData.payment_method !== undefined && { payment_method: validatedData.payment_method }),
+      ...(validatedData.notes !== undefined && { notes: validatedData.notes }),
+      ...(validatedData.is_active !== undefined && { is_active: validatedData.is_active }),
       updated_at: new Date().toISOString()
     }
     const { data, error } = await supabase
       .from('operational_costs')
       .update(updatePayload)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select()
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Operational cost not found' }, { status: 404 })
       }
       apiLogger.error({ error }, 'Error updating operational cost')
@@ -137,12 +137,12 @@ export async function PUT(
 }
 
 // DELETE /api/operational-costs/[id] - Delete operational cost
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
-  context: RouteContext
-) {
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = params
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -162,10 +162,10 @@ export async function DELETE(
       .from('operational_costs')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Operational cost not found' }, { status: 404 })
       }
       apiLogger.error({ error }, 'Error deleting operational cost')
@@ -181,3 +181,7 @@ export async function DELETE(
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/operational-costs/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureHandler(putHandler, 'PUT /api/operational-costs/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/operational-costs/[id]', SecurityPresets.enhanced())

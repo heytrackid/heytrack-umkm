@@ -1,15 +1,17 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
 import { Palette } from 'lucide-react'
-import { useSettings } from '@/contexts/settings-context'
+
 import type {
   AppSettingsState,
   SettingsUpdateHandler,
   ThemeOption,
   LanguageOption,
 } from '@/app/settings/types'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { useSettings } from '@/contexts/settings-context'
+
 
 interface UIThemeSettingsProps {
   settings: AppSettingsState
@@ -53,15 +55,15 @@ export const UIThemeSettings = ({ settings, onSettingChange }: UIThemeSettingsPr
             className="w-full p-2 border border-input rounded-md bg-background"
             value={settings.ui.language}
             onChange={(e) => {
-              const selected = languages.find(l => l.code === e.target.value)
+              const selected = languages.find(l => l['code'] === e.target.value)
               if (selected) {
-                void updateLanguage(selected)
-                onSettingChange('ui', 'language', selected.code as LanguageOption)
+                updateLanguage(selected)
+                onSettingChange('ui', 'language', selected['code'] as LanguageOption)
               }
             }}
           >
             {languages.map(language => (
-              <option key={language.code} value={language.code}>
+              <option key={language['code']} value={language['code']}>
                 {language.flag} {language.name}
               </option>
             ))}

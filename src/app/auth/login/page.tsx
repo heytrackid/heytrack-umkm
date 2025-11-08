@@ -1,5 +1,9 @@
 'use client'
 
+import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import React, { type FormEvent, useEffect, useRef, useState, useTransition } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -7,15 +11,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { useRenderPerformance } from '@/hooks/usePerformance'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
-import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
-import Link from 'next/link'
-import React, { type FormEvent, useState, useTransition } from 'react'
+
+import { useRenderPerformance } from '@/lib/performance'
 // import { login } from './actions' // Replaced with API call
 
-const LoginPage = () => {
+const LoginPage = (): JSX.Element => {
+  const router = useRouter()
   useRenderPerformance('LoginPage')
+  const mountedRef = useRef(true)
+  const abortControllerRef = useRef<AbortController | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
@@ -23,11 +28,18 @@ const LoginPage = () => {
 
   const [isPending, startTransition] = useTransition()
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+   useEffect((): (() => void) => () => {
+     mountedRef.current = false
+     if (abortControllerRef.current) {
+       abortControllerRef.current.abort()
+     }
+   }, [])
+
+   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault()
-    void setError('')
-    void setErrorAction(null)
-    void setFieldErrors({})
+    setError('')
+    setErrorAction(null)
+    setFieldErrors({})
 
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
@@ -38,7 +50,7 @@ const LoginPage = () => {
 
     const emailValidation = validateEmail(email)
     if (!emailValidation.isValid) {
-      errors.email = emailValidation.error
+      errors.email = emailValidation.error ?? ''
     }
 
     if (!password) {
@@ -46,13 +58,15 @@ const LoginPage = () => {
     }
 
     if (Object.keys(errors).length > 0) {
-      void setFieldErrors(errors)
+      setFieldErrors(errors)
       return
     }
 
     startTransition(async () => {
+      abortControllerRef.current = new AbortController()
       try {
         const response = await fetch('/api/auth/login', {
+          signal: abortControllerRef.current.signal,
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -64,32 +78,38 @@ const LoginPage = () => {
           credentials: 'include', // Include cookies for authentication
         })
 
-        const data = await response.json()
+        const data = await response.json() as { error?: string }
 
         if (!response.ok) {
+          if (!mountedRef.current) {
+            return
+          }
           const authError = getAuthErrorMessage(data.error ?? 'Login failed')
-          void setError(authError)
-          void setErrorAction(null)
+          setError(authError)
+          setErrorAction(null)
           return
         }
 
         // Success - redirect
-        window.location.href = '/dashboard'
-      } catch (_err) {
-        void setError('Network error. Please try again.')
-        void setErrorAction(null)
+        router.push('/dashboard')
+      } catch (_error) {
+        if (!mountedRef.current) {
+          return
+        }
+        setError('Network error. Please try again.')
+        setErrorAction(null)
       }
     })
   }
 
-  const clearFieldError = (field: 'email' | 'password') => {
+   const clearFieldError = (field: 'email' | 'password'): void => {
     setFieldErrors((prev) => {
       const newErrors = { ...prev }
       delete newErrors[field]
       return newErrors
     })
-    void setError('')
-    void setErrorAction(null)
+    setError('')
+    setErrorAction(null)
   }
 
   return (
@@ -154,7 +174,7 @@ const LoginPage = () => {
                     required
                     disabled={isPending}
                     onChange={() => clearFieldError('email')}
-                    aria-invalid={!!fieldErrors.email}
+                    aria-invalid={Boolean(fieldErrors.email)}
                     aria-describedby={fieldErrors.email ? 'email-error' : undefined}
                   />
                 </div>
@@ -188,7 +208,7 @@ const LoginPage = () => {
                     required
                     disabled={isPending}
                     onChange={() => clearFieldError('password')}
-                    aria-invalid={!!fieldErrors.password}
+                    aria-invalid={Boolean(fieldErrors.password)}
                     aria-describedby={fieldErrors.password ? 'password-error' : undefined}
                   />
                   <Button

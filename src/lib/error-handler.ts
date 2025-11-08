@@ -32,7 +32,7 @@ export function captureError(
 
   // In production, you might want to send this to an error tracking service
   // like Sentry, LogRocket, etc.
-  if (process.env.NODE_ENV === 'production') {
+  if (process['env'].NODE_ENV === 'production') {
     // Example: Sentry.captureException(error, { contexts: context })
   }
 }

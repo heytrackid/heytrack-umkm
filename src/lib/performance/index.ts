@@ -6,6 +6,15 @@
  * Centralized exports for all performance-related utilities
  */
 
+export * from './core'
+export * from './advanced'
+export * from './monitoring'
+export * from './operation-monitor'
+export * from './performance-monitoring'
+export * from './user-flows'
+export * from './hooks'
+export * from './use-performance-monitoring'
+
 // Virtual scrolling
 export { VirtualScroll, useVirtualScroll } from './virtual-scroll'
 
@@ -43,7 +52,7 @@ export {
   useLongTaskTracking,
   useResourceTiming,
   getPerformanceMetrics,
-  PerformanceMonitor
+  PerformanceMonitor as WebVitalsPerformanceMonitor
 } from './web-vitals'
 
 // Bundle optimization

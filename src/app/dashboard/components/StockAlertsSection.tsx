@@ -1,8 +1,9 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Package } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface LowStockItem {
   id: string
@@ -15,7 +16,7 @@ interface StockAlertsSectionProps {
   lowStockItems?: LowStockItem[]
 }
 
-const StockAlertsSection = ({ lowStockItems }: StockAlertsSectionProps) => {
+const StockAlertsSection = ({ lowStockItems }: StockAlertsSectionProps): JSX.Element => {
   // Show skeleton if data is undefined
   if (lowStockItems === undefined) {
     return (
@@ -50,7 +51,7 @@ const StockAlertsSection = ({ lowStockItems }: StockAlertsSectionProps) => {
           <div className="space-y-3">
             {lowStockItems.map((item) => (
               <div
-                key={item.id}
+                key={item['id']}
                 className="flex items-center justify-between p-3 bg-destructive/10 rounded-lg border border-destructive/20"
               >
                 <div className="flex-1 min-w-0">

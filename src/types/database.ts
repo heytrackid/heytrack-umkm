@@ -32,7 +32,7 @@ export type SafeUpdate<T extends string> = T extends TableName
   : Record<string, unknown>
 
 // Helper type for nested relations
-export type WithNestedRelation<T, K extends string, R> = T & { [P in K]: R }
+export type WithNestedRelation<T, K extends string, R> = T & Record<K, R>
 
 // Table Row types (for SELECT queries) - using Tables helper from supabase-generated
 export type AppSettingsTable = SupabaseTables<'app_settings'>
@@ -174,17 +174,17 @@ export type UserRole = SupabaseEnums<'user_role'>
 
 // Note: payment_status is stored as string in the database, not an enum
 // This is just for type consistency in our code
-export type PaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID' | 'REFUNDED' | 'CANCELLED'
+export type PaymentStatus = 'CANCELLED' | 'PAID' | 'PARTIAL' | 'PENDING' | 'REFUNDED'
 
 // Stock reservation status (stored as string in database)
-export type StockReservationStatus = 'ACTIVE' | 'CONSUMED' | 'RELEASED' | 'EXPIRED'
+export type StockReservationStatus = 'ACTIVE' | 'CONSUMED' | 'EXPIRED' | 'RELEASED'
 
 // Batch status (stored as string in database)
-export type BatchStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+export type BatchStatus = 'CANCELLED' | 'COMPLETED' | 'IN_PROGRESS' | 'PLANNED'
 
-// ============================================
+// ==================================
 // EXTENDED TYPES WITH RELATIONS
-// ============================================
+// ==================================
 
 // Order with relations
 export type OrderWithItems = OrdersTable & {
@@ -226,9 +226,9 @@ export type SupplierWithIngredients = SuppliersTable & {
   }>
 }
 
-// ============================================
+// ==================================
 // UTILITY TYPES
-// ============================================
+// ==================================
 
 // Extract specific fields from table
 export type PickFields<T extends TableName, K extends keyof Row<T>> = Pick<Row<T>, K>
@@ -263,9 +263,9 @@ export interface ApiErrorResponse {
 
 export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse
 
-// ============================================
+// ==================================
 // DOMAIN-SPECIFIC TYPES
-// ============================================
+// ==================================
 
 // Stock Reservation - using generated types
 export type StockReservation = StockReservationsTable
@@ -298,23 +298,23 @@ export interface InventoryStatusCustom {
   available_stock: number
   min_stock: number
   reorder_point: number
-  status: 'OK' | 'LOW' | 'OUT_OF_STOCK' | 'REORDER_NEEDED'
+  status: 'LOW' | 'OK' | 'OUT_OF_STOCK' | 'REORDER_NEEDED'
 }
 
-// ============================================
+// ==================================
 // FORM TYPES
-// ============================================
+// ==================================
 
 // Form data types (for client-side forms)
-export type IngredientFormData = Omit<IngredientsInsert, 'id' | 'created_at' | 'updated_at' | 'user_id'>
-export type RecipeFormData = Omit<RecipesInsert, 'id' | 'created_at' | 'updated_at' | 'user_id'>
-export type OrderFormData = Omit<OrdersInsert, 'id' | 'created_at' | 'updated_at' | 'user_id'>
-export type CustomerFormData = Omit<CustomersInsert, 'id' | 'created_at' | 'updated_at' | 'user_id'>
-export type SupplierFormData = Omit<SuppliersInsert, 'id' | 'created_at' | 'updated_at' | 'user_id'>
+export type IngredientFormData = Omit<IngredientsInsert, 'created_at' | 'id' | 'updated_at' | 'user_id'>
+export type RecipeFormData = Omit<RecipesInsert, 'created_at' | 'id' | 'updated_at' | 'user_id'>
+export type OrderFormData = Omit<OrdersInsert, 'created_at' | 'id' | 'updated_at' | 'user_id'>
+export type CustomerFormData = Omit<CustomersInsert, 'created_at' | 'id' | 'updated_at' | 'user_id'>
+export type SupplierFormData = Omit<SuppliersInsert, 'created_at' | 'id' | 'updated_at' | 'user_id'>
 
-// ============================================
+// ==================================
 // QUERY FILTER TYPES
-// ============================================
+// ==================================
 
 export interface DateRangeFilter {
   start: string
@@ -336,9 +336,9 @@ export interface SearchParams {
   fields?: string[]
 }
 
-// ============================================
+// ==================================
 // CONSTANTS
-// ============================================
+// ==================================
 
 // Table names as const for type safety
 export const TABLE_NAMES = {

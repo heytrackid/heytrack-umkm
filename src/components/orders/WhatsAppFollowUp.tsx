@@ -1,5 +1,9 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
+
+import { Check, Copy, MessageCircle, Send } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,14 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useSettings } from '@/contexts/settings-context';
+import { createClientLogger } from '@/lib/client-logger'
 import type { OrderData } from '@/lib/communications/types';
 import { WhatsAppService } from '@/lib/communications/whatsapp';
-import { createClientLogger } from '@/lib/client-logger'
+
 
 const logger = createClientLogger('WhatsAppFollowUp');
-import { Check, Copy, MessageCircle, Send } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
+
 
 
 
@@ -29,7 +32,7 @@ interface OrderItemData {
   name?: string;
 }
 
-interface WhatsAppFollowUpProps {
+export interface WhatsAppFollowUpProps {
   order: {
     id: string;
     customer_name: string;
@@ -41,10 +44,10 @@ interface WhatsAppFollowUpProps {
     notes?: string;
   };
   businessName?: string;
-  onSent?: (type: 'whatsapp' | 'business', message: string) => void;
+  onSent?: (type: 'business' | 'whatsapp', message: string) => void;
 }
 
-const WhatsAppFollowUp = ({
+export const WhatsAppFollowUp = ({
   order,
   businessName = 'UMKM UMKM',
   onSent
@@ -65,18 +68,18 @@ const WhatsAppFollowUp = ({
 
   // Convert order data to WhatsApp service format
   const convertOrderData = (order: WhatsAppFollowUpProps['order']): OrderData => ({
-    id: order.id,
-    customer_name: order.customer_name,
+    id: order['id'],
+    customer_name: order['customer_name'],
     customer_phone: order.customer_phone,
     total_amount: order.total_amount,
-    delivery_date: order.delivery_date,
-    status: order.status,
+    delivery_date: order.delivery_date ?? '',
+    status: order['status'],
     items: order.order_items?.map((item: OrderItemData) => ({
-      name: (item.recipe_name ?? item.name) ?? 'Product',
-      quantity: item.quantity || 1,
-      price: item.price_per_unit || 0
+      name: (item['recipe_name'] ?? item.name) ?? 'Product',
+      quantity: item.quantity ?? 1,
+      price: item.price_per_unit ?? 0
     })) ?? [],
-    notes: order.notes
+    notes: order.notes ?? ''
   });
 
   // Generate message based on selected template
@@ -88,7 +91,7 @@ const WhatsAppFollowUp = ({
 
     try {
       const orderData = convertOrderData(order);
-      const template = templates.find(t => t.id === selectedTemplate);
+      const template = templates.find(t => t['id'] === selectedTemplate);
 
       if (!template) {
         throw new Error('Template not found');
@@ -103,8 +106,8 @@ const WhatsAppFollowUp = ({
 
       // Replace variables in template
       const replacements: Record<string, string> = {
-        customer_name: orderData.customer_name,
-        order_id: orderData.id,
+        customer_name: orderData['customer_name'],
+        order_id: orderData['id'],
         total_amount: formatCurrency(orderData.total_amount),
         delivery_date: orderData.delivery_date ?? 'Sesuai kesepakatan',
         business_name: businessName,
@@ -124,8 +127,8 @@ const WhatsAppFollowUp = ({
       });
 
       setGeneratedMessage(message);
-    } catch (err: unknown) {
-      logger.error({ err }, 'Error generating message:');
+    } catch (error: unknown) {
+      logger.error({ error }, 'Error generating message:');
       toast.error('Gagal generate pesan. Coba template lain.');
     }
   };
@@ -150,13 +153,13 @@ const WhatsAppFollowUp = ({
       setCopied(type);
       toast.success('Berhasil disalin!');
       setTimeout(() => setCopied(null), 2000);
-    } catch (_err: unknown) {
+    } catch (_error: unknown) {
       toast.error('Gagal menyalin text');
     }
   };
 
   // Handle send action
-  const handleSend = (type: 'whatsapp' | 'business') => {
+  const handleSend = (type: 'business' | 'whatsapp') => {
     const urls = getWhatsAppURLs();
     const url = type === 'whatsapp' ? urls.whatsapp : urls.business;
     const message = generatedMessage || customMessage;
@@ -192,7 +195,7 @@ const WhatsAppFollowUp = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5 text-gray-600" />
-            WhatsApp Follow-up untuk {order.customer_name}
+            WhatsApp Follow-up untuk {order['customer_name']}
           </DialogTitle>
         </DialogHeader>
 
@@ -223,7 +226,7 @@ const WhatsAppFollowUp = ({
                     </SelectTrigger>
                     <SelectContent>
                       {templates.map((template) => (
-                        <SelectItem key={template.id} value={template.id}>
+                        <SelectItem key={template['id']} value={template['id']}>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className="text-xs">
                               {template.category.replace('_', ' ')}
@@ -245,7 +248,7 @@ const WhatsAppFollowUp = ({
                 {/* Template Info */}
                 {!isCustomTemplate && (
                   <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                    {templates.find(t => t.id === selectedTemplate)?.description}
+                    {templates.find(t => t['id'] === selectedTemplate)?.description}
                   </div>
                 )}
 
@@ -283,16 +286,16 @@ const WhatsAppFollowUp = ({
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
-                  <div><strong>ID:</strong> {order.id}</div>
-                  <div><strong>Customer:</strong> {order.customer_name}</div>
+                  <div><strong>ID:</strong> {order['id']}</div>
+                  <div><strong>Customer:</strong> {order['customer_name']}</div>
                   <div><strong>Phone:</strong> {order.customer_phone}</div>
                   <div><strong>Total:</strong> {formatCurrency(order.total_amount)}</div>
                   <div><strong>Status:</strong>
                     <Badge className="ml-2" variant={
-                      order.status === 'COMPLETED' ? 'default' :
-                        order.status === 'PENDING' ? 'secondary' : 'outline'
+                      order['status'] === 'COMPLETED' ? 'default' :
+                        order['status'] === 'PENDING' ? 'secondary' : 'outline'
                     }>
-                      {order.status}
+                      {order['status']}
                     </Badge>
                   </div>
                   {order.delivery_date && (
@@ -407,5 +410,3 @@ const WhatsAppFollowUp = ({
     </Dialog>
   );
 };
-
-export default WhatsAppFollowUp;

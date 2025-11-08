@@ -1,6 +1,7 @@
-import type { PaymentStatus, PaymentMethod, DeliveryMethod } from './types'
-import type { OrderStatus } from '@/types/database'
 import { formatCurrentCurrency } from '@/lib/currency'
+
+import type { PaymentStatus, PaymentMethod, DeliveryMethod } from '@/modules/orders/types'
+import type { OrderStatus } from '@/types/database'
 
 
 
@@ -180,7 +181,7 @@ export const DELIVERY_METHOD_CONFIG: Record<DeliveryMethod, {
   icon: string
   description: string
   estimatedTime: string
-  feeCalculation: 'fixed' | 'distance' | 'weight'
+  feeCalculation: 'distance' | 'fixed' | 'weight'
 }> = {
   PICKUP: {
     label: 'Ambil Sendiri',

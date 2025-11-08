@@ -1,11 +1,12 @@
 'use client'
 
+import { type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes, forwardRef, useId } from 'react'
+
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
-import { type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes, forwardRef } from 'react'
 
 
 
@@ -26,7 +27,7 @@ interface FormInputProps extends FormFieldProps, InputHTMLAttributes<HTMLInputEl
  */
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ label, error, required, helperText, className, ...props }, ref) => {
-    const id = props.id ?? props.name
+    const id = props['id'] ?? props.name
     return (
       <div className={cn('space-y-2', className)}>
         {label && (
@@ -38,7 +39,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           ref={ref}
           id={id}
           className={cn(error && 'border-red-500 focus-visible:ring-red-500')}
-          aria-invalid={!!error}
+          aria-invalid={Boolean(error)}
           aria-describedby={(() => {
             if (error) {return `${id}-error`}
             if (helperText) {return `${id}-helper`}
@@ -72,7 +73,7 @@ interface FormTextareaProps extends FormFieldProps, TextareaHTMLAttributes<HTMLT
  */
 export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
   ({ label, error, required, helperText, className, ...props }, ref) => {
-    const id = props.id ?? props.name
+    const id = props['id'] ?? props.name
     return (
       <div className={cn('space-y-2', className)}>
         {label && (
@@ -84,7 +85,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
           ref={ref}
           id={id}
           className={cn(error && 'border-red-500 focus-visible:ring-red-500')}
-          aria-invalid={!!error}
+          aria-invalid={Boolean(error)}
           aria-describedby={(() => {
             if (error) {return `${id}-error`}
             if (helperText) {return `${id}-helper`}
@@ -123,7 +124,7 @@ interface FormSelectProps extends FormFieldProps {
  */
 export const FormSelect = forwardRef<HTMLButtonElement, FormSelectProps>(
   ({ label, error, required, helperText, className, options, onValueChange, placeholder, value, disabled }, ref) => {
-    const id = `select-${Math.random().toString(36).substr(2, 9)}`
+    const id = useId()
     return (
       <div className={cn('space-y-2', className)}>
         {label && (
@@ -131,12 +132,12 @@ export const FormSelect = forwardRef<HTMLButtonElement, FormSelectProps>(
             {label}
           </Label>
         )}
-        <Select value={value} onValueChange={onValueChange} disabled={disabled}>
+        <Select {...(value !== undefined ? { value } : {})} {...(onValueChange ? { onValueChange } : {})} {...(disabled !== undefined ? { disabled } : {})}>
           <SelectTrigger
             id={id}
             ref={ref}
             className={cn(error && 'border-red-500 focus-visible:ring-red-500')}
-            aria-invalid={!!error}
+            aria-invalid={Boolean(error)}
             aria-describedby={(() => {
               if (error) {return `${id}-error`}
               if (helperText) {return `${id}-helper`}

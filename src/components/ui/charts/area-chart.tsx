@@ -1,5 +1,7 @@
 import { memo, lazy, Suspense } from 'react'
+
 import { useResponsive } from '@/hooks/useResponsive'
+
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from './types'
@@ -34,7 +36,7 @@ interface MobileAreaChartProps extends BaseMobileChartProps {
  * MobileAreaChart - Optimized with React.memo
  * Prevents unnecessary re-renders when data hasn't changed
  */
-export const MobileAreaChart = memo(({
+const MobileAreaChart = memo(({
   data,
   xKey,
   areas,
@@ -114,4 +116,8 @@ export const MobileAreaChart = memo(({
       </Suspense>
     </BaseMobileChart>
   )
-}, (prevProps: MobileAreaChartProps, nextProps: MobileAreaChartProps) => prevProps.data === nextProps.data && prevProps.areas === nextProps.areas)
+}, (prevProps: MobileAreaChartProps, nextProps: MobileAreaChartProps) => prevProps['data'] === nextProps['data'] && prevProps.areas === nextProps.areas)
+
+MobileAreaChart.displayName = 'MobileAreaChart'
+
+export default MobileAreaChart

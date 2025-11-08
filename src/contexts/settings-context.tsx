@@ -1,7 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import { uiLogger } from '@/lib/logger'
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 
 
 
@@ -51,11 +50,11 @@ export const languages: Language[] = [
   { code: 'en', name: 'English', flag: '🇺🇸' }
 ]
 
-const DEFAULT_CURRENCY_CODE = process.env['NEXT_PUBLIC_DEFAULT_CURRENCY'] ?? 'IDR'
-const DEFAULT_LANGUAGE_CODE = process.env['NEXT_PUBLIC_DEFAULT_LANGUAGE'] ?? 'id'
+const DEFAULT_CURRENCY_CODE = process['env']['NEXT_PUBLIC_DEFAULT_CURRENCY'] ?? 'IDR'
+const DEFAULT_LANGUAGE_CODE = process['env']['NEXT_PUBLIC_DEFAULT_LANGUAGE'] ?? 'id'
 
-const defaultCurrency = currencies.find(c => c.code === DEFAULT_CURRENCY_CODE) ?? currencies[0]
-const defaultLanguage = languages.find(l => l.code === DEFAULT_LANGUAGE_CODE) ?? languages[0]
+const defaultCurrency = currencies.find(c => c['code'] === DEFAULT_CURRENCY_CODE) ?? currencies[0] as Currency
+const defaultLanguage = languages.find(l => l['code'] === DEFAULT_LANGUAGE_CODE) ?? languages[0] as Language
 
 const defaultSettings: Settings = {
   currency: defaultCurrency,
@@ -64,51 +63,41 @@ const defaultSettings: Settings = {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
-export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-  const [settings, setSettings] = useState<Settings>(defaultSettings)
-  const [_isHydrated, setIsHydrated] = useState(false)
-
-  useEffect(() => {
-    // Mark as hydrated to prevent hydration mismatch
-    setIsHydrated(true)
-
-    // Load settings from localStorage (client-side only)
-    if (typeof window !== 'undefined') {
-      const savedSettings = localStorage.getItem('heytrack-settings')
-      if (savedSettings) {
-        try {
-          const parsed = JSON.parse(savedSettings)
-          const parsedCurrency = currencies.find(c => c.code === parsed?.currency?.code) ?? defaultCurrency
-          const parsedLanguage = languages.find(l => l.code === parsed?.language?.code) ?? defaultLanguage
-          const newSettings: Settings = {
-            currency: parsedCurrency,
-            language: parsedLanguage
-          }
-          void setSettings(newSettings)
-          localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
-        } catch (err: unknown) {
-          uiLogger.error({ err }, 'Failed to parse saved settings from localStorage')
-          void setSettings(defaultSettings)
-          localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
-        }
-      } else {
-        void setSettings(defaultSettings)
-        localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
-      }
+export const SettingsProvider = ({ children }: { children: ReactNode }): JSX.Element => {
+  const [settings, setSettings] = useState<Settings>(() => {
+    if (typeof window === 'undefined') {
+      return defaultSettings
     }
+    try {
+      const stored = localStorage.getItem('heytrack-settings')
+      if (stored) {
+        return JSON.parse(stored) as Settings
+      }
+    } catch {
+      // ignore corrupted data
+    }
+    return defaultSettings
+  })
+
+  // Settings are loaded in useState initializer
+
+  const persistSettings = useCallback((updater: (prev: Settings) => Settings) => {
+    setSettings(prev => {
+      const next = updater(prev)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('heytrack-settings', JSON.stringify(next))
+      }
+      return next
+    })
   }, [])
 
-  const updateCurrency = (currency: Currency) => {
-    const newSettings = { ...settings, currency }
-    void setSettings(newSettings)
-    localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
-  }
+  const updateCurrency = useCallback((currency: Currency): void => {
+    persistSettings(prev => ({ ...prev, currency }))
+  }, [persistSettings])
 
-  const updateLanguage = (language: Language) => {
-    const newSettings = { ...settings, language }
-    void setSettings(newSettings)
-    localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
-  }
+  const updateLanguage = useCallback((language: Language): void => {
+    persistSettings(prev => ({ ...prev, language }))
+  }, [persistSettings])
 
   const formatCurrency = (amount: number | null | undefined): string => {
     const { symbol, decimals } = settings.currency
@@ -120,10 +109,9 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     return `${symbol} ${formattedAmount}`
   }
 
-  const resetToDefault = () => {
-    void setSettings(defaultSettings)
-    localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
-  }
+  const resetToDefault = useCallback((): void => {
+    persistSettings(() => defaultSettings)
+  }, [persistSettings])
 
   return (
     <SettingsContext.Provider value={{
@@ -140,7 +128,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   )
 }
 
-export function useSettings() {
+export function useSettings(): SettingsContextType {
   const context = useContext(SettingsContext)
   if (context === undefined) {
     throw new Error('useSettings must be used within a SettingsProvider')

@@ -1,7 +1,8 @@
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
 import { ShoppingCart, DollarSign, Package, Clock } from 'lucide-react'
+
+import { Card, CardContent } from '@/components/ui/card'
 
 
 
@@ -19,7 +20,7 @@ const OrdersStatsSection = ({
   averageOrderValue,
   pendingRevenue,
   formatCurrency,
-}: OrdersStatsSectionProps) => (
+}: OrdersStatsSectionProps): JSX.Element => (
   <div className="grid gap-4 md:grid-cols-4">
     <Card>
       <CardContent className="p-6">

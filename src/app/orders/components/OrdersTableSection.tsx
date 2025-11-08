@@ -1,12 +1,18 @@
 'use client'
 
-import { memo, useMemo, useState, useEffect } from 'react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, Eye, Edit, Trash2, MoreVertical } from 'lucide-react'
-import type { Row } from '@/types/database'
+import { useRouter } from 'next/navigation'
+import { memo, useMemo, useState, useEffect } from 'react'
+
+import { DeleteConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
+import { LoadingButton } from '@/components/ui/loading-button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useToast } from '@/hooks'
+
+import type { Row } from '@/types/database'
+
 
 type OrderForTable = Row<'orders'>
 
@@ -23,6 +29,14 @@ const OrdersTableSection = ({
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
+
+  // Delete confirmation state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [orderToDelete, setOrderToDelete] = useState<OrderForTable | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const router = useRouter()
+  const { toast } = useToast()
 
   const ORDER_STATUS_CONFIG: Record<string, { label: string; color: string }> = useMemo(() => ({
     PENDING: { label: "Pending", color: 'bg-gray-100 text-gray-800' },
@@ -54,6 +68,52 @@ const OrdersTableSection = ({
     setCurrentPage(1)
   }, [orders.length])
 
+  // Delete handler
+  const handleDeleteOrder = async (): Promise<void> => {
+    if (!orderToDelete) {return}
+
+    try {
+      setIsDeleting(true)
+      const response = await fetch(`/api/orders/${orderToDelete['id']}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const { error: message } = await response.json().catch(() => ({ error: 'Gagal menghapus pesanan' }))
+        throw new Error(message ?? 'Gagal menghapus pesanan')
+      }
+
+      toast({
+        title: 'Pesanan terhapus',
+        description: `Pesanan ${orderToDelete.order_no} berhasil dihapus.`
+      })
+      router.refresh()
+    } catch (error) {
+      toast({
+        title: 'Gagal menghapus pesanan',
+        description: error instanceof Error ? error.message : 'Terjadi kesalahan saat menghapus pesanan.',
+        variant: 'destructive'
+      })
+    } finally {
+      setIsDeleting(false)
+      setDeleteDialogOpen(false)
+      setOrderToDelete(null)
+    }
+  }
+
+  const handleViewOrder = (order: OrderForTable): void => {
+    router.push(`/orders/${order['id']}`)
+  }
+
+  const handleEditOrder = (order: OrderForTable): void => {
+    router.push(`/orders/${order['id']}/edit`)
+  }
+
+  const handleDeleteClick = (order: OrderForTable): void => {
+    setOrderToDelete(order)
+    setDeleteDialogOpen(true)
+  }
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -71,11 +131,11 @@ const OrdersTableSection = ({
         </TableHeader>
         <TableBody>
           {paginatedOrders.map((order: OrderForTable) => (
-            <TableRow key={order.id}>
-              <TableCell className="font-medium">{order.order_no}</TableCell>
+            <TableRow key={order['id']}>
+              <TableCell className="font-medium">{order['order_no']}</TableCell>
               <TableCell>
                 <div className="flex flex-col">
-                  <span className="font-medium">{order.customer_name ?? '-'}</span>
+                  <span className="font-medium">{order['customer_name'] ?? '-'}</span>
                   {order.customer_phone && (
                     <span className="text-xs text-muted-foreground">{order.customer_phone}</span>
                   )}
@@ -84,39 +144,42 @@ const OrdersTableSection = ({
               <TableCell>{order.order_date ? formatDate(order.order_date) : '-'}</TableCell>
               <TableCell>{order.delivery_date ? formatDate(order.delivery_date) : '-'}</TableCell>
               <TableCell>
-                <span className={`text-xs px-2 py-1 rounded ${order.status ? ORDER_STATUS_CONFIG[order.status]?.color : 'bg-gray-100 text-gray-800'}`}>
-                  {order.status ? (ORDER_STATUS_CONFIG[order.status]?.label || order.status) : 'Unknown'}
+                <span className={`text-xs px-2 py-1 rounded ${order['status'] ? ORDER_STATUS_CONFIG[order['status']]?.color : 'bg-gray-100 text-gray-800'}`}>
+                  {order['status'] ? (ORDER_STATUS_CONFIG[order['status']]?.label ?? order['status']) : 'Unknown'}
                 </span>
               </TableCell>
               <TableCell>
                 <span className={`text-xs px-2 py-1 rounded ${order.payment_status ? PAYMENT_STATUS_CONFIG[order.payment_status]?.color : 'bg-gray-100 text-gray-800'}`}>
-                  {order.payment_status ? (PAYMENT_STATUS_CONFIG[order.payment_status]?.label || order.payment_status) : 'Unknown'}
+                  {order.payment_status ? (PAYMENT_STATUS_CONFIG[order.payment_status]?.label ?? order.payment_status) : 'Unknown'}
                 </span>
               </TableCell>
               <TableCell className="text-right font-medium">
                 {formatCurrency(order.total_amount ?? 0)}
               </TableCell>
               <TableCell className="text-center">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => window.location.href = `/orders/${order.id}`}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      Lihat Detail
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => window.location.href = `/orders/${order.id}/edit`}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Hapus
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
+                 <DropdownMenu>
+                   <DropdownMenuTrigger asChild>
+                     <LoadingButton variant="ghost" size="sm" hapticFeedback hapticType="light">
+                       <MoreVertical className="h-4 w-4" />
+                     </LoadingButton>
+                   </DropdownMenuTrigger>
+                   <DropdownMenuContent align="end">
+                     <DropdownMenuItem onClick={() => handleViewOrder(order)}>
+                       <Eye className="mr-2 h-4 w-4" />
+                       Lihat Detail
+                     </DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => handleEditOrder(order)}>
+                       <Edit className="mr-2 h-4 w-4" />
+                       Edit
+                     </DropdownMenuItem>
+                     <DropdownMenuItem
+                       className="text-red-600 focus:text-red-600"
+                       onClick={() => handleDeleteClick(order)}
+                     >
+                       <Trash2 className="mr-2 h-4 w-4" />
+                       Hapus
+                     </DropdownMenuItem>
+                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
             </TableRow>
@@ -152,31 +215,44 @@ const OrdersTableSection = ({
 
             {/* Page Navigation */}
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
+               <LoadingButton
+                 variant="outline"
+                 size="sm"
+                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                 disabled={currentPage === 1}
+                 hapticFeedback
+                 hapticType="light"
+               >
+                 <ChevronLeft className="h-4 w-4" />
+               </LoadingButton>
 
-              <span className="text-sm font-medium">
-                Page {currentPage} of {totalPages}
-              </span>
+               <span className="text-sm font-medium">
+                 Page {currentPage} of {totalPages}
+               </span>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+               <LoadingButton
+                 variant="outline"
+                 size="sm"
+                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                 disabled={currentPage === totalPages}
+                 hapticFeedback
+                 hapticType="light"
+               >
+                 <ChevronRight className="h-4 w-4" />
+               </LoadingButton>
             </div>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        itemName={`Order ${orderToDelete?.id ?? ''}`}
+        onConfirm={handleDeleteOrder}
+        loading={isDeleting}
+      />
     </div>
   )
 }

@@ -1,7 +1,9 @@
-import { dbLogger } from '@/lib/logger'
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
+import { dbLogger } from '@/lib/logger'
 import { isRecipeWithIngredients } from '@/lib/type-guards'
-import type { Row, Database } from '@/types/database'
+
+import type { Row, Insert, Database } from '@/types/database'
+
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 
@@ -14,7 +16,6 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  */
 
 
-type _Recipe = Row<'recipes'>
 type RecipeIngredient = Row<'recipe_ingredients'>
 type Ingredient = Row<'ingredients'>
 
@@ -38,7 +39,7 @@ export interface HppCalculationResult {
 }
 
 export class HppCalculatorService {
-  private logger = dbLogger
+  private readonly logger = dbLogger
 
   /**
    * Calculate HPP for a specific recipe
@@ -103,11 +104,11 @@ export class HppCalculatorService {
 
         const quantity = Number(ri.quantity)
         // Use WAC if available, otherwise use current price
-        const unit_price = Number(validIngredient.weighted_average_cost || validIngredient.price_per_unit || 0)
+        const unit_price = Number(validIngredient.weighted_average_cost ?? validIngredient.price_per_unit ?? 0)
         const total_cost = quantity * unit_price
 
         material_breakdown.push({
-          ingredient_id: validIngredient.id,
+          ingredient_id: validIngredient['id'],
           ingredient_name: validIngredient.name,
           quantity,
           unit: ri.unit,
@@ -127,7 +128,6 @@ export class HppCalculatorService {
       // Apply WAC adjustment based on recipe quantities
       const wac_adjustment = await this.calculateWacAdjustment(
         supabase,
-        recipeId,
         userId,
         recipeIngredients as unknown as Array<RecipeIngredient & { ingredients: Ingredient | null }>
       )
@@ -191,7 +191,7 @@ export class HppCalculatorService {
 
       // Calculate weighted average labor cost per unit
       const totalLaborCost = productions.reduce(
-        (sum, p) => sum + Number(p.labor_cost || 0),
+        (sum, p) => sum + Number(p.labor_cost ?? 0),
         0
       )
       const totalQuantity = productions.reduce(
@@ -234,7 +234,7 @@ export class HppCalculatorService {
       }
 
       const totalOverhead = operationalCosts.reduce(
-        (sum, cost) => sum + Number(cost.amount || 0),
+        (sum, cost) => sum + Number(cost.amount ?? 0),
         0
       )
 
@@ -277,7 +277,7 @@ export class HppCalculatorService {
       // Fallback: equal allocation across active recipes
       const { count: recipeCount } = await supabase
         .from('recipes')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
         .eq('is_active', true)
 
@@ -299,7 +299,6 @@ export class HppCalculatorService {
    */
   private async calculateWacAdjustment(
     supabase: SupabaseClient<Database>,
-    recipeId: string,
     userId: string,
     recipeIngredients: Array<RecipeIngredient & { ingredients: Ingredient | null }>
   ): Promise<number> {
@@ -326,7 +325,7 @@ export class HppCalculatorService {
         .order('created_at', { ascending: false })
         .limit(HPP_CONFIG.WAC_LOOKBACK_TRANSACTIONS)
 
-      if (error || !transactions) {
+      if (error ?? !transactions) {
         this.logger.warn({ error }, 'Failed to fetch stock transactions for WAC')
         return 0
       }
@@ -346,7 +345,7 @@ export class HppCalculatorService {
 
         // Calculate weighted average cost from transactions
         const totalQuantity = ingredientTransactions.reduce(
-          (sum, t) => sum + Number(t.quantity || 0),
+          (sum, t) => sum + Number(t.quantity ?? 0),
           0
         )
         const totalValue = ingredientTransactions.reduce(
@@ -357,16 +356,16 @@ export class HppCalculatorService {
         if (totalQuantity === 0) {continue}
 
         const wac = totalValue / totalQuantity
-        const currentPrice = Number(ingredient.price_per_unit || 0)
+        const currentPrice = Number(ingredient.price_per_unit ?? 0)
 
         // Adjustment based on recipe quantity (not transaction quantity!)
-        const recipeQuantity = Number(ri.quantity || 0)
+        const recipeQuantity = Number(ri.quantity ?? 0)
         const adjustment = (wac - currentPrice) * recipeQuantity
 
         totalAdjustment += adjustment
 
         this.logger.debug({
-          ingredientId: ingredient.id,
+          ingredientId: ingredient['id'],
           ingredientName: ingredient.name,
           wac,
           currentPrice,
@@ -392,10 +391,10 @@ export class HppCalculatorService {
     userId: string
   ): Promise<void> {
     try {
-      const calculationData = {
+      const calculationData: Insert<'hpp_calculations'> = {
         recipe_id: result.recipe_id,
         user_id: userId,
-        calculation_date: new Date().toISOString().split('T')[0],
+        calculation_date: new Date().toISOString().split('T')[0] ?? null,
         material_cost: result.material_cost,
         labor_cost: result.labor_cost,
         overhead_cost: result.overhead_cost,
@@ -447,7 +446,7 @@ export class HppCalculatorService {
         .limit(1)
         .single()
 
-      if (error && error.code !== 'PGRST116') {
+      if (error && error['code'] !== 'PGRST116') {
         throw new Error(`Failed to fetch latest HPP: ${error.message}`)
       }
 

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+
 import type { APIError } from './types'
 
 /**
@@ -44,8 +45,8 @@ export function createAPIErrorResponse(error: APIError): NextResponse {
     {
       success: false,
       error: error.message,
-      code: error.code
+      code: error['code']
     },
-    { status: error.statusCode }
+    { status: error['statusCode'] }
   )
 }

@@ -1,8 +1,9 @@
+import { logger } from '@/lib/logger'
+
 import { dbLogger } from './logger';
 
 import type { NextRequest } from 'next/server'
 
-import { logger } from '@/lib/logger'
 
 // Simple in-memory rate limiter (for development)
 // In production, use Redis or similar

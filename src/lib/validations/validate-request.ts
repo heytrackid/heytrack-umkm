@@ -41,7 +41,7 @@ export interface ValidationError {
  * if (!result.success) {
  *   return NextResponse.json(result.error, { status: 400 })
  * }
- * const data = result.data
+ * const _data result['data']
  * ```
  */
 export async function validateRequest<T>(
@@ -52,15 +52,15 @@ export async function validateRequest<T>(
     const body = await request.json()
     const data = schema.parse(body)
     return { success: true, data }
-  } catch (err) {
-    if (err instanceof ZodError) {
+  } catch (error) {
+    if (error instanceof ZodError) {
       return {
         success: false,
         error: {
           message: 'Validation failed',
-          errors: err.issues.map((err) => ({
-            field: err.path.join('.'),
-            message: err.message,
+          errors: error.issues.map((error) => ({
+            field: error.path.join('.'),
+            message: error.message,
           })),
         },
       }
@@ -86,7 +86,7 @@ export async function validateRequest<T>(
  * 
  * @example
  * ```typescript
- * const data = await validateRequestOrRespond(request, CreateIngredientSchema)
+ * const _data = await validateRequestOrRespond(request, CreateIngredientSchema)
  * if (data instanceof NextResponse) {
  *   return data // Return error response
  * }
@@ -96,7 +96,7 @@ export async function validateRequest<T>(
 export async function validateRequestOrRespond<T>(
   request: NextRequest,
   schema: z.ZodSchema<T>
-): Promise<T | NextResponse> {
+): Promise<NextResponse | T> {
   const result = await validateRequest(request, schema)
   
   if (!result.success) {
@@ -109,7 +109,7 @@ export async function validateRequestOrRespond<T>(
     )
   }
   
-  return result.data
+  return result['data']
 }
 
 /**
@@ -141,15 +141,15 @@ export function validateQueryParams<T>(
     const params = Object.fromEntries(searchParams.entries())
     const data = schema.parse(params)
     return { success: true, data }
-  } catch (err) {
-    if (err instanceof ZodError) {
+  } catch (error) {
+    if (error instanceof ZodError) {
       return {
         success: false,
         error: {
           message: 'Invalid query parameters',
-          errors: err.issues.map((err) => ({
-            field: err.path.join('.'),
-            message: err.message,
+          errors: error.issues.map((error) => ({
+            field: error.path.join('.'),
+            message: error.message,
           })),
         },
       }
@@ -185,21 +185,21 @@ export function validateQueryParams<T>(
  * ```
  */
 export function validatePathParams<T>(
-  params: Record<string, string | string[]>,
+  params: Record<string, string[] | string>,
   schema: z.ZodSchema<T>
 ): ValidationResult<T> {
   try {
     const data = schema.parse(params)
     return { success: true, data }
-  } catch (err) {
-    if (err instanceof ZodError) {
+  } catch (error) {
+    if (error instanceof ZodError) {
       return {
         success: false,
         error: {
           message: 'Invalid path parameters',
-          errors: err.issues.map((err) => ({
-            field: err.path.join('.'),
-            message: err.message,
+          errors: error.issues.map((error) => ({
+            field: error.path.join('.'),
+            message: error.message,
           })),
         },
       }
@@ -249,5 +249,5 @@ export function safeParseWithDefault<T>(
   defaultValue: T
 ): T {
   const result = schema.safeParse(data)
-  return result.success ? result.data : defaultValue
+  return result.success ? result['data'] : defaultValue
 }

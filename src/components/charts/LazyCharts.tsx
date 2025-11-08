@@ -1,8 +1,9 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { Skeleton } from '@/components/ui/skeleton'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 /**
  * Lazy-loaded Chart Components
@@ -12,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 
 // Loading component for charts
-const ChartSkeleton = () => (
+const ChartSkeleton = (): JSX.Element => (
     <div className="space-y-3">
         <Skeleton className="h-[300px] w-full" />
         <div className="flex gap-4">
@@ -25,9 +26,7 @@ const ChartSkeleton = () => (
 
 // Lazy load Line Chart
 export const LazyLineChart = dynamic(
-    () => import('recharts').then(mod => ({
-        default: mod.LineChart
-    })),
+    () => import('recharts').then(mod => mod.LineChart),
     {
         loading: () => <ChartSkeleton />,
         ssr: false, // Charts don't need SSR
@@ -36,9 +35,7 @@ export const LazyLineChart = dynamic(
 
 // Lazy load Bar Chart
 export const LazyBarChart = dynamic(
-    () => import('recharts').then(mod => ({
-        default: mod.BarChart
-    })),
+    () => import('recharts').then(mod => mod.BarChart),
     {
         loading: () => <ChartSkeleton />,
         ssr: false,
@@ -47,9 +44,7 @@ export const LazyBarChart = dynamic(
 
 // Lazy load Pie Chart
 export const LazyPieChart = dynamic(
-    () => import('recharts').then(mod => ({
-        default: mod.PieChart
-    })),
+    () => import('recharts').then(mod => mod.PieChart),
     {
         loading: () => <ChartSkeleton />,
         ssr: false,
@@ -58,9 +53,7 @@ export const LazyPieChart = dynamic(
 
 // Lazy load Area Chart
 export const LazyAreaChart = dynamic(
-    () => import('recharts').then(mod => ({
-        default: mod.AreaChart
-    })),
+    () => import('recharts').then(mod => mod.AreaChart),
     {
         loading: () => <ChartSkeleton />,
         ssr: false,
@@ -68,18 +61,18 @@ export const LazyAreaChart = dynamic(
 )
 
 // Export other Recharts components
-export const Line = dynamic(() => import('recharts').then(mod => ({ default: mod.Line })))
-export const Bar = dynamic(() => import('recharts').then(mod => ({ default: mod.Bar })))
-export const Pie = dynamic(() => import('recharts').then(mod => ({ default: mod.Pie })))
-export const Area = dynamic(() => import('recharts').then(mod => ({ default: mod.Area })))
-export const XAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.XAxis })))
-export const YAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.YAxis })))
-export const CartesianGrid = dynamic(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
-export const Tooltip = dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
+export const Line = dynamic(() => import('recharts').then(mod => mod.Line))
+export const Bar = dynamic(() => import('recharts').then(mod => mod.Bar))
+export const Pie = dynamic(() => import('recharts').then(mod => mod.Pie))
+export const Area = dynamic(() => import('recharts').then(mod => mod.Area))
+export const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis))
+export const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis))
+export const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid))
+export const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip))
 // Export Legend directly without dynamic loading to avoid typing issues
 export { Legend as ChartLegend } from 'recharts'
-export const ResponsiveContainer = dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
-export const Cell = dynamic(() => import('recharts').then(mod => ({ default: mod.Cell })))
+export const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer))
+export const Cell = dynamic(() => import('recharts').then(mod => mod.Cell))
 
 /**
  * Wrapper component for lazy-loaded charts with error boundary
@@ -90,7 +83,7 @@ interface LazyChartWrapperProps {
     children: React.ReactNode
 }
 
-export const LazyChartWrapper = ({ title, description, children }: LazyChartWrapperProps) => (
+export const LazyChartWrapper = ({ title, description, children }: LazyChartWrapperProps): JSX.Element => (
     <Card>
         {(title ?? description) && (
             <CardHeader>

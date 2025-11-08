@@ -1,4 +1,8 @@
-/* eslint-disable */
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
+ 
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import type { Row } from '@/types/database'
@@ -7,8 +11,6 @@ import { apiLogger } from '@/lib/logger'
  import type { RecipeWithIngredients } from '@/types/query-results'
  import { withSecurity, SecurityPresets } from '@/utils/security'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
 
 
 type Order = Row<'orders'>
@@ -63,7 +65,7 @@ async function getHandler(request: NextRequest) {
           total_price
         )
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .eq('status', 'DELIVERED')
       .gte('delivery_date', startDate)
       .lte('delivery_date', endDate)
@@ -87,7 +89,7 @@ async function getHandler(request: NextRequest) {
           ingredient:ingredients (*)
         )
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (recipesError) {
       apiLogger.error({ error: recipesError }, 'Error fetching recipes:')
@@ -115,7 +117,7 @@ async function getHandler(request: NextRequest) {
     const { data: expenses, error: expensesError } = await supabase
       .from('financial_records')
       .select('id, user_id, date, description, category, amount, reference, type, created_at, created_by')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .eq('type', 'EXPENSE')
       .gte('date', startDate)
       .lte('date', endDate)
@@ -126,9 +128,9 @@ async function getHandler(request: NextRequest) {
 
     // Calculate profit metrics
     const profitData = await calculateProfitMetrics(
-      orders || [],
+      orders ?? [],
       recipes,
-      expenses || [],
+      expenses ?? [],
       period
     )
 
@@ -229,7 +231,7 @@ async function calculateProfitMetrics(
   
   recipes.forEach(recipe => {
     const cogs = calculateRecipeCOGS(recipe)
-    recipeCostMap.set(recipe.id, {
+    recipeCostMap.set(recipe['id'], {
       name: recipe.name,
       cogs
     })
@@ -391,7 +393,7 @@ function calculateCOGSBreakdown(
   
   // Create recipe lookup map
   const recipeMap = new Map<string, RecipeWithIngredients>()
-  recipes.forEach(recipe => recipeMap.set(recipe.id, recipe))
+  recipes.forEach(recipe => recipeMap.set(recipe['id'], recipe))
 
   orders.forEach(order => {
     if (!order.order_items) {return}
@@ -447,7 +449,7 @@ function getPeriodKey(date: string, period: string): string {
     case 'weekly': {
       const weekStart = new Date(d)
       weekStart.setDate(d.getDate() - d.getDay())
-      return weekStart.toISOString().split('T')[0]
+      return weekStart.toISOString().split('T')[0]!
     }
     case 'monthly':
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`

@@ -1,7 +1,9 @@
+import { Send, Loader2 } from 'lucide-react'
 import { type FormEvent } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Send, Loader2 } from 'lucide-react'
+
 import { SuggestionChips } from './SuggestionChips'
 
 interface ChatInputProps {
@@ -11,21 +13,21 @@ interface ChatInputProps {
   isLoading: boolean
 }
 
-export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInputProps) => {
-  const handleSubmit = (e: FormEvent) => {
+export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInputProps): JSX.Element => {
+  const handleSubmit = (e: FormEvent): void => {
     e.preventDefault()
     if (input.trim() && !isLoading) {
       onSendMessage()
     }
   }
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = (suggestion: string): void => {
     onSendMessage(suggestion)
   }
 
   return (
-    <div className="p-4 bg-muted/30">
-      <div className="max-w-4xl mx-auto space-y-3">
+    <div className="border-t border-border bg-background px-4 py-4">
+      <div className="space-y-3">
         {/* Quick Suggestions */}
         <SuggestionChips
           onSuggestionClick={handleSuggestionClick}
@@ -38,7 +40,7 @@ export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInp
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Tanyakan apa saja tentang bisnis UMKM kuliner Anda..."
-            className="flex-1 bg-background"
+            className="flex-1"
             disabled={isLoading}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey && input.trim()) {
@@ -59,7 +61,7 @@ export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInp
             )}
           </Button>
         </form>
-        
+
         <p className="text-xs text-center text-muted-foreground">
           Tekan Enter untuk kirim pesan
         </p>

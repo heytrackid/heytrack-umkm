@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
-import type { Row, Insert, Update } from '@/types/database'
+
+import type { Insert, Update } from '@/types/database'
 
 /**
  * React Query hooks for Recipes
@@ -12,7 +14,6 @@ import type { Row, Insert, Update } from '@/types/database'
  */
 
 
-type _Recipe = Row<'recipes'>
 type RecipeInsert = Insert<'recipes'>
 type RecipeUpdate = Update<'recipes'>
 
@@ -65,7 +66,7 @@ export function useRecipe(id: string | null) {
       }
       return response.json()
     },
-    enabled: !!id,
+    enabled: Boolean(id),
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   })
@@ -141,7 +142,7 @@ export function useUpdateRecipe() {
     },
     onSuccess: (_, variables) => {
       // Invalidate specific recipe and list
-      void queryClient.invalidateQueries({ queryKey: ['recipe', variables.id] })
+      void queryClient.invalidateQueries({ queryKey: ['recipe', variables['id']] })
       void queryClient.invalidateQueries({ queryKey: ['recipes'] })
       
       toast({

@@ -1,23 +1,27 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
-import type { Insert } from '@/types/database'
-import { getErrorMessage } from '@/lib/type-guards'
-import { apiLogger } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
+import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
+import type { Insert } from '@/types/database'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
+
 /**
  * GET /api/operational-costs
  *
- * Fetch all operational costs (expenses where category != 'Revenue')
+ * Fetch all operational costs (expenses where category !== 'Revenue')
  *
  * Query Parameters:
  * - start_date: Filter by start date (optional)
  * - end_date: Filter by end date (optional)
  */
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -33,7 +37,7 @@ async function POST(request: NextRequest) {
        )
      }
 
-     const body = await request.json()
+      const body = await request.json() as unknown
 
     // Validate request body with Zod
     const validation = OperationalCostInsertSchema.safeParse(body)
@@ -47,21 +51,21 @@ async function POST(request: NextRequest) {
       )
     }
 
-    const validatedData = validation.data
+    const validatedData = validation['data']
 
     const insertPayload: Insert<'expenses'> = {
-      user_id: user.id,
+      user_id: user['id'],
       category: validatedData.category,
-      subcategory: validatedData.subcategory,
       amount: validatedData.amount,
-      description: validatedData.description ?? '',
-      expense_date: validatedData.date,
-      supplier: validatedData.vendor_name ?? undefined,
-      payment_method: 'CASH',
-      status: validatedData.is_paid ? 'paid' : 'pending',
-      receipt_number: validatedData.invoice_number,
-      is_recurring: validatedData.is_recurring,
-      recurring_frequency: validatedData.recurring_frequency ?? undefined,
+      description: validatedData.description,
+      expense_date: validatedData.date ?? null,
+      supplier: validatedData.supplier ?? null,
+      payment_method: validatedData.payment_method ?? 'CASH',
+      reference_id: null,
+      reference_type: null,
+      status: 'pending',
+      is_recurring: validatedData.recurring ?? false,
+      recurring_frequency: validatedData.frequency ?? null,
       tags: []
     }
 

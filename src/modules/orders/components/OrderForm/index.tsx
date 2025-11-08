@@ -1,16 +1,20 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
+import { AlertCircle } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { memo, useCallback, useState, type FormEvent } from 'react'
+
 import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
+import { useOrderItemsController } from '@/components/orders/hooks/useOrderItemsController'
 import { Button } from '@/components/ui/button'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { warningToast } from '@/hooks/use-toast'
 import { ORDER_CONFIG } from '@/modules/orders/constants'
 import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
+
 import type { Row } from '@/types/database'
-import { useQuery } from '@tanstack/react-query'
-import { AlertCircle } from 'lucide-react'
-import dynamic from 'next/dynamic'
-import { memo, useState, type FormEvent } from 'react'
+
 
 
 
@@ -65,7 +69,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         customer_name: order?.customer_name ?? '',
         customer_phone: order?.customer_phone ?? '',
         customer_address: order?.customer_address ?? '',
-        order_date: order?.order_date ?? new Date().toISOString().split('T')[0],
+        order_date: order?.order_date ?? (new Date().toISOString().split('T')[0] ?? ''),
         delivery_date: order?.delivery_date ?? '',
         delivery_time: order?.delivery_date?.includes('T')
             ? order.delivery_date.split('T')[1]?.slice(0, 5) || ''
@@ -98,8 +102,8 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 credentials: 'include', // Include cookies for authentication
             })
             if (!response.ok) { throw new Error('Failed to fetch recipes') }
-            const data: Array<Row<'recipes'>> = await response.json()
-            return data.filter(recipe => recipe.is_active)
+            const _data: Array<Row<'recipes'>> = await response.json()
+            return _data.filter(recipe => recipe.is_active)
         },
         staleTime: 5 * 60 * 1000,
     })
@@ -117,6 +121,113 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         staleTime: 5 * 60 * 1000,
     })
 
+    const createEmptyOrderItem = useCallback((): OrderItemWithRecipe => {
+        const firstRecipe = recipesData[0]
+        const unitPrice = firstRecipe?.selling_price ?? 0
+        const cost = firstRecipe?.cost_per_unit ?? 0
+
+        return {
+            id: `temp-${Date.now()}`,
+            order_id: order?.id ?? '',
+            recipe_id: firstRecipe?.['id'] ?? '',
+            product_name: firstRecipe?.name ?? null,
+            quantity: 1,
+            unit_price: unitPrice,
+            total_price: unitPrice,
+            special_requests: null,
+            hpp_at_order: cost,
+            profit_amount: unitPrice - cost,
+            profit_margin: unitPrice > 0 ? (((unitPrice - cost) / unitPrice) * 100) : 0,
+            updated_at: null,
+            user_id: order?.user_id ?? '',
+            recipe: firstRecipe
+                ? {
+                    id: firstRecipe['id'],
+                    name: firstRecipe.name,
+                    price: unitPrice,
+                    category: firstRecipe.category ?? 'Uncategorized',
+                    servings: firstRecipe.servings ?? 0,
+                    description: firstRecipe.description ?? undefined
+                }
+                : undefined
+        }
+    }, [order?.id, order?.user_id, recipesData])
+
+    const {
+        addItem: pushOrderItem,
+        updateItem: applyOrderItemUpdate,
+        removeItem: removeOrderItem,
+        selectRecipe: handleRecipeSelect
+    } = useOrderItemsController<OrderItemWithRecipe>({
+        items: orderItems,
+        onItemsChange: setOrderItems,
+        createEmptyItem: createEmptyOrderItem,
+        availableRecipes: recipesData,
+        onRecipeSelected: (recipe, currentItem) => {
+            const unitPrice = recipe.selling_price ?? currentItem.unit_price
+            const cost = recipe.cost_per_unit ?? currentItem.hpp_at_order ?? 0
+
+            return {
+                ...currentItem,
+                recipe_id: recipe['id'],
+                product_name: recipe.name,
+                recipe: {
+                    id: recipe['id'],
+                    name: recipe.name,
+                    price: unitPrice,
+                    category: recipe.category ?? 'Uncategorized',
+                    servings: recipe.servings ?? 0,
+                    description: recipe.description ?? undefined
+                },
+                unit_price: unitPrice,
+                total_price: unitPrice * currentItem.quantity,
+                hpp_at_order: cost,
+                profit_amount: unitPrice - cost,
+                profit_margin: unitPrice > 0 ? (((unitPrice - cost) / unitPrice) * 100) : 0
+            }
+        },
+        deriveItemTotals: (item) => {
+            const quantity = Number(item.quantity) || 0
+            const unitPrice = Number(item.unit_price) || 0
+            const cost = Number(item.hpp_at_order ?? 0)
+            const total = quantity * unitPrice
+            const profit = unitPrice - cost
+
+            return {
+                ...item,
+                total_price: total,
+                profit_amount: profit,
+                profit_margin: unitPrice > 0 ? ((profit / unitPrice) * 100) : 0
+            }
+        }
+    })
+
+    const addOrderItem = () => {
+        if (recipesData.length === 0) {
+            warningToast('Resep tidak tersedia', 'Tambahkan resep baru sebelum membuat item pesanan')
+            return
+        }
+        pushOrderItem()
+    }
+
+    const updateOrderItem = <K extends keyof OrderItemWithRecipe>(
+        index: number,
+        field: K,
+        value: OrderItemWithRecipe[K] | string
+    ) => {
+        if (field === 'recipe_id') {
+            handleRecipeSelect(index, value as string)
+            return
+        }
+        let nextValue = value
+
+        if (typeof value === 'string' && (field === 'quantity' || field === 'unit_price')) {
+            nextValue = Number(value) as OrderItemWithRecipe[K]
+        }
+
+        applyOrderItemUpdate(index, field, nextValue as OrderItemWithRecipe[K])
+    }
+
     const handleInputChange = <K extends keyof FormState>(field: K, value: FormState[K]) => {
         setFormData(prev => ({ ...prev, [field]: value }))
     }
@@ -129,103 +240,12 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         })
     }
 
-    const addOrderItem = () => {
-        if (recipesData.length === 0) {
-            warningToast('Resep tidak tersedia', 'Tambahkan resep baru sebelum membuat item pesanan')
-            return
-        }
-
-        const firstRecipe = recipesData[0]
-        if (!firstRecipe) { return }
-
-        const newItem: OrderItemWithRecipe = {
-            id: `temp-${Date.now()}`,
-            order_id: '',
-            recipe_id: firstRecipe.id,
-            product_name: firstRecipe.name,
-            quantity: 1,
-            unit_price: firstRecipe.selling_price ?? 0,
-            total_price: firstRecipe.selling_price ?? 0,
-            special_requests: null,
-            hpp_at_order: firstRecipe.cost_per_unit ?? 0,
-            profit_amount: (firstRecipe.selling_price ?? 0) - (firstRecipe.cost_per_unit ?? 0),
-            profit_margin: firstRecipe.selling_price ? (((firstRecipe.selling_price - (firstRecipe.cost_per_unit ?? 0)) / firstRecipe.selling_price) * 100) : 0,
-            updated_at: null,
-            user_id: '',
-            recipe: {
-                id: firstRecipe.id,
-                name: firstRecipe.name,
-                price: firstRecipe.selling_price ?? 0,
-                category: firstRecipe.category ?? 'Uncategorized',
-                servings: firstRecipe.servings ?? 0,
-                description: firstRecipe.description ?? undefined
-            }
-        }
-        setOrderItems(prev => [...prev, newItem])
-    }
-
-    const updateOrderItem = <K extends keyof OrderItemWithRecipe>(
-        index: number,
-        field: K,
-        value: OrderItemWithRecipe[K] | string
-    ) => {
-        setOrderItems(prev => {
-            const updated = [...prev]
-            const currentItem = updated[index]
-            if (!currentItem) { return updated }
-
-            if (field === 'recipe_id') {
-                const selectedRecipe = recipesData.find(recipe => recipe.id === value)
-                if (selectedRecipe) {
-                    updated[index] = {
-                        ...currentItem,
-                        recipe_id: value as string,
-                        product_name: selectedRecipe.name,
-                        recipe: {
-                            id: selectedRecipe.id,
-                            name: selectedRecipe.name,
-                            price: selectedRecipe.selling_price ?? currentItem.unit_price,
-                            category: selectedRecipe.category ?? 'Uncategorized',
-                            servings: selectedRecipe.servings ?? 0,
-                            description: selectedRecipe.description ?? undefined
-                        },
-                        unit_price: selectedRecipe.selling_price ?? currentItem.unit_price,
-                        total_price: (selectedRecipe.selling_price ?? currentItem.unit_price) * currentItem.quantity
-                    }
-                }
-            } else if (field === 'quantity') {
-                const parsedQty = Number.parseInt(value as string, 10)
-                const qty = Number.isNaN(parsedQty) ? 0 : parsedQty
-                updated[index] = {
-                    ...currentItem,
-                    quantity: qty,
-                    total_price: currentItem.unit_price * qty
-                }
-            } else if (field === 'unit_price') {
-                const parsedPrice = Number.parseFloat(value as string)
-                const price = Number.isNaN(parsedPrice) ? 0 : parsedPrice
-                updated[index] = {
-                    ...currentItem,
-                    unit_price: price,
-                    total_price: price * currentItem.quantity
-                }
-            } else {
-                updated[index] = { ...currentItem, [field]: value }
-            }
-            return updated
-        })
-    }
-
-    const removeOrderItem = (index: number) => {
-        setOrderItems(prev => prev.filter((_, i) => i !== index))
-    }
-
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
 
         const errors: Record<string, string> = {}
 
-        if (!formData.customer_name.trim()) {
+        if (!formData['customer_name'].trim()) {
             errors['customer_name'] = 'Nama pelanggan wajib diisi'
         }
 
@@ -305,7 +325,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 <SwipeableTabsContent value="customer" className="space-y-4">
                     <CustomerSection
                         formData={{
-                            customer_name: formData.customer_name,
+                            customer_name: formData['customer_name'],
                             customer_phone: formData.customer_phone,
                             customer_address: formData.customer_address,
                             order_date: formData.order_date,

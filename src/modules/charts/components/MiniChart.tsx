@@ -1,7 +1,7 @@
 'use client'
 
-import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
+import { Suspense } from 'react'
 
 
 
@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic'
 
 export interface MiniChartProps {
   data: unknown[]
-  type?: 'line' | 'bar'
+  type?: 'bar' | 'line'
   dataKey: string
   color?: string
   height?: number
@@ -29,7 +29,7 @@ const DynamicChart = dynamic(
   }
 )
 
-const MiniChart = (props: MiniChartProps) => {
+const MiniChart = (props: MiniChartProps): JSX.Element => {
   const { data, height = 60, className = '' } = props
 
   if (!data || data.length === 0) {

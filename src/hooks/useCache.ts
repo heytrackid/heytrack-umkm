@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { enhancedCache } from '@/lib/enhanced-cache'
+
 import { createClientLogger } from '@/lib/client-logger'
+import { enhancedCache } from '@/lib/enhanced-cache'
 
 const cacheLogger = createClientLogger('CacheHook')
 
@@ -9,25 +10,23 @@ const cacheLogger = createClientLogger('CacheHook')
  */
 export const useCache = <T>(key: string, initialValue?: T) => {
   const mountedRef = useRef(true)
-  const [value, setValue] = useState<T | null>(null)
+  const [value, setValue] = useState<T | null>(() => {
+    const cachedValue = enhancedCache.get<T>(key)
+    if (cachedValue) {
+      return cachedValue
+    } else if (initialValue !== undefined) {
+      enhancedCache.set(key, initialValue)
+      return initialValue
+    }
+    return null
+  })
 
   useEffect(() => {
     mountedRef.current = true
-    
-    // Load cached value
-    const cachedValue = enhancedCache.get<T>(key)
-    if (cachedValue) {
-      setValue(cachedValue)
-    } else if (initialValue !== undefined) {
-      setValue(initialValue)
-      // Store initial value in cache
-      enhancedCache.set(key, initialValue)
-    }
-    
     return () => {
       mountedRef.current = false
     }
-  }, [key, initialValue])
+  }, [])
 
   const setCachedValue = (newValue: T, ttl?: number) => {
     if (!mountedRef.current) {return}
@@ -101,13 +100,13 @@ export const useAsyncCache = <T>(key: string, fetcher: () => Promise<T>, ttl?: n
           enhancedCache.set(key, freshData, ttl)
           setLoading(false)
         }
-      } catch (err) {
-        const error = err as Error
+      } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error(String(error))
         if (mountedRef.current) {
-          setError(error)
+          setError(normalizedError)
           setLoading(false)
         }
-        cacheLogger.error({ error: error.message, key }, 'Cache fetch error')
+        cacheLogger.error({ error: normalizedError.message, key }, 'Cache fetch error')
         
         // Try to return stale data if available
         try {
@@ -143,13 +142,13 @@ export const useAsyncCache = <T>(key: string, fetcher: () => Promise<T>, ttl?: n
         enhancedCache.set(key, freshData, ttl)
         setLoading(false)
       }
-    } catch (err) {
-      const error = err as Error
+    } catch (error) {
+      const normalizedError = error instanceof Error ? error : new Error(String(error))
       if (mountedRef.current) {
-        setError(error)
+        setError(normalizedError)
         setLoading(false)
       }
-      cacheLogger.error({ error: error.message, key }, 'Cache refresh error')
+      cacheLogger.error({ error: normalizedError.message, key }, 'Cache refresh error')
     }
   }
 

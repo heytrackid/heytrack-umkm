@@ -1,24 +1,47 @@
 'use client'
 
+import { format } from 'date-fns'
+import { id as idLocale } from 'date-fns/locale'
+import { CalendarIcon, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import type { Row } from '@/types/database'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { toast } from 'sonner'
+
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { CalendarIcon, Loader2 } from 'lucide-react'
-import { format } from 'date-fns'
 import { uiLogger } from '@/lib/logger'
-import { id as idLocale } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
-import { toast } from 'sonner'
+
+import type { Row } from '@/types/database'
 
 
 type Recipe = Row<'recipes'>
+interface ApiErrorPayload {
+    message?: string
+}
+
+const isRecipe = (value: unknown): value is Recipe => {
+    if (typeof value !== 'object' || value === null) {
+        return false
+    }
+    const record = value as Record<string, unknown>
+    return typeof record['id'] === 'string' && typeof record['name'] === 'string'
+}
+
+const isRecipeArray = (value: unknown): value is Recipe[] => Array.isArray(value) && value.every(isRecipe)
+
+const isApiErrorPayload = (value: unknown): value is ApiErrorPayload => {
+    if (typeof value !== 'object' || value === null) {
+        return false
+    }
+    const { message } = value as { message?: unknown }
+    return message === undefined || typeof message === 'string'
+}
 
 interface ProductionFormDialogProps {
     open: boolean
@@ -50,9 +73,12 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
-                const data = await response.json()
-                // Ensure data is an array
-                setRecipes(Array.isArray(data) ? data : [])
+                const payload: unknown = await response.json()
+                if (isRecipeArray(payload)) {
+                    setRecipes(payload)
+                } else {
+                    setRecipes([])
+                }
             } else {
                 setRecipes([])
             }
@@ -94,8 +120,9 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
             })
 
             if (!response.ok) {
-                const error = await response.json()
-                throw new Error(error.message ?? 'Gagal membuat batch produksi')
+                const errorPayload: unknown = await response.json()
+                const errorMessage = isApiErrorPayload(errorPayload) ? errorPayload.message : undefined
+                throw new Error(errorMessage ?? 'Gagal membuat batch produksi')
             }
 
             toast.success('Batch produksi berhasil dibuat')
@@ -119,7 +146,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
         })
     }
 
-    // const selectedRecipe = recipes.find(r => r.id === formData.recipe_id)
+    // const selectedRecipe = recipes.find(r => r['id'] === formData.recipe_id)
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -152,7 +179,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                                 <SelectContent>
                                     {Array.isArray(recipes) && recipes.length > 0 ? (
                                         recipes.map((recipe) => (
-                                            <SelectItem key={recipe.id} value={recipe.id}>
+                                            <SelectItem key={recipe['id']} value={recipe['id']}>
                                                 {recipe.name}
                                             </SelectItem>
                                         ))

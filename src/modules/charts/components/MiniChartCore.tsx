@@ -40,7 +40,7 @@ const ResponsiveContainer = dynamic(
 
 interface MiniChartCoreProps {
   data: unknown[]
-  type?: 'line' | 'bar'
+  type?: 'bar' | 'line'
   dataKey: string
   color?: string
   height?: number
@@ -54,7 +54,7 @@ const MiniChartCore = ({
   color = '#3b82f6',
   height = 60,
   className = ''
-}: MiniChartCoreProps) => (
+}: MiniChartCoreProps): JSX.Element => (
   <div className={className} style={{ height }}>
     <Suspense fallback={<div className="w-full h-full bg-muted animate-pulse rounded" />}>
       <ResponsiveContainer width="100%" height="100%">

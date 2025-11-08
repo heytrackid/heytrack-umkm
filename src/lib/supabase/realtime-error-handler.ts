@@ -6,7 +6,6 @@
  */
 
 // Store original console.error
-// eslint-disable-next-line no-console
 const originalConsoleError = console.error
 
 /**
@@ -19,7 +18,6 @@ export function initRealtimeErrorSuppression() {
   }
 
   // Override console.error to filter out WebSocket errors
-  // eslint-disable-next-line no-console
   console.error = (...args: unknown[]) => {
     // Check if this is a WebSocket error from Supabase
     const errorString = args.join(' ')
@@ -47,6 +45,5 @@ export function initRealtimeErrorSuppression() {
  * Useful for testing or debugging
  */
 export function restoreConsoleError() {
-  // eslint-disable-next-line no-console
   console.error = originalConsoleError
 }

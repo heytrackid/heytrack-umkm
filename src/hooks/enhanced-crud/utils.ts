@@ -1,18 +1,17 @@
+import { errorToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
-import { errorToast } from '@/hooks/use-toast'
 
 /**
  * Enhanced CRUD Utilities
  * Helper functions for CRUD operations and error handling
  */
 
-
 /**
  * Get operation label for user-friendly messages
  */
-export const getOperationLabel = (operation: 'create' | 'update' | 'delete'): string => {
+export const getOperationLabel = (operation: 'create' | 'delete' | 'update'): string => {
   const labels = {
     create: 'membuat',
     update: 'mengupdate',
@@ -26,9 +25,9 @@ export const getOperationLabel = (operation: 'create' | 'update' | 'delete'): st
  */
 export const handleCRUDError = (
   error: Error,
-  operation: 'create' | 'update' | 'delete',
+  operation: 'create' | 'delete' | 'update',
   showErrorToast = true,
-  customErrorHandler?: (error: Error, operation: 'create' | 'update' | 'delete') => void
+  customErrorHandler?: (error: Error, operation: 'create' | 'delete' | 'update') => void
 ): void => {
   const errorMessage = error.message || 'Terjadi kesalahan tak terduga'
 
@@ -48,7 +47,7 @@ export const handleCRUDError = (
  * Validate CRUD operation inputs
  */
 export const validateCRUDInputs = (
-  operation: 'create' | 'update' | 'delete',
+  operation: 'create' | 'delete' | 'update',
   data?: unknown,
   id?: string
 ): void => {
@@ -67,7 +66,7 @@ export const validateCRUDInputs = (
  * Validate bulk operation inputs
  */
 export const validateBulkInputs = (
-  operation: 'create' | 'update' | 'delete',
+  operation: 'create' | 'delete' | 'update',
   data: Array<Record<string, unknown>>
 ): void => {
   if (!Array.isArray(data) || data.length === 0) {
@@ -76,7 +75,7 @@ export const validateBulkInputs = (
 
   if (operation === 'update') {
     data.forEach((item, index) => {
-      if (typeof item.id !== 'string' || item.id.length === 0 || !('data' in item)) {
+      if (typeof item['id'] !== 'string' || item['id'].length === 0 || !('data' in item)) {
         throw new Error(`Item ${index + 1}: ID dan data diperlukan`)
       }
     })

@@ -1,10 +1,11 @@
 'use client'
 
+import { Plus, Zap, type LucideIcon } from 'lucide-react'
+import Link from 'next/link'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { Plus, Zap, type LucideIcon } from 'lucide-react'
-import Link from 'next/link'
 
 
 
@@ -12,7 +13,7 @@ interface EmptyStateAction {
   label: string
   onClick?: () => void
   href?: string
-  variant?: 'default' | 'outline' | 'ghost'
+  variant?: 'default' | 'ghost' | 'outline'
   icon?: LucideIcon
 }
 

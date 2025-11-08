@@ -1,8 +1,9 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
 import type { Row, Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
+import { createClient } from '@/utils/supabase/server'
+
 
 type WhatsAppTemplate = Row<'whatsapp_templates'>
 type WhatsAppTemplateInsert = Insert<'whatsapp_templates'>
@@ -28,7 +29,7 @@ export class WhatsAppTemplateService {
 
       let query = supabase
         .from('whatsapp_templates')
-        .select('*')
+        .select('id, user_id, name, category, template_content, variables, description, is_active, is_default, created_at, updated_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
@@ -42,11 +43,11 @@ export class WhatsAppTemplateService {
         throw error
       }
 
-      return data || []
+      return data ?? []
 
-    } catch (err) {
-      dbLogger.error({ error: err, userId, filters }, 'Failed to get WhatsApp templates')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, userId, filters }, 'Failed to get WhatsApp templates')
+      throw error
     }
   }
 
@@ -101,9 +102,9 @@ export class WhatsAppTemplateService {
 
       return data as WhatsAppTemplate
 
-    } catch (err) {
-      dbLogger.error({ error: err, userId, templateData }, 'Failed to create WhatsApp template')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, userId, templateData }, 'Failed to create WhatsApp template')
+      throw error
     }
   }
 
@@ -154,9 +155,9 @@ export class WhatsAppTemplateService {
 
       return data as WhatsAppTemplate
 
-    } catch (err) {
-      dbLogger.error({ error: err, templateId, userId, updates }, 'Failed to update WhatsApp template')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, templateId, userId, updates }, 'Failed to update WhatsApp template')
+      throw error
     }
   }
 
@@ -178,9 +179,9 @@ export class WhatsAppTemplateService {
         throw error
       }
 
-    } catch (err) {
-      dbLogger.error({ error: err, templateId, userId }, 'Failed to delete WhatsApp template')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, templateId, userId }, 'Failed to delete WhatsApp template')
+      throw error
     }
   }
 
@@ -194,7 +195,7 @@ export class WhatsAppTemplateService {
 
       const { data, error } = await supabase
         .from('whatsapp_templates')
-        .select('*')
+        .select('id, user_id, name, category, template_content, variables, description, is_active, is_default, created_at, updated_at')
         .eq('user_id', userId)
         .eq('category', category)
         .eq('is_default', true)
@@ -202,7 +203,7 @@ export class WhatsAppTemplateService {
         .single()
 
       if (error) {
-        if (error.code === 'PGRST116') { // No rows returned
+        if (error['code'] === 'PGRST116') { // No rows returned
           return null
         }
         throw error
@@ -210,8 +211,8 @@ export class WhatsAppTemplateService {
 
       return data as WhatsAppTemplate
 
-    } catch (err) {
-      dbLogger.error({ error: err, userId, category }, 'Failed to get default WhatsApp template')
+    } catch (error) {
+      dbLogger.error({ error, userId, category }, 'Failed to get default WhatsApp template')
       return null
     }
   }

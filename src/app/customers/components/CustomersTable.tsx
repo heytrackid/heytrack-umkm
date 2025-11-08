@@ -1,29 +1,131 @@
 'use client'
 
+import { ChevronLeft, ChevronRight, Edit2, Eye, Mail, MoreHorizontal, Phone, Plus, Trash2, Users } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { ChevronLeft, ChevronRight, Edit2, Eye, Mail, MoreHorizontal, Phone, Plus, Trash2, Users } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import type { CustomersTable } from '@/types/database'
+import { useResponsive } from '@/hooks/useResponsive'
+
+import type { Row } from '@/types/database'
+type CustomerRow = Row<'customers'>
 
 interface CustomersTableProps {
-  customers: CustomersTable[]
+  customers: CustomerRow[]
   selectedItems: string[]
   onSelectItem: (itemId: string) => void
   onSelectAll: () => void
-  onView: (customer: CustomersTable) => void
-  onEdit: (customer: CustomersTable) => void
-  onDelete: (customer: CustomersTable) => void
+  onView?: (customer: CustomerRow) => void
+  onEdit: (customer: CustomerRow) => void
+  onDelete: (customer: CustomerRow) => void
   onAddNew: () => void
   formatCurrency: (amount: number) => string
   isMobile: boolean
 }
+
+interface MobileCustomerCardProps {
+  customer: CustomerRow
+  onView?: (customer: CustomerRow) => void
+  onEdit: (customer: CustomerRow) => void
+  onDelete: (customer: CustomerRow) => void
+  formatCurrency: (amount: number) => string
+}
+
+const MobileCustomerCard = ({
+  customer,
+  onView,
+  onEdit,
+  onDelete,
+  formatCurrency
+}: MobileCustomerCardProps): JSX.Element => (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          {/* Header */}
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold">{customer.name}</h3>
+                <Badge variant={customer.is_active ? "default" : "secondary"} className="text-xs">
+                  {customer.is_active ? 'Aktif' : 'Tidak Aktif'}
+                </Badge>
+              </div>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onView && (
+                  <DropdownMenuItem onClick={() => onView(customer)}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Lihat
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={() => onEdit(customer)}>
+                  <Edit2 className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={() => onDelete(customer)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Hapus
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Contact */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-1 text-sm">
+              <Mail className="h-3 w-3 text-gray-400 flex-shrink-0" />
+              <span className="truncate">{customer.email}</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <Phone className="h-3 w-3 text-gray-400 flex-shrink-0" />
+              <span>{customer.phone}</span>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Belanja</p>
+              <p className="font-medium text-gray-600">
+                {formatCurrency(customer.total_spent ?? 0)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Order</p>
+              <p className="font-medium">
+                {customer.total_orders ?? 0}
+              </p>
+            </div>
+          </div>
+
+          {/* Last Order */}
+          {customer.last_order_date && (
+            <div>
+              <p className="text-sm text-muted-foreground">Order Terakhir</p>
+              <p className="text-sm text-gray-600">
+                {customer.last_order_date}
+              </p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
 
 /**
  * Customers Table Component with Pagination
@@ -38,8 +140,11 @@ const CustomersTable = ({
   onEdit,
   onDelete,
   onAddNew,
-  formatCurrency
-}: CustomersTableProps) => {
+  formatCurrency,
+  isMobile
+}: CustomersTableProps): JSX.Element => {
+  const { isMobile: responsiveIsMobile } = useResponsive()
+  const mobile = isMobile || responsiveIsMobile
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -48,19 +153,14 @@ const CustomersTable = ({
   // Calculate pagination
   const totalItems = customers.length
   const totalPages = Math.ceil(totalItems / pageSize)
+  const effectivePage = Math.min(currentPage, totalPages || 1)
 
   // Get paginated data
   const paginatedCustomers = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize
+    const startIndex = (effectivePage - 1) * pageSize
     const endIndex = startIndex + pageSize
     return customers.slice(startIndex, endIndex)
-  }, [customers, currentPage, pageSize])
-
-  // Reset to page 1 when customers change
-  useMemo(() => {
-    void setCurrentPage(1)
-     
-  }, [])
+  }, [customers, effectivePage, pageSize])
 
   if (customers.length === 0) {
     return (
@@ -89,8 +189,22 @@ const CustomersTable = ({
         </p>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
-          <Table>
+        {mobile ? (
+          <div className="space-y-4">
+            {paginatedCustomers.map((customer) => (
+              <MobileCustomerCard
+                key={customer['id']}
+                customer={customer}
+                onView={onView || (() => {})}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                formatCurrency={formatCurrency}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-md border">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">
@@ -109,11 +223,11 @@ const CustomersTable = ({
             </TableHeader>
             <TableBody>
               {paginatedCustomers.map((customer) => (
-                <TableRow key={customer.id} className="hover:bg-gray-50">
+                <TableRow key={customer['id']} className="hover:bg-gray-50">
                   <TableCell>
                     <Checkbox
-                      checked={selectedItems.includes(customer.id.toString())}
-                      onCheckedChange={() => onSelectItem(customer.id.toString())}
+                      checked={selectedItems.includes(customer['id'].toString())}
+                      onCheckedChange={() => onSelectItem(customer['id'].toString())}
                     />
                   </TableCell>
                   <TableCell>
@@ -153,13 +267,15 @@ const CustomersTable = ({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onView(customer)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                       {onView && (
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => onView(customer)}
+                         >
+                           <Eye className="h-4 w-4" />
+                         </Button>
+                       )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
@@ -202,7 +318,7 @@ const CustomersTable = ({
                   <span className="text-sm text-muted-foreground">Show</span>
                   <Select value={pageSize.toString()} onValueChange={(value: string) => {
                     setPageSize(Number(value))
-                    void setCurrentPage(1)
+                    setCurrentPage(1)
                   }}>
                     <SelectTrigger className="w-20 h-8">
                       <SelectValue />
@@ -240,11 +356,12 @@ const CustomersTable = ({
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </CardContent>
+               </div>
+             </div>
+           )}
+         </div>
+         )}
+       </CardContent>
     </Card>
   )
 }

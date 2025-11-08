@@ -18,8 +18,8 @@ export function parseSearchParams(request: NextRequest): Record<string, string> 
  * Get client IP address from request
  */
 export function getClientIP(request: NextRequest): string {
-  return request.headers.get('x-forwarded-for') ??
-         request.headers.get('x-real-ip') ??
+  return request['headers'].get('x-forwarded-for') ??
+         request['headers'].get('x-real-ip') ??
          'unknown'
 }
 
@@ -27,9 +27,9 @@ export function getClientIP(request: NextRequest): string {
  * Create ETag for response caching
  */
 export function createETag(data: unknown): string {
-  const hash = JSON.stringify(data).split('').reduce((a, b) => {
-    a = ((a << 5) - a) + b.charCodeAt(0)
-    return a & a
+  const hash = JSON.stringify(data).split('').reduce((acc, char) => {
+    const nextHash = ((acc << 5) - acc) + char.charCodeAt(0)
+    return nextHash & nextHash
   }, 0)
   return `"${hash}"`
 }
@@ -38,7 +38,7 @@ export function createETag(data: unknown): string {
  * Handle conditional GET requests with ETags
  */
 export function handleConditionalGET(request: NextRequest, etag: string): NextResponse | null {
-  const ifNoneMatch = request.headers.get('if-none-match')
+  const ifNoneMatch = request['headers'].get('if-none-match')
   if (ifNoneMatch === etag) {
     return new NextResponse(null, { status: 304 })
   }

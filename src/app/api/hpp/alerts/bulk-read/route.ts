@@ -1,11 +1,14 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { apiLogger } from '@/lib/logger'
-
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-async function POST(_request: NextRequest) {
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
+import { createClient } from '@/utils/supabase/server'
+async function postHandler(_request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -30,7 +33,7 @@ async function POST(_request: NextRequest) {
         updated_at: new Date().toISOString()
       })
       .eq('is_read', false)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select()
 
     if (error) {
@@ -55,4 +58,4 @@ async function POST(_request: NextRequest) {
   }
 }
 
-export { POST as securedPOST }
+export const POST = createSecureHandler(postHandler, 'POST /api/hpp/alerts/bulk-read', SecurityPresets.enhanced())

@@ -1,11 +1,14 @@
-import { createClient } from '@/utils/supabase/server'
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 import { type NextRequest, NextResponse } from 'next/server'
+
 import { apiLogger } from '@/lib/logger'
 import { safeNumber, getErrorMessage } from '@/lib/type-guards'
 import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
 
 // Unused types removed
 
@@ -13,7 +16,7 @@ export const runtime = 'nodejs'
  * POST /api/financial/records
  * Create a new financial record (manual entry)
  */
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -24,8 +27,8 @@ async function POST(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       )
-    }    const body = await request.json()
-    const { description, category, amount, date, type, source = 'manual_entry' } = body
+    }    const _body = await request.json() as { description: string; category: string; amount: number; date: string; type: string }
+    const { description, category, amount, date, type } = _body
 
     // Validation
     if (!description || !category || !amount || !date || !type) {
@@ -53,14 +56,13 @@ async function POST(request: NextRequest) {
     const { data: record, error: insertError } = await supabase
       .from('financial_records')
       .insert({
-        user_id: user.id,
-        type: type.toUpperCase() as 'INCOME' | 'EXPENSE',
+        user_id: user['id'],
+        type: type.toUpperCase() as 'EXPENSE' | 'INCOME',
         description,
         category: type === 'income' ? 'Revenue' : category,
         amount,
         date,
-        reference: `MANUAL-${Date.now()}`,
-        source
+        reference: `MANUAL-${Date.now()}`
       })
       .select()
       .single()
@@ -91,7 +93,7 @@ async function POST(request: NextRequest) {
  * GET /api/financial/records
  * Get financial records for the current user
  */
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -112,8 +114,8 @@ async function GET(request: NextRequest) {
 
     let query = supabase
       .from('financial_records')
-      .select('id, description, category, amount, date, reference, type, source, created_at')
-      .eq('user_id', user.id)
+      .select('id, description, category, amount, date, reference, type, created_at')
+      .eq('user_id', user['id'])
       .order('date', { ascending: false })
       .limit(limit)
 
@@ -143,7 +145,7 @@ async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: records || []
+      data: records ?? []
     })
 
   } catch (error: unknown) {

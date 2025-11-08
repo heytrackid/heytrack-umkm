@@ -1,9 +1,11 @@
  
 'use client'
 
-import { cn } from '@/lib/utils'
 import { X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
+
+import { cn } from '@/lib/utils'
+
 import { Button } from './button'
 
 interface BottomSheetProps {
@@ -28,18 +30,18 @@ export const BottomSheet = ({
   className
 }: BottomSheetProps) => {
   const [snapIndex, _setSnapIndex] = useState(defaultSnap)
-  const currentSnap = snapPoints[snapIndex] ?? snapPoints[0]
+  const currentSnap = snapPoints?.[snapIndex] ?? snapPoints?.[0] ?? 0.5
 
   useEffect(() => {
     if (open) {
       // Prevent body scroll when open
-      document.body.style.overflow = 'hidden'
+      document['body'].style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = ''
+      document['body'].style.overflow = ''
     }
 
     return () => {
-      document.body.style.overflow = ''
+      document['body'].style.overflow = ''
     }
   }, [open])
 
@@ -64,7 +66,7 @@ export const BottomSheet = ({
       {/* Sheet */}
       <div
         className={cn(
-          'relative w-full bg-background rounded-t-2xl shadow-2xl',
+          'relative w-full bg-background rounded-t-[20px] sm:rounded-t-2xl shadow-2xl',
           'animate-in slide-in-from-bottom duration-300',
           className
         )}
@@ -81,7 +83,7 @@ export const BottomSheet = ({
 
         {/* Header */}
         {(title ?? description) && (
-          <div className="px-6 py-4 border-b">
+          <div className="px-5 sm:px-6 py-4 border-b">
             <div className="flex items-center justify-between">
               <div>
                 {title && <h2 className="text-lg font-semibold">{title}</h2>}
@@ -102,7 +104,7 @@ export const BottomSheet = ({
         )}
 
         {/* Content */}
-        <div className="overflow-auto px-6 py-4" style={{ maxHeight: 'calc(100% - 120px)' }}>
+        <div className="overflow-auto px-5 sm:px-6 py-4" style={{ maxHeight: 'calc(100% - 120px)' }}>
           {children}
         </div>
       </div>

@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils"
 import { 
 
   Skeleton, 
@@ -7,6 +6,7 @@ import {
   SkeletonAvatar,
   SkeletonTable
 } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 
 interface SkeletonProps {
   className?: string
@@ -285,51 +285,3 @@ export const DataGridSkeleton = ({ className, rows = 10 }: SkeletonProps & { row
     </div>
   )
 
-
-// Skeleton untuk Categories Table
-export const CategoriesTableSkeleton = ({ className, rows = 8 }: SkeletonProps & { rows?: number }) => (
-    <div className={cn("", className)}>
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
-        {/* Table Header */}
-        <div className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex space-x-4">
-              <SkeletonText className="h-4 w-16" />
-              <SkeletonText className="h-4 w-20" />
-              <SkeletonText className="h-4 w-24" />
-              <SkeletonText className="h-4 w-32" />
-            </div>
-            <SkeletonText className="h-4 w-20" />
-          </div>
-        </div>
-        
-        {/* Table Body */}
-        <div className="divide-y divide-gray-200 dark:divide-gray-800">
-          {Array.from({ length: rows }, (_, i) => (
-            <div key={i} className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4 flex-1">
-                  <SkeletonText className="h-4 w-16" />
-                  <div className="space-y-1">
-                    <SkeletonText className="h-4 w-32" />
-                    <SkeletonText className="h-3 w-48" />
-                  </div>
-                  <SkeletonText className="h-4 w-24" />
-                  <div className="flex flex-wrap gap-1">
-                    {Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, j) => (
-                      <Skeleton key={j} className="h-5 w-16 rounded-full" />
-                    ))}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <SkeletonButton className="w-8 h-8" />
-                  <SkeletonButton className="w-8 h-8" />
-                  <SkeletonButton className="w-8 h-8" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )

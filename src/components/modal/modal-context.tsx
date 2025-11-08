@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
 
@@ -12,7 +13,7 @@ interface ModalConfig {
   content: ReactNode
   isOpen: boolean
   onClose?: () => void
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'lg' | 'md' | 'sm' | 'xl'
   closeButton?: boolean
   showOverlay?: boolean
 }
@@ -83,7 +84,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
 /**
  * Hook to use modal context
  */
-export function useModal() {
+export function useModal(): ModalContextType {
   const context = useContext(ModalContext)
   if (!context) {
     throw new Error('useModal must be used within ModalProvider')

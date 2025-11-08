@@ -1,43 +1,6 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { useToast } from '@/hooks/use-toast'
-import { useResponsive } from '@/hooks/useResponsive'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { MobileRecipeCard } from './MobileRecipeCard'
-import { RecipeStatsCards } from './RecipeStatsCards'
-import { DeleteModal } from '@/components/ui'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { useRecipes } from '@/hooks/supabase/entities'
-import { useSupabaseCRUD } from '@/hooks/supabase'
-import { usePagination } from '@/hooks/usePagination'
-import { SimplePagination } from '@/components/ui/simple-pagination'
-import type { Row } from '@/types/database'
-
-
-// import { useSettings } from '@/contexts/settings-context'
-
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
     Search,
     Plus,
@@ -51,9 +14,52 @@ import {
     Users,
     X
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState, useMemo, useCallback } from 'react'
+
+import { PageHeader } from '@/components/layout/PageHeader'
+import { DeleteModal } from '@/components/ui'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { undoableToast } from '@/components/ui/enhanced-toast'
 import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
 import { SimpleFAB } from '@/components/ui/floating-action-button'
-import { undoableToast } from '@/components/ui/enhanced-toast'
+import { Input } from '@/components/ui/input'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { SimplePagination } from '@/components/ui/simple-pagination'
+import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useRecipes } from '@/hooks/supabase/entities'
+import { useToast } from '@/hooks/use-toast'
+import { usePagination } from '@/hooks/usePagination'
+import { useResponsive } from '@/hooks/useResponsive'
+
+import type { Row } from '@/types/database'
+
+import { MobileRecipeCard } from './MobileRecipeCard'
+import { RecipeFormDialog } from './RecipeFormDialog'
+import { RecipeStatsCards } from './RecipeStatsCards'
+
+
+
+
+// import { useSettings } from '@/contexts/settings-context'
+
 
 // UI Components
 
@@ -66,19 +72,21 @@ import { undoableToast } from '@/components/ui/enhanced-toast'
 // Types
 
 type Recipe = Row<'recipes'>
-type CategoryFilter = 'all' | 'bread' | 'pastry' | 'cake' | 'cookie' | 'other'
-type DifficultyFilter = 'all' | 'easy' | 'medium' | 'hard'
+type CategoryFilter = 'all' | 'bread' | 'cake' | 'cookie' | 'other' | 'pastry'
+type DifficultyFilter = 'all' | 'easy' | 'hard' | 'medium'
 
-export const EnhancedRecipesPage = () => {
+export const EnhancedRecipesPage = (): JSX.Element => {
     const router = useRouter()
     const { data: recipes, loading } = useRecipes({ realtime: true })
-    const { delete: deleteRecipe } = useSupabaseCRUD('recipes')
+    const { remove: deleteRecipe } = useSupabaseCRUD('recipes')
     const { toast } = useToast()
     const { isMobile } = useResponsive()
 
     // Modal states
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
+    const [showAddDialog, setShowAddDialog] = useState(false)
+    const [editingRecipe, setEditingRecipe] = useState<Recipe | undefined>(undefined)
 
     // Filter states
     const [searchTerm, setSearchTerm] = useState('')
@@ -160,12 +168,18 @@ export const EnhancedRecipesPage = () => {
 
     // Handlers
     const handleView = useCallback((recipe: Recipe) => {
-        router.push(`/recipes/${recipe.id}`)
+        router.push(`/recipes/${recipe['id']}`)
     }, [router])
 
+    const handleAdd = useCallback(() => {
+        setEditingRecipe(undefined)
+        setShowAddDialog(true)
+    }, [])
+
     const handleEdit = useCallback((recipe: Recipe) => {
-        router.push(`/recipes/${recipe.id}/edit`)
-    }, [router])
+        setEditingRecipe(recipe)
+        setShowAddDialog(true)
+    }, [])
 
     const handleDelete = useCallback((recipe: Recipe) => {
         setSelectedRecipe(recipe)
@@ -173,7 +187,7 @@ export const EnhancedRecipesPage = () => {
     }, [])
 
     const handleCalculateHPP = useCallback((recipe: Recipe) => {
-        router.push(`/hpp?recipe=${recipe.id}`)
+        router.push(`/hpp?recipe=${recipe['id']}`)
     }, [router])
 
     const handleConfirmDelete = useCallback(async () => {
@@ -181,7 +195,7 @@ export const EnhancedRecipesPage = () => {
 
         try {
             const deletedRecipe = selectedRecipe
-            await deleteRecipe(selectedRecipe.id)
+            await deleteRecipe(selectedRecipe['id'])
 
             // Enhanced toast with undo
             undoableToast({
@@ -199,8 +213,8 @@ export const EnhancedRecipesPage = () => {
 
             setIsDeleteDialogOpen(false)
             setSelectedRecipe(null)
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal menghapus resep'
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Gagal menghapus resep'
             toast({
                 title: 'Gagal menghapus resep',
                 description: message,
@@ -275,7 +289,7 @@ export const EnhancedRecipesPage = () => {
                 description="Kelola resep dan hitung HPP dengan sistem otomatis"
                 action={
                     <div className="flex gap-2">
-                        <Button onClick={() => router.push('/recipes/new')}>
+                        <Button onClick={handleAdd}>
                             <Plus className="h-4 w-4 mr-2" />
                             Resep Baru
                         </Button>
@@ -370,7 +384,7 @@ export const EnhancedRecipesPage = () => {
             {/* Recipe List */}
             {loading ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {[...Array(6)].map((_, i) => (
+                    {Array.from({length: 6}).map((_, i) => (
                         <Card key={i}>
                             <CardContent className="p-6">
                                 <div className="space-y-3">
@@ -394,7 +408,7 @@ export const EnhancedRecipesPage = () => {
                             actions={[
                                 {
                                     label: 'Buat Resep Baru',
-                                    onClick: () => router.push('/recipes/new'),
+                                    onClick: handleAdd,
                                     icon: Plus
                                 },
                                 {
@@ -432,7 +446,7 @@ export const EnhancedRecipesPage = () => {
                 <div className="space-y-3">
                     {paginatedData.map((recipe) => (
                         <MobileRecipeCard
-                            key={recipe.id}
+                            key={recipe['id']}
                             recipe={recipe}
                             onView={handleView}
                             onEdit={handleEdit}
@@ -448,7 +462,7 @@ export const EnhancedRecipesPage = () => {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {paginatedData.map((recipe) => (
                         <Card
-                            key={recipe.id}
+                            key={recipe['id']}
                             className="hover:shadow-md transition-shadow cursor-pointer"
                             onClick={() => handleView(recipe)}
                         >
@@ -564,10 +578,17 @@ export const EnhancedRecipesPage = () => {
                 itemName={selectedRecipe?.name ?? ''}
             />
 
+            {/* Recipe Form Dialog */}
+            <RecipeFormDialog
+                open={showAddDialog}
+                onOpenChange={setShowAddDialog}
+                recipe={editingRecipe}
+            />
+
             {/* Floating Action Button for Mobile */}
             {isMobile && (
                 <SimpleFAB
-                    onClick={() => router.push('/recipes/new')}
+                    onClick={handleAdd}
                     icon={<Plus className="h-6 w-6" />}
                 />
             )}

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import {
 
   UUIDSchema,
@@ -143,6 +144,8 @@ export const SupplierInsertSchema = z.object({
 
 export const SupplierUpdateSchema = SupplierInsertSchema.partial()
 
+export type SupplierUpdate = z.infer<typeof SupplierUpdateSchema>
+
 // Operational costs database schemas
 export const OperationalCostInsertSchema = z.object({
   category: z.string().min(1, 'Category is required').max(100),
@@ -195,6 +198,8 @@ export const SalesInsertSchema = z.object({
 }, 'Total amount must equal quantity × unit price')
 
 export const SalesUpdateSchema = SalesInsertSchema.partial()
+
+export type SalesUpdate = z.infer<typeof SalesUpdateSchema>
 
 export const IngredientPurchaseInsertSchema = z.object({
   ingredient_id: UUIDSchema,

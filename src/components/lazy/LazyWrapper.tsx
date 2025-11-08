@@ -1,11 +1,12 @@
 'use client'
 
 import { lazy, Suspense, type ComponentProps, type ComponentType } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
+
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // Loading skeletons for different components
-export const TableSkeleton = () => (
+export const TableSkeleton = (): JSX.Element => (
   <div className="space-y-3">
     <Skeleton className="h-10 w-full" />
     <Skeleton className="h-8 w-full" />
@@ -14,7 +15,7 @@ export const TableSkeleton = () => (
   </div>
 )
 
-export const CardSkeleton = () => (
+export const CardSkeleton = (): JSX.Element => (
   <Card>
     <CardContent className="p-6">
       <div className="space-y-3">
@@ -29,7 +30,7 @@ export const CardSkeleton = () => (
   </Card>
 )
 
-export const ChartSkeleton = () => (
+export const ChartSkeleton = (): JSX.Element => (
   <Card>
     <CardContent className="p-6">
       <div className="space-y-4">
@@ -69,11 +70,17 @@ export const createLazyComponent = <T extends ComponentType<Record<string, unkno
 ) => {
   const LazyComponent = lazy(importFunc)
 
-  return (props: ComponentProps<T>) => (
+  const LazyComponentWrapper = (props: ComponentProps<T>) => (
     <LazyWrapper
       component={LazyComponent as ComponentType<unknown>}
-      loadingComponent={loadingComponent}
+      {...(loadingComponent && { loadingComponent })}
       props={props}
     />
   )
+
+  LazyComponentWrapper.displayName = 'LazyComponentWrapper'
+
+  LazyComponentWrapper.displayName = 'LazyComponentWrapper'
+
+  return LazyComponentWrapper
 }

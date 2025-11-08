@@ -32,7 +32,7 @@ const CACHE_VERSION = 'v1'
  */
 export function generateCacheKey(
   prefix: keyof typeof CACHE_PREFIXES,
-  identifier?: string | string[]
+  identifier?: string[] | string
 ): string {
   const prefixValue = CACHE_PREFIXES[prefix]
   
@@ -71,12 +71,12 @@ export const CACHE_INVALIDATION_PATTERNS = {
  * Cache invalidation helper
  */
 export class CacheInvalidator {
-  private invalidatedKeys: Set<string> = new Set()
+  private readonly invalidatedKeys: Set<string> = new Set()
 
   /**
    * Invalidate cache for a specific entity
    */
-  invalidate(prefix: keyof typeof CACHE_PREFIXES, identifier?: string | string[]): void {
+  invalidate(prefix: keyof typeof CACHE_PREFIXES, identifier?: string[] | string): void {
     const key = generateCacheKey(prefix, identifier)
     this.invalidatedKeys.add(key)
     dbLogger.debug({ key }, 'Cache key marked for invalidation')

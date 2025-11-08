@@ -1,4 +1,5 @@
 import { HelpCircle } from "lucide-react"
+
 import {
     Tooltip,
     TooltipContent,
@@ -10,7 +11,7 @@ interface TooltipHelperProps {
     content: string
     children?: React.ReactNode
     showIcon?: boolean
-    side?: "top" | "right" | "bottom" | "left"
+    side?: "bottom" | "left" | "right" | "top"
     className?: string
 }
 

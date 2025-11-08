@@ -8,7 +8,7 @@ export interface ReportConfig {
   id: string
   name: string
   type: 'financial' | 'inventory' | 'production' | 'sales'
-  period: 'daily' | 'weekly' | 'monthly' | 'yearly'
+  period: 'daily' | 'monthly' | 'weekly' | 'yearly'
 }
 
 export interface Report<T = unknown> {

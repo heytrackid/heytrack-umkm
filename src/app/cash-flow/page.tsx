@@ -1,35 +1,35 @@
 'use client'
 
+import { AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
 import { Suspense } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
-import { Card, CardContent } from '@/components/ui/card'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { StatsSkeleton, CardSkeleton } from '@/components/ui'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb' 
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import PrefetchLink from '@/components/ui/prefetch-link'
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
-import PrefetchLink from '@/components/ui/prefetch-link'
-import { AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb' 
-import { StatsSkeleton, CardSkeleton } from '@/components/ui'
-import { PageHeader } from '@/components/layout/PageHeader'
 
 // Import components directly - no lazy loading for better parallel loading
-import EnhancedTransactionForm from './components/EnhancedTransactionForm'
-import EnhancedSummaryCards from './components/EnhancedSummaryCards'
-import EnhancedCashFlowChart from './components/EnhancedCashFlowChart'
-import EnhancedTransactionList from './components/EnhancedTransactionList'
 import CategoryBreakdown from './components/CategoryBreakdown'
+import EnhancedCashFlowChart from './components/EnhancedCashFlowChart'
+import EnhancedSummaryCards from './components/EnhancedSummaryCards'
+import EnhancedTransactionForm from './components/EnhancedTransactionForm'
+import EnhancedTransactionList from './components/EnhancedTransactionList'
 import FilterPeriod from './components/FilterPeriod'
-
 import { useEnhancedCashFlow } from './hooks/useEnhancedCashFlow'
 
 // Summary cards skeleton component
-const SummaryCardsSkeleton = () => (
+const SummaryCardsSkeleton = (): JSX.Element[] => (
   Array.from({ length: 3 }, (_, i) => (
     <div key={`summary-card-${i}`} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
   ))
 )
 
-const CashFlowPage = () => {
+const CashFlowPage = (): JSX.Element => {
   const { formatCurrency } = useSettings()
   const { isMobile } = useResponsive()
 

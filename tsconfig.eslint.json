@@ -1,11 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": true
+    "exactOptionalPropertyTypes": true    // 👈 Lebih strict hanya untuk linting
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "src/**/*",
     "eslint.config.js"
   ],
   "exclude": [
@@ -14,6 +13,16 @@
     "dist",
     "build",
     "out",
-    "supabase/functions"
+    "supabase",
+    "scripts",
+    "public",
+    "docs",
+    "eslint-rules",
+    ".kiro",
+    "workers",
+    "**/__tests__/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "src/types/supabase-generated.ts"
   ]
 }

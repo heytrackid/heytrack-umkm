@@ -12,7 +12,7 @@ interface RateLimitEntry {
 }
 
 export class RateLimiter {
-  private static limits = new Map<string, RateLimitEntry>()
+  private static readonly limits = new Map<string, RateLimitEntry>()
   private static readonly CLEANUP_INTERVAL = 60 * 1000 // 1 minute
   private static cleanupTimer: ReturnType<typeof setTimeout> | null = null
 

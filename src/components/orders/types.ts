@@ -13,14 +13,14 @@ export type OrderWithItems = Order & {
 
 // Extended types for UI
 export type PaymentStatus = 
-  | 'UNPAID' 
-  | 'PARTIAL' 
   | 'PAID'
+  | 'PARTIAL' 
+  | 'UNPAID'
 
 export type Priority = 
+  | 'high'
   | 'low' 
   | 'normal' 
-  | 'high'
   | 'urgent'
 
 export interface OrderFormItem {

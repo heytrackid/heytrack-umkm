@@ -1,9 +1,13 @@
-import { automationLogger } from '@/lib/logger'
 import { BaseWorkflowAutomation } from '@/lib/automation/base-workflow'
-import { OrderWorkflowHandlers } from './order-workflows'
-import { InventoryWorkflowHandlers } from './inventory-workflows'
-import { FinancialWorkflowHandlers } from './financial-workflows'
+import { automationLogger } from '@/lib/logger'
+
 import type { WorkflowEventData, WorkflowResult, AutomationConfig } from '@/types/features/automation'
+
+import { FinancialWorkflowHandlers } from './financial-workflows'
+import { HPPWorkflowHandlers } from './hpp-workflows'
+import { InventoryWorkflowHandlers } from './inventory-workflows'
+import { OrderWorkflowHandlers } from './order-workflows'
+
 
 /**
  * Workflow Automation System
@@ -60,11 +64,7 @@ export class WorkflowAutomation extends BaseWorkflowAutomation {
       case 'operational_cost.changed':
         return FinancialWorkflowHandlers.handleOperationalCostChanged(context)
       case 'hpp.recalculation_needed':
-        // TODO: Implement handleHPPRecalculationNeeded
-        return {
-          success: true,
-          message: 'HPP recalculation event received (not yet implemented)'
-        }
+        return HPPWorkflowHandlers.handleHppRecalculation(context)
 
       default:
         automationLogger.warn({ event: event.event }, 'No handler found for workflow event')

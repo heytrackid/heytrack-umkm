@@ -1,22 +1,9 @@
 // Notification system types
 
 export type NotificationType = 
-  | 'stock_low'
-  | 'stock_out'
-  | 'stock_critical'
-  | 'order_pending'
-  | 'order_overdue'
-  | 'ingredient_expiring'
-  | 'cost_increase'
-  | 'profit_margin_low'
-  | 'daily_summary'
-  | 'system'
-  | 'success'
-  | 'warning'
-  | 'error'
-  | 'info'
+  'cost_increase' | 'daily_summary' | 'error' | 'info' | 'ingredient_expiring' | 'order_overdue' | 'order_pending' | 'profit_margin_low' | 'stock_critical' | 'stock_low' | 'stock_out' | 'success' | 'system' | 'warning'
 
-export type NotificationPriority = 'low' | 'medium' | 'high' | 'critical'
+export type NotificationPriority = 'critical' | 'high' | 'low' | 'medium'
 
 export interface Notification {
   id: string

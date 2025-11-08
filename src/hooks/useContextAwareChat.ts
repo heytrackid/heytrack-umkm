@@ -1,12 +1,14 @@
 'use client'
 
-import { createClientLogger } from '@/lib/client-logger'
-
-const logger = createClientLogger('Hook');
-import { getErrorMessage } from '@/lib/type-guards';
-import type { ChatMessage, ChatSuggestion, SessionListItem } from '@/types/features/chat';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+
+import { createClientLogger } from '@/lib/client-logger'
+import { getErrorMessage } from '@/lib/type-guards';
+
+import type { ChatMessage, ChatSuggestion, SessionListItem } from '@/types/features/chat';
+
+const logger = createClientLogger('Hook');
 
 /**
  * React Hook for Context-Aware AI Chat with Session Persistence
@@ -58,8 +60,8 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
         throw new Error('Failed to load sessions');
       }
 
-      const data = await response.json();
-      setSessions(data.sessions ?? []);
+       const _data = await response.json() as { sessions?: SessionListItem[] };
+       setSessions(_data.sessions ?? []);
     } catch (error: unknown) {
       const message = getErrorMessage(error)
       logger.error({ error: message }, 'Failed to load sessions');
@@ -79,8 +81,8 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
         throw new Error('Failed to load suggestions');
       }
 
-      const data = await response.json();
-      setSuggestions(data.suggestions ?? []);
+       const _data = await response.json() as { suggestions?: ChatSuggestion[] };
+       setSuggestions(_data.suggestions ?? []);
     } catch (error: unknown) {
       const message = getErrorMessage(error)
       logger.error({ error: message }, 'Failed to load suggestions');
@@ -120,33 +122,33 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
           credentials: 'include', // Include cookies for authentication
         });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message ?? 'Failed to send message');
-        }
+         if (!response.ok) {
+           const errorData = await response.json() as { message?: string };
+           throw new Error(errorData.message ?? 'Failed to send message');
+         }
 
-        const data = await response.json();
+        const _data = await response.json() as { session_id?: string; message: string; metadata?: Record<string, unknown>; suggestions?: ChatSuggestion[] };
 
         // Update session ID if new
-        if (data.session_id && data.session_id !== sessionId) {
-          setSessionId(data.session_id);
+        if (_data.session_id !== null && _data.session_id !== sessionId) {
+          setSessionId(_data.session_id as string);
         }
 
         // Add AI response
         const aiMessage: ChatMessage = {
           id: `ai-${Date.now()}`,
-          session_id: data.session_id,
+          session_id: _data.session_id ?? '',
           role: 'assistant',
-          content: data.message,
-          metadata: data.metadata ?? {},
+          content: _data.message,
+          metadata: _data.metadata ?? {},
           created_at: new Date().toISOString(),
         };
 
         setMessages((prev) => [...prev, aiMessage]);
 
         // Update suggestions
-        if (data.suggestions) {
-          setSuggestions(data.suggestions);
+        if (_data.suggestions) {
+          setSuggestions(_data.suggestions);
         }
 
         // Reload sessions to update list (without triggering re-render loop)
@@ -155,7 +157,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
             credentials: 'include', // Include cookies for authentication
           });
           if (sessionsResponse.ok) {
-            const sessionsData = await sessionsResponse.json();
+            const sessionsData = await sessionsResponse.json() as { sessions?: SessionListItem[] };
             setSessions(sessionsData.sessions ?? []);
           }
         } catch (error: unknown) {
@@ -168,7 +170,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
         logger.error({ error: errorMessage }, 'Failed to send message');
 
         // Remove optimistic user message on error
-        setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
+        setMessages((prev) => prev.filter((m) => m['id'] !== userMessage['id']));
       } finally {
         setIsLoading(false);
       }
@@ -189,9 +191,9 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
         throw new Error('Failed to load session');
       }
 
-      const data = await response.json();
-      setSessionId(newSessionId);
-      setMessages(data.messages ?? []);
+       const _data = await response.json() as { messages?: ChatMessage[] };
+       setSessionId(newSessionId);
+       setMessages(_data.messages ?? []);
     } catch (error: unknown) {
       const errorMessage = getErrorMessage(error) || 'Failed to load session';
       setError(errorMessage);
@@ -233,7 +235,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
             credentials: 'include', // Include cookies for authentication
           });
           if (sessionsResponse.ok) {
-            const sessionsData = await sessionsResponse.json();
+            const sessionsData = await sessionsResponse.json() as { sessions?: SessionListItem[] };
             setSessions(sessionsData.sessions ?? []);
           }
         } catch (error: unknown) {

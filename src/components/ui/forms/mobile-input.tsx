@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
-import { cn } from '@/lib/utils'
-import { useResponsive } from '@/hooks/useResponsive'
-import { Input } from '../input'
-import { Label } from '../label'
 import { Eye, EyeOff } from 'lucide-react'
+import { useState } from 'react'
+
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useResponsive } from '@/hooks/useResponsive'
+import { cn } from '@/lib/utils'
+
 
 /**
  * Mobile Input Component
@@ -20,7 +22,7 @@ interface MobileInputProps {
   defaultValue?: string
   onChange?: (value: string) => void
   onBlur?: () => void
-  type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'number' | 'date'
+  type?: 'date' | 'email' | 'number' | 'password' | 'tel' | 'text' | 'url'
   required?: boolean
   disabled?: boolean
   error?: string
@@ -57,6 +59,9 @@ export const MobileInput = ({
       case 'tel': return 'tel'
       case 'url': return 'url'
       case 'number': return 'decimal'
+      case 'date': return 'text'
+      case 'text': return 'text'
+      case 'password': return 'text'
       default: return 'text'
     }
   }
@@ -85,7 +90,7 @@ export const MobileInput = ({
           onChange={(e) => onChange?.(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
-            void setIsFocused(false)
+            setIsFocused(false)
             onBlur?.()
           }}
           disabled={disabled}

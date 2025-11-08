@@ -1,5 +1,5 @@
-import type { RecipeWithIngredients} from '@/types/query-results'
 import type { Row } from '@/types/database'
+import type { RecipeWithIngredients} from '@/types/query-results'
 
 
 /**
@@ -61,7 +61,7 @@ export function transformRecipeWithIngredients(
   return {
     ...recipe,
     recipe_ingredients: (recipe.recipe_ingredients ?? []).map(ri => ({
-      id: ri.id,
+      id: ri['id'],
       recipe_id: ri.recipe_id,
       ingredient_id: ri.ingredient_id,
       quantity: ri.quantity,
@@ -138,7 +138,7 @@ export function toDate(value: unknown): Date {
 /**
  * Group array by key
  */
-export function groupBy<T, K extends string | number>(
+export function groupBy<T, K extends number | string>(
   array: T[],
   keyFn: (item: T) => K
 ): Record<K, T[]> {

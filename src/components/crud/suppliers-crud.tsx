@@ -1,15 +1,16 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useSuppliers } from '@/hooks';
-import { useSupabaseCRUD } from '@/hooks/supabase';
-import { SimpleDataTable, type SimpleColumn } from '@/components/ui/simple-data-table';
-import { SupplierFormSchema, type SupplierForm } from '@/lib/validations/form-validations';
+import { useState, useCallback, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+
 import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields';
 import { CreateModal, EditModal, DeleteModal } from '@/components/ui';
+import { SimpleDataTable, type SimpleColumn } from '@/components/ui/simple-data-table';
+import { useSuppliers } from '@/hooks';
+import { useSupabaseCRUD } from '@/hooks/supabase';
 import { createClientLogger } from '@/lib/client-logger'
+import { SupplierFormSchema, type SupplierForm } from '@/lib/validations/form-validations';
 
 const logger = createClientLogger('SuppliersCRUD')
 import type { Row, Insert, Update } from '@/types/database'
@@ -23,9 +24,9 @@ import type { Row, Insert, Update } from '@/types/database'
 type Supplier = Row<'suppliers'>
 
 
-export const SuppliersCRUD = () => {
+export const SuppliersCRUD = (): JSX.Element => {
   const { data: suppliersData, loading, error } = useSuppliers();
-  const { create: createSupplier, update: updateSupplier, delete: deleteSupplier } = useSupabaseCRUD('suppliers');
+  const { create: createSupplier, update: updateSupplier, remove: deleteSupplier } = useSupabaseCRUD('suppliers');
   const suppliers = suppliersData || [];
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -43,6 +44,20 @@ export const SuppliersCRUD = () => {
       notes: '',
     }
   });
+
+  // Reset create form when modal opens
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      createForm.reset({
+        name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: '',
+      })
+    }
+  }, [isCreateModalOpen, createForm])
 
   const editForm = useForm<SupplierForm>({
     resolver: zodResolver(SupplierFormSchema),
@@ -83,20 +98,12 @@ export const SuppliersCRUD = () => {
     },
   ];
 
-  const handleCreate = useCallback(() => {
-    createForm.reset({
-      name: '',
-      contact_person: '',
-      phone: '',
-      email: '',
-      address: '',
-      notes: '',
-    })
-    void setIsCreateModalOpen(true)
-  }, [createForm])
+  const handleCreate = useCallback((): void => {
+    setIsCreateModalOpen(true)
+  }, [])
 
-  const handleEdit = useCallback((supplier: Supplier) => {
-    void setSelectedSupplier(supplier)
+  const handleEdit = useCallback((supplier: Supplier): void => {
+    setSelectedSupplier(supplier)
     editForm.reset({
       name: supplier.name,
       contact_person: supplier.contact_person ?? '',
@@ -105,38 +112,30 @@ export const SuppliersCRUD = () => {
       address: supplier.address ?? '',
       notes: supplier.notes ?? '',
     })
-    void setIsEditModalOpen(true)
+    setIsEditModalOpen(true)
   }, [editForm])
 
   const handleDelete = useCallback((supplier: Supplier) => {
-    void setSelectedSupplier(supplier)
-    void setIsDeleteDialogOpen(true)
+    setSelectedSupplier(supplier)
+    setIsDeleteDialogOpen(true)
   }, [])
 
-  const handleSubmitCreate = useCallback(async (data: Record<string, unknown>) => {
+  const handleSubmitCreate = useCallback(async (data: Record<string, unknown>): Promise<void> => {
     try {
       await createSupplier(data as Insert<'suppliers'>)
-      void setIsCreateModalOpen(false)
-      createForm.reset({
-        name: '',
-        contact_person: '',
-        phone: '',
-        email: '',
-        address: '',
-        notes: '',
-      })
-    } catch (err: unknown) {
-      logger.error({ err }, 'Failed to create supplier:')
+      setIsCreateModalOpen(false)
+    } catch (error: unknown) {
+      logger.error({ error }, 'Failed to create supplier:')
     }
-  }, [createSupplier, createForm])
+  }, [createSupplier])
 
   const handleSubmitEdit = useCallback(async (data: Record<string, unknown>) => {
     if (!selectedSupplier) { return }
 
     try {
-      await updateSupplier(selectedSupplier.id, data as Update<'suppliers'>)
-      void setIsEditModalOpen(false)
-      void setSelectedSupplier(null)
+      await updateSupplier(selectedSupplier['id'], data as Update<'suppliers'>)
+      setIsEditModalOpen(false)
+      setSelectedSupplier(null)
       editForm.reset({
         name: '',
         contact_person: '',
@@ -145,20 +144,20 @@ export const SuppliersCRUD = () => {
         address: '',
         notes: '',
       })
-    } catch (err: unknown) {
-      logger.error({ err }, 'Failed to update supplier:')
+    } catch (error: unknown) {
+      logger.error({ error }, 'Failed to update supplier:')
     }
   }, [selectedSupplier, updateSupplier, editForm])
 
-  const handleConfirmDelete = useCallback(async () => {
+  const handleConfirmDelete = useCallback(async (): Promise<void> => {
     if (!selectedSupplier) { return }
 
     try {
-      await deleteSupplier(selectedSupplier.id)
+      await deleteSupplier(selectedSupplier['id'])
       setIsDeleteDialogOpen(false);
       setSelectedSupplier(null);
-    } catch (err: unknown) {
-      logger.error({ err }, 'Failed to delete supplier:');
+    } catch (error: unknown) {
+      logger.error({ error }, 'Failed to delete supplier:');
     }
   }, [selectedSupplier, deleteSupplier])
 

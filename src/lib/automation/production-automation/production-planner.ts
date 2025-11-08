@@ -1,7 +1,3 @@
-import type { OrderForProduction } from './types'
-import { AvailabilityChecker } from './availability-checker'
-import { TimeCalculator } from './time-calculator'
-import { ProductionRecommendations } from './recommendations'
 import type {
   Recipe,
   RecipeIngredient,
@@ -11,6 +7,12 @@ import type {
   ProductionPlanSummary,
   AutomationConfig
 } from '@/lib/automation/types'
+
+import { AvailabilityChecker } from './availability-checker'
+import { ProductionRecommendations } from './recommendations'
+import { TimeCalculator } from './time-calculator'
+
+import type { OrderForProduction } from './types'
 
 /**
  * Production Planner Module
@@ -28,7 +30,7 @@ export class ProductionPlanner {
     config: AutomationConfig
   ): ProductionPlan {
     const productionPlan = orders.map(order => {
-      const recipe = recipes.find(r => r.id === order.recipe_id)
+      const recipe = recipes.find(r => r['id'] === order.recipe_id)
       if (!recipe) {
         throw new Error(`Recipe not found for order: ${order.recipe_id}`)
       }

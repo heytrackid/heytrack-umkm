@@ -17,7 +17,7 @@ export interface ProjectionResult {
   revenueGrowthRate: number
   expenseGrowthRate: number
   projections: FinancialProjection[]
-  confidence: 'High' | 'Medium' | 'Low'
+  confidence: 'High' | 'Low' | 'Medium'
 }
 
 // Break-even Analysis Types
@@ -78,6 +78,4 @@ export interface HistoricalData {
 }
 
 // Expenses by Category Type
-export interface ExpensesByCategory {
-  [category: string]: number
-}
+export type ExpensesByCategory = Record<string, number>;

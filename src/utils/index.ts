@@ -5,12 +5,12 @@
  * 
  * Usage:
  *   import { isMobile, isTablet } from '@/utils'
- *   import { createClient } from '@/utils/supabase'
+ *   import { createClient } from '@/lib/auth'
  */
 
-// ============================================================================
+// ==========================================================
 // RESPONSIVE UTILITIES
-// ============================================================================
+// ==========================================================
 
 export {
   isMobile,
@@ -19,12 +19,12 @@ export {
   getCurrentBreakpoint,
 } from './responsive'
 
-// Re-export BREAKPOINTS and DEVICE_BREAKPOINTS from types
-export { BREAKPOINTS, DEVICE_BREAKPOINTS } from '@/types/responsive'
+// Re-export BREAKPOINTS and DEVICE_BREAKPOINTS from responsive utils
+export { BREAKPOINTS, DEVICE_BREAKPOINTS } from '@/utils/responsive'
 
-// ============================================================================
+// ==========================================================
 // SUPABASE UTILITIES
-// ============================================================================
+// ==========================================================
 
 export { createClient } from './supabase/client'
 // Server client functionality is only available in server contexts

@@ -41,26 +41,28 @@ export function useSwipeableTabs(
   })
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const isTransitioning = useRef(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   // Handle touch start
-  const handleTouchStart = useCallback((e: TouchEvent | React.TouchEvent) => {
-    if (!enabled || isTransitioning.current) { return }
+  const handleTouchStart = useCallback((e: React.TouchEvent | TouchEvent) => {
+    if (!enabled || isTransitioning) { return }
 
-    const touch = 'touches' in e ? e.touches[0] : e
+    const touch = 'touches' in e ? e.touches[0] : undefined
+    if (!touch) { return }
     setSwipeState({
       isDragging: true,
       startX: touch.clientX,
       currentX: touch.clientX,
       translateX: 0
     })
-  }, [enabled])
+  }, [enabled, isTransitioning])
 
   // Handle touch move
-  const handleTouchMove = useCallback((e: TouchEvent | React.TouchEvent) => {
-    if (!enabled || !swipeState.isDragging || isTransitioning.current) { return }
+  const handleTouchMove = useCallback((e: React.TouchEvent | TouchEvent) => {
+    if (!enabled || !swipeState.isDragging || isTransitioning) { return }
 
-    const touch = 'touches' in e ? e.touches[0] : e
+    const touch = 'touches' in e ? e.touches[0] : undefined
+    if (!touch) { return }
     const currentX = touch.clientX
     let deltaX = currentX - swipeState.startX
 
@@ -83,11 +85,11 @@ export function useSwipeableTabs(
     if (Math.abs(deltaX) > 10) {
       e.preventDefault()
     }
-  }, [enabled, swipeState.isDragging, swipeState.startX, currentIndex, totalTabs, resistance])
+  }, [enabled, swipeState.isDragging, swipeState.startX, currentIndex, totalTabs, resistance, isTransitioning])
 
   // Handle touch end
   const handleTouchEnd = useCallback(() => {
-    if (!enabled || !swipeState.isDragging || isTransitioning.current) { return }
+    if (!enabled || !swipeState.isDragging || isTransitioning) { return }
 
     const deltaX = swipeState.translateX
     const absDelta = Math.abs(deltaX)
@@ -109,12 +111,12 @@ export function useSwipeableTabs(
 
     // Animate to final position
     if (newIndex !== currentIndex) {
-      isTransitioning.current = true
+      setIsTransitioning(true)
       onIndexChange(newIndex)
 
       // Reset after animation
       setTimeout(() => {
-        isTransitioning.current = false
+        setIsTransitioning(false)
       }, animationDuration)
     }
 
@@ -132,6 +134,7 @@ export function useSwipeableTabs(
     currentIndex,
     totalTabs,
     threshold,
+    isTransitioning,
     animationDuration,
     onIndexChange,
     onSwipeLeft,
@@ -140,7 +143,7 @@ export function useSwipeableTabs(
 
   // Mouse events for desktop testing
   const handleMouseDown = useCallback((e: MouseEvent | React.MouseEvent) => {
-    if (!enabled || isTransitioning.current) { return }
+    if (!enabled || isTransitioning) { return }
 
     setSwipeState({
       isDragging: true,
@@ -148,10 +151,10 @@ export function useSwipeableTabs(
       currentX: e.clientX,
       translateX: 0
     })
-  }, [enabled])
+  }, [enabled, isTransitioning])
 
   const handleMouseMove = useCallback((e: MouseEvent | React.MouseEvent) => {
-    if (!enabled || !swipeState.isDragging || isTransitioning.current) { return }
+    if (!enabled || !swipeState.isDragging || isTransitioning) { return }
 
     const currentX = e.clientX
     let deltaX = currentX - swipeState.startX
@@ -168,7 +171,7 @@ export function useSwipeableTabs(
       currentX,
       translateX: deltaX
     }))
-  }, [enabled, swipeState.isDragging, swipeState.startX, currentIndex, totalTabs, resistance])
+  }, [enabled, swipeState.isDragging, swipeState.startX, currentIndex, totalTabs, resistance, isTransitioning])
 
   const handleMouseUp = useCallback(() => {
     if (!enabled || !swipeState.isDragging) { return }
@@ -206,6 +209,6 @@ export function useSwipeableTabs(
     swipeState,
     isDragging: swipeState.isDragging,
     translateX: swipeState.translateX,
-    isTransitioning: isTransitioning.current
+    isTransitioning: isTransitioning
   }
 }

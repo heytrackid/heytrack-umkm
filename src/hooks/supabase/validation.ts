@@ -11,7 +11,7 @@ export function validateQueryParams(params: {
   filter?: Record<string, unknown>
   orderBy?: { column: string; ascending?: boolean }
   limit?: number
-}) {
+}): void {
   if (params.limit && (params.limit < 1 || params.limit > 1000)) {
     throw new Error('Limit must be between 1 and 1000')
   }
@@ -28,7 +28,11 @@ export function validateQueryParams(params: {
 /**
  * Validate CRUD operation data
  */
-export function validateCRUDData(operation: 'create' | 'update', data: Record<string, unknown>, id?: string) {
+export function validateCRUDData(
+  operation: 'create' | 'update',
+  data: Record<string, unknown>,
+  id?: string
+): void {
   if (!data || typeof data !== 'object') {
     throw new Error('Data must be a valid object')
   }
@@ -50,7 +54,7 @@ export function validateCRUDData(operation: 'create' | 'update', data: Record<st
 /**
  * Sanitize query filters to prevent injection
  */
-export function sanitizeFilters(filters: Record<string, unknown>) {
+export function sanitizeFilters(filters: Record<string, unknown>): Record<string, unknown> {
   const sanitized: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(filters)) {
@@ -73,7 +77,7 @@ export function sanitizeFilters(filters: Record<string, unknown>) {
 /**
  * Validate table name exists in schema
  */
-export function validateTableName(tableName: string, allowedTables: string[]) {
+export function validateTableName(tableName: string, allowedTables: string[]): void {
   if (!allowedTables.includes(tableName)) {
     throw new Error(`Table ${tableName} is not allowed`)
   }

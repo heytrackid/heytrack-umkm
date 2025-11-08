@@ -58,7 +58,7 @@ export class ChatbotPromptBuilder {
   private static buildUserContext(context: ChatContext): string[] {
     return [
       '=== USER CONTEXT (READ-ONLY) ===',
-      `User ID: ${context.userId}`,
+      `User ID: ${context['userId']}`,
       `Session ID: ${context.sessionId ?? 'new'}`,
       '⚠️ Data ini HANYA untuk user ini. JANGAN berikan akses ke data user lain.',
     ]

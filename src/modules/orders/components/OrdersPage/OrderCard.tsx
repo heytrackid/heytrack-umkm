@@ -1,14 +1,16 @@
 'use client'
 
+import { Edit, Eye } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCurrency } from '@/hooks/useCurrency'
 import { ORDER_STATUS_CONFIG, ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/constants'
+
 import type { Order } from '@/modules/orders/types'
 import type { OrderStatus, PaymentStatus } from '@/types/database'
-import { Edit, Eye } from 'lucide-react'
 
 
 
@@ -37,9 +39,9 @@ export const OrderCard = ({ order, onView, onEdit, onUpdateStatus }: OrderCardPr
 
     const getStatusColor = (status: OrderStatus | null) => {
         if (!status) { return 'bg-gray-100 text-gray-800' }
-        const config = ORDER_STATUS_CONFIG[status]
-        if (!config) { return 'bg-gray-100 text-gray-800' }
-        return config.color
+        const _config = ORDER_STATUS_CONFIG[status]
+        if (!_config) { return 'bg-gray-100 text-gray-800' }
+        return _config.color
     }
 
     const getPaymentStatusColor = (_status: PaymentStatus | null) => 'bg-gray-100 text-gray-800'
@@ -53,14 +55,14 @@ export const OrderCard = ({ order, onView, onEdit, onUpdateStatus }: OrderCardPr
             <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                     <div className="space-y-1">
-                        <div className="font-semibold text-lg">{order.order_no}</div>
+                        <div className="font-semibold text-lg">{order['order_no']}</div>
                         <div className="text-sm text-muted-foreground">
-                            {order.customer_name ?? 'N/A'} • {order.order_date ? formatDate(order.order_date) : 'N/A'}
+                            {order['customer_name'] ?? 'N/A'} • {order.order_date ? formatDate(order.order_date) : 'N/A'}
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Badge className={getStatusColor(order.status)}>
-                            {order.status ? ORDER_STATUS_LABELS[order.status] : 'N/A'}
+                        <Badge className={getStatusColor(order['status'])}>
+                            {order['status'] ? ORDER_STATUS_LABELS[order['status']] : 'N/A'}
                         </Badge>
                         <Badge
                             className={getPaymentStatusColor(
@@ -96,19 +98,19 @@ export const OrderCard = ({ order, onView, onEdit, onUpdateStatus }: OrderCardPr
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
                     </Button>
-                    {order.status && ORDER_STATUS_CONFIG[order.status]?.nextStatuses && ORDER_STATUS_CONFIG[order.status].nextStatuses.length > 0 && (
+                    {order['status'] && ORDER_STATUS_CONFIG[order['status']]?.nextStatuses && ORDER_STATUS_CONFIG[order['status']].nextStatuses.length > 0 && (
                         <Select
-                            value={order.status}
-                            onValueChange={(newStatus) => onUpdateStatus(order.id, newStatus as OrderStatus)}
+                            value={order['status']}
+                            onValueChange={(newStatus) => onUpdateStatus(order['id'], newStatus as OrderStatus)}
                         >
                             <SelectTrigger className="w-full sm:w-[200px] h-8 text-sm">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value={order.status || 'PENDING'} disabled>
-                                    {order.status ? ORDER_STATUS_LABELS[order.status] : 'Status Tidak Diketahui'}
+                                <SelectItem value={order['status'] || 'PENDING'} disabled>
+                                    {order['status'] ? ORDER_STATUS_LABELS[order['status']] : 'Status Tidak Diketahui'}
                                 </SelectItem>
-                                {ORDER_STATUS_CONFIG[order.status]?.nextStatuses?.map((status: OrderStatus) => (
+                                {ORDER_STATUS_CONFIG[order['status']]?.nextStatuses?.map((status: OrderStatus) => (
                                     <SelectItem key={status} value={status}>
                                         {ORDER_STATUS_LABELS[status]}
                                     </SelectItem>

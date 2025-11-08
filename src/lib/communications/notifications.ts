@@ -13,9 +13,9 @@ import type { SmartNotification, NotificationRule, NotificationConfig } from './
 export class SmartNotificationSystem {
   private static instance: SmartNotificationSystem
   private notifications: SmartNotification[] = []
-  private rules: NotificationRule[] = []
+  private readonly rules: NotificationRule[] = []
   private subscribers: Array<(notifications: SmartNotification[]) => void> = []
-  private config: NotificationConfig
+  private readonly config: NotificationConfig
 
   private constructor(config: NotificationConfig = {
     maxNotifications: 100,
@@ -35,7 +35,7 @@ export class SmartNotificationSystem {
   /**
    * Add notification
    */
-  addNotification(notification: Omit<SmartNotification, 'id' | 'timestamp' | 'isRead' | 'type'>): void {
+  addNotification(notification: Omit<SmartNotification, 'id' | 'isRead' | 'timestamp' | 'type'>): void {
     const id = `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const fullNotification: SmartNotification = {
       ...notification,
@@ -65,7 +65,7 @@ export class SmartNotificationSystem {
    * Mark notification as read
    */
   markAsRead(notificationId: string): void {
-    const notification = this.notifications.find(n => n.id === notificationId);
+    const notification = this.notifications.find(n => n['id'] === notificationId);
     if (notification) {
       notification.isRead = true;
       this.notifySubscribers();
@@ -76,7 +76,7 @@ export class SmartNotificationSystem {
    * Remove notification
    */
   removeNotification(notificationId: string): void {
-    this.notifications = this.notifications.filter(n => n.id !== notificationId);
+    this.notifications = this.notifications.filter(n => n['id'] !== notificationId);
     this.notifySubscribers();
   }
 
@@ -110,7 +110,7 @@ export class SmartNotificationSystem {
    */
   addRule(rule: NotificationRule): void {
     this.rules.push(rule);
-    logger.info({ ruleId: rule.id, category: rule.category }, 'Notification rule added');
+    logger.info({ ruleId: rule['id'], category: rule.category }, 'Notification rule added');
   }
 
   /**
@@ -208,8 +208,8 @@ export class SmartNotificationSystem {
     this.subscribers.forEach(callback => {
       try {
         callback([...this.notifications]);
-      } catch (err) {
-        logger.error({ err: err instanceof Error ? err.message : String(err) }, 'Error notifying subscriber');
+      } catch (error) {
+        logger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error notifying subscriber');
       }
     });
   }

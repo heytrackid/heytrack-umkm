@@ -1,14 +1,15 @@
  'use client'
 
-import { useEffect, useState } from 'react'
+import { Calculator, TrendingUp, AlertCircle, CheckCircle, Settings } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
-import { Label } from '@/components/ui/label'
-import { Calculator, TrendingUp, AlertCircle, CheckCircle, Settings } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
-import { Button } from '@/components/ui/button'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 
 
 /**
@@ -30,9 +31,6 @@ interface HppEstimatorProps {
 }
 
 export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: HppEstimatorProps) => {
-    const [estimatedHPP, setEstimatedHPP] = useState(0)
-    const [materialCost, setMaterialCost] = useState(0)
-    const [operationalCost, setOperationalCost] = useState(0)
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
     const { formatCurrency } = useCurrency()
 
@@ -45,37 +43,36 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
         profit: 25, // desired profit margin
     })
 
-    useEffect(() => {
+    const materialCost = useMemo(() => {
         if (selectedIngredients.length > 0 && servings > 0) {
-            // Calculate material cost (rough estimate)
-            const material = selectedIngredients.reduce((sum, ing) => {
+            const totalMaterial = selectedIngredients.reduce((sum, ing) => {
                 // Estimate typical usage per serving
                 const typicalUsage = 50 // grams per serving (rough average)
                 const costPerGram = ing.price_per_unit / 1000 // Assuming price is per kg
                 return sum + (costPerGram * typicalUsage * servings)
             }, 0)
-
-            // Calculate operational costs based on adjustable percentages
-            const laborCost = material * (operationalCosts.labor / 100)
-            const utilitiesCost = material * (operationalCosts.utilities / 100)
-            const packagingCost = material * (operationalCosts.packaging / 100)
-            const overheadCost = material * (operationalCosts.overhead / 100)
-            const profitCost = material * (operationalCosts.profit / 100)
-
-            const totalOperational = laborCost + utilitiesCost + packagingCost + overheadCost + profitCost
-
-            // Total HPP
-            const total = material + totalOperational
-
-            setMaterialCost(material)
-            setOperationalCost(totalOperational)
-            setEstimatedHPP(total)
-        } else {
-            setEstimatedHPP(0)
-            setMaterialCost(0)
-            setOperationalCost(0)
+            return totalMaterial / servings
         }
-    }, [selectedIngredients, servings, operationalCosts])
+        return 0
+    }, [selectedIngredients, servings])
+
+    const operationalCost = useMemo(() => {
+        if (selectedIngredients.length > 0 && servings > 0) {
+            const laborCost = (materialCost * operationalCosts.labor) / 100
+            const utilitiesCost = (materialCost * operationalCosts.utilities) / 100
+            const packagingCost = (materialCost * operationalCosts.packaging) / 100
+            const overheadCost = (materialCost * operationalCosts.overhead) / 100
+            const profitCost = (materialCost * operationalCosts.profit) / 100
+            return laborCost + utilitiesCost + packagingCost + overheadCost + profitCost
+        }
+        return 0
+    }, [selectedIngredients.length, servings, operationalCosts, materialCost])
+
+    const estimatedHPP = useMemo(() => {
+        return materialCost + operationalCost
+    }, [materialCost, operationalCost])
+
+    // Calculations are now in useMemo above
 
     // Calculate margin if target price is set
     const margin = targetPrice && estimatedHPP > 0
@@ -167,7 +164,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
                                 </div>
                                 <Slider
                                     value={[operationalCosts.labor]}
-                                    onValueChange={(value) => updateOperationalCost('labor', value[0])}
+                                    onValueChange={(value) => updateOperationalCost('labor', value[0] ?? 0)}
                                     max={50}
                                     min={5}
                                     step={1}
@@ -186,7 +183,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
                                 </div>
                                 <Slider
                                     value={[operationalCosts.utilities]}
-                                    onValueChange={(value) => updateOperationalCost('utilities', value[0])}
+                                    onValueChange={(value) => updateOperationalCost('utilities', value[0] ?? 0)}
                                     max={20}
                                     min={2}
                                     step={1}
@@ -205,7 +202,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
                                 </div>
                                 <Slider
                                     value={[operationalCosts.packaging]}
-                                    onValueChange={(value) => updateOperationalCost('packaging', value[0])}
+                                    onValueChange={(value) => updateOperationalCost('packaging', value[0] ?? 0)}
                                     max={25}
                                     min={5}
                                     step={1}
@@ -224,7 +221,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
                                 </div>
                                 <Slider
                                     value={[operationalCosts.overhead]}
-                                    onValueChange={(value) => updateOperationalCost('overhead', value[0])}
+                                    onValueChange={(value) => updateOperationalCost('overhead', value[0] ?? 0)}
                                     max={30}
                                     min={2}
                                     step={1}
@@ -243,7 +240,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
                                 </div>
                                 <Slider
                                     value={[operationalCosts.profit]}
-                                    onValueChange={(value) => updateOperationalCost('profit', value[0])}
+                                    onValueChange={(value) => updateOperationalCost('profit', value[0] ?? 0)}
                                     max={50}
                                     min={10}
                                     step={1}

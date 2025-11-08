@@ -1,25 +1,26 @@
 'use client'
 
+import { Download, FileText, FileSpreadsheet, FileImage, Calendar, BarChart3, LineChart, Table, TrendingUp, type LucideIcon } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
+import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { Download, FileText, FileSpreadsheet, FileImage, Calendar, BarChart3, LineChart, Table, TrendingUp, type LucideIcon } from 'lucide-react'
-import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
-import { dbLogger } from '@/lib/logger'
+import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
-import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { dbLogger } from '@/lib/logger'
 import { HppCostTrendsChart } from '@/modules/hpp'
 
-type HppExportFormat = 'pdf' | 'excel' | 'csv' | 'json'
-type HppExportMetric = 'hpp' | 'margin' | 'cost_breakdown' | 'trends' | 'alerts' | 'recommendations'
+type HppExportFormat = 'csv' | 'excel' | 'json' | 'pdf'
+type HppExportMetric = 'alerts' | 'cost_breakdown' | 'hpp' | 'margin' | 'recommendations' | 'trends'
 
 type ExportFormat = HppExportFormat
 type ExportMetric = HppExportMetric
@@ -66,15 +67,15 @@ const reportsBreadcrumbs = [
   { label: 'Reports' }
 ]
 
-const HppReportsPage = () => {
+const HppReportsPage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const { isMobile } = useResponsive()
 
   const [config, setConfig] = useState<ReportConfig>({
     dateRange: {
-      start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] || '',
-      end: new Date().toISOString().split('T')[0] || ''
+      start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] ?? '',
+      end: new Date().toISOString().split('T')[0] ?? ''
     },
     recipeIds: [],
     metrics: ['hpp', 'margin', 'cost_breakdown'],
@@ -88,7 +89,7 @@ const HppReportsPage = () => {
 
   const loadAnalytics = useCallback(() => {
     try {
-      void setLoading(true)
+      setLoading(true)
 
       // Load analytics data - mock data for now
       const mockAnalytics: HppAnalytics = {
@@ -105,7 +106,7 @@ const HppReportsPage = () => {
           low: 2
         },
         costTrends: Array.from({ length: 30 }, (_, i) => ({
-          date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0] || '',
+          date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0] ?? '',
           averageHpp: 28000 + Math.random() * 4000,
           totalRecipes: 12 + Math.floor(Math.random() * 6)
         })).reverse(),
@@ -119,27 +120,27 @@ const HppReportsPage = () => {
         ]
       }
 
-      void setAnalytics(mockAnalytics)
+      setAnalytics(mockAnalytics)
 
-    } catch (err: unknown) {
-      dbLogger.error({ err }, 'Failed to load HPP analytics')
+    } catch (error) {
+      dbLogger.error({ error }, 'Failed to load HPP analytics')
       toast({
         title: 'Error',
         description: 'Failed to load analytics data',
         variant: 'destructive'
       })
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [toast])
 
   useEffect(() => {
-    void loadAnalytics()
+    loadAnalytics()
   }, [loadAnalytics])
 
   const generateReport = async () => {
     try {
-      void setGenerating(true)
+      setGenerating(true)
 
       // Simulate report generation
       await new Promise(resolve => setTimeout(resolve, 2000))
@@ -149,36 +150,36 @@ const HppReportsPage = () => {
         description: `Report generated successfully in ${config.format.toUpperCase()} format`,
       })
 
-    } catch (err: unknown) {
-      dbLogger.error({ err }, 'Failed to generate report')
+    } catch (error) {
+      dbLogger.error({ error }, 'Failed to generate report')
       toast({
         title: 'Error',
         description: 'Failed to generate report',
         variant: 'destructive'
       })
     } finally {
-      void setGenerating(false)
+      setGenerating(false)
     }
   }
 
   const exportData = (format: ExportFormat) => {
     try {
-      void setGenerating(true)
+      setGenerating(true)
       toast({
         title: 'Export Not Available',
         description: 'Export feature has been removed',
         variant: 'destructive'
       })
 
-    } catch (err: unknown) {
-      dbLogger.error({ err }, `Failed to export ${format}`)
+    } catch (error) {
+      dbLogger.error({ error }, `Failed to export ${format}`)
       toast({
         title: 'Export Failed',
         description: `Failed to export ${format.toUpperCase()} file`,
         variant: 'destructive'
       })
     } finally {
-      void setGenerating(false)
+      setGenerating(false)
     }
   }
 

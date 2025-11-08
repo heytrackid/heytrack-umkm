@@ -1,7 +1,9 @@
 'use client'
 
-import { Suspense, lazy, Component, type ComponentType, type ReactNode, useEffect, type FC } from 'react'
 import { Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Suspense, lazy, Component, type ComponentType, type ReactNode, useEffect, type FC } from 'react'
+
 import { uiLogger } from '@/lib/logger'
 
 /**
@@ -20,6 +22,7 @@ export const LazyWrapper = ({
   fallback?: ReactNode
   errorFallback?: ReactNode
 }) => {
+  const router = useRouter()
   const defaultFallback = (
     <div className="flex items-center justify-center p-8">
       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -32,7 +35,7 @@ export const LazyWrapper = ({
         <p className="text-sm">Failed to load component</p>
         <button
           className="text-xs underline mt-2"
-          onClick={() => window.location.reload()}
+          onClick={() => router.refresh()}
         >
           Reload page
         </button>
@@ -156,8 +159,9 @@ export function logBundleSize() {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries()
         const lastEntry = entries[entries.length - 1]
-
-        uiLogger.info({ lcp: `${lastEntry.startTime.toFixed(0)}ms` }, 'LCP:')
+        if (lastEntry) {
+          uiLogger.info({ lcp: `${lastEntry.startTime.toFixed(0)}ms` }, 'LCP:')
+        }
       })
 
       observer.observe({ entryTypes: ['largest-contentful-paint'] })

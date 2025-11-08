@@ -1,4 +1,5 @@
 import {serializeError } from './logger';
+
 import type pino from 'pino';
 
 
@@ -35,7 +36,7 @@ interface MemoryUsage {
 }
 
 export interface DetailedDebugOptions {
-  level?: 'debug' | 'info' | 'warn' | 'error';
+  level?: 'debug' | 'error' | 'info' | 'warn';
   includeMemory?: boolean;
   includeStack?: boolean;
   includeTimestamp?: boolean;
@@ -46,11 +47,11 @@ export interface DetailedDebugOptions {
 }
 
 class DebugLogger {
-  private logger: pino.Logger;
+  private readonly logger: pino.Logger;
   private context: DebugContext = {};
 
   constructor(context = 'Debug') {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     this.logger = require('./logger').createLogger(context); // Dynamic import to avoid circular dependencies
   }
 
@@ -64,20 +65,20 @@ class DebugLogger {
     additionalData?: Record<string, unknown>
   ): void {
     const logData: DebugContext & { additionalData?: Record<string, unknown> } = {
-      ...this.context,
+      ...this['context'],
       ...additionalData,
     };
 
     if (options.includeTimestamp) {
-      logData.timestamp = new Date().toISOString();
+      logData['timestamp'] = new Date().toISOString();
     }
 
     if (options.includeMemory && typeof process !== 'undefined' && process.memoryUsage) {
       logData.memory = process.memoryUsage() as MemoryUsage;
     }
 
-    if (options.level === 'error' && additionalData?.error) {
-      logData.error = serializeError(additionalData.error);
+    if (options.level === 'error' && additionalData?.['error']) {
+      logData.error = serializeError(additionalData['error']);
     }
 
     switch (options.level ?? 'debug') {
@@ -99,7 +100,9 @@ class DebugLogger {
 
   public time<T>(message: string, fn: () => T, options: DetailedDebugOptions = {}): T {
     const start = process.hrtime.bigint();
-    const _startMemory = options.includeMemory && typeof process !== 'undefined' ? process.memoryUsage() : undefined;
+    const startMemory = options.includeMemory && typeof process !== 'undefined'
+      ? process.memoryUsage()
+      : undefined;
     
     try {
       const result = fn();
@@ -107,12 +110,12 @@ class DebugLogger {
       const duration = Number(end - start) / 1_000_000; // Convert to milliseconds
       
       const logData = {
-        ...this.context,
+        ...this['context'],
         duration,
-        ...(options.includeMemory && _startMemory ? { 
-          memoryBefore: _startMemory,
+        ...(options.includeMemory && startMemory ? { 
+          memoryBefore: startMemory,
           memoryAfter: process.memoryUsage(),
-          memoryDiff: this.calculateMemoryDiff(_startMemory, process.memoryUsage())
+          memoryDiff: this.calculateMemoryDiff(startMemory, process.memoryUsage())
         } : {})
       };
 
@@ -123,13 +126,13 @@ class DebugLogger {
       const duration = Number(end - start) / 1_000_000; // Convert to milliseconds
       
       const logData = {
-        ...this.context,
+        ...this['context'],
         duration,
         error: serializeError(error),
-        ...(options.includeMemory && _startMemory ? { 
-          memoryBefore: _startMemory,
+        ...(options.includeMemory && startMemory ? { 
+          memoryBefore: startMemory,
           memoryAfter: process.memoryUsage(),
-          memoryDiff: this.calculateMemoryDiff(_startMemory, process.memoryUsage())
+          memoryDiff: this.calculateMemoryDiff(startMemory, process.memoryUsage())
         } : {})
       };
 
@@ -140,7 +143,7 @@ class DebugLogger {
 
   public async timeAsync<T>(message: string, fn: () => Promise<T>, options: DetailedDebugOptions = {}): Promise<T> {
     const start = process.hrtime.bigint();
-    const _startMemory = options.includeMemory && typeof process !== 'undefined' ? process.memoryUsage() : undefined;
+    const startMemory = options.includeMemory && typeof process !== 'undefined' ? process.memoryUsage() : undefined;
     
     try {
       const result = await fn();
@@ -148,12 +151,12 @@ class DebugLogger {
       const duration = Number(end - start) / 1_000_000; // Convert to milliseconds
       
       const logData = {
-        ...this.context,
+        ...this['context'],
         duration,
-        ...(options.includeMemory && _startMemory ? { 
-          memoryBefore: _startMemory,
+        ...(options.includeMemory && startMemory ? { 
+          memoryBefore: startMemory,
           memoryAfter: process.memoryUsage(),
-          memoryDiff: this.calculateMemoryDiff(_startMemory, process.memoryUsage())
+          memoryDiff: this.calculateMemoryDiff(startMemory, process.memoryUsage())
         } : {})
       };
 
@@ -164,13 +167,13 @@ class DebugLogger {
       const duration = Number(end - start) / 1_000_000; // Convert to milliseconds
       
       const logData = {
-        ...this.context,
+        ...this['context'],
         duration,
         error: serializeError(error),
-        ...(options.includeMemory && _startMemory ? { 
-          memoryBefore: _startMemory,
+        ...(options.includeMemory && startMemory ? { 
+          memoryBefore: startMemory,
           memoryAfter: process.memoryUsage(),
-          memoryDiff: this.calculateMemoryDiff(_startMemory, process.memoryUsage())
+          memoryDiff: this.calculateMemoryDiff(startMemory, process.memoryUsage())
         } : {})
       };
 
@@ -196,7 +199,6 @@ class DebugLogger {
       }
 
       const start = process.hrtime.bigint();
-      const _startMemory = options.includeMemory && typeof process !== 'undefined' ? process.memoryUsage() : undefined;
       
       try {
         const result = fn.apply(this, args);

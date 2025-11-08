@@ -1,5 +1,7 @@
-import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
+
+import { createClient } from '@/utils/supabase/server'
+
 import type { User } from '@supabase/supabase-js'
 
 
@@ -48,7 +50,7 @@ export async function requireAdmin(): Promise<{
   const { data: profile, error: profileError } = await supabase
     .from('user_profiles')
     .select('role')
-    .eq('user_id', user.id)
+    .eq('user_id', user['id'])
     .single()
   
   if (profileError || !profile) {
@@ -91,7 +93,7 @@ export async function hasRole(requiredRole: string): Promise<{
   const { data: profile } = await supabase
     .from('user_profiles')
     .select('role')
-    .eq('user_id', user.id)
+    .eq('user_id', user['id'])
     .single()
   
   const hasRequiredRole = profile?.role === requiredRole

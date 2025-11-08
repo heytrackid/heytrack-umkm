@@ -83,7 +83,7 @@ export class InputSanitizer {
 
 // Rate Limiting
 export class RateLimiter {
-  private static requests = new Map<string, number[]>()
+  private static readonly requests = new Map<string, number[]>()
 
   static checkLimit(identifier: string, maxRequests = 100, windowMs = 60000): boolean {
     const now = Date.now()
@@ -146,7 +146,7 @@ export class SecurityHeaders {
   static getCSPHeader(isDev = false): string {
     // Deprecation warning shown in development only (console allowed for deprecation notices)
      
-    if (process.env.NODE_ENV === 'development') {
+    if (process['env'].NODE_ENV === 'development') {
       logger.warn('SecurityHeaders.getCSPHeader is deprecated. Use getStrictCSP from @/lib/csp instead.')
     }
     const policies = [
@@ -217,7 +217,7 @@ export class PasswordValidator {
 export class APISecurity {
   static validateAPIKey(apiKey: string): boolean {
     // Basic API key validation (you should implement proper validation)
-    return !!(apiKey && apiKey.length > 20 && /^[a-zA-Z0-9_-]+$/.test(apiKey))
+    return Boolean(apiKey && apiKey.length > 20 && /^[a-zA-Z0-9_-]+$/.test(apiKey))
   }
 
   static sanitizeAPIInput(input: unknown): unknown {
@@ -251,8 +251,8 @@ export class APISecurity {
   }
   
   // Sanitize query parameters
-  static sanitizeQueryParams(params: Record<string, string | string[]>): Record<string, string | string[]> {
-    const sanitized: Record<string, string | string[]> = {}
+  static sanitizeQueryParams(params: Record<string, string[] | string>): Record<string, string[] | string> {
+    const sanitized: Record<string, string[] | string> = {}
     for (const [key, value] of Object.entries(params)) {
       const sanitizedKey = InputSanitizer.sanitizeSQLInput(key)
       if (Array.isArray(value)) {
@@ -267,3 +267,4 @@ export class APISecurity {
 
 // Export the middleware functions
 export { withSecurity, SecurityPresets } from './api-middleware'
+export { createSecureHandler, createSecureRouteHandler } from './secure-handler'

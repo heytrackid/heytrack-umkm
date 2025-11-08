@@ -20,8 +20,8 @@ export type RecipeIngredientInsert = RecipeIngredientsInsert
 export type RecipeIngredientUpdate = RecipeIngredientsUpdate
 
 // Extended types for UI
-export interface RecipeFormData extends Omit<Recipe, 'id' | 'created_at' | 'updated_at' | 'user_id'> {
-  recipe_ingredients?: Array<Omit<RecipeIngredient, 'id' | 'recipe_id' | 'created_at'>>
+export interface RecipeFormData extends Omit<Recipe, 'created_at' | 'id' | 'updated_at' | 'user_id'> {
+  recipe_ingredients?: Array<Omit<RecipeIngredient, 'created_at' | 'id' | 'recipe_id'>>
 }
 
 export interface RecipeWithIngredients extends Recipe {
@@ -64,7 +64,7 @@ export interface PricingRecommendation {
 }
 
 // Advanced HPP helper types
-export type PricingMethod = 'list_price' | 'weighted' | 'fifo' | 'moving' | 'latest'
+export type PricingMethod = 'fifo' | 'latest' | 'list_price' | 'moving' | 'weighted'
 
 export interface RecipePricingAlternative {
   method: PricingMethod
@@ -100,7 +100,7 @@ export interface RecipeHppBreakdown {
   ingredientBreakdown: RecipeHppIngredientBreakdown[]
 }
 
-export type RecipeRiskLevel = 'LOW' | 'MEDIUM' | 'HIGH'
+export type RecipeRiskLevel = 'HIGH' | 'LOW' | 'MEDIUM'
 
 export interface RecipeMarginAnalysis {
   isProfitable: boolean

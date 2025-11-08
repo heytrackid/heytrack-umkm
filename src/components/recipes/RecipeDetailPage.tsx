@@ -1,16 +1,6 @@
  
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useToast } from '@/hooks/use-toast'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { DeleteModal } from '@/components/ui'
-import type { Row } from '@/types/database'
-import { useSupabase } from '@/providers/SupabaseProvider'
-import { useAuth } from '@/hooks/useAuth'
 import {
     ChefHat,
     Edit,
@@ -20,13 +10,27 @@ import {
     Users,
     ArrowLeft,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+
+import { DeleteModal } from '@/components/ui'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAuth } from '@/hooks'
+import { useToast } from '@/hooks/use-toast'
+import { useSupabase } from '@/providers/SupabaseProvider'
+
+import type { Row } from '@/types/database'
+
+
 
 type RecipeRow = Row<'recipes'>
 type RecipeIngredientRow = Row<'recipe_ingredients'>
 type IngredientRow = Row<'ingredients'>
 
 type RecipeIngredientWithDetails = RecipeIngredientRow & {
-    ingredient: Pick<IngredientRow, 'id' | 'name' | 'unit' | 'price_per_unit'> | null
+    ingredient: Pick<IngredientRow, 'id' | 'name' | 'price_per_unit' | 'unit'> | null
 }
 
 type RecipeWithIngredients = RecipeRow & {
@@ -49,7 +53,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
 
     const loadRecipe = useCallback(async (userId: string) => {
         try {
-            void setLoading(true)
+            setLoading(true)
 
             const { data, error } = await supabase
                 .from('recipes')
@@ -82,8 +86,8 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             }
 
             setRecipe(data as RecipeWithIngredients)
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal memuat resep'
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Gagal memuat resep'
             toast({
                 title: 'Error',
                 description: message,
@@ -91,21 +95,21 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             })
             setRecipe(null)
         } finally {
-            void setLoading(false)
+            setLoading(false)
         }
     }, [recipeId, supabase, toast])
 
     useEffect(() => {
         if (!user?.id) {
             if (!authLoading) {
-                void setLoading(false)
+                setLoading(false)
                 setRecipe(null)
             }
             return
         }
 
-        void loadRecipe(user.id)
-    }, [user?.id, authLoading, loadRecipe])
+        void loadRecipe(user['id'])
+    }, [user, authLoading, loadRecipe])
 
     const handleDelete = async () => {
         if (!recipe || !user?.id) { return }
@@ -126,8 +130,8 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                 description: `${recipe.name} berhasil dihapus`,
             })
             router.push('/recipes')
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal menghapus resep'
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Gagal menghapus resep'
             toast({
                 title: 'Error',
                 description: message,
@@ -143,7 +147,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             cake: '🍰',
             cookie: '🍪',
         }
-        return icons[category] || '👩‍🍳'
+        return icons[category] ?? '👩‍🍳'
     }
 
     const getDifficultyColor = (difficulty: string) => {
@@ -152,7 +156,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             medium: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
             hard: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
         }
-        return colors[difficulty] || 'bg-gray-100 text-gray-700'
+        return colors[difficulty] ?? 'bg-gray-100 text-gray-700'
     }
 
     const getDifficultyLabel = (difficulty: string) => {
@@ -161,7 +165,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             medium: 'Sedang',
             hard: 'Sulit',
         }
-        return labels[difficulty] || difficulty
+        return labels[difficulty] ?? difficulty
     }
 
     if (loading || authLoading) {
@@ -289,7 +293,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <div className="space-y-2">
                             {recipe.recipe_ingredients.map((ri) => (
                                 <div
-                                    key={ri.id}
+                                    key={ri['id']}
                                     className="flex items-center justify-between p-3 border rounded-lg"
                                 >
                                     <div className="flex-1">

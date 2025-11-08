@@ -61,7 +61,7 @@ export function shallowEqual<T extends object>(objA: T, objB: T): boolean {
 
     for (const key of keysA) {
         if (
-            !Object.prototype.hasOwnProperty.call(objB, key) ||
+            !Object.hasOwn(objB, key) ||
             !Object.is(objA[key as keyof T], objB[key as keyof T])
         ) {
             return false
@@ -100,7 +100,7 @@ export function deepEqual(objA: unknown, objB: unknown): boolean {
 
   for (const key of keysA) {
     if (
-        !Object.prototype.hasOwnProperty.call(recordB, key) ||
+        !Object.hasOwn(recordB, key) ||
         !deepEqual(recordA[key], recordB[key])
     ) {
       return false

@@ -7,7 +7,7 @@ import { useQuery, type UseQueryOptions, type QueryKey } from '@tanstack/react-q
  * Global placeholderData di QueryProvider sudah keep previous data
  */
 
-interface SmartQueryOptions<T> extends Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryKey' | 'queryFn'> {
+interface SmartQueryOptions<T> extends Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryFn' | 'queryKey'> {
   /** Stale time dalam milidetik (default: 5 menit) */
   staleTime?: number
   /** Cache time dalam milidetik (default: 15 menit) */

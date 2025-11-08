@@ -1,20 +1,5 @@
 'use client'
 
-import { NotificationBell } from '@/components/notifications/NotificationBell'
-import { Button } from '@/components/ui/button'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
-import { Input } from '@/components/ui/input'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { useMobile } from '@/hooks/responsive'
-import { uiLogger } from '@/lib/logger'
-import { cn } from '@/lib/utils'
-import { useSupabase } from '@/providers/SupabaseProvider'
-import type { User as SupabaseUser } from '@supabase/supabase-js'
 import {
     ArrowLeft,
     Menu,
@@ -26,18 +11,35 @@ import {
 import { useRouter } from 'next/navigation'
 import { type FormEvent, type ReactNode, useCallback, useEffect, useState } from 'react'
 
+import { NotificationBell } from '@/components/notifications/NotificationBell'
+import { Button } from '@/components/ui/button'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
+import { Input } from '@/components/ui/input'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { uiLogger } from '@/lib/logger'
+import { cn } from '@/lib/utils'
+import { useSupabase } from '@/providers/SupabaseProvider'
+import { useMobile } from '@/utils/responsive'
+
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+
 interface MobileHeaderProps {
-  title?: string
-  showBackButton?: boolean
-  onBackClick?: () => void
-  actions?: ReactNode[]
-  showSearch?: boolean
-  searchPlaceholder?: string
-  onSearch?: (query: string) => void
+  title?: string | undefined
+  showBackButton?: boolean | undefined
+  onBackClick?: (() => void) | undefined
+  actions?: ReactNode[] | undefined
+  showSearch?: boolean | undefined
+  searchPlaceholder?: string | undefined
+  onSearch?: ((query: string) => void) | undefined
   notification?: {
     count: number
     onClick: () => void
-  }
+  } | undefined
   className?: string
   onMenuToggle?: () => void
 
@@ -69,12 +71,11 @@ const MobileHeader = ({
     const getUser = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
-        void setUser(user)
-      } catch (err: unknown) {
-        const error = err as Error
+        setUser(user)
+      } catch (error) {
         uiLogger.error({ error }, 'Error getting user:')
       } finally {
-        void setLoading(false)
+        setLoading(false)
       }
     }
 
@@ -83,8 +84,8 @@ const MobileHeader = ({
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event: string, session: { user: SupabaseUser | null } | null) => {
-        void setUser(session?.user ?? null)
-        void setLoading(false)
+        setUser(session?.user ?? null)
+        setLoading(false)
       }
     )
 
@@ -99,9 +100,9 @@ const MobileHeader = ({
   }, [onSearch, searchQuery])
 
   const handleSearchToggle = useCallback(() => {
-    void setIsSearchExpanded(!isSearchExpanded)
+    setIsSearchExpanded(!isSearchExpanded)
     if (isSearchExpanded) {
-      void setSearchQuery('')
+      setSearchQuery('')
     }
   }, [isSearchExpanded])
 
@@ -112,8 +113,8 @@ const MobileHeader = ({
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element
       if (!target.closest('.search-container')) {
-        void setIsSearchExpanded(false)
-        void setSearchQuery('')
+        setIsSearchExpanded(false)
+        setSearchQuery('')
       }
     }
 
@@ -266,7 +267,7 @@ const MobileHeader = ({
                 <DropdownMenuItem
                   onClick={async () => {
                     await supabase.auth.signOut()
-                    void router.push('/auth/login')
+                    router.push('/auth/login')
                   }}
                   className="text-red-600 focus:text-red-600"
                 >
@@ -302,7 +303,7 @@ const MobileHeader = ({
 export default MobileHeader
 
 // Pre-built header variants for common use cases
-export const DashboardHeader = () => (
+export const DashboardHeader = (): JSX.Element => (
   <MobileHeader
     title="Dashboard"
     notification={{

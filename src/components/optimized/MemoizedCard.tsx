@@ -1,7 +1,8 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { type ReactNode, memo } from 'react'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 /**
  * Memoized Card Components
@@ -12,7 +13,7 @@ import { type ReactNode, memo } from 'react'
 
 interface StatCardProps {
   title: string
-  value: string | number
+  value: number | string
   description?: string
   icon?: ReactNode
   trend?: {
@@ -21,7 +22,7 @@ interface StatCardProps {
   }
 }
 
-export const MemoizedStatCard = memo(({
+const MemoizedStatCard = memo(({
   title,
   value,
   description,
@@ -49,6 +50,8 @@ export const MemoizedStatCard = memo(({
     </Card>
   ))
 
+MemoizedStatCard.displayName = 'MemoizedStatCard'
+
 interface DataCardProps {
   title: string
   children: ReactNode
@@ -56,7 +59,7 @@ interface DataCardProps {
   className?: string
 }
 
-export const MemoizedDataCard = memo(({
+const MemoizedDataCard = memo(({
   title,
   children,
   actions,
@@ -72,6 +75,8 @@ export const MemoizedDataCard = memo(({
       <CardContent>{children}</CardContent>
     </Card>
   ))
+
+MemoizedDataCard.displayName = 'MemoizedDataCard'
 
 interface ListCardProps<T> {
   items: T[]
@@ -94,11 +99,16 @@ export const MemoizedListCard = memo(<T,>({
     )
   }
 
-  return (
-    <div className="space-y-2">
-      {items.map((item, index) => (
-        <div key={keyExtractor(item)}>{renderItem(item, index)}</div>
-      ))}
-    </div>
-  )
-}) as <T>(props: ListCardProps<T>) => JSX.Element
+   return (
+     <div className="space-y-2">
+       {items.map((item, index) => (
+         <div key={keyExtractor(item)}>{renderItem(item, index)}</div>
+       ))}
+     </div>
+   )
+ })
+
+MemoizedListCard.displayName = 'MemoizedListCard'
+
+export { MemoizedStatCard, MemoizedDataCard }
+

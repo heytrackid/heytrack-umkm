@@ -1,23 +1,24 @@
 'use client'
-/* eslint-disable no-nested-ternary */
+ 
 
 
+import { CheckCircle2, AlertTriangle, XCircle, TrendingUp, TrendingDown, DollarSign, Activity, Clock, Zap, Info, RefreshCw, Eye, ArrowRight } from 'lucide-react'
 import { useState, useEffect, type ReactNode } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useCurrency } from '@/hooks/useCurrency'
-import { CheckCircle2, AlertTriangle, XCircle, TrendingUp, TrendingDown, DollarSign, Activity, Clock, Zap, Info, RefreshCw, Eye, ArrowRight } from 'lucide-react'
 
 interface SyncStatus {
   isEnabled: boolean
   lastSyncTime?: string
   totalSynced: number
   totalErrors: number
-  syncHealth: 'healthy' | 'warning' | 'error'
+  syncHealth: 'error' | 'healthy' | 'warning'
 }
 
 interface SyncedTransaction {
@@ -45,7 +46,7 @@ interface CashflowSummary {
     date: string
     description: string
     amount: number
-    type: 'INCOME' | 'EXPENSE'
+    type: 'EXPENSE' | 'INCOME'
     category: string
   }>
 }
@@ -55,6 +56,21 @@ interface AutoSyncData {
   recentTransactions: SyncedTransaction[]
   recommendations: SyncRecommendations
   cashflow: CashflowSummary
+}
+
+interface AutoSyncResponse {
+  success: boolean
+  data?: AutoSyncData | null
+  error?: string
+}
+
+const isAutoSyncResponse = (value: unknown): value is AutoSyncResponse => {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+  const record = value as Record<string, unknown>
+  return typeof record['success'] === 'boolean'
+    && ('data' in record ? record['data'] === null || typeof record['data'] === 'object' : true)
 }
 
 const UMKMTooltip = ({ title, content, children }: { title: string, content: string, children: ReactNode }) => (
@@ -76,7 +92,7 @@ const UMKMTooltip = ({ title, content, children }: { title: string, content: str
   </TooltipProvider>
 )
 
-const AutoSyncFinancialDashboard = () => {
+const AutoSyncFinancialDashboard = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const [data, setData] = useState<AutoSyncData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -89,24 +105,27 @@ const AutoSyncFinancialDashboard = () => {
     setIsMounted(true)
   }, [])
 
-  const fetchAutoSyncData = async () => {
+  const fetchAutoSyncData = async (): Promise<void> => {
     try {
-      void setRefreshing(true)
+      setRefreshing(true)
       const response = await fetch('/api/financial/auto-sync')
-      const result = await response.json()
-
-      if (result.success) {
-        void setData(result.data)
-        void setError(null)
-      } else {
-        void setError(result.error ?? 'Failed to fetch auto-sync data')
+      const payload: unknown = await response.json()
+      if (!isAutoSyncResponse(payload)) {
+        throw new Error('Invalid response format from auto-sync endpoint')
       }
-    } catch (err: unknown) {
-      const error = err as Error
-      void setError(error instanceof Error ? error.message : 'Unknown error')
+
+      if (payload['success']) {
+        setData(payload['data'] ?? null)
+        setError(null)
+      } else {
+        setError(payload['error'] ?? 'Failed to fetch auto-sync data')
+      }
+    } catch (error) {
+      const normalizedError = error instanceof Error ? error : new Error(String(error))
+      setError(normalizedError.message ?? 'Unknown error')
     } finally {
-      void setLoading(false)
-      void setRefreshing(false)
+      setLoading(false)
+      setRefreshing(false)
     }
   }
 
@@ -114,7 +133,7 @@ const AutoSyncFinancialDashboard = () => {
     void fetchAutoSyncData()
   }, [])
 
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
+  const formatDate = (dateString: string): string => new Date(dateString).toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -122,7 +141,7 @@ const AutoSyncFinancialDashboard = () => {
     minute: '2-digit'
   })
 
-  const getHealthBadge = (health: string) => {
+  const getHealthBadge = (health: string): JSX.Element => {
     switch (health) {
       case 'healthy':
         return <Badge className="bg-gray-100 text-gray-800 hover:bg-green-200"><CheckCircle2 className="w-3 h-3 mr-1" />Sehat</Badge>
@@ -212,7 +231,7 @@ const AutoSyncFinancialDashboard = () => {
                   <p className="text-sm font-medium text-gray-600">Status Sync</p>
                 </UMKMTooltip>
                 <div className="mt-2">
-                  {getHealthBadge(data.status.syncHealth)}
+                  {getHealthBadge(data['status'].syncHealth)}
                 </div>
               </div>
               <Activity className="h-8 w-8 text-gray-600" />
@@ -230,7 +249,7 @@ const AutoSyncFinancialDashboard = () => {
                 >
                   <p className="text-sm font-medium text-gray-600">Total Synced</p>
                 </UMKMTooltip>
-                <p className="text-2xl font-bold">{data.status.totalSynced}</p>
+                <p className="text-2xl font-bold">{data['status'].totalSynced}</p>
               </div>
               <Zap className="h-8 w-8 text-gray-600" />
             </div>
@@ -267,7 +286,7 @@ const AutoSyncFinancialDashboard = () => {
                   <p className="text-sm font-medium text-gray-600">Last Sync</p>
                 </UMKMTooltip>
                 <p className="text-sm font-medium">
-                  {data.status.lastSyncTime ? formatDate(data.status.lastSyncTime) : 'Belum ada'}
+                  {data['status'].lastSyncTime ? formatDate(data['status'].lastSyncTime) : 'Belum ada'}
                 </p>
               </div>
               <Clock className="h-8 w-8 text-gray-600" />
@@ -354,7 +373,7 @@ const AutoSyncFinancialDashboard = () => {
           <CardContent>
             <div className="space-y-3">
               {data.recentTransactions.slice(0, 5).map((tx) => (
-                <div key={tx.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                <div key={tx['id']} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                   <div>
                     <p className="text-sm font-medium">
                       {tx.source === 'stock_transaction' ? '📦 Pembelian Bahan' :

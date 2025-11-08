@@ -1,11 +1,13 @@
 // Smart notification detection logic
 
 import type { Row } from '@/types/database'
+
 import { 
   type Notification, 
   type NotificationType,
   NOTIFICATION_CONFIGS 
 } from './notification-types'
+
 
 // Generate unique notification ID
 function generateNotificationId(type: NotificationType, itemId: string): string {
@@ -17,14 +19,17 @@ function createNotification(
   type: NotificationType,
   title: string,
   message: string,
-  actionUrl?: string,
-  actionLabel?: string,
-  metadata?: Record<string, unknown>
+  options?: {
+    actionUrl?: string
+    actionLabel?: string
+    metadata?: Record<string, unknown>
+  }
 ): Notification {
   const config = NOTIFICATION_CONFIGS[type]
-  
+  const { actionUrl, actionLabel, metadata } = options || {}
+
   return {
-    id: generateNotificationId(type, metadata?.itemId as string || 'system'),
+    id: generateNotificationId(type, (metadata?.['itemId'] as string) || 'system'),
     type,
     priority: config.defaultPriority,
     title,
@@ -55,9 +60,11 @@ export function detectStockNotifications(ingredients: Array<Row<'ingredients'>>)
           'stock_out',
           `${name} habis!`,
           `Stok ${name} sudah habis. Segera lakukan pemesanan untuk menghindari gangguan produksi.`,
-          `/ingredients?highlight=${ingredient.id}`,
-          'Lihat Detail',
-          { itemId: ingredient.id, itemName: name, currentStock, minStock }
+          {
+            actionUrl: `/ingredients?highlight=${ingredient['id']}`,
+            actionLabel: 'Lihat Detail',
+            metadata: { itemId: ingredient['id'], itemName: name, currentStock, minStock }
+          }
         )
       )
     }
@@ -68,9 +75,11 @@ export function detectStockNotifications(ingredients: Array<Row<'ingredients'>>)
           'stock_critical',
           `${name} sangat menipis!`,
           `Stok ${name} tinggal ${currentStock} ${ingredient.unit}. Segera pesan sebelum habis!`,
-          `/ingredients?highlight=${ingredient.id}`,
-          'Pesan Sekarang',
-          { itemId: ingredient.id, itemName: name, currentStock, minStock }
+          {
+            actionUrl: `/ingredients?highlight=${ingredient['id']}`,
+            actionLabel: 'Pesan Sekarang',
+            metadata: { itemId: ingredient['id'], itemName: name, currentStock, minStock }
+          }
         )
       )
     }
@@ -81,9 +90,11 @@ export function detectStockNotifications(ingredients: Array<Row<'ingredients'>>)
           'stock_low',
           `${name} menipis`,
           `Stok ${name} tinggal ${currentStock} ${ingredient.unit}. Pertimbangkan untuk melakukan reorder.`,
-          `/ingredients?highlight=${ingredient.id}`,
-          'Lihat Detail',
-          { itemId: ingredient.id, itemName: name, currentStock, minStock }
+          {
+            actionUrl: `/ingredients?highlight=${ingredient['id']}`,
+            actionLabel: 'Lihat Detail',
+            metadata: { itemId: ingredient['id'], itemName: name, currentStock, minStock }
+          }
         )
       )
     }
@@ -99,7 +110,7 @@ export function detectOrderNotifications(orders: Array<Row<'orders'>>): Notifica
 
   orders.forEach((order) => {
     // Pending orders
-    if (order.status === 'PENDING') {
+    if (order['status'] === 'PENDING') {
       const orderDate = new Date(order.created_at ?? now)
       const hoursSincePending = (now.getTime() - orderDate.getTime()) / (1000 * 60 * 60)
 
@@ -108,27 +119,31 @@ export function detectOrderNotifications(orders: Array<Row<'orders'>>): Notifica
           createNotification(
             'order_overdue',
             'Pesanan tertunda',
-            `Pesanan #${order.id.slice(0, 8)} belum diproses lebih dari 24 jam.`,
-            `/orders?highlight=${order.id}`,
-            'Proses Pesanan',
-            { itemId: order.id, hoursPending: Math.floor(hoursSincePending) }
+            `Pesanan #${order['id'].slice(0, 8)} belum diproses lebih dari 24 jam.`,
+            {
+              actionUrl: `/orders?highlight=${order['id']}`,
+              actionLabel: 'Proses Pesanan',
+              metadata: { itemId: order['id'], hoursPending: Math.floor(hoursSincePending) }
+            }
           )
         )
       }
     }
 
     // Overdue delivery
-    if (order.status === 'IN_PROGRESS' && order.delivery_date) {
+    if (order['status'] === 'IN_PROGRESS' && order.delivery_date) {
       const deliveryDate = new Date(order.delivery_date)
       if (deliveryDate < now) {
         notifications.push(
           createNotification(
             'order_overdue',
             'Pesanan melewati batas',
-            `Pesanan #${order.id.slice(0, 8)} melewati tanggal pengiriman.`,
-            `/orders?highlight=${order.id}`,
-            'Lihat Pesanan',
-            { itemId: order.id, deliveryDate: order.delivery_date }
+            `Pesanan #${order['id'].slice(0, 8)} melewati tanggal pengiriman.`,
+            {
+              actionUrl: `/orders?highlight=${order['id']}`,
+              actionLabel: 'Lihat Pesanan',
+              metadata: { itemId: order['id'], deliveryDate: order.delivery_date }
+            }
           )
         )
       }
@@ -147,7 +162,7 @@ export function detectCostIncreaseNotifications(
 
   ingredients.forEach((ingredient) => {
     const currentPrice = ingredient.price_per_unit ?? 0
-    const previousPrice = previousPrices[ingredient.id]
+    const previousPrice = previousPrices[ingredient['id']]
 
     if (previousPrice && currentPrice > previousPrice) {
       const increasePercent = ((currentPrice - previousPrice) / previousPrice) * 100
@@ -158,14 +173,16 @@ export function detectCostIncreaseNotifications(
             'cost_increase',
             `Harga ${ingredient.name} naik`,
             `Harga ${ingredient.name} naik ${increasePercent.toFixed(1)}% dari ${previousPrice} ke ${currentPrice}.`,
-            `/ingredients?highlight=${ingredient.id}`,
-            'Lihat Detail',
-            { 
-              itemId: ingredient.id, 
-              itemName: ingredient.name,
-              previousPrice, 
-              currentPrice, 
-              increasePercent 
+            {
+              actionUrl: `/ingredients?highlight=${ingredient['id']}`,
+              actionLabel: 'Lihat Detail',
+              metadata: {
+                itemId: ingredient['id'],
+                itemName: ingredient.name,
+                previousPrice,
+                currentPrice,
+                increasePercent
+              }
             }
           )
         )

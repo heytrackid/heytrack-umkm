@@ -1,12 +1,15 @@
 'use client'
 
-import { useAuth } from '@/hooks/useAuth'
-import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { ReportsLayout } from './components/ReportsLayout'
-import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+
 import { PageHeader } from '@/components/layout/PageHeader'
+import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { useAuth } from '@/hooks'
+import { useToast } from '@/hooks/use-toast'
+
+import { ReportsLayout } from './components/ReportsLayout'
+
 
 // Reports Page - Code Split Version
 // This page now uses lazy-loaded report components for better performance
@@ -27,7 +30,7 @@ const ReportsPage = () => {
         description: 'Sesi Anda telah berakhir. Silakan login kembali.',
         variant: 'destructive',
       })
-      void router.push('/auth/login')
+      router.push('/auth/login')
     }
   }, [isAuthLoading, isAuthenticated, router, toast])
 

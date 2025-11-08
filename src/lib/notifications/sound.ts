@@ -58,7 +58,7 @@ export function playNotificationSound(volume: number = soundVolume): void {
 
   } catch (error: unknown) {
     // Silent fail - notification sounds are non-critical
-    if (process.env.NODE_ENV === 'development') {
+    if (process['env'].NODE_ENV === 'development') {
       logger.error({ error }, 'Failed to play notification sound')
     }
   }
@@ -100,7 +100,7 @@ export function playUrgentNotificationSound(volume: number = soundVolume): void 
 
   } catch (error: unknown) {
     // Silent fail - notification sounds are non-critical
-    if (process.env.NODE_ENV === 'development') {
+    if (process['env'].NODE_ENV === 'development') {
       logger.error({ error }, 'Failed to play urgent notification sound')
     }
   }

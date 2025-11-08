@@ -1,12 +1,14 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
-import { createClient } from '@/utils/supabase/client'
-import type { Row } from '@/types/database'
+import { useQuery, type UseQueryResult } from '@tanstack/react-query'
+
 import { createClientLogger } from '@/lib/client-logger'
+import { cachePresets } from '@/providers/QueryProvider'
+import type { Row } from '@/types/database'
+import { createClient } from '@/utils/supabase/client'
+
 
 const logger = createClientLogger('Hook')
-import { cachePresets } from '@/providers/QueryProvider'
 
 
 // Dashboard stats type
@@ -15,7 +17,7 @@ export interface DashboardStats {
     today: number
     target: number
     weekly: number
-    trend: 'up' | 'down'
+    trend: 'down' | 'up'
     growth: number
   }
   profit: {
@@ -89,7 +91,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     // Fetch orders for today and this week
     const { data: todayOrders, error: todayError } = await supabase
       .from('orders')
-      .select('*')
+      .select('total_amount')
       .gte('created_at', todayStart.toISOString())
       .lt('created_at', todayEnd.toISOString())
 
@@ -97,7 +99,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
 
     const { data: weeklyOrders, error: weeklyError } = await supabase
       .from('orders')
-      .select('*')
+      .select('total_amount')
       .gte('created_at', weekStart.toISOString())
       .lt('created_at', todayEnd.toISOString())
 
@@ -106,14 +108,14 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     // Fetch customers
     const { data: customers, error: customersError } = await supabase
       .from('customers')
-      .select('*')
+      .select('customer_type')
 
     if (customersError) {throw customersError}
 
     // Fetch inventory with low stock
     const { data: inventory, error: inventoryError } = await supabase
       .from('ingredients')
-      .select('*')
+      .select('current_stock, reorder_point')
 
     if (inventoryError) {throw inventoryError}
 
@@ -122,19 +124,19 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     type Customer = Row<'customers'>
 
     // Calculate stats
-    const todayRevenue = todayOrders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
-    const weeklyRevenue = weeklyOrders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
+    const todayRevenue = todayOrders?.reduce((sum: number, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
+    const weeklyRevenue = weeklyOrders?.reduce((sum: number, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
     
     const lowStockItems = inventory?.filter((item: Ingredient) => 
       (item.current_stock ?? 0) <= (item.reorder_point ?? 0)
     ) || []
     const outOfStockItems = inventory?.filter((item: Ingredient) => item.current_stock === 0) || []
     
-    const vipCustomers = customers?.filter((customer: Customer) => customer.customer_type === 'vip').length || 0
+    const vipCustomers = customers?.filter((customer: Customer) => customer.customer_type === 'vip').length ?? 0
 
     // Get recent orders for activity
     const recentOrders = todayOrders?.slice(-3).map((order: Order) => ({
-      customer: order.customer_name ?? 'Unknown',
+      customer: order['customer_name'] ?? 'Unknown',
       amount: order.total_amount ?? 0,
       time: order.created_at ?? ''
     })) || []
@@ -167,13 +169,13 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
         lowStock: lowStockItems.length
       },
       orders: {
-        active: todayOrders?.length || 0,
-        today: todayOrders?.length || 0,
-        total: weeklyOrders?.length || 0,
+        active: todayOrders?.length ?? 0,
+        today: todayOrders?.length ?? 0,
+        total: weeklyOrders?.length ?? 0,
         recent: recentOrders
       },
       customers: {
-        total: customers?.length || 0,
+        total: customers?.length ?? 0,
         vip: vipCustomers
       },
       expenses: {
@@ -181,8 +183,8 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       },
       lastUpdated: Date.now()
     }
-  } catch (err: unknown) {
-    logger.error({ err }, 'Error fetching dashboard stats:')
+   } catch (error) {
+     logger.error({ error }, 'Error fetching dashboard stats:')
     
     // Return default/empty data on error
     return {
@@ -210,18 +212,18 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
       const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000)
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
-      
+
       const { data: orders, error } = await createClient()
         .from('orders')
-        .select('*')
+        .select('total_amount')
         .gte('created_at', dayStart.toISOString())
         .lt('created_at', dayEnd.toISOString())
 
       if (error) {throw error}
 
       type Order = Row<'orders'>
-      const revenue = orders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
-      
+      const revenue = orders?.reduce((sum: number, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
+
       weekData.push({
         day: date.toLocaleDateString('id-ID', { weekday: 'short' }),
         revenue,
@@ -230,10 +232,10 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
     }
     
     return weekData
-  } catch (err: unknown) {
-    logger.error({ err }, 'Error fetching weekly sales:')
-    return []
-  }
+   } catch (error) {
+     logger.error({ error }, 'Error fetching weekly sales:')
+     return []
+   }
 }
 
 // Fetch top products data
@@ -242,26 +244,26 @@ const fetchTopProducts = (): TopProductsData[] => {
     // This would need to be implemented based on your order_items and recipes schema
     // For now, return empty array since we're removing mock data
     return []
-  } catch (err: unknown) {
-    logger.error({ err }, 'Error fetching top products:')
-    return []
-  }
+   } catch (error) {
+     logger.error({ error }, 'Error fetching top products:')
+     return []
+   }
 }
 
 // Hooks
-export const useDashboardStats = () => useQuery({
+export const useDashboardStats = (): UseQueryResult<DashboardStats> => useQuery<DashboardStats, Error>({
     queryKey: ['dashboard', 'stats'],
     queryFn: fetchDashboardStats,
     ...cachePresets.dashboard,
   })
 
-export const useWeeklySales = () => useQuery({
+export const useWeeklySales = (): UseQueryResult<WeeklySalesData[]> => useQuery<WeeklySalesData[], Error>({
     queryKey: ['dashboard', 'weekly-sales'],
     queryFn: fetchWeeklySales,
     ...cachePresets.analytics,
   })
 
-export const useTopProducts = () => useQuery({
+export const useTopProducts = (): UseQueryResult<TopProductsData[]> => useQuery<TopProductsData[], Error>({
     queryKey: ['dashboard', 'top-products'],
     queryFn: fetchTopProducts,
     ...cachePresets.analytics,

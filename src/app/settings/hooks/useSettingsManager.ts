@@ -1,18 +1,10 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useSettings } from '@/contexts/settings-context'
-import { useLoading } from '@/hooks/loading'
-import { toast } from 'react-hot-toast'
-import { apiLogger } from '@/lib/logger'
-import { DEFAULT_APP_SETTINGS, normalizeSettings, type AppSettingsState, type SettingsUpdateHandler, } from '@/app/settings/types' 
 
-const LOADING_KEYS = {
-  LOAD_SETTINGS: 'loadSettings',
-  SAVE_SETTINGS: 'saveSettings',
-} as const
+import { DEFAULT_APP_SETTINGS, normalizeSettings, type AppSettingsState, type SettingsUpdateHandler, } from '@/app/settings/types'
+import { useSettings } from '@/contexts/settings-context'
 
 export function useSettingsManager() {
   const { settings: contextSettings } = useSettings()
-  const { startLoading, stopLoading, isLoading: isSkeletonLoading } = useLoading()
 
   const mergedDefaults = useMemo(
     () => normalizeSettings(DEFAULT_APP_SETTINGS, contextSettings),
@@ -25,31 +17,13 @@ export function useSettingsManager() {
 
   // Sync defaults when context settings change
   useEffect(() => {
-    void setSettings(mergedDefaults)
+    setSettings(mergedDefaults)
   }, [mergedDefaults])
 
-  // Load settings from database on component mount
+  // Initialize settings immediately - no fake loading needed
   useEffect(() => {
-    void loadSettings()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const loadSettings = () => {
-    try {
-      void startLoading(LOADING_KEYS.LOAD_SETTINGS)
-
-      // Simplified settings loading - in real implementation would use Supabase
-      // For now, just use the merged defaults
-      void setSettings(mergedDefaults)
-      apiLogger.info({ settings: mergedDefaults }, '✅ Settings loaded successfully')
-
-    } catch (err: unknown) {
-      apiLogger.error({ err }, 'Error loading settings:')
-      toast.error('Gagal memuat pengaturan')
-    } finally {
-      stopLoading(LOADING_KEYS.LOAD_SETTINGS)
-    }
-  }
+    setSettings(mergedDefaults)
+  }, [mergedDefaults])
 
   const handleSettingChange: SettingsUpdateHandler = (category, key, value) => {
     setSettings(prev => {
@@ -64,40 +38,39 @@ export function useSettingsManager() {
         [category]: updatedCategory,
       }
     })
-    void setIsUnsavedChanges(true)
+    setIsUnsavedChanges(true)
   }
 
   const handleSave = () => {
-    void setIsSaving(true)
+    setIsSaving(true)
 
     try {
       // Simplified save logic - in real implementation would save to Supabase
-      apiLogger.info({ settings }, '✅ Settings saved successfully')
-      void setIsUnsavedChanges(false)
-      toast.success('Pengaturan berhasil disimpan')
+      setIsUnsavedChanges(false)
+      // In a real implementation, this would save to the database
+      setTimeout(() => {
+        setIsSaving(false)
+      }, 500) // Simulate save delay
 
-    } catch (err: unknown) {
-      apiLogger.error({ err }, '❌ Error saving settings:')
-      toast.error('Gagal menyimpan pengaturan')
-    } finally {
-      void setIsSaving(false)
+     } catch (_error) {
+      setIsSaving(false)
+      // In a real implementation, show error toast
     }
   }
 
   const handleReset = () => {
     // Reset to default values
-    void setSettings(mergedDefaults)
-    void setIsUnsavedChanges(false)
+    setSettings(mergedDefaults)
+    setIsUnsavedChanges(false)
   }
 
   return {
     settings,
     isUnsavedChanges,
     isSaving,
-    isSkeletonLoading: isSkeletonLoading(LOADING_KEYS.LOAD_SETTINGS),
+    isSkeletonLoading: false, // No more fake loading
     handleSettingChange,
     handleSave,
     handleReset,
-    loadSettings,
   }
 }

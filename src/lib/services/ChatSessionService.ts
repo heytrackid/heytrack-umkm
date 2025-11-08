@@ -1,13 +1,6 @@
-import { createClient } from '@/utils/supabase/server'
 import { apiLogger as logger } from '@/lib/logger'
-import type { Json } from '@/types/database'
 
-class SessionNotFoundError extends Error {
-  constructor(sessionId: string) {
-    super(`Session not found: ${sessionId}`)
-    this.name = 'SessionNotFoundError'
-  }
-}
+import type { Json } from '@/types/database'
 import type {
 
   ChatSession,
@@ -16,6 +9,15 @@ import type {
   BusinessContext,
   MessageMetadata,
 } from '@/types/features/chat'
+
+import { createClient } from '@/utils/supabase/server'
+
+class SessionNotFoundError extends Error {
+  constructor(sessionId: string) {
+    super(`Session not found: ${sessionId}`)
+    this.name = 'SessionNotFoundError'
+  }
+}
 
 // Chat Session Service - Manages chat session persistence
 
@@ -66,7 +68,7 @@ export class ChatSessionService {
 
     const { data, error } = await supabase
       .from('chat_sessions')
-      .select('*')
+      .select('id, user_id, title, context_snapshot, created_at, updated_at, deleted_at')
       .eq('id', sessionId)
       .eq('user_id', userId)
       .is('deleted_at', null)
@@ -105,7 +107,7 @@ export class ChatSessionService {
     }
 
     // Get message counts and last messages
-    const sessionIds = sessions.map((s) => s.id);
+    const sessionIds = sessions.map((s) => s['id']);
     const { data: messages } = await supabase
       .from('chat_messages')
       .select('session_id, content, created_at')
@@ -114,7 +116,7 @@ export class ChatSessionService {
 
     const sessionMap = new Map<string, SessionListItem>();
     sessions.forEach((session) => {
-      sessionMap.set(session.id, {
+      sessionMap.set(session['id'], {
         ...session,
         message_count: 0,
         last_message: undefined,
@@ -184,7 +186,7 @@ export class ChatSessionService {
    */
   static async addMessage(
     sessionId: string,
-    role: 'user' | 'assistant' | 'system',
+    role: 'assistant' | 'system' | 'user',
     content: string,
     metadata: Record<string, unknown> = {}
   ): Promise<ChatMessage> {
@@ -233,7 +235,7 @@ export class ChatSessionService {
 
     const { data, error } = await supabase
       .from('chat_messages')
-      .select('*')
+      .select('id, session_id, role, content, metadata, created_at')
       .eq('session_id', sessionId)
       .order('created_at', { ascending: true })
       .limit(limit);
@@ -245,7 +247,7 @@ export class ChatSessionService {
 
     return (data || []).map(message => ({
       ...message,
-      metadata: (message.metadata as MessageMetadata | null) ?? {},
+      metadata: (message['metadata'] as MessageMetadata | null) ?? {},
     })) as ChatMessage[]
   }
 

@@ -146,18 +146,18 @@ export const themeUtils = {
   // Get color by path
   getColor: (path: string, shade: ColorShade = 500) => {
     const [colorName] = path.split('.')
-    if (isPaletteColor(colorName)) {
+    if (colorName && isPaletteColor(colorName)) {
       const colorGroup = colors[colorName]
       return colorGroup[shade] ?? colorGroup[500]
     }
-    return colors.gray[500]
+    return colors.gray[shade] ?? colors.gray[500]
   },
 
   // Get status color
   getStatusColor: (status: string, shade: ColorShade = 500) => {
     const statusColor = statusColors[status as keyof typeof statusColors]
-    if (!statusColor) {return colors.gray[shade]}
-    return statusColor[shade] || statusColor[500]
+    if (!statusColor) {return colors.gray[shade] ?? colors.gray[500]}
+    return statusColor[shade] || statusColor[500] || colors.gray[500]
   },
 
   // Generate color variants
@@ -328,11 +328,13 @@ export const colorUtils = {
   // Convert hex to RGB
   hexToRgb: (hex: string): { r: number; g: number; b: number } | null => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null
+    if (!result) {return null}
+    const [, rHex, gHex, bHex] = result
+    return {
+      r: parseInt(rHex ?? '00', 16),
+      g: parseInt(gHex ?? '00', 16),
+      b: parseInt(bHex ?? '00', 16)
+    }
   },
 
   // Convert RGB to hex

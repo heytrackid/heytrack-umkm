@@ -1,8 +1,10 @@
-import type { ComponentType, ReactNode } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+import type { ComponentType, ReactNode } from 'react'
 
 /**
  * Shared Layout Components
@@ -68,7 +70,7 @@ export const PageLayout = ({
 interface DataGridProps {
   children: ReactNode
   className?: string
-  variant?: 'default' | 'cards' | 'list'
+  variant?: 'cards' | 'default' | 'list'
 }
 
 /**

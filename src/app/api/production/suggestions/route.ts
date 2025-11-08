@@ -1,13 +1,31 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger, logError } from '@/lib/logger'
-import { ProductionBatchService } from '@/services/production/ProductionBatchService'
-
-
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+import { type NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+
+import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger, logError } from '@/lib/logger'
+import { ProductionBatchService } from '@/services/production/ProductionBatchService'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
+import { createClient } from '@/utils/supabase/server'
+
+const parseISODate = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') {return undefined}
+  const trimmed = value.trim()
+  if (!trimmed) {return undefined}
+  const parsed = new Date(trimmed)
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString()
+}
+
+const CreateBatchSchema = z.object({
+  order_ids: z.array(z.string().uuid()).min(1).transform(ids => Array.from(new Set(ids))),
+  planned_date: z.union([z.string(), z.null(), z.undefined()]).transform(parseISODate)
+}).strict()
+
 // GET /api/production/suggestions - Get suggested production batches
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/production/suggestions - Request received')
     
@@ -16,20 +34,13 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await client.auth.getUser()
 
     if (authError || !user) {
-      logError(apiLogger, authError, 'GET /api/production/suggestions - Unauthorized', {
-        userId: user?.id,
-        url: request.url,
-      })
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
-    const suggestions = await ProductionBatchService.getSuggestedBatches(user.id)
+    const suggestions = await ProductionBatchService.getSuggestedBatches(user['id'])
 
     apiLogger.info({ 
-      userId: user.id,
+      userId: user['id'],
       suggestionsCount: suggestions.length
     }, 'GET /api/production/suggestions - Success')
 
@@ -46,15 +57,12 @@ export async function GET(request: NextRequest) {
     logError(apiLogger, error, 'GET /api/production/suggestions - Unexpected error', {
       url: request.url,
     })
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return handleAPIError(error, 'GET /api/production/suggestions')
   }
 }
 
 // POST /api/production/suggestions - Create batch from suggestion
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/production/suggestions - Request received')
     
@@ -63,39 +71,26 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await client.auth.getUser()
 
     if (authError || !user) {
-      logError(apiLogger, authError, 'POST /api/production/suggestions - Unauthorized', {
-        userId: user?.id,
-        url: request.url,
-      })
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }    const body = await request.json()
-    const { order_ids, planned_date } = body
-
-    if (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0) {
-      return NextResponse.json(
-        { error: 'order_ids array is required' },
-        { status: 400 }
-      )
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
+
+    const { order_ids, planned_date } = CreateBatchSchema.parse(await request.json())
 
     const result = await ProductionBatchService.createBatchFromOrders(
       order_ids,
-      user.id,
+      user['id'],
       planned_date
     )
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.message },
-        { status: 400 }
-      )
+      throw new APIError(result.message ?? 'Gagal membuat batch produksi', {
+        status: 400,
+        code: 'BATCH_CREATION_FAILED'
+      })
     }
 
     apiLogger.info({ 
-      userId: user.id,
+      userId: user['id'],
       batchId: result.batch_id,
       orderCount: order_ids.length
     }, 'POST /api/production/suggestions - Batch created')
@@ -109,9 +104,9 @@ export async function POST(request: NextRequest) {
     logError(apiLogger, error, 'POST /api/production/suggestions - Unexpected error', {
       url: request.url,
     })
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return handleAPIError(error, 'POST /api/production/suggestions')
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/production/suggestions', SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/production/suggestions', SecurityPresets.enhanced())

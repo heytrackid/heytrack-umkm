@@ -1,8 +1,8 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
 import { typed } from '@/types/type-utilities'
+import { createClient } from '@/utils/supabase/server'
 
 /**
  * Inventory Restock Service
@@ -22,15 +22,15 @@ export class InventoryRestockService {
     reorder_point: number
     suggested_order_quantity: number
     lead_time_days: number | null
-    urgency: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
+    urgency: 'CRITICAL' | 'HIGH' | 'LOW' | 'MEDIUM'
     reason: string
   }>> {
     try {
       // Use the existing RecipeAvailabilityService for restock suggestions
       return await RecipeAvailabilityService.getRestockSuggestions(userId)
-    } catch (err) {
-      dbLogger.error({ error: err, userId }, 'Failed to get restock suggestions')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, userId }, 'Failed to get restock suggestions')
+      throw error
     }
   }
 
@@ -61,7 +61,7 @@ export class InventoryRestockService {
       }
 
       return ingredients.map(ing => ({
-        ingredient_id: ing.id,
+        ingredient_id: ing['id'],
         ingredient_name: ing.name,
         current_stock: ing.current_stock ?? 0,
         reorder_point: ing.reorder_point ?? 0,
@@ -69,9 +69,9 @@ export class InventoryRestockService {
         lead_time_days: ing.lead_time_days
       }))
 
-    } catch (err) {
-      dbLogger.error({ error: err, userId }, 'Failed to get low stock ingredients')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, userId }, 'Failed to get low stock ingredients')
+      throw error
     }
   }
 

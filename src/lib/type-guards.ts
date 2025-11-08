@@ -7,9 +7,9 @@
 
 import type { Row, OrderStatus, ProductionStatus } from '@/types/database'
 
-// ============================================================================
+// ==========================================================
 // GENERIC TYPE GUARDS
-// ============================================================================
+// ==========================================================
 
 /**
  * Check if value is a plain object (not null, not array)
@@ -53,9 +53,9 @@ export function hasKeys<T extends string>(
   return keys.every(key => key in value)
 }
 
-// ============================================================================
+// ==========================================================
 // SAFE PARSERS & UTILITIES
-// ============================================================================
+// ==========================================================
 
 /**
  * Safe number parser with fallback
@@ -171,21 +171,21 @@ export function getErrorMessage(error: unknown): string {
   
   // Handle objects with message property
   if (isRecord(error) && 'message' in error) {
-    return safeString(error.message, 'Unknown error')
+    return safeString(error['message'], 'Unknown error')
   }
   
   // Handle objects with error property (nested errors)
   if (isRecord(error) && 'error' in error) {
-    return getErrorMessage(error.error)
+    return getErrorMessage(error['error'])
   }
   
   // Fallback for truly unknown errors
   return 'An unknown error occurred'
 }
 
-// ============================================================================
+// ==========================================================
 // TYPE ASSERTIONS (Throw errors if validation fails)
-// ============================================================================
+// ==========================================================
 
 /**
  * Assert that value is a record
@@ -221,9 +221,9 @@ export function assertArrayOf<T>(
   }
 }
 
-// ============================================================================
+// ==========================================================
 // DETAILED VALIDATION FUNCTIONS (Return error details)
-// ============================================================================
+// ==========================================================
 
 /**
  * Validation result type
@@ -244,25 +244,30 @@ export function validateIngredient(value: unknown): ValidationResult {
     return { valid: false, errors }
   }
 
-  if (typeof value.id !== 'string') {
+  const record = value
+
+  if (typeof record['id'] !== 'string') {
     errors.push('id must be a string')
   }
-  if (typeof value.name !== 'string' || value.name.trim() === '') {
+  const { name } = record
+  if (typeof name !== 'string' || name.trim() === '') {
     errors.push('name must be a non-empty string')
   }
-  if (typeof value.unit !== 'string' || value.unit.trim() === '') {
+  const { unit } = record
+  if (typeof unit !== 'string' || unit.trim() === '') {
     errors.push('unit must be a non-empty string')
   }
-  if (!isNumberOrNull(value.current_stock)) {
+  if (!isNumberOrNull(record['current_stock'])) {
     errors.push('current_stock must be a number or null')
   }
-  if (typeof value.current_stock === 'number' && value.current_stock < 0) {
+  if (typeof record['current_stock'] === 'number' && record['current_stock'] < 0) {
     errors.push('current_stock must be non-negative')
   }
-  if (!isNumberOrNull(value.min_stock)) {
+  if (!isNumberOrNull(record['min_stock'])) {
     errors.push('min_stock must be a number or null')
   }
-  if (typeof value.price_per_unit !== 'number' || value.price_per_unit < 0) {
+  const pricePerUnit = record['price_per_unit']
+  if (typeof pricePerUnit !== 'number' || pricePerUnit < 0) {
     errors.push('price_per_unit must be a non-negative number')
   }
 
@@ -280,16 +285,19 @@ export function validateRecipe(value: unknown): ValidationResult {
     return { valid: false, errors }
   }
 
-  if (typeof value.id !== 'string') {
+  const record = value
+
+  if (typeof record['id'] !== 'string') {
     errors.push('id must be a string')
   }
-  if (typeof value.name !== 'string' || value.name.trim() === '') {
+  const recipeName = record['name']
+  if (typeof recipeName !== 'string' || recipeName.trim() === '') {
     errors.push('name must be a non-empty string')
   }
-  if (!isNumberOrNull(value.selling_price)) {
+  if (!isNumberOrNull(record['selling_price'])) {
     errors.push('selling_price must be a number or null')
   }
-  if (typeof value.selling_price === 'number' && value.selling_price < 0) {
+  if (typeof record['selling_price'] === 'number' && record['selling_price'] < 0) {
     errors.push('selling_price must be non-negative')
   }
 
@@ -307,28 +315,30 @@ export function validateOrder(value: unknown): ValidationResult {
     return { valid: false, errors }
   }
 
-  if (typeof value.id !== 'string') {
+  const record = value
+
+  if (typeof record['id'] !== 'string') {
     errors.push('id must be a string')
   }
-  if (!isStringOrNull(value.order_date)) {
+  if (!isStringOrNull(record['order_date'])) {
     errors.push('order_date must be a string or null')
   }
-  if (!isNumberOrNull(value.total_amount)) {
+  if (!isNumberOrNull(record['total_amount'])) {
     errors.push('total_amount must be a number or null')
   }
-  if (typeof value.total_amount === 'number' && value.total_amount < 0) {
+  if (typeof record['total_amount'] === 'number' && record['total_amount'] < 0) {
     errors.push('total_amount must be non-negative')
   }
-  if (value.status !== null && value.status !== undefined && !isOrderStatus(value.status)) {
+  if (record['status'] !== null && record['status'] !== undefined && !isOrderStatus(record['status'])) {
     errors.push('status must be a valid OrderStatus or null')
   }
 
   return { valid: errors.length === 0, errors }
 }
 
-// ============================================================================
+// ==========================================================
 // SUPABASE JOIN HELPERS (Generic & Type-Safe)
-// ============================================================================
+// ==========================================================
 
 /**
  * Helper to safely extract nested Supabase join data
@@ -355,9 +365,9 @@ export function ensureArray<T>(data: T | T[] | null | undefined): T[] {
   return [data]
 }
 
-// ============================================================================
+// ==========================================================
 // SUPABASE-SPECIFIC TYPE GUARDS
-// ============================================================================
+// ==========================================================
 
 /**
  * Type guard for recipe ingredient item (deep validation)
@@ -378,14 +388,14 @@ function isRecipeIngredientItem(value: unknown): value is RecipeIngredientItem {
   if (!isRecord(value)) {return false}
   
   return (
-    typeof value.quantity === 'number' &&
-    typeof value.unit === 'string' &&
-    typeof value.ingredient_id === 'string' &&
-    isRecord(value.ingredients) &&
-    typeof value.ingredients.id === 'string' &&
-    typeof value.ingredients.name === 'string' &&
-    typeof value.ingredients.price_per_unit === 'number' &&
-    typeof value.ingredients.unit === 'string'
+    typeof value['quantity'] === 'number' &&
+    typeof value['unit'] === 'string' &&
+    typeof value['ingredient_id'] === 'string' &&
+    isRecord(value['ingredients']) &&
+    typeof value['ingredients']['id'] === 'string' &&
+    typeof value['ingredients']['name'] === 'string' &&
+    typeof value['ingredients']['price_per_unit'] === 'number' &&
+    typeof value['ingredients']['unit'] === 'string'
   )
 }
 
@@ -399,9 +409,9 @@ export function isRecipe(data: unknown): data is Recipe {
   
   return (
     hasKeys(data, ['id', 'name']) &&
-    typeof data.id === 'string' &&
-    typeof data.name === 'string' &&
-    isNumberOrNull(data.selling_price)
+    typeof data['id'] === 'string' &&
+    typeof data['name'] === 'string' &&
+    isNumberOrNull(data['selling_price'])
   )
 }
 
@@ -430,11 +440,11 @@ export function isRecipeWithIngredients(data: unknown): data is RecipeWithIngred
   
   return (
     hasKeys(data, ['id', 'name', 'recipe_ingredients']) &&
-    typeof data.id === 'string' &&
-    typeof data.name === 'string' &&
-    isNumberOrNull(data.selling_price) &&
-    isNumberOrNull(data.servings) &&
-    isArrayOf(data.recipe_ingredients, isRecipeIngredientItem)
+    typeof data['id'] === 'string' &&
+    typeof data['name'] === 'string' &&
+    isNumberOrNull(data['selling_price']) &&
+    isNumberOrNull(data['servings']) &&
+    isArrayOf(data['recipe_ingredients'], isRecipeIngredientItem)
   )
 }
 
@@ -460,12 +470,12 @@ export function isIngredient(data: unknown): data is Ingredient {
   
   return (
     hasKeys(data, ['id', 'name', 'unit', 'price_per_unit']) &&
-    typeof data.id === 'string' &&
-    typeof data.name === 'string' &&
-    isNumberOrNull(data.current_stock) &&
-    isNumberOrNull(data.min_stock) &&
-    typeof data.price_per_unit === 'number' &&
-    typeof data.unit === 'string'
+    typeof data['id'] === 'string' &&
+    typeof data['name'] === 'string' &&
+    isNumberOrNull(data['current_stock']) &&
+    isNumberOrNull(data['min_stock']) &&
+    typeof data['price_per_unit'] === 'number' &&
+    typeof data['unit'] === 'string'
   )
 }
 
@@ -499,11 +509,11 @@ function isOrderItem(value: unknown): value is OrderItem {
   
   return (
     hasKeys(value, ['id', 'recipe_id', 'quantity', 'unit_price', 'total_price']) &&
-    typeof value.id === 'string' &&
-    typeof value.recipe_id === 'string' &&
-    typeof value.quantity === 'number' &&
-    typeof value.unit_price === 'number' &&
-    typeof value.total_price === 'number'
+    typeof value['id'] === 'string' &&
+    typeof value['recipe_id'] === 'string' &&
+    typeof value['quantity'] === 'number' &&
+    typeof value['unit_price'] === 'number' &&
+    typeof value['total_price'] === 'number'
   )
 }
 
@@ -529,10 +539,10 @@ export function isOrder(data: unknown): data is Order {
   
   return (
     hasKeys(data, ['id']) &&
-    typeof data.id === 'string' &&
-    isStringOrNull(data.order_date) &&
-    isNumberOrNull(data.total_amount) &&
-    (data.status === null || isOrderStatus(data.status))
+    typeof data['id'] === 'string' &&
+    isStringOrNull(data['order_date']) &&
+    isNumberOrNull(data['total_amount']) &&
+    (data['status'] === null || isOrderStatus(data['status']))
   )
 }
 
@@ -561,11 +571,11 @@ export function isOrderWithItems(data: unknown): data is OrderWithItems {
   
   return (
     hasKeys(data, ['id', 'order_no', 'status', 'total_amount', 'order_items']) &&
-    typeof data.id === 'string' &&
-    typeof data.order_no === 'string' &&
-    isOrderStatus(data.status) &&
-    typeof data.total_amount === 'number' &&
-    isArrayOf(data.order_items, isOrderItem)
+    typeof data['id'] === 'string' &&
+    typeof data['order_no'] === 'string' &&
+    isOrderStatus(data['status']) &&
+    typeof data['total_amount'] === 'number' &&
+    isArrayOf(data['order_items'], isOrderItem)
   )
 }
 
@@ -600,12 +610,12 @@ export function isProductionBatch(data: unknown): data is ProductionBatch {
   
   return (
     hasKeys(data, ['id', 'recipe_id', 'quantity', 'status']) &&
-    typeof data.id === 'string' &&
-    typeof data.recipe_id === 'string' &&
-    typeof data.quantity === 'number' &&
-    isProductionStatus(data.status) &&
-    isNumberOrNull(data.actual_quantity) &&
-    isNumberOrNull(data.labor_cost)
+    typeof data['id'] === 'string' &&
+    typeof data['recipe_id'] === 'string' &&
+    typeof data['quantity'] === 'number' &&
+    isProductionStatus(data['status']) &&
+    isNumberOrNull(data['actual_quantity']) &&
+    isNumberOrNull(data['labor_cost'])
   )
 }
 
@@ -619,14 +629,14 @@ export function isHppCalculation(data: unknown): data is HppCalculationData {
   
   return (
     hasKeys(data, ['id', 'recipe_id', 'calculation_date', 'material_cost', 'labor_cost', 'overhead_cost', 'total_hpp', 'cost_per_unit']) &&
-    typeof data.id === 'string' &&
-    typeof data.recipe_id === 'string' &&
-    typeof data.calculation_date === 'string' &&
-    typeof data.material_cost === 'number' &&
-    typeof data.labor_cost === 'number' &&
-    typeof data.overhead_cost === 'number' &&
-    typeof data.total_hpp === 'number' &&
-    typeof data.cost_per_unit === 'number'
+    typeof data['id'] === 'string' &&
+    typeof data['recipe_id'] === 'string' &&
+    typeof data['calculation_date'] === 'string' &&
+    typeof data['material_cost'] === 'number' &&
+    typeof data['labor_cost'] === 'number' &&
+    typeof data['overhead_cost'] === 'number' &&
+    typeof data['total_hpp'] === 'number' &&
+    typeof data['cost_per_unit'] === 'number'
   )
 }
 
@@ -640,10 +650,10 @@ export function isCustomer(data: unknown): data is Customer {
   
   return (
     hasKeys(data, ['id', 'name']) &&
-    typeof data.id === 'string' &&
-    typeof data.name === 'string' &&
-    isStringOrNull(data.phone) &&
-    isStringOrNull(data.email) &&
-    isStringOrNull(data.address)
+    typeof data['id'] === 'string' &&
+    typeof data['name'] === 'string' &&
+    isStringOrNull(data['phone']) &&
+    isStringOrNull(data['email']) &&
+    isStringOrNull(data['address'])
   )
 }

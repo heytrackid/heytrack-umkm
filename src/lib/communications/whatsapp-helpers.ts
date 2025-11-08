@@ -44,11 +44,11 @@ export function generateOrderConfirmationMessage(order: {
     .map(item => `• ${item.name} (${item.quantity}x) - Rp ${item.price.toLocaleString('id-ID')}`)
     .join('\n')
 
-  return `Halo ${order.customer_name}! 👋
+  return `Halo ${order['customer_name']}! 👋
 
 Terima kasih atas pesanan Anda!
 
-📋 *Order #${order.order_no}*
+📋 *Order #${order['order_no']}*
 
 *Pesanan:*
 ${itemsList}
@@ -70,11 +70,11 @@ export function generateDeliveryReminderMessage(order: {
   delivery_date: string
   delivery_address?: string
 }): string {
-  return `Halo ${order.customer_name}! 👋
+  return `Halo ${order['customer_name']}! 👋
 
 Pengingat pengiriman pesanan Anda:
 
-📋 *Order #${order.order_no}*
+📋 *Order #${order['order_no']}*
 📅 *Tanggal Pengiriman: ${order.delivery_date}*
 ${order.delivery_address ? `📍 *Alamat: ${order.delivery_address}*\n\n` : ''}Pesanan Anda akan segera dikirim. Mohon pastikan ada yang menerima di lokasi. 🚚
 
@@ -93,11 +93,11 @@ export function generatePaymentReminderMessage(order: {
   paid_amount: number
   remaining_amount: number
 }): string {
-  return `Halo ${order.customer_name}! 👋
+  return `Halo ${order['customer_name']}! 👋
 
 Pengingat pembayaran untuk pesanan Anda:
 
-📋 *Order #${order.order_no}*
+📋 *Order #${order['order_no']}*
 
 💰 *Total: Rp ${order.total_amount.toLocaleString('id-ID')}*
 ✅ *Dibayar: Rp ${order.paid_amount.toLocaleString('id-ID')}*
@@ -118,11 +118,11 @@ export function generateFollowUpMessage(order: {
 }): string {
   const itemsList = order.items.map(item => `• ${item.name}`).join('\n')
 
-  return `Halo ${order.customer_name}! 👋
+  return `Halo ${order['customer_name']}! 👋
 
 Terima kasih sudah memesan dari kami! 🙏
 
-📋 *Order #${order.order_no}*
+📋 *Order #${order['order_no']}*
 
 *Pesanan Anda:*
 ${itemsList}

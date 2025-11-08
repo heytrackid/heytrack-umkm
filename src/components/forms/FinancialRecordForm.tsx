@@ -1,27 +1,31 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
-import { FormField } from './shared/FormField'
-import type { Row } from '@/types/database'
 import {
   FinancialRecordSchema,
   type FinancialRecordFormData
 } from '@/lib/validations'
 
+import type { Row } from '@/types/database'
+
+import { FormField } from './shared/FormField'
+
+
 type FinancialRecord = Row<'financial_records'>
 
 interface FinancialRecordFormProps {
-  initialData?: Partial<FinancialRecordFormData> & Partial<FinancialRecord>
+  initialData?: Partial<FinancialRecord> & Partial<FinancialRecordFormData>
   onSubmit: (data: FinancialRecordFormData) => Promise<void>
   isLoading?: boolean
 }
@@ -54,7 +58,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
       if (!initialData) {
         form.reset()
       }
-    } catch (_err: unknown) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan catatan keuangan',
@@ -74,7 +78,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
             <FormField
               label="Tipe Transaksi"
               required
-              error={form.formState.errors.type?.message}
+              {...(form.formState.errors['type']?.message ? { error: form.formState.errors['type'].message } : {})}
             >
               <Select
                 value={form.watch('type')}
@@ -133,7 +137,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
               error={form.formState.errors.payment_method?.message}
             >
               <Select
-                value={form.watch('payment_method')}
+                {...(form.watch('payment_method') ? { value: form.watch('payment_method') as string } : {})}
                 onValueChange={(value) => {
                   if (
                     value === 'CASH' ||
@@ -190,8 +194,8 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              checked={form.watch('is_recurring')}
-              onCheckedChange={(checked) => form.setValue('is_recurring', !!checked)}
+              checked={form.watch('is_recurring') ?? false}
+              onCheckedChange={(checked) => form.setValue('is_recurring', Boolean(checked))}
             />
             <Label>Transaksi Berulang</Label>
           </div>
@@ -202,7 +206,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
               error={form.formState.errors.recurring_period?.message}
             >
               <Select
-                value={form.watch('recurring_period')}
+                {...(form.watch('recurring_period') ? { value: form.watch('recurring_period') as string } : {})}
                 onValueChange={(value) => {
                   if (
                     value === 'DAILY' ||

@@ -1,7 +1,8 @@
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp, TrendingDown, AlertCircle, HelpCircle } from 'lucide-react'
+
+import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface StatsCardsSectionProps {
@@ -9,7 +10,7 @@ interface StatsCardsSectionProps {
     revenue: {
       total: number
       growth: string
-      trend: 'up' | 'down'
+      trend: 'down' | 'up'
     }
     orders: {
       total: number
@@ -27,7 +28,7 @@ interface StatsCardsSectionProps {
   formatCurrency: (value: number) => string
 }
 
-const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps) => {
+const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): JSX.Element => {
   if (!stats) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">

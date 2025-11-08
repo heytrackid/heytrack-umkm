@@ -1,4 +1,5 @@
 import { formatCurrentCurrency } from '@/shared'
+
 import type {
 
 
@@ -12,7 +13,7 @@ import type {
 } from './types'
 
 export class PricingAutomation {
-  constructor(private config: AutomationConfig) {}
+  constructor(private readonly config: AutomationConfig) {}
 
   /**
    * 🧮 AUTO-CALCULATION: Smart HPP & Pricing

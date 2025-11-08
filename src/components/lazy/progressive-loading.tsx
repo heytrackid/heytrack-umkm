@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect, Suspense, type ReactNode } from 'react'
+import Image from 'next/image'
+
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
 
 
 
@@ -36,7 +38,7 @@ export const ProgressiveLoader = ({
 
     // Simulate loading completion
     const loadTimer = setTimeout(() => {
-      void setIsLoading(false)
+      setIsLoading(false)
     }, Math.random() * 2000 + 500)
 
     return () => {
@@ -46,8 +48,8 @@ export const ProgressiveLoader = ({
   }, [timeout, isLoading])
 
   const handleRetry = () => {
-    void setIsLoading(true)
-    void setHasError(false)
+    setIsLoading(true)
+    setHasError(false)
     setShowTimeout(false)
   }
 
@@ -118,10 +120,10 @@ export const ProgressiveDataTable = <T extends Record<string, ReactNode>>({
   const displayedData = data.slice(0, loadedPages * pageSize)
 
   const loadMore = async () => {
-    void setIsLoadingMore(true)
+    setIsLoadingMore(true)
     await new Promise(resolve => setTimeout(resolve, 500))
-    void setLoadedPages(prev => prev + 1)
-    void setIsLoadingMore(false)
+    setLoadedPages(prev => prev + 1)
+    setIsLoadingMore(false)
   }
 
   if (shouldVirtualize) {
@@ -165,7 +167,7 @@ export const ProgressiveDataTable = <T extends Record<string, ReactNode>>({
 }
 
 // Skeleton components untuk different loading states
-export const DataTableSkeleton = () => (
+export const DataTableSkeleton = (): JSX.Element => (
   <div className="space-y-4">
     <div className="flex justify-between">
       <Skeleton className="h-8 w-32" />
@@ -188,7 +190,7 @@ export const DataTableSkeleton = () => (
   </div>
 )
 
-export const FormSkeleton = () => (
+export const FormSkeleton = (): JSX.Element => (
   <div className="space-y-4">
     <div className="grid grid-cols-2 gap-4">
       {Array.from({ length: 6 }).map((_, i) => (
@@ -209,7 +211,7 @@ export const FormSkeleton = () => (
   </div>
 )
 
-export const StatsCardSkeleton = () => (
+export const StatsCardSkeleton = (): JSX.Element => (
   <Card>
     <CardHeader className="pb-2">
       <div className="flex justify-between">
@@ -293,9 +295,11 @@ export const ProgressiveImage = ({
         <Skeleton className="w-full h-full absolute inset-0" />
       )}
       {hasError && fallback && fallback}
-      <img
+      <Image
         src={src}
         alt={alt}
+        width={400}
+        height={300}
         className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity`}
         onLoad={() => setIsLoading(false)}
         onError={() => setHasError(true)}
@@ -316,15 +320,14 @@ export function useProgressiveData<T>(
 
   const loadData = async () => {
     try {
-      void setLoading(true)
-      void setError(null)
+      setLoading(true)
+      setError(null)
       const result = await fetchFunction()
-      void setData(result)
-    } catch (err: unknown) {
-      const error = err as Error
-      void setError(error)
+      setData(result)
+    } catch (error) {
+      setError(error as Error)
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }
 

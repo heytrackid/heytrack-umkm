@@ -1,22 +1,24 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 /**
  * AI Chat Sessions API - Get/Delete specific session
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { ChatSessionService } from '@/lib/services/ChatSessionService'
+
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { ChatSessionService } from '@/lib/services/ChatSessionService'
+import { createSecureRouteHandler, SecurityPresets } from '@/utils/security'
 
-export const runtime = 'nodejs'
+import { createClient } from '@/utils/supabase/server'
 
-interface RouteParams {
-  params: {
-    id: string
-  }
+interface RouteContext {
+  params: Promise<Record<string, string>>
 }
 
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+async function getHandler(_request: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -30,16 +32,20 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
-    const sessionId = params.id
+    const { id } = await context.params
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
+    const sessionId = id
 
     // Get session and messages
     const [session, messages] = await Promise.all([
-      ChatSessionService.getSession(sessionId, user.id),
-      ChatSessionService.getMessages(sessionId, user.id),
+      ChatSessionService.getSession(sessionId, user['id']),
+      ChatSessionService.getMessages(sessionId, user['id']),
     ])
 
     apiLogger.info(
-      { userId: user.id, sessionId, messageCount: messages.length },
+      { userId: user['id'], sessionId, messageCount: messages.length },
       'Session loaded'
     )
 
@@ -49,7 +55,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+async function deleteHandler(_request: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -63,15 +69,22 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
-    const sessionId = params.id
+    const { id } = await context.params
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
+    const sessionId = id
 
     // Delete session
-    await ChatSessionService.deleteSession(sessionId, user.id)
+    await ChatSessionService.deleteSession(sessionId, user['id'])
 
-    apiLogger.info({ userId: user.id, sessionId }, 'Session deleted')
+    apiLogger.info({ userId: user['id'], sessionId }, 'Session deleted')
 
     return NextResponse.json({ message: 'Session deleted successfully' })
   } catch (error: unknown) {
     return handleAPIError(error)
   }
 }
+
+export const GET = createSecureRouteHandler(getHandler, 'GET /api/ai/sessions/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureRouteHandler(deleteHandler, 'DELETE /api/ai/sessions/[id]', SecurityPresets.enhanced())

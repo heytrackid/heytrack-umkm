@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useRef, type ReactNode } from 'react'
-import { cn } from '@/lib/utils'
 import { RefreshCw } from 'lucide-react'
+import { useState, useRef, type ReactNode } from 'react'
+
+import { cn } from '@/lib/utils'
 
 interface PullToRefreshProps {
   children: ReactNode
@@ -29,13 +30,13 @@ export const PullToRefresh = ({
     if (disabled || isRefreshing) {return}
     
     // Only start pull if at top of scroll
-    if (containerRef.current?.scrollTop === 0) {
+    if (containerRef.current?.scrollTop === 0 && e.touches[0]) {
       startY.current = e.touches[0].clientY
     }
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (disabled || isRefreshing || startY.current === 0) {return}
+    if (disabled || isRefreshing || startY.current === 0 || !e.touches[0]) {return}
 
     const currentY = e.touches[0].clientY
     const diff = currentY - startY.current

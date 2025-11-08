@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+
 import type { ProfitData } from './types'
 
 
@@ -32,7 +33,7 @@ export const IngredientCostsTable = ({
           <tbody>
             {(ingredients || []).map((ingredient, index) => (
               <tr key={index} className="border-b hover:bg-muted/50">
-                <td className="py-3 px-4">{ingredient.ingredient_name}</td>
+                <td className="py-3 px-4">{ingredient['ingredient_name']}</td>
                 <td className="py-3 px-4 text-right">{ingredient.quantity_used.toFixed(2)}</td>
                 <td className="py-3 px-4 text-right">{formatCurrency(ingredient.wac_cost)}</td>
                 <td className="py-3 px-4 text-right font-medium">

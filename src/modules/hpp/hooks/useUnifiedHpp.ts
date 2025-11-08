@@ -1,15 +1,5 @@
 'use client'
 
-import { useToast } from '@/hooks/use-toast'
-import { createClientLogger } from '@/lib/client-logger'
-import { HPP_CONFIG } from '@/lib/constants/hpp-config'
-import type {
-    HppComparison,
-    HppOverview,
-    RecipeIngredientWithPrice,
-    RecipeWithHpp,
-} from '@/modules/hpp/types'
-import type { Row } from '@/types/database'
 import {
     useMutation,
     useQuery,
@@ -17,6 +7,18 @@ import {
     type UseMutationResult,
 } from '@tanstack/react-query'
 import { useState } from 'react'
+
+import { useToast } from '@/hooks/use-toast'
+import { createClientLogger } from '@/lib/client-logger'
+import { HPP_CONFIG } from '@/lib/constants/hpp-config'
+
+import type {
+    HppComparison,
+    HppOverview,
+    RecipeIngredientWithPrice,
+    RecipeWithHpp,
+} from '@/modules/hpp/types'
+import type { Row } from '@/types/database'
 
 const logger = createClientLogger('ClientFile')
 
@@ -96,7 +98,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {throw new Error('Failed to fetch recipes')}
-      const payload = await response.json() as RecipesListResponse | Recipe[] | null
+      const payload = await response.json() as Recipe[] | RecipesListResponse | null
       
       let recipeCount = 0
       if (Array.isArray(payload)) {
@@ -151,12 +153,12 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {throw new Error('Failed to fetch recipe')}
-      const data: RecipeDetailResponse = await response.json()
-      
+      const _data: RecipeDetailResponse = await response.json()
+
       // Calculate total cost from ingredients with type safety
       let ingredientCost = 0
-      const recipeIngredients = Array.isArray(data.recipe_ingredients)
-        ? data.recipe_ingredients.filter(isValidRecipeIngredient)
+      const recipeIngredients = Array.isArray(_data.recipe_ingredients)
+        ? _data.recipe_ingredients.filter(isValidRecipeIngredient)
         : []
 
       ingredientCost = recipeIngredients.reduce((sum: number, ri) => {
@@ -175,8 +177,8 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         HPP_CONFIG.DEFAULT_OVERHEAD_PER_SERVING
       )
       
-      const result = {
-        ...data,
+       const result = {
+         ..._data,
         ingredients: recipeIngredients.map((ri): RecipeIngredientWithPrice => ({
           id: ri.ingredient_id,
           name: ri.ingredients?.name ?? 'Unknown',
@@ -194,7 +196,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
       
       return result
     },
-    enabled: !!selectedRecipeId,
+    enabled: Boolean(selectedRecipeId),
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false
   })
@@ -207,7 +209,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {throw new Error('Failed to fetch comparison')}
-      const payload = await response.json() as HppComparisonResponse | HppComparison[] | null
+      const payload = await response.json() as HppComparison[] | HppComparisonResponse | null
       if (!payload) { return [] }
       if (Array.isArray(payload)) { return payload }
       if (isHppComparisonResponse(payload)) { return payload.recipes }

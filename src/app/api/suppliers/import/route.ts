@@ -1,11 +1,15 @@
-import { apiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 import { type NextRequest, NextResponse } from 'next/server'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+
 import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
 
 // POST /api/suppliers/import - Import suppliers from CSV
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/suppliers/import - Request received')
 
@@ -15,7 +19,7 @@ async function POST(request: NextRequest) {
     if (authError || !user) {
       apiLogger.error({ error: authError }, 'POST /api/suppliers/import - Unauthorized')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    const { suppliers } = await request.json()
+    }    const { suppliers } = await request.json() as { suppliers: unknown[] }
 
     if (!Array.isArray(suppliers) || suppliers.length === 0) {
       return NextResponse.json({ error: 'Invalid suppliers data' }, { status: 400 })
@@ -42,22 +46,22 @@ async function POST(request: NextRequest) {
         const supplierObj = supplier as Record<string, unknown>
 
         // Basic validation
-        if (!supplierObj.name || typeof supplierObj.name !== 'string' || supplierObj.name.trim().length === 0) {
+        if (!supplierObj['name'] || typeof supplierObj['name'] !== 'string' || supplierObj['name'].trim().length === 0) {
           errors.push({ row: rowNumber, error: 'Nama supplier wajib diisi' })
           return
         }
 
         // Prepare supplier data
         const supplierData = {
-          name: supplierObj.name.trim(),
-          contact_person: typeof supplierObj.contact_person === 'string' ? supplierObj.contact_person.trim() : undefined,
-          phone: typeof supplierObj.phone === 'string' ? supplierObj.phone.trim() : undefined,
-          email: typeof supplierObj.email === 'string' ? supplierObj.email.trim() : undefined,
-          address: typeof supplierObj.address === 'string' ? supplierObj.address.trim() : undefined,
-          company_type: typeof supplierObj.company_type === 'string' ? supplierObj.company_type.trim() : undefined,
-          payment_terms: typeof supplierObj.payment_terms === 'string' ? supplierObj.payment_terms.trim() : undefined,
-          notes: typeof supplierObj.notes === 'string' ? supplierObj.notes.trim() : undefined,
-          user_id: user.id
+          name: supplierObj['name'].trim(),
+          contact_person: typeof supplierObj['contact_person'] === 'string' ? supplierObj['contact_person'].trim() : '',
+          phone: typeof supplierObj['phone'] === 'string' ? supplierObj['phone'].trim() : '',
+          email: typeof supplierObj['email'] === 'string' ? supplierObj['email'].trim() : '',
+          address: typeof supplierObj['address'] === 'string' ? supplierObj['address'].trim() : '',
+          company_type: typeof supplierObj['company_type'] === 'string' ? supplierObj['company_type'].trim() : '',
+          payment_terms: typeof supplierObj['payment_terms'] === 'string' ? supplierObj['payment_terms'].trim() : '',
+          notes: typeof supplierObj['notes'] === 'string' ? supplierObj['notes'].trim() : '',
+          user_id: user['id']
         }
 
         validSuppliers.push(supplierData)
@@ -87,7 +91,7 @@ async function POST(request: NextRequest) {
     }
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       count: validSuppliers.length
     }, 'POST /api/suppliers/import - Success')
 

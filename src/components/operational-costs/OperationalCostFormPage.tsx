@@ -1,5 +1,9 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
+
+import { ArrowLeft, Save } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,13 +20,10 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { useSupabaseCRUD } from '@/hooks/supabase'
 import { useToast } from '@/hooks/use-toast'
-import type { Insert, Row, Update } from '@/types/database'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { ArrowLeft, Save } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 
-type _OperationalCost = Row<'operational_costs'>
+import type { Insert, Update } from '@/types/database'
+
 type OperationalCostInsert = Insert<'operational_costs'>
 
 interface OperationalCostFormPageProps {
@@ -72,7 +73,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
             setLoading(true)
             const { data: cost } = await supabase
                 .from('operational_costs')
-                .select('*')
+                .select('id, user_id, category, description, amount, date, frequency, recurring, payment_method, supplier, reference, notes, is_active, created_at, updated_at, created_by, updated_by')
                 .eq('id', costId)
                 .single()
 
@@ -81,8 +82,8 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
             } else {
                 throw new Error('Biaya tidak ditemukan')
             }
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal memuat biaya'
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Gagal memuat biaya'
             toast({
                 title: 'Error',
                 description: message,
@@ -127,7 +128,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                 amount: formData.amount,
                 category: formData.category ?? 'utilities',
                 description: formData.description,
-                user_id: user.id,
+                user_id: user['id'],
                 is_active: formData.is_active ?? true,
             }
 
@@ -158,7 +159,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
             } else if (costId) {
                 const updatePayload: Update<'operational_costs'> = {
                     ...basePayload,
-                    user_id: formData.user_id ?? user.id,
+                    user_id: formData.user_id ?? user['id'],
                 }
                 await update(costId, updatePayload)
             }
@@ -169,8 +170,8 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
             })
 
             router.push('/operational-costs')
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal menyimpan biaya'
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Gagal menyimpan biaya'
             toast({
                 title: 'Error',
                 description: message,
@@ -239,7 +240,7 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                                     </SelectTrigger>
                                     <SelectContent>
                                         {COST_CATEGORIES.map((cat) => (
-                                            <SelectItem key={cat.id} value={cat.id}>
+                                            <SelectItem key={cat['id']} value={cat['id']}>
                                                 {cat.icon} {cat.name}
                                             </SelectItem>
                                         ))}
@@ -251,16 +252,16 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="amount">Jumlah Biaya *</Label>
-                                <Input
-                                    id="amount"
-                                    type="number"
-                                    min="0"
-                                    step="1000"
-                                    value={formData.amount ?? ''}
-                                    onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                                    placeholder="0"
-                                    required
-                                />
+                                 <Input
+                                     id="amount"
+                                     type="number"
+                                     min="0"
+                                     step="1"
+                                     value={formData.amount ?? ''}
+                                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                                     placeholder="0"
+                                     required
+                                 />
                             </div>
 
                             <div className="space-y-2">

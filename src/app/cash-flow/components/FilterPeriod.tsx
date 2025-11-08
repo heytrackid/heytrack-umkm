@@ -1,15 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Calendar } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+
 import { type PeriodType } from '@/app/cash-flow/constants'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 interface FilterPeriodProps {
   selectedPeriod: PeriodType
   onPeriodChange: (period: PeriodType) => void
-  startDate: string
+  startDate?: string
   onStartDateChange: (date: string) => void
-  endDate: string
+  endDate?: string
   onEndDateChange: (date: string) => void
   onApplyFilters: () => void
   loading: boolean
@@ -33,8 +34,8 @@ const FilterPeriod = ({
   onApplyFilters,
   loading,
   isMobile
-}: FilterPeriodProps) => {
-  const handlePresetClick = (period: PeriodType) => {
+}: FilterPeriodProps): JSX.Element => {
+  const handlePresetClick = (period: PeriodType): void => {
     onPeriodChange(period)
     if (period !== 'custom') {
       // Auto-apply for preset periods
@@ -42,7 +43,7 @@ const FilterPeriod = ({
     }
   }
 
-  const getActivePeriodText = () => {
+  const getActivePeriodText = (): string => {
     if (selectedPeriod === 'custom' && startDate && endDate) {
       const start = new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
       const end = new Date(endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
@@ -92,7 +93,7 @@ const FilterPeriod = ({
                   <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
                   <input
                     type="date"
-                    value={startDate}
+                    value={startDate || ''}
                     onChange={(e) => onStartDateChange(e.target.value)}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   />
@@ -101,7 +102,7 @@ const FilterPeriod = ({
                   <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
                   <input
                     type="date"
-                    value={endDate}
+                    value={endDate || ''}
                     onChange={(e) => onEndDateChange(e.target.value)}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   />

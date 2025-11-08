@@ -1,18 +1,30 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { apiLogger } from '@/lib/logger'
-import type { 
-  Transaction, 
-  CashFlowSummary, 
-  CashFlowData, 
-  PeriodType, 
+
+import type {
+  Transaction,
+  CashFlowSummary,
+  CashFlowData,
+  PeriodType,
   TransactionFormData,
-  ChartDataPoint 
-} from '../constants'
+  ChartDataPoint
+} from '@/app/cash-flow/constants'
+
+import { apiLogger } from '@/lib/logger'
 
 interface ComparisonData {
   income: number
   expense: number
   net: number
+}
+
+interface CashFlowResponse extends CashFlowData {
+  comparison?: {
+    previous_period?: {
+      total_income: number
+      total_expenses: number
+      net_cash_flow: number
+    }
+  }
 }
 
 interface UseEnhancedCashFlowReturn {
@@ -24,12 +36,12 @@ interface UseEnhancedCashFlowReturn {
 
   // Filters
   selectedPeriod: PeriodType
-  startDate: string
-  endDate: string
+  startDate: string | undefined
+  endDate: string | undefined
 
   // Transaction form
   isAddDialogOpen: boolean
-  transactionType: 'income' | 'expense'
+  transactionType: 'expense' | 'income'
 
   // Computed data
   chartData: ChartDataPoint[]
@@ -41,7 +53,7 @@ interface UseEnhancedCashFlowReturn {
   setStartDate: (date: string) => void
   setEndDate: (date: string) => void
   setIsAddDialogOpen: (open: boolean) => void
-  setTransactionType: (type: 'income' | 'expense') => void
+  setTransactionType: (type: 'expense' | 'income') => void
 
   // API methods
   fetchCashFlowData: () => Promise<void>
@@ -51,24 +63,25 @@ interface UseEnhancedCashFlowReturn {
 }
 
 // Utility: Calculate date range
-function calculateDateRange(period: PeriodType, startDate?: string, endDate?: string) {
+function calculateDateRange(period: PeriodType, startDate?: string, endDate?: string): { startDate: string | undefined; endDate: string | undefined } {
   const today = new Date()
-  let calculatedStartDate = startDate
-  const calculatedEndDate = endDate ?? today.toISOString().split('T')[0]
+  const calcEndDate = endDate !== undefined ? endDate : today.toISOString().split('T')[0]
+  let calcStartDate: string | undefined = startDate
 
   if (!startDate) {
     if (period === 'week') {
       const weekAgo = new Date(today)
       weekAgo.setDate(weekAgo.getDate() - 7)
-      calculatedStartDate = weekAgo.toISOString().split('T')[0]
+       calcStartDate = weekAgo.toISOString().split('T')[0]
     } else if (period === 'month') {
-      calculatedStartDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
+      calcStartDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
     } else if (period === 'year') {
-      calculatedStartDate = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
+      calcStartDate = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
     }
+    // for custom, leave undefined
   }
 
-  return { startDate: calculatedStartDate, endDate: calculatedEndDate }
+  return { startDate: calcStartDate, endDate: calcEndDate }
 }
 
 // Utility: Prepare chart data
@@ -83,11 +96,9 @@ function prepareChartData(transactions: Transaction[]): ChartDataPoint[] {
       month: 'short' 
     })
 
-    if (!dataByDate[date]) {
-      dataByDate[date] = { date, income: 0, expense: 0, net: 0 }
-    }
+    dataByDate[date] ??= { date, income: 0, expense: 0, net: 0 }
 
-    if (transaction.type === 'income') {
+    if (transaction['type'] === 'income') {
       dataByDate[date].income += transaction.amount
     } else {
       dataByDate[date].expense += transaction.amount
@@ -141,15 +152,15 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
 
   // Filters
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const [startDate, setStartDate] = useState<string | undefined>('')
+  const [endDate, setEndDate] = useState<string | undefined>('')
 
   // Transaction form
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('expense')
+  const [transactionType, setTransactionType] = useState<'expense' | 'income'>('expense')
 
   // Fetch cash flow data
-  const fetchCashFlowData = useCallback(async () => {
+  const fetchCashFlowData = useCallback(async (): Promise<void> => {
     setLoading(true)
     setError(null)
 
@@ -171,7 +182,8 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
         throw new Error('Gagal mengambil data arus kas')
       }
 
-      const data = await response.json()
+       
+      const data: CashFlowResponse = await response.json()
       setCashFlowData(data)
 
       // Calculate comparison if previous period data exists
@@ -187,16 +199,16 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
       } else {
         setComparison(null)
       }
-    } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error fetching cash flow data')
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
+    } catch (error) {
+      apiLogger.error({ error }, 'Error fetching cash flow data')
+      setError(error instanceof Error ? error.message : 'Terjadi kesalahan saat mengambil data')
     } finally {
       setLoading(false)
     }
   }, [selectedPeriod, startDate, endDate])
 
   // Handle add transaction
-  const handleAddTransaction = useCallback(async (formData: TransactionFormData) => {
+  const handleAddTransaction = useCallback(async (formData: TransactionFormData): Promise<void> => {
     const amount = parseFloat(formData.amount)
     if (isNaN(amount) || amount <= 0) {
       throw new Error('Jumlah tidak valid')
@@ -214,47 +226,50 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
           category: formData.category,
           amount,
           date: formData.date,
-          type: transactionType,
-          source: 'manual_entry'
+          type: transactionType
         })
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error ?? 'Gagal menyimpan transaksi')
-      }
+       if (!response.ok) {
+          
+         const errorData = await response.json()
+          
+         throw new Error(errorData.error ?? 'Gagal menyimpan transaksi')
+       }
 
-      setIsAddDialogOpen(false)
-      await fetchCashFlowData()
-    } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error adding transaction')
-      throw err
+       setIsAddDialogOpen(false)
+       await fetchCashFlowData()
+     } catch (error) {
+       apiLogger.error({ error }, 'Error adding transaction')
+       throw error
     } finally {
       setLoading(false)
     }
   }, [transactionType, fetchCashFlowData])
 
   // Handle delete transaction
-  const handleDeleteTransaction = useCallback(async (transaction: Transaction) => {
+  const handleDeleteTransaction = useCallback(async (transaction: Transaction): Promise<void> => {
     try {
       setLoading(true)
 
-      // Use transaction.id as the reference_id
-      const recordId = transaction.reference_id ?? transaction.id
+      // Use transaction['id'] as the reference_id
+      const recordId = transaction.reference_id ?? transaction['id']
       
       const response = await fetch(`/api/financial/records/${recordId}`, {
         method: 'DELETE'
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error ?? 'Gagal menghapus transaksi')
-      }
+       if (!response.ok) {
+          
+         const errorData = await response.json()
+          
+         throw new Error(errorData.error ?? 'Gagal menghapus transaksi')
+       }
 
-      await fetchCashFlowData()
-    } catch (err: unknown) {
-      apiLogger.error({ error: err }, 'Error deleting transaction')
-      throw err
+       await fetchCashFlowData()
+     } catch (error) {
+       apiLogger.error({ error }, 'Error deleting transaction')
+       throw error
     } finally {
       setLoading(false)
     }
@@ -263,7 +278,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
 
 
   // Refresh data
-  const refreshData = useCallback(async () => {
+  const refreshData = useCallback(async (): Promise<void> => {
     await fetchCashFlowData()
   }, [fetchCashFlowData])
 

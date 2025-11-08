@@ -1,21 +1,21 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
 import { AlertCircle, Check, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { useState, type ChangeEvent, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react';
 
-interface FormFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onBlur'> {
+interface FormFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onBlur' | 'onChange' | 'value'> {
   label: string;
   name: string;
-  type?: 'text' | 'email' | 'password' | 'number' | 'textarea' | 'select' | 'date' | 'datetime-local' | 'tel' | 'url';
+  type?: 'date' | 'datetime-local' | 'email' | 'number' | 'password' | 'select' | 'tel' | 'text' | 'textarea' | 'url';
   value?: unknown;
   onChange?: (name: string, value: unknown) => void;
   onBlur?: (name: string) => void;
-  error?: string;
+  error?: string | undefined;
   success?: string;
   placeholder?: string;
   required?: boolean;
-  options?: Array<{ value: string | number; label: string }>;
+  options?: Array<{ value: number | string; label: string }>;
   disabled?: boolean;
   min?: number;
   max?: number;
@@ -48,19 +48,18 @@ export const FormField = (props: FormFieldProps) => {
     icon,
     fullWidth = true,
     // Extract react-hook-form specific props if present
-    onChange: rhfOnChange,
+    onChange: _rhfOnChange,
     onBlur: _rhfOnBlur,
-    value: rhfValue,
+    value: _rhfValue,
     ...restProps
   } = props;
 
   // Determine if we're using react-hook-form by checking for its props
-  const _isUsingRHF = rhfOnChange !== undefined || rhfValue !== undefined;
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(false);
 
-  const hasError = !!error;
-  const hasSuccess = !!success;
+  const hasError = Boolean(error);
+  const hasSuccess = Boolean(success);
   const isPassword = type === 'password';
 
   const baseInputClasses = `
@@ -82,21 +81,21 @@ export const FormField = (props: FormFieldProps) => {
     return `${baseInputClasses} border-input text-foreground placeholder-muted-foreground focus:ring-ring focus:border-ring hover:border-ring bg-background`;
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     let newValue: unknown = e.target.value;
 
     if (type === 'number') {
       newValue = e.target.value === '' ? '' : parseFloat(e.target.value) || 0;
     }
 
-    if (propOnChange) {
+    if (propOnChange !== undefined) {
       propOnChange(name, newValue);
     }
   };
 
   const handleBlur = () => {
     setFocused(false);
-    if (propOnBlur) {
+    if (propOnBlur !== undefined) {
       propOnBlur(name);
     }
   };
@@ -272,7 +271,7 @@ export const CrudForm = ({ onSubmit, children, className = '' }: CrudFormProps) 
 interface FormGridProps {
   children: ReactNode;
   cols?: 1 | 2 | 3 | 4;
-  gap?: 'sm' | 'md' | 'lg';
+  gap?: 'lg' | 'md' | 'sm';
   className?: string;
 }
 
@@ -421,7 +420,7 @@ interface ConfirmDialogProps {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  type?: 'danger' | 'warning' | 'info';
+  type?: 'danger' | 'info' | 'warning';
 }
 
 export const ConfirmDialog = ({

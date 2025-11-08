@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { apiLogger } from '../logger'
+
 import {
 
   AppError,
@@ -10,7 +10,9 @@ import {
   DatabaseError,
   ExternalServiceError,
   RateLimitError
-} from './app-error'
+} from '@/lib/errors/app-error'
+
+import { apiLogger } from '@/lib/logger'
 
 /**
  * Centralized Error Response Handler for API Routes
@@ -18,15 +20,15 @@ import {
  */
 
 // Export AppError as APIError for backward compatibility
-export { AppError as APIError } from './app-error';
-export type { AppError };
+export { AppError as APIError } from './app-error'
+export type { AppError }
 
 interface ErrorResponse {
-  error: string;
-  code?: string;
-  status: number;
-  details?: Record<string, unknown>;
-  timestamp: string;
+  error: string
+  code?: string
+  status: number
+  details?: Record<string, unknown>
+  timestamp: string
 }
 
 /**
@@ -44,18 +46,18 @@ export function handleAPIError(error: unknown, context?: string): NextResponse {
   if (error instanceof AppError) {
     const errorResponse: ErrorResponse = {
       error: error.message,
-      code: error.code,
-      status: error.status,
+      code: error['code'],
+      status: error['status'],
       details: error.details,
-      timestamp: error.timestamp,
+      timestamp: error['timestamp'],
     };
 
-    return NextResponse.json(errorResponse, { status: error.status });
+    return NextResponse.json(errorResponse, { status: error['status'] });
   }
 
   // Handle Zod validation errors
   if (isZodError(error)) {
-    const zodError = error as { issues: Array<{ path: Array<string | number>; message: string }> };
+    const zodError = error as { issues: Array<{ path: Array<number | string>; message: string }> };
     const errorResponse: ErrorResponse = {
       error: 'Validation failed',
       code: 'VALIDATION_ERROR',
@@ -84,9 +86,9 @@ export function handleAPIError(error: unknown, context?: string): NextResponse {
     const errorResponse: ErrorResponse = {
       error: supabaseError.message ?? 'Database error occurred',
       code: 'DATABASE_ERROR',
-      status: supabaseError.status ?? 500,
+      status: supabaseError['status'] ?? 500,
       details: {
-        code: supabaseError.code,
+        code: supabaseError['code'],
         hint: supabaseError.hint,
         details: supabaseError.details,
       },
@@ -94,10 +96,10 @@ export function handleAPIError(error: unknown, context?: string): NextResponse {
     };
 
     // Map specific Supabase error codes to appropriate HTTP status codes
-    let status = supabaseError.status ?? 500;
-    if (supabaseError.code === '23505') {status = 409;} // Unique violation
-    if (supabaseError.code === '23503') {status = 400;} // Foreign key violation
-    if (supabaseError.code === '23502') {status = 400;} // Not null violation
+    let status = supabaseError['status'] ?? 500;
+    if (supabaseError['code'] === '23505') {status = 409;} // Unique violation
+    if (supabaseError['code'] === '23503') {status = 400;} // Foreign key violation
+    if (supabaseError['code'] === '23502') {status = 400;} // Not null violation
 
     return NextResponse.json(errorResponse, { status });
   }

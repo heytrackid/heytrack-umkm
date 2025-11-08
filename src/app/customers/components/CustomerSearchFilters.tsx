@@ -1,10 +1,12 @@
 // Customer Search and Filters Component - Lazy Loaded
 // Handles search functionality and bulk actions for customers
 
+import { Edit2, Search, Trash2 } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
-import { Edit2, Search, Trash2 } from 'lucide-react'
+
 import type { Customer } from './types'
 
 interface CustomerSearchFiltersProps {
@@ -13,7 +15,7 @@ interface CustomerSearchFiltersProps {
   filteredCustomers: Customer[]
   selectedItems: string[]
   onClearSelection: () => void
-  onBulkEdit: () => void
+  onBulkEdit?: () => void
   onBulkDelete: () => void
   isLoading: boolean
 }
@@ -27,7 +29,7 @@ const CustomerSearchFilters = ({
   onBulkEdit,
   onBulkDelete,
   isLoading
-}: CustomerSearchFiltersProps) => {
+}: CustomerSearchFiltersProps): JSX.Element => {
   if (isLoading) {
     return <SearchFormSkeleton />
   }
@@ -54,7 +56,7 @@ const CustomerSearchFilters = ({
               {selectedItems.length} pelanggan dipilih
             </span>
             <span className="text-xs text-gray-500">
-              ({filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString())).map(customer => customer.name).slice(0, 2).join(', ')}
+              ({filteredCustomers.filter(customer => selectedItems.includes(customer['id'].toString())).map(customer => customer.name).slice(0, 2).join(', ')}
               {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
             </span>
           </div>
@@ -67,14 +69,16 @@ const CustomerSearchFilters = ({
             >
               Batal
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onBulkEdit}
-            >
-              <Edit2 className="h-4 w-4 mr-2" />
-              Edit Semua
-            </Button>
+            {onBulkEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onBulkEdit}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit Semua
+              </Button>
+            )}
             <Button
               variant="destructive"
               size="sm"

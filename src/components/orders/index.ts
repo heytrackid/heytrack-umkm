@@ -7,6 +7,7 @@ export { default as OrderDetailView } from './OrderDetailView'
 export { default as OrderStatusTimeline } from './OrderStatusTimeline'
 export { default as OrderQuickActions } from './OrderQuickActions'
 export { default as OrderFilters } from './OrderFilters'
+export { WhatsAppFollowUp } from './WhatsAppFollowUp'
 
 // Hook
 export { useOrders } from './useOrders'

@@ -38,10 +38,20 @@ export interface ProfitData {
   }
 }
 
+import type { DateRange } from 'react-day-picker'
+
 export interface ProfitFilters {
-  selectedPeriod: string
-  startDate: string
-  endDate: string
+  selectedPeriod: PeriodType
+  dateRange?: DateRange | null
+  startDate?: string
+  endDate?: string
+}
+
+export interface ProfitFiltersProps {
+  filters: ProfitFilters
+  onFiltersChange: (filters: Partial<ProfitFilters>) => void
+  onApplyFilters: () => void
+  isMobile: boolean
 }
 
 export interface ProductChartData {
@@ -57,4 +67,4 @@ export interface DateRangeParams {
 }
 
 export type ExportFormat = 'csv' | 'pdf' | 'xlsx'
-export type PeriodType = 'week' | 'month' | 'quarter' | 'year' | 'custom'
+export type PeriodType = 'custom' | 'month' | 'quarter' | 'week' | 'year'

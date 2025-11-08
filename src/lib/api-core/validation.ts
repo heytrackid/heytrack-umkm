@@ -1,9 +1,13 @@
+import { apiLogger } from '@/lib/logger'
+import { formatValidationErrors } from '@/lib/validations'
+
+import { createErrorResponse } from './responses'
+
+import type { ValidationResult } from './types'
 import type { NextRequest, NextResponse } from 'next/server'
 import type { z } from 'zod'
-import { formatValidationErrors } from '@/lib/validations'
-import { apiLogger } from '@/lib/logger'
-import type { ValidationResult } from './types'
-import { createErrorResponse } from './responses'
+
+
 
 /**
  * Validation Module
@@ -21,7 +25,7 @@ export function validateRequestData<T>(
   const result = schema.safeParse(data)
 
   if (result.success) {
-    return { success: true, data: result.data }
+    return { success: true, data: result['data'] }
   }
 
   const errors = formatValidationErrors(result.error.issues)
@@ -34,7 +38,7 @@ export function validateRequestData<T>(
 export async function validateRequestOrRespond<T>(
   request: NextRequest,
   schema: z.ZodSchema<T>
-): Promise<T | NextResponse> {
+): Promise<NextResponse | T> {
   try {
     const body = await request.json()
     const result = validateRequestData(body, schema)
@@ -43,13 +47,13 @@ export async function validateRequestOrRespond<T>(
       return createErrorResponse('Validation failed', 400, result.errors)
     }
 
-    if (!result.data) {
+    if (!result['data']) {
       return createErrorResponse('Validation failed: no data', 400)
     }
 
-    return result.data
-  } catch (err) {
-    apiLogger.error({ err }, 'Request validation error')
+    return result['data']
+  } catch (error) {
+    apiLogger.error({ error }, 'Request validation error')
     return createErrorResponse('Invalid request body', 400)
   }
 }

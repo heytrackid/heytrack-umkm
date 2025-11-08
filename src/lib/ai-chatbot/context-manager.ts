@@ -10,10 +10,10 @@ import type { ChatContext } from './types'
 
 
 export class ContextManager {
-  private context: ChatContext
+  private readonly context: ChatContext
 
   constructor(userId: string, sessionId?: string) {
-    this.context = {
+    this['context'] = {
       userId,
       sessionId,
       conversationHistory: [],
@@ -27,15 +27,15 @@ export class ContextManager {
    */
   async initializeSession(): Promise<void> {
     try {
-      this.context.conversationHistory = []
+      this['context'].conversationHistory = []
       logger.info(
-        { userId: this.context.userId, sessionId: this.context.sessionId },
+        { userId: this['context']['userId'], sessionId: this['context'].sessionId },
         'AI session initialized'
       )
       await Promise.resolve()
-    } catch (err) {
-      logger.error({ err }, 'Error initializing AI session')
-      throw err
+    } catch (error) {
+      logger.error({ error }, 'Error initializing AI session')
+      throw error
     }
   }
 
@@ -43,7 +43,7 @@ export class ContextManager {
    * Add user message to history
    */
   addUserMessage(content: string): void {
-    this.context.conversationHistory?.push({
+    this['context'].conversationHistory?.push({
       role: 'user',
       content,
       timestamp: new Date()
@@ -54,7 +54,7 @@ export class ContextManager {
    * Add assistant message to history
    */
   addAssistantMessage(content: string): void {
-    this.context.conversationHistory?.push({
+    this['context'].conversationHistory?.push({
       role: 'assistant',
       content,
       timestamp: new Date()
@@ -65,8 +65,8 @@ export class ContextManager {
    * Update business context
    */
   updateBusinessContext(businessData: Record<string, unknown>): void {
-    this.context.businessData = {
-      ...this.context.businessData,
+    this['context'].businessData = {
+      ...this['context'].businessData,
       ...businessData
     }
   }
@@ -75,20 +75,20 @@ export class ContextManager {
    * Get current context
    */
   getContext(): ChatContext {
-    return this.context
+    return this['context']
   }
 
   /**
    * Clear conversation history
    */
   clearHistory(): void {
-    this.context.conversationHistory = []
+    this['context'].conversationHistory = []
   }
 
   /**
    * Get conversation history
    */
   getHistory() {
-    return this.context.conversationHistory ?? []
+    return this['context'].conversationHistory ?? []
   }
 }

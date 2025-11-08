@@ -1,11 +1,9 @@
-import type { 
-
-
 /**
  * HPP Module Types
  * Uses generated Supabase types as base
  */
 
+import type {
   HppCalculationsTable,
   HppCalculationsInsert,
   HppCalculationsUpdate
@@ -81,15 +79,10 @@ export interface RecipeIngredientWithPrice {
   category?: string
 }
 
-export type HppExportFormat = 'csv' | 'json' | 'pdf' | 'excel'
+export type HppExportFormat = 'csv' | 'excel' | 'json' | 'pdf'
 
 export type HppExportMetric =
-  | 'hpp'
-  | 'margin'
-  | 'cost_breakdown'
-  | 'trends'
-  | 'alerts'
-  | 'recommendations'
+  'alerts' | 'cost_breakdown' | 'hpp' | 'margin' | 'recommendations' | 'trends'
 
 export interface HppExportOptions {
   format: HppExportFormat
@@ -102,7 +95,7 @@ export interface HppExportOptions {
 }
 
 export interface HppExportResult {
-  data: string | Blob
+  data: Blob | string
   filename: string
   mimeType: string
 }

@@ -1,76 +1,76 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Calendar } from 'lucide-react'
-import type { ProfitFilters, PeriodType } from './types'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select' 
 
-interface ProfitFiltersProps {
-  filters: ProfitFilters
-  onFiltersChange: (filters: Partial<ProfitFilters>) => void
-  onApplyFilters: () => void
-  isMobile: boolean
+import { calculateProfitDateRange } from '@/app/profit/utils'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+import type { PeriodType, ProfitFilters, ProfitFiltersProps } from './types'
+
+
+
+export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilters, isMobile }: ProfitFiltersProps) => {
+  const handlePeriodChange = (value: PeriodType) => {
+    const newFilters: Partial<ProfitFilters> = { selectedPeriod: value }
+    if (value !== 'custom') {
+      const { startDate, endDate } = calculateProfitDateRange(value)
+      if (startDate) {newFilters.startDate = startDate}
+      if (endDate) {newFilters.endDate = endDate}
+      newFilters.dateRange = null
+    } else {
+      newFilters.dateRange = null
+    }
+    onFiltersChange(newFilters)
+  }
+
+
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Calendar className="h-5 w-5" />
+          Filter Periode
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+          <div>
+            <label className="text-sm font-medium mb-2 block">Periode</label>
+            <Select
+              value={filters.selectedPeriod}
+              onValueChange={handlePeriodChange}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">Minggu Ini</SelectItem>
+                <SelectItem value="month">Bulan Ini</SelectItem>
+                <SelectItem value="quarter">Kuartal Ini</SelectItem>
+                <SelectItem value="year">Tahun Ini</SelectItem>
+                <SelectItem value="custom">Kustom</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {filters.selectedPeriod === 'custom' && (
+            <div>
+              <label className="text-sm font-medium mb-2 block">Rentang Tanggal</label>
+
+            </div>
+          )}
+
+          <div className="flex items-end col-span-full">
+            <Button onClick={onApplyFilters} className="w-full">
+              Terapkan Filter
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
-
-export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilters, isMobile }: ProfitFiltersProps) => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="text-lg flex items-center gap-2">
-        <Calendar className="h-5 w-5" />
-        Filter Periode
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-4'}`}>
-        <div>
-          <label className="text-sm font-medium mb-2 block">Periode</label>
-          <Select
-            value={filters.selectedPeriod}
-            onValueChange={(value: PeriodType) => onFiltersChange({ selectedPeriod: value })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week">Minggu Ini</SelectItem>
-              <SelectItem value="month">Bulan Ini</SelectItem>
-              <SelectItem value="quarter">Kuartal Ini</SelectItem>
-              <SelectItem value="year">Tahun Ini</SelectItem>
-              <SelectItem value="custom">Kustom</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {filters.selectedPeriod === 'custom' && (
-          <>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
-              <input
-                type="date"
-                value={filters.startDate}
-                onChange={(e) => onFiltersChange({ startDate: e.target.value })}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
-              <input
-                type="date"
-                value={filters.endDate}
-                onChange={(e) => onFiltersChange({ endDate: e.target.value })}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-            </div>
-          </>
-        )}
-
-        <div className="flex items-end">
-          <Button onClick={onApplyFilters} className="w-full">
-            Terapkan Filter
-          </Button>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-)

@@ -1,4 +1,5 @@
-import { lazy, type ComponentType } from 'react'
+import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
+
 import { uiLogger } from '@/lib/logger'
 
 /**
@@ -7,9 +8,9 @@ import { uiLogger } from '@/lib/logger'
  */
 
 // Lazy load with error boundary
-export function lazyLoad<T extends ComponentType<any>>( // eslint-disable-line @typescript-eslint/no-explicit-any
+export function lazyLoad<T extends ComponentType<any>>(  
   importFunc: () => Promise<{ default: T }>
-) {
+): LazyExoticComponent<T> {
   return lazy(() =>
      importFunc().catch((error) => {
        uiLogger.error('Failed to load component:', error)
@@ -22,9 +23,9 @@ export function lazyLoad<T extends ComponentType<any>>( // eslint-disable-line @
 
 // Route-based preloading
 export class RoutePreloader {
-  private static preloadedRoutes = new Set<string>()
+  private static readonly preloadedRoutes = new Set<string>()
 
-  static preloadRoute(route: string) {
+  static preloadRoute(route: string): void {
     if (this.preloadedRoutes.has(route)) {
       return
     }
@@ -57,15 +58,15 @@ export class RoutePreloader {
     this.preloadedRoutes.add(route)
   }
 
-  static preloadOnHover(route: string, delay = 100) {
+  static preloadOnHover(route: string, delay = 100): { preload: () => void; cancel: () => void } {
     let timeoutId: NodeJS.Timeout
 
-    const preload = () => {
+    const preload = (): void => {
       clearTimeout(timeoutId)
       timeoutId = setTimeout(() => this.preloadRoute(route), delay)
     }
 
-    const cancel = () => {
+    const cancel = (): void => {
       clearTimeout(timeoutId)
     }
 
@@ -75,9 +76,9 @@ export class RoutePreloader {
 
 // Component preloading based on user interaction
 export class ComponentPreloader {
-  private static preloadedComponents = new Set<string>()
+  private static readonly preloadedComponents = new Set<string>()
 
-  static preloadComponent(componentId: string, importFunc: () => Promise<unknown>) {
+  static preloadComponent(componentId: string, importFunc: () => Promise<unknown>): void {
     if (this.preloadedComponents.has(componentId)) {
       return
     }
@@ -92,7 +93,7 @@ export class ComponentPreloader {
     componentId: string,
     importFunc: () => Promise<unknown>,
     options: IntersectionObserverInit = {}
-  ) {
+  ): IntersectionObserver | undefined {
     if (typeof window === 'undefined') {
       return
     }
@@ -115,7 +116,7 @@ export class ComponentPreloader {
 
 // Bundle size monitoring
 export class BundleMonitor {
-  static logBundleInfo() {
+  static logBundleInfo(): void {
     if (typeof window === 'undefined') {
       return
     }
@@ -132,7 +133,7 @@ export class BundleMonitor {
     }
   }
 
-  static getBundleStats() {
+  static getBundleStats(): Array<{ name: string | undefined; size: number; loadTime: number }> | null {
     if (typeof window === 'undefined') {
       return null
     }
@@ -150,10 +151,10 @@ export class BundleMonitor {
 
 // Export common lazy-loaded components
 export const LazyCharts = {
-  BarChart: lazyLoad(() => import('@/components/ui/charts/bar-chart').then(mod => ({ default: mod.MobileBarChart }))),
-  LineChart: lazyLoad(() => import('@/components/ui/charts/line-chart').then(mod => ({ default: mod.MobileLineChart }))),
-  PieChart: lazyLoad(() => import('@/components/ui/charts/pie-chart').then(mod => ({ default: mod.MobilePieChart }))),
-  AreaChart: lazyLoad(() => import('@/components/ui/charts/area-chart').then(mod => ({ default: mod.MobileAreaChart }))),
+  BarChart: lazyLoad(() => import('@/components/ui/charts/bar-chart').then(mod => ({ default: mod.default }))),
+  LineChart: lazyLoad(() => import('@/components/ui/charts/line-chart').then(mod => ({ default: mod.default }))),
+  PieChart: lazyLoad(() => import('@/components/ui/charts/pie-chart').then(mod => ({ default: mod.default }))),
+  AreaChart: lazyLoad(() => import('@/components/ui/charts/area-chart').then(mod => ({ default: mod.default }))),
 }
 
 export const LazyPages = {

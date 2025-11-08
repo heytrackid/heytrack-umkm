@@ -9,7 +9,7 @@
 
 export interface ProductionBatch {
   id: string
-  status: 'pending' | 'in_progress' | 'completed' | 'failed'
+  status: 'completed' | 'failed' | 'in_progress' | 'pending'
   recipe_id: string
   quantity: number
   scheduled_date: string
@@ -24,7 +24,7 @@ export interface ReorderSummary {
     current_stock: number
     min_stock: number
     reorder_quantity: number
-    urgency: 'low' | 'medium' | 'high'
+    urgency: 'high' | 'low' | 'medium'
   }>
   totalItems: number
   criticalItems: number

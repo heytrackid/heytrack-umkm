@@ -1,12 +1,15 @@
 'use client'
 
+import { Filter, Search, XCircle } from 'lucide-react'
+
+import type { OrderStatus } from '@/app/orders/types/orders.types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Filter, Search, XCircle } from 'lucide-react'
-import type { OrderStatus } from '@/app/orders/types/orders.types'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
+
+
 
 
 
@@ -40,7 +43,7 @@ export const OrderFilters = ({
     onFilterChange,
     onClearFilters
 }: OrderFiltersProps) => {
-    const hasActiveFilters = filters.status?.length > 0 || filters.customer_search
+    const hasActiveFilters = filters['status']?.length > 0 || filters.customer_search
 
     return (
         <Card className="mb-6">
@@ -60,7 +63,7 @@ export const OrderFilters = ({
                         </div>
 
                         <Select
-                            value={filters.status?.join(',') || 'all'}
+                            value={filters['status']?.join(',') || 'all'}
                             onValueChange={(value) => {
                                 onFilterChange({
                                     ...filters,

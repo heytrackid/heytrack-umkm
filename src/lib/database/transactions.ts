@@ -1,7 +1,6 @@
 import { dbLogger } from '@/lib/logger'
 
-
-/**
+/** 
  * Database Transaction Management
  * 
  * Provides transaction support for complex operations that need atomicity.
@@ -126,10 +125,10 @@ async function rollbackOperations(
       try {
         await operation.rollback()
         dbLogger.debug({ operation: operationName }, 'Rollback completed')
-      } catch (rollbackError) {
+      } catch (error) {
         // Log but don't throw - we want to attempt all rollbacks
         dbLogger.error(
-          { error: rollbackError, operation: operationName },
+          { error, operation: operationName },
           'Rollback failed'
         )
       }
@@ -219,11 +218,11 @@ export async function executeParallel<T>(
         const data = await operation()
         results.push({ success: true, data })
       } catch (error) {
-        const err = error instanceof Error ? error : new Error('Unknown error')
-        results.push({ success: false, error: err })
+        const normalizedError = error instanceof Error ? error : new Error('Unknown error')
+        results.push({ success: false, error: normalizedError })
         
         if (!continueOnError) {
-          throw err
+          throw normalizedError
         }
       }
     })()

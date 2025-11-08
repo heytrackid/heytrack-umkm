@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClientLogger } from '@/lib/client-logger'
 
+import { createClientLogger } from '@/lib/client-logger'
 const logger = createClientLogger('Hook')
 import { getErrorMessage } from '@/lib/type-guards'
 
@@ -17,13 +17,14 @@ export interface Expense {
   vendor: string
   receipt_number: string
   notes?: string
-  status: 'paid' | 'pending' | 'overdue'
+  status: 'overdue' | 'paid' | 'pending'
   recurring: boolean
-  recurring_period?: 'weekly' | 'monthly' | 'quarterly' | 'yearly'
+  recurring_period?: 'monthly' | 'quarterly' | 'weekly' | 'yearly'
   created_at?: string
   updated_at?: string
 }
 
+ 
 export function useExpenses() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(true)
@@ -31,7 +32,7 @@ export function useExpenses() {
 
   const fetchExpenses = async () => {
     try {
-      void setLoading(true)
+      setLoading(true)
       const response = await fetch('/api/expenses', {
         credentials: 'include', // Include cookies for authentication
       })
@@ -40,18 +41,18 @@ export function useExpenses() {
         throw new Error('Failed to fetch expenses')
       }
 
-      const data = await response.json()
-      void setExpenses(data)
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err)
-      void setError(errorMessage)
+       const data = await response.json() as Expense[]
+       setExpenses(data)
+    } catch (error) {
+      const errorMessage = getErrorMessage(error)
+      setError(errorMessage)
       logger.error({ error: errorMessage }, 'Error fetching expenses:')
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }
 
-  const addExpense = async (expenseData: Omit<Expense, 'id' | 'created_at' | 'updated_at'>) => {
+  const addExpense = async (expenseData: Omit<Expense, 'created_at' | 'id' | 'updated_at'>) => {
     try {
       const response = await fetch('/api/expenses', {
         method: 'POST',
@@ -66,13 +67,13 @@ export function useExpenses() {
         throw new Error('Failed to add expense')
       }
 
-      const newExpense = await response.json()
-      void setExpenses(prev => [newExpense, ...prev])
-      return newExpense
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err)
-      void setError(errorMessage)
-      throw err
+       const newExpense = await response.json() as Expense
+       setExpenses(prev => [newExpense, ...prev])
+       return newExpense
+    } catch (error) {
+      const errorMessage = getErrorMessage(error)
+      setError(errorMessage)
+      throw error
     }
   }
 
@@ -91,17 +92,17 @@ export function useExpenses() {
         throw new Error('Failed to update expense')
       }
 
-      const updatedExpense = await response.json()
-      setExpenses(prev =>
-        prev.map(expense =>
-          expense.id === id ? updatedExpense : expense
-        )
-      )
-      return updatedExpense
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err)
-      void setError(errorMessage)
-      throw err
+       const updatedExpense = await response.json() as Expense
+       setExpenses(prev =>
+         prev.map(expense =>
+           expense['id'] === id ? updatedExpense : expense
+         )
+       )
+       return updatedExpense
+    } catch (error) {
+      const errorMessage = getErrorMessage(error)
+      setError(errorMessage)
+      throw error
     }
   }
 
@@ -116,11 +117,11 @@ export function useExpenses() {
         throw new Error('Failed to delete expense')
       }
 
-      setExpenses(prev => prev.filter(expense => expense.id !== id))
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err)
-      void setError(errorMessage)
-      throw err
+      setExpenses(prev => prev.filter(expense => expense['id'] !== id))
+    } catch (error) {
+      const errorMessage = getErrorMessage(error)
+      setError(errorMessage)
+      throw error
     }
   }
 

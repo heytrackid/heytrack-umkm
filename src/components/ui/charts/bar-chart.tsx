@@ -1,6 +1,8 @@
-/* eslint-disable no-nested-ternary */
-import { useResponsive } from '@/hooks/useResponsive'
+ 
 import { memo, lazy, Suspense } from 'react'
+
+import { useResponsive } from '@/hooks/useResponsive'
+
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from './types'
@@ -35,7 +37,7 @@ interface MobileBarChartProps extends BaseMobileChartProps {
  * MobileBarChart - Optimized with React.memo
  * Prevents unnecessary re-renders when data hasn't changed
  */
-export const MobileBarChart = memo(({
+const MobileBarChart = memo(({
   data,
   xKey,
   bars,
@@ -92,4 +94,8 @@ export const MobileBarChart = memo(({
       </Suspense>
     </BaseMobileChart>
   )
-}, (prevProps: MobileBarChartProps, nextProps: MobileBarChartProps) => prevProps.data === nextProps.data && prevProps.bars === nextProps.bars)
+}, (prevProps: MobileBarChartProps, nextProps: MobileBarChartProps) => prevProps['data'] === nextProps['data'] && prevProps.bars === nextProps.bars)
+
+MobileBarChart.displayName = 'MobileBarChart'
+
+export default MobileBarChart

@@ -1,19 +1,25 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Insert, Update, Database, OrderStatus } from '@/types/database'
-import { typed } from '@/types/type-utilities'
-import { OrderInsertSchema } from '@/lib/validations/domains/order'
-import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import { createPaginationMeta } from '@/lib/validations/pagination'
-import { ORDER_FIELDS } from '@/lib/database/query-fields'
-import { apiLogger, logError } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+
+import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
+import { ORDER_FIELDS } from '@/lib/database/query-fields'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger, logError } from '@/lib/logger'
+import { PaginationQuerySchema } from '@/lib/validations/domains/common'
+import { OrderInsertSchema } from '@/lib/validations/domains/order'
+import { createPaginationMeta } from '@/lib/validations/pagination'
+import type { Insert, Update, Database, OrderStatus } from '@/types/database'
+import { typed } from '@/types/type-utilities'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { createClient } from '@/utils/supabase/server'
+
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+
 
 
 
@@ -37,7 +43,7 @@ const normalizeDateValue = (value?: string | null) => {
 }
 
 // ✅ PERFORMANCE: Optimized function with caching
-/* eslint-disable require-await */
+ 
 const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: FetchOrdersParams) => {
   const { page, limit, search, sort_by, sort_order, status, user_id } = params
 
@@ -72,17 +78,17 @@ const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: 
       const orderData = order as Record<string, unknown>
       return {
         ...orderData,
-        items: orderData.order_items ?? []
+        items: orderData['order_items'] ?? []
       }
     }) ?? []
 
     return { data: mappedData, count }
   }, cacheKey, 5 * 60 * 1000) // Cache for 5 minutes
 }
-/* eslint-enable require-await */
+ 
 
 // GET /api/orders - Get all orders with caching
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/orders - Request received')
 
@@ -94,7 +100,7 @@ async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    apiLogger.info({ userId: user.id }, 'GET /api/orders - User authenticated')
+    apiLogger.info({ userId: user['id'] }, 'GET /api/orders - User authenticated')
 
     const { searchParams } = new URL(request.url)
     const queryValidation = PaginationQuerySchema.safeParse({
@@ -112,16 +118,27 @@ async function GET(request: NextRequest) {
       )
     }
 
-    const { page, limit, search, sort_by, sort_order } = queryValidation.data
+    const { page, limit, search, sort_by, sort_order } = queryValidation['data']
     const status = searchParams.get('status')
 
     // ✅ PERFORMANCE: Use cached batch query
-    const { data: orders, count } = await fetchOrdersWithCache(supabase, {
-      page, limit, search, sort_by, sort_order, status, user_id: user.id
-    })
+    const params: FetchOrdersParams = {
+      page, limit, status, user_id: user['id']
+    }
+    if (search !== undefined) {
+      params.search = search
+    }
+    if (sort_by !== undefined) {
+      params.sort_by = sort_by
+    }
+    if (sort_order !== undefined) {
+      params.sort_order = sort_order
+    }
+
+    const { data: orders, count } = await fetchOrdersWithCache(supabase, params)
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       count: orders?.length ?? 0,
       totalCount: count ?? 0,
       cached: true // Indicates caching is working
@@ -139,7 +156,7 @@ async function GET(request: NextRequest) {
 }
 
 // POST /api/orders - Create new order with cache invalidation
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/orders - Request received')
 
@@ -149,7 +166,7 @@ async function POST(request: NextRequest) {
     if (authError || !user) {
       logError(apiLogger, authError, 'POST /api/orders - Unauthorized')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    const body = await request.json()
+    }    const body: unknown = await request.json()
     const validation = OrderInsertSchema.safeParse(body)
 
     if (!validation.success) {
@@ -159,8 +176,8 @@ async function POST(request: NextRequest) {
       )
     }
 
-    const validatedData = validation.data
-    const orderStatus = validatedData.status || 'PENDING'
+    const validatedData = validation['data']
+    const orderStatus = validatedData['status'] || 'PENDING'
     let incomeRecordId = null
 
     // Create income record if needed
@@ -170,13 +187,13 @@ async function POST(request: NextRequest) {
         ?? new Date().toISOString().split('T')[0]
 
       const incomeData: FinancialRecordInsert = {
-        user_id: user.id,
+        user_id: user['id'],
         type: 'INCOME',
         category: 'Revenue',
         amount: validatedData.total_amount,
-        date: incomeDate,
-        reference: `Order #${validatedData.order_no}${validatedData.customer_name ? ` - ${validatedData.customer_name}` : ''}`,
-        description: `Income from order ${validatedData.order_no}`
+        date: incomeDate ?? null,
+        reference: `Order #${validatedData['order_no']}${validatedData['customer_name'] ? ` - ${validatedData['customer_name']}` : ''}`,
+        description: `Income from order ${validatedData['order_no']}`
       }
     
       const { data: incomeRecord, error: incomeError } = await supabase
@@ -190,28 +207,21 @@ async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to create income record' }, { status: 500 })
       }
 
-      incomeRecordId = incomeRecord.id
+      incomeRecordId = incomeRecord['id']
     }
 
     // Create order
     const orderInsertData: OrderInsert = {
-      user_id: user.id,
-      order_no: validatedData.order_no,
-      customer_id: validatedData.customer_id,
-      customer_name: validatedData.customer_name,
-      customer_phone: validatedData.customer_phone,
+      ...Object.fromEntries(
+        Object.entries(validatedData).map(([key, value]) => [key, value ?? null])
+      ),
+      user_id: user['id'],
       status: orderStatus,
       order_date: validatedData.order_date ?? new Date().toISOString().split('T')[0],
-      delivery_date: validatedData.delivery_date,
-      delivery_time: validatedData.delivery_time,
-      total_amount: validatedData.total_amount,
-      tax_amount: validatedData.tax_amount || 0,
-      payment_status: validatedData.payment_status || 'UNPAID',
-      payment_method: validatedData.payment_method,
-      notes: validatedData.notes,
-      special_instructions: validatedData.special_instructions,
+      tax_amount: validatedData.tax_amount ?? 0,
+      payment_status: validatedData.payment_status ?? 'UNPAID',
       financial_record_id: incomeRecordId
-    }
+    } as OrderInsert
     
     const { data: orderData, error: orderError } = await supabase
       .from('orders')
@@ -222,7 +232,7 @@ async function POST(request: NextRequest) {
     if (orderError) {
       logError(apiLogger, orderError, 'POST /api/orders - Failed to create order')
       if (incomeRecordId) {
-        await supabase.from('financial_records').delete().eq('id', incomeRecordId).eq('user_id', user.id)
+        await supabase.from('financial_records').delete().eq('id', incomeRecordId).eq('user_id', user['id'])
       }
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
     }
@@ -232,9 +242,9 @@ async function POST(request: NextRequest) {
     // Update income record with order reference
     if (incomeRecordId) {
       const updateData: FinancialRecordUpdate = { 
-        reference: `Order ${createdOrder.id} - ${validatedData.customer_name || 'Customer'}` 
+        reference: `Order ${createdOrder['id']} - ${validatedData['customer_name'] || 'Customer'}` 
       }
-      await supabase.from('financial_records').update(updateData).eq('id', incomeRecordId).eq('user_id', user.id)
+      await supabase.from('financial_records').update(updateData).eq('id', incomeRecordId).eq('user_id', user['id'])
     }
 
     // Create order items
@@ -246,8 +256,8 @@ async function POST(request: NextRequest) {
         unit_price: item.unit_price,
         total_price: item.total_price || (item.quantity * item.unit_price),
         special_requests: item.special_requests ?? null,
-        order_id: createdOrder.id,
-        user_id: user.id
+        order_id: createdOrder['id'],
+        user_id: user['id']
       }))
 
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
@@ -255,9 +265,9 @@ async function POST(request: NextRequest) {
       if (itemsError) {
         logError(apiLogger, itemsError, 'POST /api/orders - Failed to create order items')
         // Rollback order and income record
-        await supabase.from('orders').delete().eq('id', createdOrder.id).eq('user_id', user.id)
+        await supabase.from('orders').delete().eq('id', createdOrder['id']).eq('user_id', user['id'])
         if (incomeRecordId) {
-          await supabase.from('financial_records').delete().eq('id', incomeRecordId).eq('user_id', user.id)
+          await supabase.from('financial_records').delete().eq('id', incomeRecordId).eq('user_id', user['id'])
         }
         return NextResponse.json({ error: 'Failed to create order items' }, { status: 500 })
       }
@@ -267,15 +277,15 @@ async function POST(request: NextRequest) {
     cacheInvalidation.orders()
     
     apiLogger.info({ 
-      userId: user.id,
-      orderId: createdOrder.id,
-      orderNo: createdOrder.order_no,
-      incomeRecorded: !!incomeRecordId
+      userId: user['id'],
+      orderId: createdOrder['id'],
+      orderNo: createdOrder['order_no'],
+      incomeRecorded: Boolean(incomeRecordId)
     }, 'POST /api/orders - Success (cache invalidated)')
     
     return NextResponse.json({
       ...createdOrder,
-      income_recorded: !!incomeRecordId
+      income_recorded: Boolean(incomeRecordId)
     }, { status: 201 })
 
   } catch (error: unknown) {

@@ -1,13 +1,15 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Loader2 } from 'lucide-react'
+import { useForm, type DefaultValues, type FieldValues, type Path, type PathValue, type Resolver } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormField } from '@/components/ui/crud-form'
 import { uiLogger } from '@/lib/logger'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
-import { useForm, type DefaultValues, type FieldValues, type Path, type PathValue, type Resolver } from 'react-hook-form'
+
 import type { z } from 'zod'
 
 interface FormSection {
@@ -19,7 +21,7 @@ interface FormSection {
 interface FormFieldConfig {
   name: string
   label: string
-  type: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'date'
+  type: 'date' | 'email' | 'number' | 'select' | 'text' | 'textarea'
   required?: boolean
   placeholder?: string
   hint?: string
@@ -81,21 +83,23 @@ export const SharedForm = <T extends FieldValues>({
   compact = false
 }: SharedFormProps<T>) => {
   // zodResolver requires specific schema types, but we need generic support
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const resolver = zodResolver(schema as any) as Resolver<T>
 
   const form = useForm<T>({
     resolver,
-    defaultValues: defaultValues as DefaultValues<T> | undefined,
+    defaultValues: defaultValues as DefaultValues<T>,
   })
 
   const handleSubmit = async (data: T) => {
     try {
       await onSubmit(data)
-    } catch (err) {
-      uiLogger.error({ err }, 'Form submission error:')
-    }
+     } catch (error) {
+       uiLogger.error({ error }, 'Form submission error:')
+     }
   }
+
+  const onFormSubmit = form.handleSubmit(handleSubmit)
 
   return (
     <Card className={className}>
@@ -111,7 +115,7 @@ export const SharedForm = <T extends FieldValues>({
       )}
 
       <CardContent className={compact ? 'p-4' : ''}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <form onSubmit={onFormSubmit} className="space-y-6">
           {sections.map((section, sectionIndex) => (
             <div key={sectionIndex} className="space-y-4">
               <div>
@@ -132,12 +136,12 @@ export const SharedForm = <T extends FieldValues>({
                   return (
                     <div
                       key={fieldIndex}
-                      className={field.type === 'textarea' ? 'md:col-span-2' : ''}
+                      className={field['type'] === 'textarea' ? 'md:col-span-2' : ''}
                     >
                       <FormField
                         label={field.label}
                         name={field.name}
-                        type={field.type}
+                        type={field['type']}
                         value={form.watch(fieldPath) as unknown}
                         onChange={(_, value) => form.setValue(fieldPath, value as PathValue<T, Path<T>>)}
                         error={errorMessage}
@@ -182,7 +186,7 @@ export function useSharedForm<T extends FieldValues>(
   defaultValues?: Partial<T>
 ) {
   const form = useForm<T>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     resolver: zodResolver(schema as any) as Resolver<T>,
     defaultValues: defaultValues as DefaultValues<T> | undefined,
   })
@@ -208,7 +212,7 @@ interface SharedModalFormProps<T extends Record<string, unknown>> extends Shared
   isOpen: boolean
   onClose: () => void
   modalTitle?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'lg' | 'md' | 'sm' | 'xl'
 }
 
 export const SharedModalForm = <T extends Record<string, unknown>>({

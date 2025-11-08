@@ -1,9 +1,12 @@
 'use client'
 
-import { useState, Suspense, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
+import { useState, Suspense, useCallback, useEffect } from 'react'
+
 import AppLayout from '@/components/layout/app-layout'
-import { PageHeader } from '@/components/shared'
+import { useAuth } from '@/providers/AuthProvider'
+
 import { useChatMessages, useAIService } from './hooks'
 
 // Lazy load heavy chatbot components
@@ -19,17 +22,21 @@ const MessageList = dynamic(() => import('./components').then(mod => ({ default:
   loading: () => <div className="flex-1 bg-muted animate-pulse" />
 })
 
-const chatbotBreadcrumbs = [
-  { label: 'Dashboard', href: '/' },
-  { label: 'AI Assistant' },
-  { label: 'Chatbot' }
-]
 
-const AIChatbotPage = () => {
+
+const AIChatbotPage = (): JSX.Element => {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
+  const router = useRouter()
   const { messages, isLoading, scrollAreaRef, addMessage, setLoading } = useChatMessages()
   const { processAIQuery } = useAIService()
   const [input, setInput] = useState('')
-  
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/auth/login?redirectTo=/ai-chatbot')
+    }
+  }, [authLoading, isAuthenticated, router])
 
   const handleSendMessage = useCallback(async (messageText?: string) => {
     const textToSend = (messageText ?? input).trim()
@@ -43,8 +50,8 @@ const AIChatbotPage = () => {
     }
 
     addMessage(userMessage)
-    void setInput('')
-    void setLoading(true)
+    setInput('')
+    setLoading(true)
 
     try {
       const response = await processAIQuery(textToSend)
@@ -55,11 +62,11 @@ const AIChatbotPage = () => {
         content: response.message,
         timestamp: new Date(),
         suggestions: response.suggestions,
-        data: (response.data ?? {}) as Record<string, unknown>
+        data: (response['data'] ?? {}) as Record<string, unknown>
       }
 
       addMessage(assistantMessage)
-    } catch (_err) {
+    } catch (_error) {
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant' as const,
@@ -68,7 +75,7 @@ const AIChatbotPage = () => {
       }
       addMessage(errorMessage)
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [input, isLoading, addMessage, setInput, setLoading, processAIQuery])
 
@@ -76,53 +83,61 @@ const AIChatbotPage = () => {
     void handleSendMessage(suggestion)
   }, [handleSendMessage])
 
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <AppLayout pageTitle="AI Chatbot">
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </div>
+      </AppLayout>
+    )
+  }
+
+  // Don't render if not authenticated (should redirect)
+  if (!isAuthenticated || !user) {
+    return (
+      <AppLayout pageTitle="AI Chatbot">
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <div className="text-muted-foreground">Redirecting to login...</div>
+        </div>
+      </AppLayout>
+    )
+  }
+
   return (
     <AppLayout pageTitle="AI Chatbot">
-      {/* Container utama - full height minus navbar */}
+      {/* Full viewport chat container */}
       <div className="flex flex-col h-[calc(100vh-4rem)]">
-        {/* Header - fixed */}
-        <div className="flex-shrink-0 p-6 pb-0">
-          <PageHeader
-            title="AI Chatbot"
-            description="Asisten AI yang paham bisnis Anda - terhubung langsung dengan data real-time"
-            breadcrumbs={chatbotBreadcrumbs}
-          />
+        {/* Minimal header */}
+        <div className="flex-shrink-0">
+          <Suspense fallback={<div className="h-12 bg-muted animate-pulse" />}>
+            <ChatHeader />
+          </Suspense>
         </div>
 
-        {/* Chat Container - flex-1 untuk take remaining space */}
-        <div className="flex-1 p-6 min-h-0">
-          <div className="flex flex-col rounded-xl border border-border bg-card shadow-sm h-full">
-            {/* Chat Header - fixed */}
-            <div className="flex-shrink-0">
-              <Suspense fallback={<div className="h-16 bg-muted animate-pulse rounded-t-xl" />}>
-                <ChatHeader />
-              </Suspense>
-            </div>
+        {/* Messages area - takes remaining height */}
+        <div className="flex-1 overflow-hidden relative">
+          <Suspense fallback={<div className="flex-1 bg-muted animate-pulse" />}>
+            <MessageList
+              messages={messages}
+              isLoading={isLoading}
+              scrollAreaRef={scrollAreaRef}
+              onSuggestionClick={handleSuggestionClick}
+            />
+          </Suspense>
+        </div>
 
-            {/* Messages area - SCROLLABLE dengan fixed height */}
-            <div className="flex-1 overflow-hidden relative">
-              <Suspense fallback={<div className="flex-1 bg-muted animate-pulse" />}>
-                <MessageList
-                  messages={messages}
-                  isLoading={isLoading}
-                  scrollAreaRef={scrollAreaRef}
-                  onSuggestionClick={handleSuggestionClick}
-                />
-              </Suspense>
-            </div>
-
-            {/* Input area - fixed at bottom */}
-            <div className="flex-shrink-0 border-t">
-              <Suspense fallback={<div className="h-20 bg-muted animate-pulse" />}>
-                <ChatInput
-                  input={input}
-                  setInput={setInput}
-                  onSendMessage={handleSendMessage}
-                  isLoading={isLoading}
-                />
-              </Suspense>
-            </div>
-          </div>
+        {/* Input area - fixed at bottom */}
+        <div className="flex-shrink-0">
+          <Suspense fallback={<div className="h-20 bg-muted animate-pulse" />}>
+            <ChatInput
+              input={input}
+              setInput={setInput}
+              onSendMessage={handleSendMessage}
+              isLoading={isLoading}
+            />
+          </Suspense>
         </div>
       </div>
     </AppLayout>

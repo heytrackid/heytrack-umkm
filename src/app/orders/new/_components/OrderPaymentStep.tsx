@@ -1,15 +1,16 @@
 'use client'
 
+import type { OrderFormData } from '@/app/orders/new/hooks/useOrderLogic'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { OrderFormData } from '@/app/orders/new/hooks/useOrderLogic'
+
 
 
 
 interface OrderPaymentStepProps {
   formData: OrderFormData
-  onInputChange: (field: keyof OrderFormData, value: string | number | boolean) => void
+  onInputChange: (field: keyof OrderFormData, value: boolean | number | string) => void
 }
 
 const OrderPaymentStep = ({

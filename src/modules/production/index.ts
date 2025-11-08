@@ -1,4 +1,5 @@
 import { uiLogger } from '@/lib/logger'
+
 import type { Row, Insert, Update, ProductionStatus as ProductionStatusEnum } from '@/types/database'
 
 // Production module - use generated Supabase types

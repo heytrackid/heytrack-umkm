@@ -1,11 +1,13 @@
 'use client'
 
+import { Package, AlertTriangle, CheckCircle, TrendingDown, TrendingUp, DollarSign } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { useCurrency } from '@/hooks/useCurrency'
+
 import type { Row } from '@/types/database'
-import { Package, AlertTriangle, CheckCircle, TrendingDown, TrendingUp, DollarSign } from 'lucide-react'
 
 
 
@@ -15,7 +17,7 @@ interface StockLevelVisualizationProps {
     ingredients: Ingredient[]
 }
 
-type StockStatus = 'critical' | 'low' | 'normal' | 'good'
+type StockStatus = 'critical' | 'good' | 'low' | 'normal'
 
 const getStockStatus = (current: number, min: number): StockStatus => {
     if (current <= 0) { return 'critical' }
@@ -242,7 +244,7 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
                                     const value = currentStock * (ing.price_per_unit || 0)
 
                                     return (
-                                        <div key={ing.id} className="p-3 bg-white dark:bg-gray-900 rounded-lg border">
+                                        <div key={ing['id']} className="p-3 bg-white dark:bg-gray-900 rounded-lg border">
                                             <div className="flex items-start justify-between mb-2">
                                                 <div className="flex-1">
                                                     <div className="font-medium">{ing.name}</div>

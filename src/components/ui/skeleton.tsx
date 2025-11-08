@@ -1,12 +1,16 @@
-import type { ComponentProps, HTMLAttributes } from 'react'
+'use client'
+
 import { cn } from "@/lib/utils"
+
+import { useMemo } from 'react'
+import type { ComponentProps, HTMLAttributes } from 'react'
 
 
 interface SkeletonProps {
   className?: string
 }
 
-const Skeleton = ({ className, ...props }: SkeletonProps & HTMLAttributes<HTMLDivElement>) => (
+const Skeleton = ({ className, ...props }: HTMLAttributes<HTMLDivElement> & SkeletonProps) => (
     <div
       data-slot="skeleton"
       className={cn(
@@ -22,7 +26,7 @@ const SkeletonText = ({
   className,
   lines = 1,
   ...props 
-}: SkeletonProps & { lines?: number } & HTMLAttributes<HTMLDivElement>) => {
+}: HTMLAttributes<HTMLDivElement> & SkeletonProps & { lines?: number }) => {
   if (lines === 1) {
     return <Skeleton className={cn("h-4 w-full", className)} {...props} />
   }
@@ -98,14 +102,17 @@ const SkeletonTable = ({ rows = 5, cols = 4, className, ...props }: SkeletonProp
     </div>
   )
 
-const SkeletonChart = ({ className, ...props }: ComponentProps<'div'>) => (
+const SkeletonChart = ({ className, ...props }: ComponentProps<'div'>) => {
+  const heights = useMemo(() => [40, 80, 60, 100, 50, 90, 70], [])
+
+  return (
     <div className={cn("space-y-3", className)} {...props}>
       <div className="flex justify-between items-end h-40 px-4">
-        {Array.from({ length: 7 }, (_, i) => (
-          <Skeleton 
-            key={i} 
+        {heights.map((height, i) => (
+          <Skeleton
+            key={i}
             className="w-8 rounded-t"
-            style={{ height: `${Math.floor(Math.random() * 120) + 20}px` }}
+            style={{ height: `${height}px` }}
           />
         ))}
       </div>
@@ -116,6 +123,7 @@ const SkeletonChart = ({ className, ...props }: ComponentProps<'div'>) => (
       </div>
     </div>
   )
+}
 
 const SkeletonForm = ({ className, ...props }: SkeletonProps) => (
     <div className={cn("space-y-4", className)} {...props}>

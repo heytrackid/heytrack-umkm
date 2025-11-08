@@ -1,13 +1,8 @@
 'use client'
 
-import { useRef, useState, useCallback } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { formatDistanceToNow } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { useVirtualizer } from '@tanstack/react-virtual'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { cn } from '@/lib/utils'
-import type { Notification } from '@/types/domain/notifications'
 import {
     AlertCircle,
     AlertTriangle,
@@ -22,6 +17,15 @@ import {
     Check,
     RefreshCw,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useRef, useState, useCallback } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { cn } from '@/lib/utils'
+
+import type { Notification } from '@/types/domain/notifications'
+
 // import { Separator } from '@/components/ui/separator'
 
 interface NotificationListProps {
@@ -70,6 +74,7 @@ export const NotificationList = ({
     onNotificationUpdate,
     onRefresh,
 }: NotificationListProps) => {
+    const router = useRouter()
     const [filter, setFilter] = useState<'all' | 'unread'>('all')
     const parentRef = useRef<HTMLDivElement>(null)
 
@@ -94,13 +99,17 @@ export const NotificationList = ({
 
     const handleNotificationClick = useCallback((notification: Notification) => {
         if (!notification.is_read) {
-            onNotificationUpdate(notification.id, { is_read: true })
+            onNotificationUpdate(notification['id'], { is_read: true })
         }
 
         if (notification.action_url) {
-            window.location.href = notification.action_url
+            if (notification.action_url.startsWith('/')) {
+                router.push(notification.action_url)
+            } else {
+                window.location.href = notification.action_url
+            }
         }
-    }, [onNotificationUpdate])
+    }, [onNotificationUpdate, router])
 
     const handleDismiss = useCallback((e: React.MouseEvent, notificationId: string) => {
         e.stopPropagation()
@@ -191,14 +200,15 @@ export const NotificationList = ({
                             >
                                 {virtualizer.getVirtualItems().map((virtualItem) => {
                                     const notification = filteredNotifications[virtualItem.index]
-                                    const TypeIcon = typeIcons[notification.type as keyof typeof typeIcons] || Info
+                                    if (!notification) {return null}
+                                    const TypeIcon = typeIcons[notification['type'] as keyof typeof typeIcons] || Info
                                     const CategoryIcon = categoryIcons[notification.category as keyof typeof categoryIcons] || Settings
-                                    const typeColor = typeColors[notification.type as keyof typeof typeColors] || 'text-muted-foreground'
+                                    const typeColor = typeColors[notification['type'] as keyof typeof typeColors] || 'text-muted-foreground'
                                     const priorityColor = priorityColors[(notification.priority ?? 'normal') as keyof typeof priorityColors] ?? 'border-l-blue-400'
 
                                     return (
                                         <div
-                                            key={notification.id}
+                                            key={notification['id']}
                                             style={{
                                                 position: 'absolute',
                                                 top: 0,
@@ -254,7 +264,7 @@ export const NotificationList = ({
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="sm"
-                                                                    onClick={(e) => handleMarkAsRead(e, notification.id)}
+                                                                    onClick={(e) => handleMarkAsRead(e, notification['id'])}
                                                                     className="h-6 px-2 text-xs"
                                                                 >
                                                                     <Check className="h-3 w-3 mr-1" />
@@ -264,7 +274,7 @@ export const NotificationList = ({
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                onClick={(e) => handleDismiss(e, notification.id)}
+                                                                onClick={(e) => handleDismiss(e, notification['id'])}
                                                                 className="h-6 px-2 text-xs text-red-600 hover:text-red-700"
                                                             >
                                                                 <X className="h-3 w-3 mr-1" />
@@ -283,14 +293,14 @@ export const NotificationList = ({
                         // Regular rendering for small lists
                         <div className="divide-y">
                             {filteredNotifications.map((notification) => {
-                            const TypeIcon = typeIcons[notification.type as keyof typeof typeIcons] || Info
+                            const TypeIcon = typeIcons[notification['type'] as keyof typeof typeIcons] || Info
                             const CategoryIcon = categoryIcons[notification.category as keyof typeof categoryIcons] || Settings
-                            const typeColor = typeColors[notification.type as keyof typeof typeColors] || 'text-muted-foreground'
+                            const typeColor = typeColors[notification['type'] as keyof typeof typeColors] || 'text-muted-foreground'
                             const priorityColor = priorityColors[(notification.priority ?? 'normal') as keyof typeof priorityColors] ?? 'border-l-blue-400'
 
                             return (
                                 <div
-                                    key={notification.id}
+                                    key={notification['id']}
                                     className={cn(
                                         'p-4 hover:bg-muted/50 cursor-pointer transition-colors border-l-4',
                                         !notification.is_read && 'bg-gray-50/50',
@@ -341,7 +351,7 @@ export const NotificationList = ({
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-7 w-7"
-                                                            onClick={(e) => handleMarkAsRead(e, notification.id)}
+                                                            onClick={(e) => handleMarkAsRead(e, notification['id'])}
                                                         >
                                                             <Check className="h-3.5 w-3.5" />
                                                         </Button>
@@ -350,7 +360,7 @@ export const NotificationList = ({
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-7 w-7"
-                                                        onClick={(e) => handleDismiss(e, notification.id)}
+                                                        onClick={(e) => handleDismiss(e, notification['id'])}
                                                     >
                                                         <X className="h-3.5 w-3.5" />
                                                     </Button>

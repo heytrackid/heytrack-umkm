@@ -22,5 +22,5 @@ export * from './common'
 export * from './enums'
 
 // For now, re-export from the original generated file
-// TODO: Gradually migrate tables to modular structure
-export type { Database, Tables, TablesInsert, TablesUpdate, Enums, CompositeTypes } from '../supabase-generated'
+// Gradually migrate tables to modular structure
+export type { Database, Tables, TablesInsert, TablesUpdate, Enums, CompositeTypes } from '@/types/supabase-generated'

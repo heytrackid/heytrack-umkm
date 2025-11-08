@@ -59,7 +59,7 @@ export class RecommendationEngine {
   /**
    * Generate revenue optimization recommendations
    */
-  private static generateRevenueRecommendations(metrics: FinancialMetrics, sales: SaleData[]): string[] {
+  private static generateRevenueRecommendations(_metrics: FinancialMetrics, sales: SaleData[]): string[] {
     const recommendations: string[] = []
 
     const avgSaleAmount = sales.length > 0 ? sales.reduce((sum, s) => sum + s.amount, 0) / sales.length : 0
@@ -84,8 +84,9 @@ export class RecommendationEngine {
     const recommendations: string[] = []
 
     const expensesByCategory = expenses.reduce<Record<string, number>>((acc, exp) => {
-      if (!acc[exp.category]) {acc[exp.category] = 0}
-      acc[exp.category] += exp.amount
+      const categoryKey = exp.category ?? 'uncategorized'
+      if (!acc[categoryKey]) {acc[categoryKey] = 0}
+      acc[categoryKey] += exp.amount
       return acc
     }, {})
 
@@ -167,7 +168,7 @@ export class RecommendationEngine {
     }
 
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length
+    const variance = values.reduce((sum, val) => sum + (val - mean)**2, 0) / values.length
     return Math.sqrt(variance) / mean // Coefficient of variation
   }
 
@@ -176,7 +177,7 @@ export class RecommendationEngine {
    */
   static generateStrategicRecommendations(
     metrics: FinancialMetrics,
-    businessStage: 'startup' | 'growth' | 'mature'
+    businessStage: 'growth' | 'mature' | 'startup'
   ): string[] {
     const recommendations: string[] = []
 
@@ -200,6 +201,10 @@ export class RecommendationEngine {
         recommendations.push('💼 Focus on market share maintenance and competitive advantages')
         recommendations.push('🔬 Invest in R&D for product innovation')
         recommendations.push('📈 Consider diversification or adjacent markets')
+        break
+
+      default:
+        // No specific recommendations for unknown business stages
         break
     }
 

@@ -14,7 +14,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 export interface ApiRequestOptions extends RequestInit {
-  params?: Record<string, string | number | boolean>
+  params?: Record<string, boolean | number | string>
 }
 
 // Alias for backward compatibility
@@ -24,7 +24,7 @@ export type RequestConfig = ApiRequestOptions
  * Base API client
  */
 export class ApiClient {
-  private baseUrl: string
+  private readonly baseUrl: string
 
   constructor(baseUrl = '/api') {
     this.baseUrl = baseUrl
@@ -47,8 +47,8 @@ export class ApiClient {
       })
 
       return this.handleResponse<T>(response)
-    } catch (err) {
-      return this.handleError(err) as ApiResponse<T>
+    } catch (error) {
+      return this.handleError(error) as ApiResponse<T>
     }
   }
 
@@ -70,8 +70,8 @@ export class ApiClient {
       })
 
       return this.handleResponse<T>(response)
-    } catch (err) {
-      return this.handleError(err) as ApiResponse<T>
+    } catch (error) {
+      return this.handleError(error) as ApiResponse<T>
     }
   }
 
@@ -93,8 +93,8 @@ export class ApiClient {
       })
 
       return this.handleResponse<T>(response)
-    } catch (err) {
-      return this.handleError(err) as ApiResponse<T>
+    } catch (error) {
+      return this.handleError(error) as ApiResponse<T>
     }
   }
 
@@ -116,8 +116,8 @@ export class ApiClient {
       })
 
       return this.handleResponse<T>(response)
-    } catch (err) {
-      return this.handleError(err) as ApiResponse<T>
+    } catch (error) {
+      return this.handleError(error) as ApiResponse<T>
     }
   }
 
@@ -138,15 +138,15 @@ export class ApiClient {
       })
 
       return await this.handleResponse<T>(response)
-    } catch (err) {
-      return this.handleError(err) as ApiResponse<T>
+    } catch (error) {
+      return this.handleError(error) as ApiResponse<T>
     }
   }
 
   /**
    * Build URL with query parameters
    */
-  private buildUrl(endpoint: string, params?: Record<string, string | number | boolean>): string {
+  private buildUrl(endpoint: string, params?: Record<string, boolean | number | string>): string {
     const url = `${this.baseUrl}${endpoint}`
     
     if (!params) {return url}
@@ -169,18 +169,18 @@ export class ApiClient {
     if (!response.ok) {
       const error = isJson ? await response.json() : { error: response.statusText }
       apiLogger.error({ error, status: response.status }, 'API request failed')
-      
+
       return {
         success: false,
         error: error.error ?? error.message ?? 'Request failed'
       }
     }
 
-    const data = isJson ? await response.json() : null
+    const _data = isJson ? await response.json() : null
 
     return {
       success: true,
-      data: data as T
+      data: _data as T
     }
   }
 

@@ -1,10 +1,11 @@
 'use client'
 
 
+import { Search, Calendar } from 'lucide-react'
+
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, Calendar } from 'lucide-react'
 
 
 
@@ -31,7 +32,7 @@ const OrdersFilters = ({
   setDateTo,
   statusConfig,
   // _t not used
-}: OrdersFiltersProps) => (
+}: OrdersFiltersProps): JSX.Element => (
   <Card>
     <CardContent className="p-6">
       <div className="flex gap-4 flex-wrap">

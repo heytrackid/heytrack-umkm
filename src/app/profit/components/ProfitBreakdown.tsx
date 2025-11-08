@@ -1,6 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import type { ProfitData } from './types'
 import { DollarSign, Package, TrendingUp, TrendingDown } from 'lucide-react'
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+
+import type { ProfitData } from './types'
 
 
 interface ProfitBreakdownProps {

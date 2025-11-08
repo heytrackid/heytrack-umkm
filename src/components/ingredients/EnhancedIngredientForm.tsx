@@ -1,14 +1,17 @@
 'use client'
 
+import { AlertTriangle, Info, TrendingUp } from 'lucide-react'
+import { useMemo } from 'react'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { FormField, FormGrid } from '@/components/ui/crud-form'
 import { useSettings } from '@/contexts/settings-context'
+
 import type { SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import type { Row } from '@/types/database'
-import { AlertTriangle, Info, TrendingUp } from 'lucide-react'
-import { useEffect, useState } from 'react'
+
 import type { UseFormReturn } from 'react-hook-form'
 
 
@@ -18,7 +21,7 @@ type Ingredient = Row<'ingredients'>
 interface EnhancedIngredientFormProps {
     form: UseFormReturn<SimpleIngredientFormData>
     mode: 'create' | 'edit'
-    initialData?: SimpleIngredientFormData & Partial<Ingredient>
+    initialData?: Partial<Ingredient> & SimpleIngredientFormData
 }
 
 export const EnhancedIngredientForm = ({
@@ -34,15 +37,15 @@ export const EnhancedIngredientForm = ({
     const pricePerUnit = watch('price_per_unit')
     const name = watch('name')
 
-    const [hasChanges, setHasChanges] = useState(false)
 
-    useEffect(() => {
+
+    const hasChanges = useMemo(() => {
         if (mode === 'edit' && initialData) {
-            const changed = (currentStock || 0) !== initialData.current_stock ||
+            return (currentStock || 0) !== initialData.current_stock ||
                 (minStock ?? 0) !== initialData.min_stock ||
                 pricePerUnit !== initialData.price_per_unit
-            setHasChanges(changed)
         }
+        return false
     }, [currentStock, minStock, pricePerUnit, initialData, mode])
 
     // Validation warnings (with handling for potentially undefined values)

@@ -1,25 +1,28 @@
 'use client'
 
+import { BarChart3, Calculator, TrendingUp, Bell } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { memo, useCallback, useEffect, useState, useRef } from 'react'
+
 import { Card, CardContent } from '@/components/ui/card'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { BarChart3, Calculator, TrendingUp, Bell } from 'lucide-react'
-import { memo, useCallback, useEffect, useState } from 'react'
-import { useUnifiedHpp } from '../hooks/useUnifiedHpp'
-import { CostCalculationCard } from './CostCalculationCard'
-import { HppAlertsTab } from './HppAlertsTab'
-import { HppBreakdownVisual } from './HppBreakdownVisual'
-import { HppEmptyState } from './HppEmptyState'
-import { HppOverviewCard } from './HppOverviewCard'
-import { HppScenarioPlanner } from './HppScenarioPlanner'
-import { PricingCalculatorCard } from './PricingCalculatorCard'
-import { ProductComparisonCard } from './ProductComparisonCard'
-import { RecipeSelector } from './RecipeSelector'
+import { CostCalculationCard } from '@/modules/hpp/components/CostCalculationCard'
+import { HppAlertsTab } from '@/modules/hpp/components/HppAlertsTab'
+import { HppBreakdownVisual } from '@/modules/hpp/components/HppBreakdownVisual'
+import { HppEmptyState } from '@/modules/hpp/components/HppEmptyState'
+import { HppOverviewCard } from '@/modules/hpp/components/HppOverviewCard'
+import { HppScenarioPlanner } from '@/modules/hpp/components/HppScenarioPlanner'
+import { PricingCalculatorCard } from '@/modules/hpp/components/PricingCalculatorCard'
+import { ProductComparisonCard } from '@/modules/hpp/components/ProductComparisonCard'
+import { RecipeSelector } from '@/modules/hpp/components/RecipeSelector'
+import { useUnifiedHpp } from '@/modules/hpp/hooks/useUnifiedHpp'
 
 
 
 
 export const UnifiedHppPage = memo(() => {
+  const router = useRouter()
   const {
     recipes,
     overview,
@@ -35,32 +38,36 @@ export const UnifiedHppPage = memo(() => {
   const [marginPercentage, setMarginPercentage] = useState(60)
   const [suggestedPrice, setSuggestedPrice] = useState(0)
 
-  // Auto-calculate when recipe or margin changes
+  // Calculate suggested price whenever recipe cost or margin percentage changes  
   useEffect(() => {
     if (recipe) {
       const price = recipe.total_cost * (1 + marginPercentage / 100)
-      setSuggestedPrice(Math.round(price / 100) * 100) // Round to nearest 100
+      const roundedPrice = Math.round(price / 100) * 100 // Round to nearest 100
+      setTimeout(() => setSuggestedPrice(roundedPrice), 0)
     }
-  }, [recipe, marginPercentage])
-
+  }, [recipe, recipe?.total_cost, marginPercentage])  
+  
   // Set initial margin from recipe data (only when recipe ID changes)
+  const prevRecipeId = useRef<string | null>(null)
   useEffect(() => {
-    if (recipe?.margin_percentage && recipe.id) {
-      void setMarginPercentage(recipe.margin_percentage)
+    if (recipe && recipe.margin_percentage !== null && recipe.id !== prevRecipeId.current) {
+      const margin = recipe.margin_percentage as number
+      setTimeout(() => setMarginPercentage(margin), 0)
+      prevRecipeId.current = recipe.id
     }
-  }, [recipe?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [recipe?.id, recipe?.margin_percentage])  
 
   const handleRecipeSelect = useCallback((recipeId: string) => {
     if (recipeId === 'new') {
-      window.location.href = '/recipes/new'
+      router.push('/recipes/new')
       return
     }
-    void setSelectedRecipeId(recipeId)
-  }, [setSelectedRecipeId])
+    setSelectedRecipeId(recipeId)
+  }, [setSelectedRecipeId, router])
 
   const handleRecalculate = useCallback(() => {
     if (recipe) {
-      calculateHpp.mutate(recipe.id)
+      calculateHpp.mutate(recipe['id'])
     }
   }, [recipe, calculateHpp])
 
@@ -68,7 +75,7 @@ export const UnifiedHppPage = memo(() => {
     if (!recipe) { return }
 
     updatePrice.mutate({
-      recipeId: recipe.id,
+      recipeId: recipe['id'],
       price,
       margin
     })
@@ -76,10 +83,7 @@ export const UnifiedHppPage = memo(() => {
 
 
 
-  // Calculate progress steps
-  const step1Complete = !!selectedRecipeId && selectedRecipeId !== 'new'
-  const step2Complete = step1Complete && recipe && recipe.total_cost > 0
-  const _step3Complete = step2Complete && recipe.selling_price && recipe.selling_price > 0
+
 
   return (
     <TooltipProvider>
@@ -177,3 +181,5 @@ export const UnifiedHppPage = memo(() => {
     </TooltipProvider>
   )
 })
+
+UnifiedHppPage.displayName = 'UnifiedHppPage'

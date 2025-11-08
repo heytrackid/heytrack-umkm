@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { AlertTriangle } from 'lucide-react'
+import { useEffect } from 'react'
+
+import { Button } from '@/components/ui/button'
 import { uiLogger } from '@/lib/client-logger'
 
 const Error = ({
@@ -11,7 +12,7 @@ const Error = ({
 }: {
     error: Error & { digest?: string }
     reset: () => void
-}) => {
+}): JSX.Element => {
     useEffect(() => {
         // Log error to monitoring service, but avoid logging HMR errors
         if (error.message && !error.message.includes('Module was instantiated because it was required from')) {

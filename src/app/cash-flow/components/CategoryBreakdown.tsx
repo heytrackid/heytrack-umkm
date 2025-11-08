@@ -1,8 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Settings, AlertTriangle } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+
 import type { CashFlowSummary } from '../constants'
 
 interface CategoryBreakdownProps {
@@ -23,7 +25,7 @@ const categoryColors = [
   'bg-teal-500'
 ]
 
-const CategoryBreakdown = ({ summary, formatCurrency, isMobile }: CategoryBreakdownProps) => {
+const CategoryBreakdown = ({ summary, formatCurrency, isMobile }: CategoryBreakdownProps): JSX.Element | null => {
   if (!summary) { return null }
 
   const hasIncomeData = Object.keys(summary.income_by_category || {}).length > 0

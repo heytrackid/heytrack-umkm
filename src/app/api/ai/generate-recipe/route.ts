@@ -1,13 +1,19 @@
-import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
 import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
+
 import type { Row } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security'
+
+import { createClient } from '@/utils/supabase/server'
 
 // Use generated types from database.ts (these are already Row types)
 type Ingredient = Row<'ingredients'>
-type _Recipe = Row<'recipes'>
 
 // AI response structure (not a table type)
 interface RecipeIngredient {
@@ -15,6 +21,32 @@ interface RecipeIngredient {
   quantity: number
   unit: string
   notes?: string
+}
+
+// OpenRouter API response types
+interface OpenRouterMessage {
+  role: string
+  content: string
+}
+
+interface OpenRouterChoice {
+  message: OpenRouterMessage
+  finish_reason: string
+}
+
+interface OpenRouterResponse {
+  choices: OpenRouterChoice[]
+  usage?: {
+    prompt_tokens: number
+    completion_tokens: number
+    total_tokens: number
+  }
+}
+
+interface OpenRouterError {
+  error?: {
+    message?: string
+  }
 }
 
 // Generated recipe from AI (before saving to DB)
@@ -25,8 +57,22 @@ interface GeneratedRecipe {
   servings?: number
   prep_time?: number
   cook_time?: number
-  description?: string
+  difficulty?: string
   category?: string
+  notes?: string
+}
+
+// Raw AI response structure (before validation)
+interface RawRecipeResponse {
+  name?: unknown
+  ingredients?: unknown
+  instructions?: unknown
+  servings?: unknown
+  prep_time?: unknown
+  cook_time?: unknown
+  difficulty?: unknown
+  category?: unknown
+  notes?: unknown
 }
 
 // interface AIGeneratedRecipe {
@@ -44,14 +90,13 @@ interface GeneratedRecipe {
 //   storage?: string
 //   shelf_life?: string
 // }
-export const runtime = 'nodejs'
 export const maxDuration = 60
 
 /**
  * AI Recipe Generator API
  * Generates UMKM recipes with accurate ingredient measurements and HPP calculations
  */
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
     try {
         // 1. Authenticate user first
         const supabase = await createClient()
@@ -64,7 +109,7 @@ export async function POST(request: NextRequest) {
             )
         }
         
-        const userId = user.id
+        const userId = user['id']
         
         // 2. Validate request body
         const validatedData = await validateRequestOrRespond(request, AIRecipeGenerationSchema)
@@ -90,9 +135,9 @@ export async function POST(request: NextRequest) {
         }
 
         // Type the ingredients properly
-        type IngredientSubset = Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>
+        type IngredientSubset = Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>
         const typedIngredients: IngredientSubset[] = (ingredients ?? []).map(ing => ({
-            id: ing.id,
+            id: ing['id'],
             name: ing.name,
             unit: ing.unit || 'gram', // Default to common unit if null
             price_per_unit: ing.price_per_unit || 0, // Default to 0 if null
@@ -104,7 +149,7 @@ export async function POST(request: NextRequest) {
             productName,
             productType,
             servings,
-            targetPrice,
+            ...(targetPrice !== undefined && { targetPrice }),
             dietaryRestrictions,
             availableIngredients: typedIngredients,
             userProvidedIngredients: availableIngredients
@@ -140,7 +185,8 @@ export async function POST(request: NextRequest) {
             success: true,
             recipe: {
                 ...recipe,
-                hpp: hppCalculation
+                hpp: hppCalculation.totalHPP,
+                hppDetails: hppCalculation
             }
         })
 
@@ -153,7 +199,6 @@ export async function POST(request: NextRequest) {
         )
     }
 }
-
 
 /**
  * Sanitize user input to prevent prompt injection
@@ -206,9 +251,9 @@ function buildRecipePrompt(params: {
     servings: number
     targetPrice?: number
     dietaryRestrictions?: string[]
-    availableIngredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>
+    availableIngredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>
     userProvidedIngredients?: string[]
-}) {
+}): string {
     const {
         productName,
         productType,
@@ -364,24 +409,27 @@ Generate the professional UMKM recipe now:`
  */
 async function callAIServiceWithRetry(prompt: string, maxRetries = 3): Promise<string> {
     let lastError: Error | null = null
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    let attempt = 1
+
+    while (attempt <= maxRetries) {
         try {
             apiLogger.info({ attempt, maxRetries }, 'Calling AI service')
-            const result = await callAIService(prompt)
+            const result = await callAIService(prompt)  
             apiLogger.info({ attempt }, 'AI service call successful')
             return result
         } catch (error: unknown) {
             lastError = error as Error
             apiLogger.warn({ attempt, maxRetries, error }, 'AI service call failed')
-            
+
             if (attempt < maxRetries) {
                 // Exponential backoff: wait 2^attempt seconds
-                const waitTime = Math.pow(2, attempt) * 1000
+                const waitTime = 2**attempt * 1000
                 apiLogger.info({ waitTime }, 'Waiting before retry')
+                 
                 await new Promise(resolve => setTimeout(resolve, waitTime))
             }
         }
+        attempt++
     }
     
     throw new Error(
@@ -393,7 +441,7 @@ async function callAIServiceWithRetry(prompt: string, maxRetries = 3): Promise<s
  * Call AI service to generate recipe
  */
 async function callAIService(prompt: string): Promise<string> {
-    const apiKey = process.env['OPENROUTER_API_KEY']
+    const apiKey = process['env']['OPENROUTER_API_KEY']
 
     if (!apiKey) {
         throw new Error('OpenRouter API key not configured')
@@ -405,7 +453,7 @@ async function callAIService(prompt: string): Promise<string> {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
-                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+                'HTTP-Referer': process['env']['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
                 'X-Title': 'HeyTrack AI Recipe Generator'
             },
             body: JSON.stringify({
@@ -438,14 +486,17 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
         })
 
         if (!response.ok) {
-            const error = await response.json()
+            const error = await response.json() as OpenRouterError
             const apiMessage = typeof error.error?.message === 'string' && error.error.message.trim().length > 0
                 ? error.error.message
                 : 'Unknown error'
             throw new Error(`OpenRouter API error: ${apiMessage}`)
         }
 
-        const data = await response.json()
+        const data = await response.json() as OpenRouterResponse
+        if (!data.choices?.[0]?.message?.content) {
+            throw new Error('Invalid response format from OpenRouter API')
+        }
         return data.choices[0].message.content
     } catch (error) {
         apiLogger.error({ error }, 'OpenRouter API call failed, trying fallback model')
@@ -456,7 +507,7 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`,
-                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+                'HTTP-Referer': process['env']['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
                     'X-Title': 'HeyTrack AI Recipe Generator'
                 },
                 body: JSON.stringify({
@@ -486,18 +537,21 @@ Generate professional UMKM recipes with accurate measurements.`
                 })
             })
 
-            if (!fallbackResponse.ok) {
-                const fallbackError = await fallbackResponse.json()
-                const fallbackMessage = typeof fallbackError.error?.message === 'string' && fallbackError.error.message.trim().length > 0
-                    ? fallbackError.error.message
-                    : 'Unknown error'
-                throw new Error(`OpenRouter fallback API error: ${fallbackMessage}`)
-            }
+        if (!fallbackResponse.ok) {
+            const fallbackError = await fallbackResponse.json() as OpenRouterError
+            const fallbackMessage = typeof fallbackError.error?.message === 'string' && fallbackError.error.message.trim().length > 0
+                ? fallbackError.error.message
+                : 'Unknown error'
+            throw new Error(`OpenRouter fallback API error: ${fallbackMessage}`)
+        }
 
-            const fallbackData = await fallbackResponse.json()
-            return fallbackData.choices[0].message.content
-        } catch (fallbackError) {
-            apiLogger.error({ error: fallbackError }, 'Both OpenRouter models failed')
+        const fallbackData = await fallbackResponse.json() as OpenRouterResponse
+        if (!fallbackData.choices?.[0]?.message?.content) {
+            throw new Error('Invalid response format from OpenRouter fallback API')
+        }
+        return fallbackData.choices[0].message.content
+        } catch (error) {
+            apiLogger.error({ error }, 'Both OpenRouter models failed')
             throw new Error('AI service temporarily unavailable. Please try again later.')
         }
     }
@@ -516,31 +570,54 @@ function parseRecipeResponse(response: string): GeneratedRecipe {
             cleanResponse = cleanResponse.replace(/```\n?/g, '')
         }
 
-        const recipe = JSON.parse(cleanResponse)
+        const rawRecipe = JSON.parse(cleanResponse) as RawRecipeResponse
 
         // Validate required fields
-        if (!(recipe).name || !recipe.ingredients || !recipe.instructions) {
-            throw new Error('Invalid recipe structure: missing required fields')
+        if (!rawRecipe.name || typeof rawRecipe.name !== 'string' || !rawRecipe.name.trim()) {
+            throw new Error('Invalid recipe structure: missing or invalid name')
         }
-
-        // Validate ingredients array
-        if (!Array.isArray((recipe).ingredients) || (recipe).ingredients.length === 0) {
+        if (!rawRecipe.ingredients || !Array.isArray(rawRecipe.ingredients) || rawRecipe.ingredients.length === 0) {
             throw new Error('Recipe must have at least one ingredient')
+        }
+        if (!rawRecipe.instructions || !Array.isArray(rawRecipe.instructions) || rawRecipe.instructions.length === 0) {
+            throw new Error('Recipe must have instructions')
         }
 
         // Validate each ingredient
-        (recipe.ingredients as RecipeIngredient[]).forEach((ing: RecipeIngredient, index: number) => {
-            if (!ing.name || !ing.quantity || !ing.unit) {
-                throw new Error(`Invalid ingredient at index ${index}: missing required fields`)
+        rawRecipe.ingredients.forEach((ing: unknown, index: number) => {
+            if (!ing || typeof ing !== 'object') {
+                throw new Error(`Invalid ingredient at index ${index}: must be an object`)
             }
-            if (typeof ing.quantity !== 'number' || ing.quantity <= 0) {
+            const ingredient = ing as Record<string, unknown>
+            if (!ingredient['name'] || typeof ingredient['name'] !== 'string' || !(ingredient['name']).trim()) {
+                throw new Error(`Invalid ingredient at index ${index}: missing or invalid name`)
+            }
+            if (typeof ingredient['quantity'] !== 'number' || ingredient['quantity'] <= 0) {
                 throw new Error(`Invalid ingredient quantity at index ${index}`)
+            }
+            if (!ingredient['unit'] || typeof ingredient['unit'] !== 'string' || !(ingredient['unit']).trim()) {
+                throw new Error(`Invalid ingredient unit at index ${index}`)
             }
         })
 
-        // Validate instructions array
-        if (!Array.isArray(recipe.instructions) || recipe.instructions.length === 0) {
-            throw new Error('Recipe must have at least one instruction step')
+        // Validate instructions
+        rawRecipe.instructions.forEach((instruction: unknown, index: number) => {
+            if (typeof instruction !== 'string' || !instruction.trim()) {
+                throw new Error(`Invalid instruction at index ${index}: must be a non-empty string`)
+            }
+        })
+
+        // Build validated recipe
+        const recipe: GeneratedRecipe = {
+            name: rawRecipe.name,
+            ingredients: rawRecipe.ingredients as RecipeIngredient[],
+            instructions: rawRecipe.instructions as string[],
+            ...(typeof rawRecipe.servings === 'number' ? { servings: rawRecipe.servings } : {}),
+            ...(typeof rawRecipe.prep_time === 'number' ? { prep_time: rawRecipe.prep_time } : {}),
+            ...(typeof rawRecipe.cook_time === 'number' ? { cook_time: rawRecipe.cook_time } : {}),
+            ...(typeof rawRecipe.difficulty === 'string' ? { difficulty: rawRecipe.difficulty } : {}),
+            ...(typeof rawRecipe.category === 'string' ? { category: rawRecipe.category } : {}),
+            ...(typeof rawRecipe.notes === 'string' ? { notes: rawRecipe.notes } : {}),
         }
 
         return recipe
@@ -551,14 +628,13 @@ function parseRecipeResponse(response: string): GeneratedRecipe {
     }
 }
 
-
 /**
  * Find best matching ingredient using fuzzy matching
  */
 function findBestIngredientMatch(
     searchName: string, 
-    ingredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>
-): Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'> | null {
+    ingredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>
+): Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'> | null {
     const search = searchName.toLowerCase().trim()
     
     // 1. Exact match
@@ -588,10 +664,28 @@ function findBestIngredientMatch(
  * Calculate HPP for the generated recipe
  */
 async function calculateRecipeHPP(
-    recipe: GeneratedRecipe, 
-    availableIngredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>, 
+    recipe: GeneratedRecipe,
+    availableIngredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>,
     userId: string
-) {
+): Promise<{
+    totalMaterialCost: number
+    operationalCost: number
+    totalHPP: number
+    hppPerUnit: number
+    servings: number
+    ingredientBreakdown: Array<{
+        name: string
+        quantity: number
+        unit: string
+        pricePerUnit: number
+        totalCost: number
+        percentage: number
+    }>
+    breakdown: Record<string, number>
+    suggestedSellingPrice: number
+    estimatedMargin: number
+    note: string
+}> {
     let totalMaterialCost = 0
     const ingredientBreakdown: Array<{
         name: string
@@ -692,3 +786,5 @@ async function calculateRecipeHPP(
             : 'Operational cost estimated (30% of material cost)'
     }
 }
+
+export const POST = createSecureHandler(postHandler, 'POST /api/ai/generate-recipe', SecurityPresets.enhanced())

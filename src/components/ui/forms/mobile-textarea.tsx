@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { cn } from '@/lib/utils'
+
 import { useResponsive } from '@/hooks/useResponsive'
-import { Textarea } from '../textarea'
+import { cn } from '@/lib/utils'
+
 import { Label } from '../label'
+import { Textarea } from '../textarea'
 
 /**
  * Mobile Textarea Component
@@ -70,7 +72,7 @@ export const MobileTextarea = ({
           onChange={(e) => onChange?.(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
-            void setIsFocused(false)
+            setIsFocused(false)
             onBlur?.()
           }}
           disabled={disabled}

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
 import type { IngredientPurchase } from './types'
 
 // Purchases Table Component - Lazy Loaded
@@ -10,7 +11,7 @@ interface PurchasesTableProps {
   purchases: IngredientPurchase[]
 }
 
-const PurchasesTable = ({ purchases }: PurchasesTableProps) => (
+const PurchasesTable = ({ purchases }: PurchasesTableProps): JSX.Element => (
   <Card>
     <CardHeader>
       <CardTitle>Riwayat Pembelian</CardTitle>
@@ -37,7 +38,7 @@ const PurchasesTable = ({ purchases }: PurchasesTableProps) => (
               </TableRow>
             ) : (
               purchases.map((purchase) => (
-                <TableRow key={purchase.id}>
+                <TableRow key={purchase['id']}>
                   <TableCell>
                     {new Date(purchase.purchase_date).toLocaleDateString('id-ID')}
                   </TableCell>
