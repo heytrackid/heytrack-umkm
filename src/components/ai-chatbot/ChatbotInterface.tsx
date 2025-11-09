@@ -1,15 +1,16 @@
 'use client'
 
-import { Send, Bot, User, BarChart3, Package, DollarSign, Users, MessageCircle, Minimize2, Maximize2 } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react'
+import { BarChart3, Bot, DollarSign, Maximize2, MessageCircle, Minimize2, Package, Send, Trash2, User, Users } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
-import { createClientLogger } from '@/lib/client-logger'
+import { createClientLogger } from '@/lib/client-logger';
 
+import { useChatHistory } from '../../hooks/useChatHistory';
 import DataVisualization from './DataVisualization';
 
 
@@ -24,7 +25,7 @@ interface ExtendedChatMessage {
   role: 'assistant' | 'system' | 'user'
   content: string
   timestamp: Date
-  actions?: ChatAction[]
+  actions?: { type: string; label: string }[]
   data?: Record<string, unknown>
 }
 interface ChatbotInterfaceProps {
@@ -40,7 +41,15 @@ const ChatbotInterface = ({
   isMinimized = false,
   onToggleMinimize
 }: ChatbotInterfaceProps): JSX.Element => {
-  const [messages, setMessages] = useState<ExtendedChatMessage[]>([]);
+  // Use chat history hook for database persistence
+  const { 
+    messages, 
+    setMessages, 
+    saveMessage, 
+    clearHistory, 
+    isLoading: isHistoryLoading
+  } = useChatHistory(userId);
+  
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [context, setContext] = useState<ChatContext | null>(null);
@@ -56,28 +65,53 @@ const ChatbotInterface = ({
     scrollToBottom();
   }, [messages]);
 
-  // Initialize chat with greeting
+  // Initialize chat with greeting (only if no history and history is loaded)
   useEffect(() => {
-    if (messages.length === 0) {
+    if (!isHistoryLoading && messages.length === 0) {
       // Add initial greeting without calling API
       const greetingMessage: ExtendedChatMessage = {
         id: `greeting_${Date.now()}`,
         role: 'assistant' as const,
-        content: `Halo! Saya asisten AI HeyTrack untuk membantu bisnis kuliner Anda 🍰
+        content: `👋 **Hai! Saya HeyTrack AI Assistant**
 
-Saya bisa bantu dengan:
-📊 Analisis profitabilitas & HPP
-💰 Strategi pricing & marketing
-📦 Manajemen stok & inventory
-📈 Insight keuangan & growth strategy
+Saya di sini untuk membantu bisnis kuliner UMKM kamu berkembang! 🚀
 
-Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
+**Yang bisa saya bantu:**
+
+📊 **Analisis Bisnis**
+• Profitabilitas produk & margin keuntungan
+• HPP (Harga Pokok Produksi) real-time
+• Trend penjualan & performa produk
+
+💰 **Strategi Keuangan**
+• Rekomendasi harga jual optimal
+• Analisis cash flow & biaya operasional
+• Proyeksi profit & break-even point
+
+📦 **Manajemen Operasional**
+• Monitoring stok & restock alerts
+• Optimasi inventory & waste reduction
+• Perencanaan produksi
+
+📈 **Growth Strategy**
+• Insight customer behavior
+• Rekomendasi menu & bundling
+• Marketing & promosi yang efektif
+
+---
+
+💡 **Tips:** Tanya dengan bahasa sehari-hari, saya paham kok! Misalnya:
+• "Resep mana yang paling untung?"
+• "Gimana cara ningkatin penjualan?"
+• "Stok bahan apa yang mau habis?"
+
+Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
         timestamp: new Date()
       };
       setMessages([greetingMessage]);
+      void saveMessage(greetingMessage);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isHistoryLoading, messages.length, saveMessage, setMessages]);
 
   // Handle sending messages via API
   const handleSendMessage = async (message?: string): Promise<void> => {
@@ -88,7 +122,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
     setInputValue('');
 
     try {
-      // Add user message to UI immediately
+      // Add user message to UI and database
       if (!message) { // Only add user message if it's not an auto-greeting
         const userMessage: ExtendedChatMessage = {
           id: `user_${Date.now()}`,
@@ -97,6 +131,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
           timestamp: new Date()
         };
         setMessages(prev => [...prev, userMessage]);
+        void saveMessage(userMessage);
       }
 
       // Call AI chat API with enhanced NLP
@@ -134,6 +169,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
         };
 
         setMessages(prev => [...prev, assistantMessage]);
+        void saveMessage(assistantMessage);
 
         // Update session context
         if (result.session_id) {
@@ -220,6 +256,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
         };
 
         setMessages(prev => [...prev, systemMessage]);
+        void saveMessage(systemMessage);
       } else {
         throw new Error(apiResult.error ?? 'Unknown action error');
       }
@@ -289,16 +326,16 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
             {/* Action buttons */}
             {message.actions && message.actions.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
-                {message.actions.map((action: ChatAction, index: number) => (
+                {message.actions.map((action, index: number) => (
                   <Button
-                    key={`${action['type']}-${index}`}
+                    key={`${action.type}-${index}`}
                     variant="secondary"
                     size="sm"
-                    onClick={() => handleActionClick(action)}
+                    onClick={() => handleActionClick(action as ChatAction)}
                     disabled={isLoading}
                     className="text-xs h-8"
                   >
-                    {getActionIcon(action['type'])}
+                    {getActionIcon(action.type)}
                     <span className="ml-1">{action.label}</span>
                   </Button>
                 ))}
@@ -422,22 +459,44 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
   return (
     <Card className={`fixed bottom-4 right-4 w-96 h-[700px] border-2 flex flex-col ${className}`}>
       {/* Header */}
-      <CardHeader className="p-4 bg-gray-700 dark:bg-gray-800 text-white rounded-t-lg flex flex-row items-center justify-between flex-shrink-0">
-        <div className="flex items-center space-x-2">
-          <Bot className="h-5 w-5" />
-          <h3 className="font-semibold">Asisten UMKM AI</h3>
-          <Badge variant="secondary" className="text-xs">Online</Badge>
+      <CardHeader className="p-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-t-lg flex flex-row items-center justify-between flex-shrink-0 shadow-lg">
+        <div className="flex items-center space-x-3">
+          <div className="relative">
+            <Bot className="h-6 w-6 animate-pulse" />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse" />
+          </div>
+          <div>
+            <h3 className="font-bold text-base">HeyTrack AI Assistant</h3>
+            <p className="text-xs text-blue-100">Siap membantu bisnis kuliner Anda</p>
+          </div>
         </div>
-        {onToggleMinimize && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleMinimize}
-            className="text-white hover:bg-gray-600 dark:hover:bg-gray-700 h-8 w-8 p-0"
-          >
-            <Minimize2 className="h-4 w-4" />
-          </Button>
-        )}
+        <div className="flex items-center space-x-2">
+          {messages.length > 1 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={async () => {
+                if (confirm('Yakin ingin menghapus semua riwayat chat?')) {
+                  await clearHistory();
+                }
+              }}
+              className="text-white hover:bg-white/20 h-8 w-8 p-0 rounded-full transition-all"
+              title="Clear chat history"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+          {onToggleMinimize && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleMinimize}
+              className="text-white hover:bg-white/20 h-8 w-8 p-0 rounded-full transition-all"
+            >
+              <Minimize2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </CardHeader>
 
       {/* Messages area - Scrollable content */}

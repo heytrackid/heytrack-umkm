@@ -1290,11 +1290,12 @@ async function calculateRecipeHPP(
     // Fetch actual operational costs from database
     const today = new Date().toISOString().split('T')[0]
     const { data: opCosts } = await supabaseClient
-        .from('expenses')
+        .from('operational_costs')
         .select('amount')
         .eq('user_id', userId)
-        .gte('expense_date', today)
-        .lte('expense_date', today)
+        .eq('is_active', true)
+        .gte('date', today)
+        .lte('date', today)
     
     const dailyOpCost = opCosts?.reduce((sum, cost) => sum + cost.amount, 0) ?? 0
     

@@ -8,11 +8,11 @@
  */
 
 // UI Hooks
-export { useResponsive, useMobile, useIsMobile, useMediaQuery, useScreenSize, useOrientation, useTouchDevice } from '@/utils/responsive'
+export { useIsMobile, useMediaQuery, useMobile, useOrientation, useResponsive, useScreenSize, useTouchDevice } from '@/utils/responsive'
 
 // export { useLoading } from './useLoading'
-export { useConfirm } from './useConfirm'
 export { useToast } from './use-toast'
+export { useConfirm } from './useConfirm'
 
 // Error Handling Hooks
 // export { useErrorHandler, useAsyncError, useFormErrors, useRetry } from './useErrorHandler'
@@ -22,15 +22,7 @@ export { useAuth } from '@/providers/AuthProvider'
 
 // Database Hooks
 export {
-  useSupabaseQuery,
-  useSupabaseCRUD,
-  useSupabaseBulk,
-  useIngredients,
-  useRecipes,
-  useOrders,
-  useCustomers,
-  useSuppliers,
-  useExpenses,
+    useCustomers, useFinancialRecords, useIngredients, useOrders, useRecipes, useSupabaseBulk, useSupabaseCRUD, useSupabaseQuery, useSuppliers
 } from './supabase'
 
 // Business Logic Hooks
@@ -39,10 +31,10 @@ export { useCurrency } from './useCurrency'
 // export { default as useAIPowered } from './useAIPowered'
 
 // Performance Hooks
-export { useSimplePreload, useAdvancedLinkPreloading, useAdvancedButtonPreloading } from './usePreloading'
+export { useAdvancedButtonPreloading, useAdvancedLinkPreloading, useSimplePreload } from './usePreloading'
 
 // API Hooks
-export { useDashboardStats, useWeeklySales, useTopProducts } from './api/useDashboard'
+export { useDashboardStats, useTopProducts, useWeeklySales } from './api/useDashboard'
 export { useHPPAlerts } from './api/useHPPAlerts'
 export { useHPPComparison } from './api/useHPPComparison'
 export { useHPPExport } from './api/useHPPExport'
@@ -53,8 +45,8 @@ export { useHppOverview } from '@/modules/hpp/hooks/useHppOverview'
 export { useHppWorker } from '@/modules/hpp/hooks/useHppWorker'
 
 // Inventory Hooks
-export { useInventoryAlerts, useIngredientStockStatus } from './useInventoryAlerts'
-export { useReorderManagement, usePurchaseOrderGenerator } from './useReorderManagement'
+export { useIngredientStockStatus, useInventoryAlerts } from './useInventoryAlerts'
+export { usePurchaseOrderGenerator, useReorderManagement } from './useReorderManagement'
 
 // HPP Automation Hooks
 // export { useHPPAutomation, useRecipeHPPAnalysis } from './useHPPAutomation'

@@ -43,7 +43,27 @@ export async function createClient() {
           document.cookie = `${name}=${value}; ${options?.domain ? `domain=${options.domain}; ` : ''}${options?.path ? `path=${options.path}; ` : ''}${options?.expires ? `expires=${options.expires.toUTCString()}; ` : ''}${options?.httpOnly ? 'httpOnly; ' : ''}${options?.secure ? 'secure; ' : ''}${options?.sameSite ? `sameSite=${options.sameSite}; ` : ''}`
         })
       }
+    },
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce'
     }
   })
+
+  // Handle auth state changes
+  browserClient.auth.onAuthStateChange((event) => {
+    const logger = createClientLogger('SupabaseAuth')
+    
+    if (event === 'SIGNED_OUT') {
+      logger.info({ event }, 'User signed out')
+    } else if (event === 'TOKEN_REFRESHED') {
+      logger.debug({ event }, 'Token refreshed successfully')
+    } else if (event === 'SIGNED_IN') {
+      logger.info({ event }, 'User signed in')
+    }
+  })
+
   return browserClient
 }

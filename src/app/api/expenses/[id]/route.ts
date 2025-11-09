@@ -6,11 +6,11 @@ import { NextResponse } from 'next/server';
 
 import { apiLogger, logError } from '@/lib/logger';
 import { prepareUpdate } from '@/lib/supabase/insert-helpers';
-import { getErrorMessage, isValidUUID, isRecord, extractFirst, safeString } from '@/lib/type-guards';
+import { extractFirst, getErrorMessage, isRecord, isValidUUID, safeString } from '@/lib/type-guards';
 import { UpdateExpenseSchema } from '@/lib/validations/api-schemas';
-import type { Database } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security';
-import { createClient } from '@/utils/supabase/server'
+import type { Database } from '@/types/database';
+import { SecurityPresets, withSecurity } from '@/utils/security';
+import { createClient } from '@/utils/supabase/server';
 
 
 // Apply security middleware
@@ -18,7 +18,7 @@ const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
 const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
 const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
 
-export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }
+export { securedDELETE as DELETE, securedGET as GET, securedPUT as PUT };
 
 async function getHandler(
   _request: Request,
@@ -43,13 +43,11 @@ async function getHandler(
     }
 
     const { data: expense, error } = await supabase
-      .from('expenses')
-      .select(`
-        *,
-        supplier:suppliers(name)
-      `)
+      .from('financial_records')
+      .select('*')
       .eq('id', id)
       .eq('user_id', user['id'])
+      .eq('type', 'EXPENSE')
       .single();
 
     if (error) {
@@ -189,10 +187,11 @@ async function deleteHandler(
     }
 
     const { error } = await supabase
-      .from('expenses')
+      .from('financial_records')
       .delete()
       .eq('id', id)
-      .eq('user_id', user['id']);
+      .eq('user_id', user['id'])
+      .eq('type', 'EXPENSE');
 
     if (error) {
       logError(apiLogger, error, 'DELETE /api/expenses/[id] - Database error');

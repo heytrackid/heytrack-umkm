@@ -1,7 +1,41 @@
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 
-const logger = createClientLogger('ClientFile');
+const logger = createClientLogger('ClientFile')
+
+// Session handler functions
+async function handleSessionExpired(): Promise<void> {
+  const sessionLogger = createClientLogger('SessionHandler')
+  sessionLogger.warn('Session expired, clearing local data')
+  
+  if (typeof window !== 'undefined') {
+    const keysToRemove: string[] = []
+    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && (key.includes('supabase') || key.includes('auth'))) {
+        keysToRemove.push(key)
+      }
+    }
+    
+    keysToRemove.forEach(key => localStorage.removeItem(key))
+    window.location.href = '/auth/login?session_expired=true'
+  }
+}
+
+function isSessionExpiredError(error: unknown): boolean {
+  if (!error) return false
+  
+  const errorMessage = error instanceof Error ? error.message : String(error)
+  
+  return (
+    errorMessage.includes('JWT') ||
+    errorMessage.includes('expired') ||
+    errorMessage.includes('invalid') ||
+    errorMessage.includes('401') ||
+    errorMessage.includes('Unauthorized')
+  )
+}
 
 
 /**
@@ -19,6 +53,16 @@ export interface ApiResponse<T = unknown> {
 
 export class ApiErrorHandler {
   static handle(error: unknown, context?: string, showNotification = true): ApiResponse {
+    // Check if this is a session expired error
+    if (isSessionExpiredError(error)) {
+      void handleSessionExpired()
+      return {
+        error: 'Session expired. Please login again.',
+        code: 'SESSION_EXPIRED',
+        success: false,
+      }
+    }
+
     // Log the error
     logger.error({
       error,
@@ -49,6 +93,8 @@ export class ApiErrorHandler {
           case 401:
             message = 'Authentication required';
             code = 'AUTH_REQUIRED';
+            // Handle session expired
+            void handleSessionExpired()
             break;
           case 403:
             message = 'Access denied';

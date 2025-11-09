@@ -379,75 +379,6 @@ export type Database = {
         }
         Relationships: []
       }
-      expenses: {
-        Row: {
-          amount: number
-          category: string
-          created_at: string | null
-          description: string
-          expense_date: string | null
-          id: string
-          is_recurring: boolean | null
-          metadata: Json | null
-          payment_method: string | null
-          receipt_number: string | null
-          recurring_frequency: string | null
-          reference_id: string | null
-          reference_type: string | null
-          status: string | null
-          subcategory: string | null
-          supplier: string | null
-          tags: Json | null
-          tax_amount: number | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          category: string
-          created_at?: string | null
-          description: string
-          expense_date?: string | null
-          id?: string
-          is_recurring?: boolean | null
-          metadata?: Json | null
-          payment_method?: string | null
-          receipt_number?: string | null
-          recurring_frequency?: string | null
-          reference_id?: string | null
-          reference_type?: string | null
-          status?: string | null
-          subcategory?: string | null
-          supplier?: string | null
-          tags?: Json | null
-          tax_amount?: number | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          category?: string
-          created_at?: string | null
-          description?: string
-          expense_date?: string | null
-          id?: string
-          is_recurring?: boolean | null
-          metadata?: Json | null
-          payment_method?: string | null
-          receipt_number?: string | null
-          recurring_frequency?: string | null
-          reference_id?: string | null
-          reference_type?: string | null
-          status?: string | null
-          subcategory?: string | null
-          supplier?: string | null
-          tags?: Json | null
-          tax_amount?: number | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       financial_records: {
         Row: {
           amount: number
@@ -783,13 +714,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "ingredient_purchases_expense_id_fkey"
-            columns: ["expense_id"]
-            isOneToOne: false
-            referencedRelation: "expenses"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "ingredient_purchases_ingredient_id_fkey"
             columns: ["ingredient_id"]

@@ -2,17 +2,17 @@
 export const runtime = 'nodejs'
 
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 
 import { formatCurrency } from '@/lib/currency'
 import { apiLogger } from '@/lib/logger'
-import { safeString, getErrorMessage } from '@/lib/type-guards'
-import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/domains/common'
+import { getErrorMessage, safeString } from '@/lib/type-guards'
+import { DateRangeQuerySchema, PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { FinancialRecordInsertSchema, type FinancialRecordInsert } from '@/lib/validations/domains/finance'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { SecurityPresets, withSecurity } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
 
@@ -67,9 +67,10 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const offset = (page - 1) * limit
 
     let query = supabase
-      .from('expenses')
-      .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, created_at, updated_at')
+      .from('financial_records')
+      .select('id, description, category, amount, date, reference, type, created_at, created_by')
       .eq('user_id', user['id'])
+      .eq('type', 'EXPENSE')
       .range(offset, offset + limit - 1)
 
     // Add search filter
@@ -84,15 +85,15 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
     // Add date range filter
     if (start_date) {
-      query = query.gte('expense_date', start_date)
+      query = query.gte('date', start_date)
     }
 
     if (end_date) {
-      query = query.lte('expense_date', end_date)
+      query = query.lte('date', end_date)
     }
 
     // Add sorting
-    const sortField = sort_by ?? 'expense_date'
+    const sortField = sort_by ?? 'date'
     const sortDirection = sort_order === 'asc'
     query = query.order(sortField, { ascending: sortDirection })
 
@@ -101,7 +102,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     if (error) {throw error}
 
     // Get total count for pagination
-    let countQuery = supabase.from('expenses').select('id', { count: 'exact', head: true }).eq('user_id', user['id'])
+    let countQuery = supabase.from('financial_records').select('id', { count: 'exact', head: true }).eq('user_id', user['id']).eq('type', 'EXPENSE')
 
     // Apply same filters to count query
     if (search) {
@@ -111,10 +112,10 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       countQuery = countQuery.eq('category', category)
     }
     if (start_date) {
-      countQuery = countQuery.gte('expense_date', start_date)
+      countQuery = countQuery.gte('date', start_date)
     }
     if (end_date) {
-      countQuery = countQuery.lte('expense_date', end_date)
+      countQuery = countQuery.lte('date', end_date)
     }
 
     const { count } = await countQuery
@@ -124,17 +125,20 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const thisMonth = new Date().toISOString().slice(0, 7)
     
     const { data: todayExpenses } = await supabase
-      .from('expenses')
+      .from('financial_records')
       .select('amount, category')
       .eq('user_id', user['id'])
-      .eq('expense_date', today)
+      .eq('type', 'EXPENSE')
+      .gte('date', today)
+      .lte('date', today)
 
     const { data: monthExpenses } = await supabase
-      .from('expenses')
+      .from('financial_records')
       .select('amount, category')
       .eq('user_id', user['id'])
-      .gte('expense_date', `${thisMonth}-01`)
-      .lte('expense_date', `${thisMonth}-31`)
+      .eq('type', 'EXPENSE')
+      .gte('date', `${thisMonth}-01`)
+      .lte('date', `${thisMonth}-31`)
 
     interface ExpensePartial { amount: number; category: string }
     

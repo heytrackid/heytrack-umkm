@@ -5,10 +5,10 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 
 import { apiLogger } from '@/lib/logger'
-import { safeString, getErrorMessage } from '@/lib/type-guards'
+import { getErrorMessage, safeString } from '@/lib/type-guards'
 import type { Database, OrderStatus } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { SecurityPresets, withSecurity } from '@/utils/security'
 import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -19,7 +19,8 @@ type OrderRow = Database['public']['Tables']['orders']['Row']
 type CustomerRow = Database['public']['Tables']['customers']['Row']
 type IngredientRow = Database['public']['Tables']['ingredients']['Row'] & { reorder_point?: number | null }
 type RecipeRow = Database['public']['Tables']['recipes']['Row'] & { times_made?: number | null }
-type ExpenseRow = Database['public']['Tables']['expenses']['Row']
+type FinancialRecordRow = Database['public']['Tables']['financial_records']['Row']
+type ExpenseRow = FinancialRecordRow // Alias for backward compatibility
 
 
 
@@ -251,7 +252,7 @@ async function fetchDashboardData(
     supabase.from('customers').select('id, customer_type').eq('user_id', userId),
     supabase.from('ingredients').select('id, name, current_stock, min_stock, category, reorder_point').eq('user_id', userId),
     supabase.from('recipes').select('id, name, times_made').eq('user_id', userId),
-    supabase.from('expenses').select('amount').eq('user_id', userId)
+    supabase.from('financial_records').select('amount').eq('user_id', userId).eq('type', 'EXPENSE')
   ])
 
   return {

@@ -2,7 +2,7 @@
 
 import { useSupabaseQuery } from './core'
 
-import type { UseSupabaseQueryResult, UseSupabaseQueryOptions } from './types'
+import type { UseSupabaseQueryOptions, UseSupabaseQueryResult } from './types'
 
 /**
  * Entity-specific hooks for common database operations
@@ -52,10 +52,14 @@ export function useSuppliers(options?: { realtime?: boolean }): UseSupabaseQuery
   })
 }
 
-// Expenses
-export function useExpenses(options?: { realtime?: boolean }): UseSupabaseQueryResult<'expenses'> {
-  return useSupabaseQuery('expenses', {
-    orderBy: { column: 'expense_date', ascending: false },
+// Financial Records (replaces Expenses)
+export function useFinancialRecords(
+  filter?: Record<string, unknown>,
+  options?: { realtime?: boolean }
+): UseSupabaseQueryResult<'financial_records'> {
+  return useSupabaseQuery('financial_records', {
+    filter,
+    orderBy: { column: 'date', ascending: false },
     ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
@@ -63,18 +67,6 @@ export function useExpenses(options?: { realtime?: boolean }): UseSupabaseQueryR
 // Operational Costs
 export function useOperationalCosts(options?: { realtime?: boolean }): UseSupabaseQueryResult<'operational_costs'> {
   return useSupabaseQuery('operational_costs', {
-    orderBy: { column: 'created_at', ascending: false },
-    ...(options?.realtime !== undefined && { realtime: options.realtime }),
-  })
-}
-
-// Financial Records
-export function useFinancialRecords(
-  filter?: Record<string, unknown>,
-  options?: { realtime?: boolean }
-): UseSupabaseQueryResult<'financial_records'> {
-  return useSupabaseQuery('financial_records', {
-    filter,
     orderBy: { column: 'created_at', ascending: false },
     ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })

@@ -1,7 +1,9 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { type ReactNode, createContext, useContext, useEffect, useState } from 'react'
 
+import { createClientLogger } from '@/lib/client-logger'
 import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
 
@@ -24,16 +26,30 @@ const Context = createContext<SupabaseContext | undefined>(undefined)
 const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   const [supabase, setSupabase] = useState<SupabaseClient<Database> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
+  const logger = createClientLogger('SupabaseProvider')
 
   useEffect(() => {
+    let subscription: { unsubscribe: () => void } | null = null
+
     const initializeClient = async () => {
       try {
         const client = await createClient()
         setSupabase(client as unknown as SupabaseClient<Database>)
+
+        // Listen for auth state changes
+        const { data } = client.auth.onAuthStateChange((event) => {
+          if (event === 'SIGNED_OUT') {
+            logger.info('User signed out, redirecting to login')
+            router.push('/auth/login')
+          } else if (event === 'TOKEN_REFRESHED') {
+            logger.debug('Token refreshed successfully')
+          }
+        })
+
+        subscription = data.subscription
       } catch (error) {
-        console.error('Failed to initialize Supabase client:', error)
-        // Fallback: create client synchronously for critical functionality
-        // This is a temporary measure - ideally handle errors properly
+        logger.error({ error }, 'Failed to initialize Supabase client')
         setSupabase(null as any)
       } finally {
         setIsLoading(false)
@@ -41,7 +57,14 @@ const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
 
     void initializeClient()
-  }, [])
+
+    // Cleanup subscription on unmount
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe()
+      }
+    }
+  }, [router, logger])
 
   // Show loading state while client initializes
   if (isLoading) {

@@ -2,7 +2,7 @@
 
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import React, { type FormEvent, useEffect, useRef, useState, useTransition } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -18,6 +18,7 @@ import { useRenderPerformance } from '@/lib/performance'
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter()
+  const searchParams = useSearchParams()
   useRenderPerformance('LoginPage')
   const mountedRef = useRef(true)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -28,12 +29,20 @@ const LoginPage = (): JSX.Element => {
 
   const [isPending, startTransition] = useTransition()
 
-   useEffect((): (() => void) => () => {
-     mountedRef.current = false
-     if (abortControllerRef.current) {
-       abortControllerRef.current.abort()
+   useEffect((): (() => void) => {
+     // Check if session expired
+     const sessionExpired = searchParams.get('session_expired')
+     if (sessionExpired === 'true') {
+       setError('Sesi Anda telah berakhir. Silakan login kembali.')
      }
-   }, [])
+
+     return () => {
+       mountedRef.current = false
+       if (abortControllerRef.current) {
+         abortControllerRef.current.abort()
+       }
+     }
+   }, [searchParams])
 
    const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault()

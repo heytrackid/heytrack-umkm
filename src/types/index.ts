@@ -85,7 +85,7 @@ export type Order = Row<'orders'>
 export type OrderItem = Row<'order_items'>
 export type Customer = Row<'customers'>
 export type Supplier = Row<'suppliers'>
-export type Expense = Row<'expenses'>
+export type FinancialRecord = Row<'financial_records'>
 export type OperationalCost = Row<'operational_costs'>
 
 // Complex types
