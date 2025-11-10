@@ -10,19 +10,22 @@ export function parseCSV(text: string): Array<Record<string, string>> {
   }
 
   // Parse header
+  if (lines.length === 0 || !lines[0]) {return []}
   const headers = parseCSVLine(lines[0])
-  
+
   // Parse rows
   const data: Array<Record<string, string>> = []
-  
+
   for (let i = 1; i < lines.length; i++) {
-    const values = parseCSVLine(lines[i])
+    const line = lines[i]
+    if (!line) {continue}
+    const values = parseCSVLine(line)
     
     // Skip if row doesn't have enough columns
     if (values.length > 0) {
       const row: Record<string, string> = {}
       headers.forEach((header, index) => {
-        row[header] = values[index] || ''
+        row[header] = values[index] ?? ''
       })
       data.push(row)
     }
@@ -197,14 +200,14 @@ export function parseIngredientsCSV(text: string) {
   const data = parseCSV(text)
   
   return data.map(row => ({
-    name: (row.name || row.Name || row.NAMA) || '',
-    unit: (row.unit || row.Unit || row.SATUAN) || '',
-    price_per_unit: (row.price_per_unit || row['Price Per Unit'] || row.HARGA) || '',
-    current_stock: (row.current_stock || row['Current Stock'] || row.STOK) || '0',
-    min_stock: (row.min_stock || row['Min Stock'] || row.MIN_STOK) || '0',
-    category: (row.category || row.Category || row.KATEGORI) || 'General',
-    supplier: (row.supplier || row.Supplier || row.SUPPLIER) || '',
-    description: (row.description || row.Description || row.DESKRIPSI) || ''
+    name: (row['name'] ?? row['Name'] ?? row['NAMA']) ?? '',
+    unit: (row['unit'] ?? row['Unit'] ?? row['SATUAN']) ?? '',
+    price_per_unit: (row['price_per_unit'] ?? row['Price Per Unit'] ?? row['HARGA']) ?? '',
+    current_stock: (row['current_stock'] ?? row['Current Stock'] ?? row['STOK']) ?? '0',
+    min_stock: (row['min_stock'] ?? row['Min Stock'] ?? row['MIN_STOK']) ?? '0',
+    category: (row['category'] ?? row['Category'] ?? row['KATEGORI']) ?? 'General',
+    supplier: (row['supplier'] ?? row['Supplier'] ?? row['SUPPLIER']) ?? '',
+    description: (row['description'] ?? row['Description'] ?? row['DESKRIPSI']) ?? ''
   }))
 }
 
@@ -215,14 +218,14 @@ export function parseSuppliersCSV(text: string) {
   const data = parseCSV(text)
 
   return data.map(row => ({
-    name: (row.name || row.Name || row.NAMA) || '',
-    contact_person: (row.contact_person || row['Contact Person'] || row.KONTAK) || '',
-    phone: (row.phone || row.Phone || row.TELEPON) || '',
-    email: (row.email || row.Email || row.EMAIL) || '',
-    address: (row.address || row.Address || row.ALAMAT) || '',
-    company_type: (row.company_type || row['Company Type'] || row.TIPE_PERUSAHAAN) || '',
-    payment_terms: (row.payment_terms || row['Payment Terms'] || row.SYARAT_PEMBAYARAN) || '',
-    notes: (row.notes || row.Notes || row.CATATAN) || ''
+    name: (row['name'] ?? row['Name'] ?? row['NAMA']) ?? '',
+    contact_person: (row['contact_person'] ?? row['Contact Person'] ?? row['KONTAK']) ?? '',
+    phone: (row['phone'] ?? row['Phone'] ?? row['TELEPON']) ?? '',
+    email: (row['email'] ?? row['Email'] ?? row['EMAIL']) ?? '',
+    address: (row['address'] ?? row['Address'] ?? row['ALAMAT']) ?? '',
+    company_type: (row['company_type'] ?? row['Company Type'] ?? row['TIPE_PERUSAHAAN']) ?? '',
+    payment_terms: (row['payment_terms'] ?? row['Payment Terms'] ?? row['SYARAT_PEMBAYARAN']) ?? '',
+    notes: (row['notes'] ?? row['Notes'] ?? row['CATATAN']) ?? ''
   }))
 }
 
@@ -233,16 +236,16 @@ export function parseOrdersCSV(text: string) {
   const data = parseCSV(text)
   
   return data.map(row => ({
-    order_no: (row.order_no || row['Order No'] || row.NO_PESANAN) || '',
-    customer_name: (row.customer_name || row['Customer Name'] || row.NAMA_CUSTOMER) || '',
-    customer_phone: (row.customer_phone || row['Customer Phone'] || row.TELEPON) || '',
-    customer_email: (row.customer_email || row['Customer Email'] || row.EMAIL) || '',
-    customer_address: (row.customer_address || row['Customer Address'] || row.ALAMAT) || '',
-    recipe_name: (row.recipe_name || row['Recipe Name'] || row.NAMA_RESEP) || '',
-    quantity: (row.quantity || row.Quantity || row.JUMLAH) || '',
-    unit_price: (row.unit_price || row['Unit Price'] || row.HARGA_SATUAN) || '',
-    delivery_date: (row.delivery_date || row['Delivery Date'] || row.TANGGAL_KIRIM) || '',
-    notes: (row.notes || row.Notes || row.CATATAN) || '',
-    status: (row.status || row.Status || row.STATUS) || 'PENDING'
+    order_no: (row['order_no'] ?? row['Order No'] ?? row['NO_PESANAN']) ?? '',
+    customer_name: (row['customer_name'] ?? row['Customer Name'] ?? row['NAMA_CUSTOMER']) ?? '',
+    customer_phone: (row['customer_phone'] ?? row['Customer Phone'] ?? row['TELEPON']) ?? '',
+    customer_email: (row['customer_email'] ?? row['Customer Email'] ?? row['EMAIL']) ?? '',
+    customer_address: (row['customer_address'] ?? row['Customer Address'] ?? row['ALAMAT']) ?? '',
+    recipe_name: (row['recipe_name'] ?? row['Recipe Name'] ?? row['NAMA_RESEP']) ?? '',
+    quantity: (row['quantity'] ?? row['Quantity'] ?? row['JUMLAH']) ?? '',
+    unit_price: (row['unit_price'] ?? row['Unit Price'] ?? row['HARGA_SATUAN']) ?? '',
+    delivery_date: (row['delivery_date'] ?? row['Delivery Date'] ?? row['TANGGAL_KIRIM']) ?? '',
+    notes: (row['notes'] ?? row['Notes'] ?? row['CATATAN']) ?? '',
+    status: (row['status'] ?? row['Status'] ?? row['STATUS']) ?? 'PENDING'
   }))
 }

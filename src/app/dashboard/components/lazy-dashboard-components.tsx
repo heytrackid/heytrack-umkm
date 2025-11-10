@@ -1,18 +1,16 @@
 // Lazy loaded dashboard components for improved performance
 
-import { lazy, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 
 // Define props interface to replace 'any' types
-interface DashboardComponentProps {
-  [key: string]: unknown
-}
+type DashboardComponentProps = Record<string, unknown>;
 
 interface StatsCardsProps {
   stats?: {
     revenue: {
       total: number
       growth: string
-      trend: 'up' | 'down'
+      trend: 'down' | 'up'
     }
     orders: {
       total: number
@@ -31,30 +29,36 @@ interface StatsCardsProps {
 }
 
 // Lazy load dashboard components with proper chunk names for better bundle analysis
-const LazyHppDashboardWidget = lazy(() => 
-  import('./HppDashboardWidget').then(module => ({ default: module.default }))
+const LazyHppDashboardWidget = dynamic(() =>
+  import('./HppDashboardWidget').then(m => m.HppDashboardWidget), {
+    loading: () => <div className="h-80 bg-gray-100 animate-pulse rounded-lg" />
+  }
 )
 
-const LazyRecentOrdersSection = lazy(() => 
-  import('./RecentOrdersSection').then(module => ({ default: module.default }))
+const LazyRecentOrdersSection = dynamic(() =>
+  import('./RecentOrdersSection').then(m => m.RecentOrdersSection), {
+    loading: () => <RecentOrdersSkeleton />
+  }
 )
 
-const LazyStatsCardsSection = lazy(() => 
-  import('./StatsCardsSection').then(module => ({ default: module.default }))
+const LazyStatsCardsSection = dynamic(() =>
+  import('./StatsCardsSection').then(m => m.StatsCardsSection), {
+    loading: () => <StatsCardsSkeleton />
+  }
 )
 
-const LazyStockAlertsSection = lazy(() => 
-  import('./StockAlertsSection').then(module => ({ default: module.default }))
+const LazyStockAlertsSection = dynamic(() =>
+  import('./StockAlertsSection').then(m => m.StockAlertsSection), {
+    loading: () => <StockAlertsSkeleton />
+  }
 )
 
-// Wrapper components that include Suspense boundaries
+// Wrapper components that include loading boundaries
 const HppDashboardWidgetWithSuspenseComponent = (): JSX.Element => (
-  <Suspense fallback={<div className="h-80 bg-gray-100 animate-pulse rounded-lg" />}>
-    <LazyHppDashboardWidget />
-  </Suspense>
+  <LazyHppDashboardWidget />
 )
 
-const RecentOrdersSkeleton = () => (
+const RecentOrdersSkeleton = (): JSX.Element => (
   <div className="space-y-4">
     <div className="h-12 bg-gray-100 animate-pulse rounded" />
     <div className="space-y-3">
@@ -66,12 +70,10 @@ const RecentOrdersSkeleton = () => (
 )
 
 const RecentOrdersSectionWithSuspenseComponent = (props: DashboardComponentProps): JSX.Element => (
-  <Suspense fallback={<RecentOrdersSkeleton />}>
-    <LazyRecentOrdersSection {...props} />
-  </Suspense>
+  <LazyRecentOrdersSection {...props} />
 )
 
-const StatsCardsSkeleton = () => (
+const StatsCardsSkeleton = (): JSX.Element => (
   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
     {Array.from({ length: 4 }, (_, i) => (
       <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
@@ -80,12 +82,10 @@ const StatsCardsSkeleton = () => (
 )
 
 const StatsCardsSectionWithSuspenseComponent = (props: DashboardComponentProps): JSX.Element => (
-  <Suspense fallback={<StatsCardsSkeleton />}>
-    <LazyStatsCardsSection {...(props as unknown as StatsCardsProps)} />
-  </Suspense>
+  <LazyStatsCardsSection {...(props as unknown as StatsCardsProps)} />
 )
 
-const StockAlertsSkeleton = () => (
+const StockAlertsSkeleton = (): JSX.Element => (
   <div className="space-y-4">
     <div className="h-12 bg-gray-100 animate-pulse rounded" />
     <div className="space-y-3">
@@ -97,9 +97,7 @@ const StockAlertsSkeleton = () => (
 )
 
 const StockAlertsSectionWithSuspenseComponent = (props: DashboardComponentProps): JSX.Element => (
-  <Suspense fallback={<StockAlertsSkeleton />}>
-    <LazyStockAlertsSection {...props} />
-  </Suspense>
+  <LazyStockAlertsSection {...props} />
 )
 
 export const HppDashboardWidgetWithSuspense = HppDashboardWidgetWithSuspenseComponent

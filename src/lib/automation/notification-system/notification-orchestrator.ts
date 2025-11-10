@@ -1,10 +1,12 @@
 import { automationLogger } from '@/lib/logger'
-import { InventoryNotifications } from './inventory-notifications'
-import { OrderNotifications } from './order-notifications'
-import { FinancialNotifications } from './financial-notifications'
-import { MaintenanceNotifications } from './maintenance-notifications'
-import { SeasonalNotifications } from './seasonal-notifications'
-import { NotificationFilter } from './notification-filter'
+
+import { FinancialNotifications } from '@/lib/automation/notification-system/financial-notifications'
+import { InventoryNotifications } from '@/lib/automation/notification-system/inventory-notifications'
+import { MaintenanceNotifications } from '@/lib/automation/notification-system/maintenance-notifications'
+import { NotificationFilter } from '@/lib/automation/notification-system/notification-filter'
+import { OrderNotifications } from '@/lib/automation/notification-system/order-notifications'
+import { SeasonalNotifications } from '@/lib/automation/notification-system/seasonal-notifications'
+
 import type {
 
 /**
@@ -20,10 +22,10 @@ import type {
   Equipment,
   UserPreferences,
   NotificationSummary
-} from './types'
+} from '@/lib/automation/notification-system/types'
 
 export class NotificationSystem {
-  constructor(private config: AutomationConfig) {}
+  constructor(private readonly config: AutomationConfig) {}
 
   /**
    * 🔔 NOTIFICATION SYSTEM: Smart Alerts
@@ -57,8 +59,8 @@ export class NotificationSystem {
         if (priorityDiff !== 0) {return priorityDiff}
 
         // If same priority, sort by timestamp (newer first)
-        const aTime = a.timestamp?.getTime() ?? 0
-        const bTime = b.timestamp?.getTime() ?? 0
+        const aTime = a['timestamp']?.getTime() ?? 0
+        const bTime = b['timestamp']?.getTime() ?? 0
         return bTime - aTime
       })
       .slice(0, 20) // Limit to 20 most important notifications
@@ -104,10 +106,10 @@ export class NotificationSystem {
   getNotificationSummary(notifications: SmartNotification[]): NotificationSummary {
     return {
       total: notifications.length,
-      critical: notifications.filter(n => n.type === 'critical').length,
-      warning: notifications.filter(n => n.type === 'warning').length,
-      info: notifications.filter(n => n.type === 'info').length,
-      success: notifications.filter(n => n.type === 'success').length,
+      critical: notifications.filter(n => n['type'] === 'critical').length,
+      warning: notifications.filter(n => n['type'] === 'warning').length,
+      info: notifications.filter(n => n['type'] === 'info').length,
+      success: notifications.filter(n => n['type'] === 'success').length,
       byCategory: {
         inventory: notifications.filter(n => n.category === 'inventory').length,
         production: notifications.filter(n => n.category === 'production').length,

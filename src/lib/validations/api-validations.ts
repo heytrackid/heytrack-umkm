@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { DateStringSchema, UUIDSchema } from './base-validations'
+
+import { DateStringSchema, UUIDSchema } from '@/lib/validations/base-validations'
 
 
 /**

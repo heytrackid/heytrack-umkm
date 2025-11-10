@@ -12,9 +12,9 @@
  * - shared/: Utilities (common, api, errors, guards, utils)
  */
 
-// ============================================================================
+// ==========================================================
 // DATABASE TYPES (Primary Source)
-// ============================================================================
+// ==========================================================
 export type {
     CompositeTypes, Database, Enums, Tables,
     TablesInsert,
@@ -27,15 +27,15 @@ export type { Insert, Row, TableName, Update, ViewName } from './database'
 // Note: database.ts is a backward compatibility layer that re-exports from this file
 // Do not export from it here to avoid circular dependencies
 
-// ============================================================================
+// ==========================================================
 // DOMAIN TYPES (Business Logic)
-// ============================================================================
+// ==========================================================
 // Domain types removed - use Tables helper from supabase-generated
 // Example: type Recipe = Row<'recipes'>
 
-// ============================================================================
+// ==========================================================
 // FEATURE TYPES (Application Features)
-// ============================================================================
+// ==========================================================
 // Note: UserProfile is also exported from domain/auth, using that as primary
 export * from './features/auth'
 // Note: RateLimitError is also in shared/errors, using that as primary
@@ -50,9 +50,9 @@ export type {
 
 export * from './features/notifications'
 
-// ============================================================================
+// ==========================================================
 // UI TYPES (Interface)
-// ============================================================================
+// ==========================================================
 export * from './ui/components'
 // Note: OrderItemUpdate is also in domain/orders, using that as primary
 export * from './ui/charts'
@@ -62,21 +62,21 @@ export type {
 } from './ui/forms'
 export * from './ui/responsive'
 
-// ============================================================================
+// ==========================================================
 // SHARED TYPES (Utilities)
-// ============================================================================
+// ==========================================================
 export * from './shared/api'
 export * from './shared/common'
 export * from './shared/errors'
 export * from './shared/guards'
 export * from './shared/utils'
 
-// ============================================================================
+// ==========================================================
 // CONVENIENCE ALIASES
-// ============================================================================
+// ==========================================================
 
 // Import Row type for convenience aliases
-import type { Row } from './database'
+import type { Row } from '@/types/database'
 
 export type Ingredient = Row<'ingredients'>
 export type Recipe = Row<'recipes'>
@@ -85,7 +85,7 @@ export type Order = Row<'orders'>
 export type OrderItem = Row<'order_items'>
 export type Customer = Row<'customers'>
 export type Supplier = Row<'suppliers'>
-export type Expense = Row<'expenses'>
+export type FinancialRecord = Row<'financial_records'>
 export type OperationalCost = Row<'operational_costs'>
 
 // Complex types

@@ -1,40 +1,48 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-async function postHandler(request: NextRequest) {
+
+import { type NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+
+import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
+import { SecurityPresets, createSecureHandler } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
+
+const WebVitalsSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  value: z.number().finite(),
+  rating: z.string().trim().min(1).max(30),
+  id: z.string().trim().min(1).max(120),
+  page: z.string().trim().max(200).optional()
+}).strict()
+
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
-    // ✅ Add authentication
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
-    const body = await request.json()
-    
-    // Log web vitals metrics with user context
+    const body = WebVitalsSchema.parse(await request.json())
+
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       metric: body.name,
       value: body.value,
       rating: body.rating,
-      id: body.id
+      id: body.id,
+      page: body.page
     }, 'Web Vitals metric recorded')
-
-    // In production, you might want to send this to analytics service
-    // like Google Analytics, Vercel Analytics, or custom analytics
 
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Failed to record web vitals')
-    return NextResponse.json({ error: 'Failed to record metric' }, { status: 500 })
+    return handleAPIError(error, 'POST /api/analytics/web-vitals')
   }
 }
 
-export const POST = withSecurity(postHandler, SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/analytics/web-vitals', SecurityPresets.maximum())

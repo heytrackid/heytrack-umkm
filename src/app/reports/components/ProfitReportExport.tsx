@@ -2,7 +2,10 @@
 'use client'
 
 import { saveAs } from 'file-saver'
-import type { ProfitData } from './ProfitReportTypes'
+
+import { HtmlEscaper } from '@/utils/security/index'
+
+import type { ProfitData } from '@/app/reports/components/ProfitReportTypes'
 
 interface ExportToCSVProps {
     profitData: ProfitData
@@ -38,16 +41,24 @@ interface ExportToPDFProps {
 }
 
 export const exportToPDF = ({ profitData, dateRange, formatCurrency }: ExportToPDFProps) => {
-    const printWindow = window.open('', '_blank')
-    if (!printWindow || !profitData) {
+    if (!profitData) {
         return
     }
+
+    // Escape all dynamic content to prevent XSS
+    const escapedTitle = HtmlEscaper.escape(`Profit Report - ${dateRange.start} to ${dateRange.end}`)
+    const escapedStartDate = HtmlEscaper.escape(new Date(profitData.summary.period.start).toLocaleDateString('id-ID'))
+    const escapedEndDate = HtmlEscaper.escape(new Date(profitData.summary.period.end).toLocaleDateString('id-ID'))
+    const escapedRevenue = HtmlEscaper.escape(formatCurrency(profitData.summary.total_revenue))
+    const escapedCogs = HtmlEscaper.escape(formatCurrency(profitData.summary.total_cogs))
+    const escapedGrossProfit = HtmlEscaper.escape(formatCurrency(profitData.summary.gross_profit))
+    const escapedNetProfit = HtmlEscaper.escape(formatCurrency(profitData.summary.net_profit))
 
     const htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Profit Report - ${dateRange.start} to ${dateRange.end}</title>
+            <title>${escapedTitle}</title>
             <style>
                 body { font-family: Arial, sans-serif; margin: 20px; }
                 h1 { color: #333; }
@@ -55,18 +66,19 @@ export const exportToPDF = ({ profitData, dateRange, formatCurrency }: ExportToP
                 th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
                 th { background-color: #f2f2f2; }
                 .summary { background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px; }
+                @media print { body { margin: 0; } }
             </style>
         </head>
         <body>
             <h1>Laporan Profit & Loss</h1>
-            <p>Periode: ${new Date(profitData.summary.period.start).toLocaleDateString('id-ID')} - ${new Date(profitData.summary.period.end).toLocaleDateString('id-ID')}</p>
+            <p>Periode: ${escapedStartDate} - ${escapedEndDate}</p>
 
             <div class="summary">
                 <h2>Ringkasan</h2>
-                <p>Total Revenue: ${formatCurrency(profitData.summary.total_revenue)}</p>
-                <p>COGS: ${formatCurrency(profitData.summary.total_cogs)}</p>
-                <p>Gross Profit: ${formatCurrency(profitData.summary.gross_profit)}</p>
-                <p>Net Profit: ${formatCurrency(profitData.summary.net_profit)}</p>
+                <p>Total Revenue: ${escapedRevenue}</p>
+                <p>COGS: ${escapedCogs}</p>
+                <p>Gross Profit: ${escapedGrossProfit}</p>
+                <p>Net Profit: ${escapedNetProfit}</p>
             </div>
 
             <h2>Data per Periode</h2>
@@ -84,23 +96,31 @@ export const exportToPDF = ({ profitData, dateRange, formatCurrency }: ExportToP
                 <tbody>
                     ${profitData.profit_by_period.map(item => `
                         <tr>
-                            <td>${item.period}</td>
-                            <td>${formatCurrency(item.revenue)}</td>
-                            <td>${formatCurrency(item.cogs)}</td>
-                            <td>${formatCurrency(item.gross_profit)}</td>
-                            <td>${item.gross_margin.toFixed(1)}%</td>
-                            <td>${item.orders_count}</td>
+                            <td>${HtmlEscaper.escape(item.period)}</td>
+                            <td>${HtmlEscaper.escape(formatCurrency(item.revenue))}</td>
+                            <td>${HtmlEscaper.escape(formatCurrency(item.cogs))}</td>
+                            <td>${HtmlEscaper.escape(formatCurrency(item.gross_profit))}</td>
+                            <td>${HtmlEscaper.escape(item.gross_margin.toFixed(1))}%</td>
+                            <td>${HtmlEscaper.escape(item.orders_count)}</td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            <script>
+                window.onload = function() {
+                    window.print();
+                    setTimeout(function() { window.close(); }, 1000);
+                }
+            </script>
         </body>
         </html>
     `
 
-    printWindow.document.write(htmlContent)
-    printWindow.document.close()
-    printWindow.print()
+    // Use secure Blob approach instead of document.write
+    const secureWindow = HtmlEscaper.openSecureWindow(htmlContent, '_blank')
+    if (!secureWindow) {
+        console.error('Failed to open export window')
+    }
 }
 
 export const printReport = () => {

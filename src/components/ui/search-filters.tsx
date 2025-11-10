@@ -1,11 +1,12 @@
 'use client'
 
+import { Search, X, Filter, SortAsc, SortDesc } from 'lucide-react'
 import { type ReactNode, useEffect, useDeferredValue } from 'react'
-import { Input } from '@/components/ui/input'
+
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Search, X, Filter, SortAsc, SortDesc } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { useDebounce } from '@/hooks/useDebounce'
 
 /**
@@ -147,7 +148,7 @@ export const ActiveFilters = ({ filters, onRemoveFilter, filterLabels = {} }: Ac
       <span className="text-sm text-gray-600 self-center">Filter aktif:</span>
       {activeFilters.map(([key, value]) => (
         <Badge key={key} variant="secondary" className="flex items-center gap-1">
-          {filterLabels[key] || key}: {String(value)}
+          {filterLabels[key] ?? key}: {String(value)}
           <Button
             variant="ghost"
             size="sm"

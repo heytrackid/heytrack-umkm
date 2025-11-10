@@ -1,20 +1,24 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { FormField } from './shared/FormField'
-import type { Row } from '@/types/database'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/lib/type-guards'
+
+import type { Row } from '@/types/database'
+
+import { FormField } from '@/components/forms/shared/FormField'
+
 
 
 
@@ -41,25 +45,25 @@ interface CustomerFormComponentProps {
   isLoading?: boolean
 }
 
-export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormComponentProps) => {
+export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormComponentProps): JSX.Element => {
   const { toast } = useToast()
 
   const form = useForm<CustomerFormData>({
     resolver: zodResolver(CustomerFormSchema),
-    mode: 'onChange',
+    mode: 'onBlur',
     defaultValues: {
       name: initialData?.name ?? '',
       email: initialData?.email ?? null,
       phone: initialData?.phone ?? null,
       address: initialData?.address ?? null,
-      customer_type: (initialData?.customer_type as 'retail' | 'wholesale' | 'vip' | 'regular') || 'regular',
+      customer_type: (initialData?.customer_type as 'regular' | 'retail' | 'vip' | 'wholesale') || 'regular',
       notes: initialData?.notes ?? null,
       is_active: initialData?.is_active !== undefined ? initialData.is_active : true,
       user_id: initialData?.user_id ?? '',
     }
   })
 
-  const handleSubmit = async (data: CustomerFormData) => {
+  const handleSubmit = async (data: CustomerFormData): Promise<void> => {
     try {
       await onSubmit(data)
       toast({
@@ -114,8 +118,9 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
               error={form.formState.errors['customer_type']?.message as string}
             >
               <Select
+                // eslint-disable-next-line react-hooks/incompatible-library
                 value={form.watch('customer_type') as string}
-                onValueChange={(value) => form.setValue('customer_type', value as 'retail' | 'wholesale' | 'vip' | 'regular')}
+                onValueChange={(value) => form.setValue('customer_type', value as 'regular' | 'retail' | 'vip' | 'wholesale')}
               >
                 <SelectTrigger>
                   <SelectValue />

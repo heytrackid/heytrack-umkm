@@ -32,7 +32,7 @@ export interface OrdersModuleConfig {
     default: string
     supported: string[]
     allow_multi_currency: boolean
-    exchange_rates_source?: 'manual' | 'api' | 'fixed'
+    exchange_rates_source?: 'api' | 'fixed' | 'manual'
   }
   
   // Tax configuration (PPN/VAT optional)
@@ -96,30 +96,30 @@ export interface OrdersModuleConfig {
   }
 }
 
-export type OrderStatus = 
-  | 'draft'          // Order being prepared
-  | 'confirmed'      // Customer confirmed the order
-  | 'payment_pending' // Waiting for payment
-  | 'paid'           // Payment received
-  | 'in_production'  // Items being prepared
-  | 'ready'          // Ready for delivery/pickup
-  | 'delivered'      // Order completed
+export type OrderStatus =
   | 'cancelled'      // Order cancelled
+  | 'confirmed'      // Customer confirmed the order
+  | 'delivered'      // Order completed
+  | 'draft'          // Order being prepared
+  | 'in_production'  // Items being prepared
+  | 'paid'           // Payment received
+  | 'payment_pending' // Waiting for payment
+  | 'ready'          // Ready for delivery/pickup
   | 'refunded'       // Order refunded
 
-export type PaymentMethod = 
-  | 'cash'
+export type PaymentMethod =
   | 'bank_transfer'
   | 'card'
-  | 'qris'
-  | 'ewallet'
+  | 'cash'
   | 'check'
   | 'credit'
+  | 'ewallet'
+  | 'qris'
 
-export type OrderPriority = 
+export type OrderPriority =
+  | 'high'
   | 'low'
   | 'normal'
-  | 'high'
   | 'urgent'
 
 // Default configuration
@@ -200,7 +200,7 @@ export const DEFAULT_ORDERS_CONFIG: OrdersModuleConfig = {
     auto_reminder_days: [3, 1] // Remind 3 days and 1 day before due date
   },
   
-  regional: REGIONAL_DEFAULTS['ID'] // Default to Indonesia
+  regional: REGIONAL_DEFAULTS['ID'] as RegionalDefaults // Default to Indonesia
 }
 
 // Status color mappings for UI
@@ -343,7 +343,7 @@ export function validateOrdersConfig(config: Partial<OrdersModuleConfig>): strin
  * Create region-specific configuration
  */
 export function createRegionalOrdersConfig(countryCode: string): OrdersModuleConfig {
-  const regional = REGIONAL_DEFAULTS[countryCode] || REGIONAL_DEFAULTS['ID']
+  const regional = REGIONAL_DEFAULTS[countryCode] ?? (REGIONAL_DEFAULTS['ID'] as RegionalDefaults)
   
   return {
     ...DEFAULT_ORDERS_CONFIG,
@@ -364,4 +364,3 @@ export function createRegionalOrdersConfig(countryCode: string): OrdersModuleCon
   }
 }
 
-export default DEFAULT_ORDERS_CONFIG

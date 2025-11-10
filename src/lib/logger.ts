@@ -10,12 +10,12 @@ import pino from 'pino'
  */
 
 
-const isDevelopment = process.env.NODE_ENV === 'development'
-const isPreview = process.env.VERCEL_ENV === 'preview'
-const isTest = process.env.NODE_ENV === 'test'
+const isDevelopment = process['env']?.['NODE_ENV'] === 'development'
+const isPreview = process['env']?.['VERCEL_ENV'] === 'preview'
+const isTest = process['env']?.['NODE_ENV'] === 'test'
 
 // Configure Pino logger
-const getLogLevel = () => {
+const getLogLevel = (): string => {
   if (isTest) {return 'silent'}
   if (isDevelopment || isPreview) {return 'debug'}
   return 'info'
@@ -30,16 +30,16 @@ const logger = pino({
   },
   // Add more detailed serialization for better debugging
   serializers: {
-    error: (err: Error) => ({
-        type: err.constructor.name,
-        name: err.name,
-        message: err.message,
-        stack: err.stack,
+    error: (error: Error) => ({
+        type: error.constructor.name,
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
         // Include additional error properties
-        ...Object.getOwnPropertyNames(err).reduce((acc, key) => {
+        ...Object.getOwnPropertyNames(error).reduce((acc, key) => {
           if (!['name', 'message', 'stack'].includes(key)) {
             try {
-              const errorRecord = err as unknown as Record<string, unknown>
+              const errorRecord = error as unknown as Record<string, unknown>
               acc[key] = errorRecord[key]
             } catch {
               // If property can't be accessed, skip it
@@ -55,7 +55,7 @@ const logger = pino({
 /**
  * Create a child logger with context
  */
-export const createLogger = (context: string) => logger.child({ context })
+export const createLogger = (context: string): pino.Logger => logger.child({ context })
 
 /**
  * Serialized error type for logging
@@ -85,22 +85,22 @@ export const serializeError = (error: unknown): Record<string, unknown> | Serial
     }
 
     // Include additional error properties if they exist
-    if (error.cause) {
-      serialized.cause = serializeError(error.cause)
+    if (error['cause']) {
+      serialized['cause'] = serializeError(error['cause'])
     }
     
     // Add request-specific properties if they exist
     if ('status' in error) {
-      serialized.status = (error as Record<string, unknown>).status
+      serialized['status'] = (error as Record<string, unknown>)['status']
     }
     if ('statusCode' in error) {
-      serialized.statusCode = (error as Record<string, unknown>).statusCode
+      serialized['statusCode'] = (error as Record<string, unknown>)['statusCode']
     }
     if ('code' in error) {
-      serialized.code = (error as Record<string, unknown>).code
+      serialized['code'] = (error as Record<string, unknown>)['code']
     }
     if ('errno' in error) {
-      serialized.errno = (error as Record<string, unknown>).errno
+      serialized['errno'] = (error as Record<string, unknown>)['errno']
     }
     
     return serialized
@@ -140,7 +140,7 @@ export const logError = (
   error: unknown,
   message: string,
   context?: ErrorContext
-) => {
+): void => {
   logger.error({
     ...(context ?? {}),
     error: serializeError(error),
@@ -157,59 +157,59 @@ export interface DebugOptions {
   performanceTracking?: boolean;
   logParams?: boolean;
   logResult?: boolean;
-  logLevel?: 'debug' | 'info' | 'warn' | 'error';
+  logLevel?: 'debug' | 'error' | 'info' | 'warn';
 }
 
 /**
  * Create a debug logger with additional context
  */
-export const createDebugLogger = (context: string, userId?: string) => {
+export const createDebugLogger = (context: string, userId?: string): object => {
   const baseLogger = createLogger(context);
-  
+
   return {
     ...baseLogger,
-    debugWithContext: (message: string, additionalContext?: Record<string, unknown>, options?: DebugOptions) => {
+    debugWithContext: (message: string, additionalContext?: Record<string, unknown>, options?: DebugOptions): void => {
       const logData: Record<string, unknown> = { ...additionalContext ?? {} };
-      
+
       if (options?.includeTimestamp) {
-        logData.timestamp = new Date().toISOString();
+        logData['timestamp'] = new Date().toISOString();
       }
-      
+
       if (options?.includeUserId && userId) {
-        logData.userId = userId;
+        logData['userId'] = userId;
       }
-      
+
       const level = options?.logLevel ?? 'debug';
       baseLogger[level](logData, message);
     },
-    
-    performanceDebug: (fn: () => unknown, operationName: string, userIdParam?: string) => {
+
+    performanceDebug: (fn: () => unknown, operationName: string, userIdParam?: string): unknown => {
       // Use Date.now() for Edge Runtime compatibility
       const start = Date.now();
-      
+
       try {
         const result = fn();
         const end = Date.now();
         const duration = end - start; // milliseconds
-        
+
         baseLogger.info({
           operation: operationName,
           duration: `${duration.toFixed(2)}ms`,
           userId: userIdParam,
         }, `Performance: ${operationName} completed`);
-        
+
         return result;
       } catch (error) {
         const end = Date.now();
         const duration = end - start;
-        
+
         baseLogger.error({
           operation: operationName,
           duration: `${duration.toFixed(2)}ms`,
           userId: userIdParam,
           error: serializeError(error),
         }, `Performance: ${operationName} failed`);
-        
+
         throw error;
       }
     }
@@ -219,9 +219,9 @@ export const createDebugLogger = (context: string, userId?: string) => {
 /**
  * Detailed logger for API requests with request/response information
  */
-export const createApiDebugLogger = () => {
+export const createApiDebugLogger = (): object => {
   const baseLogger = createLogger('API');
-  
+
   return {
     ...baseLogger,
     request: (
@@ -229,7 +229,7 @@ export const createApiDebugLogger = () => {
       method: string,
       requestContext?: Record<string, unknown>,
       userId?: string
-    ) => {
+    ): void => {
       baseLogger.info({
         url,
         method,
@@ -238,40 +238,36 @@ export const createApiDebugLogger = () => {
         ...requestContext
       }, 'API Request Started');
     },
-    
+
     response: (
       url: string,
       method: string,
-      status: number,
-      duration: number,
-      responseContext?: Record<string, unknown>,
-      userId?: string
-    ) => {
+      options: { status: number; duration: number; responseContext?: Record<string, unknown>; userId?: string }
+    ): void => {
       baseLogger.info({
         url,
         method,
-        status,
-        duration: `${duration.toFixed(2)}ms`,
-        userId,
+        status: options.status,
+        duration: `${options.duration.toFixed(2)}ms`,
+        userId: options.userId,
         timestamp: new Date().toISOString(),
-        ...responseContext
+        ...(options.responseContext ?? {})
       }, 'API Request Completed');
     },
-    
+
     error: (
       url: string,
       method: string,
       error: unknown,
-      errorContext?: Record<string, unknown>,
-      userId?: string
-    ) => {
+      options?: { errorContext?: Record<string, unknown>; userId?: string }
+    ): void => {
       baseLogger.error({
         url,
         method,
-        userId,
+        userId: options?.userId,
         timestamp: new Date().toISOString(),
         error: serializeError(error),
-        ...errorContext
+        ...(options?.errorContext ?? {})
       }, 'API Request Error');
     }
   };
@@ -292,7 +288,4 @@ export const apiDebugLogger = createApiDebugLogger();
 export const debugLogger = createDebugLogger('GlobalDebug');
 
 // Default export
-export default logger
-
-// Re-export for convenience
-export { logger }
+export { logger } // Re-export for convenience

@@ -1,16 +1,17 @@
-import { HelpCircle } from "lucide-react"
+import { HelpCircle } from 'lucide-react'
+
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from '@/components/ui/tooltip'
 
 interface TooltipHelperProps {
     content: string
     children?: React.ReactNode
     showIcon?: boolean
-    side?: "top" | "right" | "bottom" | "left"
+    side?: "bottom" | "left" | "right" | "top"
     className?: string
 }
 

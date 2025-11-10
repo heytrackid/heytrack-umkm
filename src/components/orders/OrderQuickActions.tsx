@@ -1,9 +1,5 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { useState } from 'react'
-import type { Order } from './types'
 import {
     Phone,
     MessageSquare,
@@ -11,6 +7,13 @@ import {
     Copy,
     Check
 } from 'lucide-react'
+import { useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+
+import type { Order } from '@/components/orders/types'
+
 
 interface OrderQuickActionsProps {
     order: Order
@@ -24,14 +27,14 @@ const OrderQuickActions = ({ order }: OrderQuickActionsProps) => {
             await navigator.clipboard.writeText(text)
             setCopiedField(field)
             setTimeout(() => setCopiedField(null), 2000)
-        } catch (_err) {
+        } catch (_error) {
             // Fallback for older browsers
             const textArea = document.createElement('textarea')
             textArea.value = text
-            document.body.appendChild(textArea)
+            document['body'].appendChild(textArea)
             textArea.select()
             document.execCommand('copy')
-            document.body.removeChild(textArea)
+            document['body'].removeChild(textArea)
             setCopiedField(field)
             setTimeout(() => setCopiedField(null), 2000)
         }
@@ -54,7 +57,7 @@ const OrderQuickActions = ({ order }: OrderQuickActionsProps) => {
         if (order.customer_phone) {
             const phone = order.customer_phone.replace(/\D/g, '')
             const message = encodeURIComponent(
-                `Halo ${order.customer_name}, terima kasih atas pesanan Anda (${order.order_no}). `
+                `Halo ${order['customer_name']}, terima kasih atas pesanan Anda (${order['order_no']}). `
             )
             window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
         }
@@ -133,4 +136,4 @@ const OrderQuickActions = ({ order }: OrderQuickActionsProps) => {
     )
 }
 
-export default OrderQuickActions
+export { OrderQuickActions }

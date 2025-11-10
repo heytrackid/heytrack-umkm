@@ -73,6 +73,6 @@ export function parsePaginationQuery(searchParams: URLSearchParams): PaginationQ
     limit: searchParams.get('limit'),
     offset: searchParams.get('offset'),
   }
-  
+
   return PaginationQuerySchema.parse(params)
 }

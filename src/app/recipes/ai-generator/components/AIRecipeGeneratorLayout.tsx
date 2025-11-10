@@ -1,27 +1,32 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import AppLayout from '@/components/layout/app-layout'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import { ChefHat, Sparkles, Zap, ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
+
+import { AppLayout } from '@/components/layout/app-layout'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import { useSupabase } from '@/providers/SupabaseProvider'
 import { typedInsert } from '@/lib/supabase-client'
-import type { Insert, Row } from '@/types/database'
-import type { GeneratedRecipe, AvailableIngredient } from './types'
-
-import { HppEstimator } from './HppEstimator'
-import { SmartIngredientSelector } from './SmartIngredientSelector'
 import { loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
+import { useSupabase } from '@/providers/SupabaseProvider'
 
-import GeneratedRecipeDisplay from './GeneratedRecipeDisplay'
-import RecipePreviewCard from './RecipePreviewCard'
-import RecipeGeneratorForm from './RecipeGeneratorForm'
+
+import type { Insert, Row } from '@/types/database'
+
+import { GeneratedRecipeDisplay } from '@/app/recipes/ai-generator/components/GeneratedRecipeDisplay'
+import { HppEstimator } from '@/app/recipes/ai-generator/components/HppEstimator'
+import { RecipeGeneratorForm } from '@/app/recipes/ai-generator/components/RecipeGeneratorForm'
+import { RecipePreviewCard } from '@/app/recipes/ai-generator/components/RecipePreviewCard'
+import { SmartIngredientSelector } from '@/app/recipes/ai-generator/components/SmartIngredientSelector'
+
+
+
+import type { GeneratedRecipe, AvailableIngredient } from '@/app/recipes/ai-generator/components/types'
 
 // AI Recipe Generator Layout - Enhanced Interactive Version
 // Improved UX with live preview, quick mode, and better guidance
@@ -50,7 +55,7 @@ const AIRecipeGeneratorPage = () => {
   const [generatedRecipe, setGeneratedRecipe] = useState<GeneratedRecipe | null>(null)
 
   // Mode state (quick vs complete)
-  const [mode, setMode] = useState<'quick' | 'complete'>('quick')
+  const [mode, setMode] = useState<'complete' | 'quick'>('quick')
 
   // Wizard state
   const [currentStep, setCurrentStep] = useState(1)
@@ -72,7 +77,7 @@ const AIRecipeGeneratorPage = () => {
         description: 'Sesi Anda telah berakhir. Silakan login kembali.',
         variant: 'destructive',
       })
-      void router.push('/auth/login')
+      router.push('/auth/login')
     }
   }, [isAuthLoading, isAuthenticated, router, toast])
 
@@ -99,23 +104,23 @@ const AIRecipeGeneratorPage = () => {
    }, [toast])
 
    const fetchIngredients = useCallback(async () => {
-     const { data, error } = await supabase
-       .from('ingredients')
-       .select('*')
-       .order('name')
-       .returns<Array<Row<'ingredients'>>>()
+      const { data, error } = await supabase
+        .from('ingredients')
+        .select('id, name, unit, price_per_unit, current_stock, min_stock')
+        .order('name')
+        .returns<Array<Row<'ingredients'>>>()
 
      if (!error && data) {
-       const ingredients: AvailableIngredient[] = data.map((item) => ({
-         id: item.id,
-         name: item.name,
-         unit: item.unit,
-         price_per_unit: item.price_per_unit,
-         current_stock: item.current_stock,
-         minimum_stock: item.min_stock ?? undefined
-       }))
+        const ingredients = data.map((item): AvailableIngredient => ({
+          id: item['id'],
+          name: item.name,
+          unit: item.unit,
+          price_per_unit: item.price_per_unit,
+          current_stock: item.current_stock,
+          ...(item.min_stock !== null && { minimum_stock: item.min_stock })
+        }))
 
-       void setAvailableIngredients(ingredients)
+       setAvailableIngredients(ingredients)
      }
    }, [supabase])
 
@@ -137,8 +142,8 @@ const AIRecipeGeneratorPage = () => {
       return
     }
 
-    void setLoading(true)
-    void setGeneratedRecipe(null)
+    setLoading(true)
+    setGeneratedRecipe(null)
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -159,17 +164,17 @@ const AIRecipeGeneratorPage = () => {
           targetPrice: targetPrice ? parseFloat(targetPrice) : undefined,
           dietaryRestrictions,
           preferredIngredients: selectedIngredients,
-          userId: user.id
+          userId: user['id']
         })
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error ?? 'Failed to generate recipe')
+        const errorData = await response.json() as { error?: string }
+        throw new Error(errorData.error ?? 'Failed to generate recipe')
       }
 
-      const data = await response.json()
-      void setGeneratedRecipe(data.recipe)
+      const data = await response.json() as { recipe: GeneratedRecipe }
+      setGeneratedRecipe(data.recipe)
 
       toast({
         title: '✨ Resep berhasil dibuat!',
@@ -183,7 +188,7 @@ const AIRecipeGeneratorPage = () => {
         variant: 'destructive',
       })
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [productName, productType, servings, targetPrice, dietaryRestrictions, selectedIngredients, toast, supabase])
 
@@ -199,7 +204,7 @@ const AIRecipeGeneratorPage = () => {
 
       // Save recipe to database
       const recipeInsert: Insert<'recipes'> = {
-        user_id: user.id,
+        user_id: user['id'],
         name: generatedRecipe.name,
         category: generatedRecipe.category,
         servings: generatedRecipe.servings,
@@ -230,11 +235,11 @@ const AIRecipeGeneratorPage = () => {
           }
 
           return {
-            recipe_id: recipe.id,
-            ingredient_id: ingredient.id,
+            recipe_id: recipe['id'],
+            ingredient_id: ingredient['id'],
             quantity: ing.quantity,
             unit: ing.unit,
-            user_id: user.id
+            user_id: user['id']
           }
         })
         .filter((value): value is Insert<'recipe_ingredients'> => value !== null)
@@ -251,11 +256,11 @@ const AIRecipeGeneratorPage = () => {
       })
 
       // Reset form & clear draft
-      void setGeneratedRecipe(null)
-      void setProductName('')
-      void setServings(2)
-      void setTargetPrice('')
-      void setSelectedIngredients([])
+      setGeneratedRecipe(null)
+      setProductName('')
+      setServings(2)
+      setTargetPrice('')
+      setSelectedIngredients([])
 
       clearDraft() // Sprint 1: Clear saved draft
 
@@ -270,7 +275,7 @@ const AIRecipeGeneratorPage = () => {
    }, [generatedRecipe, availableIngredients, toast, supabase])
 
   const handleGenerateAgain = useCallback(() => {
-    void setGeneratedRecipe(null)
+    setGeneratedRecipe(null)
   }, [])
 
   // Wizard navigation
@@ -384,20 +389,20 @@ const AIRecipeGeneratorPage = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-4">
               {wizardSteps.map((step, index) => (
-                <div key={step.id} className="flex items-center flex-1">
+                <div key={step['id']} className="flex items-center flex-1">
                   <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-full border-2 cursor-pointer transition-all ${getStepClassName(step.id)}`}
-                    onClick={() => handleStepClick(step.id)}
+                    className={`flex items-center justify-center w-10 h-10 rounded-full border-2 cursor-pointer transition-all ${getStepClassName(step['id'])}`}
+                    onClick={() => handleStepClick(step['id'])}
                   >
-                    {step.id < currentStep ? (
+                    {step['id'] < currentStep ? (
                       <CheckCircle className="h-5 w-5" />
                     ) : (
-                      <span className="text-sm font-medium">{step.id}</span>
+                      <span className="text-sm font-medium">{step['id']}</span>
                     )}
                   </div>
                   <div className="ml-3 flex-1">
                     <div className={`text-sm font-medium ${
-                      step.id <= currentStep ? 'text-foreground' : 'text-muted-foreground'
+                      step['id'] <= currentStep ? 'text-foreground' : 'text-muted-foreground'
                     }`}>
                       {step.title}
                     </div>
@@ -407,7 +412,7 @@ const AIRecipeGeneratorPage = () => {
                   </div>
                   {index < wizardSteps.length - 1 && (
                     <div className={`flex-1 h-px mx-4 ${
-                      step.id < currentStep ? 'bg-primary' : 'bg-muted-foreground/30'
+                      step['id'] < currentStep ? 'bg-primary' : 'bg-muted-foreground/30'
                     }`} />
                   )}
                 </div>
@@ -445,14 +450,14 @@ const AIRecipeGeneratorPage = () => {
             {/* Step 2: Ingredient Selection */}
             {currentStep === 2 && !generatedRecipe && (
               <SmartIngredientSelector
-                availableIngredients={availableIngredients.map(ing => ({
-                  id: ing.id,
-                  name: ing.name,
-                  unit: ing.unit,
-                  price_per_unit: ing.price_per_unit,
-                  current_stock: ing.current_stock ?? 0,
-                  minimum_stock: ing.minimum_stock ?? undefined
-                }))}
+                  availableIngredients={availableIngredients.map(ing => ({
+                    id: ing['id'],
+                    name: ing.name,
+                    unit: ing.unit,
+                    price_per_unit: ing.price_per_unit,
+                    current_stock: ing.current_stock ?? 0,
+                    ...(ing.minimum_stock !== undefined && { minimum_stock: ing.minimum_stock })
+                  }))}
                 selectedIngredients={selectedIngredients}
                 onSelectionChange={setSelectedIngredients}
                 productType={productType}
@@ -501,19 +506,19 @@ const AIRecipeGeneratorPage = () => {
           <div className="space-y-6">
             {/* Sprint 1: HPP Estimator */}
             {!generatedRecipe && !loading && (
-              <HppEstimator
-                selectedIngredients={availableIngredients
-                  .filter(ing => selectedIngredients.includes(ing.id))
-                  .map(ing => ({
-                    id: ing.id,
-                    name: ing.name,
-                    unit: ing.unit,
-                    price_per_unit: ing.price_per_unit,
-                    current_stock: ing.current_stock ?? 0
-                  }))}
-                servings={servings}
-                targetPrice={targetPrice ? parseFloat(targetPrice) : undefined}
-              />
+               <HppEstimator
+                 selectedIngredients={availableIngredients
+                   .filter(ing => selectedIngredients.includes(ing['id']))
+                   .map(ing => ({
+                     id: ing['id'],
+                     name: ing.name,
+                     unit: ing.unit,
+                     price_per_unit: ing.price_per_unit,
+                     current_stock: ing.current_stock ?? 0
+                   }))}
+                 servings={servings}
+                 {...(targetPrice && { targetPrice: parseFloat(targetPrice) })}
+               />
             )}
             {loading && (
               <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
@@ -664,4 +669,4 @@ const AIRecipeGeneratorPage = () => {
   )
 }
 
-export default AIRecipeGeneratorPage
+export { AIRecipeGeneratorPage }

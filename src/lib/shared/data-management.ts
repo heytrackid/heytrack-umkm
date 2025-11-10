@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ClientFile')
@@ -13,7 +14,7 @@ const logger = createClientLogger('ClientFile')
 
 // Cache implementation
 class MemoryCache {
-  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
+  private readonly cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
 
   set<T>(key: string, data: T, ttl = 5 * 60 * 1000) { // 5 minutes default
     this.cache.set(key, {
@@ -27,12 +28,12 @@ class MemoryCache {
     const item = this.cache.get(key)
     if (!item) {return null}
 
-    if (Date.now() - item.timestamp > item.ttl) {
+    if (Date.now() - item['timestamp'] > item.ttl) {
       this.cache.delete(key)
       return null
     }
 
-    return item.data as T
+    return item['data'] as T
   }
 
   delete(key: string) {
@@ -46,7 +47,7 @@ class MemoryCache {
   cleanup() {
     const now = Date.now()
     for (const [key, value] of this.cache.entries()) {
-      if (now - value.timestamp > value.ttl) {
+      if (now - value['timestamp'] > value.ttl) {
         this.cache.delete(key)
       }
     }
@@ -94,22 +95,22 @@ export function useCachedData<T>(
     if (!force) {
       const cached = globalCache.get<T>(key)
       if (cached) {
-        void setData(cached)
+        setData(cached)
         return
       }
     }
 
-    void setLoading(true)
-    void setError(null)
+    setLoading(true)
+    setError(null)
 
     try {
       const result = await fetcher()
-      void setData(result)
+      setData(result)
       globalCache.set<T>(key, result, ttl)
-    } catch (err) {
-      void setError(err as Error)
+    } catch (error) {
+      setError(error as Error)
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [key, fetcher, ttl, enabled])
 
@@ -120,7 +121,7 @@ export function useCachedData<T>(
       // Try to get from cache first
       const cached = globalCache.get<T>(key)
       if (cached) {
-        void setData(cached)
+        setData(cached)
       } else {
         void fetchData()
       }
@@ -150,17 +151,17 @@ export function useDataSync<T>(
   const [lastSynced, setLastSynced] = useState<Date | null>(null)
 
   const sync = useCallback(async () => {
-    void setSyncing(true)
+    setSyncing(true)
     try {
       const syncedData = await syncFunction(data)
-      void setData(syncedData)
+      setData(syncedData)
       setLastSynced(new Date())
       globalCache.set(`${key}_synced`, syncedData)
-    } catch (err) {
-      logger.error({ err, key }, 'Sync failed')
-      throw err
+    } catch (error) {
+      logger.error({ error, key }, 'Sync failed')
+      throw error
     } finally {
-      void setSyncing(false)
+      setSyncing(false)
     }
   }, [data, key, syncFunction])
 
@@ -195,21 +196,21 @@ export function useOptimisticUpdate<T>(
     const previousData = data
 
     // Optimistically update UI
-    void setData(newData)
-    void setUpdating(true)
-    void setError(null)
+    setData(newData)
+    setUpdating(true)
+    setError(null)
 
     try {
       // Attempt to persist the change
       const result = await updateFunction(newData)
       setData(result) // Use server response
-    } catch (err) {
+    } catch (error) {
       // Revert on error
-      void setData(previousData)
-      void setError(err as Error)
-      throw err
+      setData(previousData)
+      setError(error as Error)
+      throw error
     } finally {
-      void setUpdating(false)
+      setUpdating(false)
     }
   }, [data, updateFunction])
 
@@ -242,7 +243,7 @@ export function usePagination(
 
   const goToPage = useCallback((newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
-      void setPage(newPage)
+      setPage(newPage)
     }
   }, [totalPages])
 
@@ -255,12 +256,12 @@ export function usePagination(
   }, [page, goToPage])
 
   const changeLimit = useCallback((newLimit: number) => {
-    void setLimit(newLimit)
+    setLimit(newLimit)
     setPage(1) // Reset to first page when changing limit
   }, [])
 
   const updateTotal = useCallback((newTotal: number) => {
-    void setTotal(newTotal)
+    setTotal(newTotal)
   }, [])
 
   const pagination: PaginationState = {
@@ -298,26 +299,26 @@ export function useInfiniteScroll<T>(
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) {return}
 
-    void setLoading(true)
-    void setError(null)
+    setLoading(true)
+    setError(null)
 
     try {
       const result = await fetchFunction(page, limit)
-      void setData(prev => [...prev, ...result.data])
-      void setHasMore(result.hasMore)
-      void setPage(prev => prev + 1)
-    } catch (err) {
-      void setError(err as Error)
+      setData(prev => [...prev, ...result['data']])
+      setHasMore(result.hasMore)
+      setPage(prev => prev + 1)
+    } catch (error) {
+      setError(error as Error)
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [fetchFunction, page, limit, loading, hasMore])
 
   const reset = useCallback(() => {
-    void setData([])
-    void setPage(1)
-    void setHasMore(true)
-    void setError(null)
+    setData([])
+    setPage(1)
+    setHasMore(true)
+    setError(null)
   }, [])
 
   const refresh = useCallback(async () => {
@@ -343,7 +344,7 @@ export function useSearchAndFilter<T>(
   filterOptions: Array<{
     field: keyof T
     value: unknown
-    operator?: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'greaterThan' | 'lessThan'
+    operator?: 'contains' | 'endsWith' | 'equals' | 'greaterThan' | 'lessThan' | 'startsWith'
   }> = []
 ) {
   const [searchTerm, setSearchTerm] = useState('')
@@ -411,8 +412,8 @@ export function useSearchAndFilter<T>(
   }, [])
 
   const clearAllFilters = useCallback(() => {
-    void setFilters({})
-    void setSearchTerm('')
+    setFilters({})
+    setSearchTerm('')
   }, [])
 
   return {

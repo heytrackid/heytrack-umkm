@@ -1,5 +1,6 @@
 import { apiLogger } from '@/lib/logger'
 import { isArrayOf, isProductionBatch, getErrorMessage } from '@/lib/type-guards'
+
 import type { Row, Insert, ProductionStatus } from '@/types/database'
 
 
@@ -40,11 +41,11 @@ export interface ProductionCapacity {
 // Timeline and scheduling types
 export interface TimelineSlot {
   batch_id: string
-  resource_type: 'oven' | 'mixer' | 'decorator' | 'packaging'
+  resource_type: 'decorator' | 'mixer' | 'oven' | 'packaging'
   resource_id: string
   start_time: string
   end_time: string
-  status: 'available' | 'occupied' | 'blocked'
+  status: 'available' | 'blocked' | 'occupied'
 }
 
 export interface SchedulingResult {
@@ -88,7 +89,7 @@ export class BatchSchedulingService {
         throw new Error(`Failed to fetch batches: ${errorText}`)
       }
       const data = await response.json()
-      
+
       // Validate the data structure with type guards
       if (Array.isArray(data)) {
         // If the API returns an array directly
@@ -108,8 +109,8 @@ export class BatchSchedulingService {
       
       apiLogger.warn({ data }, 'API returned unexpected format for batches')
       return []
-    } catch (err) {
-      const message = getErrorMessage(err)
+    } catch (error) {
+      const message = getErrorMessage(error)
       apiLogger.error({ error: message }, 'Error fetching scheduled batches')
       return []
     }
@@ -131,16 +132,16 @@ export class BatchSchedulingService {
         throw new Error(`Failed to create batch: ${errorText}`)
       }
       const data = await response.json()
-      
+
       // Validate the response with type guards
       if (isProductionBatch(data)) {
         return data
       }
-      
+
       apiLogger.warn({ data }, 'API returned unexpected format for created batch')
       return null
-    } catch (err) {
-      const message = getErrorMessage(err)
+    } catch (error) {
+      const message = getErrorMessage(error)
       apiLogger.error({ error: message }, 'Error creating batch')
       return null
     }
@@ -161,8 +162,8 @@ export class BatchSchedulingService {
         credentials: 'include', // Include cookies for authentication
       })
       return response.ok
-    } catch (err) {
-      const message = getErrorMessage(err)
+    } catch (error) {
+      const message = getErrorMessage(error)
       apiLogger.error({ error: message }, 'Error updating batch status')
       return false
     }
@@ -173,7 +174,7 @@ export class BatchSchedulingService {
    */
   static calculateCapacity(batches: ProductionBatch[]): number {
     return batches.reduce((total, batch) => {
-      if (batch.status !== 'CANCELLED') {
+      if (batch['status'] !== 'CANCELLED') {
         return total + (batch.quantity || 0)
       }
       return total
@@ -193,8 +194,8 @@ export class BatchSchedulingService {
       }
       const data = await response.json()
       return data as ProductionConstraints
-    } catch (err) {
-      const message = getErrorMessage(err)
+    } catch (error) {
+      const message = getErrorMessage(error)
       apiLogger.error({ error: message }, 'Error fetching production capacity')
       // Return default constraints
       return {
@@ -228,8 +229,8 @@ export class BatchSchedulingService {
         credentials: 'include', // Include cookies for authentication
       })
       return response.ok
-    } catch (err) {
-      const message = getErrorMessage(err)
+    } catch (error) {
+      const message = getErrorMessage(error)
       apiLogger.error({ error: message }, 'Error updating production constraints')
       return false
     }

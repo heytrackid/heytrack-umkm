@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
+
 import type { Row, Insert, Update } from '@/types/database'
 
 const logger = createClientLogger('Hook')
@@ -35,7 +37,7 @@ export function useIngredientPurchases(options?: UseIngredientPurchasesOptions) 
         throw new Error('Failed to fetch ingredient purchases')
       }
       const result = await response.json() as { data?: IngredientPurchase[] }
-      return result.data ?? []
+      return result['data'] ?? []
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000,
@@ -111,7 +113,7 @@ export function useUpdateIngredientPurchase() {
       return response.json()
     },
     onSuccess: (_, variables) => {
-      void queryClient.invalidateQueries({ queryKey: ['ingredient-purchase', variables.id] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredient-purchase', variables['id']] })
       void queryClient.invalidateQueries({ queryKey: ['ingredient-purchases'] })
 
       toast({

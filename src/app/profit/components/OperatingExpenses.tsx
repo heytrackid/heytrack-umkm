@@ -1,6 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Receipt } from 'lucide-react'
-import type { ProfitData } from './types'
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+
+import type { ProfitData } from '@/app/profit/components/types'
 
 
 interface OperatingExpensesProps {

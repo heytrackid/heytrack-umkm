@@ -1,4 +1,3 @@
-import type { ApiError, ApiResponse } from './api';
 import type { 
 
 
@@ -30,6 +29,8 @@ import type {
   UserProfilesTable 
 } from '@/types/database';
 
+import type { ApiError, ApiResponse } from '@/types/shared/api';
+
 // Type aliases for easier use in guards
 type Customer = CustomersTable;
 type Ingredient = IngredientsTable;
@@ -40,7 +41,7 @@ type Recipe = RecipesTable;
 type RecipeIngredient = RecipeIngredientsTable;
 type Supplier = SuppliersTable;
 type UserProfile = UserProfilesTable;
-type PaymentStatus = 'unpaid' | 'partial' | 'paid';
+type PaymentStatus = 'paid' | 'partial' | 'unpaid';
 
 /**
  * Check if a value is a non-null object

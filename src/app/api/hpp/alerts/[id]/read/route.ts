@@ -1,17 +1,21 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { apiLogger, logError } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger, logError } from '@/lib/logger'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
+
+
 async function putHandler(
-  request: NextRequest,
+  _req: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   try {
-    const alertId = params.id
+    const alertId = params['id']
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -20,7 +24,7 @@ async function putHandler(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    apiLogger.info({ alertId, userId: user.id }, 'Marking HPP alert as read')
+    apiLogger.info({ alertId, userId: user['id'] }, 'Marking HPP alert as read')
 
     // Update the alert to mark it as read
     const { data, error } = await supabase
@@ -31,7 +35,7 @@ async function putHandler(
         updated_at: new Date().toISOString()
       })
       .eq('id', alertId)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select()
       .single()
 
@@ -47,7 +51,7 @@ async function putHandler(
       )
     }
 
-    apiLogger.info({ alertId, userId: user.id }, 'Alert marked as read successfully')
+    apiLogger.info({ alertId, userId: user['id'] }, 'Alert marked as read successfully')
 
     return NextResponse.json({
       success: true,

@@ -17,8 +17,8 @@ export const ReactQueryProvider = ({ children }: ReactQueryProviderProps) => {
         refetchOnWindowFocus: false,
         retry: (failureCount, error) => {
           // Don't retry on 4xx errors
-          if (error instanceof Error && 'status' in error && typeof error.status === 'number') {
-            if (error.status >= 400 && error.status < 500) {
+          if (error instanceof Error && 'status' in error && typeof error['status'] === 'number') {
+            if (error['status'] >= 400 && error['status'] < 500) {
               return false
             }
           }
@@ -34,7 +34,7 @@ export const ReactQueryProvider = ({ children }: ReactQueryProviderProps) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+      {process['env'].NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   )
 }

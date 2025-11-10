@@ -1,181 +1,250 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 /**
  * Enhanced AI Chat API with Context Awareness and Session Persistence
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
-import { ContextAwareAI } from '@/lib/ai-chatbot-enhanced';
-import { ChatSessionService } from '@/lib/services/ChatSessionService';
-import { BusinessContextService } from '@/lib/services/BusinessContextService';
-import { SuggestionEngine } from '@/lib/services/SuggestionEngine';
-import { AIFallbackService } from '@/lib/services/AIFallbackService';
-import { RateLimiter, RATE_LIMITS } from '@/lib/services/RateLimiter';
-import { logger } from '@/lib/logger';
-import { createClient } from '@/utils/supabase/server';
-import { APIError } from '@/lib/errors/api-error-handler';
+import { NextResponse, type NextRequest } from 'next/server'
+import { z } from 'zod'
 
-export const runtime = 'nodejs';
-export const maxDuration = 30;
 
-export async function POST(request: NextRequest) {
-  const startTime = Date.now();
+import { ContextAwareAI } from '@/lib/ai-chatbot-enhanced'
+import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
+import { logger } from '@/lib/logger'
+import { AIFallbackService } from '@/lib/services/AIFallbackService'
+import { BusinessContextService } from '@/lib/services/BusinessContextService'
+import { ChatSessionService } from '@/lib/services/ChatSessionService'
+import { RateLimiter, RATE_LIMITS } from '@/lib/services/RateLimiter'
+import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
+import type { Database } from '@/types/database'
+import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
+
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+export const maxDuration = 30
+
+const ChatRequestSchema = z.object({
+  message: z.string().min(1, 'Message is required').max(2000),
+  session_id: z
+    .string()
+    .trim()
+    .min(1)
+    .max(64)
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Invalid session id')
+    .optional(),
+  currentPage: z.string().trim().max(200).optional()
+}).strict()
+
+async function authenticateUser(supabase: SupabaseClient<Database>): Promise<{ userId: string }> {
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
+  }
+
+  return { userId: user['id'] }
+}
+
+function checkRateLimits(userId: string): void {
+  // Rate limiting - per minute
+  const rateLimitKey = `ai-chat:${userId}`
+  if (!RateLimiter.check(rateLimitKey, RATE_LIMITS.AI_CHAT.maxRequests, RATE_LIMITS.AI_CHAT.windowMs)) {
+    const resetTime = RateLimiter.getResetTime(rateLimitKey)
+    const remaining = RateLimiter.getRemaining(rateLimitKey, RATE_LIMITS.AI_CHAT.maxRequests)
+
+    logger.warn({ userId, remaining, resetTime }, 'AI chat rate limit exceeded')
+
+    throw new APIError(
+      'Terlalu banyak permintaan. Silakan tunggu sebentar.',
+      { status: 429, code: 'RATE_LIMIT_EXCEEDED' }
+    )
+  }
+
+  // Rate limiting - per hour
+  const hourlyRateLimitKey = `ai-chat-hourly:${userId}`
+  if (!RateLimiter.check(hourlyRateLimitKey, RATE_LIMITS.AI_CHAT_HOURLY.maxRequests, RATE_LIMITS.AI_CHAT_HOURLY.windowMs)) {
+    throw new APIError(
+      'Anda telah mencapai batas maksimal chat per jam. Silakan coba lagi nanti.',
+      { status: 429, code: 'RATE_LIMIT_EXCEEDED' }
+    )
+  }
+}
+
+function validateAndSanitizeMessage(message: string, userId: string): string {
+  if (!message || typeof message !== 'string') {
+    throw new APIError('Message is required', { status: 400 })
+  }
+
+  // Sanitize message - prevent injection attacks
+  let sanitizedMessage = message
+    .trim()
+    .substring(0, 2000) // Max 2000 characters
+    .split('')
+    .filter(char => char.charCodeAt(0) >= 32 && char.charCodeAt(0) !== 127)
+    .join('')
+
+  sanitizedMessage = InputSanitizer.sanitizeHtml(sanitizedMessage)
+
+  if (sanitizedMessage.length === 0) {
+    throw new APIError('Message cannot be empty', { status: 400 })
+  }
+
+  // Enhanced input validation and security checks
+  const suspiciousPatterns = [
+    // Prompt injection patterns
+    /ignore\s+(previous|all|above)\s+instructions?/i,
+    /forget\s+(everything|all|previous)/i,
+    /you\s+are\s+now/i,
+    /new\s+instructions?:/i,
+    /system\s*:\s*/i,
+    /\[SYSTEM\]/i,
+    /<\|im_start\|>/i,
+    /<\|im_end\|>/i,
+    // Additional security patterns
+    /override.*settings/i,
+    /bypass.*security/i,
+    /admin.*mode/i,
+    /root.*access/i,
+    /sudo/i,
+    /eval\s*\(/i,
+    /exec\s*\(/i,
+    /require\s*\(/i,
+    /import\s*\(/i,
+    // SQL injection patterns
+    /union\s+select/i,
+    /drop\s+table/i,
+    /alter\s+table/i,
+    /script.*alert/i,
+    /javascript:/i,
+    /onload\s*=/i,
+    /onerror\s*=/i,
+  ]
+
+  const containsSuspiciousPattern = suspiciousPatterns.some(pattern => pattern.test(sanitizedMessage))
+
+  if (containsSuspiciousPattern) {
+    logger.warn(
+      { userId, message: sanitizedMessage.substring(0, 100) },
+      'Potential security threat detected in AI chat input'
+    )
+    throw new APIError('Input mengandung konten yang tidak diizinkan.', { status: 400, code: 'INVALID_INPUT' })
+  }
+
+  // Content quality checks
+  const spamPatterns = [
+    /(.)\1{10,}/, // Repeated characters
+    /\b(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+\.[a-z]{2,}(?:\/\S*)?/gi, // URLs
+    /\b\d{10,}\b/g, // Long numbers (potentially phone numbers)
+  ]
+
+  const containsSpam = spamPatterns.some(pattern => pattern.test(sanitizedMessage))
+  if (containsSpam) {
+    logger.warn({ userId }, 'Potential spam content detected')
+    throw new APIError('Input terdeteksi sebagai spam.', { status: 400, code: 'SPAM_DETECTED' })
+  }
+
+  // Length and content validation
+  if (sanitizedMessage.length < 2) {
+    throw new APIError('Pertanyaan terlalu pendek. Minimal 2 karakter.', { status: 400 })
+  }
+
+  if (sanitizedMessage.length > 2000) {
+    throw new APIError('Pertanyaan terlalu panjang. Maksimal 2000 karakter.', { status: 400 })
+  }
+
+  // Check for meaningful content (not just symbols/numbers)
+  const meaningfulContent = sanitizedMessage.replace(/[^\w\s]/g, '').trim()
+  if (meaningfulContent.length < 1) {
+    throw new APIError('Pertanyaan harus mengandung kata yang bermakna.', { status: 400 })
+  }
+
+  return sanitizedMessage
+}
+
+async function handleSession(supabase: SupabaseClient, userId: string, sessionId: string | undefined, message: string, currentPage?: string): Promise<string> {
+  if (sessionId) {return sessionId}
+
+  const context = await BusinessContextService.loadContext(userId, currentPage)
+  const title = ChatSessionService.generateTitle(message)
+  const session = await ChatSessionService.createSession(supabase, userId, title, context)
+  return session['id']
+}
+
+async function processAIResponse(
+  userId: string,
+  sessionId: string,
+  sanitizedMessage: string,
+  currentPage?: string
+): Promise<{ aiResponse: string; fallbackUsed: boolean }> {
+  const context = await BusinessContextService.loadContext(userId, currentPage)
+
+  const fallbackResult = await AIFallbackService.getResponseWithFallback(
+    sanitizedMessage,
+    context,
+    async () => {
+      const ai = new ContextAwareAI(userId, sessionId)
+      await ai.initializeSession()
+      const result = await ai.processQuery(sanitizedMessage, context as Record<string, unknown>)
+      return result.content || ''
+    }
+  )
+
+  return { aiResponse: fallbackResult.response, fallbackUsed: fallbackResult.fallbackUsed }
+}
+
+async function chatEnhancedPOST(request: NextRequest): Promise<NextResponse> {
+  const startTime = Date.now()
 
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
+    const { userId } = await authenticateUser(supabase)
 
-    // Get authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    await checkRateLimits(userId)
 
-    if (authError || !user) {
-      throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' });
-    }
+    const sanitizedBody = APISecurity.sanitizeRequestBody(await request.json())
+    const { message, session_id, currentPage } = ChatRequestSchema.parse(sanitizedBody)
 
-    // Rate limiting - per minute
-    const rateLimitKey = `ai-chat:${user.id}`;
-    if (!RateLimiter.check(rateLimitKey, RATE_LIMITS.AI_CHAT.maxRequests, RATE_LIMITS.AI_CHAT.windowMs)) {
-      const resetTime = RateLimiter.getResetTime(rateLimitKey);
-      const remaining = RateLimiter.getRemaining(rateLimitKey, RATE_LIMITS.AI_CHAT.maxRequests);
-      
-      logger.warn(
-        { userId: user.id, remaining, resetTime },
-        'AI chat rate limit exceeded'
-      );
-      
-      throw new APIError(
-        'Terlalu banyak permintaan. Silakan tunggu sebentar.',
-        { status: 429, code: 'RATE_LIMIT_EXCEEDED' }
-      );
-    }
+    const sanitizedMessage = validateAndSanitizeMessage(message, userId)
+    const safeSessionId = session_id ? InputSanitizer.sanitizeSQLInput(session_id) : undefined
+    const safeCurrentPage = currentPage
+      ? (() => {
+          const sanitized = InputSanitizer.sanitizeHtml(currentPage).slice(0, 200).trim()
+          return sanitized.length ? sanitized : undefined
+        })()
+      : undefined
 
-    // Rate limiting - per hour
-    const hourlyRateLimitKey = `ai-chat-hourly:${user.id}`;
-    if (!RateLimiter.check(hourlyRateLimitKey, RATE_LIMITS.AI_CHAT_HOURLY.maxRequests, RATE_LIMITS.AI_CHAT_HOURLY.windowMs)) {
-      throw new APIError(
-        'Anda telah mencapai batas maksimal chat per jam. Silakan coba lagi nanti.',
-        { status: 429, code: 'RATE_LIMIT_EXCEEDED' }
-      );
-    }
+    const sessionId = await handleSession(supabase, userId, safeSessionId, sanitizedMessage, safeCurrentPage)
 
-    const body = await request.json();
-    const { message, session_id, currentPage } = body;
+    await ChatSessionService.addMessage(supabase, sessionId, 'user', sanitizedMessage)
 
-    // Input validation and sanitization
-    if (!message || typeof message !== 'string') {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
-    }
+    const { aiResponse, fallbackUsed } = await processAIResponse(userId, sessionId, sanitizedMessage, safeCurrentPage)
 
-    // Sanitize message - prevent injection attacks
-    const sanitizedMessage = message
-      .trim()
-      .substring(0, 2000) // Max 2000 characters
-      .split('').filter(char => char.charCodeAt(0) >= 32 && char.charCodeAt(0) !== 127).join(''); // Remove control characters
-
-    if (sanitizedMessage.length === 0) {
-      return NextResponse.json(
-        { error: 'Message cannot be empty' },
-        { status: 400 }
-      );
-    }
-
-    // Detect potential prompt injection attempts
-    const suspiciousPatterns = [
-      /ignore\s+(previous|all|above)\s+instructions?/i,
-      /forget\s+(everything|all|previous)/i,
-      /you\s+are\s+now/i,
-      /new\s+instructions?:/i,
-      /system\s*:\s*/i,
-      /\[SYSTEM\]/i,
-      /<\|im_start\|>/i,
-      /<\|im_end\|>/i,
-    ];
-
-    const containsSuspiciousPattern = suspiciousPatterns.some(pattern =>
-      pattern.test(sanitizedMessage)
-    );
-
-    if (containsSuspiciousPattern) {
-      logger.warn(
-        { userId: user.id, message: sanitizedMessage.substring(0, 100) },
-        'Potential prompt injection attempt detected'
-      );
-      // Don't reject, but log for monitoring
-    }
-
-    // Get or create session
-    let sessionId = session_id;
-    if (!sessionId) {
-      const context = await BusinessContextService.loadContext(
-        user.id,
-        currentPage
-      );
-      const title = ChatSessionService.generateTitle(message);
-      const session = await ChatSessionService.createSession(
-        user.id,
-        title,
-        context
-      );
-      sessionId = session.id;
-    }
-
-    // Save user message (use sanitized version)
-    await ChatSessionService.addMessage(sessionId, 'user', sanitizedMessage);
-
-    // Load business context
-    const context = await BusinessContextService.loadContext(
-      user.id,
-      currentPage
-    );
-
-    // Get AI response with fallback (use sanitized message)
-    const fallbackResult = await AIFallbackService.getResponseWithFallback(
-        sanitizedMessage,
-        context,
-        async () => {
-          const ai = new ContextAwareAI(user.id, sessionId);
-          await ai.initializeSession();
-          const result = await ai.processQuery(sanitizedMessage, context as Record<string, unknown>);
-          return result.content || '';
-        }
-      );
-    const aiResponse = fallbackResult.response;
-    const {fallbackUsed} = fallbackResult;
-
-    // Save assistant message
-    const responseTime = Date.now() - startTime;
-    await ChatSessionService.addMessage(sessionId, 'assistant', aiResponse, {
+    const responseTime = Date.now() - startTime
+    await ChatSessionService.addMessage(supabase, sessionId, 'assistant', aiResponse, {
       response_time_ms: responseTime,
       fallback_used: fallbackUsed,
-    });
+    })
 
-    // Generate suggestions
-    const suggestions = SuggestionEngine.generateSuggestions(context);
+    const context = await BusinessContextService.loadContext(userId, safeCurrentPage)
+    const suggestions = SuggestionEngine.generateSuggestions(context)
 
-    logger.info(`Chat message processed - User: ${user.id}, Session: ${sessionId}, Response time: ${responseTime}ms, Fallback: ${fallbackUsed}`);
+    logger.info(`Chat message processed - User: ${userId}, Session: ${sessionId}, Response time: ${responseTime}ms, Fallback: ${fallbackUsed}`)
 
     return NextResponse.json({
       message: aiResponse,
       session_id: sessionId,
-      suggestions,
+      suggestions: suggestions.map(s => s.text),
       metadata: {
         response_time_ms: responseTime,
         fallback_used: fallbackUsed,
       },
-    });
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error(`Error in enhanced chat API: ${errorMessage}`);
-
-    return NextResponse.json(
-      {
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    })
+  } catch (error) {
+    logger.error({ error }, 'Error in AI chat')
+    return handleAPIError(error, 'POST /api/ai/chat-enhanced')
   }
 }
+
+export const POST = withSecurity(chatEnhancedPOST, SecurityPresets.enhanced())

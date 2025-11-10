@@ -3,9 +3,10 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
+// import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DateRangePicker, type DateRangeValue } from '@/components/ui/date-range'
 
 type HppExportFormat = 'csv' | 'excel' | 'json' | 'pdf'
 type HppExportMetric = 'alerts' | 'cost_breakdown' | 'hpp' | 'margin' | 'recommendations' | 'trends'
@@ -38,29 +39,19 @@ const ReportsTabContent = ({ config, setConfig, generateReport, generating }: Re
     </CardHeader>
     <CardContent className="space-y-6">
       {/* Date Range */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="start-date">Start Date</Label>
-          <Input
-            id="start-date"
-            type="date"
-            value={config.dateRange.start}
-            onChange={(e) => setConfig(prev => ({
-              ...prev,
-              dateRange: { ...prev.dateRange, start: e.target.value }
-            }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="end-date">End Date</Label>
-          <Input
-            id="end-date"
-            type="date"
-            value={config.dateRange.end}
-            onChange={(e) => setConfig(prev => ({
-              ...prev,
-              dateRange: { ...prev.dateRange, end: e.target.value }
-            }))}
+          <Label>Periode</Label>
+          <DateRangePicker
+            onChange={(range: DateRangeValue) => {
+              setConfig(prev => ({
+                ...prev,
+                dateRange: {
+                  start: range.from ? range.from.toISOString().slice(0, 10) : prev.dateRange.start,
+                  end: range.to ? range.to.toISOString().slice(0, 10) : prev.dateRange.end,
+                }
+              }))
+            }}
           />
         </div>
       </div>
@@ -144,4 +135,4 @@ const ReportsTabContent = ({ config, setConfig, generateReport, generating }: Re
   </Card>
 )
 
-export default ReportsTabContent
+export { ReportsTabContent }

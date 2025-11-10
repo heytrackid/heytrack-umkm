@@ -1,18 +1,19 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Sparkles, Clock, TrendingUp } from 'lucide-react'
-import { getDifficultyColor, formatTime, getCategoryIcon } from '@/lib/utils/recipe-helpers'
+import { useState } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import {
     RECIPE_CATEGORIES,
     getTemplatesByCategory,
     type RecipeTemplate
 } from '@/lib/constants/recipe-templates'
+import { getDifficultyColor, formatTime, getCategoryIcon } from '@/lib/utils/recipe-helpers'
 
 /**
  * Recipe Template Selector
@@ -25,7 +26,7 @@ interface RecipeTemplateSelectorProps {
 }
 
 export const RecipeTemplateSelector = ({ onSelectTemplate, selectedTemplateId }: RecipeTemplateSelectorProps) => {
-    const [selectedCategory, setSelectedCategory] = useState<string>(RECIPE_CATEGORIES[0])
+    const [selectedCategory, setSelectedCategory] = useState<string>(() => RECIPE_CATEGORIES[0] ?? 'bread')
     const { formatCurrency } = useCurrency()
 
     const getDifficultyLabel = (difficulty: string): string => {
@@ -61,8 +62,8 @@ export const RecipeTemplateSelector = ({ onSelectTemplate, selectedTemplateId }:
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {getTemplatesByCategory(category).map(template => (
                                     <Button
-                                        key={template.id}
-                                        variant={selectedTemplateId === template.id ? 'default' : 'outline'}
+                                        key={template['id']}
+                                        variant={selectedTemplateId === template['id'] ? 'default' : 'outline'}
                                         className="h-auto p-4 flex flex-col items-start gap-2"
                                         onClick={() => onSelectTemplate(template)}
                                     >

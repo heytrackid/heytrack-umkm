@@ -1,10 +1,6 @@
  
 'use client'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import type { OrderStatus as DatabaseOrderStatus } from '@/types/database'
 import {
     Clock,
     CheckCircle,
@@ -15,8 +11,14 @@ import {
 } from 'lucide-react'
 import { memo } from 'react'
 
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+import type { OrderStatus as DatabaseOrderStatus } from '@/types/database'
+
 // Map the database enum values to component-friendly values
-type OrderStatus = 'pending' | 'confirmed' | 'in_production' | 'completed' | 'cancelled' | 'delivered'
+type OrderStatus = 'cancelled' | 'completed' | 'confirmed' | 'delivered' | 'in_production' | 'pending'
 
 // Map from UI values to database values
 const uiToDbStatusMap: Record<OrderStatus, DatabaseOrderStatus> = {
@@ -39,7 +41,7 @@ const dbToUiStatusMap: Record<DatabaseOrderStatus, OrderStatus> = {
 } as const
 
 interface OrderStatusBadgeProps {
-    status: OrderStatus | DatabaseOrderStatus // Accept both UI and DB formats
+    status: DatabaseOrderStatus | OrderStatus // Accept both UI and DB formats
     showNextAction?: boolean
     onNextAction?: () => void
     compact?: boolean
@@ -113,20 +115,20 @@ export const OrderStatusBadge = memo(({
         normalizedStatus = status as OrderStatus;
     }
 
-    const config = statusConfig[normalizedStatus];
-    const Icon = config.icon
+    const _config = statusConfig[normalizedStatus];
+    const Icon = _config.icon
 
     if (compact) {
         return (
             <Badge
                 variant="outline"
-                className={cn(config.color, 'font-medium', className)}
+                className={cn(_config.color, 'font-medium', className)}
             >
                 <Icon className={cn(
                     'w-3 h-3 mr-1',
-                    'animate' in config && config.animate && 'animate-spin'
+                    'animate' in _config && _config.animate && 'animate-spin'
                 )} />
-                {config.label}
+                {_config.label}
             </Badge>
         )
     }
@@ -136,39 +138,41 @@ export const OrderStatusBadge = memo(({
             <div className="flex items-center gap-2">
                 <Badge
                     variant="outline"
-                    className={cn(config.color, 'font-medium px-3 py-1')}
+                    className={cn(_config.color, 'font-medium px-3 py-1')}
                 >
                     <Icon className={cn(
                         'w-4 h-4 mr-2',
-                        'animate' in config && config.animate && 'animate-spin'
+                        'animate' in _config && _config.animate && 'animate-spin'
                     )} />
-                    {config.label}
+                    {_config.label}
                 </Badge>
 
-                {config.nextAction && showNextAction && onNextAction && (
+                {_config.nextAction && showNextAction && onNextAction && (
                     <Button
                         size="sm"
-                        variant={config.nextActionVariant}
+                        variant={_config.nextActionVariant}
                         onClick={onNextAction}
                         className="h-7"
                     >
-                        {config.nextAction}
+                        {_config.nextAction}
                     </Button>
                 )}
             </div>
 
             {!compact && (
                 <p className="text-xs text-muted-foreground">
-                    {config.description}
+                    {_config.description}
                 </p>
             )}
         </div>
     )
 })
 
+OrderStatusBadge.displayName = 'OrderStatusBadge'
+
 // Progress indicator component
 interface OrderProgressProps {
-    currentStatus: OrderStatus | DatabaseOrderStatus
+    currentStatus: DatabaseOrderStatus | OrderStatus
     className?: string
 }
 
@@ -190,7 +194,7 @@ export const OrderProgress = memo(({ currentStatus, className }: OrderProgressPr
         { status: 'completed', label: 'Selesai' }
     ]
 
-    const currentIndex = steps.findIndex(s => s.status === normalizedStatus)
+    const currentIndex = steps.findIndex(s => s['status'] === normalizedStatus)
     const isCancelled = normalizedStatus === 'cancelled'
 
     if (isCancelled) {
@@ -209,7 +213,7 @@ export const OrderProgress = memo(({ currentStatus, className }: OrderProgressPr
                 const isCurrent = index === currentIndex
 
                 return (
-                    <div key={step.status} className="flex items-center">
+                    <div key={step['status']} className="flex items-center">
                         <div className="flex flex-col items-center">
                             <div className={cn(
                                 'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors',
@@ -245,8 +249,10 @@ export const OrderProgress = memo(({ currentStatus, className }: OrderProgressPr
     )
 })
 
+OrderProgress.displayName = 'OrderProgress'
+
 // Status change confirmation dialog helper
-export function getStatusChangeConfirmation(fromStatus: OrderStatus | DatabaseOrderStatus, toStatus: OrderStatus | DatabaseOrderStatus) {
+export function getStatusChangeConfirmation(fromStatus: DatabaseOrderStatus | OrderStatus, toStatus: DatabaseOrderStatus | OrderStatus) {
     // Normalize the statuses to UI format
     let normalizedFromStatus: OrderStatus;
     let normalizedToStatus: OrderStatus;
@@ -286,7 +292,7 @@ export function getStatusChangeConfirmation(fromStatus: OrderStatus | DatabaseOr
         }
     }
 
-    return confirmations[`${normalizedFromStatus}-${normalizedToStatus}`] || {
+    return confirmations[`${normalizedFromStatus}-${normalizedToStatus}`] ?? {
         title: 'Ubah Status?',
         description: 'Apakah Anda yakin ingin mengubah status order ini?',
         action: 'Ya, Ubah Status'

@@ -1,12 +1,12 @@
 export interface PerformanceMetric {
-  name: string;
-  value: number;
-  timestamp: number;
+  name: string
+  value: number
+  timestamp: number
 }
 
 export interface PerformanceOptions {
-  enabled?: boolean;
-  threshold?: number;
+  enabled?: boolean
+  threshold?: number
 }
 
 class PerformanceMonitoring {
@@ -61,4 +61,4 @@ class PerformanceMonitoring {
   }
 }
 
-export default PerformanceMonitoring;
+export { PerformanceMonitoring }

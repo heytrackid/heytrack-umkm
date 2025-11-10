@@ -32,7 +32,7 @@ export const OptimizedImage = ({
   fill = false,
   objectFit = 'cover',
   quality = 75
-}: OptimizedImageProps) => {
+}: OptimizedImageProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
 
@@ -43,31 +43,37 @@ export const OptimizedImage = ({
         style={{ width, height }}
       >
         <span className="text-muted-foreground text-sm">Failed to load image</span>
-      </div>
-    )
-  }
+     </div>
+   );
+}
+
+  const resolvedWidth = width ?? 1
+  const resolvedHeight = height ?? 1
+
+  const imageClass = `
+    duration-300 ease-in-out
+    ${isLoading ? 'scale-105 blur-sm' : 'scale-100 blur-0'}
+    ${objectFit === 'cover' ? 'object-cover' : ''}
+    ${objectFit === 'contain' ? 'object-contain' : ''}
+  `
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
       <Image
         src={src}
         alt={alt}
-        width={fill ? undefined : width}
-        height={fill ? undefined : height}
+        width={fill ? undefined : resolvedWidth}
+        height={fill ? undefined : resolvedHeight}
         fill={fill}
         quality={quality}
         priority={priority}
         loading={priority ? 'eager' : 'lazy'}
-        className={`
-          duration-300 ease-in-out
-          ${isLoading ? 'scale-105 blur-sm' : 'scale-100 blur-0'}
-          ${objectFit === 'cover' ? 'object-cover' : ''}
-          ${objectFit === 'contain' ? 'object-contain' : ''}
-        `}
+        className={imageClass}
+        style={{ objectFit }}
         onLoad={() => setIsLoading(false)}
         onError={() => {
-          void setIsLoading(false)
-          void setError(true)
+          setIsLoading(false)
+          setError(true)
         }}
       />
       {isLoading && (

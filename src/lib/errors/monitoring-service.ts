@@ -1,4 +1,4 @@
-import { apiLogger } from '../logger'
+import { apiLogger } from '@/lib/logger'
 
 
 /**
@@ -19,7 +19,7 @@ interface ErrorEvent {
     username?: string
   }
   tags?: Record<string, string>
-  level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug'
+  level?: 'debug' | 'error' | 'fatal' | 'info' | 'warning'
   url?: string
   userAgent?: string
   componentStack?: string
@@ -41,8 +41,8 @@ class ErrorMonitoringService {
   constructor(config?: MonitoringServiceConfig) {
     this.config = {
       enabled: true,
-      environment: process.env.NODE_ENV || 'development',
-      release: process.env.NEXT_PUBLIC_APP_VERSION ?? '1.0.0',
+      environment: process['env'].NODE_ENV || 'development',
+      release: process['env']?.['NEXT_PUBLIC_APP_VERSION'] ?? '1.0.0',
       sampleRate: 1.0,
       beforeSend: (event) => event,
       ...config
@@ -73,7 +73,7 @@ class ErrorMonitoringService {
    */
   captureException(
     error: Error, 
-    _context: {
+    context: {
       _user?: ErrorEvent['_user']
       tags?: ErrorEvent['tags']
       extra?: Record<string, unknown>
@@ -91,7 +91,7 @@ class ErrorMonitoringService {
     }
 
     const tags: Record<string, string> = {
-      ...(_context.tags ?? {}),
+      ...(context.tags ?? {}),
       environment: this.config.environment ?? 'development',
       release: this.config.release ?? '1.0.0'
     }
@@ -101,10 +101,10 @@ class ErrorMonitoringService {
       stack: error.stack,
       name: error.name,
       timestamp: new Date().toISOString(),
-      _context: _context.extra,
-      _user: _context._user,
+      _context: context.extra,
+      _user: context._user,
       tags,
-      level: _context.level ?? 'error',
+      level: context.level ?? 'error',
       url: typeof window !== 'undefined' ? window.location.href : undefined,
       userAgent: typeof window !== 'undefined' 
         ? window.navigator.userAgent 
@@ -116,14 +116,14 @@ class ErrorMonitoringService {
     
     if (processedEvent) {
       // Log to console in development or if no external service is configured
-      if (process.env.NODE_ENV === 'development' || !this.config.dsn) {
+      if (process['env'].NODE_ENV === 'development' || !this.config.dsn) {
         apiLogger.error({
           ...processedEvent,
           error
         }, 'Captured error (development mode)')
       } else {
         // Send to external error monitoring service
-        void this.sendError(processedEvent)
+        this.sendError(processedEvent)
       }
     }
   }
@@ -167,9 +167,9 @@ class ErrorMonitoringService {
     const processedEvent = this.config.beforeSend?.(errorEvent) ?? errorEvent
     
     if (processedEvent) {
-      if (process.env.NODE_ENV === 'development' || !this.config.dsn) {
+      if (process['env'].NODE_ENV === 'development' || !this.config.dsn) {
         type LogLevelKey = NonNullable<ErrorEvent['level']>
-        const levelMap: Record<LogLevelKey, 'error' | 'warn' | 'info' | 'debug'> = {
+        const levelMap: Record<LogLevelKey, 'debug' | 'error' | 'info' | 'warn'> = {
           fatal: 'error',
           error: 'error',
           warning: 'warn',
@@ -181,7 +181,7 @@ class ErrorMonitoringService {
           ...processedEvent
         }, `Captured message (${level})`)
       } else {
-        void this.sendError(processedEvent)
+        this.sendError(processedEvent)
       }
     }
   }
@@ -197,18 +197,18 @@ class ErrorMonitoringService {
         // For example, for Sentry: fetch(this.config.dsn, { ... })
         apiLogger.error({
           ...errorEvent,
-          dsn_used: !!this.config.dsn
+          dsn_used: Boolean(this.config.dsn)
         }, 'External error monitoring DSN configured but not implemented')
       } else {
         // Log to our own error log for now
         apiLogger.error({
           ...errorEvent,
-          dsn_used: !!this.config.dsn
+          dsn_used: Boolean(this.config.dsn)
         }, 'Error sent to monitoring service')
       }
-    } catch (err) {
+    } catch (error) {
       apiLogger.error({ 
-        error: err instanceof Error ? err.message : String(err),
+        error: error instanceof Error ? error.message : String(error),
         original_event: errorEvent.message
       }, 'Error sending to monitoring service')
     }

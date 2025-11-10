@@ -1,10 +1,10 @@
+import { AlertCircle, ChefHat, Loader2, Sparkles, CheckCircle, XCircle } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { AlertCircle, ChefHat, Loader2, Sparkles, CheckCircle, XCircle } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -12,7 +12,10 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import type { AvailableIngredient } from './types'
+import { Textarea } from '@/components/ui/textarea'
+
+
+import type { AvailableIngredient } from '@/app/recipes/ai-generator/components/types'
 
 interface RecipeGeneratorFormProps {
   productName: string
@@ -283,4 +286,4 @@ const RecipeGeneratorForm = ({
   )
 }
 
-export default RecipeGeneratorForm
+export { RecipeGeneratorForm }

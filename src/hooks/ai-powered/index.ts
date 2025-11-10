@@ -1,6 +1,6 @@
 
 // Main hook
-export { default as useAIPowered } from './useAIPowered'
+export { useAIPowered } from './useAIPowered'
 
 // Individual analysis hooks
 export { usePricingAnalysis } from './usePricingAnalysis'

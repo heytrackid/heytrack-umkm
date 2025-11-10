@@ -1,13 +1,17 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
-import { cacheInvalidation } from '@/lib/cache'
-import type { Update } from '@/types/database'
-import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { cacheInvalidation } from '@/lib/cache'
+import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import type { Update } from '@/types/database'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
+
+
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -19,7 +23,7 @@ async function getHandler(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -37,11 +41,11 @@ async function getHandler(
       .from('suppliers')
       .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at, user_id')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Supplier not found' }, { status: 404 })
       }
       apiLogger.error({ error }, 'Error fetching supplier')
@@ -61,7 +65,7 @@ async function putHandler(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -75,22 +79,22 @@ async function putHandler(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const updatePayload: Update<'suppliers'> = body
+    const body = await request.json() as Update<'suppliers'>
+    const updatePayload = body
 
     const { data, error } = await supabase
       .from('suppliers')
       .update(updatePayload)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select('id, name, contact_person, email, phone, address, notes, is_active, updated_at')
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Supplier not found' }, { status: 404 })
       }
-      if (error.code === '23505') {
+      if (error['code'] === '23505') {
         return NextResponse.json({ error: 'Supplier with this email already exists' }, { status: 409 })
       }
       apiLogger.error({ error }, 'Error updating supplier')
@@ -111,7 +115,7 @@ async function deleteHandler(
   context: RouteContext
 ) {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -130,7 +134,7 @@ async function deleteHandler(
       .from('ingredients')
       .select('id')
       .eq('supplier_id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .limit(1)
     
     if (ingredients && ingredients.length > 0) {
@@ -144,7 +148,7 @@ async function deleteHandler(
       .from('suppliers')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (error) {
       apiLogger.error({ error }, 'Error deleting supplier')

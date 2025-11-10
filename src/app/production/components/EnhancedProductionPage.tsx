@@ -1,20 +1,22 @@
 'use client'
 
+import { format } from 'date-fns'
+import { id as idLocale } from 'date-fns/locale'
+import { Factory, Plus, Search, Calendar, Clock, CheckCircle, XCircle, TrendingUp, Package, Play, BarChart3, Filter, Download, RefreshCw } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
-import type { Row, ProductionStatus } from '@/types/database'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
-import { format } from 'date-fns'
-import { id as idLocale } from 'date-fns/locale'
 import { apiLogger } from '@/lib/logger'
-import dynamic from 'next/dynamic'
+
 
 // Lazy load the ProductionFormDialog component as it's heavy
 const LazyProductionFormDialog = dynamic(
@@ -37,7 +39,8 @@ const LazyProductionFormDialog = dynamic(
     ssr: false
   }
 )
-import { Factory, Plus, Search, Calendar, Clock, CheckCircle, XCircle, TrendingUp, Package, Play, BarChart3, Filter, Download, RefreshCw } from 'lucide-react'
+
+import type { Row, ProductionStatus } from '@/types/database'
 
 // Extended type for production page display
 interface ProductionWithRecipe extends Row<'production_batches'> {
@@ -45,6 +48,17 @@ interface ProductionWithRecipe extends Row<'production_batches'> {
     // Override status to use the enum type
     status: ProductionStatus
 }
+
+const isProductionWithRecipe = (value: unknown): value is ProductionWithRecipe => {
+    if (typeof value !== 'object' || value === null) {
+        return false
+    }
+    const record = value as Record<string, unknown>
+    return typeof record['id'] === 'string' && typeof record['status'] === 'string'
+}
+
+const isProductionWithRecipeArray = (value: unknown): value is ProductionWithRecipe[] =>
+    Array.isArray(value) && value.every(isProductionWithRecipe)
 
 const STATUS_CONFIG = {
     PLANNED: {
@@ -69,7 +83,7 @@ const STATUS_CONFIG = {
     }
 }
 
-export const EnhancedProductionPage = () => {
+const EnhancedProductionPage = () => {
     const { formatCurrency } = useCurrency()
     const { isMobile } = useResponsive()
     const [productions, setProductions] = useState<ProductionWithRecipe[]>([])
@@ -88,8 +102,12 @@ export const EnhancedProductionPage = () => {
             setLoading(true)
             const response = await fetch('/api/production-batches')
             if (response.ok) {
-                const data = await response.json()
-                setProductions(data)
+                const payload: unknown = await response.json()
+                if (isProductionWithRecipeArray(payload)) {
+                    setProductions(payload)
+                } else {
+                    setProductions([])
+                }
             }
         } catch (error) {
             apiLogger.error({ error }, 'Error fetching productions')
@@ -107,7 +125,7 @@ export const EnhancedProductionPage = () => {
             batchNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
             recipeName.toLowerCase().includes(searchTerm.toLowerCase())
 
-        const matchesStatus = statusFilter === 'all' || prod.status === statusFilter
+        const matchesStatus = statusFilter === 'all' || prod['status'] === statusFilter
 
         // Date filter
         let matchesDate = true
@@ -132,6 +150,9 @@ export const EnhancedProductionPage = () => {
                     matchesDate = prodDate >= monthAgo
                     break
                 }
+                default:
+                    matchesDate = true
+                    break
             }
         }
 
@@ -141,15 +162,15 @@ export const EnhancedProductionPage = () => {
     // Calculate stats
     const stats = {
         total: productions.length,
-        planned: productions.filter(p => p.status === 'PLANNED').length,
-        inProgress: productions.filter(p => p.status === 'IN_PROGRESS').length,
-        completed: productions.filter(p => p.status === 'COMPLETED').length,
-        cancelled: productions.filter(p => p.status === 'CANCELLED').length,
+        planned: productions.filter(p => p['status'] === 'PLANNED').length,
+        inProgress: productions.filter(p => p['status'] === 'IN_PROGRESS').length,
+        completed: productions.filter(p => p['status'] === 'COMPLETED').length,
+        cancelled: productions.filter(p => p['status'] === 'CANCELLED').length,
         totalCost: productions
             .filter(p => p.actual_cost)
             .reduce((sum, p) => sum + (p.actual_cost ?? 0), 0),
         totalQuantity: productions
-            .filter(p => p.status === 'COMPLETED')
+            .filter(p => p['status'] === 'COMPLETED')
             .reduce((sum, p) => sum + (p.quantity || 0), 0)
     }
 
@@ -457,7 +478,7 @@ export const EnhancedProductionPage = () => {
                 </SwipeableTabsList>
 
                 <SwipeableTabsContent value="active" className="space-y-4">
-                    {filteredProductions.filter(p => p.status === 'PLANNED' || p.status === 'IN_PROGRESS').length === 0 ? (
+                    {filteredProductions.filter(p => p['status'] === 'PLANNED' || p['status'] === 'IN_PROGRESS').length === 0 ? (
                         <EmptyState
                             {...EmptyStatePresets.production}
                             actions={[
@@ -472,10 +493,10 @@ export const EnhancedProductionPage = () => {
                     ) : (
                         <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
                             {filteredProductions
-                                .filter(p => p.status === 'PLANNED' || p.status === 'IN_PROGRESS')
+                                .filter(p => p['status'] === 'PLANNED' || p['status'] === 'IN_PROGRESS')
                                 .map((production) => (
                                     <ProductionCard
-                                        key={production.id}
+                                        key={production['id']}
                                         production={production}
                                         onStart={handleStartProduction}
                                         onComplete={handleCompleteProduction}
@@ -490,10 +511,10 @@ export const EnhancedProductionPage = () => {
                 <SwipeableTabsContent value="completed" className="space-y-4">
                     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
                         {filteredProductions
-                            .filter(p => p.status === 'COMPLETED')
+                            .filter(p => p['status'] === 'COMPLETED')
                             .map((production) => (
                                 <ProductionCard
-                                    key={production.id}
+                                    key={production['id']}
                                     production={production}
                                     onStart={handleStartProduction}
                                     onComplete={handleCompleteProduction}
@@ -508,7 +529,7 @@ export const EnhancedProductionPage = () => {
                     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
                         {filteredProductions.map((production) => (
                             <ProductionCard
-                                key={production.id}
+                                key={production['id']}
                                 production={production}
                                 onStart={handleStartProduction}
                                 onComplete={handleCompleteProduction}
@@ -587,7 +608,7 @@ const ProductionCard = ({
                         {production.recipe?.name ?? 'Unknown Recipe'}
                     </p>
                 </div>
-                {getStatusBadge(production.status)}
+                {getStatusBadge(production['status'])}
             </div>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -643,14 +664,14 @@ const ProductionCard = ({
                 <Button variant="outline" size="sm" className="flex-1">
                     Detail
                 </Button>
-                {production.status === 'PLANNED' && (
-                    <Button size="sm" className="flex-1" onClick={() => onStart(production.id)}>
+                {production['status'] === 'PLANNED' && (
+                    <Button size="sm" className="flex-1" onClick={() => onStart(production['id'])}>
                         <Play className="h-4 w-4 mr-1" />
                         Mulai
                     </Button>
                 )}
-                {production.status === 'IN_PROGRESS' && (
-                    <Button size="sm" className="flex-1" onClick={() => onComplete(production.id)}>
+                {production['status'] === 'IN_PROGRESS' && (
+                    <Button size="sm" className="flex-1" onClick={() => onComplete(production['id'])}>
                         <CheckCircle className="h-4 w-4 mr-1" />
                         Selesai
                     </Button>
@@ -659,3 +680,5 @@ const ProductionCard = ({
         </CardContent>
     </Card>
 )
+
+export { EnhancedProductionPage }

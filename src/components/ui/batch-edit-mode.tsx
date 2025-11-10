@@ -1,12 +1,14 @@
  
 'use client'
 
-import { cn } from '@/lib/utils'
 import { CheckSquare, Edit, Trash2, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
-import { Badge } from './badge'
-import { Button } from './button'
-import { Checkbox } from './checkbox'
+
+import { cn } from '@/lib/utils'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface BatchEditModeProps<T> {
   items: T[]
@@ -23,7 +25,7 @@ interface BatchEditModeProps<T> {
 export interface BatchAction {
   icon: ReactNode
   label: string
-  onClick: (selectedIds: string[]) => void | Promise<void>
+  onClick: (selectedIds: string[]) => Promise<void> | void
   variant?: 'default' | 'destructive' | 'outline'
   requiresConfirmation?: boolean
 }
@@ -67,7 +69,7 @@ export const BatchEditMode = <T,>({
     const selectedIds = Array.from(selectedItems)
     
     if (action.requiresConfirmation) {
-      // eslint-disable-next-line no-alert
+       
       if (!confirm(`Yakin ingin melakukan aksi ini pada ${selectedCount} item?`)) {
         return
       }

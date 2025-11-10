@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { RecipeInsertSchema, type RecipeInsert, type RecipeUpdate } from './recipe'
+
+import { RecipeInsertSchema, type RecipeInsert, type RecipeUpdate } from '@/lib/validations/domains/recipe'
 
 
 /**
@@ -80,9 +81,9 @@ export class RecipeValidationHelpers {
     try {
       const validatedData = EnhancedRecipeInsertSchema.parse(data)
       return { success: true, data: validatedData as RecipeInsert }
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors = error.issues.map(error => `${error.path.join('.')}: ${error.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -96,9 +97,9 @@ export class RecipeValidationHelpers {
     try {
       const validatedData = EnhancedRecipeUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors = error.issues.map(error => `${error.path.join('.')}: ${error.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -142,7 +143,7 @@ export class RecipeValidationHelpers {
     instructions?: Array<Record<string, unknown>>
     preparation_time?: number
     cooking_time?: number
-  }): 'simple' | 'moderate' | 'complex' {
+  }): 'complex' | 'moderate' | 'simple' {
     const ingredientCount = recipe.ingredients.length
     const instructionCount = recipe.instructions?.length ?? 0
     const totalTime = (recipe.preparation_time ?? 0) + (recipe.cooking_time ?? 0)
@@ -206,8 +207,8 @@ export class RecipeValidationHelpers {
 
     recipes.forEach((recipe, index) => {
       const result = this.validateInsert(recipe)
-      if (result.success && result.data) {
-        valid.push(result.data as Record<string, unknown>)
+      if (result.success && result['data']) {
+        valid.push(result['data'] as Record<string, unknown>)
       } else {
         invalid.push({
           index,

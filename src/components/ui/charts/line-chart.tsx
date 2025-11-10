@@ -1,8 +1,10 @@
 import { memo, lazy, Suspense } from 'react'
+
 import { useResponsive } from '@/hooks/useResponsive'
-import { BaseMobileChart } from './base-chart'
-import { MobileTooltip } from './mobile-tooltip'
-import { type BaseMobileChartProps, CHART_COLORS } from './types'
+
+import { BaseMobileChart } from '@/components/ui/charts/base-chart'
+import { MobileTooltip } from '@/components/ui/charts/mobile-tooltip'
+import { type BaseMobileChartProps, CHART_COLORS } from '@/components/ui/charts/types'
 
 // Lazy load recharts components
 const Line = lazy(() => import('recharts').then(mod => ({ default: mod.Line })))
@@ -37,7 +39,7 @@ interface MobileLineChartProps extends BaseMobileChartProps {
  * MobileLineChart - Optimized with React.memo
  * Prevents unnecessary re-renders when data hasn't changed
  */
-export const MobileLineChart = memo(({
+const MobileLineChart = memo(({
   data,
   xKey,
   lines,
@@ -104,4 +106,8 @@ export const MobileLineChart = memo(({
       </Suspense>
     </BaseMobileChart>
   )
-}, (prevProps: MobileLineChartProps, nextProps: MobileLineChartProps) => prevProps.data === nextProps.data && prevProps.lines === nextProps.lines)
+}, (prevProps: MobileLineChartProps, nextProps: MobileLineChartProps) => prevProps['data'] === nextProps['data'] && prevProps.lines === nextProps.lines)
+
+MobileLineChart.displayName = 'MobileLineChart'
+
+export { MobileLineChart }

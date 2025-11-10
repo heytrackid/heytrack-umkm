@@ -1,6 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
+
+import { apiLogger } from '@/lib/logger'
+
 import type { User } from '@supabase/supabase-js'
-import { apiLogger } from './logger'
 
 export interface AdminCheckResult {
   isAdmin: boolean
@@ -64,8 +66,8 @@ export async function isAdminUser(userId: string): Promise<AdminCheckResult> {
  */
 export function checkAdminPrivileges(user: User): Promise<AdminCheckResult> {
   // In development, allow all users to have admin privileges for testing
-  if (process.env.NODE_ENV === 'development' && 
-      process.env.ADMIN_ALL_USERS === 'true') {
+  if (process['env']?.NODE_ENV === 'development' && 
+      process['env']?.['ADMIN_ALL_USERS'] === 'true') {
     return Promise.resolve({
       isAdmin: true,
       hasPermission: true,
@@ -73,7 +75,7 @@ export function checkAdminPrivileges(user: User): Promise<AdminCheckResult> {
     })
   }
 
-  return isAdminUser(user.id)
+  return isAdminUser(user['id'])
 }
 
 /**
@@ -99,7 +101,7 @@ export function withAdminAuth(
       
       if (!adminCheck.hasPermission) {
         apiLogger.warn({ 
-          userId: user.id, 
+          userId: user['id'], 
           email: user.email 
         }, 'Unauthorized admin access attempt')
         

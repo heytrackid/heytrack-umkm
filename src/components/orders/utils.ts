@@ -1,5 +1,6 @@
-import type { OrderStatus, PaymentStatus, Priority, StatusInfo } from './types'
-import { formatCurrentCurrency } from '@/shared'
+import { formatCurrentCurrency } from '@/shared/index'
+
+import type { OrderStatus, PaymentStatus, Priority, StatusInfo } from '@/components/orders/types'
 
 
 // Order Status Configurations
@@ -68,7 +69,7 @@ export function normalizePriority(value: unknown, fallback: Priority = 'normal')
 
 export { formatDate } from '@/shared'
 
-export function formatTime(date: string | Date): string {
+export function formatTime(date: Date | string): string {
   return new Date(date).toLocaleTimeString('id-ID', {
     hour: '2-digit',
     minute: '2-digit'

@@ -1,15 +1,18 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+import { NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+
+import { createClient } from '@/utils/supabase/server'
 
 /**
  * Generate default WhatsApp templates for current user
  * POST /api/whatsapp-templates/generate-defaults
  */
-export async function POST() {
+async function postHandler(): Promise<NextResponse> {
   try {
     // 1. Authentication
     const supabase = await createClient()
@@ -24,11 +27,11 @@ export async function POST() {
     const { data: existingTemplates, error: checkError } = await supabase
       .from('whatsapp_templates')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .limit(1)
 
     if (checkError) {
-      apiLogger.error({ error: checkError, userId: user.id }, 'Failed to check existing templates')
+      apiLogger.error({ error: checkError, userId: user['id'] }, 'Failed to check existing templates')
       throw checkError
     }
 
@@ -43,11 +46,11 @@ export async function POST() {
     // we'll log the event and return success
     const { error: logError } = await supabase.rpc('log_sync_event', {
       event_type: 'cleanup_expired_context_cache',
-      event_data: JSON.stringify({ userId: user.id }),
+      event_data: JSON.stringify({ userId: user['id'] }),
     })
 
     if (logError) {
-      apiLogger.error({ error: logError, userId: user.id }, 'Failed to log template creation event')
+      apiLogger.error({ error: logError, userId: user['id'] }, 'Failed to log template creation event')
       // We don't throw here as this is just logging
     }
 
@@ -55,15 +58,15 @@ export async function POST() {
     const { data: templates, error: fetchError } = await supabase
       .from('whatsapp_templates')
       .select('id, user_id, name, message, is_active, created_at, updated_at')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .order('created_at', { ascending: true })
 
     if (fetchError) {
-      apiLogger.error({ error: fetchError, userId: user.id }, 'Failed to fetch created templates')
+      apiLogger.error({ error: fetchError, userId: user['id'] }, 'Failed to fetch created templates')
       throw fetchError
     }
 
-    apiLogger.info({ userId: user.id, count: templates?.length }, 'Default templates created')
+    apiLogger.info({ userId: user['id'], count: templates?.length }, 'Default templates created')
 
     return NextResponse.json({
       message: 'Template default berhasil dibuat!',
@@ -74,3 +77,5 @@ export async function POST() {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const POST = createSecureHandler(postHandler, 'POST /api/whatsapp-templates/generate-defaults', SecurityPresets.enhanced())

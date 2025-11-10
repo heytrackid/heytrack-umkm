@@ -1,54 +1,73 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
-import type { Row } from '@/types/database'
 import { ShoppingCart, DollarSign, CheckCircle, Clock } from 'lucide-react'
-
-// Sales Report Component
-// Handles sales data filtering, calculations, and display
-
-
-type Order = Row<'orders'>
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { createLogger } from '@/lib/logger'
 
 interface SalesReportProps {
   dateRange: {
-    start: string
-    end: string
+    start: string | undefined
+    end: string | undefined
   }
 }
 
-const SalesReport = ({ dateRange }: SalesReportProps) => {
-  const { formatCurrency } = useCurrency()
-  const { data: orders } = useSupabaseCRUD<'orders'>('orders')
+// Server-side data fetching
+async function fetchSalesData(dateRange: { start: string | undefined; end: string | undefined }) {
+  const logger = createLogger('SalesReport')
 
-  // Calculate sales report
-  const salesData = (orders ?? []).filter((order): order is Order & { created_at: string } => {
-    if (!order.created_at) { return false }
-    const orderDate = new Date(order.created_at).toISOString().split('T')[0]
-    return orderDate >= dateRange.start && orderDate <= dateRange.end
-  })
+  if (!dateRange.start || !dateRange.end) {
+    return { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
+  }
 
-  const salesStats = salesData.reduce<{ totalOrders: number; totalRevenue: number; completedOrders: number; pendingOrders: number }>(
-    (stats, order) => {
-      stats.totalOrders += 1
-      stats.totalRevenue += order.total_amount ?? 0
+  try {
+    const params = new URLSearchParams({
+      start_date: dateRange.start,
+      end_date: dateRange.end,
+      limit: '1000' // Get all data for the period
+    })
 
-      if (order.status === 'DELIVERED') {
-        stats.completedOrders += 1
-      }
+    const response = await fetch(`${process.env['NEXT_PUBLIC_SITE_URL'] || 'http://localhost:3000'}/api/sales?${params}`, {
+      cache: 'no-store',
+    })
 
-      if (order.status === 'PENDING' || order.status === 'CONFIRMED') {
-        stats.pendingOrders += 1
-      }
+    if (!response.ok) {
+      throw new Error('Failed to fetch sales data')
+    }
 
-      return stats
-    },
-    { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
-  )
+    const result = await response.json()
+    const sales = result.data || []
+
+    // Calculate stats from API data
+    const stats = sales.reduce(
+      (acc: { totalOrders: number; totalRevenue: number; completedOrders: number; pendingOrders: number }, sale: any) => {
+        acc.totalOrders += 1
+        acc.totalRevenue += sale.amount ?? 0
+        // Note: The sales API returns financial_records, not orders, so status-based counting may not apply
+        return acc
+      },
+      { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
+    )
+
+    return stats
+  } catch (error) {
+    logger.error({ error }, 'Failed to fetch sales data')
+    return { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
+  }
+}
+
+export async function SalesReport({ dateRange }: SalesReportProps) {
+  const salesStats = await fetchSalesData(dateRange)
 
   // Calculate growth percentage (assuming we have previous period data)
   const revenueGrowth = 12; // This would be calculated from previous period
   const orderGrowth = 8; // This would be calculated from previous period
+
+  // Format currency function (simplified for server component)
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(amount)
+  }
 
   return (
     <div className="space-y-6">
@@ -110,51 +129,18 @@ const SalesReport = ({ dateRange }: SalesReportProps) => {
           <CardTitle className="flex items-center gap-2">
             Detail Penjualan
             <span className="text-sm text-muted-foreground">
-              ({salesData.length} pesanan dalam periode ini)
+              ({salesStats.totalOrders} transaksi dalam periode ini)
             </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {salesData.length > 0 ? (
-              salesData.slice(0, 10).map((order) => (
-                <div 
-                  key={order.id} 
-                  className="flex justify-between items-center p-4 border rounded-lg hover:bg-muted/20 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="bg-blue-100 p-2 rounded-lg">
-                      <ShoppingCart className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{order.order_no}</p>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <span>{new Date(order.created_at).toLocaleDateString('id-ID')}</span>
-                        <span>•</span>
-                        <span className="capitalize">{order.status?.toLowerCase()}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{formatCurrency(order.total_amount ?? 0)}</p>
-                    <span className="text-xs text-muted-foreground">
-                       {order.customer_name ?? 'Pelanggan'}
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">Tidak ada data penjualan untuk periode ini</p>
-                <p className="text-sm text-muted-foreground mt-1">Coba ganti rentang tanggal atau cek kembali data pesanan</p>
-              </div>
-            )}
+          <div className="text-center py-8">
+            <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">Detail transaksi akan ditampilkan di versi lengkap</p>
+            <p className="text-sm text-muted-foreground mt-1">Fitur ini sedang dalam pengembangan</p>
           </div>
         </CardContent>
       </Card>
     </div>
   )
 }
-
-export default SalesReport

@@ -1,9 +1,11 @@
 'use client';
 
-import type { ComponentProps } from 'react'
 import * as SelectPrimitive from"@radix-ui/react-select"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from"lucide-react"
+
 import { cn } from"@/lib/utils"
+
+import type { ComponentProps } from 'react'
 
 
 
@@ -26,7 +28,7 @@ const SelectTrigger = ({
   children,
   ...props
 }: ComponentProps<typeof SelectPrimitive.Trigger> & {
-  size?:"sm" |"default"
+  size?:"default" | "sm"
 }) => (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"

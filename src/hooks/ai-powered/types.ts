@@ -18,7 +18,7 @@ export interface PricingAnalysisRequest {
   currentPrice?: number
   competitorPrices?: number[]
   location?: string
-  targetMarket?: 'premium' | 'mid-market' | 'budget'
+  targetMarket?: 'budget' | 'mid-market' | 'premium'
 }
 
 export interface InventoryOptimizationRequest {
@@ -31,7 +31,7 @@ export interface InventoryOptimizationRequest {
     supplier?: string
     leadTime?: number
   }>
-  seasonality?: 'high' | 'normal' | 'low'
+  seasonality?: 'high' | 'low' | 'normal'
   upcomingEvents?: string[]
   weatherForecast?: string
 }
@@ -53,8 +53,8 @@ export interface CustomerAnalyticsRequest {
   }>
   marketConditions: {
     season: string
-    competition: 'high' | 'medium' | 'low'
-    economicCondition: 'good' | 'fair' | 'challenging'
+    competition: 'high' | 'low' | 'medium'
+    economicCondition: 'challenging' | 'fair' | 'good'
   }
 }
 
@@ -83,10 +83,10 @@ export interface AIInsight {
   type: string
   productName?: string
   analysis: unknown
-  priority: 'high' | 'medium' | 'low'
+  priority: 'high' | 'low' | 'medium'
   confidence?: number
   timestamp?: string
   isAIPowered?: boolean
 }
 
-export type AnalysisType = 'pricing' | 'inventory' | 'customer' | 'financial'
+export type AnalysisType = 'customer' | 'financial' | 'inventory' | 'pricing'

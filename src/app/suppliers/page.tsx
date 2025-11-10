@@ -1,17 +1,20 @@
 'use client'
 
-import { SuppliersCRUD } from '@/components/crud/suppliers-crud'
-import { ImportDialog } from '@/components/import/ImportDialog'
-import { generateSuppliersTemplate, parseSuppliersCSV } from '@/components/import/csv-helpers'
-import AppLayout from '@/components/layout/app-layout'
-import { BreadcrumbPatterns, PageBreadcrumb, PageHeader, StatsCards } from '@/components/ui'
-import { Button } from '@/components/ui/button'
-import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
-import type { Row } from '@/types/database'
 import { DollarSign, Package, TrendingUp, Upload, Users } from 'lucide-react'
 import { useState } from 'react'
 
-const SuppliersPage = () => {
+import { SuppliersCRUD } from '@/components/crud/suppliers-crud'
+import { generateSuppliersTemplate, parseSuppliersCSV } from '@/components/import/csv-helpers'
+import { ImportDialog } from '@/components/import/ImportDialog'
+import { AppLayout } from '@/components/layout/app-layout'
+import { DateRangePicker, type DateRangeValue } from '@/components/ui/date-range'
+import { BreadcrumbPatterns, PageBreadcrumb, PageHeader, StatsCards } from '@/components/ui/index'
+import { Button } from '@/components/ui/button'
+import { useSupabaseCRUD } from '@/hooks/supabase/index'
+
+import type { Row } from '@/types/database'
+
+const SuppliersPage = (): JSX.Element => {
     const { data: suppliers } = useSupabaseCRUD('suppliers')
     const [importDialogOpen, setImportDialogOpen] = useState(false)
 
@@ -37,14 +40,27 @@ const SuppliersPage = () => {
                     title="Supplier"
                     description="Kelola data supplier dan vendor bahan baku"
                       actions={
+                        <div className="flex items-center gap-2">
+                          <div className="hidden md:block">
+                            <DateRangePicker
+                              onChange={(range: DateRangeValue) => {
+                                const params = new URLSearchParams(window.location.search)
+                                if (range.from) params.set('from', range.from.toISOString())
+                                if (range.to) params.set('to', range.to.toISOString())
+                                const url = `${window.location.pathname}?${params.toString()}`
+                                window.history.replaceState(null, '', url)
+                              }}
+                            />
+                          </div>
                           <Button
-                              variant="outline"
-                              onClick={() => setImportDialogOpen(true)}
-                              className="flex-1 sm:flex-none"
+                            variant="outline"
+                            onClick={() => setImportDialogOpen(true)}
+                            className="flex-1 sm:flex-none"
                           >
-                              <Upload className="h-4 w-4 mr-2" />
-                              Import
+                            <Upload className="h-4 w-4 mr-2" />
+                            Import
                           </Button>
+                        </div>
                       }
                 />
 
@@ -101,19 +117,19 @@ const SuppliersPage = () => {
                                 credentials: 'include', // Include cookies for authentication
                             })
 
-                            const result = await response.json()
+                            const result = await response.json() as { error?: string; details?: unknown[]; count?: number }
 
                             if (!response.ok) {
                                 return {
                                     success: false,
                                     error: result.error ?? 'Import gagal',
-                                    details: result.details
+                                    details: result.details || []
                                 }
                             }
 
                             return {
                                 success: true,
-                                count: result.count
+                                ...(result.count !== undefined && { count: result.count })
                             }
                         } catch (_error) {
                             return {

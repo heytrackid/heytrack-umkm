@@ -1,13 +1,14 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { Legend } from 'recharts'
-import { formatCurrentCurrency } from '@/lib/currency'
+
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
+} from '@/components/ui/chart'
+import { ChartLegend } from '@/components/charts/LazyCharts'
+import { formatCurrentCurrency } from '@/lib/currency'
 
 // Dynamically import recharts components to reduce bundle size
 const LineChart = dynamic(
@@ -98,7 +99,7 @@ const chartConfig = {
   },
 }
 
-const FinancialTrendsChart = () => (
+const FinancialTrendsChart = (): JSX.Element => (
   <ChartContainer _config={chartConfig}>
     <LineChart
       accessibilityLayer
@@ -183,9 +184,9 @@ const FinancialTrendsChart = () => (
         strokeDasharray="5 5"
         dot={false}
       />
-      <Legend />
+      <ChartLegend />
     </LineChart>
   </ChartContainer>
 )
 
-export default FinancialTrendsChart
+export { FinancialTrendsChart }

@@ -76,16 +76,16 @@ export function useHppCalculatorWorker() {
           return
         }
 
-        void setIsCalculating(true)
-        void setError(null)
+        setIsCalculating(true)
+        setError(null)
 
         const handleMessage = (e: MessageEvent) => {
-          void setIsCalculating(false)
-          if (e.data.success) {
-            resolve(e.data.data)
+          setIsCalculating(false)
+          if (e['data'].success) {
+            resolve(e['data']['data'])
           } else {
-            const errorMsg = e.data.error ?? 'Calculation failed'
-            void setError(errorMsg)
+            const errorMsg = e['data'].error ?? 'Calculation failed'
+            setError(errorMsg)
             reject(new Error(errorMsg))
           }
           workerRef.current?.removeEventListener('message', handleMessage)

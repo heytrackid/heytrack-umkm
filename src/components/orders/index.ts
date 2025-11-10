@@ -1,12 +1,13 @@
 
 // Components
-export { default as OrdersList } from './OrdersList'
-export { default as OrderForm } from './OrderForm'
-export { default as EnhancedOrderForm } from './EnhancedOrderForm'
-export { default as OrderDetailView } from './OrderDetailView'
-export { default as OrderStatusTimeline } from './OrderStatusTimeline'
-export { default as OrderQuickActions } from './OrderQuickActions'
-export { default as OrderFilters } from './OrderFilters'
+export { OrdersList as OrdersList } from './OrdersList'
+export { OrderForm as OrderForm } from './OrderForm'
+export { EnhancedOrderForm as EnhancedOrderForm } from './EnhancedOrderForm'
+export { OrderDetailView as OrderDetailView } from './OrderDetailView'
+export { OrderStatusTimeline as OrderStatusTimeline } from './OrderStatusTimeline'
+export { OrderQuickActions as OrderQuickActions } from './OrderQuickActions'
+export { OrderFilters as OrderFilters } from './OrderFilters'
+export { WhatsAppFollowUp } from './WhatsAppFollowUp'
 
 // Hook
 export { useOrders } from './useOrders'

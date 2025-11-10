@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
@@ -42,7 +43,7 @@ export function useRecipeAvailability(recipeId: string | null, quantity = 1) {
 
       return response.json() as Promise<RecipeAvailabilityResult>
     },
-    enabled: !!recipeId,
+    enabled: Boolean(recipeId),
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: true
   })

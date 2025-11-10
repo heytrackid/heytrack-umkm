@@ -1,6 +1,6 @@
 import { useToast } from '@/hooks/use-toast'
-import { getErrorMessage } from '@/shared'
 import { createClientLogger } from '@/lib/client-logger'
+import { getErrorMessage } from '@/shared/index'
 
 const logger = createClientLogger('ClientFile')
 
@@ -73,8 +73,8 @@ export function useErrorHandler() {
   ): Promise<T | null> => {
     try {
       return await asyncFn()
-    } catch (err) {
-      void handleError(err, context)
+    } catch (error) {
+      void handleError(error, context)
       return null
     }
   }
@@ -111,7 +111,7 @@ export function handleAPIResponse<T>(
     })
   }
 
-  return response.data
+  return response['data']
 }
 
 // Form error handling
@@ -170,14 +170,14 @@ export function createErrorRecovery<T>(
   return async (): Promise<T> => {
     try {
       return await primaryFn()
-    } catch (err) {
-      errorHandler?.(err as Error)
+    } catch (error) {
+      errorHandler?.(error as Error)
 
       if (fallbackFn) {
         return fallbackFn()
       }
 
-      throw err
+      throw error
     }
   }
 }

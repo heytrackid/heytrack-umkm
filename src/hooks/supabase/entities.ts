@@ -1,91 +1,84 @@
 'use client'
 
-import { useSupabaseQuery } from './core'
+import { useSupabaseQuery } from '@/hooks/supabase/core'
 
-
+import type { UseSupabaseQueryOptions, UseSupabaseQueryResult } from '@/hooks/supabase/types'
 
 /**
  * Entity-specific hooks for common database operations
  */
 
 // Ingredients
-export function useIngredients(options?: { realtime?: boolean }) {
-  return useSupabaseQuery('ingredients', {
+export function useIngredients(options?: { realtime?: boolean }): UseSupabaseQueryResult<'ingredients'> {
+  const queryOptions: UseSupabaseQueryOptions<'ingredients'> = {
     orderBy: { column: 'name' },
-    realtime: options?.realtime,
-  })
+  }
+  if (options?.realtime !== undefined) {
+    queryOptions.realtime = options.realtime
+  }
+  return useSupabaseQuery('ingredients', queryOptions)
 }
 
 // Recipes
-export function useRecipes(options?: { realtime?: boolean }) {
+export function useRecipes(options?: { realtime?: boolean }): UseSupabaseQueryResult<'recipes'> {
   return useSupabaseQuery('recipes', {
     filter: { is_active: true },
     orderBy: { column: 'name' },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
 // Orders
-export function useOrders(options?: { realtime?: boolean }) {
+export function useOrders(options?: { realtime?: boolean }): UseSupabaseQueryResult<'orders'> {
   return useSupabaseQuery('orders', {
     orderBy: { column: 'created_at', ascending: false },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
 // Customers
-export function useCustomers(options?: { realtime?: boolean }) {
+export function useCustomers(options?: { realtime?: boolean }): UseSupabaseQueryResult<'customers'> {
   return useSupabaseQuery('customers', {
     orderBy: { column: 'name' },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
 // Suppliers
-export function useSuppliers(options?: { realtime?: boolean }) {
+export function useSuppliers(options?: { realtime?: boolean }): UseSupabaseQueryResult<'suppliers'> {
   return useSupabaseQuery('suppliers', {
     orderBy: { column: 'name' },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
-// Expenses
-export function useExpenses(options?: { realtime?: boolean }) {
-  return useSupabaseQuery('expenses', {
-    orderBy: { column: 'expense_date', ascending: false },
-    realtime: options?.realtime,
+// Financial Records (replaces Expenses)
+export function useFinancialRecords(
+  filter?: Record<string, unknown>,
+  options?: { realtime?: boolean }
+): UseSupabaseQueryResult<'financial_records'> {
+  return useSupabaseQuery('financial_records', {
+    filter,
+    orderBy: { column: 'date', ascending: false },
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
 // Operational Costs
-export function useOperationalCosts(options?: { realtime?: boolean }) {
+export function useOperationalCosts(options?: { realtime?: boolean }): UseSupabaseQueryResult<'operational_costs'> {
   return useSupabaseQuery('operational_costs', {
     orderBy: { column: 'created_at', ascending: false },
-    realtime: options?.realtime,
-  })
-}
-
-// Financial Records
-export function useFinancialRecords(options?: {
-  startDate?: string
-  endDate?: string
-  type?: 'INCOME' | 'EXPENSE' | 'INVESTMENT' | 'WITHDRAWAL'
-  realtime?: boolean
-}) {
-  const filter: Record<string, unknown> = {}
-  if (options?.type) {filter.type = options.type}
-
-  return useSupabaseQuery('financial_records', {
-    filter,
-    orderBy: { column: 'created_at', ascending: false },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
 
 // Productions
-export function useProductions(options?: { realtime?: boolean }) {
+export function useProductions(options?: { realtime?: boolean }): UseSupabaseQueryResult<'productions'> {
   return useSupabaseQuery('productions', {
     orderBy: { column: 'created_at', ascending: false },
-    realtime: options?.realtime,
+    ...(options?.realtime !== undefined && { realtime: options.realtime }),
   })
 }
+
+
+

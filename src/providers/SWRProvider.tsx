@@ -1,6 +1,7 @@
 'use client'
 
 import { SWRConfig } from 'swr'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('SWR')
@@ -8,7 +9,7 @@ const logger = createClientLogger('SWR')
 const swrFetcher = async (resource: string) => {
   const response = await fetch(resource)
   if (!response.ok) {
-    throw new Error(`Error fetching ${resource}: ${response.status}`)
+    throw new Error(`Error fetching ${resource}: ${response['status']}`)
   }
   return response.json()
 }

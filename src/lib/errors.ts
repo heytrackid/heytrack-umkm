@@ -7,11 +7,11 @@ import { apiLogger } from '@/lib/logger'
  */
 
 
-// ============================================================================
+// ==========================================================
 // GENERAL ERROR HANDLING
-// ============================================================================
+// ==========================================================
 
-export type ErrorSeverity = 'fatal' | 'error' | 'warning' | 'info' | 'debug'
+export type ErrorSeverity = 'debug' | 'error' | 'fatal' | 'info' | 'warning'
 
 export interface ErrorContext {
   user?: {
@@ -76,6 +76,9 @@ export function captureMessage(
     case 'debug':
       apiLogger.debug(logData, message)
       break
+    default:
+      // Unknown log level
+      break
   }
 }
 
@@ -104,11 +107,12 @@ export function handleApiError(error: unknown, context?: ErrorContext): {
   }
 }
 
-// ============================================================================
+// ==========================================================
 // AUTH ERROR HANDLING
-// ============================================================================
+// ==========================================================
 
 export interface AuthError {
+  code?: string
   message: string
   action?: {
     label: string
@@ -227,14 +231,15 @@ export function logAuthError(error: unknown, context?: ErrorContext): void {
  */
 export function createAuthError(code: string, message: string, action?: AuthError['action']): AuthError {
   return {
+    code,
     message,
     action
   }
 }
 
-// ============================================================================
+// ==========================================================
 // DATABASE ERROR HANDLING
-// ============================================================================
+// ==========================================================
 
 /**
  * Handle database operation errors
@@ -244,11 +249,11 @@ export function handleDatabaseError(error: unknown): {
   statusCode: number
   code?: string
 } {
-  apiLogger.error({ err: error }, 'Database Error')
+  apiLogger.error({ error }, 'Database Error')
 
   // Handle specific Supabase/Postgres errors
   if (error && typeof error === 'object' && 'code' in error) {
-    const errCode = String((error as { code?: string }).code)
+    const errCode = String((error as { code?: string })['code'])
     switch (errCode) {
       case '23505': // Unique constraint violation
         return {

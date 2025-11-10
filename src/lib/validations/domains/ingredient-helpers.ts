@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { IngredientInsertSchema, type IngredientInsert } from './ingredient'
+
+import { IngredientInsertSchema, type IngredientInsert } from '@/lib/validations/domains/ingredient'
 
 
 /**
@@ -73,9 +74,9 @@ export class IngredientValidationHelpers {
     try {
       const validatedData = EnhancedIngredientInsertSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors = error.issues.map(error => `${error.path.join('.')}: ${error.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -89,9 +90,9 @@ export class IngredientValidationHelpers {
     try {
       const validatedData = EnhancedIngredientUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors = error.issues.map(error => `${error.path.join('.')}: ${error.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -110,7 +111,7 @@ export class IngredientValidationHelpers {
   }): {
     shouldReorder: boolean
     recommendedQuantity: number
-    priority: 'low' | 'medium' | 'high' | 'critical'
+    priority: 'critical' | 'high' | 'low' | 'medium'
     reason: string
   } {
     const { current_stock, min_stock, max_stock, usage_rate_daily, reorder_lead_time = 7 } = ingredient
@@ -125,7 +126,7 @@ export class IngredientValidationHelpers {
 
     const shouldReorder = current_stock <= effectiveReorderPoint
     let recommendedQuantity = (max_stock ?? min_stock * 2) - current_stock
-    let priority: 'low' | 'medium' | 'high' | 'critical' = 'low'
+    let priority: 'critical' | 'high' | 'low' | 'medium' = 'low'
     let reason = 'Stock at reorder level'
 
     if (current_stock <= min_stock) {
@@ -165,8 +166,8 @@ export class IngredientValidationHelpers {
 
     ingredients.forEach((ingredient, index) => {
       const result = this.validateInsert(ingredient)
-      if (result.success && result.data) {
-        valid.push(result.data)
+      if (result.success && result['data']) {
+        valid.push(result['data'])
       } else {
         invalid.push({
           index,
@@ -187,22 +188,22 @@ export class IngredientValidationHelpers {
     unit: string
     indices: number[]
   }> {
-    const duplicates: Record<string, number[]> = {}
+    const duplicates: Record<string, { name: string; unit: string; indices: number[] }> = {}
 
     ingredients.forEach((ingredient, index) => {
-      const key = `${ingredient.name.toLowerCase()}-${ingredient.unit}`
+      const normalizedName = ingredient.name.toLowerCase()
+      const key = `${normalizedName}-${ingredient.unit}`
       if (!duplicates[key]) {
-        duplicates[key] = []
+        duplicates[key] = {
+          name: ingredient.name,
+          unit: ingredient.unit,
+          indices: []
+        }
       }
-      duplicates[key].push(index)
+      duplicates[key]?.indices.push(index)
     })
 
-    return Object.entries(duplicates)
-      .filter(([_, indices]) => indices.length > 1)
-      .map(([key, indices]) => {
-        const [name, unit] = key.split('-')
-        return { name, unit, indices }
-      })
+    return Object.values(duplicates).filter(entry => entry.indices.length > 1)
   }
 }
 

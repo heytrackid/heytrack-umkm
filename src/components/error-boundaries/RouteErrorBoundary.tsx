@@ -1,9 +1,10 @@
 'use client'
 
+import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
 import { Component, type ComponentType, type ErrorInfo, type ReactNode } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('RouteErrorBoundary')
@@ -41,7 +42,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
     }
   }
 
-  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     const routeName = this.props.routeName ?? 'Unknown Route'
 
     logger.error({
@@ -55,15 +56,14 @@ export class RouteErrorBoundary extends Component<Props, State> {
     // Example: Sentry.captureException(error, { tags: { route: routeName } })
   }
 
-  handleRetry = () => {
+  handleRetry = (): void => {
     this.setState(prevState => ({
       hasError: false,
-      error: undefined,
       retryCount: prevState.retryCount + 1
     }))
   }
 
-  handleGoBack = () => {
+  handleGoBack = (): void => {
     if (window.history.length > 1) {
       window.history.back()
     } else {
@@ -71,7 +71,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
     }
   }
 
-  override render() {
+  override render(): ReactNode {
     if (this.state.hasError) {
       const routeName = this.props.routeName ?? 'this page'
       const maxRetries = 3
@@ -128,9 +128,9 @@ export class RouteErrorBoundary extends Component<Props, State> {
 export function withRouteErrorBoundary<P extends object>(
   Component: ComponentType<P>,
   routeName?: string
-) {
-  const WrappedComponent = (props: P) => (
-    <RouteErrorBoundary routeName={routeName}>
+): ComponentType<P> {
+  const WrappedComponent = (props: P): ReactNode => (
+    <RouteErrorBoundary {...(routeName && { routeName })}>
       <Component {...props} />
     </RouteErrorBoundary>
   )

@@ -3,19 +3,20 @@
  * Protected route - Admin only
  */
 
+import { AlertTriangle } from 'lucide-react'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
-import { isAdmin } from '@/lib/auth/admin-check'
+
 import { AdminDashboardWrapper } from '@/components/admin/AdminDashboardWrapper'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertTriangle } from 'lucide-react'
+import { isAdmin } from '@/lib/auth/admin-check'
+import { createClient } from '@/utils/supabase/server'
 
 export const metadata = {
     title: 'Admin & Performance Monitor | HeyTrack',
     description: 'System administration and performance monitoring'
 }
 
-const AdminPage = async () => {
+const AdminPage = async (): Promise<JSX.Element> => {
     const supabase = await createClient()
 
     // Check authentication
@@ -26,7 +27,7 @@ const AdminPage = async () => {
     }
 
     // Check if user is admin
-    const hasAdminAccess = await isAdmin(user.id)
+    const hasAdminAccess = await isAdmin(user['id'])
 
     if (!hasAdminAccess) {
         return (
@@ -52,7 +53,7 @@ const AdminPage = async () => {
                 </div>
             </div>
 
-            <AdminDashboardWrapper userId={user.id} />
+            <AdminDashboardWrapper userId={user['id']} />
         </div>
     )
 }

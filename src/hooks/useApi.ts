@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+
 import { type ApiResponse, type ApiRequestOptions, apiClient } from '@/lib/api/client'
 
 
@@ -25,7 +26,14 @@ interface UseApiState<T> {
 export function useApi<T = unknown >(
   endpoint: string,
   options: UseApiOptions<T> = {}
-) {
+): {
+  data: T | null;
+  error: string | null;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  fetch: (config?: RequestConfig) => Promise<void>;
+  refetch: (config?: RequestConfig) => Promise<void>;
+} {
   const { onSuccess, onError, autoLoad = false } = options
 
   const [state, setState] = useState<UseApiState<T>>({
@@ -38,20 +46,20 @@ export function useApi<T = unknown >(
   /**
    * Execute GET request
    */
-  const fetch = useCallback(async (config?: RequestConfig) => {
+  const fetch = useCallback(async (config?: RequestConfig): Promise<void> => {
     setState((prev) => ({ ...prev, isLoading: true }))
 
     try {
       const response = await apiClient.get<T>(endpoint, config)
 
-      if (response.success && response.data) {
+      if (response.success && response['data']) {
         setState({
-          data: response.data,
+          data: response['data'],
           error: null,
           isLoading: false,
           isRefreshing: false,
         })
-        onSuccess?.(response.data)
+        onSuccess?.(response['data'])
       } else {
         const error = response.error ?? 'Failed to fetch data'
         setState({
@@ -62,8 +70,8 @@ export function useApi<T = unknown >(
         })
         onError?.(error)
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       setState({
         data: null,
         error: errorMessage,
@@ -77,20 +85,20 @@ export function useApi<T = unknown >(
   /**
    * Refetch data
    */
-  const refetch = useCallback(async (config?: RequestConfig) => {
+  const refetch = useCallback(async (config?: RequestConfig): Promise<void> => {
     setState((prev) => ({ ...prev, isRefreshing: true }))
 
     try {
       const response = await apiClient.get<T>(endpoint, config)
 
-      if (response.success && response.data) {
+      if (response.success && response['data']) {
         setState((prev) => ({
           ...prev,
-          data: response.data as T,
+          data: response['data'] as T,
           error: null,
           isRefreshing: false,
         }))
-        onSuccess?.(response.data)
+        onSuccess?.(response['data'])
       } else {
         const error = response.error ?? 'Failed to refetch data'
         setState((prev) => ({
@@ -100,8 +108,8 @@ export function useApi<T = unknown >(
         }))
         onError?.(error)
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       setState((prev) => ({
         ...prev,
         error: errorMessage,
@@ -116,12 +124,17 @@ export function useApi<T = unknown >(
    */
   useEffect(() => {
     if (autoLoad) {
-      void fetch()
+      const timer = setTimeout(() => {
+        void fetch()
+      }, 0)
+
+      return () => clearTimeout(timer)
     }
+    return undefined
   }, [autoLoad, fetch])
 
   return {
-    data: state.data,
+    data: state['data'],
     error: state.error,
     isLoading: state.isLoading,
     isRefreshing: state.isRefreshing,
@@ -135,9 +148,14 @@ export function useApi<T = unknown >(
  */
 export function useMutationApi<T = unknown , R = unknown >(
   endpoint: string,
-  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'POST',
+  method: 'DELETE' | 'PATCH' | 'POST' | 'PUT' = 'POST',
   options: UseApiOptions<R> = {}
-) {
+): {
+  data: R | null;
+  error: string | null;
+  isLoading: boolean;
+  mutate: (body?: T, config?: RequestConfig) => Promise<void>;
+} {
   const { onSuccess, onError } = options
 
   const [state, setState] = useState<Omit<UseApiState<R>, 'isRefreshing'> & { data: R | null }>({
@@ -150,8 +168,8 @@ export function useMutationApi<T = unknown , R = unknown >(
    * Execute mutation
    */
   const mutate = useCallback(
-    async (body?: T, config?: RequestConfig) => {
-      void setState({ data: null, error: null, isLoading: true })
+    async (body?: T, config?: RequestConfig): Promise<void> => {
+      setState({ data: null, error: null, isLoading: true })
 
       try {
         let response: ApiResponse<R>
@@ -173,13 +191,13 @@ export function useMutationApi<T = unknown , R = unknown >(
             response = await apiClient.post<R>(endpoint, body, config)
         }
 
-        if (response.success && response.data) {
+        if (response.success && response['data']) {
           setState({
-            data: response.data,
+            data: response['data'],
             error: null,
             isLoading: false,
           })
-          onSuccess?.(response.data)
+          onSuccess?.(response['data'])
         } else {
           const error = response.error ?? 'Operation failed'
           setState({
@@ -190,22 +208,22 @@ export function useMutationApi<T = unknown , R = unknown >(
           onError?.(error)
           throw new Error(error)
         }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         setState({
           data: null,
           error: errorMessage,
           isLoading: false,
         })
         onError?.(errorMessage)
-        throw err
+        throw error
       }
     },
     [endpoint, method, onSuccess, onError]
   )
 
   return {
-    data: state.data,
+    data: state['data'],
     error: state.error,
     isLoading: state.isLoading,
     mutate,

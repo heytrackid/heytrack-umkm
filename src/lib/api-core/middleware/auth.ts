@@ -1,5 +1,6 @@
-import type { NextRequest, NextResponse } from 'next/server'
 import { createErrorResponse } from '@/lib/api-core/responses'
+
+import type { NextRequest, NextResponse } from 'next/server'
 
 /**
  * Authentication Middleware Module
@@ -13,7 +14,7 @@ import { createErrorResponse } from '@/lib/api-core/responses'
 export function withAuth(options: { requireAdmin?: boolean } = {}) {
   return (request: NextRequest): NextResponse | null => {
     // Simplified auth check - in real implementation, verify JWT token
-    const authHeader = request.headers.get('authorization')
+    const authHeader = request['headers'].get('authorization')
     if (!authHeader) {
       return createErrorResponse('Authentication required', 401)
     }

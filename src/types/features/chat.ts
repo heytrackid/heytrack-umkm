@@ -15,7 +15,7 @@ export interface ChatSession {
 export interface ChatMessage {
   id: string;
   session_id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: 'assistant' | 'system' | 'user';
   content: string;
   metadata: MessageMetadata;
   created_at: string;
@@ -40,12 +40,7 @@ export interface ChatContextCache {
 }
 
 export type ContextType =
-  | 'user_profile'
-  | 'recipes'
-  | 'ingredients'
-  | 'orders'
-  | 'hpp'
-  | 'financial';
+  'financial' | 'hpp' | 'ingredients' | 'orders' | 'recipes' | 'user_profile';
 
 export interface BusinessContext {
   user?: UserProfile;
@@ -64,17 +59,17 @@ export interface BusinessInsight {
   id: string;
   title: string;
   summary: string;
-  category: 'inventory' | 'sales' | 'finance' | 'production' | 'other';
+  category: 'finance' | 'inventory' | 'other' | 'production' | 'sales';
   confidence: number; // 0-1
-  impact?: 'low' | 'medium' | 'high';
+  impact?: 'high' | 'low' | 'medium';
   actionItems?: string[];
   sources?: string[];
 }
 
 export interface QuickStat {
   label: string;
-  value: string | number;
-  trend?: 'up' | 'down' | 'stable';
+  value: number | string;
+  trend?: 'down' | 'stable' | 'up';
   delta?: number; // percentage delta
   context?: string;
 }
@@ -111,7 +106,7 @@ export interface OrderSummary {
 
 export interface HppSummary {
   average_hpp: number;
-  trend: 'up' | 'down' | 'stable';
+  trend: 'down' | 'stable' | 'up';
   alerts_count: number;
   last_updated: string;
 }
@@ -126,7 +121,7 @@ export interface FinancialSummary {
 export interface ChatSuggestion {
   id: string;
   text: string;
-  category: 'page' | 'state' | 'common' | 'contextual';
+  category: 'common' | 'contextual' | 'page' | 'state';
   priority: number;
 }
 

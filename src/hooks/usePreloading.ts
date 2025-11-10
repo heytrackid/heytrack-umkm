@@ -1,8 +1,9 @@
 'use client'
 
-import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { preloadChartBundle, preloadModalComponent } from '@/components/lazy/index'
+import { useCallback } from 'react'
+
+import { preloadModalComponent } from '@/components/lazy/index'
 
 /**
  * Consolidated Preloading Hooks
@@ -18,7 +19,7 @@ export function useSimpleLinkPreloading() {
 
   const handleMouseEnter = useCallback((href: string) => {
     // Prefetch the route
-    void router.prefetch(href)
+    router.prefetch(href)
   }, [router])
 
   return { handleMouseEnter }
@@ -32,7 +33,7 @@ export function useSimpleButtonPreloading() {
   const router = useRouter()
 
   const preload = useCallback((href: string) => {
-    void router.prefetch(href)
+    router.prefetch(href)
   }, [router])
 
   return { preload }
@@ -45,7 +46,7 @@ export function useSimplePreload() {
   const router = useRouter()
 
   const preloadRoute = useCallback((href: string) => {
-    void router.prefetch(href)
+    router.prefetch(href)
   }, [router])
 
   return { preloadRoute }
@@ -63,7 +64,7 @@ export const useAdvancedButtonPreloading = () => {
   }, [])
 
   const preloadChartOnHover = useCallback(() => {
-    preloadChartBundle().catch(() => {})
+    // Chart bundle preloading temporarily disabled
   }, [])
 
   return {
@@ -80,12 +81,12 @@ export const useAdvancedLinkPreloading = () => {
   const router = useRouter()
 
   const handleLinkHover = useCallback((href: string) => {
-    void router.prefetch(href)
+    router.prefetch(href)
   }, [router])
 
   const handleLinkFocus = useCallback((href: string) => {
     // Preload on focus for keyboard navigation
-    void router.prefetch(href)
+    router.prefetch(href)
   }, [router])
 
   return {

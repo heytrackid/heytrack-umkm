@@ -1,6 +1,10 @@
 'use client'
 
-import AppLayout from '@/components/layout/app-layout'
+import { Bell, Clock, Layers, Volume2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+
+import { AppLayout } from '@/components/layout/app-layout'
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -19,10 +23,56 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { apiLogger } from '@/lib/logger'
 import { testNotificationSound, testUrgentSound } from '@/lib/notifications/sound'
+
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
-import { Bell, Clock, Layers, Volume2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+
+// Cache utilities for notification preferences
+const CACHE_KEY = 'heytrack-notification-preferences'
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+interface CachedPreferences {
+    data: NotificationPreferences
+    timestamp: number
+}
+
+const getCachedPreferences = (): NotificationPreferences | null => {
+    if (typeof window === 'undefined') {
+        return null
+    }
+
+    try {
+        const cached = localStorage.getItem(CACHE_KEY)
+        if (!cached) {
+            return null
+        }
+
+        const parsed: CachedPreferences = JSON.parse(cached)
+        if (Date.now() - parsed.timestamp > CACHE_DURATION) {
+            localStorage.removeItem(CACHE_KEY)
+            return null
+        }
+
+        return parsed.data
+    } catch {
+        return null
+    }
+}
+
+const setCachedPreferences = (preferences: NotificationPreferences): void => {
+    if (typeof window === 'undefined') {
+        return
+    }
+
+    try {
+        const cached: CachedPreferences = {
+            data: preferences,
+            timestamp: Date.now()
+        }
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cached))
+    } catch {
+        // Ignore localStorage errors
+    }
+}
 
 const NotificationSettingsPage = () => {
     const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
@@ -36,23 +86,56 @@ const NotificationSettingsPage = () => {
 
     useEffect(() => {
         void fetchPreferences()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const fetchPreferences = async () => {
         try {
             setIsLoading(true)
+
+            // Try to load from cache first
+            const cached = getCachedPreferences()
+            if (cached) {
+                setPreferences(cached)
+                setIsLoading(false)
+                // Refresh from server in background
+                void refreshFromServer()
+                return
+            }
+
+            // Load from server
             const response = await fetch('/api/notifications/preferences', {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
-                const data = await response.json()
-                setPreferences(data)
+                const data = await response.json() as NotificationPreferences | null
+                if (data) {
+                    setPreferences(data)
+                    setCachedPreferences(data)
+                }
             }
         } catch (error) {
             apiLogger.error({ error }, 'Failed to fetch preferences')
             toast.error('Gagal memuat pengaturan')
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    const refreshFromServer = async () => {
+        try {
+            const response = await fetch('/api/notifications/preferences', {
+                credentials: 'include',
+            })
+            if (response.ok) {
+                const data = await response.json() as NotificationPreferences | null
+                if (data) {
+                    setPreferences(data)
+                    setCachedPreferences(data)
+                }
+            }
+        } catch (_error) {
+            // Silently fail background refresh
         }
     }
 
@@ -69,6 +152,8 @@ const NotificationSettingsPage = () => {
             })
 
             if (response.ok) {
+                // Update cache with new preferences
+                setCachedPreferences(preferences)
                 toast.success('Pengaturan berhasil disimpan')
             } else {
                 toast.error('Gagal menyimpan pengaturan')
@@ -311,7 +396,7 @@ const NotificationSettingsPage = () => {
                                     </div>
                                     <Slider
                                         value={[toNumber(preferences.sound_volume) * 100]}
-                                        onValueChange={([value]) => updatePreference('sound_volume', value / 100)}
+                                        onValueChange={(values) => updatePreference('sound_volume', (values[0] ?? 50) / 100)}
                                         max={100}
                                         step={5}
                                         className="w-full"
@@ -390,7 +475,7 @@ const NotificationSettingsPage = () => {
                                 <div className="space-y-3">
                                     <Label className="text-wrap-mobile">Jendela Waktu Pengelompokan</Label>
                                     <Select
-                                        value={preferences.group_time_window?.toString()}
+                                        value={(preferences.group_time_window?.toString() ?? '300')}
                                         onValueChange={(value) => updatePreference('group_time_window', parseInt(value))}
                                     >
                                         <SelectTrigger>

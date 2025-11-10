@@ -106,4 +106,4 @@ const MobileCustomerCard = ({
   </Card>
 )
 
-export default MobileCustomerCard
+export { MobileCustomerCard }

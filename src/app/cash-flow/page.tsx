@@ -1,37 +1,40 @@
 'use client'
 
-import { Suspense } from 'react'
-import AppLayout from '@/components/layout/app-layout'
-import { Card, CardContent } from '@/components/ui/card'
+import { AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle, Settings } from 'lucide-react'
+import { Suspense, useState } from 'react'
+import { DateRangePicker, type DateRangeValue } from '@/components/ui/date-range'
+
+import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { StatsSkeleton, CardSkeleton } from '@/components/ui/index'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb' 
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
-import PrefetchLink from '@/components/ui/prefetch-link'
-import { AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb' 
-import { StatsSkeleton, CardSkeleton } from '@/components/ui'
-import { PageHeader } from '@/components/layout/PageHeader'
 
 // Import components directly - no lazy loading for better parallel loading
-import EnhancedTransactionForm from './components/EnhancedTransactionForm'
-import EnhancedSummaryCards from './components/EnhancedSummaryCards'
-import EnhancedCashFlowChart from './components/EnhancedCashFlowChart'
-import EnhancedTransactionList from './components/EnhancedTransactionList'
-import CategoryBreakdown from './components/CategoryBreakdown'
-import FilterPeriod from './components/FilterPeriod'
-
-import { useEnhancedCashFlow } from './hooks/useEnhancedCashFlow'
+import { CategoryBreakdown } from '@/app/cash-flow/components/CategoryBreakdown'
+import { CategoryManagementDialog } from '@/app/cash-flow/components/CategoryManagementDialog'
+import { EnhancedCashFlowChart } from '@/app/cash-flow/components/EnhancedCashFlowChart'
+import { EnhancedSummaryCards } from '@/app/cash-flow/components/EnhancedSummaryCards'
+import { EnhancedTransactionForm } from '@/app/cash-flow/components/EnhancedTransactionForm'
+import { EnhancedTransactionList } from '@/app/cash-flow/components/EnhancedTransactionList'
+import { FilterPeriod } from '@/app/cash-flow/components/FilterPeriod'
+import { useEnhancedCashFlow } from '@/app/cash-flow/hooks/useEnhancedCashFlow'
 
 // Summary cards skeleton component
-const SummaryCardsSkeleton = () => (
+const SummaryCardsSkeleton = (): JSX.Element[] => (
   Array.from({ length: 3 }, (_, i) => (
     <div key={`summary-card-${i}`} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
   ))
 )
 
-const CashFlowPage = () => {
+const CashFlowPage = (): JSX.Element => {
   const { formatCurrency } = useSettings()
   const { isMobile } = useResponsive()
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
 
   // Use the enhanced hook for all cash flow logic
   const {
@@ -113,15 +116,38 @@ const CashFlowPage = () => {
           title="Arus Kas"
           description="Kelola semua transaksi pemasukan dan pengeluaran"
           action={
-            <Button
-              onClick={() => setIsAddDialogOpen(true)}
-              disabled={loading}
-            >
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Tambah Transaksi
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setIsAddDialogOpen(true)}
+                disabled={loading}
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Tambah Transaksi
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsCategoryDialogOpen(true)}
+                disabled={loading}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Kelola Kategori
+              </Button>
+            </div>
           }
         />
+
+        {/* Mobile DateRangePicker */}
+        <div className="md:hidden">
+          <DateRangePicker
+            onChange={(range: DateRangeValue) => {
+              const params = new URLSearchParams(window.location.search)
+              if (range.from) params.set('from', range.from.toISOString())
+              if (range.to) params.set('to', range.to.toISOString())
+              const url = `${window.location.pathname}?${params.toString()}`
+              window.history.replaceState(null, '', url)
+            }}
+          />
+        </div>
 
         {/* Main Content - Single Suspense boundary for parallel loading */}
         <Suspense fallback={
@@ -152,6 +178,12 @@ const CashFlowPage = () => {
             onTransactionTypeChange={setTransactionType}
             onSubmit={handleAddTransaction}
             loading={loading}
+          />
+
+          {/* Category Management Dialog */}
+          <CategoryManagementDialog
+            isOpen={isCategoryDialogOpen}
+            onOpenChange={setIsCategoryDialogOpen}
           />
 
           {/* Quick Actions for Mobile */}
@@ -239,4 +271,5 @@ const CashFlowPage = () => {
   )
 }
 
+export { CashFlowPage }
 export default CashFlowPage

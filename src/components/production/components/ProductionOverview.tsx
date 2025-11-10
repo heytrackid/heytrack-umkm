@@ -1,5 +1,7 @@
-import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle, Clock, Play } from 'lucide-react'
+
+import { Card, CardContent } from '@/components/ui/card'
+
 import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
 
 // Production Overview Component - Lazy Loaded
@@ -11,7 +13,7 @@ interface ProductionOverviewProps {
 }
 
 const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
-  const completedBatches = batches.filter(b => b.status === 'COMPLETED').slice(0, 5)
+  const completedBatches = batches.filter(b => b['status'] === 'COMPLETED').slice(0, 5)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -20,7 +22,7 @@ const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Active Batches</p>
-              <p className="text-2xl font-bold">{batches.filter(b => b.status === 'IN_PROGRESS').length}</p>
+              <p className="text-2xl font-bold">{batches.filter(b => b['status'] === 'IN_PROGRESS').length}</p>
             </div>
             <Play className="h-8 w-8 text-gray-600 dark:text-gray-400" />
           </div>
@@ -32,7 +34,7 @@ const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Scheduled</p>
-              <p className="text-2xl font-bold">{batches.filter(b => b.status === 'PLANNED').length}</p>
+              <p className="text-2xl font-bold">{batches.filter(b => b['status'] === 'PLANNED').length}</p>
             </div>
             <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
           </div>
@@ -54,4 +56,4 @@ const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
   )
 }
 
-export default ProductionOverview
+export { ProductionOverview }

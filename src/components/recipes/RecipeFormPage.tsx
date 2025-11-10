@@ -1,5 +1,9 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
+
+import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,10 +19,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { uiLogger } from '@/lib/logger'
+
 import type { Row, Database } from '@/types/database'
-import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 
 type RecipeInsert = Row<'recipes'>
 type Ingredient = Row<'ingredients'>
@@ -26,6 +28,9 @@ type Ingredient = Row<'ingredients'>
 interface RecipeFormPageProps {
     mode: 'create' | 'edit'
     recipeId?: string
+    onSuccess?: () => void
+    onCancel?: () => void
+    isDialog?: boolean
 }
 
 interface RecipeIngredientForm {
@@ -36,7 +41,7 @@ interface RecipeIngredientForm {
     notes?: string
 }
 
-export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
+export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog = false }: RecipeFormPageProps) => {
     const router = useRouter()
     const { toast } = useToast()
 
@@ -68,12 +73,12 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
-                const data = await response.json()
+                const data = await response.json() as { ingredients: Ingredient[] }
                 setIngredients(data.ingredients ?? [])
             }
         } catch (error: unknown) {
             // Silent fail - will show empty ingredients list
-            if (process.env.NODE_ENV === 'development') {
+            if (process['env'].NODE_ENV === 'development') {
                 uiLogger.error({ error }, 'Failed to load ingredients')
             }
         }
@@ -93,7 +98,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                 throw new Error('Gagal memuat resep')
             }
 
-            const recipe = await response.json()
+            const recipe = await response.json() as RecipeInsert & { recipe_ingredients: Array<Database['public']['Tables']['recipe_ingredients']['Row']> }
             setFormData(recipe)
 
             // Load recipe ingredients from the response
@@ -108,8 +113,8 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                     }))
                 )
             }
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal memuat resep'
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Gagal memuat resep'
             toast({
                 title: 'Error',
                 description: message,
@@ -176,18 +181,22 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                 })
 
                 if (!response.ok) {
-                    const error = await response.json()
+                    const error = await response.json() as { error?: string }
                     throw new Error(error.error ?? 'Gagal membuat resep')
                 }
 
-                const newRecipe = await response.json()
+                const newRecipe = await response.json() as RecipeInsert
 
                 toast({
                     title: 'Resep dibuat',
                     description: `${formData.name} berhasil dibuat dengan ${recipeIngredients.length} bahan`,
                 })
 
-                router.push(`/recipes/${newRecipe.id}`)
+                if (isDialog && onSuccess) {
+                    onSuccess()
+                } else {
+                    router.push(`/recipes/${newRecipe.id}`)
+                }
             } else if (recipeId) {
                 // Use API route for update (handles ingredients atomically)
                 const response = await fetch(`/api/recipes/${recipeId}`, {
@@ -206,7 +215,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                 })
 
                 if (!response.ok) {
-                    const error = await response.json()
+                    const error = await response.json() as { error?: string }
                     throw new Error(error.error ?? 'Gagal memperbarui resep')
                 }
 
@@ -215,10 +224,14 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                     description: `${formData.name} berhasil diperbarui dengan ${recipeIngredients.length} bahan`,
                 })
 
-                router.push(`/recipes/${recipeId}`)
+                if (isDialog && onSuccess) {
+                    onSuccess()
+                } else {
+                    router.push(`/recipes/${recipeId}`)
+                }
             }
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Gagal menyimpan resep'
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Gagal menyimpan resep'
             toast({
                 title: 'Error',
                 description: message,
@@ -245,41 +258,58 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
         setRecipeIngredients(recipeIngredients.filter((_, i) => i !== index))
     }
 
-    const updateIngredient = (index: number, field: keyof RecipeIngredientForm, value: string | number) => {
+    const updateIngredient = (index: number, field: keyof RecipeIngredientForm, value: number | string) => {
         const updated = [...recipeIngredients]
-        updated[index] = { ...updated[index], [field]: value }
+        const current = updated[index]
+        if (!current) {return}
+
+        const safeValue = value ?? ''
+
+        const updatedIngredient: RecipeIngredientForm = {
+            id: current['id'],
+            ingredient_id: field === 'ingredient_id' ? String(safeValue) : String(current.ingredient_id || ''),
+            quantity: field === 'quantity' ? Number(safeValue) : Number(current.quantity || 0),
+            unit: field === 'unit' ? String(safeValue) : String(current.unit || 'gram'),
+            notes: field === 'notes' ? String(safeValue) : String(current.notes ?? ''),
+        }
+
+        updated[index] = updatedIngredient
         setRecipeIngredients(updated)
     }
 
     return (
         <div className="space-y-6">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <button onClick={() => router.push('/recipes')} className="hover:text-foreground">
-                    Resep Produk
-                </button>
-                <span>/</span>
-                <span className="text-foreground font-medium">
-                    {mode === 'create' ? 'Tambah Resep Baru' : 'Edit Resep'}
-                </span>
-            </div>
+            {!isDialog && (
+                <>
+                    {/* Breadcrumb */}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <button onClick={() => router.push('/recipes')} className="hover:text-foreground">
+                            Resep Produk
+                        </button>
+                        <span>/</span>
+                        <span className="text-foreground font-medium">
+                            {mode === 'create' ? 'Tambah Resep Baru' : 'Edit Resep'}
+                        </span>
+                    </div>
 
-            {/* Header */}
-            <div className="flex items-center gap-3">
-                <Button variant="ghost" size="sm" onClick={() => router.push('/recipes')}>
-                    <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                    <h1 className="text-3xl font-bold">
-                        {mode === 'create' ? 'Tambah Resep Baru' : 'Edit Resep'}
-                    </h1>
-                    <p className="text-muted-foreground mt-1">
-                        {mode === 'create'
-                            ? 'Buat resep baru untuk produk Anda'
-                            : 'Perbarui informasi resep'}
-                    </p>
-                </div>
-            </div>
+                    {/* Header */}
+                    <div className="flex items-center gap-3">
+                        <Button variant="ghost" size="sm" onClick={() => router.push('/recipes')}>
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                        <div>
+                            <h1 className="text-3xl font-bold">
+                                {mode === 'create' ? 'Tambah Resep Baru' : 'Edit Resep'}
+                            </h1>
+                            <p className="text-muted-foreground mt-1">
+                                {mode === 'create'
+                                    ? 'Buat resep baru untuk produk Anda'
+                                    : 'Perbarui informasi resep'}
+                            </p>
+                        </div>
+                    </div>
+                </>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Basic Info */}
@@ -405,7 +435,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                     <CardContent className="space-y-4">
                         {recipeIngredients.length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground">
-                                <p>Belum ada bahan. Klik "Tambah Bahan" untuk mulai.</p>
+                                <p>Belum ada bahan. Klik &#34;Tambah Bahan&#34; untuk mulai.</p>
                             </div>
                         ) : (
                             recipeIngredients.map((ri, index) => (
@@ -420,7 +450,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {ingredients.map((ing) => (
-                                                    <SelectItem key={ing.id} value={ing.id}>
+                                                    <SelectItem key={ing['id']} value={ing['id']}>
                                                         {ing.name}
                                                     </SelectItem>
                                                 ))}
@@ -434,7 +464,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                                             placeholder="Jumlah"
                                             value={ri.quantity || ''}
                                             onChange={(e) =>
-                                                updateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)
+                                                updateIngredient(index, 'quantity', parseFloat(e.target.value.replace(',', '.')) || 0)
                                             }
                                         />
 
@@ -477,14 +507,26 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
 
                 {/* Actions */}
                 <div className="flex justify-end gap-3">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => router.push('/recipes')}
-                        disabled={loading}
-                    >
-                        Batal
-                    </Button>
+                    {!isDialog && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.push('/recipes')}
+                            disabled={loading}
+                        >
+                            Batal
+                        </Button>
+                    )}
+                    {isDialog && onCancel && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onCancel}
+                            disabled={loading}
+                        >
+                            Batal
+                        </Button>
+                    )}
                     <Button type="submit" disabled={loading}>
                         <Save className="h-4 w-4 mr-2" />
                         {loading ? 'Menyimpan...' : mode === 'create' ? 'Buat Resep' : 'Simpan Perubahan'}

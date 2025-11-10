@@ -1,4 +1,4 @@
-import type { ProfitData, ProfitPeriodType, ChartDataPoint } from './constants'
+import type { ProfitData, ProfitPeriodType, ChartDataPoint } from '@/app/profit/constants'
 
 
 /**
@@ -75,7 +75,7 @@ export function calculateProfitMetrics(summary: ProfitData['summary']) {
  * Validate profit data
  */
 export function validateProfitData(data: ProfitData): boolean {
-  return !!(data?.summary && data?.products && data?.ingredients && data?.operating_expenses)
+  return Boolean(data?.summary && data?.products && data?.ingredients && data?.operating_expenses)
 }
 
 /**
@@ -123,9 +123,9 @@ function exportProfitToCSV(data: ProfitData, filename: string) {
   link.setAttribute('href', url)
   link.setAttribute('download', filename)
   link.style.visibility = 'hidden'
-  document.body.appendChild(link)
+  document['body'].appendChild(link)
   link.click()
-  document.body.removeChild(link)
+  document['body'].removeChild(link)
 }
 
 /**

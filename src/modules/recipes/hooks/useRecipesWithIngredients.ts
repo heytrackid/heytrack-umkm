@@ -1,6 +1,7 @@
 'use client'
 
-import { useSupabaseQuery } from '@/hooks/supabase'
+import { useSupabaseQuery } from '@/hooks/supabase/index'
+
 import type { Row } from '@/types/database'
 
 

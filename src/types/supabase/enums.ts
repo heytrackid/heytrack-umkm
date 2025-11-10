@@ -16,7 +16,7 @@ import type {
   RecordType as RecordTypeDB,
   TransactionType as TransactionTypeDB,
   UserRole as UserRoleDB
-} from '../database'
+} from '@/types/database'
 
 // Re-export enum types from the main database file for consistency
 export type BusinessUnit = BusinessUnitDB
@@ -29,24 +29,24 @@ export type UserRole = UserRoleDB
 
 // Constants for enum values
 export const EnumConstants = {
-  business_unit: ["kitchen", "sales", "inventory", "finance", "all"] as const,
+  business_unit: ['kitchen', 'sales', 'inventory', 'finance', 'all'] as const,
   order_status: [
-    "PENDING",
-    "CONFIRMED",
-    "IN_PROGRESS",
-    "READY",
-    "DELIVERED",
-    "CANCELLED",
+    'PENDING',
+    'CONFIRMED',
+    'IN_PROGRESS',
+    'READY',
+    'DELIVERED',
+    'CANCELLED',
   ] as const,
   payment_method: [
-    "CASH",
-    "BANK_TRANSFER",
-    "CREDIT_CARD",
-    "DIGITAL_WALLET",
-    "OTHER",
+    'CASH',
+    'BANK_TRANSFER',
+    'CREDIT_CARD',
+    'DIGITAL_WALLET',
+    'OTHER',
   ] as const,
-  production_status: ["PLANNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"] as const,
-  record_type: ["INCOME", "EXPENSE", "INVESTMENT", "WITHDRAWAL"] as const,
-  transaction_type: ["PURCHASE", "USAGE", "ADJUSTMENT", "WASTE"] as const,
-  user_role: ["super_admin", "admin", "manager", "staff", "viewer"] as const,
+  production_status: ['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'] as const,
+  record_type: ['INCOME', 'EXPENSE', 'INVESTMENT', 'WITHDRAWAL'] as const,
+  transaction_type: ['PURCHASE', 'USAGE', 'ADJUSTMENT', 'WASTE'] as const,
+  user_role: ['super_admin', 'admin', 'manager', 'staff', 'viewer'] as const,
 } as const

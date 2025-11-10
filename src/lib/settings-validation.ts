@@ -57,9 +57,9 @@ export function validateBusinessInfoSettingsSafe(data: unknown): {
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string> = {}
-      error.issues.forEach((err) => {
-        if (err.path.length > 0) {
-          errors[err.path[0] as string] = err.message
+      error.issues.forEach((error) => {
+        if (error.path.length > 0) {
+          errors[error.path[0] as string] = error.message
         }
       })
       return { isValid: false, errors }

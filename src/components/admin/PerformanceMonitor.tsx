@@ -1,10 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { 
   Activity, 
   Zap, 
@@ -13,14 +8,19 @@ import {
   CheckCircle,
   TrendingUp
 } from 'lucide-react'
-import { usePerformanceMonitoring } from '@/utils/performance/usePerformanceMonitoring'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { usePerformanceMonitoring } from '@/lib/performance/index'
 
 /**
  * Performance Monitor Component
  * Real-time display of Core Web Vitals and performance metrics
  */
 
-export const PerformanceMonitor = () => {
+export const PerformanceMonitor = (): JSX.Element | null => {
   const {
     metrics,
     isSupported,
@@ -29,27 +29,22 @@ export const PerformanceMonitor = () => {
     exportMetrics
   } = usePerformanceMonitoring()
 
-  const [isVisible, setIsVisible] = useState(false)
+  const shouldShow =
+    process['env'].NODE_ENV === 'development' ||
+    (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('perf') === 'true')
 
-  useEffect(() => {
-    // Show monitor only in development or when ?perf=true is in URL
-    const shouldShow = 
-      process.env.NODE_ENV === 'development' || 
-      new URLSearchParams(window.location.search).get('perf') === 'true'
-    
-    setIsVisible(shouldShow)
-  }, [])
+   const isVisible = shouldShow
 
   if (!isVisible || !isSupported) {
     return null
   }
 
-  const formatMetric = (value: number | null, unit = 'ms') => {
+  const formatMetric = (value: number | null, unit = 'ms'): string => {
     if (value === null) {return '—'}
     return `${value.toFixed(0)}${unit}`
   }
 
-  const getScoreColor = (score: number | null) => {
+  const getScoreColor = (score: number | null): string => {
     if (score === null) {return 'gray'}
     if (score >= 90) {return 'green'}
     if (score >= 70) {return 'yellow'}
@@ -57,25 +52,23 @@ export const PerformanceMonitor = () => {
     return 'red'
   }
 
-  const getRatingBadge = (rating: string) => {
-    const variants: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-      excellent: { label: 'Excellent', variant: 'default' },
-      good: { label: 'Good', variant: 'secondary' },
-      'needs-improvement': { label: 'Needs Improvement', variant: 'outline' },
-      poor: { label: 'Poor', variant: 'destructive' },
-      unknown: { label: 'Unknown', variant: 'outline' }
+  const getRatingBadge = (rating: string): JSX.Element => {
+    const variants = {
+      excellent: { label: 'Excellent', variant: 'default' as const },
+      good: { label: 'Good', variant: 'secondary' as const },
+      'needs-improvement': { label: 'Needs Improvement', variant: 'outline' as const },
+      poor: { label: 'Poor', variant: 'destructive' as const },
+      unknown: { label: 'Unknown', variant: 'outline' as const }
     }
 
-    const { label, variant } = variants[rating] || variants.unknown
+    const ratingData = variants[rating as keyof typeof variants] || variants.unknown
+    const { label, variant } = ratingData
     return <Badge variant={variant}>{label}</Badge>
   }
 
-  const handleExport = () => {
-    const _data = exportMetrics()
-    // console.log('Performance Metrics:', _data)
-    
+  const handleExport = (): void => {
+    exportMetrics()
     // Could send to analytics service here
-    // analytics.track('performance_metrics', _data)
   }
 
   return (
@@ -213,11 +206,11 @@ interface MetricRowProps {
   value: string
   threshold: { good: number; poor: number }
   currentValue: number | null
-  icon: React.ComponentType<{ className?: string }>
+  icon: React.ComponentType<{ className?: string | undefined }>
 }
 
-const MetricRow = ({ label, value, threshold, currentValue, icon: Icon }: MetricRowProps) => {
-  const getStatus = () => {
+const MetricRow = ({ label, value, threshold, currentValue, icon: Icon }: MetricRowProps): JSX.Element => {
+  const getStatus = (): string => {
     if (currentValue === null) {return 'unknown'}
     if (currentValue <= threshold.good) {return 'good'}
     if (currentValue <= threshold.poor) {return 'needs-improvement'}
@@ -235,7 +228,7 @@ const MetricRow = ({ label, value, threshold, currentValue, icon: Icon }: Metric
   return (
     <div className="flex items-center justify-between text-sm">
       <div className="flex items-center gap-2">
-        {icons[status]}
+        {icons[status as keyof typeof icons]}
         <span className="text-xs text-gray-600">{label}</span>
       </div>
       <span className="font-medium text-xs">{value}</span>
@@ -243,4 +236,3 @@ const MetricRow = ({ label, value, threshold, currentValue, icon: Icon }: Metric
   )
 }
 
-export default PerformanceMonitor

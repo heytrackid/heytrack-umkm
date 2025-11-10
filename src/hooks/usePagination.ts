@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 
 
 interface UsePaginationProps {
@@ -34,17 +34,13 @@ export function usePagination({
   // Calculate total pages
   const totalPages = useMemo(() => Math.max(1, Math.ceil(totalItems / pageSize)), [totalItems, pageSize])
 
+  // Use effective page to prevent going beyond total pages
+  const effectivePage = useMemo(() => Math.min(page, totalPages), [page, totalPages])
+
   // Calculate start and end indices
-  const startIndex = useMemo(() => (page - 1) * pageSize, [page, pageSize])
+  const startIndex = useMemo(() => (effectivePage - 1) * pageSize, [effectivePage, pageSize])
 
   const endIndex = useMemo(() => Math.min(startIndex + pageSize, totalItems), [startIndex, pageSize, totalItems])
-
-  // Reset to page 1 if current page exceeds total pages
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages)
-    }
-  }, [page, totalPages])
 
   // Reset to page 1 when page size changes
   const handlePageSizeChange = (newSize: number) => {

@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import type { AIAnalysisState, InventoryOptimizationRequest } from './types'
+
+import type { AIAnalysisState, InventoryOptimizationRequest } from '@/hooks/ai-powered/types'
 
 
 
@@ -9,7 +10,15 @@ import type { AIAnalysisState, InventoryOptimizationRequest } from './types'
  * AI-Powered Inventory Optimization Hook
  * Provides intelligent inventory management recommendations based on usage patterns, seasonality, and supply chain factors
  */
-export function useInventoryOptimization() {
+export function useInventoryOptimization(): {
+  data: AIAnalysisState['data'];
+  loading: boolean;
+  error: string | null;
+  confidence: number;
+  lastUpdated: string | null;
+  optimizeInventory: (request: InventoryOptimizationRequest) => Promise<unknown>;
+  clearAnalysis: () => void;
+} {
   const [state, setState] = useState<AIAnalysisState>({
     data: null,
     loading: false,
@@ -18,7 +27,7 @@ export function useInventoryOptimization() {
     lastUpdated: null
   })
 
-  const optimizeInventory = useCallback(async (request: InventoryOptimizationRequest) => {
+  const optimizeInventory = useCallback(async (request: InventoryOptimizationRequest): Promise<unknown> => {
     setState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
@@ -29,7 +38,7 @@ export function useInventoryOptimization() {
         credentials: 'include', // Include cookies for authentication
       })
 
-      const result = await response.json()
+      const result = await response.json() as { error?: string; metadata?: { confidence?: number } }
 
       if (!response.ok) {
         throw new Error(result.error ?? 'Failed to optimize inventory')
@@ -43,20 +52,20 @@ export function useInventoryOptimization() {
         lastUpdated: new Date().toISOString()
       })
 
-      return result
+      return result as unknown
 
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      setState(prev => ({
-        ...prev,
-        loading: false,
-        error: errorMessage
-      }))
-      throw err
-    }
+     } catch (error) {
+       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+       setState(prev => ({
+         ...prev,
+         loading: false,
+         error: errorMessage
+       }))
+       throw error
+     }
   }, [])
 
-  const clearAnalysis = useCallback(() => {
+  const clearAnalysis = useCallback((): void => {
     setState({
       data: null,
       loading: false,

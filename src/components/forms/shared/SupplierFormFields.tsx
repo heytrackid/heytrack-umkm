@@ -1,6 +1,10 @@
 import { FormField, FormGrid, FormSection } from '@/components/ui/crud-form'
-import type { UseFormRegister, FieldErrors } from 'react-hook-form'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+
 import type { SupplierForm } from '@/lib/validations/form-validations'
+
+import type { UseFormRegister, FieldErrors } from 'react-hook-form'
 
 /**
  * Shared Form Fields Components
@@ -33,7 +37,7 @@ export const SupplierFormFields = ({
           error={errors.name?.message}
           required
         >
-          <input
+          <Input
             {...register('name')}
             type="text"
             placeholder="Nama supplier atau perusahaan"
@@ -45,7 +49,7 @@ export const SupplierFormFields = ({
           label="Contact Person"
           error={errors.contact_person?.message}
         >
-          <input
+          <Input
             {...register('contact_person')}
             type="text"
             placeholder="Nama orang yang bisa dihubungi"
@@ -63,7 +67,7 @@ export const SupplierFormFields = ({
             label="Nomor Telepon"
             error={errors.phone?.message}
           >
-            <input
+            <Input
               {...register('phone')}
               type="tel"
               placeholder="Nomor telepon yang bisa dihubungi"
@@ -75,7 +79,7 @@ export const SupplierFormFields = ({
             label="Email"
             error={errors.email?.message}
           >
-            <input
+            <Input
               {...register('email')}
               type="email"
               placeholder="Alamat email untuk komunikasi"
@@ -87,10 +91,10 @@ export const SupplierFormFields = ({
       <FormSection title="Alamat">
         <FormField
           name="address"
-          label="Alamat Lengkap"
+          label="Alamat"
           error={errors.address?.message}
         >
-          <textarea
+          <Textarea
             {...register('address')}
             placeholder="Alamat lengkap supplier"
             rows={3}
@@ -105,7 +109,7 @@ export const SupplierFormFields = ({
             label="Catatan"
             error={errors.notes?.message}
           >
-            <textarea
+            <Textarea
               {...register('notes')}
               placeholder="Catatan tambahan tentang supplier (opsional)"
               rows={2}

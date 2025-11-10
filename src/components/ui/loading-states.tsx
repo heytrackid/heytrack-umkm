@@ -1,5 +1,5 @@
-import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 /**
  * Shared Loading Components
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 // Loading spinner component
 export const LoadingSpinner = ({ size = 'md', className }: {
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'lg' | 'md' | 'sm'
   className?: string
 }) => {
   const sizeClasses = {

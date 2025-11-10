@@ -1,24 +1,9 @@
-import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { apiLogger } from '@/lib/logger'
 
 /**
- * Root page - redirects based on auth status
- * Middleware will handle the redirect, but this provides server-side fallback
+ * Root page - simple redirect to dashboard
+ * Middleware handles all auth redirects, this is just a fallback
  */
-export default async function HomePage() {
-  const supabase = await createClient()
-
-  try {
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (user) {
-      redirect('/dashboard')
-    } else {
-      redirect('/auth/login')
-    }
-  } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error checking auth')
-    redirect('/auth/login')
-  }
+export default async function HomePage(): Promise<never> {
+  redirect('/dashboard')
 }

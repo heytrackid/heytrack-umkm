@@ -36,10 +36,10 @@ export function groupNotifications(
     // Don't group if too old
     if (ageSeconds > timeWindowSeconds) {
       // Add as individual notification
-      const key = `individual_${notification.id}`
+      const key = `individual_${notification['id']}`
       groups.set(key, {
-        id: notification.id,
-        type: notification.type,
+        id: notification['id'],
+        type: notification['type'],
         category: notification.category,
         title: notification.title,
         message: notification.message,
@@ -78,8 +78,8 @@ export function groupNotifications(
     } else {
       // Create new group
       groups.set(groupKey, {
-        id: notification.id,
-        type: notification.type,
+        id: notification['id'],
+        type: notification['type'],
         category: notification.category,
         title: notification.title,
         message: notification.message,
@@ -125,11 +125,11 @@ export function getGroupedMessage(group: GroupedNotification): string {
   // Get unique entity names from metadata
   const entityNames = new Set<string>()
   for (const notif of group.notifications) {
-    if (notif.metadata && typeof notif.metadata === 'object') {
-      const metadata = notif.metadata as Record<string, unknown>
-      const name = (metadata.ingredient_name as string) || (metadata.recipe_name as string) || 
-                   (metadata.order_no as string) || 
-                   (metadata.customer_name as string)
+    if (notif['metadata'] && typeof notif['metadata'] === 'object') {
+      const _metadata = notif['metadata'] as Record<string, unknown>
+      const name = (_metadata['ingredient_name'] as string) || (_metadata['recipe_name'] as string) || 
+                    (_metadata['order_no'] as string) ||
+                    (_metadata['customer_name'] as string)
       if (name && typeof name === 'string') {
         entityNames.add(name)
       }

@@ -1,8 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
-import type { Row } from '@/types/database'
 import { TrendingUp, TrendingDown, DollarSign, PiggyBank } from 'lucide-react'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useSupabaseCRUD } from '@/hooks/supabase/index'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import type { Row } from '@/types/database'
 
 // Financial Report Component
 // Handles financial data filtering, calculations, and display
@@ -12,8 +14,8 @@ type FinancialRecord = Row<'financial_records'>
 
 interface FinancialReportProps {
   dateRange: {
-    start: string
-    end: string
+    start: string | undefined
+    end: string | undefined
   }
 }
 
@@ -24,16 +26,16 @@ const FinancialReport = ({ dateRange }: FinancialReportProps) => {
   // Calculate financial report
   const financialData = (financialRecords ?? []).filter((record): record is FinancialRecord & { date: string } => {
     if (!record.date) { return false }
-    const recordDate = new Date(record.date).toISOString().split('T')[0]
-    return recordDate >= dateRange.start && recordDate <= dateRange.end
+    const recordDate = new Date(record.date).toISOString().split('T')[0] as string
+    return recordDate >= (dateRange.start ?? '') && recordDate <= (dateRange.end ?? '')
   })
 
   const financialStats = financialData.reduce<{ totalIncome: number; totalExpense: number }>(
     (stats, record) => {
-      if (record.type === 'INCOME') {
+      if (record['type'] === 'INCOME') {
         stats.totalIncome += record.amount
       }
-      if (record.type === 'EXPENSE') {
+      if (record['type'] === 'EXPENSE') {
         stats.totalExpense += record.amount
       }
       return stats
@@ -201,4 +203,4 @@ const FinancialReport = ({ dateRange }: FinancialReportProps) => {
   )
 }
 
-export default FinancialReport
+export { FinancialReport }

@@ -1,4 +1,4 @@
-import type { CacheEntry, CacheConfig } from './types'
+import type { CacheEntry, CacheConfig } from '@/lib/api-core/types'
 
 /**
  * Cache Module
@@ -7,9 +7,9 @@ import type { CacheEntry, CacheConfig } from './types'
 
 
 export class APICache {
-  private cache = new Map<string, CacheEntry<unknown>>()
-  private pendingRequests = new Map<string, Promise<unknown>>()
-  private config: CacheConfig
+  private readonly cache = new Map<string, CacheEntry<unknown>>()
+  private readonly pendingRequests = new Map<string, Promise<unknown>>()
+  private readonly config: CacheConfig
 
   constructor(config: Partial<CacheConfig> = {}) {
     this.config = {
@@ -37,7 +37,7 @@ export class APICache {
    * Check if cache entry is valid
    */
   private isCacheValid<T>(entry: CacheEntry<T>): boolean {
-    return Date.now() - entry.timestamp < entry.ttl
+    return Date.now() - entry['timestamp'] < entry.ttl
   }
 
   /**
@@ -48,7 +48,7 @@ export class APICache {
     if (!entry) {return null}
 
     if (this.isCacheValid(entry)) {
-      return entry.data as T
+      return entry['data'] as T
     } 
       this.cache.delete(key)
       return null
@@ -80,36 +80,38 @@ export class APICache {
   executeWithCache<T>(
     operationName: string,
     queryFn: () => Promise<T>,
-    cacheKey: string,
+    cacheKey?: string,
     ttl?: number,
     useCache = true
   ): Promise<T> {
+    const finalCacheKey = cacheKey ?? this.generateCacheKey(operationName)
+
     // Check cache first
     if (useCache) {
-      const cached = this.get<T>(cacheKey)
+      const cached = this.get<T>(finalCacheKey)
       if (cached !== null) {
         return Promise.resolve(cached)
       }
     }
 
     // Check if request is pending
-    if (this.pendingRequests.has(cacheKey)) {
-      return this.pendingRequests.get(cacheKey) as Promise<T>
+    if (this.pendingRequests.has(finalCacheKey)) {
+      return this.pendingRequests.get(finalCacheKey) as Promise<T>
     }
 
     // Execute and cache
     const requestPromise = queryFn()
       .then((result) => {
         if (useCache) {
-          this.set(cacheKey, result, ttl)
+          this.set(finalCacheKey, result, ttl)
         }
         return result
       })
       .finally(() => {
-        this.pendingRequests.delete(cacheKey)
+        this.pendingRequests.delete(finalCacheKey)
       })
 
-    this.pendingRequests.set(cacheKey, requestPromise)
+    this.pendingRequests.set(finalCacheKey, requestPromise)
     return requestPromise
   }
 

@@ -1,10 +1,12 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useIngredients } from '@/hooks'
-import type { Row, Json } from '@/types/database'
+
 import { Badge } from '@/components/ui/badge'
+import { useIngredients } from '@/hooks/index'
+
 import type { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
+import type { Row, Json } from '@/types/database'
 
 
 
@@ -84,10 +86,10 @@ export function useInventoryAlerts() {
       if (currentStock === 0) {
         outOfStockCount++
         alerts.push({
-          id: `out_of_stock_${ingredient.id}`,
+          id: `out_of_stock_${ingredient['id']}`,
           alert_type: 'out_of_stock',
           created_at: new Date().toISOString(),
-          ingredient_id: ingredient.id,
+          ingredient_id: ingredient['id'],
           is_active: true,
           message: `${ingredient.name} habis stok! Perlu segera diisi ulang.`,
           resolved_at: null,
@@ -106,10 +108,10 @@ export function useInventoryAlerts() {
       } else if (currentStock <= reorderPoint) {
         lowStockCount++
         alerts.push({
-          id: `reorder_needed_${ingredient.id}`,
+          id: `reorder_needed_${ingredient['id']}`,
           alert_type: 'reorder_needed',
           created_at: new Date().toISOString(),
-          ingredient_id: ingredient.id,
+          ingredient_id: ingredient['id'],
           is_active: true,
           message: `${ingredient.name} stok rendah. Saat ini ${currentStock} ${ingredient.unit}, titik reorder ${reorderPoint} ${ingredient.unit}.`,
           resolved_at: null,
@@ -128,10 +130,10 @@ export function useInventoryAlerts() {
       } else if (maxStock && currentStock > maxStock) {
         overStockCount++
         alerts.push({
-          id: `over_stock_${ingredient.id}`,
+          id: `over_stock_${ingredient['id']}`,
           alert_type: 'over_stock',
           created_at: new Date().toISOString(),
-          ingredient_id: ingredient.id,
+          ingredient_id: ingredient['id'],
           is_active: true,
           message: `${ingredient.name} stok berlebih. Saat ini ${currentStock} ${ingredient.unit}, maksimal ${maxStock} ${ingredient.unit}.`,
           resolved_at: null,
@@ -188,7 +190,7 @@ export function useIngredientStockStatus(ingredientId: string) {
   const stockStatus = useMemo(() => {
     if (!ingredients || ingredients.length === 0) { return null }
 
-    const ingredient = ingredients.find((ing: Ingredient) => ing.id === ingredientId)
+    const ingredient = ingredients.find((ing: Ingredient) => ing['id'] === ingredientId)
     if (!ingredient) { return null }
 
     const currentStock = ingredient.current_stock ?? 0
@@ -196,8 +198,8 @@ export function useIngredientStockStatus(ingredientId: string) {
     const maxStock = ingredient.max_stock
     const reorderPoint = ingredient.reorder_point ?? minStock
 
-    let status: 'out_of_stock' | 'low_stock' | 'reorder_needed' | 'healthy' | 'over_stock' = 'healthy'
-    let statusColor: 'destructive' | 'orange' | 'yellow' | 'green' | 'blue' = 'green'
+    let status: 'healthy' | 'low_stock' | 'out_of_stock' | 'over_stock' | 'reorder_needed' = 'healthy'
+    let statusColor: 'blue' | 'destructive' | 'green' | 'orange' | 'yellow' = 'green'
     let statusText = 'Stok Sehat'
 
     if (currentStock === 0) {
@@ -257,7 +259,7 @@ export const InventoryAlertsList = ({ alerts, maxItems = 5 }: { alerts: Inventor
         }
         
         return (
-        <div key={alert.id} className="flex items-start gap-3 p-3 rounded-lg border">
+        <div key={alert['id']} className="flex items-start gap-3 p-3 rounded-lg border">
           <Badge
             variant={getBadgeVariant()}
             className="shrink-0"
@@ -265,7 +267,7 @@ export const InventoryAlertsList = ({ alerts, maxItems = 5 }: { alerts: Inventor
             {alert.severity?.toUpperCase() ?? 'INFO'}
           </Badge>
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm">{alert.ingredient_name ?? 'Unknown Ingredient'}</p>
+            <p className="font-medium text-sm">{alert['ingredient_name'] ?? 'Unknown Ingredient'}</p>
             <p className="text-sm text-muted-foreground">{alert.message}</p>
             <p className="text-xs text-muted-foreground mt-1">
               Stok: {alert.current_stock ?? 0} {alert.unit ?? ''}

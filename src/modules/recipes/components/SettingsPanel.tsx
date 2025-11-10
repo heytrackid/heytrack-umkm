@@ -1,14 +1,18 @@
 'use client'
 
+import { Calculator, Package } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Calculator, Package } from 'lucide-react'
-import type { PricingMethod } from '@/modules/recipes/types'
-import { UMKMTooltip } from './UMKMTooltip'
 import { useSettings } from '@/contexts/settings-context'
+
+import type { PricingMethod } from '@/modules/recipes/types/index'
+
+import { UMKMTooltip } from '@/modules/recipes/components/UMKMTooltip'
+
 
 
 

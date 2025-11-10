@@ -9,15 +9,17 @@ import { logger } from '@/lib/logger'
 interface RateLimitEntry {
   count: number
   resetAt: number
+  violations: number // Track consecutive violations for progressive backoff
+  lastViolation: number
 }
 
 export class RateLimiter {
-  private static limits = new Map<string, RateLimitEntry>()
+  private static readonly limits = new Map<string, RateLimitEntry>()
   private static readonly CLEANUP_INTERVAL = 60 * 1000 // 1 minute
   private static cleanupTimer: ReturnType<typeof setTimeout> | null = null
 
   /**
-   * Check if request is allowed
+   * Check if request is allowed with progressive backoff
    * @param key - Unique identifier (e.g., userId)
    * @param maxRequests - Maximum requests allowed
    * @param windowMs - Time window in milliseconds
@@ -28,19 +30,26 @@ export class RateLimiter {
     const entry = this.limits.get(key)
 
     if (!entry || now > entry.resetAt) {
-      // New window or expired
+      // New window or expired - reset violations if it's been a while
+      const resetViolations = entry && (now - entry.lastViolation) > windowMs * 2
       this.limits.set(key, {
         count: 1,
         resetAt: now + windowMs,
+        violations: resetViolations ? 0 : (entry?.violations ?? 0),
+        lastViolation: entry?.lastViolation ?? 0,
       })
       this.scheduleCleanup()
       return true
     }
 
     if (entry.count >= maxRequests) {
+      // Progressive backoff: increase violation count
+      entry.violations = (entry.violations ?? 0) + 1
+      entry.lastViolation = now
+
       logger.warn(
-        { key, count: entry.count, maxRequests },
-        'Rate limit exceeded'
+        { key, count: entry.count, maxRequests, violations: entry.violations },
+        'Rate limit exceeded with progressive backoff'
       )
       return false
     }
@@ -63,14 +72,32 @@ export class RateLimiter {
   }
 
   /**
-   * Get reset time for a key
+   * Get reset time for a key with progressive backoff
    */
   static getResetTime(key: string): number | null {
     const entry = this.limits.get(key)
     if (!entry || Date.now() > entry.resetAt) {
       return null
     }
-    return entry.resetAt
+
+    // Apply progressive backoff based on violation count
+    const violations = entry.violations ?? 0
+    const baseResetTime = entry.resetAt
+    const backoffMultiplier = Math.min(violations + 1, 5) // Max 5x backoff
+
+    return baseResetTime + (violations * 30 * 1000 * backoffMultiplier) // Additional seconds
+  }
+
+  /**
+   * Get retry-after seconds for rate limited requests
+   */
+  static getRetryAfter(key: string): number {
+    const resetTime = this.getResetTime(key)
+    if (!resetTime) return 60 // Default 1 minute
+
+    const now = Date.now()
+    const secondsUntilReset = Math.ceil((resetTime - now) / 1000)
+    return Math.max(1, secondsUntilReset)
   }
 
   /**

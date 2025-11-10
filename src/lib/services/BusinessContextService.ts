@@ -1,5 +1,5 @@
-import { createClient } from '@/utils/supabase/server'
 import { logger } from '@/lib/logger'
+
 import type { Json } from '@/types/database'
 import type {
 
@@ -12,6 +12,7 @@ import type {
   QuickStat,
   BusinessInsight,
 } from '@/types/features/chat'
+import { createClient } from '@/utils/supabase/server'
 
 // Business Context Service - Aggregates business data for AI context
 
@@ -101,7 +102,7 @@ export class BusinessContextService {
       .limit(10);
 
     return data?.map(r => ({
-      id: r.id,
+      id: r['id'],
       name: r.name,
       hpp: r.cost_per_unit ?? 0
     })) ?? [];
@@ -123,7 +124,7 @@ export class BusinessContextService {
 
     return (
       data?.map((ing) => ({
-        id: ing.id,
+        id: ing['id'],
         name: ing.name,
         stock: ing.current_stock ?? 0,
         unit: ing.unit,
@@ -147,10 +148,10 @@ export class BusinessContextService {
       .limit(10);
 
     return (data ?? []).map(order => ({
-      id: order.id,
-      customer_name: order.customer_name ?? 'Unknown customer',
+      id: order['id'],
+      customer_name: order['customer_name'] ?? 'Unknown customer',
       total_amount: order.total_amount ?? 0,
-      status: order.status ?? 'UNKNOWN',
+      status: order['status'] ?? 'UNKNOWN',
       created_at: order.created_at ?? new Date().toISOString()
     }));
   }
@@ -175,7 +176,7 @@ export class BusinessContextService {
     const current = calculations?.[0];
     const previous = calculations?.[1];
 
-    let trend: 'up' | 'down' | 'stable' = 'stable';
+    let trend: 'down' | 'stable' | 'up' = 'stable';
     if (current && previous) {
       const diff = current.total_hpp - previous.total_hpp;
       if (diff > 0.05) {trend = 'up';}
@@ -259,7 +260,7 @@ export class BusinessContextService {
       return null;
     }
 
-    return data.data as BusinessContext;
+    return data['data'] as BusinessContext;
   }
 
   /**

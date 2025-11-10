@@ -1,8 +1,10 @@
 'use client'
 
 import { Suspense, useEffect, lazy } from 'react'
+
 import { CardSkeleton, ChartSkeleton } from '@/components/lazy/LazyWrapper'
-import type { SmartPricingAssistantProps } from './SmartPricingAssistant'
+
+import type { SmartPricingAssistantProps } from '@/modules/recipes/components/SmartPricingAssistant'
 
 // Define explicit prop interface with index signature for ComponentType compatibility
 export interface SmartPricingAssistantPropsWithIndex extends SmartPricingAssistantProps {
@@ -10,12 +12,12 @@ export interface SmartPricingAssistantPropsWithIndex extends SmartPricingAssista
 }
 
 // Create lazy component with proper typing
-const LazySmartPricingAssistantComponent = lazy(() => import('./SmartPricingAssistant'))
+const LazySmartPricingAssistantComponent = lazy(() => import('./SmartPricingAssistant').then(m => ({ default: m.SmartPricingAssistant })))
 
 // Wrapper component that provides proper typing and suspense boundary
-const LazySmartPricingAssistant = (_props: SmartPricingAssistantPropsWithIndex) => (
+const LazySmartPricingAssistant = (props: SmartPricingAssistantPropsWithIndex) => (
   <Suspense fallback={<CardSkeleton />}>
-    <LazySmartPricingAssistantComponent {..._props} />
+    <LazySmartPricingAssistantComponent {...props} />
   </Suspense>
 )
 
@@ -66,8 +68,7 @@ export function useRecipeProgressiveLoading(delay = 250) {
 export const SmartRecipeLoader = ({
   userRole,
   recipeId,
-  recipeName,
-  ..._props
+  recipeName
 }: {
   userRole: 'admin' | 'manager' | 'staff'
   recipeId: string

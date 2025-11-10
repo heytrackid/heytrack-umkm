@@ -1,230 +1,225 @@
 import 'server-only'
+import { ORDER_CONFIG } from '@/lib/constants/index'
 import { dbLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
+import type { OrderItemCalculation, OrderPricing } from '@/modules/orders/types'
+import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
+import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
-import type { Update } from '@/types/database'
-import { typed } from '@/types/type-utilities'
 
 
 
+
+
+type Recipe = Row<'recipes'>
+type RecipeIngredient = Row<'recipe_ingredients'>
+type Ingredient = Row<'ingredients'>
 
 /**
- * Order Pricing Service
- * Handles order pricing with customer discounts and loyalty points
+ * Service for handling order pricing calculations
  * SERVER-ONLY: Uses server client for database operations
  */
-
-
-export interface OrderPricingCalculation {
-  subtotal: number
-  discount_amount: number
-  discount_percentage: number
-  tax_amount: number
-  delivery_fee: number
-  total_amount: number
-  loyalty_points_earned: number
-  loyalty_points_used: number
-  customer_info?: {
-    name: string
-    discount_percentage: number
-    loyalty_points: number
-  }
-}
-
 export class OrderPricingService {
   /**
-   * Calculate order pricing with customer discount
+   * Calculate pricing for order items
+   * ✅ NEW: Supports customer_id for automatic discount application
    */
-  static async calculateOrderPrice(
-    customerId: string | null,
-    items: Array<{ unit_price: number; quantity: number }>,
+  static async calculateOrderPricing(
+    items: Array<{
+      recipe_id: string
+      quantity: number
+      custom_price?: number
+    }>,
     options: {
-      delivery_fee?: number
       tax_rate?: number
-      use_loyalty_points?: number
+      discount_amount?: number
+      discount_percentage?: number
+      customer_id?: string  // ✅ NEW: Auto-apply customer discount
     } = {}
-  ): Promise<OrderPricingCalculation> {
+  ): Promise<OrderPricing> {
     try {
-      const client = await createClient()
+      const {
+        tax_rate = ORDER_CONFIG.DEFAULT_TAX_RATE,
+        discount_amount: initialDiscountAmount = 0,
+        discount_percentage: initialDiscountPercentage = 0,
+        customer_id
+      } = options
+      
+      const discount_amount = initialDiscountAmount
+      let discount_percentage = initialDiscountPercentage
 
-      const supabase = typed(client)
-
-      // Calculate subtotal
-      const subtotal = items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0)
-
-      let discountPercentage = 0
-      let customerLoyaltyPoints = 0
-      let customerInfo
-
-      // Get customer discount if customer_id provided
-      if (customerId) {
-        const { data: customer, error } = await supabase
+      // ✅ NEW: Auto-apply customer discount if customer_id provided
+      const supabase = await createClient()
+      
+      if (customer_id && discount_percentage === 0 && discount_amount === 0) {
+        const { data: customer } = await supabase
           .from('customers')
-          .select('name, discount_percentage, loyalty_points')
-          .eq('id', customerId)
+          .select('discount_percentage, loyalty_points')
+          .eq('id', customer_id)
           .single()
 
-        if (!error && customer) {
-          discountPercentage = customer.discount_percentage ?? 0
-          customerLoyaltyPoints = customer.loyalty_points ?? 0
-          customerInfo = {
-            name: customer.name,
-            discount_percentage: discountPercentage,
-            loyalty_points: customerLoyaltyPoints
-          }
+        if (customer?.discount_percentage) {
+          discount_percentage = Number(customer.discount_percentage)
+          dbLogger.info({ 
+            customerId: customer_id, 
+            discount: discount_percentage 
+          }, 'Applied customer discount')
         }
       }
 
-      // Calculate discount
-      const discountAmount = (subtotal * discountPercentage) / 100
+      // Get recipe details for pricing
+      const recipeIds = items.map(item => item.recipe_id)
+      const { data: recipes, error } = await supabase
+        .from('recipes')
+        .select(`
+          id,
+          name,
+          selling_price,
+          servings,
+          user_id,
+          recipe_ingredients (
+            quantity,
+            unit,
+            ingredient:ingredients (
+              price_per_unit,
+              unit
+            )
+          )
+        `)
+        .in('id', recipeIds)
 
-      // Apply loyalty points (1 point = Rp 1000)
-      const loyaltyPointsUsed = Math.min(
-        options.use_loyalty_points ?? 0,
-        customerLoyaltyPoints,
-        Math.floor(subtotal / 1000) // Max 1 point per 1000 rupiah
+      if (error) {throw error}
+      if (!recipes) {throw new Error('Recipes not found')}
+
+      // Define query result type using generated types
+      type RecipeQueryResult = Recipe & {
+        recipe_ingredients: Array<RecipeIngredient & {
+          ingredient: Array<Pick<Ingredient, 'price_per_unit' | 'unit'>>  // Supabase returns arrays
+        }>
+      }
+
+      /**
+       * Type guard for recipe query result
+       */
+      function isRecipeQueryResult(data: unknown): data is RecipeQueryResult {
+        if (!data || typeof data !== 'object') {return false}
+        const recipe = data as RecipeQueryResult
+        return (
+          typeof recipe['id'] === 'string' &&
+          typeof recipe.name === 'string' &&
+          Array.isArray(recipe.recipe_ingredients)
+        )
+      }
+
+      // Validate data structure
+      if (!Array.isArray(recipes) || !recipes.every(isRecipeQueryResult)) {
+        dbLogger.error({ recipes }, 'Invalid recipes data structure')
+        throw new Error('Invalid recipes data structure')
+      }
+
+      // Calculate each item with real HPP
+      const hppCalculator = new HppCalculatorService()
+      const calculatedItems: OrderItemCalculation[] = await Promise.all(
+        items.map(async (item) => {
+          const recipe = recipes.find(r => r['id'] === item.recipe_id)
+          if (!recipe) {
+            throw new Error(`Recipe with ID ${item.recipe_id} not found`)
+          }
+
+          // Use recipe selling price as unit price
+          const baseUnitPrice = item.custom_price ?? recipe.selling_price ?? 0
+          const unit_price = baseUnitPrice
+          const total_price = baseUnitPrice * item.quantity
+          
+          // Try to get real HPP calculation
+          let estimated_cost = baseUnitPrice * ORDER_CONFIG.DEFAULT_HPP_PERCENTAGE // Fallback estimate
+          
+          try {
+            const latestHpp = await hppCalculator.getLatestHpp(supabase, recipe['id'], recipe.user_id)
+            if (latestHpp && latestHpp.cost_per_unit > 0) {
+              estimated_cost = latestHpp.cost_per_unit
+              dbLogger.info({ 
+                recipeId: recipe['id'], 
+                hpp: estimated_cost 
+              }, 'Using real HPP for order pricing')
+            } else {
+              // If no HPP exists, try to calculate it
+              try {
+                const hppResult = await hppCalculator.calculateRecipeHpp(supabase, recipe['id'], recipe.user_id)
+                estimated_cost = hppResult.cost_per_unit
+                dbLogger.info({ 
+                  recipeId: recipe['id'], 
+                  hpp: estimated_cost 
+                }, 'Calculated new HPP for order pricing')
+              } catch (error) {
+                const calcError = getErrorMessage(error)
+                dbLogger.warn({ 
+                  recipeId: recipe['id'], 
+                  error: calcError 
+                }, 'Failed to calculate HPP, using estimate')
+              }
+            }
+          } catch (error) {
+            const hppError = getErrorMessage(error)
+            dbLogger.warn({ 
+              recipeId: recipe['id'], 
+              error: hppError 
+            }, 'Failed to fetch HPP, using estimate')
+          }
+          
+          const total_cost = estimated_cost * item.quantity
+          const profit = total_price - total_cost
+          const margin_percentage = total_price > 0 ? (profit / total_price) * 100 : 0
+
+          return {
+            recipe_id: recipe['id'],
+            recipe_name: recipe.name,
+            quantity: item.quantity,
+            unit_price,
+            total_price,
+            estimated_cost,
+            total_cost,
+            profit,
+            margin_percentage,
+            cost_per_unit: estimated_cost
+          }
+        })
       )
-      const loyaltyDiscount = loyaltyPointsUsed * 1000
 
-      // Calculate after discount
-      const afterDiscount = subtotal - discountAmount - loyaltyDiscount
+      // Calculate totals
+      const subtotal = calculatedItems.reduce((sum, item) => sum + item.total_price, 0)
 
-      // Calculate tax
-      const taxRate = options.tax_rate ?? 0
-      const taxAmount = (afterDiscount * taxRate) / 100
+      // Apply discount
+      let final_subtotal = subtotal
+      if (discount_percentage > 0) {
+        final_subtotal = subtotal * (1 - discount_percentage / 100)
+      } else if (discount_amount > 0) {
+        final_subtotal = Math.max(0, subtotal - discount_amount)
+      }
 
-      // Add delivery fee
-      const deliveryFee = options.delivery_fee ?? 0
+      const tax_amount = final_subtotal * tax_rate
+      const total_amount = final_subtotal + tax_amount
 
-      // Calculate total
-      const totalAmount = afterDiscount + taxAmount + deliveryFee
-
-      // Calculate loyalty points earned (1 point per 10,000 spent)
-      const loyaltyPointsEarned = Math.floor(totalAmount / 10000)
-
-      dbLogger.info({
-        customerId,
-        subtotal,
-        discountAmount,
-        totalAmount,
-        loyaltyPointsEarned
-      }, 'Order pricing calculated')
+      const total_estimated_cost = calculatedItems.reduce((sum, item) => sum + item.total_cost, 0)
+      const total_profit = final_subtotal - total_estimated_cost
+      const overall_margin = final_subtotal > 0 ? (total_profit / final_subtotal) * 100 : 0
 
       return {
+        items: calculatedItems,
         subtotal,
-        discount_amount: discountAmount + loyaltyDiscount,
-        discount_percentage: discountPercentage,
-        tax_amount: taxAmount,
-        delivery_fee: deliveryFee,
-        total_amount: totalAmount,
-        loyalty_points_earned: loyaltyPointsEarned,
-        loyalty_points_used: loyaltyPointsUsed,
-        customer_info: customerInfo
+        tax_amount,
+        tax_rate,
+        discount_amount: discount_percentage > 0
+          ? subtotal * (discount_percentage / 100)
+          : discount_amount,
+        total_amount,
+        total_estimated_cost,
+        total_profit,
+        overall_margin
       }
-
     } catch (error) {
-      dbLogger.error({ error }, 'Failed to calculate order price')
-      throw error
-    }
-  }
-
-  /**
-   * Update customer loyalty points after order
-   */
-  static async updateCustomerLoyalty(
-    customerId: string,
-    pointsEarned: number,
-    pointsUsed: number,
-    orderAmount: number
-  ): Promise<void> {
-    try {
-      const client = await createClient()
-
-      const supabase = typed(client)
-
-      // Get current customer data
-      const { data: customer, error: fetchError } = await supabase
-        .from('customers')
-        .select('loyalty_points, total_orders, total_spent')
-        .eq('id', customerId)
-        .single()
-
-      if (fetchError || !customer) {
-        throw new Error('Customer not found')
-      }
-
-      // Update customer
-      const updateData: Update<'customers'> = {
-        loyalty_points: (customer.loyalty_points ?? 0) + pointsEarned - pointsUsed,
-        total_orders: (customer.total_orders ?? 0) + 1,
-        total_spent: (customer.total_spent ?? 0) + orderAmount,
-        last_order_date: new Date().toISOString().split('T')[0],
-        updated_at: new Date().toISOString()
-      }
-
-      const { error } = await supabase
-        .from('customers')
-        .update(updateData)
-        .eq('id', customerId)
-
-      if (error) {
-        throw error
-      }
-
-      dbLogger.info({
-        customerId,
-        pointsEarned,
-        pointsUsed,
-        newBalance: (customer.loyalty_points ?? 0) + pointsEarned - pointsUsed
-      }, 'Customer loyalty updated')
-
-    } catch (error) {
-      dbLogger.error({ error, customerId }, 'Failed to update customer loyalty')
-      throw error
-    }
-  }
-
-  /**
-   * Get customer pricing preview
-   */
-  static async getCustomerPricingPreview(customerId: string): Promise<{
-    discount_percentage: number
-    loyalty_points: number
-    loyalty_value: number
-    total_orders: number
-    total_spent: number
-    average_order_value: number
-  }> {
-    try {
-      const client = await createClient()
-
-      const supabase = typed(client)
-
-      const { data: customer, error } = await supabase
-        .from('customers')
-        .select('discount_percentage, loyalty_points, total_orders, total_spent')
-        .eq('id', customerId)
-        .single()
-
-      if (error || !customer) {
-        throw new Error('Customer not found')
-      }
-
-      const loyaltyPoints = customer.loyalty_points ?? 0
-      const totalOrders = customer.total_orders ?? 0
-      const totalSpent = customer.total_spent ?? 0
-
-      return {
-        discount_percentage: customer.discount_percentage ?? 0,
-        loyalty_points: loyaltyPoints,
-        loyalty_value: loyaltyPoints * 1000, // 1 point = Rp 1000
-        total_orders: totalOrders,
-        total_spent: totalSpent,
-        average_order_value: totalOrders > 0 ? totalSpent / totalOrders : 0
-      }
-
-    } catch (error) {
-      dbLogger.error({ error, customerId }, 'Failed to get customer pricing preview')
-      throw error
+      dbLogger.error({ error }, 'Error calculating order pricing')
+      throw new Error('Failed to calculate order pricing')
     }
   }
 }

@@ -1,10 +1,12 @@
 'use client'
 
+import { DollarSign } from 'lucide-react'
+
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { DollarSign } from 'lucide-react'
 import { useSettings, currencies } from '@/contexts/settings-context'
-import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+
 
 
 
@@ -46,17 +48,17 @@ export const NumberCurrencySettings = ({ settings, onSettingChange }: NumberCurr
           <select
             id="uiCurrency"
             className="w-full p-2 border border-input rounded-md bg-background"
-            value={currentSettings.currency.code}
+            value={currentSettings.currency['code']}
             onChange={(e) => {
-              const selectedCurrency = currencies.find(c => c.code === e.target.value)
+              const selectedCurrency = currencies.find(c => c['code'] === e.target.value)
               if (selectedCurrency) {
-                void updateCurrency(selectedCurrency)
-                onSettingChange('ui', 'currency', selectedCurrency.code)
+                updateCurrency(selectedCurrency)
+                onSettingChange('ui', 'currency', selectedCurrency['code'])
               }
             }}
           >
             {currencies.map(currency => (
-              <option key={currency.code} value={currency.code}>
+              <option key={currency['code']} value={currency['code']}>
                 {currency.symbol} ({currency.name})
               </option>
             ))}

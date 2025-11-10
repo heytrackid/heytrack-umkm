@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { VALIDATION_MESSAGES } from './constants'
+
+import { VALIDATION_MESSAGES } from '@/lib/shared/constants'
 
 
 // Advanced validation utilities and rules
@@ -64,14 +65,14 @@ export const validationFunctions = {
   },
 
   // Date validation (not in future for some cases)
-  notInFuture: (date: string | Date) => {
+  notInFuture: (date: Date | string) => {
     const dateObj = new Date(date)
     const now = new Date()
     return dateObj <= now
   },
 
   // Age validation (for customers)
-  validAge: (birthDate: string | Date) => {
+  validAge: (birthDate: Date | string) => {
     const birth = new Date(birthDate)
     const now = new Date()
     const age = now.getFullYear() - birth.getFullYear()
@@ -86,7 +87,12 @@ export const validationFunctions = {
 
   // Business hours validation
   businessHours: (time: string) => {
-    const [hours, minutes] = time.split(':').map(Number)
+    const [hoursStr, minutesStr] = time.split(':')
+    const hours = Number(hoursStr)
+    const minutes = Number(minutesStr)
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+      return false
+    }
     return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59
   },
 
@@ -94,7 +100,7 @@ export const validationFunctions = {
   fileSize: (file: File, maxSize: number) => file.size <= maxSize,
 
   // File type validation
-  fileType: (file: File, allowedTypes: string[]) => allowedTypes.includes(file.type),
+  fileType: (file: File, allowedTypes: string[]) => allowedTypes.includes(file['type']),
 
   // URL validation
   url: (value: string) => {
@@ -270,9 +276,9 @@ export const validationHelpers = {
     try {
       const result = schema.parse(data)
       return { success: true, data: result }
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return { success: false, errors: err }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return { success: false, errors: error }
       }
       return { success: false, errors: new z.ZodError([]) }
     }
@@ -300,9 +306,9 @@ export const validationHelpers = {
         return null
       }
       return 'Field not found in schema'
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return err.issues[0]?.message || 'Validation failed'
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return error.issues[0]?.message || 'Validation failed'
       }
       return 'Validation failed'
     }

@@ -1,5 +1,6 @@
 import { useSettings } from '@/contexts/settings-context'
-import type { Currency } from '@/shared'
+
+import type { Currency } from '@/shared/index'
 
 /**
  * Custom hook for currency formatting using settings context
@@ -25,7 +26,7 @@ export function useCurrency(): UseCurrencyReturn {
   
   const getCurrencySymbol = () => settings.currency.symbol
   
-  const getCurrencyCode = () => settings.currency.code
+  const getCurrencyCode = () => settings.currency['code']
   
   const getCurrencyDecimals = () => settings.currency.decimals
   

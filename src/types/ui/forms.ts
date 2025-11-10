@@ -55,7 +55,4 @@ export interface FormState<T> {
 }
 
 export type FormAction<T> =
-  | { type: 'UPDATE_FIELD'; payload: FormFieldUpdate<T> }
-  | { type: 'SET_ERRORS'; payload: Record<string, string> }
-  | { type: 'SET_SUBMITTING'; payload: boolean }
-  | { type: 'RESET_FORM' };
+  { type: 'RESET_FORM' } | { type: 'SET_ERRORS'; payload: Record<string, string> } | { type: 'SET_SUBMITTING'; payload: boolean } | { type: 'UPDATE_FIELD'; payload: FormFieldUpdate<T> };

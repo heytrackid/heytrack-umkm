@@ -1,7 +1,21 @@
+'use client'
+
 import { memo } from 'react'
+import { useMemo } from 'react'
+
 import { cn } from '@/lib/utils'
-import { Line, LineChart, Area, AreaChart, Bar, BarChart, ResponsiveContainer } from 'recharts'
-import { type ChartDataPoint, CHART_COLORS } from './types'
+
+import {
+    Line,
+    Area,
+    Bar,
+    LazyLineChart,
+    LazyAreaChart,
+    LazyBarChart,
+    ResponsiveContainer
+} from '@/components/charts/LazyCharts'
+
+import { type ChartDataPoint, CHART_COLORS } from '@/components/ui/charts/types'
 
 /**
  * Mini Chart Component
@@ -11,7 +25,7 @@ import { type ChartDataPoint, CHART_COLORS } from './types'
 
 interface MiniChartProps {
   data: ChartDataPoint[]
-  type: 'line' | 'area' | 'bar'
+  type: 'area' | 'bar' | 'line'
   dataKey: string
   color?: string
   className?: string
@@ -30,12 +44,11 @@ export const MiniChart = memo(({
   className,
   height = 60
 }: MiniChartProps) => {
-  const getChartComponent = () => {
-    if (type === 'line') {return LineChart}
-    if (type === 'area') {return AreaChart}
-    return BarChart
-  }
-  const ChartComponent = getChartComponent()
+  const ChartComponent = useMemo(() => {
+    if (type === 'line') return LazyLineChart
+    if (type === 'area') return LazyAreaChart
+    return LazyBarChart
+  }, [type])
 
   return (
     <div className={cn("w-full", className)} style={{ height }}>
@@ -75,6 +88,7 @@ export const MiniChart = memo(({
       </ResponsiveContainer>
     </div>
   )
-}, (prevProps: MiniChartProps, nextProps: MiniChartProps) => prevProps.data === nextProps.data && prevProps.type === nextProps.type)
+}, (prevProps: MiniChartProps, nextProps: MiniChartProps) => prevProps['data'] === nextProps['data'] && prevProps['type'] === nextProps['type'])
 
-export default memo(MiniChart)
+MiniChart.displayName = 'MiniChart'
+

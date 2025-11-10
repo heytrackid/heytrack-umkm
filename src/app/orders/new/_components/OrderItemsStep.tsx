@@ -1,20 +1,23 @@
 'use client'
 
+import { Plus, Trash2, Package, GripVertical } from 'lucide-react'
+import { useState } from 'react'
+
+import type { OrderItem } from '@/app/orders/new/hooks/useOrderLogic'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, Package, GripVertical } from 'lucide-react'
-import type { OrderItem } from '@/app/orders/new/hooks/useOrderLogic'
-import type { Recipe } from '@/types'
-import { useState } from 'react'
+
+import type { Recipe } from '@/types/index'
+
 
 interface OrderItemsStepProps {
   orderItems: OrderItem[]
   availableRecipes: Recipe[]
   subtotal: number
   onAddItem: () => void
-  onUpdateItem: (index: number, field: keyof OrderItem, value: string | number | boolean) => void
+  onUpdateItem: (index: number, field: keyof OrderItem, value: boolean | number | string) => void
   onRemoveItem: (index: number) => void
   onReorderItems?: (fromIndex: number, toIndex: number) => void
 }
@@ -66,12 +69,12 @@ const OrderItemsStep = ({
         <div className="text-center py-8 text-muted-foreground">
           <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
           <p>Belum ada item ditambahkan</p>
-          <p className="text-sm">Klik "Tambah Item" untuk memulai</p>
+          <p className="text-sm">Klik &quot;Tambah Item&quot; untuk memulai</p>
         </div>
       ) : (
         <div className="space-y-4">
           {orderItems.map((item, index) => {
-            const itemKey = item.id ?? `${item.recipe_id}-${index}`
+            const itemKey = item['id'] ?? `${item.recipe_id}-${index}`
 
             return (
               <div
@@ -79,7 +82,7 @@ const OrderItemsStep = ({
                 className={`border rounded-lg p-4 transition-all ${
                   draggedIndex === index ? 'opacity-50 shadow-lg' : ''
                 } ${draggedIndex !== null && draggedIndex !== index ? 'hover:border-primary/50' : ''}`}
-                draggable={!!onReorderItems}
+                draggable={Boolean(onReorderItems)}
                 onDragStart={(e) => handleDragStart(e, index)}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, index)}
@@ -107,7 +110,7 @@ const OrderItemsStep = ({
                       </SelectTrigger>
                       <SelectContent>
                         {availableRecipes.map((recipe) => (
-                          <SelectItem key={recipe.id} value={recipe.id}>
+                          <SelectItem key={recipe['id']} value={recipe['id']}>
                             {recipe.name}
                           </SelectItem>
                         ))}
@@ -137,7 +140,7 @@ const OrderItemsStep = ({
                       min="0"
                       step="1000"
                       value={item.unit_price}
-                      onChange={(e) => onUpdateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
+                      onChange={(e) => onUpdateItem(index, 'unit_price', parseFloat(e.target.value.replace(',', '.')) || 0)}
                       placeholder="0"
                     />
                   </div>
@@ -196,4 +199,4 @@ const OrderItemsStep = ({
   )
 }
 
-export default OrderItemsStep
+export { OrderItemsStep }

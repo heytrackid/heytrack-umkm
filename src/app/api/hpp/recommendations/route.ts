@@ -1,14 +1,17 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { PaginationQuerySchema } from '@/lib/validations'
-import { apiLogger } from '@/lib/logger'
-import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
+import { apiLogger } from '@/lib/logger'
+import { PaginationQuerySchema } from '@/lib/validations'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+
+import { createClient } from '@/utils/supabase/server'
+
 // GET /api/hpp/recommendations - Get HPP recommendations
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -42,16 +45,16 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { page, limit, search, sort_by, sort_order } = queryValidation.data
+    const { page, limit, search, sort_by, sort_order } = queryValidation['data']
     const recipeId = searchParams.get('recipe_id')
     const priority = searchParams.get('priority')
     const isImplemented = searchParams.get('is_implemented')
 
     // Create cache key based on query parameters
-    const cacheKey = `${cacheKeys.hpp.recommendations}:${user.id}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${priority ?? ''}:${isImplemented ?? ''}`
+    const cacheKey = `${cacheKeys.hpp.recommendations}:${user['id']}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${priority ?? ''}:${isImplemented ?? ''}`
 
     // Wrap database query with caching
-    const getRecommendations = async () => {
+    const getRecommendations = async (): Promise<{ recommendations: any[], total: number, page: number, limit: number, totalPages: number }> => {
       let query = supabase
         .from('hpp_recommendations')
         .select(`
@@ -62,7 +65,7 @@ export async function GET(request: NextRequest) {
             category
           )
         `, { count: 'exact' })
-        .eq('user_id', user.id)
+        .eq('user_id', user['id'])
 
       // Apply filters
       if (recipeId) {
@@ -98,7 +101,7 @@ export async function GET(request: NextRequest) {
       }
 
       return {
-        recommendations: data || [],
+        recommendations: data ?? [],
         total: count ?? 0,
         page,
         limit,
@@ -109,15 +112,15 @@ export async function GET(request: NextRequest) {
     const result = await withCache(getRecommendations, cacheKey, 300) // 5 minutes cache
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       count: result.recommendations.length,
       total: result.total
     }, 'HPP recommendations retrieved successfully')
 
     return NextResponse.json(result)
 
-  } catch (err: unknown) {
-    apiLogger.error({ error: err }, 'Error fetching HPP recommendations')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error fetching HPP recommendations')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -126,7 +129,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/hpp/recommendations - Create new recommendation
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -140,7 +143,15 @@ export async function POST(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       )
-    }    const body = await request.json()
+    }
+    const body = await request.json() as {
+      recipeId?: string
+      recommendationType?: string
+      title?: string
+      description?: string
+      potentialSavings?: number
+      priority?: string
+    }
     const { recipeId, recommendationType, title, description, potentialSavings, priority } = body
 
     if (!recipeId || !recommendationType || !title || !description) {
@@ -161,7 +172,7 @@ export async function POST(request: NextRequest) {
         potential_savings: potentialSavings ?? 0,
         priority: priority ?? 'MEDIUM',
         is_implemented: false,
-        user_id: user.id
+        user_id: user['id']
       })
       .select()
       .single()
@@ -174,8 +185,8 @@ export async function POST(request: NextRequest) {
     cacheInvalidation.hpp()
 
     apiLogger.info({
-      userId: user.id,
-      recommendationId: data.id,
+      userId: user['id'],
+      recommendationId: data['id'],
       recipeId
     }, 'HPP recommendation created successfully')
 
@@ -184,11 +195,14 @@ export async function POST(request: NextRequest) {
       recommendation: data
     })
 
-  } catch (err: unknown) {
-    apiLogger.error({ error: err }, 'Error creating HPP recommendation')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error creating HPP recommendation')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/hpp/recommendations', SecurityPresets.enhanced())
+export const POST = createSecureHandler(postHandler, 'POST /api/hpp/recommendations', SecurityPresets.enhanced())

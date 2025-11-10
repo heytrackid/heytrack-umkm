@@ -1,4 +1,4 @@
-import type { SmartNotification, Ingredient } from './types'
+import type { SmartNotification, Ingredient } from '@/lib/automation/notification-system/types'
 
 /**
  * Inventory Notifications Module
@@ -26,7 +26,7 @@ export class InventoryNotifications {
           priority: 'high',
           timestamp: now,
           data: {
-            ingredientId: ingredient.id,
+            ingredientId: ingredient['id'],
             currentStock: ingredient.current_stock ?? 0,
             minStock: ingredient.min_stock ?? 0,
             unit: ingredient.unit
@@ -44,7 +44,7 @@ export class InventoryNotifications {
           priority: 'medium',
           timestamp: now,
           data: {
-            ingredientId: ingredient.id,
+            ingredientId: ingredient['id'],
             currentStock: ingredient.current_stock ?? 0,
             minStock: ingredient.min_stock ?? 0,
             unit: ingredient.unit
@@ -62,7 +62,7 @@ export class InventoryNotifications {
           priority: 'low',
           timestamp: now,
           data: {
-            ingredientId: ingredient.id,
+            ingredientId: ingredient['id'],
             currentStock: ingredient.current_stock ?? 0,
             recommendedMax: ingredient.min_stock ?? 0 * 3
           }

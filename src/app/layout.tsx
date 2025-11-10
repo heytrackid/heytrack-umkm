@@ -1,16 +1,18 @@
+import { Analytics } from '@vercel/analytics/next';
+import { Geist, Geist_Mono } from 'next/font/google';
+
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
 import { getNonce } from '@/lib/nonce';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
-import QueryProvider from '@/providers/QueryProvider';
+import { QueryProvider } from '@/providers/QueryProvider';
+import { SupabaseProvider } from '@/providers/SupabaseProvider';
 import { SWRProvider } from '@/providers/SWRProvider';
-import SupabaseProvider from '@/providers/SupabaseProvider';
-import { Analytics } from '@vercel/analytics/next';
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import type { ReactNode } from 'react';
+
+import type { Metadata } from 'next';
+import type { ReactElement, ReactNode } from 'react';
 
 import "./globals.css";
 
@@ -35,29 +37,24 @@ const RootLayout = async ({
   children,
 }: Readonly<{
   children: ReactNode;
-}>) => {
+}>): Promise<ReactElement> => {
   // Get CSP nonce for this request
   const nonce = await getNonce()
 
   return (
-    <html lang="id" suppressHydrationWarning className="dark h-full">
+    <html lang="id" suppressHydrationWarning className="dark h-full" nonce={nonce ?? undefined}>
       <head>
         {/* Mobile viewport with safe area support */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 
         {/* Performance resource hints */}
-        <link rel="preconnect" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} />
+        <link rel="preconnect" href={process['env']['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href={process['env']['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} />
         <link rel="preconnect" href="https://api.openrouter.ai" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.openrouter.ai" />
-
-        {/* CSP nonce for Next.js inline scripts */}
-        {nonce && (
-          <meta property="csp-nonce" content={nonce} />
-        )}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100svh] m-0 p-0 w-full`}
       >
         <SupabaseProvider>
           <AuthProvider>

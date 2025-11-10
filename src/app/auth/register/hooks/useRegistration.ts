@@ -1,23 +1,33 @@
-import { getAuthErrorMessage, validateEmail, validatePassword, validatePasswordMatch } from '@/app/auth/register/utils/validation'
 import { useState, useTransition } from 'react'
-// import { signup } from '@/app/auth/register/actions' // Replaced with API call
-import type { ErrorAction, FieldErrors } from '@/app/auth/register/types'
 
-export function useRegistration() {
+import type { ErrorAction, FieldErrors } from '@/app/auth/register/types/index'
+import { getAuthErrorMessage, validateEmail, validatePassword, validatePasswordMatch } from '@/app/auth/register/utils/validation'
+
+// import { signup } from '@/app/auth/register/actions' // Replaced with API call
+
+export function useRegistration(): {
+  error: string
+  errorAction: ErrorAction | null
+  fieldErrors: FieldErrors
+  success: boolean
+  isPending: boolean
+  clearFieldError: (field: keyof FieldErrors) => void
+  handleSubmit: (formData: FormData) => void
+} {
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<ErrorAction | null>(null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [success, setSuccess] = useState(false)
   const [isPending, startTransition] = useTransition()
 
-  const clearFieldError = (field: keyof FieldErrors) => {
+  const clearFieldError = (field: keyof FieldErrors): void => {
     setFieldErrors((prev) => {
       const newErrors = { ...prev }
       delete newErrors[field]
       return newErrors
     })
-    void setError('')
-    void setErrorAction(null)
+    setError('')
+    setErrorAction(null)
   }
 
   const validateForm = (email: string, password: string, confirmPassword: string): FieldErrors => {
@@ -41,10 +51,10 @@ export function useRegistration() {
     return errors
   }
 
-  const handleSubmit = (formData: FormData) => {
-    void setError('')
-    void setErrorAction(null)
-    void setFieldErrors({})
+  const handleSubmit = (formData: FormData): void => {
+    setError('')
+    setErrorAction(null)
+    setFieldErrors({})
 
     const email = formData.get('email') as string
     const password = formData.get('password') as string
@@ -54,7 +64,7 @@ export function useRegistration() {
     const errors = validateForm(email, password, confirmPassword)
 
     if (Object.keys(errors).length > 0) {
-      void setFieldErrors(errors)
+      setFieldErrors(errors)
       return
     }
 
@@ -73,20 +83,20 @@ export function useRegistration() {
           credentials: 'include', // Include cookies for authentication
         })
 
-        const data = await response.json()
+        const data = await response.json() as unknown
 
         if (!response.ok) {
-          const authError = getAuthErrorMessage(data.error ?? 'Registration failed')
-          void setError(authError.message)
+          const authError = getAuthErrorMessage((data as { error?: string }).error ?? 'Registration failed')
+          setError(authError.message)
           if (authError.action) {
-            void setErrorAction(authError.action)
+            setErrorAction(authError.action)
           }
           return
         }
 
-        void setSuccess(true)
-      } catch (_err) {
-        void setError('Network error. Please try again.')
+        setSuccess(true)
+      } catch (_error) {
+        setError('Network error. Please try again.')
       }
     })
   }

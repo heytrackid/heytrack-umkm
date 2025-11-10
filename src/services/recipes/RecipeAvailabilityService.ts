@@ -1,8 +1,10 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
 import type { Row, Json } from '@/types/database'
 import { safeGet, typed, isRecord, hasKey, isArray } from '@/types/type-utilities'
+import { createClient } from '@/utils/supabase/server'
+import type { RecipeOption } from '@/modules/orders/types'
+
 
 
 type JsonValue = Json
@@ -118,7 +120,7 @@ export class RecipeAvailabilityService {
         // Check if insufficient
         if (currentStock < totalRequired) {
           missingIngredients.push({
-            ingredient_id: ingredient.id,
+            ingredient_id: ingredient['id'],
             ingredient_name: ingredient.name,
             required: totalRequired,
             available: currentStock,
@@ -154,9 +156,9 @@ export class RecipeAvailabilityService {
         warnings
       }
 
-    } catch (err) {
-      dbLogger.error({ error: err, recipeId }, 'Failed to check recipe availability')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error, recipeId }, 'Failed to check recipe availability')
+      throw error
     }
   }
 
@@ -171,16 +173,100 @@ export class RecipeAvailabilityService {
         recipes.map(r => this.checkAvailability(r.recipe_id, r.quantity))
       )
       return results
-    } catch (err) {
-      dbLogger.error({ error: err }, 'Failed to check multiple recipes')
-      throw err
+    } catch (error) {
+      dbLogger.error({ error }, 'Failed to check multiple recipes')
+      throw error
+    }
+  }
+
+  /**
+   * Get recipes that are currently available for ordering
+   */
+  static async getAvailableRecipes(): Promise<RecipeOption[]> {
+    try {
+      const supabase = await createClient()
+
+      const { data: recipes, error } = await supabase
+        .from('recipes')
+        .select(`
+          id,
+          name,
+          category,
+          servings,
+          description,
+          selling_price,
+          is_active,
+          cost_per_unit,
+          margin_percentage,
+          prep_time,
+          cook_time,
+          recipe_ingredients!inner (
+            quantity,
+            unit,
+            ingredient:ingredients (
+              id,
+              name,
+              current_stock,
+              reorder_point,
+              is_active
+            )
+          )
+        `)
+        .eq('is_active', true)
+        .order('name')
+
+      if (error) {
+        throw error
+      }
+      if (!recipes) {
+        return []
+      }
+
+      return recipes.map((recipe) => {
+        const price = recipe.selling_price ?? 0
+        const estimatedMargin = 0.3
+
+        // Check ingredient availability based on recipe_ingredients data
+        let isAvailable = true
+        const insufficientIngredients: string[] = []
+
+        for (const recipeIngredient of recipe.recipe_ingredients || []) {
+          const ingredient = recipeIngredient.ingredient
+          if (!ingredient) continue
+
+          const requiredAmount = recipeIngredient.quantity * (recipe.servings ?? 1)
+          const availableStock = ingredient.current_stock ?? 0
+
+          if (availableStock < requiredAmount) {
+            isAvailable = false
+            insufficientIngredients.push(`${ingredient.name}: perlu ${requiredAmount}, tersedia ${availableStock}`)
+          }
+        }
+
+        return {
+          id: recipe['id'],
+          name: recipe.name,
+          category: recipe.category ?? '',
+          servings: recipe.servings ?? 1,
+          description: recipe.description,
+          selling_price: price,
+          cost_per_unit: recipe.cost_per_unit ?? (price * 0.7),
+          margin_percentage: recipe.margin_percentage ?? estimatedMargin,
+          is_available: isAvailable,
+          prep_time: recipe.prep_time ?? null,
+          cook_time: recipe.cook_time ?? null
+        }
+      })
+    } catch (error) {
+      dbLogger.error({ error }, 'Error fetching available recipes')
+      throw new Error('Failed to fetch available recipes')
     }
   }
 
   /**
    * Get all available recipes (can be made with current stock)
    */
-  static async getAvailableRecipes(userId: string): Promise<Array<{
+  static async getRecipeStockAvailability(userId: string): Promise<Array<{
     recipe_id: string
     recipe_name: string
     max_quantity: number
@@ -233,7 +319,7 @@ export class RecipeAvailabilityService {
 
         if (maxQuantity > 0 && maxQuantity !== Infinity) {
           availableRecipes.push({
-            recipe_id: recipe.id,
+            recipe_id: recipe['id'],
             recipe_name: recipe.name,
             max_quantity: maxQuantity,
             cost_per_unit: recipe.cost_per_unit ?? 0,
@@ -244,8 +330,8 @@ export class RecipeAvailabilityService {
 
       return availableRecipes.sort((a, b) => b.max_quantity - a.max_quantity)
 
-    } catch (err) {
-      dbLogger.error({ error: err }, 'Failed to get available recipes')
+    } catch (error) {
+      dbLogger.error({ error }, 'Failed to get available recipes')
       return []
     }
   }
@@ -262,7 +348,7 @@ export class RecipeAvailabilityService {
     reorder_point: number
     suggested_order_quantity: number
     lead_time_days: number | null
-    urgency: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
+    urgency: 'CRITICAL' | 'HIGH' | 'LOW' | 'MEDIUM'
     reason: string
   }>> {
     try {
@@ -296,7 +382,7 @@ export class RecipeAvailabilityService {
         const suggestedQuantity = Math.max(0, targetStock - currentStock)
 
         // Determine urgency
-        let urgency: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' = 'LOW'
+        let urgency: 'CRITICAL' | 'HIGH' | 'LOW' | 'MEDIUM' = 'LOW'
         let reason = ''
 
         if (availableStock <= 0) {
@@ -321,7 +407,7 @@ export class RecipeAvailabilityService {
         }
 
         return {
-          ingredient_id: ing.id,
+          ingredient_id: ing['id'],
           ingredient_name: ing.name,
           current_stock: currentStock,
           reserved_stock: reservedStock,
@@ -338,8 +424,8 @@ export class RecipeAvailabilityService {
       const urgencyOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 }
       return suggestions.sort((a, b) => urgencyOrder[b.urgency] - urgencyOrder[a.urgency])
 
-    } catch (err) {
-      dbLogger.error({ error: err }, 'Failed to get restock suggestions')
+    } catch (error) {
+      dbLogger.error({ error }, 'Failed to get restock suggestions')
       return []
     }
   }

@@ -1,4 +1,4 @@
-import type { SmartNotification } from './types'
+import type { SmartNotification } from '@/lib/automation/notification-system/types'
 
 /**
  * Seasonal Notifications Module
@@ -14,7 +14,6 @@ export class SeasonalNotifications {
     const notifications: SmartNotification[] = []
     const now = new Date()
     const month = now.getMonth() + 1 // 1-12
-    const _day = now.getDate()
 
     // Holiday season preparations
     const holidays = [

@@ -1,12 +1,18 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { apiLogger } from '@/lib/logger'
-import type { Update, Insert } from '@/types/database'
-import { getErrorMessage, isValidUUID, isRecord, extractFirst } from '@/lib/type-guards'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core'
+import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isValidUUID, isRecord, extractFirst } from '@/lib/type-guards'
+import type { IngredientPurchaseUpdate } from '@/lib/validations/database-validations'
+import type { Update, Insert } from '@/types/database'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
+
+import type { NextRequest, NextResponse } from 'next/server'
+
+
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -16,13 +22,13 @@ interface RouteContext {
 async function getHandler(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid purchase ID format' }, { status: 400 })
+      return createErrorResponse('Invalid purchase ID format', 400)
     }
     
     const supabase = await createClient()
@@ -30,7 +36,7 @@ async function getHandler(
     // Authenticate
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return createErrorResponse('Unauthorized', 401)
     }
 
     // Fetch purchase with ingredient details
@@ -47,21 +53,21 @@ async function getHandler(
         )
       `)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Purchase not found' }, { status: 404 })
+      if (error['code'] === 'PGRST116') {
+        return createErrorResponse('Purchase not found', 404)
       }
       apiLogger.error({ error }, 'Error fetching purchase')
-      return NextResponse.json({ error: 'Failed to fetch purchase' }, { status: 500 })
+      return createErrorResponse('Failed to fetch purchase', 500)
     }
 
     // ✅ V2: Validate data structure with type guards
     if (!isRecord(data)) {
       apiLogger.error({ data }, 'Invalid purchase data structure')
-      return NextResponse.json({ error: 'Invalid data structure' }, { status: 500 })
+      return createErrorResponse('Invalid data structure', 500)
     }
 
     // ✅ V2: Safe extraction of joined ingredient data
@@ -70,19 +76,16 @@ async function getHandler(
       if (ingredient && isRecord(ingredient)) {
         // Ingredient data is safely extracted and validated
         apiLogger.info({ 
-          purchaseId: data.id, 
+          purchaseId: data['id'], 
           ingredientName: ingredient.name 
         }, 'Purchase fetched with ingredient details')
       }
     }
 
-    return NextResponse.json(data)
+    return createSuccessResponse(data)
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/ingredient-purchases/[id]')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
+    return createErrorResponse(getErrorMessage(error), 500)
   }
 }
 
@@ -90,13 +93,13 @@ async function getHandler(
 async function putHandler(
   request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid purchase ID format' }, { status: 400 })
+      return createErrorResponse('Invalid purchase ID format', 400)
     }
     
     const supabase = await createClient()
@@ -104,21 +107,21 @@ async function putHandler(
     // Authenticate
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return createErrorResponse('Unauthorized', 401)
     }
 
-    const body = await request.json()
+    const body = await request.json() as IngredientPurchaseUpdate
 
     // Get existing purchase
     const { data: existingPurchase, error: fetchError } = await supabase
       .from('ingredient_purchases')
       .select('id, ingredient_id, quantity, user_id')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (fetchError || !existingPurchase) {
-      return NextResponse.json({ error: 'Purchase not found' }, { status: 404 })
+      return createErrorResponse('Purchase not found', 404)
     }
 
     // Calculate stock adjustment
@@ -128,12 +131,12 @@ async function putHandler(
 
     // Update purchase
     const updatePayload: Update<'ingredient_purchases'> = {
-      supplier: body.supplier,
+      ...(body.supplier !== undefined && { supplier: body.supplier }),
       quantity: newQuantity,
-      unit_price: body.unit_price,
+      ...(body.unit_price !== undefined && { unit_price: body.unit_price }),
       total_price: newQuantity * (body.unit_price ?? 0),
-      purchase_date: body.purchase_date,
-      notes: body.notes,
+      ...(body.purchase_date !== undefined && { purchase_date: body.purchase_date }),
+      ...(body.notes !== undefined && { notes: body.notes }),
       updated_at: new Date().toISOString()
     }
 
@@ -141,7 +144,7 @@ async function putHandler(
       .from('ingredient_purchases')
       .update(updatePayload)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select(`
         *,
         ingredient:ingredients (
@@ -156,7 +159,7 @@ async function putHandler(
 
     if (updateError) {
       apiLogger.error({ error: updateError }, 'Error updating purchase')
-      return NextResponse.json({ error: 'Failed to update purchase' }, { status: 500 })
+      return createErrorResponse('Failed to update purchase', 500)
     }
 
     // ✅ FIX: Let database trigger handle stock update
@@ -180,7 +183,7 @@ async function putHandler(
         total_price: quantityDiff * (body.unit_price ?? 0),
         reference: `PURCHASE-UPDATE-${id}`,
         notes: `Purchase quantity adjusted from ${oldQuantity} to ${newQuantity}`,
-        user_id: user.id
+        user_id: user['id']
       }
 
       const { error: transactionError } = await supabase
@@ -208,13 +211,10 @@ async function putHandler(
         .insert(stockLog)
     }
 
-    return NextResponse.json(updatedPurchase)
+    return createSuccessResponse(updatedPurchase)
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/ingredient-purchases/[id]')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
+    return createErrorResponse(getErrorMessage(error), 500)
   }
 }
 
@@ -222,13 +222,13 @@ async function putHandler(
 async function deleteHandler(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = await context['params']
     
     // Validate UUID format
     if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid purchase ID format' }, { status: 400 })
+      return createErrorResponse('Invalid purchase ID format', 400)
     }
     
     const supabase = await createClient()
@@ -236,7 +236,7 @@ async function deleteHandler(
     // Authenticate
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return createErrorResponse('Unauthorized', 401)
     }
 
     // Get purchase details
@@ -244,11 +244,11 @@ async function deleteHandler(
       .from('ingredient_purchases')
       .select('id, ingredient_id, quantity, user_id')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (fetchError || !purchase) {
-      return NextResponse.json({ error: 'Purchase not found' }, { status: 404 })
+      return createErrorResponse('Purchase not found', 404)
     }
 
     // Get current stock before reversal
@@ -266,9 +266,9 @@ async function deleteHandler(
       ingredient_id: purchase.ingredient_id,
       type: 'ADJUSTMENT',
       quantity: -purchase.quantity, // Negative to reduce stock
-      reference: `PURCHASE-DELETE-${purchase.id}`,
+      reference: `PURCHASE-DELETE-${purchase['id']}`,
       notes: `Purchase deleted - reverting stock`,
-      user_id: user.id
+      user_id: user['id']
     }
 
     const { error: transactionError } = await supabase
@@ -277,7 +277,7 @@ async function deleteHandler(
 
     if (transactionError) {
       apiLogger.error({ error: transactionError }, 'Failed to create reversal transaction')
-      return NextResponse.json({ error: 'Failed to revert stock' }, { status: 500 })
+      return createErrorResponse('Failed to revert stock', 500)
     }
 
     // Log stock reversal for audit trail
@@ -288,7 +288,7 @@ async function deleteHandler(
       quantity_after: currentStock - purchase.quantity,
       change_type: 'adjustment',
       reason: 'Purchase deletion',
-      reference_id: purchase.id,
+      reference_id: purchase['id'],
       reference_type: 'ingredient_purchase'
     }
 
@@ -301,20 +301,17 @@ async function deleteHandler(
       .from('ingredient_purchases')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (deleteError) {
       apiLogger.error({ error: deleteError }, 'Error deleting purchase')
-      return NextResponse.json({ error: 'Failed to delete purchase' }, { status: 500 })
+      return createErrorResponse('Failed to delete purchase', 500)
     }
 
-    return NextResponse.json({ message: 'Purchase deleted successfully' })
+    return createSuccessResponse(null, 'Purchase deleted successfully')
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/ingredient-purchases/[id]')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
+    return createErrorResponse(getErrorMessage(error), 500)
   }
 }
 

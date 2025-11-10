@@ -5,19 +5,69 @@ import { logger } from '@/lib/logger'
 // Security Utilities
 // Input sanitization, validation, and security helpers
 
+// HTML Escaping utility for safe HTML generation
+export class HtmlEscaper {
+  // Escape HTML to prevent XSS in template generation
+  static escape(input: unknown): string {
+    if (input === null || input === undefined) {
+      return ''
+    }
+    
+    const str = String(input)
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;')
+  }
+  
+  // Create secure HTML content using Blob approach
+  static createSecureHtmlContent(htmlContent: string): { blob: Blob; url: string } {
+    const escapedHtml = htmlContent
+    const blob = new Blob([escapedHtml], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    return { blob, url }
+  }
+  
+  // Open secure window for export/print
+  static openSecureWindow(content: string, windowName = '_blank'): Window | null {
+    try {
+      const { url } = this.createSecureHtmlContent(content)
+      const windowFeatures = 'noopener,noreferrer,width=1024,height=768'
+      const secureWindow = window.open(url, windowName, windowFeatures)
+      
+      // Clean up blob URL after a short delay
+      setTimeout(() => {
+        URL.revokeObjectURL(url)
+      }, 1000)
+      
+      return secureWindow
+    } catch (error) {
+      logger.error({ error }, 'Failed to open secure window')
+      return null
+    }
+  }
+}
+
 // Input Sanitization (Basic client-safe version)
 export class InputSanitizer {
-  // Sanitize HTML input to prevent XSS (basic strip tags version)
+  // Sanitize HTML input to prevent XSS (escape-based approach - most secure)
   static sanitizeHtml(input: string): string {
-    // Basic HTML sanitization without DOMPurify (client-safe)
-    // For server-side with full DOMPurify, use @/utils/security/server
+    // Escape all HTML entities to prevent XSS - this is the safest approach
+    return this.escapeHtml(input)
+  }
+
+  // Escape HTML entities to prevent XSS
+  private static escapeHtml(input: string): string {
     return input
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-      .replace(/<embed[^>]*>/gi, '')
-      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
-      .trim()
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;')
   }
 
   // Sanitize for rich text (limited HTML)
@@ -83,7 +133,7 @@ export class InputSanitizer {
 
 // Rate Limiting
 export class RateLimiter {
-  private static requests = new Map<string, number[]>()
+  private static readonly requests = new Map<string, number[]>()
 
   static checkLimit(identifier: string, maxRequests = 100, windowMs = 60000): boolean {
     const now = Date.now()
@@ -146,7 +196,7 @@ export class SecurityHeaders {
   static getCSPHeader(isDev = false): string {
     // Deprecation warning shown in development only (console allowed for deprecation notices)
      
-    if (process.env.NODE_ENV === 'development') {
+    if (process['env'].NODE_ENV === 'development') {
       logger.warn('SecurityHeaders.getCSPHeader is deprecated. Use getStrictCSP from @/lib/csp instead.')
     }
     const policies = [
@@ -217,7 +267,7 @@ export class PasswordValidator {
 export class APISecurity {
   static validateAPIKey(apiKey: string): boolean {
     // Basic API key validation (you should implement proper validation)
-    return !!(apiKey && apiKey.length > 20 && /^[a-zA-Z0-9_-]+$/.test(apiKey))
+    return Boolean(apiKey && apiKey.length > 20 && /^[a-zA-Z0-9_-]+$/.test(apiKey))
   }
 
   static sanitizeAPIInput(input: unknown): unknown {
@@ -251,8 +301,8 @@ export class APISecurity {
   }
   
   // Sanitize query parameters
-  static sanitizeQueryParams(params: Record<string, string | string[]>): Record<string, string | string[]> {
-    const sanitized: Record<string, string | string[]> = {}
+  static sanitizeQueryParams(params: Record<string, string[] | string>): Record<string, string[] | string> {
+    const sanitized: Record<string, string[] | string> = {}
     for (const [key, value] of Object.entries(params)) {
       const sanitizedKey = InputSanitizer.sanitizeSQLInput(key)
       if (Array.isArray(value)) {
@@ -267,3 +317,4 @@ export class APISecurity {
 
 // Export the middleware functions
 export { withSecurity, SecurityPresets } from './api-middleware'
+export { createSecureHandler, createSecureRouteHandler } from './secure-handler'

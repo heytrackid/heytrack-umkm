@@ -1,14 +1,16 @@
 'use client'
 
+import { Building } from 'lucide-react'
+import React, { useState, useLayoutEffect } from 'react'
+
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Building } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import { validateBusinessInfoSettings } from '@/lib/settings-validation'
 import { useToast } from '@/hooks/use-toast'
-import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+import { validateBusinessInfoSettings } from '@/lib/settings-validation'
+
 
 
 
@@ -22,32 +24,34 @@ interface BusinessInfoSettingsProps {
 /**
  * Business information settings component with Zod validation
  */
-export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfoSettingsProps) => {
+function BusinessInfoSettingsComponent({ settings, onSettingChange }: BusinessInfoSettingsProps) {
   const { toast } = useToast()
   const [localSettings, setLocalSettings] = useState<BusinessSettingsState>(settings.general)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Update local state when settings change
-  useEffect(() => {
-    void setLocalSettings(settings.general)
-  }, [settings.general])
+  useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocalSettings(settings.general)
+  }, [settings])
 
   const handleChange = (field: string, value: string) => {
     const newSettings: BusinessSettingsState = { ...localSettings, [field]: value }
-    void setLocalSettings(newSettings)
+    setLocalSettings(newSettings)
 
     // Validate on change
     try {
       const validatedData = validateBusinessInfoSettings(newSettings)
-      void setErrors({})
+      setErrors({})
       // If validation passes, update parent
       onSettingChange('general', field, validatedData[field as keyof typeof validatedData] ?? value)
-    } catch (err) {      // Don't update parent if validation fails, but allow user to continue typing
-      if (err instanceof Error) {
+    } catch (error) {
+      // Don't update parent if validation fails, but allow user to continue typing
+      if (error instanceof Error) {
         // Extract field-specific errors if possible
-        const errorMessage = err.message
+        const errorMessage = error.message
         if (errorMessage.includes(field)) {
-          void setErrors({ [field]: errorMessage })
+          setErrors({ [field]: errorMessage })
         }
       }
     }
@@ -57,12 +61,12 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
     // Final validation on blur
     try {
       validateBusinessInfoSettings(localSettings)
-      void setErrors({})
-    } catch (err) {
-      if (err instanceof Error) {
+      setErrors({})
+    } catch (error) {
+      if (error instanceof Error) {
         toast({
           title: 'Pengaturan Tidak Valid',
-          description: err.message,
+          description: error.message,
           variant: 'destructive',
         })
       }
@@ -86,10 +90,10 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
               value={localSettings.businessName || ''}
               onChange={(e) => handleChange('businessName', e.target.value)}
               onBlur={() => handleBlur('businessName')}
-              className={errors.businessName ? 'border-red-500' : ''}
+              className={errors['businessName'] ? 'border-red-500' : ''}
             />
-            {errors.businessName && (
-              <p className="text-sm text-red-600 mt-1">{errors.businessName}</p>
+            {errors['businessName'] && (
+              <p className="text-sm text-red-600 mt-1">{errors['businessName']}</p>
             )}
           </div>
           <div>
@@ -107,8 +111,8 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
               <option value="catering">Katering</option>
               <option value="other">Lainnya</option>
             </select>
-            {errors.businessType && (
-              <p className="text-sm text-red-600 mt-1">{errors.businessType}</p>
+            {errors['businessType'] && (
+              <p className="text-sm text-red-600 mt-1">{errors['businessType']}</p>
             )}
           </div>
         </div>
@@ -122,10 +126,10 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
             onBlur={() => handleBlur('address')}
             placeholder="Alamat lengkap bisnis"
             rows={3}
-            className={errors.address ? 'border-red-500' : ''}
+            className={errors['address'] ? 'border-red-500' : ''}
           />
-          {errors.address && (
-            <p className="text-sm text-red-600 mt-1">{errors.address}</p>
+          {errors['address'] && (
+            <p className="text-sm text-red-600 mt-1">{errors['address']}</p>
           )}
         </div>
 
@@ -138,10 +142,10 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
               onChange={(e) => handleChange('phone', e.target.value)}
               onBlur={() => handleBlur('phone')}
               placeholder="Contoh: +6281234567890"
-              className={errors.phone ? 'border-red-500' : ''}
+              className={errors['phone'] ? 'border-red-500' : ''}
             />
-            {errors.phone && (
-              <p className="text-sm text-red-600 mt-1">{errors.phone}</p>
+            {errors['phone'] && (
+              <p className="text-sm text-red-600 mt-1">{errors['phone']}</p>
             )}
           </div>
           <div>
@@ -153,10 +157,10 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
               onChange={(e) => handleChange('email', e.target.value)}
               onBlur={() => handleBlur('email')}
               placeholder="business@email.com"
-              className={errors.email ? 'border-red-500' : ''}
+              className={errors['email'] ? 'border-red-500' : ''}
             />
-            {errors.email && (
-              <p className="text-sm text-red-600 mt-1">{errors.email}</p>
+            {errors['email'] && (
+              <p className="text-sm text-red-600 mt-1">{errors['email']}</p>
             )}
           </div>
         </div>
@@ -168,12 +172,12 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
             value={localSettings.website || ''}
             onChange={(e) => handleChange('website', e.target.value)}
             onBlur={() => handleBlur('website')}
-            placeholder="https://www.bisnisanda.com"
-            className={errors.website ? 'border-red-500' : ''}
-          />
-          {errors.website && (
-            <p className="text-sm text-red-600 mt-1">{errors.website}</p>
-          )}
+             placeholder="https://www.bisnisanda.com"
+             className={errors['website'] ? 'border-red-500' : ''}
+           />
+           {errors['website'] && (
+             <p className="text-sm text-red-600 mt-1">{errors['website']}</p>
+           )}
         </div>
 
         <div>
@@ -184,14 +188,20 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
             onChange={(e) => handleChange('description', e.target.value)}
             onBlur={() => handleBlur('description')}
             placeholder="Deskripsikan bisnis Anda..."
-            rows={4}
-            className={errors.description ? 'border-red-500' : ''}
-          />
-          {errors.description && (
-            <p className="text-sm text-red-600 mt-1">{errors.description}</p>
-          )}
+             rows={4}
+             className={errors['description'] ? 'border-red-500' : ''}
+           />
+           {errors['description'] && (
+             <p className="text-sm text-red-600 mt-1">{errors['description']}</p>
+           )}
         </div>
       </CardContent>
     </Card>
   )
 }
+
+const BusinessInfoSettings = React.memo(BusinessInfoSettingsComponent)
+
+BusinessInfoSettings.displayName = 'BusinessInfoSettings'
+
+export { BusinessInfoSettings }

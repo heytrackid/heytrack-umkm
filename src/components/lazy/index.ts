@@ -8,16 +8,14 @@ import { apiLogger } from '@/lib/logger'
 
 
 // Chart Lazy Loading
-export {
-  AreaChartWithSuspense, BarChartWithSuspense, ChartContainer, ComposedChartWithSuspense, LazyAreaChart, LazyBarChart, LazyComposedChart, LazyLineChart, LazyPieChart, LineChartWithSuspense, PieChartWithSuspense, preloadChartBundle,
-  useChartPerformance,
-  type ChartType
-} from './chart-lazy-loader'
+// Chart lazy-loader exports temporarily removed (module missing)
 
 // Table Lazy Loading
+export { LazyDataTable } from './lazy-data-table'
+
 // Temporarily disabled due to syntax errors in table-lazy-loader.tsx
 // export {
-//   CRUDTableWithSuspense, DataTableWithSuspense, FinanceTableWithSuspense, InventoryTableWithSuspense, LazyCRUDTable, LazyDataTable, LazyFinanceTable, LazyInventoryTable, LazyOrdersTable, LazyVirtualizedTable, OrdersTableWithSuspense, preloadTableBundle, TableContainer, useRowVirtualization, useTableIntersectionObserver, useTablePerformance, VirtualizedTableWithSuspense, type TableType
+//   CRUDTableWithSuspense, DataTableWithSuspense, FinanceTableWithSuspense, InventoryTableWithSuspense, LazyCRUDTable, LazyFinanceTable, LazyInventoryTable, LazyOrdersTable, LazyVirtualizedTable, OrdersTableWithSuspense, preloadTableBundle, TableContainer, useRowVirtualization, useTableIntersectionObserver, useTablePerformance, VirtualizedTableWithSuspense, type TableType
 // } from './table-lazy-loader'
 
 // Modal Lazy Loading
@@ -195,6 +193,8 @@ export const globalLazyLoadingUtils = {
             break
           case 'financial-summary':
             // preloadPromises.push(preloadChartBundle()) // Use chart preloader if available
+            break
+          default:
             break
         }
       })

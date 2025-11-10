@@ -5,6 +5,132 @@
 
 import type { NextConfig } from 'next'
 
+const securityHeaders = [
+  {
+    source: '/:path*',
+    headers: [
+      {
+        key: 'X-DNS-Prefetch-Control',
+        value: 'on'
+      },
+      {
+        key: 'Strict-Transport-Security',
+        value: 'max-age=63072000; includeSubDomains; preload'
+      },
+      {
+        key: 'X-Content-Type-Options',
+        value: 'nosniff'
+      },
+      {
+        key: 'X-Frame-Options',
+        value: 'SAMEORIGIN'
+      },
+      {
+        key: 'X-XSS-Protection',
+        value: '1; mode=block'
+      },
+      {
+        key: 'Referrer-Policy',
+        value: 'origin-when-cross-origin'
+      }
+    ]
+  },
+  {
+    source: '/api/:path*',
+    headers: [
+      {
+        key: 'Cache-Control',
+        value: 'public, s-maxage=60, stale-while-revalidate=300'
+      }
+    ]
+  },
+  {
+    source: '/_next/static/:path*',
+    headers: [
+      {
+        key: 'Cache-Control',
+        value: 'public, max-age=31536000, immutable'
+      }
+    ]
+  }
+]
+
+/**
+ * Apply development webpack optimizations
+ */
+ 
+ 
+function applyDevOptimizations(config: any): void {
+  // Ensure module IDs are stable across HMR updates
+  config.optimization = {
+    ...(config.optimization as Record<string, unknown>),
+    moduleIds: 'named',
+    chunkIds: 'named'
+  }
+}
+
+/**
+ * Apply production webpack optimizations
+ */
+ 
+ 
+function applyProdOptimizations(config: any): void {
+  // Enable tree shaking
+  config.optimization = {
+    ...(config.optimization as Record<string, unknown>),
+    usedExports: true,
+    sideEffects: false
+  }
+
+  // Enable bundle analyzer if requested
+  if (process.env['ANALYZE'] === 'true') {
+     
+    (config as any).plugins = [
+      ...(config.plugins as unknown[] || []),
+      // Bundle analyzer plugin would go here
+    ]
+  }
+
+  // Split chunks for better caching
+  ;(config.optimization).splitChunks = {
+    chunks: 'all',
+    cacheGroups: {
+      default: false,
+      vendors: false,
+      // Vendor chunk
+      vendor: {
+        name: 'vendor',
+        chunks: 'all',
+        test: /node_modules/,
+        priority: 20
+      },
+      // Common chunk
+      common: {
+        name: 'common',
+        minChunks: 2,
+        chunks: 'all',
+        priority: 10,
+        reuseExistingChunk: true,
+        enforce: true
+      },
+      // UI components chunk
+      ui: {
+        name: 'ui',
+        test: /[\\/]components[\\/]ui[\\/]/,
+        chunks: 'all',
+        priority: 30
+      },
+      // Recharts chunk (heavy library)
+      recharts: {
+        name: 'recharts',
+        test: /[\\/]node_modules[\\/]recharts[\\/]/,
+        chunks: 'all',
+        priority: 40
+      }
+    }
+  }
+}
+
 export const performanceConfig: Partial<NextConfig> = {
   // Compiler optimizations
   compiler: {
@@ -38,119 +164,19 @@ export const performanceConfig: Partial<NextConfig> = {
 
   // Headers for caching
   headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin'
-          }
-        ]
-      },
-      {
-        source: '/api/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, s-maxage=60, stale-while-revalidate=300'
-          }
-        ]
-      },
-      {
-        source: '/_next/static/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
-        ]
-      }
-    ]
+    return securityHeaders
   },
 
   // Webpack optimizations
-  webpack: (config, { dev, isServer }) => {
-    // Development optimizations for better HMR
+  webpack: (config: Record<string, unknown>, { dev, isServer }: { dev: boolean; isServer: boolean }) => {
+     
     if (dev) {
-      // Ensure module IDs are stable across HMR updates
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: 'named',
-        chunkIds: 'named'
-      }
+      applyDevOptimizations(config)
+    } else if (!isServer) {
+      applyProdOptimizations(config)
     }
 
-    // Production optimizations
-    if (!dev && !isServer) {
-      // Enable tree shaking
-      config.optimization = {
-        ...config.optimization,
-        usedExports: true,
-        sideEffects: false
-      }
-
-      // Split chunks for better caching
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          // Vendor chunk
-          vendor: {
-            name: 'vendor',
-            chunks: 'all',
-            test: /node_modules/,
-            priority: 20
-          },
-          // Common chunk
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 10,
-            reuseExistingChunk: true,
-            enforce: true
-          },
-          // UI components chunk
-          ui: {
-            name: 'ui',
-            test: /[\\/]components[\\/]ui[\\/]/,
-            chunks: 'all',
-            priority: 30
-          },
-
-          // Recharts chunk (heavy library)
-          recharts: {
-            name: 'recharts',
-            test: /[\\/]node_modules[\\/]recharts[\\/]/,
-            chunks: 'all',
-            priority: 40
-          }
-        }
-      }
-    }
-
+     
     return config
   }
 }

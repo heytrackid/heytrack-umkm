@@ -1,7 +1,9 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useIngredients } from '@/hooks'
+
+import { useIngredients } from '@/hooks/index'
+
 import type { Row } from '@/types/database'
 
 
@@ -17,7 +19,7 @@ export interface ReorderSuggestion {
   unit: string
   unit_cost: number
   total_cost: number
-  priority: 'urgent' | 'high' | 'medium' | 'low'
+  priority: 'high' | 'low' | 'medium' | 'urgent'
   reason: string
   supplier?: string
   lead_time_days?: number
@@ -72,7 +74,7 @@ export function useReorderManagement() {
         const deficit = targetStock - currentStock
         const suggestedQuantity = Math.max(deficit, reorderPoint - currentStock + minStock)
 
-        let priority: 'urgent' | 'high' | 'medium' | 'low' = 'low'
+        let priority: 'high' | 'low' | 'medium' | 'urgent' = 'low'
         let reason = ''
 
         if (currentStock === 0) {
@@ -94,7 +96,7 @@ export function useReorderManagement() {
         }
 
         suggestions.push({
-          ingredient_id: ingredient.id,
+          ingredient_id: ingredient['id'],
           ingredient_name: ingredient.name,
           current_stock: currentStock,
           reorder_point: reorderPoint,
@@ -116,7 +118,7 @@ export function useReorderManagement() {
       if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
         return priorityOrder[b.priority] - priorityOrder[a.priority]
       }
-      return a.ingredient_name.localeCompare(b.ingredient_name)
+      return a['ingredient_name'].localeCompare(b['ingredient_name'])
     })
 
     const totalEstimatedCost = suggestions.reduce((sum, item) => sum + item.total_cost, 0)

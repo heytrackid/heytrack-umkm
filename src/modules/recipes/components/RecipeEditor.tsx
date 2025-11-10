@@ -1,15 +1,13 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/hooks/use-toast'
 import { Plus, Trash2, Save, X, ChefHat, Clock, Users, DollarSign } from 'lucide-react'
 import { useState } from 'react'
-import { useCurrency } from '@/hooks/useCurrency'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
     Select,
     SelectContent,
@@ -17,6 +15,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface RecipeIngredient {
     id?: string
@@ -109,7 +110,7 @@ export const RecipeEditor = ({
     const addIngredient = () => {
         if (!newIngredient.ingredient_id || newIngredient.quantity <= 0) { return }
 
-        const ingredient = availableIngredients.find(i => i.id === newIngredient.ingredient_id)
+        const ingredient = availableIngredients.find(i => i['id'] === newIngredient.ingredient_id)
         if (!ingredient) { return }
 
         setRecipe({
@@ -117,7 +118,7 @@ export const RecipeEditor = ({
             ingredients: [
                 ...recipe.ingredients,
                 {
-                    ingredient_id: ingredient.id,
+                    ingredient_id: ingredient['id'],
                     ingredient_name: ingredient.name,
                     quantity: newIngredient.quantity,
                     unit: newIngredient.unit,
@@ -170,13 +171,19 @@ export const RecipeEditor = ({
         })
     }
 
-    const moveStep = (index: number, direction: 'up' | 'down') => {
+    const moveStep = (index: number, direction: 'down' | 'up') => {
         const newSteps = [...recipe.steps]
         const targetIndex = direction === 'up' ? index - 1 : index + 1
 
         if (targetIndex < 0 || targetIndex >= newSteps.length) { return }
 
-        [newSteps[index], newSteps[targetIndex]] = [newSteps[targetIndex], newSteps[index]]
+        const stepAtIndex = newSteps[index]
+        const stepAtTargetIndex = newSteps[targetIndex]
+        
+        if (!stepAtIndex || !stepAtTargetIndex) { return }
+
+        newSteps[index] = stepAtTargetIndex
+        newSteps[targetIndex] = stepAtIndex
 
         setRecipe({
             ...recipe,
@@ -373,7 +380,7 @@ export const RecipeEditor = ({
                                 <Select
                                     value={newIngredient.ingredient_id}
                                     onValueChange={(v) => {
-                                        const ing = availableIngredients.find(i => i.id === v)
+                                        const ing = availableIngredients.find(i => i['id'] === v)
                                         setNewIngredient({
                                             ...newIngredient,
                                             ingredient_id: v,
@@ -386,7 +393,7 @@ export const RecipeEditor = ({
                                     </SelectTrigger>
                                     <SelectContent>
                                         {availableIngredients.map(ing => (
-                                            <SelectItem key={ing.id} value={ing.id}>
+                                            <SelectItem key={ing['id']} value={ing['id']}>
                                                 {ing.name} ({formatCurrency(ing.price_per_unit)}/{ing.unit})
                                             </SelectItem>
                                         ))}
@@ -429,13 +436,13 @@ export const RecipeEditor = ({
                         {recipe.ingredients.map((ing, idx) => {
                             const cost = ing.quantity * ing.price_per_unit
                             const percent = totalCost > 0 ? (cost / totalCost) * 100 : 0
-                            const ingredientKey = ing.ingredient_id || `${ing.ingredient_name}-${idx}`
+                            const ingredientKey = ing.ingredient_id || `${ing['ingredient_name']}-${idx}`
 
                             return (
                                 <div key={ingredientKey} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-lg border">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <span className="font-medium">{ing.ingredient_name}</span>
+                                            <span className="font-medium">{ing['ingredient_name']}</span>
                                             <Badge variant="outline" className="text-xs">
                                                 {percent.toFixed(1)}%
                                             </Badge>
@@ -512,7 +519,7 @@ export const RecipeEditor = ({
                     {/* Steps List */}
                     <div className="space-y-2">
                         {recipe.steps.map((step, idx) => {
-                            const stepKey = step.id ?? `step-${step.step_number}-${idx}`
+                            const stepKey = step['id'] ?? `step-${step.step_number}-${idx}`
                             return (
                                 <div key={stepKey} className="flex gap-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
                                     <div className="flex flex-col gap-2">

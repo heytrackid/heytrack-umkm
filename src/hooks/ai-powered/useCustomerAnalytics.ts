@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import type { AIAnalysisState, CustomerAnalyticsRequest } from './types'
+
+import type { AIAnalysisState, CustomerAnalyticsRequest } from '@/hooks/ai-powered/types'
 
 
 
@@ -9,7 +10,15 @@ import type { AIAnalysisState, CustomerAnalyticsRequest } from './types'
  * AI-Powered Customer Analytics Hook
  * Provides intelligent customer behavior analysis, segmentation, and marketing recommendations
  */
-export function useCustomerAnalytics() {
+export function useCustomerAnalytics(): {
+  data: AIAnalysisState['data'];
+  loading: boolean;
+  error: string | null;
+  confidence: number;
+  lastUpdated: string | null;
+  analyzeCustomers: (request: CustomerAnalyticsRequest) => Promise<unknown>;
+  clearAnalysis: () => void;
+} {
   const [state, setState] = useState<AIAnalysisState>({
     data: null,
     loading: false,
@@ -18,7 +27,7 @@ export function useCustomerAnalytics() {
     lastUpdated: null
   })
 
-  const analyzeCustomers = useCallback(async (request: CustomerAnalyticsRequest) => {
+  const analyzeCustomers = useCallback(async (request: CustomerAnalyticsRequest): Promise<unknown> => {
     setState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
@@ -29,7 +38,7 @@ export function useCustomerAnalytics() {
         credentials: 'include', // Include cookies for authentication
       })
 
-      const result = await response.json()
+      const result = await response.json() as { error?: string }
 
       if (!response.ok) {
         throw new Error(result.error ?? 'Failed to analyze customers')
@@ -43,7 +52,7 @@ export function useCustomerAnalytics() {
         lastUpdated: new Date().toISOString()
       })
 
-      return result
+      return result as unknown
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -56,7 +65,7 @@ export function useCustomerAnalytics() {
     }
   }, [])
 
-  const clearAnalysis = useCallback(() => {
+  const clearAnalysis = useCallback((): void => {
     setState({
       data: null,
       loading: false,

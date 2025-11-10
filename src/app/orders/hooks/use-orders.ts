@@ -1,9 +1,11 @@
 import { useMemo } from 'react'
-import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks'
-import { formatCurrency, parseCurrencyString } from '@/lib/currency'
+
+import { DEFAULT_ORDERS_CONFIG, calculateOrderTotals, type OrdersModuleConfig, type OrderPriority } from '@/app/orders/config/orders.config'
 import type {
   Order,
   OrderItem,
+  OrderPayment,
+  PaymentMethod,
   CreateOrderData,
   UpdateOrderData,
   OrderFilters,
@@ -11,8 +13,10 @@ import type {
   OrderTotalsBreakdown,
   InvoiceData
 } from '@/app/orders/types/orders.types'
-import type { CatchError } from '@/types/common'
-import { DEFAULT_ORDERS_CONFIG, calculateOrderTotals, type OrdersModuleConfig, type OrderPriority } from '../config/orders.config' 
+import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/index'
+import { formatCurrency, parseCurrencyString } from '@/lib/currency'
+
+import type { CatchError } from '@/types/common' 
 
 interface FinancialMetadata {
   currency?: string | null
@@ -20,7 +24,7 @@ interface FinancialMetadata {
   tax_inclusive?: boolean | null
 }
 
-const hasFinancialMetadata = (order: Order): order is Order & FinancialMetadata =>
+const hasFinancialMetadata = (order: Order): order is FinancialMetadata & Order =>
   typeof order === 'object' &&
   order !== null &&
   ('currency' in order || 'tax_rate' in order || 'tax_inclusive' in order)
@@ -49,6 +53,58 @@ const resolveOrderTaxInclusive = (order: Order): boolean => {
   return DEFAULT_ORDERS_CONFIG.tax.is_inclusive
 }
 
+const PAYMENT_METADATA_PREFIX = '[PAYMENT_META]'
+const DEFAULT_PAYMENT_METHOD: PaymentMethod = 'CASH'
+
+interface PaymentMetadata {
+  payment_method: PaymentMethod
+  currency: string
+  notes: string
+}
+
+const encodePaymentDescription = (metadata: PaymentMetadata): string => {
+  const payload = JSON.stringify({
+    payment_method: metadata.payment_method ?? DEFAULT_PAYMENT_METHOD,
+    currency: metadata.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
+    notes: metadata.notes?.trim() ?? ''
+  })
+
+  return `${PAYMENT_METADATA_PREFIX}${payload}`
+}
+
+const decodePaymentDescription = (description?: string | null): PaymentMetadata => {
+  if (!description) {
+    return {
+      payment_method: DEFAULT_PAYMENT_METHOD,
+      currency: DEFAULT_ORDERS_CONFIG.currency.default,
+      notes: ''
+    }
+  }
+
+  if (!description.startsWith(PAYMENT_METADATA_PREFIX)) {
+    return {
+      payment_method: DEFAULT_PAYMENT_METHOD,
+      currency: DEFAULT_ORDERS_CONFIG.currency.default,
+      notes: description
+    }
+  }
+
+  try {
+    const parsed = JSON.parse(description.slice(PAYMENT_METADATA_PREFIX.length)) as Partial<PaymentMetadata>
+    return {
+      payment_method: parsed.payment_method ?? DEFAULT_PAYMENT_METHOD,
+      currency: parsed.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
+      notes: parsed.notes ?? ''
+    }
+  } catch {
+    return {
+      payment_method: DEFAULT_PAYMENT_METHOD,
+      currency: DEFAULT_ORDERS_CONFIG.currency.default,
+      notes: description
+    }
+  }
+}
+
 // Main orders hook
 export function useOrders(filters?: OrderFilters) {
   // Use useSupabaseQuery for fetching data
@@ -66,7 +122,7 @@ export function useOrders(filters?: OrderFilters) {
   const {
     create: createRecord,
     update: updateRecord,
-    delete: deleteRecord,
+    remove: deleteRecord,
     loading: crudLoading,
     error: crudError,
     clearError
@@ -132,8 +188,8 @@ export function useOrders(filters?: OrderFilters) {
       if (typeof search === 'string' && search.trim().length > 0) {
         const searchLower = search.toLowerCase()
         filteredOrders = filteredOrders.filter(order => {
-          const name = order.customer_name?.toLowerCase() ?? ''
-          const orderNo = order.order_no?.toLowerCase() || ''
+          const name = order['customer_name']?.toLowerCase() ?? ''
+          const orderNo = order['order_no']?.toLowerCase() || ''
           return name.includes(searchLower) || orderNo.includes(searchLower)
         })
       }
@@ -172,7 +228,7 @@ export function useOrderItems(orderId: string) {
   const {
     create,
     update,
-    delete: deleteItem
+    remove: deleteItem
   } = useSupabaseCRUD('order_items')
 
   return {
@@ -187,21 +243,113 @@ export function useOrderItems(orderId: string) {
   }
 }
 
-// Order payments tracking
-export function useOrderPayments(_orderId: string) {
-  // TODO: Implement when order_payments table is created
-  // For now, return empty data structure
-  const notImplemented = (action: string) => Promise.reject(new Error(`${action} order payments is not yet implemented`))
+// Order payments tracking (stored via financial_records table)
+export function useOrderPayments(orderId?: string | null) {
+  const referenceKey = orderId ? `Order ${orderId}` : null
+
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    create,
+    update,
+    remove,
+  } = useSupabaseCRUD('financial_records', referenceKey ? {
+    strategy: 'swr',
+    orderBy: { column: 'date', ascending: false },
+    filter: { reference: referenceKey, type: 'INCOME', category: 'SALES' },
+  } : {
+    strategy: 'swr',
+    orderBy: { column: 'date', ascending: false },
+  })
+
+  const payments: OrderPayment[] = useMemo(() => {
+    if (!Array.isArray(data) || !orderId) {
+      return []
+    }
+
+    return data.map((record) => {
+      const metadata = decodePaymentDescription(record.description)
+
+      return {
+        id: record['id'],
+        order_id: orderId,
+        amount: record.amount,
+        currency: metadata.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
+        payment_method: metadata.payment_method ?? DEFAULT_PAYMENT_METHOD,
+        payment_date: record.date ?? record.created_at ?? new Date().toISOString(),
+        reference_number: record.reference,
+        notes: metadata.notes ?? record.description ?? undefined,
+        created_at: record.created_at ?? new Date().toISOString(),
+      }
+    })
+  }, [data, orderId])
+
+  const ensureOrderId = () => {
+    if (!orderId || !referenceKey) {
+      throw new Error('Order ID is required for payment operations')
+    }
+  }
+
+  const createPayment = async (payment: {
+    amount: number
+    payment_method?: PaymentMethod
+    currency?: string
+    payment_date?: string
+    notes?: string
+    reference_number?: string
+  }): Promise<void> => {
+    ensureOrderId()
+
+    await create({
+      amount: payment.amount,
+      category: 'SALES',
+      type: 'INCOME',
+      date: payment.payment_date ?? new Date().toISOString(),
+      description: encodePaymentDescription({
+        payment_method: payment.payment_method ?? DEFAULT_PAYMENT_METHOD,
+        currency: payment.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
+        notes: payment.notes ?? '',
+      }),
+      reference: payment.reference_number ?? referenceKey!,
+    })
+  }
+
+  const updatePayment = async (
+    id: string,
+    updates: Partial<Pick<OrderPayment, 'amount' | 'payment_method' | 'currency' | 'payment_date' | 'notes' | 'reference_number'>>
+  ): Promise<void> => {
+    ensureOrderId()
+
+    const existingRecord = data?.find((record) => record['id'] === id)
+    const existingMetadata = decodePaymentDescription(existingRecord?.description)
+
+    await update(id, {
+      amount: updates.amount ?? existingRecord?.amount ?? 0,
+      date: updates.payment_date ?? existingRecord?.date ?? new Date().toISOString(),
+      description: encodePaymentDescription({
+        payment_method: updates.payment_method ?? existingMetadata.payment_method ?? DEFAULT_PAYMENT_METHOD,
+        currency: updates.currency ?? existingMetadata.currency ?? DEFAULT_ORDERS_CONFIG.currency.default,
+        notes: updates.notes ?? existingMetadata.notes ?? '',
+      }),
+      reference: updates.reference_number ?? existingRecord?.reference ?? referenceKey!,
+    })
+  }
+
+  const removePayment = async (id: string): Promise<void> => {
+    await remove(id)
+  }
 
   return {
-    data: [] as never[],
-    payments: [] as never[],
-    loading: false,
-    error: null,
-    create: () => notImplemented('Creating'),
-    update: () => notImplemented('Updating'),
-    remove: () => notImplemented('Removing'),
-    refresh: () => Promise.resolve()
+    data: payments,
+    payments,
+    loading,
+    error,
+    create: createPayment,
+    update: updatePayment,
+    remove: removePayment,
+    refresh: refetch,
   }
 }
 
@@ -266,21 +414,25 @@ export function useOrderSummary(filters?: OrderFilters): {
         totalRevenue += order.total_amount
       }
 
-      // Status counts
-      switch (order.status) {
-        case 'DELIVERED':
-          completedOrders++
-          break
-        case 'CANCELLED':
-          cancelledOrders++
-          break
-        case 'PENDING':
-        case 'CONFIRMED':
-        case 'IN_PROGRESS':
-        case 'READY':
-          pendingOrders++
-          break
-      }
+       // Status counts
+       switch (order['status']) {
+         case 'DELIVERED':
+           completedOrders++
+           break
+         case 'CANCELLED':
+           cancelledOrders++
+           break
+         case 'PENDING':
+         case 'CONFIRMED':
+         case 'IN_PROGRESS':
+         case 'READY':
+           pendingOrders++
+           break
+         case null:
+           break
+         default:
+           break
+       }
 
       // Top selling items tracking - items would need to be fetched separately
       // Skipping for now as order.items doesn't exist on the base type
@@ -307,15 +459,15 @@ export function useOrderSummary(filters?: OrderFilters): {
 export function useOrderStatus(orderId: string) {
   const { update } = useOrders()
 
-  const updateStatus = async (newStatus: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'READY' | 'DELIVERED' | 'CANCELLED', reason?: string) => {
+  const updateStatus = async (newStatus: 'CANCELLED' | 'CONFIRMED' | 'DELIVERED' | 'IN_PROGRESS' | 'PENDING' | 'READY', reason?: string) => {
     try {
       await update(orderId, {
         status: newStatus,
-        notes: reason ? `Status changed to ${newStatus}: ${reason}` : undefined
+        notes: reason ? `Status changed to ${newStatus}: ${reason}` : null
       })
-    } catch (err: unknown) {
-      throw new Error(`Failed to update order status: ${err instanceof Error ? err.message : 'Unknown error'}`)
-    }
+     } catch (error) {
+       throw new Error(`Failed to update order status: ${error instanceof Error ? error.message : 'Unknown error'}`)
+     }
   }
 
   const canTransitionTo = (currentStatus: string, targetStatus: string): boolean => {
@@ -329,7 +481,7 @@ export function useOrderStatus(orderId: string) {
       'CANCELLED': []
     }
 
-    return transitions[currentStatus]?.includes(targetStatus) || false
+    return transitions[currentStatus]?.includes(targetStatus) ?? false
   }
 
   return {
@@ -392,12 +544,12 @@ export function useInvoiceGeneration() {
 
     return {
       order,
-      company_info: companyInfo,
+      company_info: companyInfo ?? { name: '', address: '', phone: '', email: '' },
       totals_breakdown: totalsBreakdown,
       payment_terms: paymentTerms,
-      due_date: dueDate.toISOString().split('T')[0],
-      invoice_number: order.order_no || `INV-${order.id.slice(-8)}`,
-      notes: order.notes ?? undefined
+      due_date: dueDate.toISOString().split('T')[0] as string,
+      invoice_number: order['order_no'] ?? `INV-${order['id'].slice(-8)}`,
+      notes: order.notes as string | null | undefined
     }
   }
 

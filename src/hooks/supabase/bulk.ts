@@ -1,9 +1,10 @@
 'use client'
 
-import { createClient } from '@/utils/supabase/client'
-import type { TableName, Row, Insert} from '@/types/database'
+import type { Insert, Row, TableName } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import type { BulkUpdateItem } from './types'
+import { createClient } from '@/utils/supabase/client'
+
+import type { BulkUpdateItem } from '@/hooks/supabase/types'
 
 /**
  * Bulk operations for Supabase tables
@@ -12,8 +13,8 @@ export class useSupabaseBulk {
   static async createMultiple<T extends TableName>(
     table: T,
     records: Array<Insert<T>>
-  ) {
-    const supabase = typed(createClient())
+  ): Promise<Array<Row<T>>> {
+    const supabase = typed(await createClient())
 
     const { data, error } = await supabase
       .from(table)
@@ -30,20 +31,20 @@ export class useSupabaseBulk {
   static async updateMultiple<T extends TableName>(
     table: T,
     updates: Array<BulkUpdateItem<T>>
-  ) {
-    const supabase = typed(createClient())
-    const results = []
+  ): Promise<Array<Row<T>>> {
+    const supabase = typed(await createClient())
+    const results: Array<Row<T>> = []
 
     for (const update of updates) {
       const { data, error } = await supabase
         .from(table)
-        .update(update.data as never)
-        .eq('id', update.id as never)
+        .update(update['data'] as never)
+        .eq('id', update['id'] as never)
         .select('*')
         .single() as { data: Row<T> | null; error: Error | null }
 
       if (error) {
-        throw new Error(`Failed to update record ${update.id}: ${error.message}`)
+        throw new Error(`Failed to update record ${update['id']}: ${error.message}`)
       }
 
       results.push(data as Row<T>)
@@ -55,8 +56,8 @@ export class useSupabaseBulk {
   static async deleteMultiple<T extends TableName>(
     table: T,
     ids: string[]
-  ) {
-    const supabase = typed(createClient())
+  ): Promise<boolean> {
+    const supabase = typed(await createClient())
 
     const { error } = await supabase
       .from(table)
@@ -74,8 +75,8 @@ export class useSupabaseBulk {
     table: T,
     records: Array<Insert<T>>,
     conflictColumns: string[] = ['id']
-  ) {
-    const supabase = typed(createClient())
+  ): Promise<Array<Row<T>>> {
+    const supabase = typed(await createClient())
 
     const { data, error } = await supabase
       .from(table)

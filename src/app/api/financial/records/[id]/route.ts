@@ -1,23 +1,22 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { FinancialRecordUpdateSchema } from '@/lib/validations/domains/finance'
-import { apiLogger } from '@/lib/logger'
-import type { Update } from '@/types/database'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-interface RouteContext {
-  params: Promise<{ id: string }>
-}
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { FinancialRecordUpdateSchema, type FinancialRecordUpdate } from '@/lib/validations/domains/finance'
+import type { Update } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+
+import { createClient } from '@/utils/supabase/server'
 
 // GET /api/financial/records/[id] - Get single financial record
-export async function GET(
+async function getHandler(
   _request: NextRequest,
-  context: RouteContext
-) {
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = params
     const supabase = await createClient()
 
     // Authenticate
@@ -31,11 +30,11 @@ export async function GET(
       .from('financial_records')
       .select('id, user_id, date, description, category, amount, reference, type, created_at, created_by')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Financial record not found' }, { status: 404 })
       }
       apiLogger.error({ error }, 'Error fetching financial record')
@@ -53,12 +52,12 @@ export async function GET(
 }
 
 // PUT /api/financial/records/[id] - Update financial record
-export async function PUT(
+async function putHandler(
   request: NextRequest,
-  context: RouteContext
-) {
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = params
     const supabase = await createClient()
 
     // Authenticate
@@ -67,7 +66,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = await request.json() as FinancialRecordUpdate
 
     // Validate request body
     const validation = FinancialRecordUpdateSchema.safeParse(body)
@@ -81,16 +80,16 @@ export async function PUT(
       )
     }
 
-    const validatedData = validation.data
+    const validatedData = validation['data']
 
     // Build update object (only fields that exist in financial_records table)
     const updatePayload: Update<'financial_records'> = {
-      date: validatedData.date,
-      type: validatedData.type,
-      category: validatedData.category,
-      amount: validatedData.amount,
-      description: validatedData.description ?? undefined,
-      reference: validatedData.reference_id ?? undefined
+      ...(validatedData.date !== undefined && { date: validatedData.date || null }),
+      ...(validatedData['type'] !== undefined && { type: validatedData['type'] }),
+      ...(validatedData.category !== undefined && { category: validatedData.category }),
+      ...(validatedData.amount !== undefined && { amount: validatedData.amount }),
+      ...(validatedData.description !== undefined && { description: validatedData.description ?? '' }),
+      ...(validatedData.reference_id !== undefined && { reference: validatedData.reference_id ?? null })
     }
 
     // Update with RLS enforcement
@@ -98,12 +97,12 @@ export async function PUT(
       .from('financial_records')
       .update(updatePayload)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select()
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Financial record not found' }, { status: 404 })
       }
       apiLogger.error({ error }, 'Error updating financial record')
@@ -121,12 +120,12 @@ export async function PUT(
 }
 
 // DELETE /api/financial/records/[id] - Delete financial record
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
-  context: RouteContext
-) {
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = params
     const supabase = await createClient()
 
     // Authenticate
@@ -140,7 +139,7 @@ export async function DELETE(
       .from('orders')
       .select('id')
       .eq('financial_record_id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .limit(1)
 
     if (linkedOrders && linkedOrders.length > 0) {
@@ -155,10 +154,10 @@ export async function DELETE(
       .from('financial_records')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         return NextResponse.json({ error: 'Financial record not found' }, { status: 404 })
       }
       apiLogger.error({ error }, 'Error deleting financial record')
@@ -174,3 +173,7 @@ export async function DELETE(
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler as any, 'GET /api/financial/records/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureHandler(putHandler as any, 'PUT /api/financial/records/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler as any, 'DELETE /api/financial/records/[id]', SecurityPresets.enhanced())

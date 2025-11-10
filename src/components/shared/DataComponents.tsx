@@ -1,18 +1,9 @@
 'use client'
 
-import { useState, useEffect, type ReactNode } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
 import {
   Search,
   Filter,
   X,
-  Calendar,
   Download,
   Settings,
   ChevronDown,
@@ -20,6 +11,15 @@ import {
   SortAsc,
   SortDesc
 } from 'lucide-react'
+import { useState, useEffect, type ReactNode } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 // Search Component
 interface SearchInputProps {
@@ -42,7 +42,7 @@ export const SearchInput = ({
   const [localValue, setLocalValue] = useState(value)
 
   useEffect(() => {
-    void setLocalValue(value)
+    setLocalValue(value)
   }, [value])
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export const SearchInput = ({
   }, [localValue, value, onChange, debounceMs])
 
   const handleClear = () => {
-    void setLocalValue('')
+    setLocalValue('')
     onChange('')
   }
 
@@ -147,7 +147,7 @@ export const AdvancedFilters = ({
                   {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
                 </label>
                 <Select
-                  value={filters[key] || ""}
+                  value={filters[key] ?? ""}
                   onValueChange={(value) => onFilterChange(key, value)}
                 >
                   <SelectTrigger>
@@ -174,66 +174,9 @@ export const AdvancedFilters = ({
   )
 }
 
-// Date Range Picker Component
-interface DateRange {
-  from: Date | undefined
-  to: Date | undefined
-}
 
-interface DateRangePickerProps {
-  value: DateRange
-  onChange: (range: DateRange) => void
-  placeholder?: string
-  className?: string
-}
 
-export const DateRangePicker = ({
-  value,
-  onChange: _onChange,
-  placeholder = "Pick a date range",
-  className = ""
-}: DateRangePickerProps) => {
-  const [isOpen, setIsOpen] = useState(false)
 
-  const formatRange = () => {
-    if (!value.from && !value.to) { return placeholder }
-    if (value.from && !value.to) { return value.from.toLocaleDateString() }
-    if (!value.from && value.to) { return `Until ${value.to.toLocaleDateString()}` }
-    return `${value.from?.toLocaleDateString()} - ${value.to?.toLocaleDateString()}`
-  }
-
-  return (
-    <div className={cn("relative", className)}>
-      <Button
-        variant="outline"
-        onClick={() => setIsOpen(!isOpen)}
-        className="justify-start text-left font-normal"
-      >
-        <Calendar className="mr-2 h-4 w-4" />
-        {formatRange()}
-      </Button>
-
-      {isOpen && (
-        <Card className="absolute top-full mt-2 z-50 w-80">
-          <CardContent className="p-4">
-            {/* Date picker implementation would go here */}
-            <p className="text-sm text-muted-foreground">
-              Date range picker implementation
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsOpen(false)}
-              className="mt-2"
-            >
-              Close
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  )
-}
 
 // Sortable Column Header
 interface SortableColumnProps {

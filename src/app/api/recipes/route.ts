@@ -1,20 +1,23 @@
-import { createClient } from '@/utils/supabase/server'
+export const runtime = 'nodejs'
 import { type NextRequest, NextResponse } from 'next/server'
-import { PaginationQuerySchema } from '@/lib/validations'
-import { createPaginationMeta } from '@/lib/validations/pagination'
-import { apiLogger } from '@/lib/logger'
+
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
-import type { Insert } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+import { PaginationQuerySchema } from '@/lib/validations'
+import { RecipeInsertSchema } from '@/lib/validations/domains/recipe'
+import { createPaginationMeta } from '@/lib/validations/pagination'
+import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
+
+
 
 // GET /api/recipes - Get all recipes with ingredient relationships
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = typed(await createClient())
@@ -48,12 +51,12 @@ async function GET(request: NextRequest) {
       )
     }
 
-    const { page, limit, search, sort_by, sort_order } = queryValidation.data
+    const { page, limit, search, sort_by, sort_order } = queryValidation['data']
     const category = searchParams.get('category')
     const status = searchParams.get('status')
 
     // Create cache key based on query parameters
-    const cacheKey = `${cacheKeys.recipes.all}:${user.id}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${category ?? ''}:${status ?? ''}`
+    const cacheKey = `${cacheKeys.recipes.all}:${user['id']}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${category ?? ''}:${status ?? ''}`
 
     // Wrap database query with caching
     // ✅ OPTIMIZED: Use specific fields instead of SELECT *
@@ -61,8 +64,8 @@ async function GET(request: NextRequest) {
       // Get total count
       let countQuery = supabase
         .from('recipes')
-        .select('*', { count: 'exact', head: true })
-        .eq('created_by', user.id)
+        .select('id', { count: 'exact', head: true })
+        .eq('created_by', user['id'])
 
       if (search) {
         countQuery = countQuery.ilike('name', `%${search}%`)
@@ -84,7 +87,7 @@ async function GET(request: NextRequest) {
       let query = supabase
         .from('recipes')
         .select(RECIPE_FIELDS.DETAIL) // Specific fields for better performance
-        .eq('created_by', user.id)
+        .eq('created_by', user['id'])
 
       // Add search filter
       if (search) {
@@ -117,22 +120,25 @@ async function GET(request: NextRequest) {
       }
 
       return {
-        data: recipes || [],
+        data: recipes ?? [],
         meta: createPaginationMeta(page, limit, count ?? 0)
       }
     }, cacheKey, 10 * 60 * 1000) // Cache for 10 minutes
 
     apiLogger.info({
-      userId: user.id,
+      userId: user['id'],
       cached: true,
       page,
       limit,
       search: search ?? '',
-      resultCount: result.data.length,
+      resultCount: result['data'].length,
       total: result.meta.total
     }, 'Recipes fetched (cached)')
 
-    return NextResponse.json(result)
+    const response = NextResponse.json(result)
+    // Add HTTP caching headers (5 minutes stale-while-revalidate)
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
+    return response
 
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/recipes:')
@@ -144,7 +150,7 @@ async function GET(request: NextRequest) {
 }
 
 // POST /api/recipes - Create new recipe with ingredients
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Create authenticated Supabase client
     const supabase = typed(await createClient())
@@ -158,26 +164,51 @@ async function POST(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       )
-    }    // The request body is already sanitized by the security middleware
-    const body = await request.json()
-    const { recipe_ingredients, ...recipeData } = body
+    }
 
-    // Validate required fields
-    if (!recipeData.name && !recipeData.nama) {
+    // Parse and validate request body
+    const _body = await request.json() as unknown
+
+    // Support legacy field names for backwards compatibility
+    const bodyWithNormalization = _body as { recipe_ingredients?: unknown[]; ingredients?: unknown[]; name?: string; nama?: string; [key: string]: unknown }
+    
+    // Normalize ingredients field name
+    if (bodyWithNormalization.recipe_ingredients && !bodyWithNormalization.ingredients) {
+      bodyWithNormalization.ingredients = bodyWithNormalization.recipe_ingredients
+    }
+
+    // Normalize name field
+    if (bodyWithNormalization.nama && !bodyWithNormalization.name) {
+      bodyWithNormalization.name = bodyWithNormalization.nama
+    }
+
+    // Validate with Zod schema
+    const validationResult = RecipeInsertSchema.safeParse(bodyWithNormalization)
+    
+    if (!validationResult.success) {
+      apiLogger.warn({ errors: validationResult.error.issues }, 'Recipe validation failed')
       return NextResponse.json(
-        { error: 'Recipe name is required' },
+        { 
+          error: 'Invalid recipe data', 
+          details: validationResult.error.issues.map(issue => ({
+            path: issue.path.join('.'),
+            message: issue.message
+          }))
+        },
         { status: 400 }
       )
     }
+
+    const { ingredients, ...recipeData } = validationResult.data
 
     // Start a transaction by creating the recipe first
     const { data: recipe, error: recipeError } = await supabase
       .from('recipes')
       .insert([{
         ...recipeData,
-        created_by: user.id,
-        name: recipeData.name ?? recipeData.nama
-      }])
+        created_by: user['id'],
+        user_id: user['id']
+      } as any])
       .select('id, name, created_at')
       .single()
 
@@ -189,42 +220,33 @@ async function POST(request: NextRequest) {
       )
     }
 
-    // If ingredients are provided, add them to recipe_ingredients
+    // Add ingredients to recipe_ingredients (already validated by schema)
     const createdRecipe = recipe
-    if (recipe_ingredients && recipe_ingredients.length > 0) {
-      interface RecipeIngredientInput {
-        ingredient_id?: string
-        bahan_id?: string
-        quantity?: number
-        qty_per_batch?: number
-        unit?: string
-      }
+    const recipeIngredientsToInsert: Array<Insert<'recipe_ingredients'>> = ingredients.map((ingredient) => ({
+      recipe_id: createdRecipe['id'],
+      ingredient_id: ingredient.ingredient_id,
+      quantity: ingredient.quantity,
+      unit: ingredient.unit,
+      notes: ingredient.notes ?? null,
+      user_id: user['id']
+    }))
 
-      const recipeIngredientsToInsert: Array<Insert<'recipe_ingredients'>> = recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
-        recipe_id: createdRecipe.id,
-        ingredient_id: ingredient.ingredient_id ?? ingredient.bahan_id ?? '',
-        quantity: ingredient.quantity ?? ingredient.qty_per_batch ?? 0,
-        unit: ingredient.unit ?? 'g',
-        user_id: user.id
-      }))
+    const { error: ingredientsError } = await supabase
+      .from('recipe_ingredients')
+      .insert(recipeIngredientsToInsert)
 
-      const { error: ingredientsError } = await supabase
-        .from('recipe_ingredients')
-        .insert(recipeIngredientsToInsert)
-
-      if (ingredientsError) {
-        apiLogger.error({ error: ingredientsError }, 'Error adding recipe ingredients:')
-        // If ingredients fail, we should delete the recipe to maintain consistency
-        await supabase
-          .from('recipes')
-          .delete()
-          .eq('id', createdRecipe.id)
-          .eq('created_by', user.id)
-        return NextResponse.json(
-          { error: 'Failed to add recipe ingredients' },
-          { status: 500 }
-        )
-      }
+    if (ingredientsError) {
+      apiLogger.error({ error: ingredientsError }, 'Error adding recipe ingredients:')
+      // If ingredients fail, we should delete the recipe to maintain consistency
+      await supabase
+        .from('recipes')
+        .delete()
+        .eq('id', createdRecipe['id'])
+        .eq('created_by', user['id'])
+      return NextResponse.json(
+        { error: 'Failed to add recipe ingredients' },
+        { status: 500 }
+      )
     }
 
     // Fetch the complete recipe with ingredients for response
@@ -232,8 +254,8 @@ async function POST(request: NextRequest) {
     const { data: completeRecipe, error: fetchError } = await supabase
       .from('recipes')
       .select(RECIPE_FIELDS.DETAIL)
-      .eq('id', createdRecipe.id)
-      .eq('created_by', user.id)
+      .eq('id', createdRecipe['id'])
+      .eq('created_by', user['id'])
       .single()
 
     if (fetchError) {

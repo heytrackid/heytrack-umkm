@@ -1,13 +1,18 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { getErrorMessage } from '@/lib/type-guards'
+
 import { createClientLogger } from '@/lib/client-logger'
+import { getErrorMessage } from '@/lib/type-guards'
 
 const logger = createClientLogger('Hook')
-import type { AppError, ErrorState } from './types'
+import type { AppError, ErrorState } from '@/hooks/error-handler/types'
 
-
+interface UseErrorHandlerReturn extends ErrorState {
+  handleError: (error: unknown, context?: string) => AppError
+  resetError: () => void
+  throwError: (error: AppError) => never
+}
 
 /**
  * Hook untuk handle errors dalam functional components
@@ -26,15 +31,15 @@ import type { AppError, ErrorState } from './types'
  *
  * try {
  *   await someAsyncOperation()
- * } catch (err) {
- *   handleError(err, 'MyComponent.operation')
+ * } catch (error) {
+ *   handleError(error, 'MyComponent.operation')
  * }
  *
  * if (isError) {
  *   return <ErrorDisplay message={message} onRetry={resetError} />
  * }
  */
-export function useErrorHandler() {
+export function useErrorHandler(): UseErrorHandlerReturn {
   const [errorState, setErrorState] = useState<ErrorState>({
     error: null,
     isError: false,

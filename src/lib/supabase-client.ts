@@ -1,7 +1,8 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { createClientLogger } from '@/lib/client-logger'
 import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
-import { createClientLogger } from '@/lib/client-logger'
+
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 const logger = createClientLogger('ClientFile')
 
@@ -12,9 +13,9 @@ const logger = createClientLogger('ClientFile')
  */
 
 
-// ============================================================================
+// ==========================================================
 // TYPE UTILITIES
-// ============================================================================
+// ==========================================================
 
 // Import types from database
 type Tables = Database['public']['Tables']
@@ -34,9 +35,9 @@ export interface QueryArrayResult<T> {
   error: Error | null
 }
 
-// ============================================================================
+// ==========================================================
 // TYPED CRUD OPERATIONS
-// ============================================================================
+// ==========================================================
 
 /**
  * Generic insert wrapper with proper typing
@@ -44,7 +45,7 @@ export interface QueryArrayResult<T> {
 export async function typedInsert<T extends TableName>(
   supabase: SupabaseClient<Database>,
   table: T,
-  data: TableInsert<T> | Array<TableInsert<T>>
+  data: Array<TableInsert<T>> | TableInsert<T>
 ) {
   const result = await supabase
     .from(table)
@@ -185,20 +186,20 @@ export async function typedSelect<T extends TableName>(
   }
 
   return result as {
-    data: TableRow<T> | Array<TableRow<T>> | null
+    data: Array<TableRow<T>> | TableRow<T> | null
     error: Error | null
   }
 }
 
-// ============================================================================
+// ==========================================================
 // CLIENT INSTANCES
-// ============================================================================
+// ==========================================================
 
 /**
  * Get Supabase client instance (client-side)
  */
-export function getSupabaseClient() {
-  return createClient()
+export async function getSupabaseClient() {
+  return await createClient()
 }
 
 /**
@@ -206,18 +207,18 @@ export function getSupabaseClient() {
  */
 export { updateSession } from '@/utils/supabase/middleware'
 
-// ============================================================================
+// ==========================================================
 // UTILITY FUNCTIONS
-// ============================================================================
+// ==========================================================
 
 /**
  * Check if user is authenticated
  */
 export async function isAuthenticated() {
   try {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
-    return !!user
+    return Boolean(user)
   } catch (_error) {
     return false
   }
@@ -228,11 +229,11 @@ export async function isAuthenticated() {
  */
 export async function getCurrentUser() {
   try {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) {throw error}
     return user
-  } catch (_err) {
+  } catch (_error) {
     return null
   }
 }
@@ -242,7 +243,7 @@ export async function getCurrentUser() {
  */
 export async function signOut() {
   try {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
     const { error } = await supabase.auth.signOut()
     if (error) {throw error}
     return { success: true }
@@ -251,9 +252,9 @@ export async function signOut() {
   }
 }
 
-// ============================================================================
+// ==========================================================
 // TYPE EXPORTS
-// ============================================================================
+// ==========================================================
 
 export type {
   Database,

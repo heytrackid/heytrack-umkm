@@ -179,7 +179,8 @@ export function parseDate(dateString: string): Date | null {
 }
 
 export function formatDateForAPI(date: Date | string): string {
-  return new Date(date).toISOString().split('T')[0] // YYYY-MM-DD format
+  const [datePart] = new Date(date).toISOString().split('T')
+  return datePart ?? ''
 }
 
 export function formatDateTimeForAPI(date: Date | string): string {
@@ -237,7 +238,7 @@ export function createDateRange(
 }
 
 export function getDateRangeForPeriod(
-  period: 'today' | 'yesterday' | 'thisWeek' | 'lastWeek' | 'thisMonth' | 'lastMonth' | 'thisYear' | 'lastYear'
+  period: 'lastMonth' | 'lastWeek' | 'lastYear' | 'thisMonth' | 'thisWeek' | 'thisYear' | 'today' | 'yesterday'
 ): DateRange {
   const now = new Date()
   let start: Date

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from 'web-vitals'
+
 import { performanceLogger } from '@/lib/client-logger'
 
 
@@ -65,8 +66,8 @@ export function usePerformanceObserver(
 
         try {
             observer.observe({ entryTypes })
-        } catch (e) {
-            performanceLogger.error({ error: e }, 'PerformanceObserver error')
+        } catch (error) {
+            performanceLogger.error({ error }, 'PerformanceObserver error')
         }
 
         return () => observer.disconnect()
@@ -121,15 +122,27 @@ export function getPerformanceMetrics() {
         return null
     }
 
-    const navigation = performance.getEntriesByType('navigation')[0]
+    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
     const paint = performance.getEntriesByType('paint')
+    const dns = navigation
+        ? navigation.domainLookupEnd - navigation.domainLookupStart
+        : undefined
+    const tcp = navigation
+        ? navigation.connectEnd - navigation.connectStart
+        : undefined
+    const ttfb = navigation
+        ? navigation.responseStart - navigation.requestStart
+        : undefined
+    const download = navigation
+        ? navigation.responseEnd - navigation.responseStart
+        : undefined
 
     return {
         // Navigation timing
-        dns: navigation?.domainLookupEnd - navigation?.domainLookupStart,
-        tcp: navigation?.connectEnd - navigation?.connectStart,
-        ttfb: navigation?.responseStart - navigation?.requestStart,
-        download: navigation?.responseEnd - navigation?.responseStart,
+        dns,
+        tcp,
+        ttfb,
+        download,
         domInteractive: navigation?.domInteractive,
         domComplete: navigation?.domComplete,
         loadComplete: navigation?.loadEventEnd,

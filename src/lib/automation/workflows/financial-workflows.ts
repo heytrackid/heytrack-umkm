@@ -1,7 +1,9 @@
+import { CacheInvalidator } from '@/lib/cache/cache-manager'
+import { sendNotification } from '@/lib/communications/index'
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
+
 import type {WorkflowResult, WorkflowContext } from '@/types/features/automation'
-import { CacheInvalidator } from '@/lib/cache/cache-manager'
 
 /**
  * Financial Workflow Handlers
@@ -16,7 +18,7 @@ export class FinancialWorkflowHandlers {
   static handleIngredientPriceChanged(context: WorkflowContext): WorkflowResult {
     const { event, logger } = context
 
-    if (!event.data || typeof event.data !== 'object') {
+    if (!event['data'] || typeof event['data'] !== 'object') {
       return {
         success: false,
         message: 'Invalid price change event data',
@@ -78,7 +80,7 @@ export class FinancialWorkflowHandlers {
   static handleOperationalCostChanged(context: WorkflowContext): WorkflowResult {
     const { event, logger } = context
 
-    if (!event.data || typeof event.data !== 'object') {
+    if (!event['data'] || typeof event['data'] !== 'object') {
       return {
         success: false,
         message: 'Invalid cost change event data',
@@ -107,7 +109,7 @@ export class FinancialWorkflowHandlers {
       const costChange = ((newAmount - oldAmount) / oldAmount) * 100
 
       // Send notifications
-      void this.sendCostChangeNotification(data, costChange)
+      this.sendCostChangeNotification(data, costChange)
 
       // Trigger pricing reviews for significant changes
       if (Math.abs(costChange) > 10) {
@@ -115,10 +117,7 @@ export class FinancialWorkflowHandlers {
           costChange: costChange.toFixed(1)
         })
 
-        // TODO: Trigger pricing review workflow
-        setTimeout(() => {
-          logger.info('Pricing review triggered for cost change', { costId })
-        }, 3000)
+        this.triggerPricingReviewNotification(context, data, costChange)
       }
 
       return {
@@ -160,20 +159,25 @@ export class FinancialWorkflowHandlers {
     const { priceChange, affectedRecipes } = data
 
     try {
-      // TODO: Import and use notification system
+      const type = priceChange > 0 ? 'warning' as const : 'info' as const
+      const priority = Math.abs(priceChange) > 20 ? 'critical' as const : 'high' as const
       const notificationData = {
-        type: priceChange > 0 ? 'warning' : 'info',
-        category: 'financial',
-        priority: Math.abs(priceChange) > 20 ? 'critical' : 'high',
+        type,
+        category: 'financial' as const,
+        priority,
         title: `Harga Bahan Baku ${priceChange > 0 ? 'NAIK' : 'TURUN'} Signifikan`,
         message: `Perubahan ${Math.abs(priceChange).toFixed(1)}% mempengaruhi ${affectedRecipes?.length ?? 0} resep.`,
         actionUrl: '/ingredients',
         actionLabel: 'Review Bahan Baku'
       }
 
+      sendNotification({
+        ...notificationData,
+        status: 'sent'
+      })
       automationLogger.info({ notificationData }, 'Price change notification sent')
-    } catch (err: unknown) {
-      automationLogger.debug({ err: getErrorMessage(err) }, 'Notification system not available')
+    } catch (error) {
+      automationLogger.debug({ error: getErrorMessage(error) }, 'Notification system not available')
     }
   }
 
@@ -189,9 +193,9 @@ export class FinancialWorkflowHandlers {
     try {
       // Send general notification
       const generalNotification = {
-        type: 'info',
-        category: 'financial',
-        priority: 'medium',
+        type: 'info' as const,
+        category: 'financial' as const,
+        priority: 'medium' as const,
         title: 'Biaya Operasional Diperbarui',
         message: `${costName} berubah dari Rp${oldAmount.toLocaleString()} ke Rp${newAmount.toLocaleString()}.`,
         actionUrl: '/operational-costs',
@@ -201,21 +205,56 @@ export class FinancialWorkflowHandlers {
       // Send review notification for significant changes
       if (Math.abs(costChange) > 10) {
         const reviewNotification = {
-          type: 'warning',
-          category: 'financial',
-          priority: 'high',
+          type: 'warning' as const,
+          category: 'financial' as const,
+          priority: 'high' as const,
           title: 'Review Pricing Strategy Disarankan',
           message: `Perubahan biaya operasional ${Math.abs(costChange).toFixed(1)}% mempengaruhi seluruh profitabilitas. Pertimbangkan review harga jual.`,
           actionUrl: '/hpp-simple?tab=pricing_review',
           actionLabel: 'Review Pricing'
         }
 
+        sendNotification({
+          ...reviewNotification,
+          status: 'sent'
+        })
         automationLogger.info({ reviewNotification }, 'Pricing review notification sent')
       }
 
+      sendNotification({
+        ...generalNotification,
+        status: 'sent'
+      })
       automationLogger.info({ generalNotification }, 'Cost change notification sent')
-    } catch (err: unknown) {
-      automationLogger.debug({ err: getErrorMessage(err) }, 'Notification system not available')
+    } catch (error) {
+      automationLogger.debug({ error: getErrorMessage(error) }, 'Notification system not available')
+    }
+  }
+
+  private static triggerPricingReviewNotification(
+    context: WorkflowContext,
+    data: { costId: string; costName: string; oldAmount: number; newAmount: number },
+    costChange: number
+  ): void {
+    try {
+      sendNotification({
+        category: 'financial',
+        priority: 'high',
+        title: 'Perlu Review Harga Jual',
+        message: `Biaya ${data.costName} berubah ${costChange.toFixed(1)}%. Pertimbangkan review harga.`,
+        actionUrl: '/hpp-simple?tab=pricing_review',
+        actionLabel: 'Mulai Review',
+        status: 'sent',
+        type: 'warning'
+      })
+      context.logger.info('Pricing review notification dispatched', {
+        costId: data.costId,
+        costChange
+      })
+    } catch (error) {
+      context.logger.error('Failed to dispatch pricing review notification', {
+        error: getErrorMessage(error)
+      })
     }
   }
 
@@ -226,7 +265,7 @@ export class FinancialWorkflowHandlers {
     const { event, logger } = context
 
     try {
-      logger.info({ eventData: event.data }, 'HPP recalculation workflow triggered')
+      logger.info({ eventData: event['data'] }, 'HPP recalculation workflow triggered')
 
       // Invalidate HPP caches
       const invalidator = new CacheInvalidator()
@@ -234,8 +273,11 @@ export class FinancialWorkflowHandlers {
       void invalidator.execute()
 
       // Trigger HPP recalculation for affected recipes
-      const affectedRecipeIds = event.data && typeof event.data === 'object' && 'affectedRecipeIds' in event.data
-        ? event.data.affectedRecipeIds
+      const eventData = typeof event['data'] === 'object' && event['data'] !== null
+        ? event['data']
+        : null
+      const affectedRecipeIds = Array.isArray(eventData?.['affectedRecipeIds'])
+        ? eventData['affectedRecipeIds']
         : undefined
 
       if (affectedRecipeIds && Array.isArray(affectedRecipeIds)) {
@@ -253,9 +295,9 @@ export class FinancialWorkflowHandlers {
           affectedRecipes: (affectedRecipeIds && Array.isArray(affectedRecipeIds)) ? affectedRecipeIds.length : 0
         }
       }
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err)
-      logger.error({ err: errorMessage }, 'HPP recalculation workflow failed')
+    } catch (error) {
+      const errorMessage = getErrorMessage(error)
+      logger.error({ error: errorMessage }, 'HPP recalculation workflow failed')
 
       return {
         success: false,

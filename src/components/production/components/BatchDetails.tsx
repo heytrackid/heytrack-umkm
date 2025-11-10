@@ -1,12 +1,16 @@
-import { Button } from '@/components/ui/button'
+import { CheckSquare, Eye, MessageSquare, X } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { CheckSquare, Eye, MessageSquare, X } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+
+
 import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
-import type { BatchExecutionState } from './types'
+
+import type { BatchExecutionState } from '@/components/production/components/types'
 
 // Batch Details Component - Lazy Loaded
 // Displays detailed view of selected batch with quality control and notes
@@ -51,7 +55,7 @@ const BatchDetails = ({
   }
 
   const state = executionStates.get(selectedBatch)
-  const batch = batches.find(b => b.id === selectedBatch)
+  const batch = batches.find(b => b['id'] === selectedBatch)
 
   if (!batch) {
     return (
@@ -81,7 +85,7 @@ const BatchDetails = ({
         <div className="space-y-4">
           {/* Batch Info */}
           <div>
-            <h3 className="font-semibold text-lg">{batch.recipe_name}</h3>
+            <h3 className="font-semibold text-lg">{batch['recipe_name']}</h3>
             <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground mt-1">
               <span>Quantity: {batch.quantity}</span>
               <span>Priority: {batch.priority}/10</span>
@@ -97,7 +101,7 @@ const BatchDetails = ({
             <div className="space-y-3">
               <h4 className="font-medium">Quality Checks</h4>
               {state.qualityChecks.map((check) => (
-                <div key={check.id} className="flex items-center justify-between p-2 border rounded">
+                <div key={check['id']} className="flex items-center justify-between p-2 border rounded">
                   <span className="text-sm">{check.name}</span>
                   <div className="flex gap-1">
                     {check.completed ? (
@@ -109,14 +113,14 @@ const BatchDetails = ({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => onQualityCheck(selectedBatch, check.id, true)}
+                          onClick={() => onQualityCheck(selectedBatch, check['id'], true)}
                         >
                           <CheckSquare className="h-3 w-3" />
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => onQualityCheck(selectedBatch, check.id, false)}
+                          onClick={() => onQualityCheck(selectedBatch, check['id'], false)}
                         >
                           <X className="h-3 w-3" />
                         </Button>
@@ -169,4 +173,4 @@ const BatchDetails = ({
   )
 }
 
-export default BatchDetails
+export { BatchDetails }

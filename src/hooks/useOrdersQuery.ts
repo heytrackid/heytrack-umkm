@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
+
 import { useSupabase } from '@/providers/SupabaseProvider'
+
 import type { Row } from '@/types/database'
 
 type Order = Row<'orders'> & {
@@ -52,7 +54,7 @@ export function useOrders({
 
       // Apply status filter
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter as 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'READY' | 'DELIVERED' | 'CANCELLED')
+        query = query.eq('status', statusFilter as 'CANCELLED' | 'CONFIRMED' | 'DELIVERED' | 'IN_PROGRESS' | 'PENDING' | 'READY')
       }
 
       // Apply pagination
@@ -110,7 +112,7 @@ export function useOrder(orderId: string, enabled = true) {
 
       return data as Order
     },
-    enabled: enabled && !!orderId,
+    enabled: enabled && Boolean(orderId),
     staleTime: 60000, // 1 minute - single order details
     gcTime: 600000, // 10 minutes cache
   })
@@ -133,12 +135,12 @@ export function useOrderStats(enabled = true) {
 
       const stats = {
         total: data.length,
-        pending: data.filter(order => order.status === 'PENDING').length,
-        confirmed: data.filter(order => order.status === 'CONFIRMED').length,
-        inProgress: data.filter(order => order.status === 'IN_PROGRESS').length,
-        completed: data.filter(order => order.status === 'READY').length,
-        delivered: data.filter(order => order.status === 'DELIVERED').length,
-        cancelled: data.filter(order => order.status === 'CANCELLED').length,
+        pending: data.filter(order => order['status'] === 'PENDING').length,
+        confirmed: data.filter(order => order['status'] === 'CONFIRMED').length,
+        inProgress: data.filter(order => order['status'] === 'IN_PROGRESS').length,
+        completed: data.filter(order => order['status'] === 'READY').length,
+        delivered: data.filter(order => order['status'] === 'DELIVERED').length,
+        cancelled: data.filter(order => order['status'] === 'CANCELLED').length,
         totalRevenue: data.reduce((sum, order) => sum + (order.total_amount ?? 0), 0),
         recentOrders: data
           .sort((a, b) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime())

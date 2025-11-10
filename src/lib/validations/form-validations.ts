@@ -1,5 +1,7 @@
 import { z } from 'zod'
+
 import type { OrderFormData as OrderFormValues } from '@/components/orders/types'
+
 import {
 
   UUIDSchema,
@@ -10,7 +12,8 @@ import {
   positiveNumber,
   rupiah,
   percentage
-} from './base-validations'
+} from '@/lib/validations/base-validations'
+
 
 // Form validation schemas
 // Validation schemas specifically for form submissions and user input 
@@ -303,7 +306,7 @@ export type OperationalCostForm = z.infer<typeof OperationalCostFormSchema>
 export function validateOrderData(data: OrderFormValues): string[] {
   const errors: string[] = []
 
-  if (!data.customer_name.trim()) {
+  if (!data['customer_name'].trim()) {
     errors.push('Nama pelanggan harus diisi')
   }
 

@@ -1,8 +1,9 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
 import type { Insert, Update, Row, WithNestedRelation, Json } from '@/types/database'
 import { isRecord, hasKey, getErrorMessage, typed, safeGet } from '@/types/type-utilities'
+import { createClient } from '@/utils/supabase/server'
+
 
 
 type JsonValue = Json
@@ -157,7 +158,7 @@ export class ProductionBatchService {
       // Orders are linked to batches through order_items -> recipes -> productions relationship
 
       dbLogger.info({
-        batchId: production.id,
+        batchId: production['id'],
         recipeId: primaryBatch.recipe_id,
         quantity: primaryBatch.total_quantity,
         orderCount: orderIds.length
@@ -165,15 +166,15 @@ export class ProductionBatchService {
 
       return {
         success: true,
-        batch_id: production.id,
-        message: `Production batch created for ${primaryBatch.recipe_name} (${primaryBatch.total_quantity} units from ${orderIds.length} orders)`
+        batch_id: production['id'],
+        message: `Production batch created for ${primaryBatch['recipe_name']} (${primaryBatch.total_quantity} units from ${orderIds.length} orders)`
       }
 
-    } catch (err) {
-      dbLogger.error({ error: err }, 'Failed to create batch from orders')
+    } catch (error) {
+      dbLogger.error({ error }, 'Failed to create batch from orders')
       return {
         success: false,
-        message: getErrorMessage(err)
+        message: getErrorMessage(error)
       }
     }
   }
@@ -187,7 +188,7 @@ export class ProductionBatchService {
     total_quantity: number
     order_count: number
     estimated_cost: number
-    priority: 'HIGH' | 'MEDIUM' | 'LOW'
+    priority: 'HIGH' | 'LOW' | 'MEDIUM'
   }>> {
     try {
       const client = await createClient()
@@ -266,7 +267,7 @@ export class ProductionBatchService {
 
       // Convert to array and determine priority
       const suggestions = Array.from(recipeGroups.values()).map(group => {
-        let priority: 'HIGH' | 'MEDIUM' | 'LOW' = 'LOW'
+        let priority: 'HIGH' | 'LOW' | 'MEDIUM' = 'LOW'
         
         if (group.urgent_count > 0 || group.order_count >= 3) {
           priority = 'HIGH'
@@ -276,7 +277,7 @@ export class ProductionBatchService {
 
         return {
           recipe_id: group.recipe_id,
-          recipe_name: group.recipe_name,
+          recipe_name: group['recipe_name'],
           total_quantity: group.total_quantity,
           order_count: group.order_count,
           estimated_cost: group.estimated_cost,

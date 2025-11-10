@@ -1,4 +1,4 @@
-import type { BreakEvenResult } from './types'
+import type { BreakEvenResult } from '@/lib/automation/financial-automation/types'
 
 /**
  * Break-even Analyzer Module

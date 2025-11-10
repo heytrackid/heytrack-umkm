@@ -34,7 +34,7 @@ const ingredients: IngredientsTable[] = await fetchIngredients()
 - `CustomersTable`
 - `DailySalesSummaryTable`
 - `ErrorLogsTable`
-- `ExpensesTable`
+- ~~`ExpensesTable`~~ (REMOVED - use `FinancialRecordsTable`)
 - `FinancialRecordsTable`
 - `HppAlertsTable`
 - `HppCalculationsTable`

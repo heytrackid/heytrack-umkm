@@ -1,7 +1,11 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
+import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
+import { useCallback, useState } from 'react'
+
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
+import { useOrderItemsController } from '@/components/orders/hooks/useOrderItemsController'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -10,19 +14,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
-import { createClientLogger } from '@/lib/client-logger'
-
-const logger = createClientLogger('OrderForm')
-import { isRecipe } from '@/lib/type-guards'
 import { validateOrderData } from '@/lib/validations/form-validations'
-import type { Row } from '@/types/database'
-import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import type { Order, OrderFormData, OrderFormItem, Priority } from './types'
-import { calculateOrderTotal, normalizePriority } from './utils'
 
 
-type Recipe = Row<'recipes'>
+import { calculateOrderTotal, normalizePriority } from '@/components/orders/utils'
+
+import type { Order, OrderFormData, OrderFormItem, Priority } from '@/components/orders/types'
+
 
 
 interface OrderFormProps {
@@ -40,29 +38,13 @@ const OrderForm = ({
 }: OrderFormProps) => {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
-  const [formData, setFormData] = useState<OrderFormData>({
-    customer_name: '',
-    customer_phone: '',
-    // customer_email: '', // Field doesn't exist in DB
-    customer_address: '',
-    delivery_date: '',
-    delivery_time: '10:00',
-    priority: 'normal',
-    notes: '',
-    order_items: []
-  })
-  const [recipes, setRecipes] = useState<Recipe[]>([])
-  const [errors, setErrors] = useState<string[]>([])
-
-  // Load form data for editing
-  useEffect(() => {
+  const [formData, setFormData] = useState<OrderFormData>(() => {
     if (order) {
-      setFormData({
-        customer_name: order.customer_name ?? '',
+      return {
+        customer_name: order['customer_name'] ?? '',
         customer_phone: order.customer_phone ?? '',
-        // customer_email: order.customer_email || '', // Field doesn't exist in DB
         customer_address: order.customer_address ?? '',
-        delivery_date: order.delivery_date ? order.delivery_date.split('T')[0] : '',
+        delivery_date: order.delivery_date?.split('T')[0] ?? '',
         delivery_time: order.delivery_time ?? '10:00',
         priority: normalizePriority(order.priority),
         notes: order.notes ?? '',
@@ -73,31 +55,52 @@ const OrderForm = ({
           unit_price: item.unit_price,
           total_price: item.total_price,
           special_requests: item.special_requests ?? null
-        })) || []
-      })
+        })) ?? []
+      }
     }
-  }, [order])
-
-  // Fetch recipes for order items
-  useEffect(() => {
-    void fetchRecipes()
-  }, [])
-
-  const fetchRecipes = async () => {
-    try {
-      const response = await fetch('/api/recipes')
-      if (!response.ok) { return }
-
-      const payload = await response.json()
-      const recipeList: Recipe[] = Array.isArray(payload)
-        ? payload.filter((item): item is Recipe => isRecipe(item))
-        : []
-
-      void setRecipes(recipeList)
-    } catch (err: unknown) {
-      logger.error({ err }, 'Error fetching recipes')
+    return {
+      customer_name: '',
+      customer_phone: '',
+      customer_address: '',
+      delivery_date: '',
+      delivery_time: '10:00',
+      priority: 'normal',
+      notes: '',
+      order_items: []
     }
-  }
+  })
+  const [errors, setErrors] = useState<string[]>([])
+
+  // Form data is initialized in useState above
+
+  const createEmptyOrderItem = useCallback((): OrderFormItem => ({
+    recipe_id: '',
+    product_name: null,
+    quantity: 1,
+    unit_price: 0,
+    total_price: 0,
+    special_requests: null
+  }), [])
+
+  const {
+    recipes,
+    addItem: addOrderItem,
+    updateItem: updateOrderItem,
+    removeItem: removeOrderItem,
+    selectRecipe: handleRecipeSelect
+  } = useOrderItemsController<OrderFormItem>({
+    items: formData.order_items,
+    onItemsChange: (nextItems) => setFormData(prev => ({ ...prev, order_items: nextItems })),
+    createEmptyItem: createEmptyOrderItem,
+    onRecipeSelected: (recipe, item) => {
+      const unitPrice = recipe.selling_price ?? item.unit_price
+      return {
+        ...item,
+        unit_price: unitPrice,
+        total_price: unitPrice * item.quantity
+      }
+    }
+  })
 
   const handleInputChange = <K extends keyof OrderFormData>(
     field: K,
@@ -109,60 +112,10 @@ const OrderForm = ({
     }
   }
 
-  const addOrderItem = () => {
-    const newItem: OrderFormItem = {
-      recipe_id: '',
-      product_name: null,
-      quantity: 1,
-      unit_price: 0,
-      total_price: 0,
-      special_requests: null
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      order_items: [...prev.order_items, newItem]
-    }))
-  }
-
-  const updateOrderItem = <K extends keyof OrderFormItem>(
-    index: number,
-    field: K,
-    value: OrderFormItem[K]
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      order_items: prev.order_items.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      )
-    }))
-  }
-
-  const removeOrderItem = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      order_items: prev.order_items.filter((_, i) => i !== index)
-    }))
-  }
-
-  const handleRecipeSelect = (index: number, recipeId: string) => {
-    if (recipeId === 'placeholder') { return } // Ignore placeholder selection
-
-    const recipe = recipes.find(r => r.id === recipeId)
-    if (recipe) {
-      void updateOrderItem(index, 'recipe_id', recipeId)
-      void updateOrderItem(index, 'product_name', recipe.name)
-      if (recipe.selling_price) {
-        void updateOrderItem(index, 'unit_price', recipe.selling_price)
-        void updateOrderItem(index, 'total_price', recipe.selling_price * formData.order_items[index].quantity)
-      }
-    }
-  }
-
   const handleSubmit = () => {
     const validationErrors = validateOrderData(formData)
     if (validationErrors.length > 0) {
-      void setErrors(validationErrors)
+      setErrors(validationErrors)
       return
     }
 
@@ -217,7 +170,7 @@ const OrderForm = ({
             <div className="space-y-2">
               <Label>Nama Pelanggan *</Label>
               <Input
-                value={formData.customer_name}
+                value={formData['customer_name']}
                 onChange={(e) => handleInputChange('customer_name', e.target.value)}
                 placeholder=""
               />
@@ -318,7 +271,7 @@ const OrderForm = ({
           {formData.order_items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>Belum ada item ditambahkan</p>
-              <p className="text-sm">Klik "Tambah Item" untuk mulai membuat pesanan</p>
+              <p className="text-sm">Klik &#34;Tambah Item&#34; untuk mulai membuat pesanan</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -339,7 +292,7 @@ const OrderForm = ({
                             Pilih produk
                           </SelectItem>
                           {recipes.map((recipe) => (
-                            <SelectItem key={recipe.id} value={recipe.id}>
+                            <SelectItem key={recipe['id']} value={recipe['id']}>
                               {recipe.name}
                             </SelectItem>
                           ))}
@@ -362,7 +315,7 @@ const OrderForm = ({
                       <Input
                         type="number"
                         value={item.unit_price}
-                        onChange={(e) => updateOrderItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
+                        onChange={(e) => updateOrderItem(index, 'unit_price', parseFloat(e.target.value.replace(',', '.')) || 0)}
                         min="0"
                       />
                     </div>
@@ -419,4 +372,4 @@ const OrderForm = ({
   )
 }
 
-export default OrderForm
+export { OrderForm }

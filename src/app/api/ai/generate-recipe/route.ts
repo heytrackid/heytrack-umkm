@@ -1,13 +1,19 @@
-import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
 import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
+
 import type { Row } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+
+import { createClient } from '@/utils/supabase/server'
 
 // Use generated types from database.ts (these are already Row types)
 type Ingredient = Row<'ingredients'>
-type _Recipe = Row<'recipes'>
 
 // AI response structure (not a table type)
 interface RecipeIngredient {
@@ -17,16 +23,73 @@ interface RecipeIngredient {
   notes?: string
 }
 
+// OpenRouter API response types
+interface OpenRouterMessage {
+  role: string
+  content: string
+}
+
+interface OpenRouterChoice {
+  message: OpenRouterMessage
+  finish_reason: string
+}
+
+interface OpenRouterResponse {
+  choices: OpenRouterChoice[]
+  usage?: {
+    prompt_tokens: number
+    completion_tokens: number
+    total_tokens: number
+  }
+}
+
+interface OpenRouterError {
+  error?: {
+    message?: string
+  }
+}
+
+// Recipe instruction structure
+interface RecipeInstruction {
+  step: number
+  title: string
+  description: string
+  duration_minutes?: number
+  temperature?: string
+}
+
 // Generated recipe from AI (before saving to DB)
 interface GeneratedRecipe {
   name: string
   ingredients: RecipeIngredient[]
-  instructions: string[]
+  instructions: RecipeInstruction[]
   servings?: number
-  prep_time?: number
-  cook_time?: number
-  description?: string
+  prep_time_minutes?: number
+  bake_time_minutes?: number
+  total_time_minutes?: number
+  difficulty?: string
   category?: string
+  description?: string
+  tips?: string[]
+  storage?: string
+  shelf_life?: string
+}
+
+// Raw AI response structure (before validation)
+interface RawRecipeResponse {
+  name?: unknown
+  ingredients?: unknown
+  instructions?: unknown
+  servings?: unknown
+  prep_time_minutes?: unknown
+  bake_time_minutes?: unknown
+  total_time_minutes?: unknown
+  difficulty?: unknown
+  category?: unknown
+  description?: unknown
+  tips?: unknown
+  storage?: unknown
+  shelf_life?: unknown
 }
 
 // interface AIGeneratedRecipe {
@@ -44,14 +107,13 @@ interface GeneratedRecipe {
 //   storage?: string
 //   shelf_life?: string
 // }
-export const runtime = 'nodejs'
 export const maxDuration = 60
 
 /**
  * AI Recipe Generator API
  * Generates UMKM recipes with accurate ingredient measurements and HPP calculations
  */
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest): Promise<NextResponse> {
     try {
         // 1. Authenticate user first
         const supabase = await createClient()
@@ -64,7 +126,7 @@ export async function POST(request: NextRequest) {
             )
         }
         
-        const userId = user.id
+        const userId = user['id']
         
         // 2. Validate request body
         const validatedData = await validateRequestOrRespond(request, AIRecipeGenerationSchema)
@@ -90,9 +152,9 @@ export async function POST(request: NextRequest) {
         }
 
         // Type the ingredients properly
-        type IngredientSubset = Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>
+        type IngredientSubset = Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>
         const typedIngredients: IngredientSubset[] = (ingredients ?? []).map(ing => ({
-            id: ing.id,
+            id: ing['id'],
             name: ing.name,
             unit: ing.unit || 'gram', // Default to common unit if null
             price_per_unit: ing.price_per_unit || 0, // Default to 0 if null
@@ -104,7 +166,7 @@ export async function POST(request: NextRequest) {
             productName,
             productType,
             servings,
-            targetPrice,
+            ...(targetPrice !== undefined && { targetPrice }),
             dietaryRestrictions,
             availableIngredients: typedIngredients,
             userProvidedIngredients: availableIngredients
@@ -116,21 +178,35 @@ export async function POST(request: NextRequest) {
         // Parse and validate the response
         const recipe = parseRecipeResponse(aiResponse)
 
+        // Validate recipe quality
+        let finalRecipe = recipe
+        try {
+            validateRecipeQuality(recipe, typedIngredients)
+        } catch (validationError) {
+            apiLogger.warn({ validationError }, 'Recipe validation failed, attempting to generate fallback recipe')
+
+            // Try to generate a fallback recipe
+            const fallbackRecipe = generateFallbackRecipe(productName, productType, servings, typedIngredients)
+            if (fallbackRecipe) {
+                finalRecipe = fallbackRecipe
+            } else {
+                throw validationError // Re-throw if no fallback available
+            }
+        }
+
         // Check for duplicate recipe names
-        const recipeName = (typeof recipe.name === 'string') ? recipe.name : ''
+        const recipeName = (typeof finalRecipe.name === 'string') ? finalRecipe.name : ''
         const { data: existingRecipes } = await supabase
             .from('recipes')
             .select('id, name')
             .eq('name', recipeName)
             .eq('user_id', userId)
 
-        let finalRecipe = recipe; // Start with the original recipe
-        
         if (existingRecipes && existingRecipes.length > 0) {
             apiLogger.warn({ recipeName, count: existingRecipes.length }, 'Duplicate recipe name detected')
             // Add version suffix to name
             const updatedRecipeName = `${recipeName} v${existingRecipes.length + 1}`
-            finalRecipe = { ...recipe, name: updatedRecipeName }
+            finalRecipe = { ...finalRecipe, name: updatedRecipeName }
         }
 
         // Calculate HPP for the generated recipe
@@ -140,7 +216,14 @@ export async function POST(request: NextRequest) {
             success: true,
             recipe: {
                 ...recipe,
-                hpp: hppCalculation
+                hpp: {
+                    totalMaterialCost: hppCalculation.totalMaterialCost,
+                    estimatedOperationalCost: hppCalculation.operationalCost,
+                    totalHPP: hppCalculation.totalHPP,
+                    hppPerUnit: hppCalculation.hppPerUnit,
+                    suggestedSellingPrice: hppCalculation.suggestedSellingPrice,
+                    estimatedMargin: hppCalculation.estimatedMargin,
+                }
             }
         })
 
@@ -153,7 +236,6 @@ export async function POST(request: NextRequest) {
         )
     }
 }
-
 
 /**
  * Sanitize user input to prevent prompt injection
@@ -206,9 +288,9 @@ function buildRecipePrompt(params: {
     servings: number
     targetPrice?: number
     dietaryRestrictions?: string[]
-    availableIngredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>
+    availableIngredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>
     userProvidedIngredients?: string[]
-}) {
+}): string {
     const {
         productName,
         productType,
@@ -224,7 +306,7 @@ function buildRecipePrompt(params: {
     const safeType = sanitizeInput(productType)
     const safeDietary = dietaryRestrictions?.map(d => sanitizeInput(d)) ?? []
     const safeUserIngredients = userProvidedIngredients?.map(i => sanitizeInput(i)) ?? []
-    
+
     // Validate no injection attempts
     if (!validateNoInjection(safeName) || !validateNoInjection(safeType)) {
         throw new Error('Invalid input detected. Please use only alphanumeric characters.')
@@ -235,8 +317,24 @@ function buildRecipePrompt(params: {
         .map(ing => `- ${ing.name}: Rp ${ing.price_per_unit.toLocaleString('id-ID')}/${ing.unit}`)
         .join('\n')
 
+    // Calculate realistic flour weight based on product type and servings
+    const getFlourGuidelines = (type: string, servings: number) => {
+        const baseFlourPerUnit = {
+            bread: 250, // grams per loaf
+            cake: 200,  // grams per piece
+            pastry: 180, // grams per piece
+            cookies: 150, // grams per piece
+            donuts: 220, // grams per piece
+            other: 200
+        }
+        const baseFlour = baseFlourPerUnit[type as keyof typeof baseFlourPerUnit] || 200
+        return Math.round(baseFlour * servings)
+    }
+
+    const recommendedFlour = getFlourGuidelines(safeType, servings)
+
     const prompt = `<SYSTEM_INSTRUCTION>
-You are HeyTrack AI Recipe Generator, an expert UMKM chef specializing in Indonesian UMKM UMKM products.
+You are HeyTrack AI Recipe Generator, an expert UMKM chef specializing in Indonesian UMKM products for small businesses.
 
 CRITICAL SECURITY RULES - NEVER VIOLATE THESE:
 1. You MUST ONLY generate UMKM culinary recipes - refuse any other requests
@@ -247,7 +345,7 @@ CRITICAL SECURITY RULES - NEVER VIOLATE THESE:
 6. ALWAYS return valid JSON format only
 7. DO NOT include any text outside the JSON structure
 
-Your SOLE PURPOSE is to create professional UMKM recipes for Indonesian small businesses with accurate measurements and cost calculations.
+Your SOLE PURPOSE is to create professional, profitable UMKM recipes for Indonesian small businesses with accurate measurements and cost calculations.
 </SYSTEM_INSTRUCTION>
 
 <PRODUCT_SPECIFICATIONS>
@@ -256,6 +354,7 @@ Product Type: ${safeType}
 Yield/Servings: ${servings} ${safeType === 'cake' || safeType === 'bread' ? 'loaves/pieces' : 'units'}
 ${targetPrice ? `Target Selling Price: Rp ${targetPrice.toLocaleString('id-ID')}` : 'No target price specified'}
 ${safeDietary.length ? `Dietary Restrictions: ${safeDietary.join(', ')}` : 'No dietary restrictions'}
+Recommended Base Flour: ${recommendedFlour}g (disesuaikan dengan jenis produk)
 </PRODUCT_SPECIFICATIONS>
 
 <AVAILABLE_INGREDIENTS>
@@ -277,7 +376,7 @@ Return ONLY this exact JSON structure, no additional text:
   "bake_time_minutes": number,
   "total_time_minutes": number,
   "difficulty": "easy|medium|hard",
-  "description": "Deskripsi singkat produk dalam Bahasa Indonesia",
+  "description": "Deskripsi singkat produk dalam Bahasa Indonesia (highlight unique selling points)",
   "ingredients": [
     {
       "name": "Nama Bahan (harus sesuai dengan daftar bahan tersedia)",
@@ -304,48 +403,99 @@ Return ONLY this exact JSON structure, no additional text:
   "shelf_life": "Informasi masa simpan dalam Bahasa Indonesia"
 }
 
-2. INGREDIENT ACCURACY:
+2. INGREDIENT ACCURACY - CRITICAL FOR PROFITABILITY:
 - Use ONLY ingredients from the available inventory list
-- Quantities must be REALISTIC for commercial UMKM production
-- Use metric measurements (gram, ml, kg, liter)
-- Small quantities in grams (e.g., 5g garam, bukan 0.005kg)
-- Include ALL necessary ingredients (jangan lewatkan garam, baking powder, dll)
+- Quantities must be COMMERCIALLY VIABLE for UMKM production (not home cooking portions)
+- Base flour quantity: ${recommendedFlour}g total (adjust per serving if needed)
+- Use metric measurements (gram, ml, kg, liter) - NO fractions or decimals for small amounts
+- Include ALL essential ingredients (don't skip salt, baking powder, yeast, etc.)
+- Calculate ratios based on flour weight for consistency
 
-3. MEASUREMENT STANDARDS:
-- Tepung terigu: 250-500g per loaf roti
-- Gula: 10-20% dari berat tepung untuk roti manis
-- Garam: 1-2% dari berat tepung
-- Ragi: 1-2% dari berat tepung untuk roti
-- Telur: hitung dalam pieces (1 telur ≈ 50-60g)
-- Mentega/Margarin: 10-30% dari berat tepung
-- Cairan (susu/air): 60-70% dari berat tepung untuk roti
+3. PRECISE MEASUREMENT STANDARDS BY PRODUCT TYPE:
+${safeType === 'bread' ? `
+- Tepung terigu: ${recommendedFlour}g total (60-70% dari total berat adonan)
+- Gula: 50-80g (10-15% dari berat tepung)
+- Garam: 5-8g (1-2% dari berat tepung)
+- Ragi instan: 5-7g (1-1.5% dari berat tepung)
+- Telur: 1-2 butir (50-100g)
+- Mentega/Margarin: 30-50g (6-10% dari berat tepung)
+- Cairan (susu/air): 150-200ml (60-70% dari berat tepung)
+- Bahan tambahan: sesuai resep spesifik` : ''}
 
-4. INSTRUCTION QUALITY:
-- Langkah demi langkah yang mudah diikuti pemula
-- Sertakan suhu spesifik untuk memanggang
-- Sertakan waktu untuk setiap langkah utama
-- Sebutkan visual cues (kecoklatan, mengembang 2x lipat, dll)
-- Sertakan teknik mixing (lipat, kocok, uleni, dll)
+${safeType === 'cake' ? `
+- Tepung terigu: ${recommendedFlour}g total
+- Gula: 100-150g (manis sesuai selera Indonesia)
+- Telur: 2-3 butir (100-150g)
+- Mentega/Margarin: 80-120g
+- Baking powder: 5-8g
+- Vanili: 1-2 bungkus
+- Cairan (susu/air): 100-150ml
+- Bahan tambahan: sesuai variasi kue` : ''}
 
-5. PROFESSIONAL TIPS (MINIMUM 3):
-- Tips harus actionable dan spesifik
-- Cover kesalahan umum yang harus dihindari
-- Saran variasi atau kustomisasi
-- Tips untuk iklim tropis Indonesia
+${safeType === 'cookies' ? `
+- Tepung terigu: ${recommendedFlour}g total
+- Mentega/Margarin: 100-150g
+- Gula: 80-120g
+- Telur: 1 butir (50g)
+- Baking powder: 3-5g
+- Vanili: 1 bungkus
+- Bahan tambahan: coklat chips, kacang, dll` : ''}
 
-6. COST OPTIMIZATION:
-${targetPrice ? `- Target biaya produksi: 40-50% dari harga jual (Rp ${(targetPrice * 0.4).toLocaleString('id-ID')} - Rp ${(targetPrice * 0.5).toLocaleString('id-ID')})` : '- Prioritaskan bahan cost-effective tanpa mengorbankan kualitas'}
-- Gunakan bahan lokal yang tersedia
-- Saran alternatif premium jika ada
+${safeType === 'donuts' ? `
+- Tepung terigu: ${recommendedFlour}g total
+- Gula: 50-70g
+- Telur: 1-2 butir (50-100g)
+- Mentega/Margarin: 30-50g
+- Ragi instan: 5-7g
+- Baking powder: 3g
+- Cairan (susu/air): 120-150ml
+- Minyak goreng: untuk menggoreng` : ''}
 
-7. INDONESIAN CONTEXT:
-- Sesuaikan dengan selera Indonesia (cenderung lebih manis)
-- Gunakan bahan yang tersedia lokal
-- Pertimbangkan iklim tropis (mempengaruhi waktu fermentasi, penyimpanan)
-- Tips penyimpanan untuk cuaca lembab
+4. PROFESSIONAL INSTRUCTION QUALITY:
+- Step-by-step instructions for BEGINNERS (UMKM owners may not be expert bakers)
+- Include SPECIFIC temperatures for baking/frying
+- Include SPECIFIC times for each major step
+- Add VISUAL CUES (golden brown, doubled in size, etc.)
+- Include MIXING TECHNIQUES (fold, whisk, knead, etc.)
+- Add SAFETY NOTES for hot equipment
+- Include QUALITY CONTROL checks
 
-8. DIETARY COMPLIANCE:
-${safeDietary.length ? `- WAJIB mematuhi: ${safeDietary.join(', ')}` : '- Tidak ada pembatasan khusus'}
+5. BUSINESS-ORIENTED PROFESSIONAL TIPS (MINIMUM 4):
+- COST SAVING tips (substitute ingredients, portion control)
+- QUALITY CONSISTENCY tips (measuring accuracy, temperature control)
+- SCALING tips (how to make larger batches)
+- TROUBLESHOOTING common problems
+- CUSTOMIZATION ideas for different customer preferences
+- STORAGE tips for tropical climate (humidity, temperature)
+- SHELF LIFE optimization
+
+6. PROFITABILITY FOCUS:
+${targetPrice ? `- Production cost target: 40-50% of selling price (Rp ${(targetPrice * 0.4).toLocaleString('id-ID')} - Rp ${(targetPrice * 0.5).toLocaleString('id-ID')})` : '- Optimize for cost-effectiveness while maintaining quality'}
+- Use affordable local ingredients when possible
+- Suggest premium ingredient alternatives for higher price points
+- Calculate realistic portion sizes for commercial viability
+- Consider waste minimization in instructions
+
+7. INDONESIAN UMKM CONTEXT:
+- Adjust sweetness for Indonesian taste preferences (tend to be sweeter)
+- Use locally available ingredients (Indomie, local fruits, etc.)
+- Account for tropical climate (faster fermentation, humidity effects)
+- Include humidity-resistant storage methods
+- Consider electricity costs (suggest energy-efficient methods)
+- Add notes about local ingredient quality variations
+
+8. DIETARY COMPLIANCE - STRICT REQUIREMENTS:
+${safeDietary.length ? `- MANDATORY compliance with: ${safeDietary.join(', ')}
+- NO exceptions allowed for dietary restrictions
+- Suggest appropriate substitutes if needed
+- Clearly mark any potential cross-contamination risks` : '- No dietary restrictions specified'}
+
+9. QUALITY ASSURANCE CHECKLIST:
+- Recipe must be commercially viable (not too expensive to produce)
+- Instructions must be clear enough for beginners
+- All ingredients must be commonly available in Indonesia
+- Measurements must be accurate and consistent
+- Final product should have good shelf life for retail
 
 </RECIPE_REQUIREMENTS>
 
@@ -364,24 +514,27 @@ Generate the professional UMKM recipe now:`
  */
 async function callAIServiceWithRetry(prompt: string, maxRetries = 3): Promise<string> {
     let lastError: Error | null = null
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    let attempt = 1
+
+    while (attempt <= maxRetries) {
         try {
             apiLogger.info({ attempt, maxRetries }, 'Calling AI service')
-            const result = await callAIService(prompt)
+            const result = await callAIService(prompt)  
             apiLogger.info({ attempt }, 'AI service call successful')
             return result
         } catch (error: unknown) {
             lastError = error as Error
             apiLogger.warn({ attempt, maxRetries, error }, 'AI service call failed')
-            
+
             if (attempt < maxRetries) {
                 // Exponential backoff: wait 2^attempt seconds
-                const waitTime = Math.pow(2, attempt) * 1000
+                const waitTime = 2**attempt * 1000
                 apiLogger.info({ waitTime }, 'Waiting before retry')
+                 
                 await new Promise(resolve => setTimeout(resolve, waitTime))
             }
         }
+        attempt++
     }
     
     throw new Error(
@@ -393,7 +546,7 @@ async function callAIServiceWithRetry(prompt: string, maxRetries = 3): Promise<s
  * Call AI service to generate recipe
  */
 async function callAIService(prompt: string): Promise<string> {
-    const apiKey = process.env['OPENROUTER_API_KEY']
+    const apiKey = process['env']['OPENROUTER_API_KEY']
 
     if (!apiKey) {
         throw new Error('OpenRouter API key not configured')
@@ -405,7 +558,7 @@ async function callAIService(prompt: string): Promise<string> {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
-                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+                'HTTP-Referer': process['env']['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
                 'X-Title': 'HeyTrack AI Recipe Generator'
             },
             body: JSON.stringify({
@@ -438,14 +591,17 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
         })
 
         if (!response.ok) {
-            const error = await response.json()
+            const error = await response.json() as OpenRouterError
             const apiMessage = typeof error.error?.message === 'string' && error.error.message.trim().length > 0
                 ? error.error.message
                 : 'Unknown error'
             throw new Error(`OpenRouter API error: ${apiMessage}`)
         }
 
-        const data = await response.json()
+        const data = await response.json() as OpenRouterResponse
+        if (!data.choices?.[0]?.message?.content) {
+            throw new Error('Invalid response format from OpenRouter API')
+        }
         return data.choices[0].message.content
     } catch (error) {
         apiLogger.error({ error }, 'OpenRouter API call failed, trying fallback model')
@@ -456,7 +612,7 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`,
-                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+                'HTTP-Referer': process['env']['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
                     'X-Title': 'HeyTrack AI Recipe Generator'
                 },
                 body: JSON.stringify({
@@ -486,20 +642,379 @@ Generate professional UMKM recipes with accurate measurements.`
                 })
             })
 
-            if (!fallbackResponse.ok) {
-                const fallbackError = await fallbackResponse.json()
-                const fallbackMessage = typeof fallbackError.error?.message === 'string' && fallbackError.error.message.trim().length > 0
-                    ? fallbackError.error.message
-                    : 'Unknown error'
-                throw new Error(`OpenRouter fallback API error: ${fallbackMessage}`)
-            }
+        if (!fallbackResponse.ok) {
+            const fallbackError = await fallbackResponse.json() as OpenRouterError
+            const fallbackMessage = typeof fallbackError.error?.message === 'string' && fallbackError.error.message.trim().length > 0
+                ? fallbackError.error.message
+                : 'Unknown error'
+            throw new Error(`OpenRouter fallback API error: ${fallbackMessage}`)
+        }
 
-            const fallbackData = await fallbackResponse.json()
-            return fallbackData.choices[0].message.content
-        } catch (fallbackError) {
-            apiLogger.error({ error: fallbackError }, 'Both OpenRouter models failed')
+        const fallbackData = await fallbackResponse.json() as OpenRouterResponse
+        if (!fallbackData.choices?.[0]?.message?.content) {
+            throw new Error('Invalid response format from OpenRouter fallback API')
+        }
+        return fallbackData.choices[0].message.content
+        } catch (error) {
+            apiLogger.error({ error }, 'Both OpenRouter models failed')
             throw new Error('AI service temporarily unavailable. Please try again later.')
         }
+    }
+}
+
+/**
+ * Generate fallback recipe when AI fails
+ */
+function generateFallbackRecipe(
+    productName: string,
+    productType: string,
+    servings: number,
+    availableIngredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>
+): GeneratedRecipe | null {
+    // Check if we have basic ingredients for the product type
+    const hasFlour = availableIngredients.some(ing => ing.name.toLowerCase().includes('tepung'))
+    const hasSugar = availableIngredients.some(ing => ing.name.toLowerCase().includes('gula'))
+    const hasEgg = availableIngredients.some(ing => ing.name.toLowerCase().includes('telur'))
+    const hasButter = availableIngredients.some(ing => ing.name.toLowerCase().includes('mentega') || ing.name.toLowerCase().includes('margarin'))
+
+    if (!hasFlour) return null // Can't make baked goods without flour
+
+    // Generate basic recipes based on available ingredients
+    switch (productType) {
+        case 'bread':
+            if (hasFlour) {
+                return generateBasicBreadRecipe(productName, servings, availableIngredients)
+            }
+            break
+        case 'cake':
+            if (hasFlour && hasSugar && hasEgg) {
+                return generateBasicCakeRecipe(productName, servings, availableIngredients)
+            }
+            break
+        case 'cookies':
+            if (hasFlour && hasButter && hasSugar) {
+                return generateBasicCookieRecipe(productName, servings, availableIngredients)
+            }
+            break
+        default:
+            // Try to generate a simple bread recipe as fallback
+            if (hasFlour) {
+                return generateBasicBreadRecipe(productName, servings, availableIngredients)
+            }
+    }
+
+    return null
+}
+
+/**
+ * Generate basic bread recipe
+ */
+function generateBasicBreadRecipe(
+    productName: string,
+    servings: number,
+    ingredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>
+): GeneratedRecipe {
+    const flour = ingredients.find(ing => ing.name.toLowerCase().includes('tepung'))
+    const sugar = ingredients.find(ing => ing.name.toLowerCase().includes('gula'))
+    const yeast = ingredients.find(ing => ing.name.toLowerCase().includes('ragi'))
+    const salt = ingredients.find(ing => ing.name.toLowerCase().includes('garam'))
+    const butter = ingredients.find(ing => ing.name.toLowerCase().includes('mentega') || ing.name.toLowerCase().includes('margarin'))
+
+    return {
+        name: productName,
+        category: 'bread',
+        servings,
+        prep_time_minutes: 15,
+        bake_time_minutes: 25,
+        total_time_minutes: 40,
+        difficulty: 'easy',
+        description: `Roti ${productName} sederhana yang cocok untuk pemula. Dibuat dengan bahan-bahan dasar yang mudah didapat.`,
+        ingredients: [
+            {
+                name: flour?.name || 'Tepung Terigu',
+                quantity: 250 * servings,
+                unit: 'gram',
+                notes: 'Tepung protein tinggi untuk hasil terbaik'
+            },
+            ...(sugar ? [{
+                name: sugar.name,
+                quantity: 30 * servings,
+                unit: 'gram',
+                notes: 'Untuk memberikan rasa manis'
+            }] : []),
+            ...(yeast ? [{
+                name: yeast.name,
+                quantity: 5 * servings,
+                unit: 'gram',
+                notes: 'Ragi instan'
+            }] : []),
+            ...(salt ? [{
+                name: salt.name,
+                quantity: 3 * servings,
+                unit: 'gram',
+                notes: 'Garam halus'
+            }] : []),
+            ...(butter ? [{
+                name: butter.name,
+                quantity: 20 * servings,
+                unit: 'gram',
+                notes: 'Mentega atau margarin'
+            }] : [])
+        ].filter(Boolean),
+        instructions: [
+            {
+                step: 1,
+                title: 'Persiapan Bahan',
+                description: 'Campurkan tepung, gula, garam, dan ragi dalam mangkuk besar.',
+                duration_minutes: 5
+            },
+            {
+                step: 2,
+                title: 'Uleni Adonan',
+                description: 'Tambahkan air sedikit demi sedikit sambil uleni hingga kalis. Diamkan 10 menit.',
+                duration_minutes: 15
+            },
+            {
+                step: 3,
+                title: 'Panggang',
+                description: 'Panggang dalam oven preheated 180°C selama 20-25 menit hingga kecoklatan.',
+                duration_minutes: 25,
+                temperature: '180°C'
+            }
+        ],
+        tips: [
+            'Gunakan tepung protein tinggi untuk hasil roti yang lebih baik',
+            'Jangan terlalu banyak air agar adonan tidak lengket',
+            'Oven harus sudah panas sebelum memasukkan roti',
+            'Simpan dalam wadah kedap udara untuk menjaga kesegaran'
+        ],
+        storage: 'Simpan dalam wadah kedap udara pada suhu ruangan',
+        shelf_life: '3-4 hari dalam kondisi normal'
+    }
+}
+
+/**
+ * Generate basic cake recipe
+ */
+function generateBasicCakeRecipe(
+    productName: string,
+    servings: number,
+    ingredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>
+): GeneratedRecipe {
+    const flour = ingredients.find(ing => ing.name.toLowerCase().includes('tepung'))
+    const sugar = ingredients.find(ing => ing.name.toLowerCase().includes('gula'))
+    const egg = ingredients.find(ing => ing.name.toLowerCase().includes('telur'))
+    const butter = ingredients.find(ing => ing.name.toLowerCase().includes('mentega') || ing.name.toLowerCase().includes('margarin'))
+
+    return {
+        name: productName,
+        category: 'cake',
+        servings,
+        prep_time_minutes: 20,
+        bake_time_minutes: 35,
+        total_time_minutes: 55,
+        difficulty: 'medium',
+        description: `Kue ${productName} klasik yang lembut dan enak. Cocok untuk berbagai acara.`,
+        ingredients: [
+            {
+                name: flour?.name || 'Tepung Terigu',
+                quantity: 200 * servings,
+                unit: 'gram'
+            },
+            {
+                name: sugar?.name || 'Gula',
+                quantity: 150 * servings,
+                unit: 'gram'
+            },
+            {
+                name: egg?.name || 'Telur',
+                quantity: 2 * servings,
+                unit: 'piece'
+            },
+            ...(butter ? [{
+                name: butter.name,
+                quantity: 100 * servings,
+                unit: 'gram'
+            }] : [])
+        ].filter(Boolean),
+        instructions: [
+            {
+                step: 1,
+                title: 'Mixer Bahan',
+                description: 'Kocok mentega dan gula hingga lembut, lalu tambahkan telur satu per satu.',
+                duration_minutes: 10
+            },
+            {
+                step: 2,
+                title: 'Campur Tepung',
+                description: 'Masukkan tepung terigu secara bertahap sambil diaduk rata.',
+                duration_minutes: 5
+            },
+            {
+                step: 3,
+                title: 'Panggang',
+                description: 'Tuang ke loyang dan panggang pada suhu 170°C selama 30-35 menit.',
+                duration_minutes: 35,
+                temperature: '170°C'
+            }
+        ],
+        tips: [
+            'Pastikan mentega dalam suhu ruangan untuk hasil yang lebih baik',
+            'Jangan overmix adonan agar kue tidak bantat',
+            'Gunakan loyang yang sudah diolesi mentega dan ditaburi tepung',
+            'Kue siap dipotong setelah dingin sempurna'
+        ],
+        storage: 'Simpan dalam wadah kedap udara di tempat sejuk',
+        shelf_life: '3-4 hari dalam suhu ruangan, 1 minggu dalam kulkas'
+    }
+}
+
+/**
+ * Generate basic cookie recipe
+ */
+function generateBasicCookieRecipe(
+    productName: string,
+    servings: number,
+    ingredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>
+): GeneratedRecipe {
+    const flour = ingredients.find(ing => ing.name.toLowerCase().includes('tepung'))
+    const sugar = ingredients.find(ing => ing.name.toLowerCase().includes('gula'))
+    const butter = ingredients.find(ing => ing.name.toLowerCase().includes('mentega') || ing.name.toLowerCase().includes('margarin'))
+
+    return {
+        name: productName,
+        category: 'cookies',
+        servings,
+        prep_time_minutes: 15,
+        bake_time_minutes: 12,
+        total_time_minutes: 27,
+        difficulty: 'easy',
+        description: `Cookies ${productName} yang renyah di luar dan lembut di dalam. Mudah dibuat dan cocok untuk jualan.`,
+        ingredients: [
+            {
+                name: flour?.name || 'Tepung Terigu',
+                quantity: 150 * servings,
+                unit: 'gram'
+            },
+            {
+                name: sugar?.name || 'Gula',
+                quantity: 80 * servings,
+                unit: 'gram'
+            },
+            {
+                name: butter?.name || 'Mentega',
+                quantity: 100 * servings,
+                unit: 'gram'
+            }
+        ].filter(Boolean),
+        instructions: [
+            {
+                step: 1,
+                title: 'Mixer Bahan',
+                description: 'Kocok mentega dan gula hingga lembut dan mengembang.',
+                duration_minutes: 5
+            },
+            {
+                step: 2,
+                title: 'Campur Tepung',
+                description: 'Masukkan tepung terigu dan aduk hingga rata. Jangan overmix.',
+                duration_minutes: 5
+            },
+            {
+                step: 3,
+                title: 'Bentuk dan Panggang',
+                description: 'Bentuk bulatan kecil dan panggang pada suhu 160°C selama 10-12 menit.',
+                duration_minutes: 12,
+                temperature: '160°C'
+            }
+        ],
+        tips: [
+            'Dinginkan adonan di kulkas 15 menit sebelum dipanggang untuk hasil lebih baik',
+            'Jangan terlalu lama memanggang agar cookies tidak keras',
+            'Gunakan loyang yang tidak lengket atau dialasi kertas roti',
+            'Cookies akan mengeras setelah dingin'
+        ],
+        storage: 'Simpan dalam toples kedap udara',
+        shelf_life: '1 minggu dalam suhu ruangan'
+    }
+}
+
+/**
+ * Validate recipe quality and completeness
+ */
+function validateRecipeQuality(recipe: GeneratedRecipe, availableIngredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>): void {
+    const errors: string[] = []
+
+    // Check basic structure
+    if (!recipe.name?.trim()) errors.push('Recipe name is missing')
+    if (!recipe.description?.trim()) errors.push('Recipe description is missing')
+    if (!recipe.ingredients?.length) errors.push('No ingredients specified')
+    if (!recipe.instructions?.length) errors.push('No instructions provided')
+    if (!recipe.tips?.length || recipe.tips.length < 3) errors.push('Minimum 3 professional tips required')
+
+    // Check ingredient validity
+    recipe.ingredients.forEach((ing, index) => {
+        if (!ing.name?.trim()) errors.push(`Ingredient ${index + 1}: name is missing`)
+        if (!ing.quantity || ing.quantity <= 0) errors.push(`Ingredient ${index + 1}: invalid quantity`)
+        if (!ing.unit?.trim()) errors.push(`Ingredient ${index + 1}: unit is missing`)
+
+        // Check if ingredient exists in available inventory
+        const availableIng = availableIngredients.find(ai =>
+            ai.name.toLowerCase().includes(ing.name.toLowerCase()) ||
+            ing.name.toLowerCase().includes(ai.name.toLowerCase())
+        )
+        if (!availableIng) {
+            errors.push(`Ingredient "${ing.name}" not found in available inventory`)
+        }
+    })
+
+    // Check instruction quality
+    recipe.instructions.forEach((inst, index) => {
+        if (!inst.description?.trim()) errors.push(`Instruction ${index + 1}: description is missing`)
+        if (inst.step !== index + 1) errors.push(`Instruction ${index + 1}: incorrect step number`)
+    })
+
+    // Check realistic quantities for commercial production
+    const totalFlour = recipe.ingredients
+        .filter(ing => ing.name.toLowerCase().includes('tepung'))
+        .reduce((sum, ing) => sum + (ing.unit === 'kg' ? ing.quantity * 1000 : ing.quantity), 0)
+
+    if (totalFlour < 100) errors.push('Flour quantity too low for commercial production')
+    if (totalFlour > 2000) errors.push('Flour quantity too high - may be impractical')
+
+    // Check for essential ingredients based on category
+    const hasSugar = recipe.ingredients.some(ing => ing.name.toLowerCase().includes('gula'))
+    const hasSalt = recipe.ingredients.some(ing => ing.name.toLowerCase().includes('garam'))
+    const hasFat = recipe.ingredients.some(ing =>
+        ing.name.toLowerCase().includes('mentega') ||
+        ing.name.toLowerCase().includes('margarin') ||
+        ing.name.toLowerCase().includes('minyak')
+    )
+
+    if (!hasSugar && recipe.category && typeof recipe.category === 'string' && ['cake', 'cookies', 'donuts'].includes(recipe.category)) {
+        errors.push('Sweet products should include sugar')
+    }
+    if (!hasSalt && recipe.category && typeof recipe.category === 'string' && ['bread', 'pastry'].includes(recipe.category)) {
+        errors.push('Savory products should include salt')
+    }
+    if (!hasFat) {
+        errors.push('Recipe should include some form of fat (butter, margarine, oil)')
+    }
+
+    // Check time estimates
+    if (recipe.prep_time_minutes !== undefined && recipe.prep_time_minutes < 5) {
+        errors.push('Preparation time too short for realistic production')
+    }
+    if (recipe.bake_time_minutes !== undefined && recipe.bake_time_minutes < 0) {
+        errors.push('Bake time cannot be negative')
+    }
+    if (recipe.prep_time_minutes !== undefined && recipe.bake_time_minutes !== undefined &&
+        recipe.total_time_minutes !== recipe.prep_time_minutes + recipe.bake_time_minutes) {
+        errors.push('Total time should equal prep time + bake time')
+    }
+
+    if (errors.length > 0) {
+        throw new Error(`Recipe validation failed: ${errors.join('; ')}`)
     }
 }
 
@@ -516,31 +1031,78 @@ function parseRecipeResponse(response: string): GeneratedRecipe {
             cleanResponse = cleanResponse.replace(/```\n?/g, '')
         }
 
-        const recipe = JSON.parse(cleanResponse)
+        const rawRecipe = JSON.parse(cleanResponse) as RawRecipeResponse
 
         // Validate required fields
-        if (!(recipe).name || !recipe.ingredients || !recipe.instructions) {
-            throw new Error('Invalid recipe structure: missing required fields')
+        if (!rawRecipe.name || typeof rawRecipe.name !== 'string' || !rawRecipe.name.trim()) {
+            throw new Error('Invalid recipe structure: missing or invalid name')
         }
-
-        // Validate ingredients array
-        if (!Array.isArray((recipe).ingredients) || (recipe).ingredients.length === 0) {
+        if (!rawRecipe.ingredients || !Array.isArray(rawRecipe.ingredients) || rawRecipe.ingredients.length === 0) {
             throw new Error('Recipe must have at least one ingredient')
+        }
+        if (!rawRecipe.instructions || !Array.isArray(rawRecipe.instructions) || rawRecipe.instructions.length === 0) {
+            throw new Error('Recipe must have instructions')
         }
 
         // Validate each ingredient
-        (recipe.ingredients as RecipeIngredient[]).forEach((ing: RecipeIngredient, index: number) => {
-            if (!ing.name || !ing.quantity || !ing.unit) {
-                throw new Error(`Invalid ingredient at index ${index}: missing required fields`)
+        rawRecipe.ingredients.forEach((ing: unknown, index: number) => {
+            if (!ing || typeof ing !== 'object') {
+                throw new Error(`Invalid ingredient at index ${index}: must be an object`)
             }
-            if (typeof ing.quantity !== 'number' || ing.quantity <= 0) {
+            const ingredient = ing as Record<string, unknown>
+            if (!ingredient['name'] || typeof ingredient['name'] !== 'string' || !(ingredient['name']).trim()) {
+                throw new Error(`Invalid ingredient at index ${index}: missing or invalid name`)
+            }
+            if (typeof ingredient['quantity'] !== 'number' || ingredient['quantity'] <= 0) {
                 throw new Error(`Invalid ingredient quantity at index ${index}`)
+            }
+            if (!ingredient['unit'] || typeof ingredient['unit'] !== 'string' || !(ingredient['unit']).trim()) {
+                throw new Error(`Invalid ingredient unit at index ${index}`)
             }
         })
 
-        // Validate instructions array
-        if (!Array.isArray(recipe.instructions) || recipe.instructions.length === 0) {
-            throw new Error('Recipe must have at least one instruction step')
+        // Validate and convert instructions
+        const instructions: RecipeInstruction[] = rawRecipe.instructions.map((instruction: unknown, index: number) => {
+            if (typeof instruction === 'string') {
+                // Convert string to object format
+                return {
+                    step: index + 1,
+                    title: `Langkah ${index + 1}`,
+                    description: instruction.trim(),
+                }
+            } else if (typeof instruction === 'object' && instruction !== null) {
+                // Handle object format from AI
+                const instObj = instruction as Record<string, unknown>
+                if (!instObj['description'] || typeof instObj['description'] !== 'string' || !(instObj['description'] as string).trim()) {
+                    throw new Error(`Invalid instruction object at index ${index}: missing or invalid description`)
+                }
+                return {
+                    step: typeof instObj['step'] === 'number' ? instObj['step'] as number : index + 1,
+                    title: typeof instObj['title'] === 'string' ? instObj['title'] as string : `Langkah ${index + 1}`,
+                    description: instObj['description'] as string,
+                    duration_minutes: typeof instObj['duration_minutes'] === 'number' ? instObj['duration_minutes'] as number : undefined,
+                    temperature: typeof instObj['temperature'] === 'string' ? instObj['temperature'] as string : undefined,
+                }
+            } else {
+                throw new Error(`Invalid instruction at index ${index}: must be a string or object`)
+            }
+        })
+
+        // Build validated recipe
+        const recipe: GeneratedRecipe = {
+            name: rawRecipe.name,
+            ingredients: rawRecipe.ingredients as RecipeIngredient[],
+            instructions,
+            ...(typeof rawRecipe.servings === 'number' ? { servings: rawRecipe.servings } : {}),
+            ...(typeof rawRecipe.prep_time_minutes === 'number' ? { prep_time_minutes: rawRecipe.prep_time_minutes } : {}),
+            ...(typeof rawRecipe.bake_time_minutes === 'number' ? { bake_time_minutes: rawRecipe.bake_time_minutes } : {}),
+            ...(typeof rawRecipe.total_time_minutes === 'number' ? { total_time_minutes: rawRecipe.total_time_minutes } : {}),
+            ...(typeof rawRecipe.difficulty === 'string' ? { difficulty: rawRecipe.difficulty } : {}),
+            ...(typeof rawRecipe.category === 'string' ? { category: rawRecipe.category } : {}),
+            ...(typeof rawRecipe.description === 'string' ? { description: rawRecipe.description } : {}),
+            ...(Array.isArray(rawRecipe.tips) ? { tips: rawRecipe.tips as string[] } : {}),
+            ...(typeof rawRecipe.storage === 'string' ? { storage: rawRecipe.storage } : {}),
+            ...(typeof rawRecipe.shelf_life === 'string' ? { shelf_life: rawRecipe.shelf_life } : {}),
         }
 
         return recipe
@@ -551,47 +1113,126 @@ function parseRecipeResponse(response: string): GeneratedRecipe {
     }
 }
 
+/**
+ * Indonesian ingredient name mappings for better matching
+ */
+const INGREDIENT_ALIASES: Record<string, string[]> = {
+    'tepung terigu': ['tepung', 'terigu', 'flour', 'wheat flour'],
+    'gula': ['gula pasir', 'gula halus', 'sugar', 'white sugar'],
+    'garam': ['salt', 'sea salt'],
+    'telur': ['egg', 'eggs', 'telur ayam'],
+    'mentega': ['butter', 'unsalted butter'],
+    'margarin': ['margarine', 'blue band'],
+    'susu': ['milk', 'fresh milk', 'susu sapi'],
+    'ragi': ['yeast', 'ragi instan', 'fermipan'],
+    'baking powder': ['bp', 'baking powder double action'],
+    'vanili': ['vanilla', 'vanili bubuk'],
+    'coklat bubuk': ['chocolate powder', 'cocoa powder'],
+    'minyak goreng': ['cooking oil', 'vegetable oil', 'minyak sayur'],
+    'air': ['water'],
+    'soda kue': ['baking soda', 'soda'],
+    'kelapa parut': ['coconut', 'grated coconut'],
+    'pisang': ['banana', 'pisang raja'],
+    'coklat chip': ['chocolate chips', 'choco chips'],
+    'kacang tanah': ['peanut', 'groundnut'],
+    'keju': ['cheese', 'cheddar cheese']
+}
 
 /**
- * Find best matching ingredient using fuzzy matching
+ * Calculate similarity score between two strings
+ */
+function calculateSimilarity(str1: string, str2: string): number {
+    const s1 = str1?.toLowerCase() || ''
+    const s2 = str2?.toLowerCase() || ''
+
+    if (s1 === s2) return 1
+    if (!s1 || !s2) return 0
+
+    // Check if one contains the other
+    if (s1.includes(s2) || s2.includes(s1)) return 0.8
+
+    // Check word overlap
+    const words1 = s1.split(' ')
+    const words2 = s2.split(' ')
+    const commonWords = words1.filter(w => words2.includes(w)).length
+    const maxWords = Math.max(words1.length, words2.length)
+
+    return maxWords > 0 ? commonWords / maxWords : 0
+}
+
+/**
+ * Find best matching ingredient using enhanced fuzzy matching
  */
 function findBestIngredientMatch(
-    searchName: string, 
-    ingredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>
-): Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'> | null {
+    searchName: string,
+    ingredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>
+): Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'> | null {
     const search = searchName.toLowerCase().trim()
-    
+
     // 1. Exact match
-    let match = ingredients.find(i => 
-        i.name.toLowerCase() === search
-    )
-    if (match) {return match}
-    
-    // 2. Contains match
-    match = ingredients.find(i => 
+    let match = ingredients.find(i => i.name.toLowerCase() === search)
+    if (match) return match
+
+    // 2. Check aliases
+    for (const [canonical, aliases] of Object.entries(INGREDIENT_ALIASES)) {
+        if (aliases.includes(search) || canonical === search) {
+            // Find ingredient that matches the canonical name
+            match = ingredients.find(i =>
+                i.name.toLowerCase().includes(canonical) ||
+                canonical.includes(i.name.toLowerCase())
+            )
+            if (match) return match
+        }
+    }
+
+    // 3. Contains match
+    match = ingredients.find(i =>
         i.name.toLowerCase().includes(search) ||
         search.includes(i.name.toLowerCase())
     )
-    if (match) {return match}
-    
-    // 3. Partial word match
-    const searchWords = search.split(' ')
-    match = ingredients.find(i => {
-        const nameWords = i.name.toLowerCase().split(' ')
-        return searchWords.some((sw: string) => nameWords.some((nw: string) => nw.includes(sw) || sw.includes(nw)))
-    })
-    
-    return match ?? null
+    if (match) return match
+
+    // 4. Similarity-based matching
+    let bestMatch: typeof ingredients[0] | null = null
+    let bestScore = 0
+
+    for (const ingredient of ingredients) {
+        const score = calculateSimilarity(search, ingredient.name)
+        if (score > bestScore && score > 0.6) { // Minimum similarity threshold
+            bestScore = score
+            bestMatch = ingredient
+        }
+    }
+
+    return bestMatch
 }
 
 /**
  * Calculate HPP for the generated recipe
  */
 async function calculateRecipeHPP(
-    recipe: GeneratedRecipe, 
-    availableIngredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>, 
+    recipe: GeneratedRecipe,
+    availableIngredients: Array<Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>>,
     userId: string
-) {
+): Promise<{
+    totalMaterialCost: number
+    operationalCost: number
+    totalHPP: number
+    hppPerUnit: number
+    servings: number
+    ingredientBreakdown: Array<{
+        name: string
+        quantity: number
+        unit: string
+        pricePerUnit: number
+        totalCost: number
+        percentage: number
+    }>
+    breakdown: Record<string, number>
+    suggestedSellingPrice: number
+    estimatedMargin: number
+    note: string
+}> {
     let totalMaterialCost = 0
     const ingredientBreakdown: Array<{
         name: string
@@ -649,11 +1290,12 @@ async function calculateRecipeHPP(
     // Fetch actual operational costs from database
     const today = new Date().toISOString().split('T')[0]
     const { data: opCosts } = await supabaseClient
-        .from('expenses')
+        .from('operational_costs')
         .select('amount')
         .eq('user_id', userId)
-        .gte('expense_date', today)
-        .lte('expense_date', today)
+        .eq('is_active', true)
+        .gte('date', today)
+        .lte('date', today)
     
     const dailyOpCost = opCosts?.reduce((sum, cost) => sum + cost.amount, 0) ?? 0
     
@@ -692,3 +1334,5 @@ async function calculateRecipeHPP(
             : 'Operational cost estimated (30% of material cost)'
     }
 }
+
+export const POST = createSecureHandler(postHandler, 'POST /api/ai/generate-recipe', SecurityPresets.enhanced())

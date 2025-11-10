@@ -1,4 +1,4 @@
-import { apiLogger } from './logger'
+import { apiLogger } from '@/lib/logger'
 
 // Enhanced Cache Configuration
 export interface EnhancedCacheConfig {
@@ -21,8 +21,8 @@ interface EnhancedCacheEntry<T> {
 
 // Enhanced cache class with better memory management
 class EnhancedCache {
-  private cache = new Map<string, EnhancedCacheEntry<unknown>>()
-  private config: EnhancedCacheConfig
+  private readonly cache = new Map<string, EnhancedCacheEntry<unknown>>()
+  private readonly config: EnhancedCacheConfig
   private cleanupInterval: NodeJS.Timeout | null = null
   private totalSize = 0 // Track total cache size
 
@@ -67,7 +67,7 @@ class EnhancedCache {
     // Check if entry is expired
     const now = Date.now()
     const ttlMs = entry.ttl * 1000
-    if (now - entry.timestamp > ttlMs) {
+    if (now - entry['timestamp'] > ttlMs) {
       this.delete(key) // Remove expired entry
       return null
     }
@@ -76,7 +76,7 @@ class EnhancedCache {
     entry.accessCount = (entry.accessCount || 0) + 1
     entry.lastAccessed = now
     
-    return entry.data as T
+    return entry['data'] as T
   }
 
   /**
@@ -89,7 +89,7 @@ class EnhancedCache {
       const jsonString = JSON.stringify(data)
       const { size: blobSize } = new Blob([jsonString])
       size = blobSize
-    } catch (_e) {
+    } catch (_error) {
       // If serialization fails, estimate a default size
       size = 100
     }
@@ -178,7 +178,7 @@ class EnhancedCache {
 
     for (const [key, entry] of this.cache.entries()) {
       const ttlMs = entry.ttl * 1000
-      if (now - entry.timestamp > ttlMs) {
+      if (now - entry['timestamp'] > ttlMs) {
         cleanedUpSize += entry.size
         this.cache.delete(key)
       }
@@ -246,7 +246,7 @@ class EnhancedCache {
 // Enhanced cache manager with better organization
 export class EnhancedCacheManager {
   private static instance: EnhancedCacheManager
-  private cache: EnhancedCache
+  private readonly cache: EnhancedCache
   private readonly cacheKeys = {
     hpp: {
       overview: 'hpp:overview',
@@ -258,32 +258,32 @@ export class EnhancedCacheManager {
     recipes: {
       list: 'recipes:list',
       all: 'recipes:all',
-      detail: (id: string) => `recipes:detail:${id}`
+      detail: (id: string): string => `recipes:detail:${id}`
     },
     ingredients: {
       list: 'ingredients:list',
-      detail: (id: string) => `ingredients:detail:${id}`
+      detail: (id: string): string => `ingredients:detail:${id}`
     },
     orders: {
       list: 'orders:list',
-      detail: (id: string) => `orders:detail:${id}`
+      detail: (id: string): string => `orders:detail:${id}`
     },
     customers: {
       list: 'customers:list',
-      detail: (id: string) => `customers:detail:${id}`
+      detail: (id: string): string => `customers:detail:${id}`
     },
     suppliers: {
       list: 'suppliers:list',
-      detail: (id: string) => `suppliers:detail:${id}`
+      detail: (id: string): string => `suppliers:detail:${id}`
     },
     users: {
-      profile: (id: string) => `users:profile:${id}`,
-      permissions: (id: string) => `users:permissions:${id}`
+      profile: (id: string): string => `users:profile:${id}`,
+      permissions: (id: string): string => `users:permissions:${id}`
     },
     inventory: {
       list: 'inventory:list',
-      byRecipe: (recipeId: string) => `inventory:recipe:${recipeId}`,
-      byIngredient: (ingredientId: string) => `inventory:ingredient:${ingredientId}`
+      byRecipe: (recipeId: string): string => `inventory:recipe:${recipeId}`,
+      byIngredient: (ingredientId: string): string => `inventory:ingredient:${ingredientId}`
     }
   }
 
@@ -304,7 +304,7 @@ export class EnhancedCacheManager {
   }
 
   // Getter for cache keys to ensure consistency
-  get keys() {
+  get keys(): typeof this.cacheKeys {
     return this.cacheKeys
   }
 
@@ -325,42 +325,42 @@ export class EnhancedCacheManager {
     this.cache.clear()
   }
 
-  getStats() {
+  getStats(): { size: number; totalSize: number; maxSize: number; keys: string[] } {
     return this.cache.getStats()
   }
 
   // Specific cache operations for different entities
-  getHppOverview() {
+  getHppOverview(): unknown | null {
     return this.get(this.cacheKeys.hpp.overview)
   }
 
-  setHppOverview<T>(data: T) {
+  setHppOverview<T>(data: T): void {
     this.set(this.cacheKeys.hpp.overview, data, 600) // 10 minutes for overview
   }
 
-  getRecipesList<T>() {
+  getRecipesList<T>(): T | null {
     return this.get<T>(this.cacheKeys.recipes.list)
   }
 
-  setRecipesList<T>(data: T) {
+  setRecipesList<T>(data: T): void {
     this.set(this.cacheKeys.recipes.list, data, 300) // 5 minutes for recipe list
   }
 
-  getRecipeDetail<T>(id: string) {
+  getRecipeDetail<T>(id: string): T | null {
     return this.get<T>(this.cacheKeys.recipes.detail(id))
   }
 
-  setRecipeDetail<T>(id: string, data: T) {
+  setRecipeDetail<T>(id: string, data: T): void {
     this.set(this.cacheKeys.recipes.detail(id), data, 900) // 15 minutes for recipe details
   }
 
   // Granular invalidation
-  invalidateHpp() {
+  invalidateHpp(): void {
     this.cache.deletePattern('^hpp:')
     apiLogger.info('HPP cache invalidated')
   }
 
-  invalidateRecipes(recipeId?: string) {
+  invalidateRecipes(recipeId?: string): void {
     if (recipeId) {
       this.cache.delete(this.cacheKeys.recipes.detail(recipeId))
     } else {
@@ -369,7 +369,7 @@ export class EnhancedCacheManager {
     apiLogger.info({ recipeId }, 'Recipes cache invalidated')
   }
 
-  invalidateIngredients(ingredientId?: string) {
+  invalidateIngredients(ingredientId?: string): void {
     if (ingredientId) {
       this.cache.delete(this.cacheKeys.ingredients.detail(ingredientId))
     } else {
@@ -378,7 +378,7 @@ export class EnhancedCacheManager {
     apiLogger.info({ ingredientId }, 'Ingredients cache invalidated')
   }
 
-  invalidateOrders(orderId?: string) {
+  invalidateOrders(orderId?: string): void {
     if (orderId) {
       this.cache.delete(this.cacheKeys.orders.detail(orderId))
     } else {
@@ -387,7 +387,7 @@ export class EnhancedCacheManager {
     apiLogger.info({ orderId }, 'Orders cache invalidated')
   }
 
-  invalidateAll() {
+  invalidateAll(): void {
     this.cache.clear()
     apiLogger.info('All cache cleared')
   }
@@ -401,8 +401,7 @@ export async function withEnhancedCache<T>(
   operationName: string,
   fn: () => Promise<T>,
   key: string,
-  ttl?: number,
-  fallbackOnError = true
+  options?: { ttl?: number; fallbackOnError?: boolean }
 ): Promise<T> {
   try {
     // Try to get from cache first
@@ -418,18 +417,18 @@ export async function withEnhancedCache<T>(
     const data = await fn()
 
     // Store in cache
-    enhancedCache.set(key, data, ttl)
+    enhancedCache.set(key, data, options?.ttl)
 
     return data
   } catch (error) {
-    apiLogger.error({ 
-      error, 
-      key, 
-      operation: operationName 
+    apiLogger.error({
+      error,
+      key,
+      operation: operationName
     }, 'Cache operation failed')
 
     // If fallback is enabled, try to return stale data
-    if (fallbackOnError) {
+    if (options?.fallbackOnError ?? true) {
       const staleData = enhancedCache.get<T>(key)
       if (staleData) {
         apiLogger.warn({ key }, 'Returning stale data due to fetch error')

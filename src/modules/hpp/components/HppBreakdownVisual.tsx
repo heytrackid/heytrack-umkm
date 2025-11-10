@@ -1,14 +1,5 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useToast } from '@/hooks/use-toast'
-import { useMemo, useState } from 'react'
-import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
-import type { RecipeIngredientWithPrice } from '@/modules/hpp/types'
 import {
     ChevronDown,
     ChevronUp,
@@ -19,11 +10,25 @@ import {
     Download,
     Info
 } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
+import { HtmlEscaper } from '@/utils/security/index'
+
+import type { RecipeWithCosts } from '@/modules/hpp/hooks/useUnifiedHpp'
+import type { RecipeIngredientWithPrice } from '@/modules/hpp/types/index'
+
+
 
 interface IngredientDisplay extends RecipeIngredientWithPrice {
     category?: string
@@ -39,12 +44,12 @@ interface HppBreakdownVisualProps {
     }
 }
 
-export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVisualProps) => {
+export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVisualProps): JSX.Element => {
     const { toast } = useToast()
     const { formatCurrency } = useCurrency()
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['ingredients']))
 
-    const toggleSection = (section: string) => {
+    const toggleSection = (section: string): void => {
         const newExpanded = new Set(expandedSections)
         if (newExpanded.has(section)) {
             newExpanded.delete(section)
@@ -109,18 +114,106 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
     // Group ingredients by category
     const ingredientsByCategory = ingredients.reduce((acc, item) => {
         const category = item.category ?? 'Lainnya'
-        if (!acc[category]) { acc[category] = [] }
+        acc[category] ??= []
         acc[category].push(item)
         return acc
     }, {} as Record<string, IngredientDisplay[]>)
 
-    const exportToPDF = () => {
-        // TODO: Implement PDF export
-        toast({
-            title: 'Fitur akan segera tersedia',
-            description: 'Export PDF akan segera tersedia!',
-            variant: 'default',
-        })
+    const exportToPDF = (): void => {
+        try {
+            if (typeof window === 'undefined') {
+                throw new Error('Export hanya tersedia di browser')
+            }
+
+            // Escape all dynamic content to prevent XSS
+            const escapedRecipeName = HtmlEscaper.escape(recipe.name)
+            const escapedExportDate = HtmlEscaper.escape(new Date().toLocaleString('id-ID'))
+            const escapedIngredientCost = HtmlEscaper.escape(formatCurrency(ingredientCost))
+            const escapedOperationalCost = HtmlEscaper.escape(formatCurrency(totalOperational))
+            const escapedTotalCost = HtmlEscaper.escape(formatCurrency(totalCost))
+            const escapedSellingPrice = HtmlEscaper.escape(formatCurrency(sellingPrice))
+            const escapedMargin = HtmlEscaper.escape(marginPercent.toFixed(2))
+
+            const summary = `
+                <h1>Ringkasan HPP - ${escapedRecipeName}</h1>
+                <p>Diekspor pada: ${escapedExportDate}</p>
+                <table>
+                    <tr><th>HPP Bahan</th><td>${escapedIngredientCost}</td></tr>
+                    <tr><th>Biaya Operasional</th><td>${escapedOperationalCost}</td></tr>
+                    <tr><th>Total HPP</th><td>${escapedTotalCost}</td></tr>
+                    <tr><th>Harga Jual</th><td>${escapedSellingPrice}</td></tr>
+                    <tr><th>Margin</th><td>${escapedMargin}%</td></tr>
+                </table>
+                <h2>Komponen Operasional</h2>
+                <ul>
+                    ${Object.entries(opCosts).map(([key, value]) => `<li>${HtmlEscaper.escape(key.toUpperCase())}: ${HtmlEscaper.escape(formatCurrency(value))}</li>`).join('')}
+                </ul>
+            `
+
+            const ingredientRows = ingredients
+                .map((item) => `<tr>
+                    <td>${HtmlEscaper.escape(item.name)}</td>
+                    <td>${HtmlEscaper.escape(item.quantity)} ${HtmlEscaper.escape(item.unit)}</td>
+                    <td>${HtmlEscaper.escape(formatCurrency(item.unit_price))}</td>
+                    <td>${HtmlEscaper.escape(formatCurrency(item.unit_price * item.quantity))}</td>
+                </tr>`)
+                .join('')
+
+            const htmlContent = `
+                <html>
+                    <head>
+                        <title>HeyTrack - Ringkasan HPP</title>
+                        <style>
+                            body { font-family: 'Inter', sans-serif; padding: 24px; color: #111827; }
+                            h1, h2 { margin-bottom: 8px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+                            th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
+                            th { background: #f3f4f6; }
+                            ul { padding-left: 20px; }
+                            @media print { body { margin: 0; } }
+                        </style>
+                    </head>
+                    <body>
+                        ${summary}
+                        <h2>Detail Bahan</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Kuantitas</th>
+                                    <th>Harga Satuan</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>${ingredientRows}</tbody>
+                        </table>
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                setTimeout(function() { window.close(); }, 1000);
+                            }
+                        </script>
+                    </body>
+                </html>
+            `
+
+            // Use secure Blob approach instead of document.write
+            const secureWindow = HtmlEscaper.openSecureWindow(htmlContent, '_blank')
+            if (!secureWindow) {
+                throw new Error('Pop-up diblokir oleh browser')
+            }
+
+            toast({
+                title: 'Export siap',
+                description: 'Gunakan dialog cetak untuk menyimpan sebagai PDF.',
+            })
+        } catch (error) {
+            toast({
+                title: 'Gagal mengekspor PDF',
+                description: error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat PDF.',
+                variant: 'destructive',
+            })
+        }
     }
 
     return (
@@ -260,7 +353,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                                             const itemPercent = ingredientCost > 0 ? (itemCost / ingredientCost) * 100 : 0
 
                                             return (
-                                                <div key={item.id} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
+                                                <div key={item['id']} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2">
                                                             <span>{item.name}</span>

@@ -1,14 +1,16 @@
  
 'use client'
 
+import { MapPin, Phone, Users } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
-import type { Row } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
-import { MapPin, Phone, Users } from 'lucide-react'
-import { getPriorityInfo, getStatusInfo } from '../utils/helpers'
+import { getPriorityInfo, getStatusInfo } from '@/modules/orders/utils/helpers'
+
+import type { Row } from '@/types/database'
 
 
 
@@ -25,7 +27,7 @@ interface OrderDetailViewProps {
 
 export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
   const { formatCurrency } = useCurrency()
-  const statusInfo = getStatusInfo(order.status ?? 'PENDING')
+  const statusInfo = getStatusInfo(order['status'] ?? 'PENDING')
   const priorityInfo = getPriorityInfo(order.priority ?? 'MEDIUM')
   const orderItems: OrderItem[] = order.order_items ?? []
   const totalAmount = order.total_amount ?? 0
@@ -60,7 +62,7 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
               <div className="mt-2 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">No. Pesanan:</span>
-                  <span className="font-mono">{order.order_no}</span>
+                  <span className="font-mono">{order['order_no']}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Status:</span>
@@ -133,7 +135,7 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
         <div className="space-y-2">
           {orderItems.length > 0 ? (
             orderItems.map((item: OrderItem) => {
-              const itemKey = item.id ?? item.recipe_id ?? `${item.product_name ?? 'item'}-${item.quantity ?? 0}`
+              const itemKey = item['id'] ?? item.recipe_id ?? `${item.product_name ?? 'item'}-${item.quantity ?? 0}`
               return (
                 <div key={itemKey} className="flex justify-between items-center p-3 bg-muted rounded-lg">
                   <div>
@@ -168,7 +170,7 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{order.customer_name}</span>
+              <span className="font-medium">{order['customer_name']}</span>
             </div>
             {order.customer_phone && (
               <div className="flex items-center gap-2">

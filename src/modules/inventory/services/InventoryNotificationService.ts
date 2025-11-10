@@ -1,7 +1,9 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { apiLogger } from '@/lib/logger'
 import { NotificationService } from '@/modules/notifications/services/NotificationService'
+
 import type { Database } from '@/types/database'
+
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 
 
@@ -46,7 +48,7 @@ export class InventoryNotificationService {
           .select('id')
           .eq('user_id', userId)
           .eq('entity_type', 'ingredient')
-          .eq('entity_id', ingredient.id)
+          .eq('entity_id', ingredient['id'])
           .eq('is_read', false)
           .eq('is_dismissed', false)
           .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
@@ -59,7 +61,7 @@ export class InventoryNotificationService {
         await NotificationService.createLowStockAlert(
           supabase,
           userId,
-          ingredient.id,
+          ingredient['id'],
           ingredient.name,
           currentStock,
           minStock

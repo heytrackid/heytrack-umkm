@@ -1,7 +1,7 @@
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ClientFile')
-import type { EmailConfig } from './types'
+import type { EmailConfig } from '@/lib/communications/types'
 
 
 /**

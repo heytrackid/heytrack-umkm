@@ -1,16 +1,3 @@
-import { MetricsCalculator } from './metrics-calculator'
-import { TrendAnalyzer } from './trend-analyzer'
-import { AlertGenerator } from './alert-generator'
-import { RecommendationEngine } from './recommendation-engine'
-import { BreakEvenAnalyzer } from './break-even-analyzer'
-import { ProjectionEngine } from './projection-engine'
-import { PricingOptimizer } from './pricing-optimizer'
-
-/**
- * Financial Automation System Orchestrator
- * Main coordinator for financial automation functionality
- */
-
 import type {
   AutomationConfig,
   SaleData,
@@ -18,16 +5,30 @@ import type {
   Ingredient,
   FinancialAnalysis
 } from '@/lib/automation/types'
+
+import { AlertGenerator } from '@/lib/automation/financial-automation/alert-generator'
+import { BreakEvenAnalyzer } from '@/lib/automation/financial-automation/break-even-analyzer'
+import { MetricsCalculator } from '@/lib/automation/financial-automation/metrics-calculator'
+import { PricingOptimizer } from '@/lib/automation/financial-automation/pricing-optimizer'
+import { ProjectionEngine } from '@/lib/automation/financial-automation/projection-engine'
+import { RecommendationEngine } from '@/lib/automation/financial-automation/recommendation-engine'
+import { TrendAnalyzer } from '@/lib/automation/financial-automation/trend-analyzer'
+
+/**
+ * Financial Automation System Orchestrator
+ * Main coordinator for financial automation functionality
+ */
+
 import type {
   BreakEvenResult,
   ROIResult,
   PricingOptimizationResult,
   HistoricalData,
   ProjectionResult
-} from './types'
+} from '@/lib/automation/financial-automation/types'
 
 export class FinancialAutomation {
-  constructor(private config: AutomationConfig) {}
+  constructor(private readonly config: AutomationConfig) {}
 
   /**
    * 💰 FINANCIAL AUTOMATION: Smart Financial Insights
@@ -90,7 +91,7 @@ export class FinancialAutomation {
     let npv = -initialInvestment
 
     for (let year = 1; year <= timeHorizonYears; year++) {
-      npv += expectedAnnualBenefit / Math.pow(1 + discountRate, year)
+      npv += expectedAnnualBenefit / (1 + discountRate)**year
     }
 
     const paybackPeriod = initialInvestment / expectedAnnualBenefit

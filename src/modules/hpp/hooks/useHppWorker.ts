@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ClientFile')
-import type { HppCalculationResult, MaterialBreakdown } from '@/modules/hpp/types'
+import type { HppCalculationResult, MaterialBreakdown } from '@/modules/hpp/types/index'
 
 
 
@@ -61,24 +62,24 @@ export function useHppWorker() {
       workerRef.current = new Worker('/workers/hpp-calculator.worker.js')
 
       workerRef.current.onmessage = (e) => {
-        const { type } = e.data
+        const { type } = e['data']
 
         if (type === 'READY') {
-          void setIsReady(true)
+          setIsReady(true)
           logger.info('HPP Worker initialized successfully')
         }
       }
 
       workerRef.current.onerror = (error) => {
-        logger.error({ err: error }, 'HPP Worker error')
-        void setIsReady(false)
+        logger.error({ error }, 'HPP Worker error')
+        setIsReady(false)
       }
 
       return () => {
         workerRef.current?.terminate()
       }
-    } catch (err) {
-      logger.error({ error: err }, 'Failed to initialize HPP Worker')
+    } catch (error) {
+      logger.error({ error }, 'Failed to initialize HPP Worker')
       return undefined
     }
   }, [])
@@ -89,17 +90,17 @@ export function useHppWorker() {
         return
       }
 
-      void setIsCalculating(true)
+      setIsCalculating(true)
 
       const handleMessage = (e: MessageEvent) => {
-        const { type, data: result, error } = e.data
+        const { type, data: result, error } = e['data']
 
         if (type === 'CALCULATE_HPP_SUCCESS') {
-          void setIsCalculating(false)
+          setIsCalculating(false)
           workerRef.current?.removeEventListener('message', handleMessage)
           resolve(result)
         } else if (type === 'ERROR') {
-          void setIsCalculating(false)
+          setIsCalculating(false)
           workerRef.current?.removeEventListener('message', handleMessage)
           reject(new Error(error))
         }
@@ -118,17 +119,17 @@ export function useHppWorker() {
         return
       }
 
-      void setIsCalculating(true)
+      setIsCalculating(true)
 
       const handleMessage = (e: MessageEvent) => {
-        const { type, data: result, error } = e.data
+        const { type, data: result, error } = e['data']
 
         if (type === 'CALCULATE_BATCH_HPP_SUCCESS') {
-          void setIsCalculating(false)
+          setIsCalculating(false)
           workerRef.current?.removeEventListener('message', handleMessage)
           resolve(result)
         } else if (type === 'ERROR') {
-          void setIsCalculating(false)
+          setIsCalculating(false)
           workerRef.current?.removeEventListener('message', handleMessage)
           reject(new Error(error))
         }
@@ -147,17 +148,17 @@ export function useHppWorker() {
         return
       }
 
-      void setIsCalculating(true)
+      setIsCalculating(true)
 
       const handleMessage = (e: MessageEvent) => {
-        const { type, data: result, error } = e.data
+        const { type, data: result, error } = e['data']
 
         if (type === 'CALCULATE_WAC_SUCCESS') {
-          void setIsCalculating(false)
+          setIsCalculating(false)
           workerRef.current?.removeEventListener('message', handleMessage)
           resolve(result)
         } else if (type === 'ERROR') {
-          void setIsCalculating(false)
+          setIsCalculating(false)
           workerRef.current?.removeEventListener('message', handleMessage)
           reject(new Error(error))
         }

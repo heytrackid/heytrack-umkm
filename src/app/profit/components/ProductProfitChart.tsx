@@ -1,10 +1,14 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { BarChart3 } from 'lucide-react'
+
 import { LazyBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
-import { type ProfitPeriodType, type ChartDataPoint, profitPeriodOptions } from '../constants'
+import type { TooltipContentProps } from 'recharts'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
+
+import { type ProfitPeriodType, type ChartDataPoint, profitPeriodOptions } from '@/app/profit/constants'
+
 
 interface ProductProfitChartProps {
   chartData: ChartDataPoint[]
@@ -19,24 +23,25 @@ interface ProductProfitChartProps {
 }
 
 // Tooltip component extracted to avoid defining components during render
-const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) =>
-  ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { name: string } }> }) => {
+const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) => {
+  const TooltipComponent = (props: TooltipContentProps<any, any>): JSX.Element | null => {
+    const { active, payload } = props
     if (active && payload?.length) {
       return (
         <div className="bg-background border rounded-lg p-3 shadow-lg">
-          <p className="font-medium mb-2">{payload[0].payload.name}</p>
+          <p className="font-medium mb-2">{payload[0]?.payload?.name ?? 'Unknown'}</p>
           <div className="space-y-1 text-sm">
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-gray-500" />
-              <span>Pendapatan: {formatCurrency(payload[0].value)}</span>
+              <span>Pendapatan: {formatCurrency((payload[0]?.value ?? 0))}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-orange-500" />
-              <span>HPP (COGS): {formatCurrency(payload[1].value)}</span>
+              <span>HPP (COGS): {formatCurrency((payload[1]?.value ?? 0))}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-gray-500" />
-              <span>Laba: {formatCurrency(payload[2].value)}</span>
+              <span>Laba: {formatCurrency((payload[2]?.value ?? 0))}</span>
             </div>
           </div>
         </div>
@@ -44,6 +49,13 @@ const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) =
     }
     return null
   }
+  TooltipComponent.displayName = 'ProductProfitChartTooltip'
+  return TooltipComponent
+}
+
+ProductProfitChartTooltip.displayName = 'ProductProfitChartTooltip'
+
+ProductProfitChartTooltip.displayName = 'ProductProfitChartTooltip'
 
 export const ProductProfitChart = ({
   chartData,
@@ -131,7 +143,7 @@ export const ProductProfitChart = ({
                   tickFormatter={(value) => {
                     if (value >= 1000000) { return `${(value / 1000000).toFixed(1)}jt` }
                     if (value >= 1000) { return `${(value / 1000).toFixed(0)}rb` }
-                    return value.toString()
+                    return String(value)
                   }}
                 />
                 <Tooltip
@@ -145,7 +157,7 @@ export const ProductProfitChart = ({
                       cogs: 'HPP (COGS)',
                       profit: 'Laba'
                     }
-                    return labels[value] || value
+                    return labels[value] ?? value
                   }}
                 />
                 <Bar

@@ -1,13 +1,14 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Bell, Volume2, Mail, Monitor, Smartphone } from 'lucide-react'
 import { toast } from 'sonner'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { 
   type NotificationPreferences, 
   type NotificationType,
@@ -111,7 +112,7 @@ export const NotificationSettings = ({ preferences, onUpdate }: NotificationSett
         <CardContent>
           <Select
             value={preferences.minPriority}
-            onValueChange={(value: 'low' | 'medium' | 'high' | 'critical') => 
+            onValueChange={(value: 'critical' | 'high' | 'low' | 'medium') => 
               onUpdate({ minPriority: value })
             }
             disabled={!preferences.enabled}

@@ -1,15 +1,13 @@
 'use client'
 
+import { Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
-import { useToast } from '@/hooks/use-toast'
-import { Loader2 } from 'lucide-react'
-import type { Row, Insert } from '@/types/database'
 import {
     Select,
     SelectContent,
@@ -17,8 +15,25 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { useToast } from '@/hooks/use-toast'
+
+import type { Row, Insert } from '@/types/database'
+
 
 type OperationalCost = Row<'operational_costs'>
+
+interface ApiErrorPayload {
+    error?: string
+}
+
+const isApiErrorPayload = (value: unknown): value is ApiErrorPayload => {
+    if (typeof value !== 'object' || value === null) {
+        return false
+    }
+    const { error } = value as { error?: unknown }
+    return error === undefined || typeof error === 'string'
+}
 
 interface OperationalCostFormDialogProps {
     open: boolean
@@ -95,7 +110,7 @@ export const OperationalCostFormDialog = ({
 
         setIsSubmitting(true)
         try {
-            const url = cost ? `/api/operational-costs/${cost.id}` : '/api/operational-costs'
+            const url = cost ? `/api/operational-costs/${cost['id']}` : '/api/operational-costs'
             const method = cost ? 'PUT' : 'POST'
 
             const response = await fetch(url, {
@@ -105,8 +120,9 @@ export const OperationalCostFormDialog = ({
             })
 
             if (!response.ok) {
-                const error = await response.json()
-                throw new Error(error.error ?? 'Gagal menyimpan biaya')
+                const errorPayload: unknown = await response.json()
+                const errorMessage = isApiErrorPayload(errorPayload) ? errorPayload.error : undefined
+                throw new Error(errorMessage ?? 'Gagal menyimpan biaya')
             }
 
             toast({
@@ -177,9 +193,9 @@ export const OperationalCostFormDialog = ({
                                     id="amount"
                                     type="number"
                                     min="0"
-                                    step="1000"
+                                    step="1"
                                     value={formData.amount ?? ''}
-                                    onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                                    onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value.replace(',', '.')) || 0 })}
                                     placeholder="0"
                                     required
                                 />
@@ -220,7 +236,7 @@ export const OperationalCostFormDialog = ({
                                 id="recurring"
                                 checked={formData.recurring ?? false}
                                 onCheckedChange={(checked) =>
-                                    setFormData({ ...formData, recurring: checked as boolean })
+                                    setFormData({ ...formData, recurring: Boolean(checked) })
                                 }
                             />
                             <Label htmlFor="recurring" className="cursor-pointer">

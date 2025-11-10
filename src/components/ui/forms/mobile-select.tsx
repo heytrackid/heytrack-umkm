@@ -1,7 +1,8 @@
-import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
-import { Label } from '../label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select'
+import { cn } from '@/lib/utils'
+
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 /**
  * Mobile Select Component

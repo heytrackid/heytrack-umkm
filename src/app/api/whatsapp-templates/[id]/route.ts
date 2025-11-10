@@ -1,28 +1,30 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // WhatsApp Templates API - Single Template Operations
 // GET: Get single template
 // PUT: Update template
 // DELETE: Delete template
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+
 import { apiLogger } from '@/lib/logger'
 import type { Update } from '@/types/database'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
+import { createClient } from '@/utils/supabase/server'
 
 type WhatsAppTemplateUpdate = Update<'whatsapp_templates'>
 
-interface RouteContext {
-  params: Promise<{ id: string }>
-}
-
-export async function GET(
+async function getHandler(
   _request: NextRequest,
-  context: RouteContext
-) {
+  { params }: { params: Record<string, string> }
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = params
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
 
     // 1. Authentication
     const supabase = await createClient()
@@ -60,12 +62,15 @@ export async function GET(
   }
 }
 
-export async function PUT(
+async function putHandler(
   request: NextRequest,
-  context: RouteContext
-) {
+  { params }: { params: Record<string, string> }
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = params
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
 
     // 1. Authentication
     const supabase = await createClient()
@@ -76,27 +81,35 @@ export async function PUT(
     }
 
     // 2. Parse body
-    const body = await request.json()
+    const _body = await request.json() as {
+      name?: string
+      description?: string
+      category?: string
+      template_content?: string
+      variables?: string[]
+      is_active?: boolean
+      is_default?: boolean
+    }
 
     // 3. If setting as default, unset other defaults in same category
-    if (body.is_default && body.category) {
+    if (_body.is_default && _body.category) {
       await supabase
         .from('whatsapp_templates')
         .update({ is_default: false })
-        .eq('user_id', user.id)
-        .eq('category', body.category)
+        .eq('user_id', user['id'])
+        .eq('category', _body.category)
         .neq('id', id)
     }
 
     // 4. Update template with ownership check
     const updateData: WhatsAppTemplateUpdate = {
-      name: body.name,
-      description: body.description,
-      category: body.category,
-      template_content: body.template_content,
-      variables: body.variables,
-      is_active: body.is_active,
-      is_default: body.is_default,
+      ...(typeof _body.name === 'string' && { name: _body.name }),
+      ...(typeof _body.description === 'string' && { description: _body.description }),
+      ...(typeof _body.category === 'string' && { category: _body.category }),
+      ...(typeof _body.template_content === 'string' && { template_content: _body.template_content }),
+      ...(Array.isArray(_body.variables) && { variables: _body.variables }),
+      ...(typeof _body.is_active === 'boolean' && { is_active: _body.is_active }),
+      ...(typeof _body.is_default === 'boolean' && { is_default: _body.is_default }),
       updated_at: new Date().toISOString()
     }
 
@@ -113,11 +126,11 @@ export async function PUT(
     }
 
     if (error) {
-      apiLogger.error({ error, userId: user.id, templateId: id }, 'Failed to update template')
+      apiLogger.error({ error, userId: user['id'], templateId: id }, 'Failed to update template')
       throw error
     }
 
-    apiLogger.info({ userId: user.id, templateId: id }, 'WhatsApp template updated')
+    apiLogger.info({ userId: user['id'], templateId: id }, 'WhatsApp template updated')
     return NextResponse.json(data)
 
   } catch (error: unknown) {
@@ -129,12 +142,15 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
+async function deleteHandler(
   _request: NextRequest,
-  context: RouteContext
-) {
+  { params }: { params: Record<string, string> }
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
+    const { id } = params
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    }
 
     // 1. Authentication
     const supabase = await createClient()
@@ -160,7 +176,7 @@ export async function DELETE(
       throw error
     }
 
-    apiLogger.info({ userId: user.id, templateId: id }, 'WhatsApp template deleted')
+    apiLogger.info({ userId: user['id'], templateId: id }, 'WhatsApp template deleted')
     return NextResponse.json({ message: 'Template deleted successfully' })
 
   } catch (error: unknown) {
@@ -171,3 +187,7 @@ export async function DELETE(
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/whatsapp-templates/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureHandler(putHandler, 'PUT /api/whatsapp-templates/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureHandler(deleteHandler, 'DELETE /api/whatsapp-templates/[id]', SecurityPresets.enhanced())

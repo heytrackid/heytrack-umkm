@@ -2,27 +2,31 @@
  
 'use client'
 
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
+import { useMemo, useState, useCallback } from 'react'
+
 import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { useCurrency } from '@/hooks/useCurrency'
 import { createClientLogger } from '@/lib/client-logger'
-import { arrayCalculations } from '@/lib/performance-optimized'
+import { arrayCalculations } from '@/lib/performance/index'
 import { getErrorMessage } from '@/lib/type-guards'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
-import type { DateRange } from 'react-day-picker'
-import dynamic from 'next/dynamic'
-import { useMemo, useState, useCallback } from 'react'
+
+
+
 
 const logger = createClientLogger('OrdersPage')
 
@@ -30,12 +34,12 @@ const logger = createClientLogger('OrdersPage')
 
 // ✅ Code Splitting - Lazy load heavy components
 const OrderForm = dynamic(() => import('./OrderForm').then(mod => ({ default: mod.OrderForm })), {
-  loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
+  loading: () => <div className="h-64 sm:h-96 animate-pulse bg-gray-100 rounded-lg" />,
   ssr: false
 })
 
 const OrderDetailView = dynamic(() => import('./OrderDetailView').then(mod => ({ default: mod.OrderDetailView })), {
-  loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
+  loading: () => <div className="h-64 sm:h-96 animate-pulse bg-gray-100 rounded-lg" />,
   ssr: false
 })
 
@@ -73,10 +77,11 @@ interface OrdersPageProps {
 }
 
 const OrdersPage = (_props: OrdersPageProps) => {
+  const router = useRouter()
   const { formatCurrency } = useCurrency()
   const queryClient = useQueryClient()
 
-  type ActiveView = 'dashboard' | 'list' | 'calendar' | 'analytics'
+  type ActiveView = 'analytics' | 'calendar' | 'dashboard' | 'list'
   const [activeView, setActiveView] = useState<ActiveView>('dashboard')
 
   // Filters
@@ -87,36 +92,36 @@ const OrdersPage = (_props: OrdersPageProps) => {
     date_to: '',
     customer_search: ''
   })
-  const hasFiltersApplied = (filters.status?.length || 0) > 0 || Boolean(filters.customer_search?.trim())
+   const hasFiltersApplied = filters.status.length > 0 || Boolean(filters.customer_search?.trim())
 
   // ✅ Use TanStack Query for automatic caching
-  const { data: ordersData, isLoading: loading, error: queryError } = useQuery({
+  const { data: ordersData, isLoading: loading, error: queryError } = useQuery<Order[]>({
     queryKey: ['orders', 'all'],
-    queryFn: async () => {
-      const response = await fetch('/api/orders', {
+    queryFn: async (): Promise<Order[]> => {
+      const response = await fetch(`/api/orders?${(() => { const p=new URLSearchParams(); const u=new URLSearchParams(typeof window!== 'undefined' ? window.location.search : ''); const f=u.get('from'); const t=u.get('to'); if (f) p.set('from', f); if (t) p.set('to', t); return p.toString(); })()}`, {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) { throw new Error('Failed to fetch orders') }
-      const data = await response.json()
+      const data: unknown = await response.json()
       // Ensure we always return an array
-      return Array.isArray(data) ? data : []
+      return Array.isArray(data) ? (data as Order[]) : []
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  const orders = useMemo(() => (Array.isArray(ordersData) ? ordersData : []), [ordersData])
+  const orders = useMemo(() => ordersData ?? [], [ordersData])
 
   const error = queryError ? getErrorMessage(queryError) : null
 
   // ✅ Calculate stats with useMemo for performance
   const stats = useMemo<OrderStats>(() => ({
     total_orders: orders.length,
-    pending_orders: orders.filter(o => o.status === 'PENDING').length,
-    confirmed_orders: orders.filter(o => o.status === 'CONFIRMED').length,
-    in_production_orders: orders.filter(o => o.status === 'IN_PROGRESS').length,
-    completed_orders: orders.filter(o => o.status === 'DELIVERED').length,
-    cancelled_orders: orders.filter(o => o.status === 'CANCELLED').length,
+    pending_orders: orders.filter(o => o['status'] === 'PENDING').length,
+    confirmed_orders: orders.filter(o => o['status'] === 'CONFIRMED').length,
+    in_production_orders: orders.filter(o => o['status'] === 'IN_PROGRESS').length,
+    completed_orders: orders.filter(o => o['status'] === 'DELIVERED').length,
+    cancelled_orders: orders.filter(o => o['status'] === 'CANCELLED').length,
     total_revenue: arrayCalculations.sum(orders, 'total_amount'),
     pending_revenue: arrayCalculations.sum(
       orders.filter(o => o.payment_status === 'UNPAID'),
@@ -154,7 +159,6 @@ const OrdersPage = (_props: OrdersPageProps) => {
   const [showOrderForm, setShowOrderForm] = useState(false)
   const [showOrderDetail, setShowOrderDetail] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
 
   const handleCreateOrder = useCallback(() => {
     setSelectedOrder(null)
@@ -221,7 +225,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
             <XCircle className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
             <h3 className="font-medium mb-2">Gagal Memuat Data</h3>
             <p className="text-sm text-muted-foreground mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>Coba Lagi</Button>
+            <Button onClick={() => router.refresh()}>Coba Lagi</Button>
           </div>
         </CardContent>
       </Card>
@@ -308,7 +312,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.location.href = '/orders/whatsapp-templates'}
+              onClick={() => router.push('/orders/whatsapp-templates')}
               className="flex items-center gap-2"
             >
               <MessageCircle className="h-4 w-4" />
@@ -356,10 +360,10 @@ const OrdersPage = (_props: OrdersPageProps) => {
       {/* Navigation Tabs */}
       <SwipeableTabs value={activeView} onValueChange={(value) => setActiveView(value as ActiveView)}>
         <SwipeableTabsList>
-          <SwipeableTabsTrigger value="dashboard">Ringkasan</SwipeableTabsTrigger>
-          <SwipeableTabsTrigger value="list">Daftar Pesanan</SwipeableTabsTrigger>
-          <SwipeableTabsTrigger value="calendar">Kalender</SwipeableTabsTrigger>
-          <SwipeableTabsTrigger value="analytics">Analitik</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="dashboard" className="text-xs sm:text-sm">Ringkasan</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="list" className="text-xs sm:text-sm">Daftar Pesanan</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="calendar" className="text-xs sm:text-sm">Kalender</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="analytics" className="text-xs sm:text-sm">Analitik</SwipeableTabsTrigger>
         </SwipeableTabsList>
 
         <SwipeableTabsContent value="dashboard" className="mt-6">
@@ -390,21 +394,21 @@ const OrdersPage = (_props: OrdersPageProps) => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {orders.slice(0, 5).map((order) => (
-                      <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex-1">
-                          <div className="font-medium">{order.order_no}</div>
-                          <div className="text-sm text-muted-foreground">{order.customer_name ?? 'N/A'}</div>
-                          <div className="text-xs text-muted-foreground">{order.order_date ? formatDate(order.order_date) : 'N/A'}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
-                          <Badge className={`text-xs ${getStatusColor(order.status)}`}>
-                            {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'N/A'}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
+                     {orders.slice(0, 5).map((order) => (
+                       <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
+                         <div className="flex-1">
+                           <div className="font-medium">{order.order_no}</div>
+                           <div className="text-sm text-muted-foreground">{order.customer_name ?? 'N/A'}</div>
+                           <div className="text-xs text-muted-foreground">{order.order_date ? formatDate(order.order_date) : 'N/A'}</div>
+                         </div>
+                         <div className="text-right">
+                           <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
+                           <Badge className={`text-xs ${getStatusColor(order.status)}`}>
+                             {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status] : 'N/A'}
+                           </Badge>
+                         </div>
+                       </div>
+                     ))}
                   </div>
                 )}
               </CardContent>
@@ -421,7 +425,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
               <CardContent>
                 <div className="space-y-3">
                   {Object.entries(ORDER_STATUS_CONFIG).map(([status, config]) => {
-                    const count = orders.filter(o => o.status === status).length
+                    const count = orders.filter(o => o['status'] === status).length
                     const percentage = orders.length > 0 ? (count / orders.length) * 100 : 0
 
                     return (
@@ -464,7 +468,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                   </div>
 
                   <Select
-                    value={filters.status?.join(',') || 'all'}
+                    value={filters['status']?.join(',') || 'all'}
                     onValueChange={(value) => {
                       setFilters(prev => ({
                         ...prev,
@@ -485,18 +489,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                     </SelectContent>
                   </Select>
 
-                   <DateRangePicker
-                     value={dateRange}
-                     onChange={(newDateRange) => {
-                       setDateRange(newDateRange)
-                       setFilters(prev => ({
-                         ...prev,
-                         date_from: newDateRange?.from ? newDateRange.from.toISOString().split('T')[0] : '',
-                         date_to: newDateRange?.to ? newDateRange.to.toISOString().split('T')[0] : ''
-                       }))
-                     }}
-                     className="w-full sm:w-[240px]"
-                   />
+
 
                    <Button variant="outline">
                      <Filter className="h-4 w-4 mr-2" />
@@ -554,7 +547,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                         Hapus Filter
                       </Button>
                     ) : (
-                      <Button onClick={handleCreateOrder}>
+          <Button onClick={handleCreateOrder}>
                         <Plus className="h-4 w-4 mr-2" />
                         Buat Pesanan Pertama
                       </Button>
@@ -576,10 +569,10 @@ const OrdersPage = (_props: OrdersPageProps) => {
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge className={getStatusColor(order.status)}>
-                            {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'N/A'}
+                            {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status] : 'N/A'}
                           </Badge>
                           <Badge className={getPaymentStatusColor(order.payment_status ?? null)}>
-                            {order.payment_status && order.payment_status in PAYMENT_STATUS_LABELS ? PAYMENT_STATUS_LABELS[order.payment_status as keyof typeof PAYMENT_STATUS_LABELS] : 'N/A'}
+                            {order.payment_status ? PAYMENT_STATUS_LABELS[order.payment_status.toUpperCase() as keyof typeof PAYMENT_STATUS_LABELS] || 'N/A' : 'N/A'}
                           </Badge>
                         </div>
                       </div>
@@ -610,7 +603,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                           <Edit className="h-3 w-3 mr-1" />
                           Edit
                         </Button>
-                        {order.status && order.status in ORDER_STATUS_CONFIG && ORDER_STATUS_CONFIG[order.status as keyof typeof ORDER_STATUS_CONFIG]?.nextStatuses && ORDER_STATUS_CONFIG[order.status as keyof typeof ORDER_STATUS_CONFIG].nextStatuses.length > 0 && (
+                        {order.status && order.status in ORDER_STATUS_CONFIG && ORDER_STATUS_CONFIG[order.status]?.nextStatuses && ORDER_STATUS_CONFIG[order.status].nextStatuses.length > 0 && (
                           <Select
                             value={order.status}
                             onValueChange={(newStatus) => handleUpdateStatus(order.id, newStatus as OrderStatus)}
@@ -620,9 +613,9 @@ const OrdersPage = (_props: OrdersPageProps) => {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value={order.status ?? 'PENDING'} disabled>
-                                {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'Status Tidak Diketahui'}
+                                {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status] : 'Status Tidak Diketahui'}
                               </SelectItem>
-                              {ORDER_STATUS_CONFIG[order.status as keyof typeof ORDER_STATUS_CONFIG]?.nextStatuses?.map((status) => (
+                              {ORDER_STATUS_CONFIG[order.status]?.nextStatuses?.map((status) => (
                                 <SelectItem key={status} value={status}>
                                   {status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[status] : status}
                                 </SelectItem>
@@ -673,7 +666,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
         <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-lg sm:text-xl">
-              {selectedOrder ? `Edit Pesanan ${selectedOrder.order_no}` : 'Buat Pesanan Baru'}
+              {selectedOrder ? `Edit Pesanan ${selectedOrder['order_no']}` : 'Buat Pesanan Baru'}
             </DialogTitle>
           </DialogHeader>
           <OrderForm
@@ -706,4 +699,4 @@ const OrdersPage = (_props: OrdersPageProps) => {
   )
 }
 
-export default OrdersPage
+export { OrdersPage }

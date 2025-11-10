@@ -1,4 +1,4 @@
-import type { Database, Row, TableName, OrderStatus, ProductionStatus } from './database'
+import type { Database, Row, TableName, OrderStatus, ProductionStatus } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 
@@ -28,17 +28,18 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 /**
  * Standard error type for catch blocks
  */
-export type CatchError = Error | { message: string; error?: CatchError } | string
+export type CatchError = Error | string | { message: string; error?: CatchError }
 
 /**
  * JSON-serializable value
  */
-export type JsonValue = 
-  | string 
-  | number 
-  | boolean 
-  | null 
-  | JsonValue[] 
+ 
+export type JsonValue =
+  | boolean
+  | JsonValue[]
+  | null
+  | number
+  | string
   | { [key: string]: JsonValue | undefined }
 
 /**
@@ -91,9 +92,7 @@ export type WithNestedRelation<
   TBase,
   TKey extends string,
   TTable extends TableName
-> = TBase & {
-  [K in TKey]: Row<TTable> | null
-}
+> = TBase & Record<TKey, Row<TTable> | null>
 
 /* -------------------------------------------------------------------------- */
 /*  🌐 BROWSER API TYPE GUARDS                                               */
@@ -181,7 +180,7 @@ export function safeGetWithDefault<T extends DataObject, K extends keyof T, D>(
   obj: T | null | undefined,
   key: K,
   defaultValue: D
-): T[K] | D {
+): D | T[K] {
   if (obj === null || obj === undefined) {return defaultValue}
   const value = obj[key]
   return value ?? defaultValue
@@ -378,7 +377,7 @@ export function getErrorMessage(error: unknown): string {
 export function extractFirst<T>(value: T | T[] | null | undefined): T | null {
   if (value === null || value === undefined) {return null}
   if (Array.isArray(value)) {
-    return value.length > 0 ? value[0] : null
+    return value.length > 0 ? (value[0] as T) : null
   }
   return value
 }
@@ -423,7 +422,7 @@ export type TypedSupabaseClient = SupabaseClient<Database>
  */
  
 export function typed(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   client: SupabaseClient<Database, any, any>
 ): TypedSupabaseClient {
   return client as unknown as TypedSupabaseClient
@@ -471,7 +470,7 @@ export type Ingredient = Row<'ingredients'>
 export type Order = Row<'orders'>
 export type Customer = Row<'customers'>
 // OrderStatus and ProductionStatus are imported from database.ts
-export type PaymentStatus = 'unpaid' | 'partial' | 'paid'
+export type PaymentStatus = 'paid' | 'partial' | 'unpaid'
 
 /**
  * Check if value is a valid Recipe
@@ -480,7 +479,7 @@ export function isRecipe(value: JsonValue): value is Recipe {
   if (!isRecord(value)) {return false}
   return (
     hasKeys(value, ['id', 'name']) &&
-    isString(value.id) &&
+    isString(value['id']) &&
     isString(value.name)
   )
 }
@@ -509,7 +508,7 @@ export type RecipeWithIngredients = Recipe & {
  */
 export function isRecipeWithIngredients(value: JsonValue): value is RecipeWithIngredients {
   if (!isRecord(value)) {return false}
-  if (!hasKey(value, 'id') || !isString(value.id)) {return false}
+  if (!hasKey(value, 'id') || !isString(value['id'])) {return false}
   if (!hasKey(value, 'name') || !isString(value.name)) {return false}
   if (!hasKey(value, 'recipe_ingredients')) {return false}
   if (!isArray(value.recipe_ingredients)) {return false}
@@ -518,7 +517,7 @@ export function isRecipeWithIngredients(value: JsonValue): value is RecipeWithIn
   return value.recipe_ingredients.every(ri => 
     isRecord(ri) &&
     hasKeys(ri, ['id', 'quantity', 'unit', 'ingredient_id']) &&
-    isString(ri.id) &&
+    isString(ri['id']) &&
     isNumber(ri.quantity) &&
     isString(ri.unit) &&
     isString(ri.ingredient_id)
@@ -532,7 +531,7 @@ export function isIngredient(value: JsonValue): value is Ingredient {
   if (!isRecord(value)) {return false}
   return (
     hasKeys(value, ['id', 'name', 'unit']) &&
-    isString(value.id) &&
+    isString(value['id']) &&
     isString(value.name) &&
     isString(value.unit)
   )
@@ -545,7 +544,7 @@ export function isOrder(value: JsonValue): value is Order {
   if (!isRecord(value)) {return false}
   return (
     hasKeys(value, ['id', 'order_date', 'total_amount']) &&
-    isString(value.id) &&
+    isString(value['id']) &&
     isStringOrNull(value.order_date) &&
     isNumberOrNull(value.total_amount)
   )
@@ -558,7 +557,7 @@ export function isCustomer(value: JsonValue): value is Customer {
   if (!isRecord(value)) {return false}
   return (
     hasKeys(value, ['id', 'name']) &&
-    isString(value.id) &&
+    isString(value['id']) &&
     isString(value.name)
   )
 }

@@ -1,15 +1,16 @@
 'use client'
 
+import type { OrderFormData } from '@/app/orders/new/hooks/useOrderLogic'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { OrderFormData } from '@/app/orders/new/hooks/useOrderLogic'
+
 
 
 
 interface OrderPaymentStepProps {
   formData: OrderFormData
-  onInputChange: (field: keyof OrderFormData, value: string | number | boolean) => void
+  onInputChange: (field: keyof OrderFormData, value: boolean | number | string) => void
 }
 
 const OrderPaymentStep = ({
@@ -46,7 +47,7 @@ const OrderPaymentStep = ({
           min="0"
           value={formData.discount_amount}
           onChange={(e) => {
-            const parsedDiscount = Number.parseFloat(e.target.value)
+            const parsedDiscount = Number.parseFloat(e.target.value.replace(',', '.'))
             onInputChange('discount_amount', Number.isNaN(parsedDiscount) ? 0 : parsedDiscount)
           }}
         />
@@ -62,7 +63,7 @@ const OrderPaymentStep = ({
           step="0.1"
           value={formData.tax_rate}
           onChange={(e) => {
-            const parsedTax = Number.parseFloat(e.target.value)
+            const parsedTax = Number.parseFloat(e.target.value.replace(',', '.'))
             onInputChange('tax_rate', Number.isNaN(parsedTax) ? 0 : parsedTax)
           }}
         />
@@ -71,4 +72,4 @@ const OrderPaymentStep = ({
   </div>
 )
 
-export default OrderPaymentStep
+export { OrderPaymentStep }

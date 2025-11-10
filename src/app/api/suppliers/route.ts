@@ -1,15 +1,19 @@
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
-import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import { getErrorMessage } from '@/lib/type-guards'
-import type { Insert } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-async function GET(request: NextRequest) {
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { getErrorMessage } from '@/lib/type-guards'
+import { PaginationQuerySchema } from '@/lib/validations/domains/common'
+import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
+import type { Insert } from '@/types/database'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
+
+
+
+async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url)
 
   // Validate query parameters
@@ -28,7 +32,7 @@ async function GET(request: NextRequest) {
     )
   }
 
-  const { page, limit, search, sort_by, sort_order } = queryValidation.data
+  const { page, limit, search, sort_by, sort_order } = queryValidation['data']
 
   try {
     const supabase = await createClient()
@@ -45,7 +49,7 @@ async function GET(request: NextRequest) {
     let query = supabase
       .from('suppliers')
       .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .range(offset, offset + limit - 1)
 
     // Add search filter
@@ -63,7 +67,7 @@ async function GET(request: NextRequest) {
     if (error) {throw error;}
 
     // Get total count
-    let countQuery = supabase.from('suppliers').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+    let countQuery = supabase.from('suppliers').select('id', { count: 'exact', head: true }).eq('user_id', user['id'])
     if (search) {
       countQuery = countQuery.or(`name.ilike.%${search}%,contact_person.ilike.%${search}%,email.ilike.%${search}%`)
     }
@@ -83,7 +87,7 @@ async function GET(request: NextRequest) {
   }
 }
 
-async function POST(request: Request) {
+async function POST(request: Request): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     
@@ -91,7 +95,8 @@ async function POST(request: Request) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    const body = await request.json()
+    }
+    const body = await request.json() as unknown
 
     // Validate request body
     const validation = SupplierInsertSchema.safeParse(body)
@@ -105,12 +110,17 @@ async function POST(request: Request) {
       )
     }
 
-    const validatedData = validation.data
+    const validatedData = validation['data']
 
-    const insertPayload: Insert<'suppliers'> = {
-      ...validatedData,
-      user_id: user.id
-    }
+    const insertPayload = {
+      user_id: user['id'],
+      name: validatedData.name,
+      address: validatedData.address ?? null,
+      contact_person: validatedData.contact_person ?? null,
+      email: validatedData.email ?? null,
+      phone: validatedData.phone ?? null,
+      notes: validatedData.notes ?? null,
+    } as Insert<'suppliers'>
 
     const { data: supplier, error } = await supabase
       .from('suppliers')

@@ -1,24 +1,25 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AlertCircle, Clock, Minus, Plus, RotateCcw, Save, Settings, TrendingUp, Users, Zap } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Slider } from '@/components/ui/slider'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Progress } from '@/components/ui/progress'
+import { Slider } from '@/components/ui/slider'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
-
-const logger = createClientLogger('ProductionCapacityManager')
-import { Users, Clock, Settings, Save, RotateCcw, Plus, Minus, AlertCircle, TrendingUp, Zap } from 'lucide-react'
 import {
   batchSchedulingService,
   type ProductionConstraints
 } from '@/services/production/BatchSchedulingService'
+
+const logger = createClientLogger('ProductionCapacityManager')
 
 /**
  * ProductionCapacityManager
@@ -59,7 +60,7 @@ const DEFAULT_CONSTRAINTS: ProductionConstraints = {
 const ProductionCapacityManager = ({
   onCapacityUpdate,
   className = ''
-}: ProductionCapacityManagerProps) => {
+}: ProductionCapacityManagerProps): JSX.Element => {
   const [constraints, setConstraints] = useState<ProductionConstraints>(DEFAULT_CONSTRAINTS)
   const [originalConstraints, setOriginalConstraints] = useState<ProductionConstraints>(DEFAULT_CONSTRAINTS)
   const [loading, setLoading] = useState(false)
@@ -69,38 +70,29 @@ const ProductionCapacityManager = ({
   const [newBreakEnd, setNewBreakEnd] = useState('')
   const { toast } = useToast()
 
-  // Load current constraints on mount
-  useEffect(() => {
-    void loadCurrentConstraints()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Track changes
   useEffect(() => {
     const hasChanges = JSON.stringify(constraints) !== JSON.stringify(originalConstraints)
     setHasChanges(hasChanges)
   }, [constraints, originalConstraints])
 
-  const loadCurrentConstraints = async () => {
-    try {
-      setLoading(true)
-      const currentConstraints = await batchSchedulingService.getProductionCapacity()
-      setConstraints(currentConstraints)
-      setOriginalConstraints(currentConstraints)
-      calculateEfficiencyMetrics(currentConstraints)
-    } catch (error: unknown) {
-      logger.error({ error }, 'Error loading constraints:')
-      toast({
-        title: 'Error',
-        description: 'Failed to load production capacity settings',
-        variant: 'destructive'
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
+  const calculateShiftHours = useCallback((currentConstraints: ProductionConstraints): number => {
+    const [startHour = 0, startMin = 0] = currentConstraints.shift_start.split(':').map(Number)
+    const [endHour = 0, endMin = 0] = currentConstraints.shift_end.split(':').map(Number)
 
-  const calculateEfficiencyMetrics = (currentConstraints: ProductionConstraints) => {
+    const startMinutes = startHour * 60 + startMin
+    const endMinutes = endHour * 60 + endMin
+
+    const totalMinutes = endMinutes - startMinutes
+    const breakMinutes = currentConstraints.break_times.reduce((sum, br) => {
+      const [brStartHour = 0, brStartMin = 0] = br.start.split(':').map(Number)
+      const [brEndHour = 0, brEndMin = 0] = br.end.split(':').map(Number)
+      return sum + ((brEndHour * 60 + brEndMin) - (brStartHour * 60 + brStartMin))
+    }, 0)
+
+    return (totalMinutes - breakMinutes) / 60
+  }, [])
+
+  const calculateEfficiencyMetrics = useCallback((currentConstraints: ProductionConstraints) => {
     // Calculate theoretical maximum daily production
     const shiftHours = calculateShiftHours(currentConstraints)
     const ovenHourCapacity = currentConstraints.oven_capacity * shiftHours
@@ -139,24 +131,30 @@ const ProductionCapacityManager = ({
       optimization_score: 82, // Composite score
       recommendations
     })
-  }
+  }, [calculateShiftHours])
 
-  const calculateShiftHours = (constraints: ProductionConstraints): number => {
-    const [startHour, startMin] = constraints.shift_start.split(':').map(Number)
-    const [endHour, endMin] = constraints.shift_end.split(':').map(Number)
+  const fetchCapacityData = useCallback(async () => {
+    try {
+      setLoading(true)
+      const currentConstraints = await batchSchedulingService.getProductionCapacity()
+      setConstraints(currentConstraints)
+      setOriginalConstraints(currentConstraints)
+      calculateEfficiencyMetrics(currentConstraints)
+    } catch (error: unknown) {
+      logger.error({ error }, 'Error loading constraints:')
+      toast({
+        title: 'Error',
+        description: 'Failed to load production capacity settings',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }, [calculateEfficiencyMetrics, toast])
 
-    const startMinutes = startHour * 60 + startMin
-    const endMinutes = endHour * 60 + endMin
-
-    const totalMinutes = endMinutes - startMinutes
-    const breakMinutes = constraints.break_times.reduce((sum, br) => {
-      const [brStartHour, brStartMin] = br.start.split(':').map(Number)
-      const [brEndHour, brEndMin] = br.end.split(':').map(Number)
-      return sum + ((brEndHour * 60 + brEndMin) - (brStartHour * 60 + brStartMin))
-    }, 0)
-
-    return (totalMinutes - breakMinutes) / 60
-  }
+  useEffect(() => {
+    void fetchCapacityData()
+  }, [fetchCapacityData])
 
   const handleSave = async () => {
     try {
@@ -189,10 +187,10 @@ const ProductionCapacityManager = ({
     })
   }
 
-  const updateConstraint = <K extends keyof ProductionConstraints>(
+  function updateConstraint<K extends keyof ProductionConstraints>(
     key: K,
     value: ProductionConstraints[K]
-  ) => {
+  ): void {
     setConstraints(prev => ({ ...prev, [key]: value }))
   }
 
@@ -298,7 +296,7 @@ const ProductionCapacityManager = ({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.oven_capacity]}
-                        onValueChange={([value]) => updateConstraint('oven_capacity', value)}
+                        onValueChange={([value = 1]) => updateConstraint('oven_capacity', value)}
                         max={10}
                         min={1}
                         step={1}
@@ -315,7 +313,7 @@ const ProductionCapacityManager = ({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.mixing_stations]}
-                        onValueChange={([value]) => updateConstraint('mixing_stations', value)}
+                        onValueChange={([value = 1]) => updateConstraint('mixing_stations', value)}
                         max={6}
                         min={1}
                         step={1}
@@ -334,7 +332,7 @@ const ProductionCapacityManager = ({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.decorating_stations]}
-                        onValueChange={([value]) => updateConstraint('decorating_stations', value)}
+                        onValueChange={([value = 1]) => updateConstraint('decorating_stations', value)}
                         max={4}
                         min={1}
                         step={1}
@@ -351,7 +349,7 @@ const ProductionCapacityManager = ({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.packaging_capacity]}
-                        onValueChange={([value]) => updateConstraint('packaging_capacity', value)}
+                        onValueChange={([value = 1]) => updateConstraint('packaging_capacity', value)}
                         max={200}
                         min={10}
                         step={10}
@@ -410,7 +408,7 @@ const ProductionCapacityManager = ({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.bakers_available]}
-                        onValueChange={([value]) => updateConstraint('bakers_available', value)}
+                        onValueChange={([value = 1]) => updateConstraint('bakers_available', value)}
                         max={8}
                         min={1}
                         step={1}
@@ -427,7 +425,7 @@ const ProductionCapacityManager = ({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.decorators_available]}
-                        onValueChange={([value]) => updateConstraint('decorators_available', value)}
+                        onValueChange={([value = 1]) => updateConstraint('decorators_available', value)}
                         max={4}
                         min={0}
                         step={1}
@@ -598,4 +596,4 @@ const ProductionCapacityManager = ({
   )
 }
 
-export default ProductionCapacityManager
+export { ProductionCapacityManager }

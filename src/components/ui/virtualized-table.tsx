@@ -3,6 +3,8 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useEffect, useRef, useState } from 'react'
 
+import { useResponsive } from '@/utils/responsive'
+
 interface VirtualizedTableProps<T> {
   data: T[]
   columns: Array<{
@@ -17,9 +19,11 @@ interface VirtualizedTableProps<T> {
 export const VirtualizedTable = <T extends Record<string, unknown>>({
   data,
   columns,
-  rowHeight = 50,
+  rowHeight: defaultRowHeight = 50,
   className = ''
 }: VirtualizedTableProps<T>) => {
+  const { isMobile } = useResponsive()
+  const rowHeight = isMobile ? 60 : defaultRowHeight
   const parentRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(400);
 
@@ -30,7 +34,7 @@ export const VirtualizedTable = <T extends Record<string, unknown>>({
 
     const updateHeight = () => {
       const availableHeight = window.innerHeight * 0.6;
-      setContainerHeight(Math.min(availableHeight, 600));
+      setContainerHeight(Math.min(Math.max(availableHeight, 300), 600));
     };
 
     updateHeight();
@@ -38,6 +42,7 @@ export const VirtualizedTable = <T extends Record<string, unknown>>({
     return () => window.removeEventListener('resize', updateHeight);
   }, []);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: data.length,
     getScrollElement: () => parentRef.current,
@@ -73,6 +78,7 @@ export const VirtualizedTable = <T extends Record<string, unknown>>({
           <tbody>
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
               const row = data[virtualRow.index];
+              if (!row) {return null;}
               return (
                 <tr
                   key={virtualRow.index}
@@ -87,7 +93,7 @@ export const VirtualizedTable = <T extends Record<string, unknown>>({
                       key={colIndex}
                       className="p-3 text-sm"
                     >
-                      {column.cell ? column.cell(row) : String(row[column.accessor])}
+                      {column.cell ? column.cell(row) : String(row[column.accessor] ?? '')}
                     </td>
                   ))}
                 </tr>

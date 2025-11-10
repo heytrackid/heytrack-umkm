@@ -57,7 +57,7 @@ export class ProductionRecommendations {
 
     // Batch optimization
     const recipeGroups = plan.reduce<Record<string, ProductionPlanItem[]>>((groups, item) => {
-      const recipeId = item.recipe.id
+      const recipeId = item.recipe['id']
       if (!groups[recipeId]) {
         groups[recipeId] = []
       }
@@ -69,7 +69,7 @@ export class ProductionRecommendations {
       if (Array.isArray(items) && items.length > 1) {
         const totalQuantity = items.reduce((sum: number, item: ProductionPlanItem) => sum + item.quantity, 0)
         optimizations.push(
-          `🔄 Batch ${items.length} orders of ${items[0].recipe.name} (${totalQuantity} total units) for efficiency`
+          `🔄 Batch ${items.length} orders of ${items[0]!.recipe.name} (${totalQuantity} total units) for efficiency`
         )
       }
     })
@@ -109,8 +109,8 @@ export class ProductionRecommendations {
 
     for (let i = 0; i < plan.length; i++) {
       for (let j = i + 1; j < plan.length; j++) {
-        const item1 = plan[i]
-        const item2 = plan[j]
+        const item1 = plan[i]!
+        const item2 = plan[j]!
 
         const start1 = item1.production.startTime
         const end1 = new Date(start1.getTime() + item1.production.estimatedDuration * 60 * 60 * 1000)
@@ -146,7 +146,7 @@ export class ProductionRecommendations {
       item.recipe.recipe_ingredients.forEach((ri: { ingredient: { id: string; name: string } | null; quantity: number }) => {
         const {ingredient} = ri
         if (!ingredient) {return}
-        const ingredientId = ingredient.id
+        const ingredientId = ingredient['id']
         if (!ingredientUsage[ingredientId]) {
           ingredientUsage[ingredientId] = {
             name: ingredient.name,

@@ -1,15 +1,17 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useToast } from '@/hooks/use-toast'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Scale, TrendingUp, Package, DollarSign, Download, Calculator } from 'lucide-react'
 import { useMemo, useState } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useToast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/useCurrency'
+
 
 
 interface RecipeBatchScalerProps {
@@ -288,7 +290,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                 const stock = ri.ingredient.stock_quantity ?? 0
                                 const cost = scaledQty * ri.ingredient.price_per_unit
                                 const isEnough = stock >= scaledQty
-                                const ingredientKey = `${ri.ingredient.id ?? ri.ingredient.name}-${ri.unit}-${ri.quantity}`
+                                const ingredientKey = `${ri.ingredient['id'] ?? ri.ingredient.name}-${ri.unit}-${ri.quantity}`
 
                                 return (
                                     <TableRow key={ingredientKey}>

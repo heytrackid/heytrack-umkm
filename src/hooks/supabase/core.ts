@@ -1,9 +1,18 @@
 'use client'
 
-import type { Row, TableName } from '@/types/database'
-import { useSupabase } from '@/providers/SupabaseProvider'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { UseSupabaseQueryOptions } from './types'
+
+import { useSupabase } from '@/providers/SupabaseProvider'
+
+import type { Row, TableName } from '@/types/database'
+
+import type { UseSupabaseQueryOptions, UseSupabaseQueryResult } from '@/hooks/supabase/types'
+
+interface RealtimePayload<T extends TableName> {
+  eventType: 'DELETE' | 'INSERT' | 'UPDATE'
+  new: Row<T>
+  old: Row<T>
+}
 
 /**
  * Core hook for Supabase queries with real-time support
@@ -11,7 +20,7 @@ import type { UseSupabaseQueryOptions } from './types'
 export function useSupabaseQuery<T extends TableName>(
   tableName: T,
   options: UseSupabaseQueryOptions<T> = {}
-) {
+): UseSupabaseQueryResult<T> {
   const { supabase } = useSupabase()
   const [data, setData] = useState<Array<Row<T>>>(options.initial ?? [])
   const [loading, setLoading] = useState(!options.initial)
@@ -23,62 +32,68 @@ export function useSupabaseQuery<T extends TableName>(
     optionsRef.current = options
   }, [options])
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (): Promise<void> => {
     const currentFetchId = Symbol('supabase-query')
     fetchIdRef.current = currentFetchId
     
     try {
-      void setLoading(true)
-      void setError(null)
+      setLoading(true)
+      setError(null)
 
       const currentOptions = optionsRef.current
-      let query = supabase.from(tableName).select(currentOptions.select ?? '*')
+      let _query = supabase.from(tableName).select(currentOptions.select ?? '*')
 
       // Apply filters
       if (currentOptions.filter) {
         Object.entries(currentOptions.filter).forEach(([key, value]) => {
-          if (value === undefined) {return}
+          if (value === undefined) {
+            return
+          }
           const column = key
           if (value === null) {
-            query = query.is(column, null)
+            _query = _query.is(column, null)
           } else {
-            query = query.eq(column, value)
+            _query = _query.eq(column, value)
           }
         })
       }
 
       // Apply ordering
       if (currentOptions.orderBy) {
-        query = query.order(currentOptions.orderBy.column, {
+        _query = _query.order(currentOptions.orderBy.column, {
           ascending: currentOptions.orderBy.ascending ?? true,
         })
       }
 
       // Apply limit
       if (currentOptions.limit) {
-        query = query.limit(currentOptions.limit)
+        _query = _query.limit(currentOptions.limit)
       }
 
-      const { data: result, error: queryError } = await query
+      const { data: result, error: queryError } = await _query
 
       if (fetchIdRef.current !== currentFetchId) {
         return
       }
 
-      if (queryError) {throw queryError}
-      void setData((result || []) as unknown as Array<Row<T>>)
-    } catch (err) {
+      if (queryError) {
+        throw queryError
+      }
+      const typedResult = (result ?? []) as unknown as Row<T>[]
+      setData(typedResult)
+    } catch (error) {
       if (fetchIdRef.current !== currentFetchId) {
         return
       }
-      void setError(err instanceof Error ? err.message : 'An error occurred')
-     } finally {
-       if (fetchIdRef.current === currentFetchId) {
-         fetchIdRef.current = null
-         void setLoading(false)
-       }
-     }
-   }, [tableName, supabase])
+      const normalizedError = error instanceof Error ? error.message : 'An error occurred'
+      setError(normalizedError)
+    } finally {
+      if (fetchIdRef.current === currentFetchId) {
+        fetchIdRef.current = null
+        setLoading(false)
+      }
+    }
+  }, [tableName, supabase])
 
   useEffect(() => {
     // Skip initial fetch if we have initial data and refetchOnMount is false
@@ -100,22 +115,18 @@ export function useSupabaseQuery<T extends TableName>(
             table: tableName,
           },
           (payload: unknown) => {
-            const typedPayload = payload as {
-              eventType: 'INSERT' | 'UPDATE' | 'DELETE';
-              new: Row<T>;
-              old: Row<T>;
-            }
+            const typedPayload = payload as RealtimePayload<T>
             if (typedPayload.eventType === 'INSERT') {
               setData((prev) => [typedPayload.new, ...prev])
             } else if (typedPayload.eventType === 'UPDATE') {
               setData((prev) =>
                 prev.map((item: Row<T>) =>
-                  (item as { id: string }).id === (typedPayload.new as { id: string }).id ? typedPayload.new : item
+                  (item as { id: string })['id'] === (typedPayload.new as { id: string })['id'] ? typedPayload.new : item
                 )
               )
             } else if (typedPayload.eventType === 'DELETE') {
               setData((prev) =>
-                prev.filter((item: Row<T>) => (item as { id: string }).id !== (typedPayload.old as { id: string }).id)
+                prev.filter((item: Row<T>) => (item as { id: string })['id'] !== (typedPayload.old as { id: string })['id'])
               )
             }
           }
@@ -128,13 +139,13 @@ export function useSupabaseQuery<T extends TableName>(
           }
         })
 
-      return () => {
+      return (): void => {
         fetchIdRef.current = null
         void supabase.removeChannel(channel)
       }
     }
     
-    return () => {
+    return (): void => {
       fetchIdRef.current = null
     }
   }, [tableName, fetchData, options.realtime, options.refetchOnMount, options.initial, supabase])

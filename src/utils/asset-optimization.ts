@@ -19,7 +19,7 @@ export const optimizeImage = (src: string, width?: number, quality = 75): string
     if (width) {params.set('w', width.toString())}
     params.set('q', quality.toString())
     params.set('f', 'webp')
-    
+
     return `${src}?${params.toString()}`
   }
   
@@ -37,7 +37,7 @@ export const lazyLoadWithPerf = async <T extends Record<string, unknown>>(
 ): Promise<T> => {
   const start = performance.now()
   try {
-    const module = await importFn()
+    const importedModule = await importFn()
     const duration = performance.now() - start
 
     apiLogger.debug({ componentName, duration: duration.toFixed(2) }, `Lazy load took ${duration.toFixed(2)}ms`)
@@ -46,7 +46,7 @@ export const lazyLoadWithPerf = async <T extends Record<string, unknown>>(
       apiLogger.warn({ componentName, duration: duration.toFixed(2) }, `Slow lazy load detected`)
     }
 
-    return module
+    return importedModule
   } catch (error) {
     apiLogger.error({ componentName, error }, 'Error lazy loading component')
     throw error
@@ -85,7 +85,7 @@ export const createDebouncedImageLoader = (delay = 300) => {
 /**
  * Preload critical resources for better performance
  */
-export const preloadResource = (url: string, as: 'image' | 'script' | 'style' | 'font' | 'fetch'): void => {
+export const preloadResource = (url: string, as: 'fetch' | 'font' | 'image' | 'script' | 'style'): void => {
   if (typeof document === 'undefined') {return}
   
   const link = document.createElement('link')
@@ -112,7 +112,7 @@ export const preloadResource = (url: string, as: 'image' | 'script' | 'style' | 
  */
 class ResourceCache {
   private static instance: ResourceCache
-  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
+  private readonly cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
   
   private constructor() {}
   
@@ -127,12 +127,12 @@ class ResourceCache {
     const item = this.cache.get(key)
     if (!item) {return null}
     
-    if (Date.now() - item.timestamp > item.ttl) {
+    if (Date.now() - item['timestamp'] > item.ttl) {
       this.cache.delete(key)
       return null
     }
     
-    return item.data as T
+    return item['data'] as T
   }
   
   set<T>(key: string, data: T, ttl = 300000): void { // 5 minutes default
@@ -146,7 +146,7 @@ class ResourceCache {
     if (this.cache.size > 100) { // Prevent unbounded growth
       const now = Date.now()
       for (const [key, item] of this.cache.entries()) {
-        if (now - item.timestamp > item.ttl) {
+        if (now - item['timestamp'] > item.ttl) {
           this.cache.delete(key)
         }
       }
@@ -161,7 +161,7 @@ class ResourceCache {
   cleanup(): void {
     const now = Date.now()
     for (const [key, item] of this.cache.entries()) {
-      if (now - item.timestamp > item.ttl) {
+      if (now - item['timestamp'] > item.ttl) {
         this.cache.delete(key)
       }
     }
@@ -188,18 +188,18 @@ export const optimizedFetch = async <T = unknown>(
     const response = await fetch(url, {
       ...options,
       headers: {
-        ...options.headers,
+        ...options['headers'],
         // Add cache headers for HTTP caching
         'Cache-Control': 'public, max-age=300',
       }
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      throw new Error(`HTTP error! status: ${response['status']}`)
     }
 
     const data = await response.json() as T
-    
+
     // Cache the successful response
     resourceCache.set(url, data, cacheTtl)
     

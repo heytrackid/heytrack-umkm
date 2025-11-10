@@ -6,9 +6,9 @@
  */
 
 // Core chart components
-export { default as FinancialTrendsChart } from './components/FinancialTrendsChart'
-export { default as InventoryTrendsChart } from './components/InventoryTrendsChart'
-export { default as MiniChart } from './components/MiniChart'
+export { FinancialTrendsChart as FinancialTrendsChart } from './components/FinancialTrendsChart'
+export { InventoryTrendsChart as InventoryTrendsChart } from './components/InventoryTrendsChart'
+export { MiniChart as MiniChart } from './components/MiniChart'
 
 // Lazy loaded chart components
 export { 

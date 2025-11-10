@@ -2,7 +2,8 @@ import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ClientFile')
 import { formatCurrentCurrency } from '@/lib/currency'
-import type { WhatsAppTemplate, WhatsAppConfig, OrderData } from './types'
+
+import type { WhatsAppTemplate, WhatsAppConfig, OrderData } from '@/lib/communications/types'
 
 
 /**
@@ -12,7 +13,7 @@ import type { WhatsAppTemplate, WhatsAppConfig, OrderData } from './types'
 
 
 export class WhatsAppService {
-  private config: WhatsAppConfig;
+  private readonly config: WhatsAppConfig;
 
   constructor(config: WhatsAppConfig) {
     this.config = config;
@@ -132,8 +133,8 @@ Kami tunggu orderan selanjutnya! 🙏
    */
   sendMessage(to: string, templateId: string, data: Record<string, unknown>): boolean {
     try {
-      const template = this.config.defaultTemplates.find(t => t.id === templateId) ??
-                      WhatsAppService.getDefaultTemplates().find(t => t.id === templateId);
+      const template = this.config.defaultTemplates.find(t => t['id'] === templateId) ??
+                      WhatsAppService.getDefaultTemplates().find(t => t['id'] === templateId);
 
       if (!template) {
         throw new Error(`Template ${templateId} not found`);
@@ -170,9 +171,9 @@ Kami tunggu orderan selanjutnya! 🙏
       // Return the link in the response (client can open it)
       // In browser context, you can use: window.open(waLink, '_blank')
       return true;
-    } catch (err) {
+    } catch (error) {
       logger.error({ 
-        err: err instanceof Error ? err.message : String(err), 
+        error: error instanceof Error ? error.message : String(error), 
         to, 
         templateId 
       }, 'Failed to generate WhatsApp link');
@@ -201,7 +202,7 @@ Kami tunggu orderan selanjutnya! 🙏
     ).join('\n');
 
     const data = {
-      customer_name: orderData.customer_name,
+      customer_name: orderData['customer_name'],
       order_items: orderItems,
       total_amount: formatCurrentCurrency(orderData.total_amount),
       delivery_date: orderData.delivery_date ?? 'Segera',
@@ -220,7 +221,7 @@ Kami tunggu orderan selanjutnya! 🙏
     ).join('\n');
 
     const data = {
-      customer_name: orderData.customer_name,
+      customer_name: orderData['customer_name'],
       order_items: orderItems,
       total_amount: formatCurrentCurrency(orderData.total_amount),
       delivery_date: orderData.delivery_date ?? 'Hari ini'
@@ -238,7 +239,7 @@ Kami tunggu orderan selanjutnya! 🙏
     ).join('\n');
 
     const data = {
-      customer_name: orderData.customer_name,
+      customer_name: orderData['customer_name'],
       order_items: orderItems,
       total_amount: formatCurrentCurrency(orderData.total_amount),
       payment_deadline: deadline,
@@ -257,7 +258,7 @@ Kami tunggu orderan selanjutnya! 🙏
     ).join('\n');
 
     const data = {
-      customer_name: orderData.customer_name,
+      customer_name: orderData['customer_name'],
       order_items: orderItems
     };
 

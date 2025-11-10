@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 /**
  * Redirect page for backward compatibility
  * /inventory -> /ingredients
  */
-const InventoryRedirect = () => {
+const InventoryRedirect = (): JSX.Element => {
   const router = useRouter()
 
   useEffect(() => {

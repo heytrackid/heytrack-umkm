@@ -1,8 +1,12 @@
+import { NextResponse, type NextRequest } from 'next/server'
+import { z } from 'zod'
+
+
 import { generateNonce, getStrictCSP } from '@/lib/csp'
 import { middlewareLogger } from '@/lib/logger'
 import { updateSession } from '@/utils/supabase/middleware'
-import { NextResponse, type NextRequest } from 'next/server'
-import { z } from 'zod'
+
+import type { User } from '@supabase/supabase-js'
 
 
 
@@ -37,6 +41,176 @@ const UrlValidationSchema = z.object({
 })
 
 /**
+ * Handle CORS preflight requests
+ */
+function handleCorsPreflight(request: NextRequest, isDev: boolean): NextResponse | null {
+  if (request.method === 'OPTIONS') {
+    const appDomain = process.env['NEXT_PUBLIC_APP_DOMAIN'] ?? 'app.heytrack.id'
+    const response = new NextResponse(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': isDev ? 'http://localhost:3000' : `https://${appDomain}`,
+        'Access-Control-Allow-Methods': 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
+        'Access-Control-Allow-Headers': 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+      }
+    });
+    return response;
+  }
+  return null
+}
+
+/**
+ * Log environment info in development
+ */
+function logDevInfo(request: NextRequest, isDev: boolean): void {
+  if (isDev) {
+    middlewareLogger.debug({
+      url: request.url,
+      method: request.method,
+      appDomain: process.env['NEXT_PUBLIC_APP_DOMAIN'],
+      nodeEnv: process.env.NODE_ENV
+    }, 'Middleware request')
+  }
+}
+
+/**
+ * Skip middleware for static assets and Next.js internals
+ */
+function shouldSkipMiddleware(pathname: string): boolean {
+  return (
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/favicon.ico') ||
+    pathname.includes('.') // Skip files with extensions
+  )
+}
+
+/**
+ * Validate request headers and URL
+ */
+function validateRequest(request: NextRequest, isDev: boolean): NextResponse | null {
+  const headersValidation = RequestHeadersSchema.safeParse({
+    'user-agent': request.headers.get('user-agent'),
+    accept: request.headers.get('accept'),
+    'accept-language': request.headers.get('accept-language'),
+    'content-type': request.headers.get('content-type'),
+    'x-forwarded-for': request.headers.get('x-forwarded-for'),
+  })
+  const urlValidation = UrlValidationSchema.safeParse({
+    pathname: request.nextUrl.pathname,
+    search: request.nextUrl.search,
+  })
+  if (!headersValidation.success && isDev) {
+    middlewareLogger.debug(
+      { url: request.url, issues: headersValidation.error.issues },
+      'Request headers validation failed (non-blocking)'
+    )
+  }
+  if (!urlValidation.success) {
+    middlewareLogger.warn(
+      { url: request.url, issues: urlValidation.error.issues },
+      'Malformed URL detected'
+    )
+    return NextResponse.json({ error: 'Invalid request URL' }, { status: 400 })
+  }
+  return null
+}
+
+/**
+ * Update session and get user
+ */
+async function getUser(request: NextRequest): Promise<{ user: User | null; response: NextResponse }> {
+  try {
+    const { user, response } = await updateSession(request)
+    return { user, response }
+  } catch (error) {
+    middlewareLogger.debug({ error }, 'Middleware auth error (non-blocking)')
+    return { user: null, response: NextResponse.next() }
+  }
+}
+
+/**
+ * Add API headers for CORS
+ */
+function addApiHeaders(response: NextResponse, isDev: boolean): void {
+  const appDomain = process.env['NEXT_PUBLIC_APP_DOMAIN'] ?? 'app.heytrack.id'
+  response.headers.set('Access-Control-Allow-Origin', isDev ? 'http://localhost:3000' : `https://${appDomain}`);
+  response.headers.set('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  response.headers.set('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+  response.headers.set('Access-Control-Allow-Credentials', 'true');
+}
+
+/**
+ * Check if route is protected
+ */
+function isProtectedRoute(pathname: string): boolean {
+  for (const base of PROTECTED_ROUTES) {
+    if (pathname.startsWith(base)) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * Handle protected route redirect
+ */
+function handleProtectedRouteRedirect(request: NextRequest, user: User | null, nonce: string, isDev: boolean): NextResponse | null {
+  const { pathname } = request.nextUrl
+  if (isProtectedRoute(pathname) && user === null && !pathname.startsWith('/auth/login')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/login'
+    url.searchParams.set('redirectTo', pathname)
+    const redirectResponse = NextResponse.redirect(url)
+    addSecurityHeaders(redirectResponse, nonce, isDev)
+    return redirectResponse
+  }
+  return null
+}
+
+/**
+ * Check if route is auth page
+ */
+function isAuthPage(pathname: string): boolean {
+  for (const base of AUTH_PAGES) {
+    if (pathname.startsWith(base)) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * Handle auth page redirect
+ */
+function handleAuthPageRedirect(request: NextRequest, user: User | null, nonce: string, isDev: boolean): NextResponse | null {
+  const { pathname } = request.nextUrl
+  if (isAuthPage(pathname) && user !== null) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    const redirectResponse = NextResponse.redirect(url)
+    addSecurityHeaders(redirectResponse, nonce, isDev)
+    return redirectResponse
+  }
+  return null
+}
+
+/**
+ * Handle root redirect
+ */
+function handleRootRedirect(request: NextRequest, user: User | null, nonce: string, isDev: boolean): NextResponse | null {
+  const { pathname } = request.nextUrl
+  if (pathname === '/') {
+    const url = request.nextUrl.clone()
+    url.pathname = user !== null ? '/dashboard' : '/auth/login'
+    const redirectResponse = NextResponse.redirect(url)
+    addSecurityHeaders(redirectResponse, nonce, isDev)
+    return redirectResponse
+  }
+  return null
+}
+
+/**
  * Add security headers to response
  */
 function addSecurityHeaders(response: NextResponse, nonce: string, isDev: boolean): void {
@@ -53,153 +227,54 @@ function addSecurityHeaders(response: NextResponse, nonce: string, isDev: boolea
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest): Promise<NextResponse> {
   const isDev = process.env.NODE_ENV === 'development'
   const nonce = generateNonce()
 
-  // Handle CORS preflight requests
-  if (request.method === 'OPTIONS') {
-    const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? 'app.heytrack.id'
-    const response = new NextResponse(null, {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': isDev ? 'http://localhost:3000' : `https://${appDomain}`,
-        'Access-Control-Allow-Methods': 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
-        'Access-Control-Allow-Headers': 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization',
-        'Access-Control-Allow-Credentials': 'true',
-      }
-    });
-    return response;
+  const corsResponse = handleCorsPreflight(request, isDev)
+  if (corsResponse) {
+    return corsResponse
   }
 
-  // Log environment info in development
-  if (isDev) {
-    middlewareLogger.debug({
-      url: request.url,
-      method: request.method,
-      appDomain: process.env.NEXT_PUBLIC_APP_DOMAIN,
-      nodeEnv: process.env.NODE_ENV
-    }, 'Middleware request')
-  }
+  logDevInfo(request, isDev)
 
-  // Skip middleware for static assets and Next.js internals
   const { pathname } = request.nextUrl
-  if (
-    pathname.startsWith('/_next/') ||
-    pathname.startsWith('/favicon.ico') ||
-    pathname.includes('.') // Skip files with extensions
-  ) {
+  if (shouldSkipMiddleware(pathname)) {
     return NextResponse.next()
   }
 
-    try {
-      // Validasi ringan (log saja saat dev)
-      const headersValidation = RequestHeadersSchema.safeParse({
-        'user-agent': request.headers.get('user-agent'),
-        accept: request.headers.get('accept'),
-        'accept-language': request.headers.get('accept-language'),
-        'content-type': request.headers.get('content-type'),
-        'x-forwarded-for': request.headers.get('x-forwarded-for'),
-      })
-      const urlValidation = UrlValidationSchema.safeParse({
-        pathname: request.nextUrl.pathname,
-        search: request.nextUrl.search,
-      })
-      if (!headersValidation.success && isDev) {
-        middlewareLogger.debug(
-          { url: request.url, issues: headersValidation.error.issues },
-          'Request headers validation failed (non-blocking)'
-        )
-      }
-      if (!urlValidation.success) {
-        middlewareLogger.warn(
-          { url: request.url, issues: urlValidation.error.issues },
-          'Malformed URL detected'
-        )
-        const errorResponse = NextResponse.json({ error: 'Invalid request URL' }, { status: 400 })
-        addSecurityHeaders(errorResponse, nonce, isDev)
-        return errorResponse
-      }
+  try {
+    const validationError = validateRequest(request, isDev)
+    if (validationError) {
+      addSecurityHeaders(validationError, nonce, isDev)
+      return validationError
+    }
 
-      // Update session and get user (this handles cookie refresh)
-      let user = null
-      let response: NextResponse
-
-      try {
-        const { user: authUser, response: authResponse } = await updateSession(request)
-        user = authUser
-        response = authResponse
-      } catch (error) {
-        // If auth fails, continue without user (they'll be redirected to login if needed)
-        middlewareLogger.debug({ error }, 'Middleware auth error (non-blocking)')
-        user = null
-        response = NextResponse.next()
-      }
-
-    // Add security headers
+    const { user, response } = await getUser(request)
     addSecurityHeaders(response, nonce, isDev)
 
-    // API routes (relying on Supabase rate limits)
     if (request.nextUrl.pathname.startsWith('/api/')) {
-      const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? 'app.heytrack.id'
-      response.headers.set('Access-Control-Allow-Origin', isDev ? 'http://localhost:3000' : `https://${appDomain}`);
-      response.headers.set('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-      response.headers.set('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
-      response.headers.set('Access-Control-Allow-Credentials', 'true');
+      addApiHeaders(response, isDev)
     }
 
-
-
-    const { pathname } = request.nextUrl
-
-    // Protected route check
-    let isProtected = false
-    for (const base of PROTECTED_ROUTES) {
-      if (pathname.startsWith(base)) {
-        isProtected = true
-        break
-      }
+    const protectedRedirect = handleProtectedRouteRedirect(request, user, nonce, isDev)
+    if (protectedRedirect) {
+      return protectedRedirect
     }
 
-    if (isProtected && !user && !pathname.startsWith('/auth/login')) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/auth/login'
-      url.searchParams.set('redirectTo', pathname)
-      const redirectResponse = NextResponse.redirect(url)
-      addSecurityHeaders(redirectResponse, nonce, isDev)
-      return redirectResponse
+    const authRedirect = handleAuthPageRedirect(request, user, nonce, isDev)
+    if (authRedirect) {
+      return authRedirect
     }
 
-    // Auth page check
-    let isAuth = false
-    for (const base of AUTH_PAGES) {
-      if (pathname.startsWith(base)) {
-        isAuth = true
-        break
-      }
-    }
-
-    if (isAuth && user) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
-      const redirectResponse = NextResponse.redirect(url)
-      addSecurityHeaders(redirectResponse, nonce, isDev)
-      return redirectResponse
-    }
-
-    // Root redirect
-    if (pathname === '/') {
-      const url = request.nextUrl.clone()
-      url.pathname = user ? '/dashboard' : '/auth/login'
-      const redirectResponse = NextResponse.redirect(url)
-      addSecurityHeaders(redirectResponse, nonce, isDev)
-      return redirectResponse
+    const rootRedirect = handleRootRedirect(request, user, nonce, isDev)
+    if (rootRedirect) {
+      return rootRedirect
     }
 
     return response
   } catch (error) {
     middlewareLogger.error({ error }, 'Middleware error')
-    // Return basic response with security headers on error
     const errorResponse = NextResponse.next()
     addSecurityHeaders(errorResponse, nonce, isDev)
     return errorResponse

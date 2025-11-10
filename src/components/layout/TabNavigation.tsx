@@ -1,18 +1,19 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 import { ChevronDown, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { prefetchRoute } from '@/lib/route-loader'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
 import { useRoutePreloader } from '@/hooks/use-preloader'
+import { prefetchRoute } from '@/lib/route-loader'
+import { cn } from '@/lib/utils'
 
 interface TabItem {
   label: string
   href?: string
   icon?: LucideIcon
-  badge?: string | number
+  badge?: number | string
   items?: Array<{
     label: string
     href: string
@@ -24,6 +25,8 @@ interface TabItem {
 interface TabNavigationProps {
   tabs: TabItem[]
 }
+
+const HOVER_PREFETCH_DELAY = 100
 
 export const TabNavigation = ({ tabs }: TabNavigationProps) => {
   const pathname = usePathname()
@@ -57,7 +60,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
     setOpenDropdown(label)
 
     // Enhanced prefetching with bundle splitting
-    const heavyRoutes = ['/reports', '/orders', '/recipes', '/ai-chatbot', '/categories', '/ingredients', '/admin']
+    const heavyRoutes = ['/reports', '/orders', '/recipes', '/ai-chatbot', '/ingredients', '/admin']
     const tab = tabs.find(t => t.label === label)
     const href = tab?.href
     if (href && heavyRoutes.includes(href)) {
@@ -70,7 +73,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
         // Use new preloader for enhanced bundle splitting
         const { preload } = preloadOnHover(href, 50)
         preload()
-      }, 100) // Small delay to avoid prefetching on quick mouse movements
+      }, HOVER_PREFETCH_DELAY) // Small delay to avoid prefetching on quick mouse movements
     }
   }, [isMobile, tabs, router, preloadOnHover])
 
@@ -91,82 +94,81 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
     }
   }, [isMobile, openDropdown])
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  const handleScroll = useCallback(() => {
-    if (!scrollRef.current) {return}
-    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
-    setShowLeftShadow(scrollLeft > 0)
-    setShowRightShadow(scrollLeft < scrollWidth - clientWidth - 1)
-  }, [])
-
-  useEffect(() => {
-    handleScroll()
+  const updateShadows = useCallback(() => {
     const ref = scrollRef.current
-    ref?.addEventListener('scroll', handleScroll)
-    return () => ref?.removeEventListener('scroll', handleScroll)
-  }, [handleScroll])
+    if (!ref) {return}
+    const { scrollLeft, scrollWidth, clientWidth } = ref
+    setShowLeftShadow(scrollLeft > 0)
+    setShowRightShadow(scrollLeft + clientWidth < scrollWidth - 1)
+  }, [])
 
-  // Update dropdown positions when they open or when the window is resized
   useEffect(() => {
-    if (openDropdown && tabButtonRefs.current[openDropdown]) {
-      const buttonEl = tabButtonRefs.current[openDropdown]
-      if (buttonEl) {
-        const rect = buttonEl.getBoundingClientRect()
-        setDropdownPositions(prev => ({
-          ...prev,
-          [openDropdown]: {
-            top: rect.bottom + window.scrollY,
-            left: rect.left + window.scrollX
-          }
-        }))
-      }
+    updateShadows()
+  }, [tabs, updateShadows])
+
+  useEffect(() => {
+    updateShadows()
+    const ref = scrollRef.current
+    if (!ref) {return undefined}
+    const onScroll = () => updateShadows()
+    ref.addEventListener('scroll', onScroll)
+    return () => ref.removeEventListener('scroll', onScroll)
+  }, [updateShadows])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {return undefined}
+    const handleResize = () => {
+      setIsMobile(window.matchMedia('(max-width: 768px)').matches)
+      updateShadows()
     }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [updateShadows])
+
+  const updateDropdownPosition = useCallback(() => {
+    if (!openDropdown) {return}
+    const buttonEl = tabButtonRefs.current[openDropdown]
+    if (!buttonEl) {return}
+    const rect = buttonEl.getBoundingClientRect()
+    setDropdownPositions(prev => ({
+      ...prev,
+      [openDropdown]: {
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX
+      }
+    }))
   }, [openDropdown])
 
-  // Handle window resize and scroll to update positions
   useEffect(() => {
-    const updatePositions = () => {
-      if (openDropdown && tabButtonRefs.current[openDropdown]) {
-        const buttonEl = tabButtonRefs.current[openDropdown]
-        if (buttonEl) {
-          const rect = buttonEl.getBoundingClientRect()
-          setDropdownPositions(prev => ({
-            ...prev,
-            [openDropdown]: {
-              top: rect.bottom + window.scrollY,
-              left: rect.left + window.scrollX
-            }
-          }))
-        }
-      }
-    }
+    updateDropdownPosition()
+  }, [updateDropdownPosition])
 
-    window.addEventListener('resize', updatePositions)
-    // We also need to listen to scroll events that might affect the position
+  useEffect(() => {
+    const handleResizeOrScroll = () => updateDropdownPosition()
+    window.addEventListener('resize', handleResizeOrScroll)
     const scrollContainer = scrollRef.current
-    if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', updatePositions)
-    }
-
+    scrollContainer?.addEventListener('scroll', handleResizeOrScroll)
     return () => {
-      window.removeEventListener('resize', updatePositions)
-      if (scrollContainer) {
-        scrollContainer.removeEventListener('scroll', updatePositions)
-      }
+      window.removeEventListener('resize', handleResizeOrScroll)
+      scrollContainer?.removeEventListener('scroll', handleResizeOrScroll)
     }
-  }, [openDropdown])
+  }, [updateDropdownPosition])
+
+  useEffect(() => () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current)
+    }
+    if (prefetchTimeoutRef.current) {
+      clearTimeout(prefetchTimeoutRef.current)
+    }
+  }, [])
 
   return (
     <div className="relative z-40 border-b border-border bg-background">
       {/* Left shadow */}
       {showLeftShadow && (
-        <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-background" />
+        <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-gradient-to-r from-background via-background/80 to-transparent" />
       )}
 
       {/* Tabs container */}
@@ -221,6 +223,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
               onMouseLeave={handleMouseLeave}
             >
               <button
+                type="button"
                 onClick={() => handleClick(tab.label)}
                 ref={(el) => {
                   tabButtonRefs.current[tab.label] = el
@@ -242,8 +245,8 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
                 <div
                   className="fixed z-50 mt-0 min-w-[200px] rounded-md border border-border bg-popover p-1 shadow-lg"
                   style={{
-                    top: `${dropdownPositions[tab.label]?.top || 0}px`,
-                    left: `${dropdownPositions[tab.label]?.left || 0}px`,
+                    top: `${dropdownPositions[tab.label]?.top ?? 0}px`,
+                    left: `${dropdownPositions[tab.label]?.left ?? 0}px`,
                   }}
                   onMouseEnter={() => handleMouseEnter(tab.label)}
                   onMouseLeave={handleMouseLeave}
@@ -283,7 +286,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
 
       {/* Right shadow */}
       {showRightShadow && (
-        <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-background" />
+        <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-background via-background/80 to-transparent" />
       )}
     </div>
   )

@@ -1,14 +1,15 @@
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Calculator, TrendingUp, BarChart3, Bell, Plus, ArrowRight, Lightbulb } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
 
 
-export const HppEmptyState = () => {
+
+export const HppEmptyState = (): JSX.Element => {
     const router = useRouter()
 
     return (

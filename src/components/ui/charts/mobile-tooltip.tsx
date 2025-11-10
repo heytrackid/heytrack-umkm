@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
-import type { TooltipEntry } from './types'
+
+import type { TooltipEntry } from '@/components/ui/charts/types'
+import type { ReactNode } from 'react'
 
 /**
  * Mobile Tooltip Component
@@ -13,9 +14,9 @@ import type { TooltipEntry } from './types'
 interface MobileTooltipProps {
   active?: boolean
   payload?: TooltipEntry[]
-  label?: string | number
+  label?: number | string
   formatter?: (value: number | string, name: string, props: TooltipEntry) => [ReactNode, string]
-  labelFormatter?: (value: string | number) => ReactNode
+  labelFormatter?: (value: number | string) => ReactNode
 }
 
 export const MobileTooltip = ({

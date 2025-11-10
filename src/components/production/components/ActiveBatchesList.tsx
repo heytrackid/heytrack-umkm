@@ -1,21 +1,25 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
+import { format } from 'date-fns'
+import { CheckCircle, ChefHat, Pause, Play, Timer } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { CheckCircle, ChefHat, Pause, Play, Timer } from 'lucide-react'
-import { format } from 'date-fns'
+
+
 import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
-import type { BatchExecutionState } from './types'
+
+import type { BatchExecutionState } from '@/components/production/components/types'
 
 // Active Batches List Component - Lazy Loaded
 // Displays the list of active and scheduled production batches
 
 
 // Define the status type for production batches based on the enum
-type ProductionStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+type ProductionStatus = 'CANCELLED' | 'COMPLETED' | 'IN_PROGRESS' | 'PLANNED'
 
 interface ActiveBatchesListProps {
   batches: ProductionBatch[]
@@ -63,7 +67,7 @@ const ActiveBatchesList = ({
 
   // Filter batches to show relevant ones
   const activeBatches = batches.filter(b =>
-    (b.status === 'PLANNED' || b.status === 'IN_PROGRESS')
+    (b['status'] === 'PLANNED' || b['status'] === 'IN_PROGRESS')
   )
 
   return (
@@ -84,14 +88,14 @@ const ActiveBatchesList = ({
               </div>
             ) : (
               activeBatches.map((batch) => {
-                const state = executionStates.get(batch.id)
+                const state = executionStates.get(batch['id'])
 
                 return (
                   <div
-                    key={batch.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedBatch === batch.id ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
+                    key={batch['id']}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedBatch === batch['id'] ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
                       }`}
-                    onClick={() => onBatchSelect(batch.id)}
+                    onClick={() => onBatchSelect(batch['id'])}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
@@ -99,15 +103,15 @@ const ActiveBatchesList = ({
                           {batch.recipe_id || 'Unknown Recipe'}
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          Quantity: {batch.quantity || 0} | Status: {batch.status}
+                          Quantity: {batch.quantity || 0} | Status: {batch['status']}
                         </p>
                       </div>
-                      <Badge className={`${getStatusColor((batch.status ?? 'PLANNED') as ProductionStatus)} text-white`}>
-                        {batch.status ?? 'PLANNED'}
+                      <Badge className={`${getStatusColor((batch['status'] ?? 'PLANNED') as ProductionStatus)} text-white`}>
+                        {batch['status'] ?? 'PLANNED'}
                       </Badge>
                     </div>
 
-                    {state && batch.status && batch.status === 'IN_PROGRESS' && (
+                    {state && batch['status'] && batch['status'] === 'IN_PROGRESS' && (
                       <>
                         <div className="space-y-2">
                           <div className="flex justify-between text-xs">
@@ -126,7 +130,7 @@ const ActiveBatchesList = ({
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation()
-      onPauseBatch(batch.id)
+      onPauseBatch(batch['id'])
                             }}
                           >
                             <Pause className="h-3 w-3 mr-1" />
@@ -137,7 +141,7 @@ const ActiveBatchesList = ({
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation()
-                              onCompleteBatch(batch.id)
+                              onCompleteBatch(batch['id'])
                             }}
                             disabled={state.actualProgress < 95}
                           >
@@ -148,7 +152,7 @@ const ActiveBatchesList = ({
                       </>
                     )}
 
-                    {batch.status && batch.status === 'PLANNED' && (
+                    {batch['status'] && batch['status'] === 'PLANNED' && (
                       <div className="flex gap-2 mt-3">
                         <Button
                           variant="default"
@@ -180,4 +184,4 @@ const ActiveBatchesList = ({
   )
 }
 
-export default ActiveBatchesList
+export { ActiveBatchesList }

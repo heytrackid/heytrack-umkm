@@ -1,17 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
 import { 
   Package, 
   ChefHat, 
@@ -21,6 +9,19 @@ import {
   ArrowRight,
   X
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 
 interface OnboardingStep {
@@ -77,7 +78,7 @@ interface OnboardingWizardProps {
   onOpenChange: (open: boolean) => void
 }
 
-export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) => {
+const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) => {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<string[]>([])
@@ -86,8 +87,8 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
 
   const handleStepAction = (step: OnboardingStep) => {
     // Mark as completed
-    if (!completedSteps.includes(step.id)) {
-      setCompletedSteps([...completedSteps, step.id])
+    if (!completedSteps.includes(step['id'])) {
+      setCompletedSteps([...completedSteps, step['id']])
     }
     
     // Close wizard and navigate
@@ -114,6 +115,8 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
   }
 
   const currentStepData = ONBOARDING_STEPS[currentStep]
+
+  if (!currentStepData) {return null}
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -150,19 +153,19 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
         <div className="grid grid-cols-4 gap-2">
           {ONBOARDING_STEPS.map((step, index) => (
             <button
-              key={step.id}
+              key={step['id']}
               onClick={() => setCurrentStep(index)}
               className={cn(
                 'flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all hover:border-primary',
                 currentStep === index ? 'border-primary bg-primary/5' : 'border-transparent',
-                completedSteps.includes(step.id) && 'bg-gray-50 border-gray-300'
+                completedSteps.includes(step['id']) && 'bg-gray-50 border-gray-300'
               )}
             >
               <div className={cn(
                 'relative rounded-full p-2 text-white',
-                completedSteps.includes(step.id) ? 'bg-gray-500' : step.color
+                completedSteps.includes(step['id']) ? 'bg-gray-500' : step.color
               )}>
-                {completedSteps.includes(step.id) ? (
+                {completedSteps.includes(step['id']) ? (
                   <CheckCircle2 className="h-4 w-4" />
                 ) : (
                   <div className="h-4 w-4">{step.icon}</div>
@@ -192,7 +195,7 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
                     <h3 className="text-xl font-semibold">
                       {currentStepData.title}
                     </h3>
-                    {completedSteps.includes(currentStepData.id) && (
+                    {completedSteps.includes(currentStepData['id']) && (
                       <CheckCircle2 className="h-5 w-5 text-gray-500" />
                     )}
                   </div>
@@ -215,7 +218,7 @@ export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) 
               {/* Tips */}
               <div className="bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-lg p-4">
                 <p className="text-sm text-gray-900 dark:text-gray-100">
-                  <strong>💡 Tips:</strong> {getStepTip(currentStepData.id)}
+                  <strong>💡 Tips:</strong> {getStepTip(currentStepData['id'])}
                 </p>
               </div>
             </div>
@@ -259,5 +262,7 @@ function getStepTip(stepId: string): string {
     hpp: 'Pastikan harga bahan baku sudah akurat untuk perhitungan HPP yang tepat.',
     orders: 'Tambahkan customer terlebih dahulu untuk mempermudah pencatatan pesanan.'
   }
-  return tips[stepId] || 'Ikuti langkah-langkah untuk setup yang optimal.'
+  return tips[stepId] ?? 'Ikuti langkah-langkah untuk setup yang optimal.'
 }
+
+export { OnboardingWizard }

@@ -1,12 +1,15 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+
 import { apiLogger } from '@/lib/logger'
 import { NotificationPreferencesUpdateSchema } from '@/lib/validations/domains/notification-preferences'
 import { DEFAULT_NOTIFICATION_PREFERENCES } from '@/types/domain/notification-preferences'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
 
 async function getHandler(_request: NextRequest) {
   try {
@@ -22,30 +25,30 @@ async function getHandler(_request: NextRequest) {
     const { data, error } = await supabase
       .from('notification_preferences')
       .select('id, user_id, email_notifications, push_notifications, sms_notifications, created_at, updated_at')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         // No preferences found, create default
         const { data: newPrefs, error: insertError } = await supabase
           .from('notification_preferences')
           .insert({
-            user_id: user.id,
+            user_id: user['id'],
             ...DEFAULT_NOTIFICATION_PREFERENCES,
           })
           .select()
           .single()
 
         if (insertError) {
-          apiLogger.error({ error: insertError, userId: user.id }, 'Failed to create default preferences')
+          apiLogger.error({ error: insertError, userId: user['id'] }, 'Failed to create default preferences')
           return NextResponse.json({ error: 'Failed to create preferences' }, { status: 500 })
         }
 
         return NextResponse.json(newPrefs)
       }
 
-      apiLogger.error({ error, userId: user.id }, 'Failed to fetch preferences')
+      apiLogger.error({ error, userId: user['id'] }, 'Failed to fetch preferences')
       return NextResponse.json({ error: 'Failed to fetch preferences' }, { status: 500 })
     }
 
@@ -67,7 +70,7 @@ async function putHandler(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = await request.json() as unknown
     const validation = NotificationPreferencesUpdateSchema.safeParse(body)
 
     if (!validation.success) {
@@ -81,39 +84,43 @@ async function putHandler(request: NextRequest) {
     const { data, error } = await supabase
       .from('notification_preferences')
       .update({
-        ...validation.data,
+        ...Object.fromEntries(
+          Object.entries(validation['data']).map(([key, value]) => [key, value ?? null])
+        ),
         updated_at: new Date().toISOString(),
       })
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select()
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error['code'] === 'PGRST116') {
         // No preferences found, create new
         const { data: newPrefs, error: insertError } = await supabase
           .from('notification_preferences')
           .insert({
-            user_id: user.id,
-            ...validation.data,
+            user_id: user['id'],
+            ...Object.fromEntries(
+              Object.entries(validation['data']).map(([key, value]) => [key, value ?? null])
+            ),
           })
           .select()
           .single()
 
         if (insertError) {
-          apiLogger.error({ error: insertError, userId: user.id }, 'Failed to create preferences')
+          apiLogger.error({ error: insertError, userId: user['id'] }, 'Failed to create preferences')
           return NextResponse.json({ error: 'Failed to create preferences' }, { status: 500 })
         }
 
-        apiLogger.info({ userId: user.id }, 'Notification preferences created')
+        apiLogger.info({ userId: user['id'] }, 'Notification preferences created')
         return NextResponse.json(newPrefs)
       }
 
-      apiLogger.error({ error, userId: user.id }, 'Failed to update preferences')
+      apiLogger.error({ error, userId: user['id'] }, 'Failed to update preferences')
       return NextResponse.json({ error: 'Failed to update preferences' }, { status: 500 })
     }
 
-    apiLogger.info({ userId: user.id }, 'Notification preferences updated')
+    apiLogger.info({ userId: user['id'] }, 'Notification preferences updated')
     return NextResponse.json(data)
 
    } catch (error: unknown) {

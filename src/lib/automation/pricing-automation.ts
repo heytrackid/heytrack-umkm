@@ -1,4 +1,5 @@
-import { formatCurrentCurrency } from '@/shared'
+import { formatCurrentCurrency } from '@/shared/index'
+
 import type {
 
 
@@ -9,10 +10,10 @@ import type {
   SmartPricingResult,
   CompetitivePricing,
   ProfitabilityAnalysis
-} from './types'
+} from '@/lib/automation/types'
 
 export class PricingAutomation {
-  constructor(private config: AutomationConfig) {}
+  constructor(private readonly config: AutomationConfig) {}
 
   /**
    * 🧮 AUTO-CALCULATION: Smart HPP & Pricing

@@ -1,4 +1,4 @@
-import { createClient } from './client'
+import { createClient } from '@/utils/supabase/client'
 
 
 /**
@@ -16,12 +16,12 @@ function validateServerEnvironment() {
     throw new Error('createServerClient should only be called server-side')
   }
 
-  const runtime = process.env['NEXT_RUNTIME']
+  const runtime = process['env']['NEXT_RUNTIME']
   if (runtime && runtime !== 'nodejs') {
     throw new Error(`createServerClient requires NEXT_RUNTIME to be "nodejs", received "${runtime}"`)
   }
 
-  const missingEnv = REQUIRED_ENV_VARS.filter((key) => !process.env[key])
+  const missingEnv = REQUIRED_ENV_VARS.filter((key) => !process['env'][key])
   if (missingEnv.length > 0) {
     throw new Error(`Missing Supabase environment variables: ${missingEnv.join(', ')}`)
   }

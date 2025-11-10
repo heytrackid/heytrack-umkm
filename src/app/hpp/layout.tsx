@@ -7,6 +7,6 @@ const HppLayout = ({
     children,
 }: {
     children: ReactNode
-}) => children
+}): ReactNode => children
 
 export default HppLayout

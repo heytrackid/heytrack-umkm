@@ -1,14 +1,17 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
-import { useResponsive } from '@/hooks/useResponsive'
-import { cn } from '@/lib/utils'
 import { Download, Maximize2, Minimize2, Share2, TrendingDown, TrendingUp } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
-import { Badge } from '../badge'
-import { Button } from '../button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../card'
-import type { BaseMobileChartProps } from './types'
+
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useResponsive } from '@/hooks/useResponsive'
+import { cn } from '@/lib/utils'
+
+import type { BaseMobileChartProps } from '@/components/ui/charts/types'
 
 /**
  * Base Mobile Chart Component
@@ -32,7 +35,7 @@ const BaseMobileChart = ({
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   const handleFullscreen = () => {
-    void setIsFullscreen(!isFullscreen)
+    setIsFullscreen(!isFullscreen)
   }
 
   const getTrendColor = () => {

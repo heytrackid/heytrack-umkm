@@ -132,7 +132,7 @@ export interface ProductionLog {
   batch_id: string
   log_type: ProductionLogType
   message: string
-  severity: 'info' | 'warning' | 'error' | 'critical'
+  severity: 'critical' | 'error' | 'info' | 'warning'
   stage?: QualityCheckPoint
   user_id?: string
   user_name?: string
@@ -205,74 +205,27 @@ export interface ProductionStaff {
 export type ProductionStatus = DBProductionStatus
 
 export type BatchPriority = 
-  | 'low'
-  | 'normal'
-  | 'high'
-  | 'urgent'
-  | 'rush'
+  'high' | 'low' | 'normal' | 'rush' | 'urgent'
 
 export type QualityCheckPoint = 
-  | 'ingredient_prep'
-  | 'mixing'
-  | 'baking'
-  | 'cooling'
-  | 'packaging'
-  | 'final_inspection'
+  'baking' | 'cooling' | 'final_inspection' | 'ingredient_prep' | 'mixing' | 'packaging'
 
 export type QualityStatus = 
-  | 'pending'
-  | 'passed'
-  | 'failed'
-  | 'conditional'
-  | 'retesting'
+  'conditional' | 'failed' | 'passed' | 'pending' | 'retesting'
 
 export type ProductionLogType = 
-  | 'status_change'
-  | 'quality_check'
-  | 'equipment_issue'
-  | 'ingredient_issue'
-  | 'staff_assignment'
-  | 'schedule_change'
-  | 'cost_update'
-  | 'completion'
-  | 'error'
+  'completion' | 'cost_update' | 'equipment_issue' | 'error' | 'ingredient_issue' | 'quality_check' | 'schedule_change' | 'staff_assignment' | 'status_change'
 
 export type EquipmentType = 
-  | 'oven'
-  | 'mixer'
-  | 'proofer'
-  | 'refrigerator'
-  | 'freezer'
-  | 'scale'
-  | 'thermometer'
-  | 'packaging_machine'
-  | 'other'
+  'freezer' | 'mixer' | 'other' | 'oven' | 'packaging_machine' | 'proofer' | 'refrigerator' | 'scale' | 'thermometer'
 
 export type EquipmentStatus = 
-  | 'available'
-  | 'in_use'
-  | 'maintenance'
-  | 'broken'
-  | 'reserved'
+  'available' | 'broken' | 'in_use' | 'maintenance' | 'reserved'
 
 export type StaffRole = 
-  | 'head_baker'
-  | 'baker'
-  | 'assistant_baker'
-  | 'quality_inspector'
-  | 'supervisor'
-  | 'packaging_operator'
-  | 'maintenance_tech'
+  'assistant_baker' | 'baker' | 'head_baker' | 'maintenance_tech' | 'packaging_operator' | 'quality_inspector' | 'supervisor'
 
-export type ProductionSkill = 
-  | 'bread_baking'
-  | 'cake_making'
-  | 'pastry_work'
-  | 'decoration'
-  | 'quality_control'
-  | 'equipment_maintenance'
-  | 'food_safety'
-  | 'inventory_management'
+export type ProductionSkill = 'bread_baking' | 'cake_making' | 'decoration' | 'equipment_maintenance' | 'food_safety' | 'inventory_management' | 'pastry_work' | 'quality_control'
 
 // Creation and update interfaces
 export interface CreateBatchData {
@@ -398,7 +351,7 @@ export interface ProductionValidationError {
 }
 
 // Export and reporting
-export type ProductionExportFormat = 'csv' | 'excel' | 'pdf' | 'json'
+export type ProductionExportFormat = 'csv' | 'excel' | 'json' | 'pdf'
 
 export interface ProductionExportOptions {
   format: ProductionExportFormat
@@ -416,7 +369,7 @@ export interface ProductionExportOptions {
 // Real-time updates
 export interface ProductionRealtimeUpdate {
   batch_id: string
-  update_type: 'status' | 'progress' | 'quality' | 'equipment' | 'alert'
+  update_type: 'alert' | 'equipment' | 'progress' | 'quality' | 'status'
   data: unknown
   timestamp: string
 }
@@ -424,8 +377,8 @@ export interface ProductionRealtimeUpdate {
 // Notifications
 export interface ProductionNotification {
   id: string
-  type: 'batch_completion' | 'quality_failure' | 'schedule_delay' | 'equipment_issue' | 'ingredient_shortage'
-  priority: 'low' | 'medium' | 'high' | 'critical'
+  type: 'batch_completion' | 'equipment_issue' | 'ingredient_shortage' | 'quality_failure' | 'schedule_delay'
+  priority: 'critical' | 'high' | 'low' | 'medium'
   title: string
   message: string
   batch_id?: string

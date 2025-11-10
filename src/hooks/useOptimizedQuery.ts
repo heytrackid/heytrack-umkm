@@ -10,7 +10,7 @@ import { useCallback, useMemo } from 'react'
  */
 
 
-interface OptimizedQueryOptions<T> extends Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryKey' | 'queryFn'> {
+interface OptimizedQueryOptions<T> extends Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryFn' | 'queryKey'> {
   // Custom options
   enableCache?: boolean
   cacheTime?: number

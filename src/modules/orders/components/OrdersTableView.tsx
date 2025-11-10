@@ -1,21 +1,19 @@
- 
 'use client'
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback, useState } from 'react'
+
 import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
-import OrdersTableComponent from '@/components/orders/orders-table'
+import { OrdersTable as OrdersTableComponent } from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'
+import { OrderDetailView } from '@/modules/orders/components/OrderDetailView'
+import { OrderForm } from '@/modules/orders/components/OrderForm'
+
 import type { OrdersTable as OrdersTableRow } from '@/types/database'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState, useCallback } from 'react'
-import { OrderDetailView } from './OrderDetailView'
-import { OrderForm } from './OrderForm'
 
 const logger = createClientLogger('OrdersTableView')
-
-
-
 
 type Order = OrdersTableRow
 
@@ -26,14 +24,12 @@ export const OrdersTableView = () => {
   const [editingOrder, setEditingOrder] = useState<OrderWithItems | undefined>(undefined)
   const [showOrderForm, setShowOrderForm] = useState(false)
 
-  // Hydration fix - prevent SSR/client mismatch
-  const [isMounted, setIsMounted] = useState(false)
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
   // ✅ Use TanStack Query for orders
-  const { data: orders = [], isLoading: loading } = useQuery<Order[]>({
+  const {
+    data: orders = [],
+    isLoading: isOrdersLoading,
+    isFetching,
+  } = useQuery<Order[]>({
     queryKey: ['orders', 'table'],
     queryFn: async () => {
       const response = await fetch('/api/orders', {
@@ -43,7 +39,7 @@ export const OrdersTableView = () => {
         const errorText = await response.text()
         throw new Error(`Failed to fetch orders: ${errorText}`)
       }
-      const data = await response.json()
+      const data = await response.json() as Order[]
 
       // Validate the response with type guards
       if (isArrayOf(data, isOrder)) {
@@ -55,6 +51,7 @@ export const OrdersTableView = () => {
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
+  const isOrdersRefreshing = isOrdersLoading || isFetching
 
   const handleViewOrder = useCallback((order: Order) => {
     setSelectedOrder(order)
@@ -72,7 +69,10 @@ export const OrdersTableView = () => {
   }, [])
 
   // ✅ Delete mutation
-  const deleteMutation = useMutation({
+  const {
+    mutateAsync: deleteOrder,
+    isPending: isDeleting
+  } = useMutation({
     mutationFn: async (orderId: string) => {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'DELETE',
@@ -88,18 +88,21 @@ export const OrdersTableView = () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
       logger.info('Order deleted successfully')
     },
-    onError: (err) => {
-      const message = getErrorMessage(err)
+    onError: (error) => {
+      const message = getErrorMessage(error)
       logger.error({ error: message }, 'Error deleting order')
     }
   })
 
   const handleDeleteOrder = useCallback(async (order: Order) => {
-    await deleteMutation.mutateAsync(order.id)
-  }, [deleteMutation])
+    await deleteOrder(order.id)
+  }, [deleteOrder])
 
   // ✅ Update status mutation
-  const updateStatusMutation = useMutation({
+  const {
+    mutateAsync: updateOrderStatus,
+    isPending: isUpdatingStatus
+  } = useMutation({
     mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: string }) => {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
@@ -111,7 +114,7 @@ export const OrdersTableView = () => {
         const errorText = await response.text()
         throw new Error(`Failed to update status: ${errorText}`)
       }
-      const data = await response.json()
+      const data = await response.json() as Order
 
       // Validate the response with type guards
       if (isOrder(data)) {
@@ -125,15 +128,15 @@ export const OrdersTableView = () => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
       logger.info('Order status updated')
     },
-    onError: (err) => {
-      const message = getErrorMessage(err)
+    onError: (error) => {
+      const message = getErrorMessage(error)
       logger.error({ error: message }, 'Error updating status')
     }
   })
 
   const handleUpdateStatus = useCallback(async (orderId: string, newStatus: string) => {
-    await updateStatusMutation.mutateAsync({ orderId, newStatus })
-  }, [updateStatusMutation])
+    await updateOrderStatus({ orderId, newStatus })
+  }, [updateOrderStatus])
 
   const handleBulkAction = useCallback(async (action: string, orderIds: string[]) => {
     logger.info({ action, orderCount: orderIds.length }, 'Bulk action triggered')
@@ -141,21 +144,15 @@ export const OrdersTableView = () => {
     switch (action) {
       case 'confirm':
         // Bulk confirm orders
-        for (const orderId of orderIds) {
-          await handleUpdateStatus(orderId, 'CONFIRMED')
-        }
+        await Promise.all(orderIds.map(orderId => handleUpdateStatus(orderId, 'CONFIRMED')))
         break
       case 'ready':
         // Bulk mark as ready for shipping
-        for (const orderId of orderIds) {
-          await handleUpdateStatus(orderId, 'READY')
-        }
+        await Promise.all(orderIds.map(orderId => handleUpdateStatus(orderId, 'READY')))
         break
       case 'shipped':
         // Bulk mark as shipped
-        for (const orderId of orderIds) {
-          await handleUpdateStatus(orderId, 'SHIPPED')
-        }
+        await Promise.all(orderIds.map(orderId => handleUpdateStatus(orderId, 'SHIPPED')))
         break
       case 'export':
         // Export selected orders
@@ -171,41 +168,27 @@ export const OrdersTableView = () => {
         break
       case 'cancel':
         // Cancel selected orders
-        for (const orderId of orderIds) {
-          await handleUpdateStatus(orderId, 'CANCELLED')
-        }
+        await Promise.all(orderIds.map(orderId => handleUpdateStatus(orderId, 'CANCELLED')))
         break
       case 'delete':
         // Delete selected orders
-        for (const orderId of orderIds) {
+        await Promise.all(orderIds.map(orderId => {
           const order = orders.find(o => o.id === orderId)
-          if (order) {
-            await handleDeleteOrder(order)
-          }
-        }
+          return order ? handleDeleteOrder(order) : Promise.resolve()
+        }))
         break
       default:
         logger.warn({ action }, 'Unknown bulk action')
     }
   }, [handleUpdateStatus, handleDeleteOrder, orders])
 
-  // Prevent hydration mismatch
-  if (!isMounted) {
-    return (
-      <div className="border rounded-lg p-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
-          <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded" />
-        </div>
-      </div>
-    )
-  }
+  const tableLoading = isOrdersRefreshing || isDeleting || isUpdatingStatus
 
   return (
     <>
       <OrdersTableComponent
         orders={orders}
-        loading={loading}
+        loading={tableLoading}
         onViewOrder={handleViewOrder}
         onEditOrder={handleEditOrder}
         onDeleteOrder={handleDeleteOrder}

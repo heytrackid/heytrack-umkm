@@ -1,27 +1,6 @@
  
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from '@/components/ui/input'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
-import { VirtualizedTable } from '@/components/ui/virtualized-table'
-import { useMobile } from '@/hooks/responsive'
 import {
     Download,
     Edit,
@@ -33,7 +12,29 @@ import {
 } from 'lucide-react'
 import { type ReactNode, useEffect, useMemo, useState } from 'react'
 
-type SortableValue = string | number | boolean | Date | null | undefined
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { VirtualizedTable } from '@/components/ui/virtualized-table'
+import { useMobile } from '@/utils/responsive'
+
+type SortableValue = Date | boolean | number | string | null | undefined
 
 export interface SimpleColumn<T, TValue = unknown> {
   key: keyof T
@@ -43,7 +44,7 @@ export interface SimpleColumn<T, TValue = unknown> {
   sortable?: boolean
   sortAccessor?: (item: T) => SortableValue
   filterable?: boolean
-  filterType?: 'text' | 'select'
+  filterType?: 'select' | 'text'
   filterOptions?: Array<{ label: string; value: string }>
   hideOnMobile?: boolean
 }
@@ -77,7 +78,7 @@ const createActionsCell = <T extends Record<string, unknown>>(
     return undefined
   }
 
-  return (item: T) => (
+  const ActionsCell = (item: T) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm">
@@ -111,6 +112,10 @@ const createActionsCell = <T extends Record<string, unknown>>(
       </DropdownMenuContent>
     </DropdownMenu>
   )
+  
+  ActionsCell.displayName = 'ActionsCell'
+  
+  return ActionsCell
 }
 
 export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[keyof T]>({
@@ -146,7 +151,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
     if (initialPageSize && sanitizedPageSizeOptions.includes(initialPageSize)) {
       return initialPageSize
     }
-    return sanitizedPageSizeOptions[0]
+    return sanitizedPageSizeOptions[0] ?? 10
   }, [enablePagination, initialPageSize, sanitizedPageSizeOptions, data.length])
 
   const [rowsPerPage, setRowsPerPage] = useState<number>(sanitizedInitialPageSize)
@@ -194,7 +199,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
 
   useEffect(() => {
     if (!enablePagination) { return }
-    void setCurrentPage(1)
+    setCurrentPage(1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, JSON.stringify(filters), rowsPerPage, enablePagination])
 
@@ -202,14 +207,14 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
     if (!enablePagination) { return }
     const maxPage = Math.max(1, Math.ceil(totalItems / rowsPerPage))
     if (currentPage > maxPage) {
-      void setCurrentPage(maxPage)
+      setCurrentPage(maxPage)
     }
   }, [currentPage, rowsPerPage, totalItems, enablePagination])
 
   useEffect(() => {
     if (!enablePagination) { return }
     if (!sanitizedPageSizeOptions.includes(rowsPerPage)) {
-      void setRowsPerPage(sanitizedInitialPageSize)
+      setRowsPerPage(sanitizedInitialPageSize)
     }
   }, [rowsPerPage, sanitizedInitialPageSize, sanitizedPageSizeOptions, enablePagination])
 
@@ -239,9 +244,9 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
     link.setAttribute('href', url)
     link.setAttribute('download', `data-${new Date().toISOString().split('T')[0]}.csv`)
     link.style.visibility = 'hidden'
-    document.body.appendChild(link)
+    document['body'].appendChild(link)
     link.click()
-    document.body.removeChild(link)
+    document['body'].removeChild(link)
   }
 
   // Create cell renderers outside render to avoid component creation during render
@@ -280,7 +285,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
             <div className="h-4 bg-gray-200 rounded w-1/4" />
-            {[...Array(5)].map((_, i) => (
+            {Array.from({length: 5}).map((_, i) => (
               <div key={i} className="h-4 bg-gray-200 rounded" />
             ))}
           </div>
@@ -340,7 +345,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
                 .map(col => (
                   <Select
                     key={String(col.key)}
-                    value={filters[String(col.key)] || 'all'}
+                    value={filters[String(col.key)] ?? 'all'}
                     onValueChange={(value) => handleFilterChange(String(col.key), value)}
                   >
                     <SelectTrigger className={isMobile ? 'w-full' : 'w-[150px]'}>
@@ -382,8 +387,8 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
               onPageChange={setCurrentPage}
               pageSize={rowsPerPage}
               onPageSizeChange={(size) => {
-                void setRowsPerPage(size)
-                void setCurrentPage(1)
+                setRowsPerPage(size)
+                setCurrentPage(1)
               }}
               totalItems={totalItems}
               pageStart={pageStart}

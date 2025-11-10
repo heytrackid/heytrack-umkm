@@ -1,15 +1,17 @@
 'use client'
 
-import { useState } from 'react'
-import { Button } from './button'
-import { Input } from './input'
 import { Plus, Minus, Package } from 'lucide-react'
+import { useState } from 'react'
+
 import { cn } from '@/lib/utils'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface QuickStockAdjustmentProps {
   currentStock: number
   unit: string
-  onAdjust: (newStock: number, adjustment: number) => void | Promise<void>
+  onAdjust: (newStock: number, adjustment: number) => Promise<void> | void
   quickAmounts?: number[]
   className?: string
   disabled?: boolean

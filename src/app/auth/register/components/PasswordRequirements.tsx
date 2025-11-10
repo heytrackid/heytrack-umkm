@@ -1,11 +1,12 @@
 import { Check, X } from 'lucide-react'
+
 import { usePasswordValidation } from '@/app/auth/register/hooks/usePasswordValidation'
 
 interface PasswordRequirementsProps {
   password: string
 }
 
-export const PasswordRequirements = ({ password }: PasswordRequirementsProps) => {
+export const PasswordRequirements = ({ password }: PasswordRequirementsProps): JSX.Element | null => {
   const { passwordRequirements } = usePasswordValidation(password)
 
   if (!password) { return null }

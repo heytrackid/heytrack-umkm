@@ -1,12 +1,13 @@
 'use client'
 
+import { Search, X } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { Search, X } from 'lucide-react'
-import type { OrderFilters as OrderFiltersType } from './types'
+import type { OrderFilters as OrderFiltersType } from '@/components/orders/types'
 
 
 
@@ -28,7 +29,7 @@ const OrderFilters = ({
   }
 
   const hasActiveFilters =
-    filters.status !== 'all' ||
+    filters['status'] !== 'all' ||
     filters.paymentStatus !== 'all' ||
     filters.priority !== 'all' ||
     Boolean(filters.dateFrom) ||
@@ -54,7 +55,7 @@ const OrderFilters = ({
           <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-5'}`}>
             {/* Status Filter */}
             <div>
-              <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+              <Select value={filters['status']} onValueChange={(value) => handleFilterChange('status', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="" />
                 </SelectTrigger>
@@ -124,23 +125,23 @@ const OrderFilters = ({
           {/* Quick Filter Buttons */}
           <div className="flex flex-wrap gap-2">
             <Button
-              variant={filters.status === 'PENDING' ? 'default' : 'outline'}
+              variant={filters['status'] === 'PENDING' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => handleFilterChange('status', filters.status === 'PENDING' ? 'all' : 'PENDING')}
+              onClick={() => handleFilterChange('status', filters['status'] === 'PENDING' ? 'all' : 'PENDING')}
             >
               Pending
             </Button>
             <Button
-              variant={filters.status === 'IN_PROGRESS' ? 'default' : 'outline'}
+              variant={filters['status'] === 'IN_PROGRESS' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => handleFilterChange('status', filters.status === 'IN_PROGRESS' ? 'all' : 'IN_PROGRESS')}
+              onClick={() => handleFilterChange('status', filters['status'] === 'IN_PROGRESS' ? 'all' : 'IN_PROGRESS')}
             >
               Diproses
             </Button>
             <Button
-              variant={filters.status === 'READY' ? 'default' : 'outline'}
+              variant={filters['status'] === 'READY' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => handleFilterChange('status', filters.status === 'READY' ? 'all' : 'READY')}
+              onClick={() => handleFilterChange('status', filters['status'] === 'READY' ? 'all' : 'READY')}
             >
               Siap Kirim
             </Button>
@@ -183,4 +184,4 @@ const OrderFilters = ({
   )
 }
 
-export default OrderFilters
+export { OrderFilters }

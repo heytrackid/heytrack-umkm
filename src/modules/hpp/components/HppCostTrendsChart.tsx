@@ -1,14 +1,17 @@
 'use client'
 
-import { useMemo } from 'react'
-import { LazyAreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
-import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import clsx from 'clsx'
+import { useMemo } from 'react'
+
+import { LazyAreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatCurrency as formatCurrencyUtil } from '@/lib/currency'
 import { useCurrency } from '@/hooks/useCurrency'
-import type { Currency } from '@/shared'
 import { createClientLogger } from '@/lib/client-logger'
+import { formatCurrency as formatCurrencyUtil } from '@/lib/currency'
+
+import type { Currency } from '@/shared/index'
+
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 
 const logger = createClientLogger('ClientFile')
 
@@ -38,7 +41,7 @@ const generateFallbackData = (): HppCostTrendPoint[] => Array.from({ length: 14 
   const averageHpp = 25000 + Math.random() * 8000
   const spread = 2000 + Math.random() * 2000
   return {
-    date: baseDate.toISOString().split('T')[0] || '',
+    date: baseDate.toISOString().split('T')[0] ?? '',
     averageHpp,
     bestHpp: averageHpp - spread,
     worstHpp: averageHpp + spread,
@@ -52,7 +55,7 @@ export const HppCostTrendsChart = ({
   className,
   showLegend = true,
   currency
-}: HppCostTrendsChartProps) => {
+}: HppCostTrendsChartProps): JSX.Element => {
   const { currency: defaultCurrency } = useCurrency()
   const resolvedCurrency = currency ?? defaultCurrency
 
@@ -62,7 +65,20 @@ export const HppCostTrendsChart = ({
     return generateFallbackData()
   }, [data])
 
-  const formatCurrencyValue = (value: number) => formatCurrencyUtil(value, resolvedCurrency)
+  const formatCurrencyValue = (value: number): string => formatCurrencyUtil(value, resolvedCurrency)
+
+  const legendLabel = (key: string): string => {
+    switch (key) {
+      case 'bestHpp':
+        return 'HPP Terbaik'
+      case 'averageHpp':
+        return 'HPP Rata-rata'
+      case 'worstHpp':
+        return 'HPP Terburuk'
+      default:
+        return key
+    }
+  }
 
   return (
     <Card className={clsx('h-full', className)}>
@@ -127,17 +143,5 @@ export const HppCostTrendsChart = ({
   )
 }
 
-const legendLabel = (key: string) => {
-  switch (key) {
-    case 'bestHpp':
-      return 'HPP Terbaik'
-    case 'averageHpp':
-      return 'HPP Rata-rata'
-    case 'worstHpp':
-      return 'HPP Terburuk'
-    default:
-      return key
-  }
-}
 
-export default HppCostTrendsChart
+

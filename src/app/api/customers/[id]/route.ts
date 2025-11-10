@@ -1,54 +1,141 @@
-// API Route: /api/customers/[id]
-// Handles GET, PUT, DELETE operations for individual customer
-
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
-import { apiLogger } from '@/lib/logger'
-import type { Update } from '@/types/database'
-import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+// API Route: /api/customers/[id]
+// Handles GET, PUT, DELETE operations for individual customer
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import { CustomerUpdateSchema, type CustomerUpdateInput } from '@/lib/validations/domains/customer'
+import type { Update } from '@/types/database'
+import { typed } from '@/types/type-utilities'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
+
+
+
 interface RouteContext {
   params: Promise<{ id: string }>
+}
+
+type TypedSupabaseClient = ReturnType<typeof typed>
+
+interface CustomerRouteContext {
+  supabase: TypedSupabaseClient
+  userId: string
+  customerId: string
+}
+
+async function buildCustomerContext(context: RouteContext): Promise<CustomerRouteContext | NextResponse> {
+  const { id } = await context.params
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid customer ID format' }, { status: 400 })
+  }
+
+  const supabase = typed(await createClient())
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  return { supabase, userId: user.id, customerId: id }
+}
+
+function mapUpdatePayload(data: CustomerUpdateInput): Update<'customers'> {
+  const payload: Update<'customers'> = { updated_at: new Date().toISOString() }
+  const setters: Array<{
+    key: keyof CustomerUpdateInput
+    map: (value: CustomerUpdateInput[keyof CustomerUpdateInput]) => unknown
+  }> = [
+    { key: 'name', map: value => value },
+    { key: 'phone', map: value => value ?? null },
+    { key: 'email', map: value => value ?? null },
+    { key: 'address', map: value => value ?? null },
+    { key: 'customer_type', map: value => value ?? null },
+    { key: 'discount_percentage', map: value => value ?? null },
+    { key: 'notes', map: value => value ?? null },
+    { key: 'is_active', map: value => value ?? null }
+  ]
+
+  setters.forEach(({ key, map }) => {
+    const value = data[key]
+    if (value !== undefined) {
+      ;(payload as any)[key as keyof Update<'customers'>] = map(value)
+    }
+  })
+
+  return payload
+}
+
+function handleCustomerNotFound(error: unknown): NextResponse | null {
+  if (typeof error === 'object' && error && 'code' in error && (error as { code: string }).code === 'PGRST116') {
+    return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
+  }
+  return null
+}
+
+async function ensureNoOrders(
+  supabase: TypedSupabaseClient,
+  customerId: string,
+  userId: string
+): Promise<NextResponse | null> {
+  const { data: orders, error } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('customer_id', customerId)
+    .eq('user_id', userId)
+    .limit(1)
+
+  if (error) {
+    apiLogger.error({ error }, 'Error checking customer orders')
+    return NextResponse.json({ error: 'Failed to check customer orders' }, { status: 500 })
+  }
+
+  if (orders && orders.length > 0) {
+    return NextResponse.json({ error: 'Cannot delete customer with existing orders. Please delete orders first.' }, { status: 409 })
+  }
+
+  return null
+}
+
+async function resolveUpdatePayload(
+  request: NextRequest,
+  userId: string
+): Promise<{ updateData: Update<'customers'> } | NextResponse> {
+  const body = await request.json() as Omit<CustomerUpdateInput, 'user_id'>
+  const validation = CustomerUpdateSchema.safeParse({ ...body, user_id: userId })
+
+  if (!validation.success) {
+    return NextResponse.json({ error: 'Invalid request data', details: validation.error.issues }, { status: 400 })
+  }
+
+  return { updateData: mapUpdatePayload(validation.data) }
 }
 
 // GET /api/customers/[id] - Get single customer
 async function getHandler(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
-    
-    // Validate UUID format
-    if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid customer ID format' }, { status: 400 })
-    }
-    
-    const supabase = await createClient()
-
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const routeContext = await buildCustomerContext(context)
+    if (routeContext instanceof NextResponse) {
+      return routeContext
     }
 
-    // Fetch customer with RLS
+    const { supabase, userId, customerId } = routeContext
     const { data, error } = await supabase
       .from('customers')
       .select('id, user_id, name, email, phone, address, created_at, updated_at')
-      .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('id', customerId)
+      .eq('user_id', userId)
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
-      }
+      const errorResponse = handleCustomerNotFound(error)
+      if (errorResponse) { return errorResponse }
       apiLogger.error({ error }, 'Error fetching customer')
       return NextResponse.json({ error: 'Failed to fetch customer' }, { status: 500 })
     }
@@ -56,10 +143,7 @@ async function getHandler(
     return NextResponse.json(data)
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/customers/[id]')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
 
@@ -67,68 +151,30 @@ async function getHandler(
 async function putHandler(
   request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
-    
-    // Validate UUID format
-    if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid customer ID format' }, { status: 400 })
-    }
-    
-    const supabase = await createClient()
-
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const routeContext = await buildCustomerContext(context)
+    if (routeContext instanceof NextResponse) {
+      return routeContext
     }
 
-    const body = await request.json()
-
-    // Validate request body
-    const validation = CustomerUpdateSchema.safeParse({
-      ...body,
-      user_id: user.id
-    })
-
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: 'Invalid request data',
-          details: validation.error.issues
-        },
-        { status: 400 }
-      )
+    const payloadResult = await resolveUpdatePayload(request, routeContext.userId)
+    if (payloadResult instanceof NextResponse) {
+      return payloadResult
     }
 
-    // Prepare update data
-    const updateData: Update<'customers'> = {
-      name: validation.data.name,
-      phone: validation.data.phone,
-      email: validation.data.email,
-      address: validation.data.address,
-      customer_type: validation.data.customer_type,
-      discount_percentage: validation.data.discount_percentage,
-      notes: validation.data.notes,
-      is_active: validation.data.is_active,
-      updated_at: new Date().toISOString(),
-    }
-
-    // Update with RLS enforcement
-    const { data, error } = await supabase
+    const { data, error } = await routeContext.supabase
       .from('customers')
-      .update(updateData)
-      .eq('id', id)
-      .eq('user_id', user.id)
+      .update(payloadResult.updateData)
+      .eq('id', routeContext.customerId)
+      .eq('user_id', routeContext.userId)
       .select()
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
-      }
-      if (error.code === '23505') {
+      const notFoundResponse = handleCustomerNotFound(error)
+      if (notFoundResponse) { return notFoundResponse }
+      if (typeof error === 'object' && error && 'code' in error && (error as { code: string }).code === '23505') {
         return NextResponse.json({ error: 'Email already exists' }, { status: 409 })
       }
       apiLogger.error({ error }, 'Error updating customer')
@@ -149,54 +195,27 @@ async function putHandler(
 async function deleteHandler(
   _request: NextRequest,
   context: RouteContext
-) {
+): Promise<NextResponse> {
   try {
-    const { id } = await context.params
-    
-    // Validate UUID format
-    if (!isValidUUID(id)) {
-      return NextResponse.json({ error: 'Invalid customer ID format' }, { status: 400 })
-    }
-    
-    const supabase = await createClient()
-
-    // Authenticate
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const routeContext = await buildCustomerContext(context)
+    if (routeContext instanceof NextResponse) {
+      return routeContext
     }
 
-    // Check if customer has orders
-    const { data: orders, error: ordersError } = await supabase
-      .from('orders')
-      .select('id')
-      .eq('customer_id', id)
-      .eq('user_id', user.id)
-      .limit(1)
-
-    if (ordersError) {
-      apiLogger.error({ error: ordersError }, 'Error checking customer orders')
-      return NextResponse.json({ error: 'Failed to check customer orders' }, { status: 500 })
+    const validationResponse = await ensureNoOrders(routeContext.supabase, routeContext.customerId, routeContext.userId)
+    if (validationResponse) {
+      return validationResponse
     }
 
-    if (orders && orders.length > 0) {
-      return NextResponse.json(
-        { error: 'Cannot delete customer with existing orders. Please delete orders first.' },
-        { status: 409 }
-      )
-    }
-
-    // Delete with RLS enforcement
-    const { error } = await supabase
+    const { error } = await routeContext.supabase
       .from('customers')
       .delete()
-      .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('id', routeContext.customerId)
+      .eq('user_id', routeContext.userId)
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
-      }
+      const notFoundResponse = handleCustomerNotFound(error)
+      if (notFoundResponse) { return notFoundResponse }
       apiLogger.error({ error }, 'Error deleting customer')
       return NextResponse.json({ error: 'Failed to delete customer' }, { status: 500 })
     }

@@ -1,9 +1,11 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { BarChart3 } from 'lucide-react'
-import type { HPPCalculationResult, PricingMethod } from '@/modules/recipes/types'
+
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+import type { HPPCalculationResult, PricingMethod } from '@/modules/recipes/types/index'
 
 
 

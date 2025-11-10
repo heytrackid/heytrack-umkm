@@ -1,13 +1,13 @@
 'use client'
 
-/* eslint-disable */
+ 
 import dynamic from 'next/dynamic'
-import { Legend } from 'recharts'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
+} from '@/components/ui/chart'
+import { ChartLegend } from '@/components/charts/LazyCharts'
 
 type TrendChartConfig = Record<string, { label: string; color: string }>
 
@@ -128,7 +128,7 @@ const chartConfig: TrendChartConfig = {
   },
 }
 
-export default function InventoryTrendsChart({
+export function InventoryTrendsChart({
   data = inventoryData,
   config = chartConfig,
   height = 400,
@@ -206,7 +206,7 @@ export default function InventoryTrendsChart({
               r: 3,
             }}
           />
-          <Legend />
+          <ChartLegend />
         </LineChart>
       </ResponsiveContainer>
     </ChartContainer>

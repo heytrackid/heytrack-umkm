@@ -1,5 +1,6 @@
-import { apiLogger } from '@/lib/logger'
 import { useCallback, useMemo } from 'react'
+
+import { apiLogger } from '@/lib/logger'
 
 /**
  * Performance Optimizations untuk Skeleton Loading System
@@ -36,7 +37,7 @@ export function useSkeletonArray(length: number, dependency?: unknown[]) {
 
 // Progressive loading utility
 export class ProgressiveLoader {
-  private timers: Map<string, NodeJS.Timeout> = new Map()
+  private readonly timers: Map<string, NodeJS.Timeout> = new Map()
 
   scheduleLoading(key: string, callback: () => void, delay: number) {
     // Clear existing timer if any
@@ -139,8 +140,8 @@ export interface SkeletonMetrics {
 }
 
 export class SkeletonPerformanceMonitor {
-  private startTimes = new Map<string, number>()
-  private metrics = new Map<string, SkeletonMetrics>()
+  private readonly startTimes = new Map<string, number>()
+  private readonly metrics = new Map<string, SkeletonMetrics>()
 
   startSkeleton(key: string) {
     this.startTimes.set(key, performance.now())

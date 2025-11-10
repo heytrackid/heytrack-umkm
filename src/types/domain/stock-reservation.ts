@@ -7,9 +7,9 @@
  * Business logic types for stock reservation system
  */
 
-export type ReservationStatus = 'ACTIVE' | 'CONSUMED' | 'RELEASED' | 'EXPIRED'
+export type ReservationStatus = 'ACTIVE' | 'CONSUMED' | 'EXPIRED' | 'RELEASED'
 
-export type ProductionPriority = 'URGENT' | 'NORMAL' | 'LOW'
+export type ProductionPriority = 'LOW' | 'NORMAL' | 'URGENT'
 
 export interface StockReservation {
   id: string
@@ -43,7 +43,7 @@ export interface IngredientAvailability {
   min_stock: number | null
   reorder_point: number | null
   unit: string
-  availability_status: 'OUT_OF_STOCK' | 'LOW_STOCK' | 'BELOW_MIN' | 'AVAILABLE'
+  availability_status: 'AVAILABLE' | 'BELOW_MIN' | 'LOW_STOCK' | 'OUT_OF_STOCK'
   user_id: string
 }
 

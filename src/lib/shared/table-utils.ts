@@ -9,12 +9,12 @@ import { type ReactNode, createElement, useMemo, useState, type UIEvent } from '
 
 // Table column configuration types
 export interface TableColumn<T = unknown, TValue = unknown> {
-  key: keyof T | string
+  key: string | keyof T
   header: string
   sortable?: boolean
   filterable?: boolean
   width?: number | string
-  align?: 'left' | 'center' | 'right'
+  align?: 'center' | 'left' | 'right'
   render?: (value: TValue, row: T, index: number) => ReactNode
   format?: (value: TValue) => string
 }
@@ -39,7 +39,7 @@ export interface TableConfig<T = unknown> {
 // Table sorting utilities
 export function sortData<T>(
   data: T[],
-  sortKey: keyof T | string,
+  sortKey: string | keyof T,
   direction: 'asc' | 'desc' = 'asc'
 ): T[] {
   return [...data].sort((a, b) => {
@@ -158,12 +158,12 @@ export function useTableData<T>(
   }
 
   const handlePageChange = (page: number) => {
-    void setCurrentPage(page)
+    setCurrentPage(page)
   }
 
   return {
     // Data
-    data: paginatedData.data,
+    data: paginatedData['data'],
     total: paginatedData.total,
     totalPages: paginatedData.totalPages,
 
@@ -201,9 +201,9 @@ export const tableFormatters = {
 
   percentage: (value: number) => `${value.toFixed(1)}%`,
 
-  date: (value: string | Date) => new Intl.DateTimeFormat('id-ID').format(new Date(value)),
+  date: (value: Date | string) => new Intl.DateTimeFormat('id-ID').format(new Date(value)),
 
-  dateTime: (value: string | Date) => new Intl.DateTimeFormat('id-ID', {
+  dateTime: (value: Date | string) => new Intl.DateTimeFormat('id-ID', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -266,7 +266,7 @@ export const commonColumns = {
     key,
     header,
     width: width ?? 100,
-    format: (value: unknown) => tableFormatters.date(value as string | Date)
+    format: (value: unknown) => tableFormatters.date(value as Date | string)
   })
 }
 
@@ -289,10 +289,10 @@ function getNestedValue(obj: unknown, path: string): unknown {
 }
 
 // Table selection utilities
-export function useTableSelection<T extends { id: string | number }>(data: T[]) {
-  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set())
+export function useTableSelection<T extends { id: number | string }>(data: T[]) {
+  const [selectedIds, setSelectedIds] = useState<Set<number | string>>(new Set())
 
-  const toggleSelect = (id: string | number) => {
+  const toggleSelect = (id: number | string) => {
     setSelectedIds(prev => {
       const newSet = new Set(prev)
       if (newSet.has(id)) {
@@ -309,7 +309,7 @@ export function useTableSelection<T extends { id: string | number }>(data: T[]) 
       if (prev.size === data.length) {
         return new Set() // Deselect all
       } 
-        return new Set(data.map(item => item.id)) // Select all
+        return new Set(data.map(item => item['id'])) // Select all
       
     })
   }
@@ -318,7 +318,7 @@ export function useTableSelection<T extends { id: string | number }>(data: T[]) 
     setSelectedIds(new Set())
   }
 
-  const selectedItems = data.filter(item => selectedIds.has(item.id))
+  const selectedItems = data.filter(item => selectedIds.has(item['id']))
 
   return {
     selectedIds,
@@ -353,7 +353,7 @@ export function useVirtualScroll<T>(
     offsetY,
     totalHeight: items.length * itemHeight,
     onScroll: (event: UIEvent<HTMLDivElement>) => {
-      void setScrollTop(event.currentTarget.scrollTop)
+      setScrollTop(event.currentTarget.scrollTop)
     }
   }
 }

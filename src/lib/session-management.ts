@@ -1,6 +1,8 @@
+import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
+
+
 import type { User } from '@supabase/supabase-js'
-import { apiLogger } from '../lib/logger'
 
 export interface SessionInfo {
   user: User | null
@@ -34,13 +36,13 @@ export async function getCurrentSession(): Promise<SessionInfo> {
       const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
         .select('role, permissions')
-        .eq('user_id', session.user.id)
+        .eq('user_id', session.user['id'])
         .single()
 
       if (profileError) {
         apiLogger.warn({ 
           error: profileError.message, 
-          userId: session.user.id 
+          userId: session.user['id'] 
         }, 'Could not fetch user profile')
       } else {
         role = profile?.role ?? undefined
@@ -159,9 +161,16 @@ export async function createCustomSession(userId: string, expiresInHours = 24) {
       throw new Error('User not authenticated')
     }
     
+    if (data.user['id'] !== userId) {
+      apiLogger.warn({
+        requestedUserId: userId,
+        actualUserId: data.user['id']
+      }, 'User mismatch detected while creating custom session')
+    }
+
     // Return session info
     return {
-      userId: data.user.id,
+      userId: data.user['id'],
       email: data.user.email,
       expiresAt: new Date(Date.now() + expiresInHours * 60 * 60 * 1000)
     }

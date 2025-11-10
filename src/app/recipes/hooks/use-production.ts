@@ -1,11 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks'
+
 import { PRODUCTION_CONFIG } from '@/app/recipes/config/production.config'
-import { formatCurrency, DEFAULT_CURRENCY, currencies, type Currency } from '@/lib/currency'
-import type { Row } from '@/types/database'
-import { isRecord } from '@/types/shared/guards'
 import type {
   ProductionBatch,
   CreateBatchData,
@@ -19,6 +16,11 @@ import type {
   BatchPriority,
   QualityStatus
 } from '@/app/recipes/types/production.types'
+import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/index'
+import { formatCurrency, DEFAULT_CURRENCY, currencies, type Currency } from '@/lib/currency'
+import type { Row } from '@/types/database'
+import { isRecord } from '@/types/shared/guards'
+
 
 // Production service hooks for Indonesian UMKM operations
 
@@ -36,7 +38,7 @@ export function useProductionBatches(filters?: ProductionFilters) {
   const {
     create: createBatchRecord,
     update: updateBatchRecord,
-    delete: deleteBatchRecord
+    remove: deleteBatchRecord
   } = useSupabaseCRUD('production_batches')
 
   // Filter batches based on criteria
@@ -46,58 +48,49 @@ export function useProductionBatches(filters?: ProductionFilters) {
 
     // Transform to the ProductionBatch type with required fields
     const castBatches = productionBatches?.map(batch => ({
-      id: batch.id,
+      id: batch['id'],
       batch_number: batch.batch_number,
       recipe_id: batch.recipe_id,
       recipe_name: '', // Would need to be populated from recipe lookup
-      status: batch.status as ProductionStatus, // Cast database enum to our type
+      status: batch['status'] as ProductionStatus, // Cast database enum to our type
       priority: 'normal' as BatchPriority,
       planned_quantity: batch.quantity,
       batch_size: batch.quantity,
-      scheduled_start: batch.planned_date,
-      scheduled_completion: batch.completed_at ?? batch.planned_date,
-      actual_start: batch.started_at ?? undefined,
-      actual_completion: batch.completed_at ?? undefined,
+       scheduled_start: batch.planned_date,
+       scheduled_completion: batch.completed_at ?? batch.planned_date,
+       ...(batch.started_at && { actual_start: batch.started_at }),
+       ...(batch.completed_at && { actual_completion: batch.completed_at }),
       estimated_duration_minutes: 0,
       actual_duration_minutes: 0,
-      assigned_staff_ids: [],
-      assigned_equipment_ids: [],
-      supervisor_id: undefined,
-      planned_cost: batch.actual_cost ?? 0,
-      actual_cost: batch.actual_cost ?? undefined,
-      labor_cost: undefined,
-      utility_cost: undefined,
-      overhead_cost: undefined,
-      cost_per_unit: undefined,
-      currency: DEFAULT_CURRENCY.code,
-      quality_checks: [],
-      quality_score: undefined,
-      quality_status: 'pending' as QualityStatus,
+       assigned_staff_ids: [],
+       assigned_equipment_ids: [],
+       planned_cost: batch.actual_cost ?? 0,
+       ...(batch.actual_cost && { actual_cost: batch.actual_cost }),
+      currency: DEFAULT_CURRENCY['code'],
+       quality_checks: [],
+       quality_status: 'pending' as QualityStatus,
       temperature_logs: [],
       compliance_notes: [],
       order_ids: [],
       ingredient_allocations: [],
       stock_transactions: [],
-      notes: batch.notes ?? undefined,
-      internal_notes: undefined,
-      tags: [],
-      created_at: batch.created_at ?? new Date().toISOString(),
-      updated_at: batch.updated_at ?? new Date().toISOString(),
-      recipe: undefined,
-      quality_inspector: undefined,
-      production_logs: []
+       ...(batch.notes && { notes: batch.notes }),
+       tags: [],
+       created_at: batch.created_at ?? new Date().toISOString(),
+       updated_at: batch.updated_at ?? new Date().toISOString(),
+       production_logs: []
     }))
 
     if (!castBatches || !filters) {return castBatches}
 
-    return castBatches.filter((batch: ProductionBatch) => {
+    return (castBatches as ProductionBatch[]).filter((batch) => {
       // Status filter - Compare with database enum values directly
-      if (filters.status?.length) {
+      if (filters['status']?.length) {
         const batchStatus = isRecord(batch) && 'status' in batch
-          ? batch.status
+          ? batch['status']
           : undefined
 
-        if (batchStatus && !filters.status.includes(batchStatus)) {
+        if (batchStatus && !filters['status'].includes(batchStatus)) {
           return false
         }
       }
@@ -152,7 +145,7 @@ export function useProductionBatches(filters?: ProductionFilters) {
         const searchLower = filters.search.toLowerCase()
         const searchableText = [
           batch.batch_number,
-          batch.recipe_name,
+          batch['recipe_name'],
           batch.notes,
           batch.internal_notes
         ].join(' ').toLowerCase()
@@ -193,12 +186,12 @@ export function useQualityChecks(batchId: string) {
   const {
     create: createCheck,
     update: updateCheckRecord,
-    delete: deleteCheck
+    remove: deleteCheck
   } = useSupabaseCRUD('app_settings')
 
   // Transform to expected type
   const checks = (checksData as Array<Row<'app_settings'>> | undefined)?.map(setting => ({
-    id: setting.id,
+    id: setting['id'],
     batch_id: setting.user_id,
     check_point: 'final', // Placeholder
     status: 'passed', // Placeholder
@@ -227,10 +220,10 @@ export function useQualityChecks(batchId: string) {
 // Equipment management - using existing table
 export function useProductionEquipment(filters?: { type?: string; status?: string }) {
   // Using app_settings as placeholder since there's no production_equipment table in schema
-  const queryFilter: Partial<Record<string, string | number | boolean | null>> | undefined = filters
+  const queryFilter: Partial<Record<string, boolean | number | string | null>> | undefined = filters
     ? {
-        ...(filters.type ? { type: filters.type } : {}),
-        ...(filters.status ? { status: filters.status } : {})
+        ...(filters['type'] ? { type: filters['type'] } : {}),
+        ...(filters['status'] ? { status: filters['status'] } : {})
       }
     : undefined
 
@@ -239,20 +232,20 @@ export function useProductionEquipment(filters?: { type?: string; status?: strin
     loading,
     error,
     refetch: refetchEquipment
-  } = useSupabaseQuery('app_settings', {
-    filter: queryFilter,
-    orderBy: { column: 'updated_at', ascending: true }
-  })
-  const {
-    create: createEquipment,
+   } = useSupabaseQuery('app_settings', {
+     ...(queryFilter && { filter: queryFilter }),
+     orderBy: { column: 'updated_at', ascending: true }
+   })
+   const {
+     create: createEquipment,
     update: updateEquipmentRecord,
-    delete: deleteEquipment
+    remove: deleteEquipment
   } = useSupabaseCRUD('app_settings')
 
   // Transform to expected type
   const equipment = (equipmentData as Array<Row<'app_settings'>> | undefined)?.map(setting => ({
-    id: setting.id,
-    name: setting.id, // Using id as name
+    id: setting['id'],
+    name: setting['id'], // Using id as name
     type: 'oven', // Placeholder
     status: 'available', // Placeholder
     capacity: 10, // Placeholder
@@ -280,7 +273,7 @@ export function useProductionEquipment(filters?: { type?: string; status?: strin
 // Staff management - using existing table
 export function useProductionStaff(filters?: { role?: string; active?: boolean }) {
   // Using app_settings as placeholder since there's no production_staff table in schema
-  const queryFilter: Partial<Record<string, string | number | boolean | null>> | undefined = filters
+  const queryFilter: Partial<Record<string, boolean | number | string | null>> | undefined = filters
     ? {
         ...(filters.role ? { type: filters.role } : {}), // Using 'type' as placeholder for role
         ...(filters.active !== undefined ? { is_active: filters.active } : {})
@@ -292,20 +285,20 @@ export function useProductionStaff(filters?: { role?: string; active?: boolean }
     loading,
     error,
     refetch: refetchStaff
-  } = useSupabaseQuery('app_settings', {
-    filter: queryFilter,
-    orderBy: { column: 'updated_at', ascending: true }
-  })
-  const {
-    create: createStaff,
+   } = useSupabaseQuery('app_settings', {
+     ...(queryFilter && { filter: queryFilter }),
+     orderBy: { column: 'updated_at', ascending: true }
+   })
+   const {
+     create: createStaff,
     update: updateStaffRecord,
-    delete: deleteStaff
+    remove: deleteStaff
   } = useSupabaseCRUD('app_settings')
 
   // Transform to expected type
   const staff = (staffData as Array<Row<'app_settings'>> | undefined)?.map(setting => ({
-    id: setting.id,
-    name: setting.id, // Using id as name
+    id: setting['id'],
+    name: setting['id'], // Using id as name
     role: 'operator', // Placeholder
     skills: ['general'], // Placeholder
     max_concurrent_batches: 2, // Placeholder
@@ -342,12 +335,12 @@ export function useIngredientAllocations(batchId: string) {
   const {
     create: createAllocation,
     update: updateAllocationRecord,
-    delete: deleteAllocation
+    remove: deleteAllocation
   } = useSupabaseCRUD('stock_transactions')
 
   // Transform to expected type
   const allocations = (allocationsData as Array<Row<'stock_transactions'>> | undefined)?.map(transaction => ({
-    id: transaction.id,
+    id: transaction['id'],
     batch_id: transaction.ingredient_id, // Using ingredient_id as batch_id
     ingredient_id: transaction.ingredient_id,
     ingredient_name: 'Unknown', // Would need to be populated from ingredients table
@@ -382,10 +375,10 @@ export function useBatchScheduling(config = PRODUCTION_CONFIG) {
       newBatchData.recipe_id,
       newBatchData.batch_size ?? config.DEFAULT_BATCH_SIZE,
       config,
-      {
-        priority: newBatchData.priority,
-        current_queue_length: currentQueue
-      }
+       {
+         priority: newBatchData.priority ?? 'normal',
+         current_queue_length: currentQueue
+       }
     )
 
     return {
@@ -436,17 +429,17 @@ export function useProductionCapacity(date: string): {
     const equipment_utilization: Record<string, number> = {}
     eqArray.forEach((eq) => {
       const usedBatches = batchArray.filter((b: ProductionBatch) => 
-        b.assigned_equipment_ids?.includes(eq.id)
+        b.assigned_equipment_ids?.includes(eq['id'])
       ).length
-      equipment_utilization[eq.id] = eq.capacity > 0 ? (usedBatches / eq.capacity) * 100 : 0
+      equipment_utilization[eq['id']] = eq.capacity > 0 ? (usedBatches / eq.capacity) * 100 : 0
     })
 
     const staff_workload: Record<string, number> = {}
     staffArray.forEach((s) => {
       const assignedBatches = batchArray.filter((b: ProductionBatch) => 
-        b.assigned_staff_ids?.includes(s.id)
+        b.assigned_staff_ids?.includes(s['id'])
       ).length
-      staff_workload[s.id] = s.max_concurrent_batches > 0 ? 
+      staff_workload[s['id']] = s.max_concurrent_batches > 0 ? 
         (assignedBatches / s.max_concurrent_batches) * 100 : 0
     })
 
@@ -523,7 +516,7 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
     if (!batches) {return null}
 
     const batchArray = batches
-    const completedBatches = batchArray.filter((b: ProductionBatch) => b.status === 'COMPLETED')
+    const completedBatches = batchArray.filter((b: ProductionBatch) => b['status'] === 'COMPLETED')
     const totalBatches = batchArray.length
 
     // Efficiency metrics
@@ -559,7 +552,7 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
       ? qualityBatches.reduce((sum: number, b: ProductionBatch) => sum + (b.quality_score ?? 0), 0) / qualityBatches.length
       : 0
 
-    const failed_batches = batchArray.filter((b: ProductionBatch) => b.status === 'CANCELLED').length
+    const failed_batches = batchArray.filter((b: ProductionBatch) => b['status'] === 'CANCELLED').length
     const defect_rate = totalBatches > 0 ? (failed_batches / totalBatches) * 100 : 0
 
     // Production volume
@@ -569,9 +562,7 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
 
     const production_by_recipe: Record<string, { batches: number, units: number, revenue: number }> = {}
     completedBatches.forEach((batch: ProductionBatch) => {
-      if (!production_by_recipe[batch.recipe_id]) {
-        production_by_recipe[batch.recipe_id] = { batches: 0, units: 0, revenue: 0 }
-      }
+      production_by_recipe[batch.recipe_id] ??= { batches: 0, units: 0, revenue: 0 }
       const recipeData = production_by_recipe[batch.recipe_id]
       if (recipeData) {
         recipeData.batches++
@@ -648,9 +639,9 @@ export function useProductionNotifications() {
   const markAsRead = async (notificationId: string) => {
     try {
       await updateNotification(notificationId, { is_read: true })
-    } catch (err: unknown) {
-      throw new Error(`Failed to mark notification as read: ${err instanceof Error ? err.message : 'Unknown error'}`)
-    }
+     } catch (error) {
+       throw new Error(`Failed to mark notification as read: ${error instanceof Error ? error.message : 'Unknown error'}`)
+     }
   }
 
   const unreadCount = (notificationsData as Array<Row<'notifications'>> | undefined)?.filter((n) => {
@@ -660,10 +651,10 @@ export function useProductionNotifications() {
 
   // Transform to expected format
   const notifications = (notificationsData as Array<Row<'notifications'>> | undefined)?.map(notification => ({
-    id: notification.id,
+    id: notification['id'],
     title: notification.title,
     message: notification.message,
-    type: notification.type,
+    type: notification['type'],
     priority: notification.priority ?? 'medium',
     batch_id: undefined, // Would need to be stored in the metadata
     recipe_id: undefined, // Would need to be stored in the metadata
@@ -696,20 +687,20 @@ export function useTemperatureMonitoring(batchId: string) {
   })
   const { create: createTemperatureLog } = useSupabaseCRUD('app_settings')
 
-  const addTemperatureReading = async (reading: Omit<TemperatureLog, 'id' | 'batch_id'>) => {
+  const addTemperatureReading = async (reading: Omit<TemperatureLog, 'batch_id' | 'id'>) => {
     try {
       await createTemperatureLog({
         user_id: batchId,
         settings_data: { temperature: reading.temperature, stage: reading.stage } // Store as JSON
       })
-    } catch (err: unknown) {
-      throw new Error(`Failed to add temperature reading: ${err instanceof Error ? err.message : 'Unknown error'}`)
-    }
+     } catch (error) {
+       throw new Error(`Failed to add temperature reading: ${error instanceof Error ? error.message : 'Unknown error'}`)
+     }
   }
 
   // Transform to expected type
   const temperatureLogs = (logsData as Array<Row<'app_settings'>> | undefined)?.map(setting => ({
-    id: setting.id,
+    id: setting['id'],
     batch_id: batchId, // Use the passed batchId
     stage: setting.settings_data && typeof setting.settings_data === 'object' && 'stage' in setting.settings_data 
       ? (setting.settings_data as { stage?: string }).stage ?? 'general'
@@ -733,9 +724,9 @@ export function useTemperatureMonitoring(batchId: string) {
 }
 
 // Currency formatting for production costs
-export function useProductionCurrency(currency?: string | Currency) {
+export function useProductionCurrency(currency?: Currency | string) {
   const resolvedCurrency: Currency = typeof currency === 'string'
-    ? currencies.find(curr => curr.code === currency) ?? DEFAULT_CURRENCY
+    ? currencies.find(curr => curr['code'] === currency) ?? DEFAULT_CURRENCY
     : currency ?? DEFAULT_CURRENCY
 
   const formatCost = (amount: number, _options?: {

@@ -1,19 +1,19 @@
 'use client'
 
- import { useEffect } from 'react'
+import { useEffect } from 'react'
+
 import { BundleMonitor } from '@/lib/bundle-splitting'
 
 /**
  * Performance monitoring component
  * Tracks real-world performance metrics
  */
-export const PerformanceMonitor = () => {
+export const PerformanceMonitor = (): JSX.Element | null => {
   useEffect(() => {
-    // Log bundle analysis on mount
+    if (typeof window === 'undefined' || !('performance' in window)) {
+      return
+    }
     BundleMonitor.logBundleInfo()
-
-    // Bundle analysis is logged above
-    // For Core Web Vitals, use browser dev tools or implement custom tracking
   }, [])
 
   return null // Invisible monitoring component

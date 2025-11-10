@@ -1,5 +1,6 @@
 import { formatCurrency } from '@/lib/currency'
-import type { PriceOption, PricingOptimizationResult } from './types'
+
+import type { PriceOption, PricingOptimizationResult } from '@/lib/automation/financial-automation/types'
 
 /**
  * Pricing Optimizer Module

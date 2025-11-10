@@ -1,14 +1,6 @@
-/* eslint-disable no-nested-ternary */
+ 
 'use client'
 
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { formatCurrency, formatNumber } from '@/lib/shared/utilities'
-import { cn } from '@/lib/utils'
-import type { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
 import {
     AlertTriangle,
     BarChart3,
@@ -22,6 +14,16 @@ import {
     Users
 } from 'lucide-react'
 import { type ReactNode, useMemo } from 'react'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { formatCurrency, formatNumber } from '@/lib/shared/utilities'
+import { cn } from '@/lib/utils'
+
+import type { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
 
 // Shared business logic components and utilities
 
@@ -50,7 +52,7 @@ interface InventoryAlert extends BaseInventoryAlert {
   }
   suggestedAction?: string
   // Map the database alert_type to the UI type field
-  type?: 'low_stock' | 'out_of_stock' | 'over_stock' | 'expiring'
+  type?: 'expiring' | 'low_stock' | 'out_of_stock' | 'over_stock'
 }
 
 interface InventoryAlertsProps {
@@ -91,17 +93,17 @@ export const InventoryAlerts = ({
     <div className={cn("space-y-3", className)}>
       {alerts.map((alert) => {
         // Map alert_type from database to UI type
-        const alertType = alert.alert_type as 'low_stock' | 'out_of_stock' | 'over_stock' | 'expiring' | undefined;
+        const alertType = alert.alert_type as 'expiring' | 'low_stock' | 'out_of_stock' | 'over_stock' | undefined;
         const Icon = alertType === 'low_stock' || alertType === 'out_of_stock' || alertType === 'expiring'
           ? AlertTriangle
           : Info
 
         // Determine item details - prefer the item object if available, otherwise extract from alert
-        const itemName = alert.item?.name ?? alert.ingredient_name ?? 'Unknown Item';
+        const itemName = alert.item?.name ?? alert['ingredient_name'] ?? 'Unknown Item';
         const itemId = alert.item?.id ?? alert.ingredient_id ?? '';
 
         return (
-          <Alert key={alert.id} className={`border-l-4 ${alert.severity === 'critical' ? 'border-red-500' :
+          <Alert key={alert['id']} className={`border-l-4 ${alert.severity === 'critical' ? 'border-red-500' :
             alert.severity === 'high' ? 'border-orange-500' :
               'border-yellow-500'
             }`}>
@@ -135,7 +137,7 @@ export const InventoryAlerts = ({
                   {onResolve && (
                     <Button
                       size="sm"
-                      onClick={() => onResolve(alert.id)}
+                      onClick={() => onResolve(alert['id'])}
                     >
                       Resolve
                     </Button>
@@ -218,11 +220,11 @@ export const StockLevelIndicator = ({
 // Financial Metrics Components
 interface MetricCardProps {
   title: string
-  value: string | number
+  value: number | string
   change?: {
     value: number
     label: string
-    trend: 'up' | 'down' | 'neutral'
+    trend: 'down' | 'neutral' | 'up'
   }
   icon?: ReactNode
   className?: string
@@ -394,7 +396,7 @@ interface SalesData {
 
 interface SalesPerformanceChartProps {
   data: SalesData[]
-  period: 'daily' | 'weekly' | 'monthly' | 'yearly'
+  period: 'daily' | 'monthly' | 'weekly' | 'yearly'
   showTargets?: boolean
   className?: string
 }
@@ -496,7 +498,7 @@ export const SalesPerformanceChart = ({
 // Customer Insights Component
 interface CustomerInsight {
   id: string
-  type: 'high_value' | 'frequent' | 'new' | 'churn_risk' | 'loyal'
+  type: 'churn_risk' | 'frequent' | 'high_value' | 'loyal' | 'new'
   customer: {
     id: string
     name: string
@@ -504,7 +506,7 @@ interface CustomerInsight {
   }
   metric: string
   change?: number
-  priority: 'low' | 'medium' | 'high'
+  priority: 'high' | 'low' | 'medium'
 }
 
 interface CustomerInsightsProps {
@@ -535,11 +537,11 @@ export const CustomerInsights = ({
   return (
     <div className={cn("space-y-3", className)}>
       {insights.map((insight) => {
-        const config = typeConfig[insight.type]
+        const config = typeConfig[insight['type']]
         const Icon = config.icon
 
         return (
-          <Card key={insight.id} className={priorityColors[insight.priority]}>
+          <Card key={insight['id']} className={priorityColors[insight.priority]}>
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 <div className={cn("p-2 rounded-lg", config.bgColor)}>
@@ -564,7 +566,7 @@ export const CustomerInsights = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onViewCustomer(insight.customer.id)}
+                      onClick={() => onViewCustomer(insight.customer['id'])}
                     >
                       View Customer
                     </Button>

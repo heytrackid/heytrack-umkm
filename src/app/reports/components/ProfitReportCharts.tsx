@@ -2,25 +2,27 @@
 'use client'
 
 import React, { Suspense } from 'react'
-import type { ChartType, ChartDataPoint, SelectedDataPoint } from './ProfitReportTypes'
-import { useCurrency } from '@/hooks/useCurrency'
+import { type PieLabelRenderProps } from 'recharts'
 import {
-  LineChart,
-  BarChart,
-  AreaChart,
-  PieChart,
+  LazyLineChart,
+  LazyBarChart,
+  LazyAreaChart,
+  LazyPieChart,
   CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
+  ChartLegend,
   Line,
   Bar,
   Area,
   Pie,
-  Cell,
-  type PieLabelRenderProps
-} from 'recharts'
+  Cell
+} from '@/components/charts/LazyCharts'
+
+import { useCurrency } from '@/hooks/useCurrency'
+
+import type { ChartType, ChartDataPoint, SelectedDataPoint } from '@/app/reports/components/ProfitReportTypes'
 
 interface ProfitChartProps {
     data: ChartDataPoint[]
@@ -47,20 +49,20 @@ export const ProfitChart: React.FC<ProfitChartProps> = ({
     }
 
     const renderChart = () => {
-        const tooltipFormatter = (value: number | string, name: string) => {
+        const tooltipFormatter = (value: number | string) => {
             const numValue = typeof value === 'string' ? parseFloat(value) : value
-            return [formatCurrency(numValue), name]
+            return formatCurrency(numValue) as unknown as string
         }
 
         switch (chartType) {
             case 'line':
                 return (
-                    <LineChart data={data} width={800} height={350}>
+                    <LazyLineChart data={data} width={800} height={350}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="period" />
                         <YAxis tickFormatter={(value) => formatCurrency(Number(value))} />
-                        <Tooltip formatter={tooltipFormatter} />
-                        <Legend />
+                        <Tooltip formatter={(v) => String(formatCurrency(Number(v as number | string)))} />
+                        <ChartLegend />
                         <Line
                             type="monotone"
                             dataKey="revenue"
@@ -82,31 +84,31 @@ export const ProfitChart: React.FC<ProfitChartProps> = ({
                             name="Gross Profit"
                             strokeWidth={3}
                         />
-                    </LineChart>
+                    </LazyLineChart>
                 )
 
             case 'bar':
                 return (
-                    <BarChart data={data} width={800} height={350}>
+                    <LazyBarChart data={data} width={800} height={350}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="period" />
                         <YAxis tickFormatter={(value) => formatCurrency(Number(value))} />
-                        <Tooltip formatter={tooltipFormatter} />
-                        <Legend />
+                        <Tooltip formatter={(v) => String(formatCurrency(Number(v as number | string)))} />
+                        <ChartLegend />
                         <Bar dataKey="revenue" fill="#3b82f6" name="Revenue" />
                         <Bar dataKey="cogs" fill="#f59e0b" name="COGS" />
                         <Bar dataKey="gross_profit" fill="#10b981" name="Gross Profit" />
-                    </BarChart>
+                    </LazyBarChart>
                 )
 
             case 'area':
                 return (
-                    <AreaChart data={data} width={800} height={350}>
+                    <LazyAreaChart data={data} width={800} height={350}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="period" />
                         <YAxis tickFormatter={(value) => formatCurrency(Number(value))} />
-                        <Tooltip formatter={tooltipFormatter} />
-                        <Legend />
+                        <Tooltip formatter={(v) => tooltipFormatter(v as number | string)} />
+                        <ChartLegend />
                         <Area
                             type="monotone"
                             dataKey="revenue"
@@ -134,7 +136,7 @@ export const ProfitChart: React.FC<ProfitChartProps> = ({
                             fillOpacity={0.8}
                             name="Gross Profit"
                         />
-                    </AreaChart>
+                    </LazyAreaChart>
                 )
 
             default:
@@ -179,7 +181,7 @@ export const ExpensesPieChart: React.FC<ExpensesPieChartProps> = ({ data }) => {
                     Loading pie chart...
                 </div>
             }>
-                <PieChart width={400} height={300}>
+                <LazyPieChart width={400} height={300}>
                     <Pie
                         data={data}
                         dataKey="total"
@@ -188,16 +190,16 @@ export const ExpensesPieChart: React.FC<ExpensesPieChartProps> = ({ data }) => {
                         cy="50%"
                         outerRadius={100}
                          label={(props: PieLabelRenderProps) => {
-                           const data = props.payload as { category: string; total: number; percentage: number }
-                           return `${data.category}: ${data.percentage.toFixed(1)}%`
-                         }}
-                    >
-                        {data.map((_, index) => (
+                             const _data = props['payload'] as { category: string; total: number; percentage: number }
+                             return `${_data.category}: ${_data.percentage.toFixed(1)}%`
+                           }}
+                     >
+                         {data.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                </PieChart>
+                    <Tooltip formatter={(value, name) => [formatCurrency(Number(value as number)), String(name)]} />
+                </LazyPieChart>
             </Suspense>
         </div>
     )
@@ -215,7 +217,7 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({ currentData, p
     if (!previousData) {
         return (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground border rounded-lg">
-                Enable "Compare Periods" to see comparison with previous period
+                Enable &#34;Compare Periods&#34; to see comparison with previous period
             </div>
         )
     }
@@ -227,19 +229,19 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({ currentData, p
                     Loading comparison chart...
                 </div>
             }>
-                <BarChart data={currentData} width={800} height={300}>
+                <LazyBarChart data={currentData} width={800} height={300}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="period" />
                     <YAxis tickFormatter={(value) => formatCurrency(Number(value))} />
                     <Tooltip
-                        formatter={(value: number) => formatCurrency(value)}
+                        formatter={(value) => formatCurrency(Number(value))}
                         labelFormatter={(label: string) => `Current Period: ${label}`}
                     />
-                    <Legend />
+                    <ChartLegend />
                     <Bar dataKey="revenue" fill="#3b82f6" name="Current Revenue" />
                     <Bar dataKey="cogs" fill="#f59e0b" name="Current COGS" />
                     <Bar dataKey="gross_profit" fill="#10b981" name="Current Gross Profit" />
-                </BarChart>
+                </LazyBarChart>
             </Suspense>
         </div>
     )

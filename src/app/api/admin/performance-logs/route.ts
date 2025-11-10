@@ -1,18 +1,21 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 /**
  * GET /api/admin/performance-logs
  * Get recent API performance logs
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+
 import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, safeNumber } from '@/lib/type-guards'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
+import { createClient } from '@/utils/supabase/server'
 
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authentication
     const supabase = await createClient()
@@ -23,7 +26,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. Admin role check
-    const hasAdminAccess = await isAdmin(user.id)
+    const hasAdminAccess = await isAdmin(user['id'])
     if (!hasAdminAccess) {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
     }
@@ -40,12 +43,12 @@ export async function GET(request: NextRequest) {
       .limit(limit)
 
     if (logsError) {
-      apiLogger.error({ error: getErrorMessage(logsError), userId: user.id }, 'Error fetching performance logs')
+      apiLogger.error({ error: getErrorMessage(logsError), userId: user['id'] }, 'Error fetching performance logs')
       return NextResponse.json({ error: 'Failed to fetch performance logs' }, { status: 500 })
     }
 
-    apiLogger.info({ userId: user.id, count: logs?.length || 0 }, 'Performance logs fetched')
-    return NextResponse.json(logs || [])
+    apiLogger.info({ userId: user['id'], count: logs?.length || 0 }, 'Performance logs fetched')
+    return NextResponse.json(logs ?? [])
 
   } catch (error: unknown) {
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/admin/performance-logs')
@@ -55,3 +58,5 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = createSecureHandler(getHandler, 'GET /api/admin/performance-logs', SecurityPresets.maximum())

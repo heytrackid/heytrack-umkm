@@ -1,19 +1,21 @@
-/* eslint-disable */
-import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
-import type { Row } from '@/types/database'
-import { apiLogger } from '@/lib/logger'
- import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
- import type { RecipeWithIngredients } from '@/types/query-results'
- import { withSecurity, SecurityPresets } from '@/utils/security'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
 
+ 
+import { apiLogger } from '@/lib/logger'
+import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
+import type { Row } from '@/types/database'
+import type { RecipeWithIngredients } from '@/types/query-results'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
+import { type NextRequest, NextResponse } from 'next/server'
+
+
+
 type Order = Row<'orders'>
 type OrderItem = Row<'order_items'>
-type FinancialRecord = Row<'financial_records'>
+
 /**
  * GET /api/reports/profit
  * 
@@ -63,7 +65,7 @@ async function getHandler(request: NextRequest) {
           total_price
         )
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .eq('status', 'DELIVERED')
       .gte('delivery_date', startDate)
       .lte('delivery_date', endDate)
@@ -87,7 +89,7 @@ async function getHandler(request: NextRequest) {
           ingredient:ingredients (*)
         )
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
 
     if (recipesError) {
       apiLogger.error({ error: recipesError }, 'Error fetching recipes:')
@@ -111,11 +113,11 @@ async function getHandler(request: NextRequest) {
         })) as RecipeWithIngredients[]
       : []
 
-    // Get all expenses (non-revenue) in the period for operating costs
+    // Get all expenses from financial_records (one-time expenses)
     const { data: expenses, error: expensesError } = await supabase
       .from('financial_records')
       .select('id, user_id, date, description, category, amount, reference, type, created_at, created_by')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .eq('type', 'EXPENSE')
       .gte('date', startDate)
       .lte('date', endDate)
@@ -124,11 +126,42 @@ async function getHandler(request: NextRequest) {
       apiLogger.error({ error: expensesError }, 'Error fetching expenses:')
     }
 
+    // Get operational costs (recurring monthly costs like salary, rent, etc)
+    const { data: operationalCosts, error: operationalCostsError } = await supabase
+      .from('operational_costs')
+      .select('id, category, amount, description, date, recurring, frequency, is_active')
+      .eq('user_id', user['id'])
+      .eq('is_active', true)
+      .gte('date', startDate)
+      .lte('date', endDate)
+
+    if (operationalCostsError) {
+      apiLogger.error({ error: operationalCostsError }, 'Error fetching operational costs:')
+    }
+
+    // Combine all expenses (one-time + operational)
+    const allExpenses = [
+      ...(expenses ?? []).map(exp => ({
+        category: exp.category || 'Other',
+        amount: exp.amount,
+        description: exp.description,
+        date: exp.date,
+        source: 'expense' as const
+      })),
+      ...(operationalCosts ?? []).map(cost => ({
+        category: cost.category || 'Operational',
+        amount: cost.amount,
+        description: cost.description,
+        date: cost.date,
+        source: 'operational' as const
+      }))
+    ]
+
     // Calculate profit metrics
     const profitData = await calculateProfitMetrics(
-      orders || [],
+      orders ?? [],
       recipes,
-      expenses || [],
+      allExpenses,
       period
     )
 
@@ -217,11 +250,18 @@ interface OperatingExpenseBreakdown {
   percentage: number
 }
 
+interface ExpenseData {
+  category: string
+  amount: number | string
+  description: string
+  date: string | Date | null
+}
+
 // Main calculation function
 async function calculateProfitMetrics(
   orders: OrderWithItemsForProfit[],
   recipes: RecipeWithIngredients[],
-  expenses: FinancialRecord[],
+  expenses: ExpenseData[],
   period: string
 ) {
   // Build recipe cost lookup map
@@ -229,7 +269,7 @@ async function calculateProfitMetrics(
   
   recipes.forEach(recipe => {
     const cogs = calculateRecipeCOGS(recipe)
-    recipeCostMap.set(recipe.id, {
+    recipeCostMap.set(recipe['id'], {
       name: recipe.name,
       cogs
     })
@@ -391,7 +431,7 @@ function calculateCOGSBreakdown(
   
   // Create recipe lookup map
   const recipeMap = new Map<string, RecipeWithIngredients>()
-  recipes.forEach(recipe => recipeMap.set(recipe.id, recipe))
+  recipes.forEach(recipe => recipeMap.set(recipe['id'], recipe))
 
   orders.forEach(order => {
     if (!order.order_items) {return}
@@ -447,7 +487,7 @@ function getPeriodKey(date: string, period: string): string {
     case 'weekly': {
       const weekStart = new Date(d)
       weekStart.setDate(d.getDate() - d.getDay())
-      return weekStart.toISOString().split('T')[0]
+      return weekStart.toISOString().split('T')[0]!
     }
     case 'monthly':
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`

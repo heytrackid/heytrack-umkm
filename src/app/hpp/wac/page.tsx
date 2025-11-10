@@ -1,7 +1,10 @@
 'use client'
 
-import AppLayout from '@/components/layout/app-layout'
-import { PageHeader } from '@/components/shared'
+import { DollarSign, Package, RefreshCw, TrendingUp } from 'lucide-react'
+import { useEffect as _useEffect, useRef, useState } from 'react'
+
+import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/shared/index'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -9,21 +12,30 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useIngredients } from '@/hooks/useIngredients'
 import { dbLogger } from '@/lib/logger'
+
 import type { Row as _Row } from '@/types/database'
-import { DollarSign, Package, RefreshCw, TrendingUp } from 'lucide-react'
-import { useEffect as _useEffect, useState } from 'react'
 
 
 
-const WacEnginePage = () => {
+const WacEnginePage = (): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
    // Use ingredients hook with caching
    const { data: ingredients = [], isLoading: loading } = useIngredients({ limit: 1000 })
    const [selectedIngredient, setSelectedIngredient] = useState<string>('')
    const [calculating, setCalculating] = useState(false)
    const [recalculating, setRecalculating] = useState(false)
+
+  // Cleanup timeout on unmount
+  _useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
 
   // Calculate WAC for selected ingredient
   const calculateWac = () => {
@@ -37,50 +49,50 @@ const WacEnginePage = () => {
     }
 
     try {
-      void setCalculating(true)
+      setCalculating(true)
       // This would normally call a WAC API endpoint
       // For now, we'll simulate the calculation
       toast({
         title: 'Info',
         description: 'WAC calculation endpoint not yet implemented',
       })
-    } catch (err: unknown) {
-      dbLogger.error({ err }, 'Failed to calculate WAC')
+    } catch (error) {
+      dbLogger.error({ error }, 'Failed to calculate WAC')
       toast({
         title: 'Error',
         description: 'Failed to calculate WAC',
         variant: 'destructive'
       })
     } finally {
-      void setCalculating(false)
+      setCalculating(false)
     }
   }
 
   // Recalculate all WAC values
   const recalculateAll = () => {
     try {
-      void setRecalculating(true)
+      setRecalculating(true)
       toast({
         title: 'Info',
         description: 'Full WAC recalculation started',
       })
 
       // Simulate recalculation
-      setTimeout(() => {
-        void setRecalculating(false)
+      timeoutRef.current = setTimeout(() => {
+        setRecalculating(false)
         toast({
           title: 'Success',
           description: 'WAC recalculation completed',
         })
       }, 2000)
-    } catch (err: unknown) {
-      dbLogger.error({ err }, 'Failed to recalculate WAC')
+    } catch (error) {
+      dbLogger.error({ error }, 'Failed to recalculate WAC')
       toast({
         title: 'Error',
         description: 'Failed to recalculate WAC',
         variant: 'destructive'
       })
-      void setRecalculating(false)
+      setRecalculating(false)
     }
   }
 
@@ -121,7 +133,7 @@ const WacEnginePage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {ingredients.map((ingredient) => (
-                      <SelectItem key={ingredient.id} value={ingredient.id}>
+                      <SelectItem key={ingredient['id']} value={ingredient['id']}>
                         {ingredient.name}
                       </SelectItem>
                     ))}
@@ -252,7 +264,7 @@ const WacEnginePage = () => {
           <CardContent>
             <div className="space-y-2">
               {ingredients.slice(0, 10).map((ingredient) => (
-                <div key={ingredient.id} className="flex justify-between items-center p-3 border rounded-lg">
+                <div key={ingredient['id']} className="flex justify-between items-center p-3 border rounded-lg">
                   <div>
                     <div className="font-medium">{ingredient.name}</div>
                     <div className="text-sm text-muted-foreground">

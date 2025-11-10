@@ -1,4 +1,4 @@
-import type { SmartNotification, UserPreferences } from './types'
+import type { SmartNotification, UserPreferences } from '@/lib/automation/notification-system/types'
 
 /**
  * Notification Filter Module

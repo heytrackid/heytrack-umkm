@@ -6,13 +6,13 @@
 
 export interface ChatMessage {
   id: string
-  role: 'user' | 'assistant' | 'system'
+  role: 'assistant' | 'system' | 'user'
   content: string
   timestamp: Date
 }
 
 export interface ChatAction {
-  type: 'navigate' | 'create' | 'update' | 'delete' | 'search'
+  type: 'create' | 'delete' | 'navigate' | 'search' | 'update'
   label?: string
   target?: string
   data?: Record<string, unknown>
@@ -22,7 +22,7 @@ export interface ChatContext {
   userId: string
   sessionId?: string
   conversationHistory?: Array<{
-    role: 'user' | 'assistant'
+    role: 'assistant' | 'user' | 'system'
     content: string
     timestamp: Date
   }>

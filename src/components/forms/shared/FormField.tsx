@@ -1,13 +1,14 @@
 'use client'
 
-import type { ReactNode } from 'react'
 import { Label } from '@/components/ui/label'
+
+import type { ReactNode } from 'react'
 
 
 
 interface FormFieldProps {
   label: string
-  error?: string
+  error?: string | undefined
   required?: boolean
   children: ReactNode
 }

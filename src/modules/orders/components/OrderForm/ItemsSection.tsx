@@ -1,12 +1,15 @@
 'use client'
 
+import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
+
 import type { OrderItemWithRecipe } from '@/app/orders/types/orders-db.types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCurrency } from '@/hooks/useCurrency'
+
 import type { Row } from '@/types/database'
-import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
+
 
 
 
@@ -79,7 +82,7 @@ export const ItemsSection = ({
             ) : (
                 <div className="space-y-3">
                     {orderItems.map((item, index: number) => {
-                        const itemKey = item.id ?? `${item.recipe_id ?? 'recipe'}-${item.product_name ?? 'product'}-${item.total_price ?? '0'}-${item.special_requests ?? 'none'}`
+                        const itemKey = item['id'] ?? `${item.recipe_id ?? 'recipe'}-${item.product_name ?? 'product'}-${item.total_price ?? '0'}-${item.special_requests ?? 'none'}`
                         return (
                             <div key={itemKey} className="border rounded-lg overflow-hidden">
                                 {/* Mobile View */}
@@ -94,7 +97,7 @@ export const ItemsSection = ({
                                                     onChange={(e) => onUpdateItem(index, 'recipe_id', e.target.value)}
                                                 >
                                                     {availableRecipes.map(recipe => (
-                                                        <option key={recipe.id} value={recipe.id}>
+                                                        <option key={recipe['id']} value={recipe['id']}>
                                                             {recipe.name}
                                                         </option>
                                                     ))}
@@ -157,7 +160,7 @@ export const ItemsSection = ({
                                                 onChange={(e) => onUpdateItem(index, 'recipe_id', e.target.value)}
                                             >
                                                 {availableRecipes.map(recipe => (
-                                                    <option key={recipe.id} value={recipe.id}>
+                                                    <option key={recipe['id']} value={recipe['id']}>
                                                         {recipe.name}
                                                     </option>
                                                 ))}

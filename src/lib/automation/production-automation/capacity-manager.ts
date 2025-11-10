@@ -1,4 +1,4 @@
-import type { Equipment, Staffing, ProductionCapacity } from './types'
+import type { Equipment, Staffing, ProductionCapacity } from '@/lib/automation/production-automation/types'
 
 /**
  * Capacity Manager Module

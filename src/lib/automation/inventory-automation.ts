@@ -1,14 +1,14 @@
-/* eslint-disable no-nested-ternary */
+ 
 import type {
     AutomationConfig,
     Ingredient,
     InventoryAnalysis,
     InventoryStatus,
     ReorderUrgency
-} from './types'
+} from '@/lib/automation/types'
 
 export class InventoryAutomation {
-  constructor(private config: AutomationConfig) {}
+  constructor(private readonly config: AutomationConfig) {}
 
   /**
    * 📊 INVENTORY AUTOMATION: Smart Stock Management
@@ -18,7 +18,7 @@ export class InventoryAutomation {
     usageData: Record<string, number>
   ): InventoryAnalysis[] {
     return ingredients.map(ingredient => {
-      const monthlyUsage = usageData[ingredient.id] || 0
+      const monthlyUsage = usageData[ingredient['id']] || 0
       const dailyUsage = monthlyUsage / 30
       const daysRemaining = dailyUsage > 0 ? (ingredient.current_stock ?? 0) / dailyUsage : Infinity
 
@@ -61,7 +61,7 @@ export class InventoryAutomation {
    * Determine inventory status based on current levels
    */
   private getInventoryStatus(
-    daysRemaining: number, 
+    _daysRemaining: number, 
     currentStock: number, 
     minStock: number
   ): InventoryStatus {
@@ -129,7 +129,7 @@ export class InventoryAutomation {
     forecastDays = 30
   ) {
     return ingredients.map(ingredient => {
-      const usage = historicalUsage[ingredient.id] || []
+      const usage = historicalUsage[ingredient['id']] || []
       
       if (usage.length < 7) {
         return {

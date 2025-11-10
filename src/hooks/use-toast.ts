@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, type ReactNode } from 'react'
+
 import type {
 
 
@@ -35,21 +36,18 @@ function genId() {
 }
 
 type Action =
-  | {
+  {
       type: ActionType['ADD_TOAST']
       toast: ToasterToast
-    }
-  | {
-      type: ActionType['UPDATE_TOAST']
-      toast: Partial<ToasterToast>
-    }
-  | {
+    } | {
       type: ActionType['DISMISS_TOAST']
       toastId?: ToasterToast['id']
-    }
-  | {
+    } | {
       type: ActionType['REMOVE_TOAST']
       toastId?: ToasterToast['id']
+    } | {
+      type: ActionType['UPDATE_TOAST']
+      toast: Partial<ToasterToast>
     }
 
 interface State {
@@ -75,7 +73,7 @@ const addToRemoveQueue = (toastId: string) => {
 }
 
 export const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
+  switch (action['type']) {
     case 'ADD_TOAST':
       return {
         ...state,
@@ -86,7 +84,7 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t
+          t['id'] === action.toast['id'] ? { ...t, ...action.toast } : t
         ),
       }
 
@@ -99,14 +97,14 @@ export const reducer = (state: State, action: Action): State => {
         addToRemoveQueue(toastId)
       } else {
         state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id)
+          addToRemoveQueue(toast['id'])
         })
       }
 
       return {
         ...state,
         toasts: state.toasts.map((t) =>
-          t.id === toastId || toastId === undefined
+          t['id'] === toastId || toastId === undefined
             ? {
                 ...t,
                 open: false,
@@ -124,10 +122,12 @@ export const reducer = (state: State, action: Action): State => {
       }
       return {
         ...state,
-        toasts: state.toasts.filter((t) => t.id !== action.toastId),
-      }
-  }
-}
+        toasts: state.toasts.filter((t) => t['id'] !== action.toastId),
+       }
+     default:
+       return state
+   }
+ }
 
 const listeners: Array<(state: State) => void> = []
 
@@ -195,7 +195,7 @@ function useToast() {
 export function successToast(
   title: string, 
   description?: string,
-  options?: Omit<Toast, 'title' | 'description' | 'variant'>
+  options?: Omit<Toast, 'description' | 'title' | 'variant'>
 ) {
   return toast({
     title,
@@ -208,7 +208,7 @@ export function successToast(
 export function errorToast(
   title: string,
   description?: string,
-  options?: Omit<Toast, 'title' | 'description' | 'variant'>
+  options?: Omit<Toast, 'description' | 'title' | 'variant'>
 ) {
   return toast({
     title,
@@ -221,7 +221,7 @@ export function errorToast(
 export function warningToast(
   title: string,
   description?: string,
-  options?: Omit<Toast, 'title' | 'description' | 'variant'>
+  options?: Omit<Toast, 'description' | 'title' | 'variant'>
 ) {
   return toast({
     title,
@@ -234,7 +234,7 @@ export function warningToast(
 export function infoToast(
   title: string,
   description?: string,
-  options?: Omit<Toast, 'title' | 'description' | 'variant'>
+  options?: Omit<Toast, 'description' | 'title' | 'variant'>
 ) {
   return toast({
     title,

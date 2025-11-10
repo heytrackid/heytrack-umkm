@@ -1,10 +1,11 @@
 'use client'
 
-import { type ReactNode, type TouchEvent as ReactTouchEvent, useState, useEffect, useRef, useCallback } from 'react'
-import { cn } from '@/lib/utils'
 import { Loader2, RefreshCw } from 'lucide-react'
-import { isTouchDevice } from '@/utils/responsive'
+import { type ReactNode, type TouchEvent as ReactTouchEvent, useState, useEffect, useRef, useCallback } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
+import { cn } from '@/lib/utils'
+import { isTouchDevice } from '@/utils/responsive'
 
 const logger = createClientLogger('MobileGestures')
 
@@ -34,12 +35,12 @@ export const PullToRefresh = ({
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const handleTouchStart = (e: TouchEvent) => {
-    if (disabled || !isMobile || window.scrollY > 0) { return }
+    if (disabled || !isMobile || window.scrollY > 0 || !e.touches[0]) { return }
     startY.current = e.touches[0].clientY
   }
 
   const handleTouchMove = (e: TouchEvent) => {
-    if (disabled || !isMobile || isRefreshing || startY.current === 0) { return }
+    if (disabled || !isMobile || isRefreshing || startY.current === 0 || !e.touches[0]) { return }
 
     currentY.current = e.touches[0].clientY
     const distance = currentY.current - startY.current
@@ -81,7 +82,7 @@ export const PullToRefresh = ({
   useEffect(() => {
     if (!isMobile) { return }
 
-    const element = document.body
+    const element = document['body']
 
     element.addEventListener('touchstart', handleTouchStart, { passive: true })
     element.addEventListener('touchmove', handleTouchMove, { passive: false })
@@ -287,7 +288,7 @@ interface SwipeAction {
   id: string
   label: string
   icon?: ReactNode
-  color: 'red' | 'green' | 'blue' | 'yellow' | 'gray'
+  color: 'blue' | 'gray' | 'green' | 'red' | 'yellow'
   onClick: () => void
 }
 
@@ -313,19 +314,21 @@ export const SwipeActions = ({
   const startX = useRef(0)
   const currentX = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
-  const handleTouchStart = (e: TouchEvent | ReactTouchEvent) => {
+  const handleTouchStart = (e: ReactTouchEvent | TouchEvent) => {
     if (!isTouchDevice() || actions.length === 0) { return }
 
     const touch = 'touches' in e ? e.touches[0] : e
+    if (!touch) {return}
     startX.current = touch.clientX
     setIsSwipeActive(true)
     onSwipeStart?.()
   }
 
-  const handleTouchMove = (e: TouchEvent | ReactTouchEvent) => {
+  const handleTouchMove = (e: ReactTouchEvent | TouchEvent) => {
     if (!isTouchDevice() || !isSwipeActive || startX.current === 0) { return }
 
     const touch = 'touches' in e ? e.touches[0] : e
+    if (!touch) {return}
     currentX.current = touch.clientX
     const distance = startX.current - currentX.current
 
@@ -404,7 +407,7 @@ export const SwipeActions = ({
         >
           {actions.map((action, index: number) => (
             <button
-              key={action.id}
+              key={action['id']}
               onClick={() => handleActionClick(action)}
               className={cn(
                 "w-20 h-full flex flex-col items-center justify-center",

@@ -1,6 +1,7 @@
 import { z } from 'zod'
+
 import { apiLogger } from '@/lib/logger'
-import { InputSanitizer } from '@/utils/security'
+import { InputSanitizer } from '@/utils/security/index'
 
 
 // Base validation utilities and core schemas
@@ -68,13 +69,13 @@ export type EnvConfig = z.infer<typeof EnvSchema>
 // Function to validate environment variables
 export function validateEnvironment(): EnvConfig {
   const env = {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
-    NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
-    NODE_ENV: process.env.NODE_ENV || 'development',
-    // CRON_SECRET: process.env.CRON_SECRET, // Removed
+    NEXT_PUBLIC_SUPABASE_URL: process['env']?.['NEXT_PUBLIC_SUPABASE_URL'],
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process['env']?.['NEXT_PUBLIC_SUPABASE_ANON_KEY'],
+    SUPABASE_SERVICE_ROLE_KEY: process['env']?.['SUPABASE_SERVICE_ROLE_KEY'],
+    OPENROUTER_API_KEY: process['env']?.['OPENROUTER_API_KEY'],
+    NEXT_PUBLIC_APP_URL: process['env']?.['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+    NODE_ENV: process['env']?.NODE_ENV || 'development',
+    // CRON_SECRET: process['env'].CRON_SECRET, // Removed
   }
 
   const validation = EnvSchema.safeParse(env)
@@ -87,7 +88,7 @@ export function validateEnvironment(): EnvConfig {
     throw new Error('Invalid environment configuration')
   }
 
-  return validation.data
+  return validation['data']
 }
 
 // Validation utility functions
@@ -99,11 +100,11 @@ export function validateFormData<T>(schema: z.ZodSchema<T>, data: unknown): {
   try {
     const result = schema.parse(data)
     return { success: true, data: result }
-  } catch (err: unknown) {
-    if (err instanceof z.ZodError) {
-      return { success: false, errors: err.issues }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, errors: error.issues }
     }
-    throw err
+    throw error
   }
 }
 

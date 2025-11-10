@@ -2,8 +2,8 @@
 
 export interface ProfitReportProps {
     dateRange: {
-        start: string
-        end: string
+        start: string | undefined
+        end: string | undefined
     }
 }
 
@@ -70,8 +70,8 @@ export interface ChartDataPoint {
 export const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 
 // Period type
-export type PeriodType = 'daily' | 'weekly' | 'monthly'
-export type ChartType = 'line' | 'bar' | 'area'
+export type PeriodType = 'daily' | 'monthly' | 'weekly'
+export type ChartType = 'area' | 'bar' | 'line'
 
 // Data point for selected chart data
 export interface SelectedDataPoint {

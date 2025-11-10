@@ -1,4 +1,4 @@
-import { getWorkflowAutomation } from './automation/workflows'
+import { getWorkflowAutomation } from '@/lib/automation/workflows'
 
 
 /**

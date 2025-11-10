@@ -8,12 +8,12 @@ import type { Row } from '@/types/database'
 // Use generated types for database entities
 
 export interface SmartNotification {
-  type: 'critical' | 'warning' | 'info' | 'success'
-  category: 'inventory' | 'production' | 'financial' | 'orders'
+  type: 'critical' | 'info' | 'success' | 'warning'
+  category: 'financial' | 'inventory' | 'orders' | 'production'
   title: string
   message: string
   action?: string
-  priority: 'low' | 'medium' | 'high'
+  priority: 'high' | 'low' | 'medium'
   timestamp?: Date
   data?: Record<string, unknown>
 }
@@ -46,7 +46,7 @@ export interface UserPreferences {
   enableFinancial?: boolean
   enableProduction?: boolean
   enableOrders?: boolean
-  minPriority?: 'low' | 'medium' | 'high'
+  minPriority?: 'high' | 'low' | 'medium'
 }
 
 export interface Equipment {

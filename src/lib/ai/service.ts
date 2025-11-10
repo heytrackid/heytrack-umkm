@@ -1,7 +1,8 @@
 import { apiLogger } from '@/lib/logger'
-import { AIClient } from './client'
-import { AISecurity } from './security'
-import { PromptBuilder } from './prompt-builder'
+
+import { AIClient } from '@/lib/ai/client'
+import { PromptBuilder } from '@/lib/ai/prompt-builder'
+import { AISecurity } from '@/lib/ai/security'
 
 /**
  * AI Service Module

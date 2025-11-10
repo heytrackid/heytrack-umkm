@@ -1,13 +1,6 @@
  
 'use client'
 
-import { memo } from 'react'
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import type { Order, PaymentStatus, Priority } from './types'
-import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
-import { useCurrency } from '@/hooks/useCurrency'
 import {
     Package,
     Calendar,
@@ -17,6 +10,16 @@ import {
     MapPin,
     AlertCircle
 } from 'lucide-react'
+import { memo } from 'react'
+
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import { getStatusInfo, getPaymentInfo, getPriorityInfo } from '@/components/orders/utils'
+
+import type { Order, PaymentStatus, Priority } from '@/components/orders/types'
 
 // ✅ OPTIMIZED: Memoized to prevent unnecessary re-renders in lists
 
@@ -33,7 +36,7 @@ const OrderSummaryCard = memo(({
     showActions: _showActions = false
 }: OrderSummaryCardProps) => {
     const { formatCurrency } = useCurrency()
-    const statusInfo = getStatusInfo(order.status ?? 'PENDING')
+    const statusInfo = getStatusInfo(order['status'] ?? 'PENDING')
     const paymentInfo = getPaymentInfo((order.payment_status ?? 'UNPAID') as PaymentStatus)
     const priorityInfo = getPriorityInfo((order.priority ?? 'normal') as Priority)
 
@@ -45,7 +48,7 @@ const OrderSummaryCard = memo(({
             <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                     <div>
-                        <CardTitle className="text-lg">{order.order_no}</CardTitle>
+                        <CardTitle className="text-lg">{order['order_no']}</CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
                             {new Date(order.created_at ?? '').toLocaleDateString('id-ID', {
                                 day: 'numeric',
@@ -71,7 +74,7 @@ const OrderSummaryCard = memo(({
                 {/* Customer Info */}
                 <div className="flex items-center gap-2 text-sm">
                     <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">{order.customer_name}</span>
+                    <span className="font-medium">{order['customer_name']}</span>
                 </div>
 
                 {order.customer_phone && (
@@ -111,7 +114,7 @@ const OrderSummaryCard = memo(({
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Package className="h-4 w-4" />
-                            <span>{(order as OrderWithRelations).items?.length || 0} item</span>
+                            <span>{(order as OrderWithRelations).items?.length ?? 0} item</span>
                         </div>
                         <div className="text-right">
                             <div className="font-bold text-lg">
@@ -129,8 +132,8 @@ const OrderSummaryCard = memo(({
 }, (prevProps, nextProps) =>
 // Custom comparison - only re-render if order data actually changed
 (
-    prevProps.order.id === nextProps.order.id &&
-    prevProps.order.status === nextProps.order.status &&
+    prevProps.order['id'] === nextProps.order['id'] &&
+    prevProps.order['status'] === nextProps.order['status'] &&
     prevProps.order.payment_status === nextProps.order.payment_status &&
     prevProps.order.total_amount === nextProps.order.total_amount &&
     prevProps.order.updated_at === nextProps.order.updated_at &&
@@ -140,4 +143,4 @@ const OrderSummaryCard = memo(({
 
 OrderSummaryCard.displayName = 'OrderSummaryCard'
 
-export default OrderSummaryCard
+export { OrderSummaryCard }

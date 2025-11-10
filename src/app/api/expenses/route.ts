@@ -1,20 +1,24 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { FinancialRecordInsertSchema } from '@/lib/validations/domains/finance'
-import { safeParseAmount, safeString } from '@/lib/api-helpers'
-import { apiLogger } from '@/lib/logger'
-import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/domains/common'
-import type { Insert } from '@/types/database'
-import { formatCurrency } from '@/lib/currency'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-import { getErrorMessage } from '@/lib/type-guards'
-import { typed } from '@/types/type-utilities'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
+
+import { NextResponse, type NextRequest } from 'next/server'
+
+
+import { formatCurrency } from '@/lib/currency'
+import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, safeString } from '@/lib/type-guards'
+import { DateRangeQuerySchema, PaginationQuerySchema } from '@/lib/validations/domains/common'
+import { FinancialRecordInsertSchema, type FinancialRecordInsert } from '@/lib/validations/domains/finance'
+import type { Insert } from '@/types/database'
+import { typed } from '@/types/type-utilities'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
+
+
+
 // Define the original GET function
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url)
 
   // Validate query parameters
@@ -46,8 +50,8 @@ async function GET(request: NextRequest) {
     )
   }
 
-  const { page, limit, search, sort_by, sort_order } = paginationValidation.data
-  const { start_date, end_date } = dateRangeValidation.data
+  const { page, limit, search, sort_by, sort_order } = paginationValidation['data']
+  const { start_date, end_date } = dateRangeValidation['data']
   const category = searchParams.get('category')
 
   try {
@@ -63,9 +67,10 @@ async function GET(request: NextRequest) {
     const offset = (page - 1) * limit
 
     let query = supabase
-      .from('expenses')
-      .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, created_at, updated_at')
-      .eq('user_id', user.id)
+      .from('financial_records')
+      .select('id, description, category, amount, date, reference, type, created_at, created_by')
+      .eq('user_id', user['id'])
+      .eq('type', 'EXPENSE')
       .range(offset, offset + limit - 1)
 
     // Add search filter
@@ -80,15 +85,15 @@ async function GET(request: NextRequest) {
 
     // Add date range filter
     if (start_date) {
-      query = query.gte('expense_date', start_date)
+      query = query.gte('date', start_date)
     }
 
     if (end_date) {
-      query = query.lte('expense_date', end_date)
+      query = query.lte('date', end_date)
     }
 
     // Add sorting
-    const sortField = sort_by ?? 'expense_date'
+    const sortField = sort_by ?? 'date'
     const sortDirection = sort_order === 'asc'
     query = query.order(sortField, { ascending: sortDirection })
 
@@ -97,7 +102,7 @@ async function GET(request: NextRequest) {
     if (error) {throw error}
 
     // Get total count for pagination
-    let countQuery = supabase.from('expenses').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+    let countQuery = supabase.from('financial_records').select('id', { count: 'exact', head: true }).eq('user_id', user['id']).eq('type', 'EXPENSE')
 
     // Apply same filters to count query
     if (search) {
@@ -107,42 +112,45 @@ async function GET(request: NextRequest) {
       countQuery = countQuery.eq('category', category)
     }
     if (start_date) {
-      countQuery = countQuery.gte('expense_date', start_date)
+      countQuery = countQuery.gte('date', start_date)
     }
     if (end_date) {
-      countQuery = countQuery.lte('expense_date', end_date)
+      countQuery = countQuery.lte('date', end_date)
     }
 
     const { count } = await countQuery
 
     // Get summary stats for dashboard
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date().toISOString().split('T')[0] as string
     const thisMonth = new Date().toISOString().slice(0, 7)
     
     const { data: todayExpenses } = await supabase
-      .from('expenses')
+      .from('financial_records')
       .select('amount, category')
-      .eq('user_id', user.id)
-      .eq('expense_date', today)
+      .eq('user_id', user['id'])
+      .eq('type', 'EXPENSE')
+      .gte('date', today)
+      .lte('date', today)
 
     const { data: monthExpenses } = await supabase
-      .from('expenses')
+      .from('financial_records')
       .select('amount, category')
-      .eq('user_id', user.id)
-      .gte('expense_date', `${thisMonth}-01`)
-      .lte('expense_date', `${thisMonth}-31`)
+      .eq('user_id', user['id'])
+      .eq('type', 'EXPENSE')
+      .gte('date', `${thisMonth}-01`)
+      .lte('date', `${thisMonth}-31`)
 
     interface ExpensePartial { amount: number; category: string }
     
     const todayTotal = (todayExpenses ?? []).reduce((sum: number, exp: ExpensePartial) =>
-      sum + safeParseAmount(exp.amount), 0)
+      sum + (value => value ?? 0)(exp.amount), 0)
     const monthTotal = (monthExpenses ?? []).reduce((sum: number, exp: ExpensePartial) =>
-      sum + safeParseAmount(exp.amount), 0)
+      sum + (value => value ?? 0)(exp.amount), 0)
 
     // Category breakdown
     const categoryBreakdown = monthExpenses?.reduce((acc: Record<string, number>, exp: ExpensePartial) => {
       const category = safeString(exp.category, 'Uncategorized')
-      acc[category] = (acc[category] || 0) + safeParseAmount(exp.amount)
+      acc[category] = (acc[category] ?? 0) + (value => value ?? 0)(exp.amount)
       return acc
     }, {} as Record<string, number>) ?? {}
 
@@ -167,7 +175,7 @@ async function GET(request: NextRequest) {
 }
 
 // Define the original POST function
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = typed(await createClient())
 
@@ -178,10 +186,10 @@ async function POST(request: NextRequest) {
     }
 
     // The request body is already sanitized by the security middleware
-    const body = await request.json()
+    const _body = await request.json() as FinancialRecordInsert
 
     // Validate request body
-    const validation = FinancialRecordInsertSchema.safeParse(body)
+    const validation = FinancialRecordInsertSchema.safeParse(_body)
     if (!validation.success) {
       return NextResponse.json(
         {
@@ -192,11 +200,11 @@ async function POST(request: NextRequest) {
       )
     }
 
-    const validatedData = validation.data
+    const validatedData = validation['data']
 
     const insertPayload: Insert<'financial_records'> = {
       ...validatedData,
-      user_id: user.id,
+      user_id: user['id'],
       description: validatedData.description ?? '',
     }
 
@@ -210,7 +218,7 @@ async function POST(request: NextRequest) {
     if (error) {throw error}
 
     // Create notification for large expenses
-    const expenseAmount = safeParseAmount(validatedData.amount)
+    const expenseAmount = (value => value ?? 0)(validatedData.amount)
     if (expenseAmount > 1000000 && expense) { // More than 1M IDR
       const notificationPayload: Insert<'notifications'> = {
         user_id: expense.user_id,
@@ -219,7 +227,7 @@ async function POST(request: NextRequest) {
         title: 'Large Expense Recorded',
         message: `A large expense of ${formatCurrency(expenseAmount, { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', decimals: 0 })} has been recorded for ${safeString(validatedData.category)}`,
         entity_type: 'expense',
-        entity_id: expense.id,
+        entity_id: expense['id'],
         priority: 'high'
       }
       await supabase

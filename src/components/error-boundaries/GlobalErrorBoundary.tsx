@@ -1,9 +1,10 @@
 'use client'
 
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('GlobalErrorBoundary')
@@ -41,7 +42,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
     }
   }
 
-  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Log the error
     const errorId = this.state.errorId ?? `error_${Date.now()}`
 
@@ -66,15 +67,15 @@ export class GlobalErrorBoundary extends Component<Props, State> {
     // Example: Sentry.captureException(error, { contexts: { react: { componentStack: errorInfo.componentStack } } })
   }
 
-  handleRetry = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined })
+  handleRetry = (): void => {
+    this.setState({ hasError: false })
   }
 
-  handleGoHome = () => {
+  handleGoHome = (): void => {
     window.location.href = '/'
   }
 
-  override render() {
+  override render(): ReactNode {
     if (this.state.hasError) {
       // Custom fallback UI
       if (this.props.fallback) {

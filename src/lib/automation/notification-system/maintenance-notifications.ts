@@ -1,4 +1,4 @@
-import type { SmartNotification, Equipment } from './types'
+import type { SmartNotification, Equipment } from '@/lib/automation/notification-system/types'
 
 /**
  * Maintenance Notifications Module

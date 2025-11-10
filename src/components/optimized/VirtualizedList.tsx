@@ -1,7 +1,8 @@
 'use client'
 
-import { useVirtualScroll } from '@/lib/performance-optimized'
 import { type ReactNode, memo } from 'react'
+
+import { useSimpleVirtualScroll } from '@/lib/performance/index'
 
 /**
  * Virtualized List Component
@@ -30,7 +31,7 @@ const VirtualizedListComponent = <T,>({
   emptyMessage = 'Tidak ada data'
 }: VirtualizedListProps<T>) => {
   const { visibleItems, totalHeight, offsetY, handleScroll, visibleRange } =
-    useVirtualScroll(items, itemHeight, containerHeight)
+    useSimpleVirtualScroll(items, itemHeight, containerHeight)
 
   if (items.length === 0) {
     return (

@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
-import { createClientLogger } from '@/lib/client-logger'
 
-const logger = createClientLogger('Hook')
+import { useToast } from '@/hooks/use-toast'
+import type { ApiErrorResponse, ApiSuccessResponse } from '@/lib/api-core'
+import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { Row, Insert, Update } from '@/types/database'
+
+const logger = createClientLogger('Hook')
 
 /**
  * React Query hooks for Ingredients
@@ -40,7 +42,10 @@ export function useIngredients(options?: UseIngredientsOptions) {
       if (!response.ok) {
         throw new Error('Failed to fetch ingredients')
       }
-      const result = await response.json() as { data?: { ingredients?: Ingredient[]; pagination?: unknown } }
+      const result = await response.json() as ApiSuccessResponse<{ ingredients?: Ingredient[]; pagination?: unknown }> | ApiErrorResponse
+      if (!('success' in result) || !result.success) {
+        throw new Error(result?.error ?? 'Failed to fetch ingredients')
+      }
       return result.data ?? { ingredients: [], pagination: null }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -65,9 +70,13 @@ export function useIngredient(id: string | null) {
       if (!response.ok) {
         throw new Error('Failed to fetch ingredient')
       }
-      return response.json()
+      const payload = await response.json() as ApiSuccessResponse<Ingredient> | ApiErrorResponse
+      if (!('success' in payload) || !payload.success) {
+        throw new Error(payload?.error ?? 'Failed to fetch ingredient')
+      }
+      return payload.data ?? null
     },
-    enabled: !!id,
+    enabled: Boolean(id),
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   })
@@ -94,7 +103,11 @@ export function useCreateIngredient() {
         throw new Error(error.message ?? 'Failed to create ingredient')
       }
       
-      return response.json()
+      const payload = await response.json() as ApiSuccessResponse<Ingredient> | ApiErrorResponse
+      if (!('success' in payload) || !payload.success) {
+        throw new Error(payload?.error ?? 'Failed to create ingredient')
+      }
+      return payload.data
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
@@ -138,10 +151,14 @@ export function useUpdateIngredient() {
         throw new Error(error.message ?? 'Failed to update ingredient')
       }
       
-      return response.json()
+      const payload = await response.json() as ApiSuccessResponse<Ingredient> | ApiErrorResponse
+      if (!('success' in payload) || !payload.success) {
+        throw new Error(payload?.error ?? 'Failed to update ingredient')
+      }
+      return payload.data
     },
     onSuccess: (_, variables) => {
-      void queryClient.invalidateQueries({ queryKey: ['ingredient', variables.id] })
+      void queryClient.invalidateQueries({ queryKey: ['ingredient', variables['id']] })
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
       
       toast({
@@ -181,7 +198,11 @@ export function useDeleteIngredient() {
         throw new Error(error.message ?? 'Failed to delete ingredient')
       }
       
-      return response.json()
+      const payload = await response.json() as ApiSuccessResponse<null> | ApiErrorResponse
+      if (!('success' in payload) || !payload.success) {
+        throw new Error(payload?.error ?? 'Failed to delete ingredient')
+      }
+      return payload.data
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['ingredients'] })

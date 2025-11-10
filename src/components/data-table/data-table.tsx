@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import {
   type ColumnDef,
   type SortingState,
@@ -12,6 +11,17 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import { useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -20,15 +30,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
 interface DataTableProps<TData, TValue> {
@@ -47,6 +48,7 @@ interface DataTableProps<TData, TValue> {
 
 /**
  * DataTable - Reusable table component with sorting, filtering, pagination
+ * Note: Use LazyDataTable for better performance in pages
  */
 export const DataTable = <TData, TValue>({
   columns,
@@ -60,11 +62,12 @@ export const DataTable = <TData, TValue>({
   showColumnToggle = true,
   onRowClick,
   className,
-}: DataTableProps<TData, TValue>) => {
+}: DataTableProps<TData, TValue>): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = useState('')
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
@@ -113,12 +116,12 @@ export const DataTable = <TData, TValue>({
                 .filter((column) => column.getCanHide())
                 .map((column) => (
                   <DropdownMenuCheckboxItem
-                    key={column.id}
+                    key={column['id']}
                     className="capitalize"
                     checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    onCheckedChange={(value) => column.toggleVisibility(Boolean(value))}
                   >
-                    {column.id}
+                    {column['id']}
                   </DropdownMenuCheckboxItem>
                 ))}
             </DropdownMenuContent>
@@ -131,9 +134,9 @@ export const DataTable = <TData, TValue>({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="bg-muted/50">
+              <TableRow key={headerGroup['id']}>
+                {headerGroup['headers'].map((header) => (
+                  <TableHead key={header['id']} className="bg-muted/50">
                     {header.isPlaceholder ? null : (
                       <div
                         onClick={header.column.getToggleSortingHandler()}
@@ -171,12 +174,12 @@ export const DataTable = <TData, TValue>({
             {!isLoading && table.getRowModel().rows?.length > 0 && (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  key={row.id}
+                  key={row['id']}
                   onClick={() => onRowClick?.(row.original)}
                   className={cn(onRowClick && 'cursor-pointer hover:bg-muted/50')}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell['id']}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}

@@ -2,9 +2,10 @@ import { AIClient, NLPProcessor } from '@/lib/ai'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ClientFile')
-import { ContextManager } from './context-manager'
-import { ChatbotPromptBuilder } from './prompt-builder'
-import type { AIResponse } from './types'
+import { ContextManager } from '@/lib/ai-chatbot/context-manager'
+import { ChatbotPromptBuilder } from '@/lib/ai-chatbot/prompt-builder'
+
+import type { AIResponse } from '@/lib/ai-chatbot/types'
 
 /**
  * Context-Aware AI Chatbot
@@ -13,7 +14,7 @@ import type { AIResponse } from './types'
 
 
 export class ContextAwareAI {
-  private contextManager: ContextManager
+  private readonly contextManager: ContextManager
 
   constructor(userId: string, sessionId?: string) {
     this.contextManager = new ContextManager(userId, sessionId)

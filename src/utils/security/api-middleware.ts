@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { APISecurity } from './index'
+import { z } from 'zod'
+
 import { apiLogger } from '@/lib/logger'
 
+import { APISecurity } from '@/utils/security/index'
 
-/* eslint-disable */
+const BaseBodySchema = z.union([
+  z.object({}).passthrough(),
+  z.array(z.unknown()),
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null()
+])
+
+
+ 
 
 /**
  * API Security Middleware
@@ -17,6 +29,9 @@ export interface SecurityConfig {
   // Validation options
   validateContentType?: boolean
   allowedContentTypes?: string[]
+  // CSRF protection options
+  enableCSRFProtection?: boolean
+  allowedOrigins?: string[]
   // Rate limiting options
   rateLimit?: {
     maxRequests: number
@@ -33,6 +48,8 @@ const DEFAULT_SECURITY_CONFIG: SecurityConfig = {
   sanitizeQueryParams: true,
   validateContentType: true,
   allowedContentTypes: ['application/json'],
+  enableCSRFProtection: true,
+  allowedOrigins: process.env['NEXT_PUBLIC_APP_URL'] ? [process.env['NEXT_PUBLIC_APP_URL']] : [],
   checkForSQLInjection: true,
   checkForXSS: true
 }
@@ -128,18 +145,59 @@ export function withSecurity<Params extends {} = {}>(
 ) {
   return async (req: NextRequest, params: Params): Promise<NextResponse> => {
     const mergedConfig = { ...DEFAULT_SECURITY_CONFIG, ...config }
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+    const clientIP = req['headers'].get('x-forwarded-for') || req['headers'].get('x-real-ip') || 'unknown'
     const {url} = req
     
-    // 1. Content-Type validation (only for requests with body)
+    // 1. CSRF Protection for state-changing operations
+    if (mergedConfig.enableCSRFProtection && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+      const origin = req['headers'].get('origin')
+      const referer = req['headers'].get('referer')
+      const host = req['headers'].get('host')
+
+      // Check Origin header
+      if (origin && mergedConfig.allowedOrigins && mergedConfig.allowedOrigins.length > 0) {
+        if (!mergedConfig.allowedOrigins.includes(origin)) {
+          apiLogger.warn({
+            clientIP,
+            url,
+            origin,
+            method: req.method
+          }, 'CSRF protection: Invalid origin')
+          return NextResponse.json(
+            { error: 'CSRF protection: Invalid origin' },
+            { status: 403 }
+          )
+        }
+      }
+
+      // Check Referer header as fallback
+      if (referer && host && !referer.includes(host)) {
+        // Allow localhost for development
+        if (!host.includes('localhost') && !host.includes('127.0.0.1')) {
+          apiLogger.warn({
+            clientIP,
+            url,
+            referer,
+            host,
+            method: req.method
+          }, 'CSRF protection: Invalid referer')
+          return NextResponse.json(
+            { error: 'CSRF protection: Invalid referer' },
+            { status: 403 }
+          )
+        }
+      }
+    }
+
+    // 2. Content-Type validation (only for requests with body)
     if (mergedConfig.validateContentType) {
-      const contentType = req.headers.get('content-type')?.split(';')[0] || ''
+      const contentType = req['headers'].get('content-type')?.split(';')[0] || ''
       // Only validate content-type for methods that typically have a body
       if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
         if (contentType && !mergedConfig.allowedContentTypes?.includes(contentType)) {
-          apiLogger.warn({ 
-            clientIP, 
-            url, 
+          apiLogger.warn({
+            clientIP,
+            url,
             contentType,
             method: req.method
           }, 'Invalid content type')
@@ -192,15 +250,34 @@ export function withSecurity<Params extends {} = {}>(
       processedReq = new NextRequest(newUrlObj.toString(), req)
     }
 
+    // Cache for request body to prevent multiple consumption
+    let cachedBodyText: string | undefined = undefined
+
+    const readBodyOnce = async (): Promise<string> => {
+      if (cachedBodyText === undefined) {
+        const clone = req.clone()
+        cachedBodyText = await clone.text()
+      }
+      return cachedBodyText
+    }
+
     // 4. Request body sanitization
     let sanitizedBody: Record<string, unknown> | undefined = undefined
-    
+
     if (mergedConfig.sanitizeInputs && req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'DELETE') {
       try {
-        // Clone the request to avoid consuming the body
-        const clonedReq = req.clone()
-        const body = await clonedReq.json()
+        // Use cached body to avoid consuming the stream multiple times
+        const bodyText = await readBodyOnce()
+        const body = JSON.parse(bodyText)
         sanitizedBody = APISecurity.sanitizeRequestBody(body)
+        try {
+          BaseBodySchema.parse(sanitizedBody)
+        } catch {
+          return NextResponse.json(
+            { error: 'Invalid request body' },
+            { status: 400 }
+          )
+        }
       } catch (e) {
         // If parsing fails, continue without sanitization but log
         apiLogger.warn({ error: 'Failed to parse request body for sanitization' }, 'Body parsing error')
@@ -210,13 +287,13 @@ export function withSecurity<Params extends {} = {}>(
     // 5. Additional security checks
     if (mergedConfig.checkForSQLInjection || mergedConfig.checkForXSS) {
       let checkData = sanitizedBody || {}
-      
+
       // If we don't have a sanitized body and method has body, parse for security checks
       if (!sanitizedBody && req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'DELETE') {
         try {
-          // Clone the request to avoid consuming the body
-          const clonedReq = req.clone()
-          checkData = await clonedReq.json()
+          // Use cached body to avoid consuming the stream multiple times
+          const bodyText = await readBodyOnce()
+          checkData = JSON.parse(bodyText)
         } catch (e) {
           // If we can't parse the body, use an empty object
           checkData = {}
@@ -259,13 +336,21 @@ export function withSecurity<Params extends {} = {}>(
       }
     }
 
-    // 6. Add sanitized body to request if it was modified
+    // 6. Rehydrate request with proper body
     if (sanitizedBody !== undefined) {
-      // Create a new request with sanitized body
-      processedReq = new NextRequest(req.url, {
-        method: req.method,
-        headers: req.headers,
-        body: JSON.stringify(sanitizedBody)
+      // Use sanitized body if it was modified
+      const sanitizedJson = JSON.stringify(sanitizedBody)
+      processedReq = new NextRequest(processedReq, {
+        body: sanitizedJson,
+        headers: new Headers(processedReq.headers),
+        method: processedReq.method
+      })
+    } else if (cachedBodyText !== undefined) {
+      // Rehydrate with original cached body if no sanitization occurred
+      processedReq = new NextRequest(processedReq, {
+        body: cachedBodyText,
+        headers: new Headers(processedReq.headers),
+        method: processedReq.method
       })
     }
 
@@ -274,9 +359,9 @@ export function withSecurity<Params extends {} = {}>(
       const response = await handler(processedReq, params)
       
       // Add security headers to the response
-      response.headers.set('X-Content-Type-Options', 'nosniff')
-      response.headers.set('X-Frame-Options', 'DENY')
-      response.headers.set('X-XSS-Protection', '1; mode=block')
+      response['headers'].set('X-Content-Type-Options', 'nosniff')
+      response['headers'].set('X-Frame-Options', 'DENY')
+      response['headers'].set('X-XSS-Protection', '1; mode=block')
       
       return response
     } catch (error) {
@@ -311,19 +396,19 @@ function flattenObject(obj: unknown, prefix = '', result: Record<string, unknown
 }
 
 // Helper function to detect potential SQL injection patterns
-function hasSQLInjectionPattern(input: string): boolean {
+export function hasSQLInjectionPattern(input: string): boolean {
   const sqlPatterns = [
     /(\b(OR|AND)\b\s+.*(?:=|>|<|LIKE)\s*['"][^'"]*['"])/gi,
     /(\b(DROP|DELETE|INSERT|UPDATE|SELECT|UNION|EXEC|EXECUTE)\b)/gi,
     /(;|--|\/\*|\*\/|xp_|sp_|0x)/gi,
     /('%.*%'|\".*\")/g // Potential wildcard SQL injection
   ]
-  
+
   return sqlPatterns.some(pattern => pattern.test(input))
 }
 
 // Helper function to detect potential XSS patterns
-function hasXSSPattern(input: string): boolean {
+export function hasXSSPattern(input: string): boolean {
   const xssPatterns = [
     /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
     /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
@@ -336,7 +421,7 @@ function hasXSSPattern(input: string): boolean {
     /on\w+\s*=/gi, // Event handlers like onclick, onload, etc.
     /<\s*img[^>]+on\w+\s*=/gi // Image tags with event handlers
   ]
-  
+
   return xssPatterns.some(pattern => pattern.test(input))
 }
 
@@ -347,37 +432,43 @@ export const SecurityPresets = {
     sanitizeInputs: true,
     sanitizeQueryParams: true,
     validateContentType: false, // Allow any content type in dev
+    enableCSRFProtection: false, // Disable CSRF in dev for easier testing
     rateLimit: { maxRequests: 1000, windowMs: 15 * 60 * 1000 }, // Very high limit for dev
-    checkForSQLInjection: false,
-    checkForXSS: false
+    checkForSQLInjection: false, // Explicit: No SQL injection checks
+    checkForXSS: false         // Explicit: No XSS checks
   }),
-  
-  // Basic security for most API routes
+
+  // Basic security for most API routes - NO deep body inspection
   basic: (): SecurityConfig => ({
     sanitizeInputs: true,
     sanitizeQueryParams: true,
     validateContentType: true,
     allowedContentTypes: ['application/json'],
-    rateLimit: { maxRequests: 100, windowMs: 15 * 60 * 1000 } // 100 requests per 15 minutes
+    enableCSRFProtection: true,
+    rateLimit: { maxRequests: 100, windowMs: 15 * 60 * 1000 }, // 100 requests per 15 minutes
+    checkForSQLInjection: false, // Explicit: No SQL injection checks (prevents body consumption)
+    checkForXSS: false         // Explicit: No XSS checks (prevents body consumption)
   }),
-  
-  // Enhanced security for sensitive routes
+
+  // Enhanced security for sensitive routes - WITH deep body inspection
   enhanced: (): SecurityConfig => ({
     sanitizeInputs: true,
     sanitizeQueryParams: true,
     validateContentType: true,
     allowedContentTypes: ['application/json'],
+    enableCSRFProtection: true,
     rateLimit: { maxRequests: 50, windowMs: 15 * 60 * 1000 }, // 50 requests per 15 minutes
-    checkForSQLInjection: true,
-    checkForXSS: true
+    checkForSQLInjection: true,  // Explicit: YES SQL injection checks
+    checkForXSS: true           // Explicit: YES XSS checks
   }),
-  
+
   // Maximum security for critical routes
   maximum: (): SecurityConfig => ({
     sanitizeInputs: true,
     sanitizeQueryParams: true,
     validateContentType: true,
     allowedContentTypes: ['application/json'],
+    enableCSRFProtection: true,
     rateLimit: { maxRequests: 20, windowMs: 15 * 60 * 1000 }, // 20 requests per 15 minutes
     checkForSQLInjection: true,
     checkForXSS: true

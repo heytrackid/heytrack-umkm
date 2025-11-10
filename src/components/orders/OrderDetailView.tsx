@@ -1,16 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
-import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
-import { useCurrency } from '@/hooks/useCurrency'
-
-import OrderStatusTimeline from './OrderStatusTimeline'
 import {
     ArrowLeft,
     Edit,
@@ -27,6 +16,19 @@ import {
     Printer,
     Share2
 } from 'lucide-react'
+import { useState } from 'react'
+
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import { OrderStatusTimeline } from '@/components/orders/OrderStatusTimeline'
+import { getStatusInfo, getPaymentInfo, getPriorityInfo } from '@/components/orders/utils'
+
+import type { Order, OrderStatus, PaymentStatus, Priority } from '@/components/orders/types'
 
 interface OrderDetailViewProps {
     order: Order
@@ -62,21 +64,21 @@ const OrderDetailView = ({
 
     const handleShare = async () => {
         const shareData = {
-            title: `Pesanan ${order.order_no}`,
-            text: `Detail pesanan untuk ${order.customer_name}`,
+            title: `Pesanan ${order['order_no']}`,
+            text: `Detail pesanan untuk ${order['customer_name']}`,
             url: window.location.href
         }
 
         if (navigator.share) {
             try {
                 await navigator.share(shareData)
-            } catch (_err) {
+            } catch (_error) {
                 // User cancelled or error occurred
             }
         }
     }
 
-    const statusInfo = getStatusInfo(order.status ?? 'PENDING')
+    const statusInfo = getStatusInfo(order['status'] ?? 'PENDING')
     const paymentInfo = getPaymentInfo((order.payment_status ?? 'UNPAID') as PaymentStatus)
     const priorityInfo = getPriorityInfo((order.priority ?? 'normal') as Priority)
 
@@ -95,7 +97,7 @@ const OrderDetailView = ({
                     </Button>
                     <div>
                         <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                            {order.order_no}
+                            {order['order_no']}
                         </h2>
                         <p className="text-sm text-muted-foreground">
                             Dibuat {new Date(order.created_at ?? '').toLocaleDateString('id-ID', {
@@ -188,7 +190,7 @@ const OrderDetailView = ({
 
             {/* Status Timeline */}
             <OrderStatusTimeline
-                currentStatus={order.status ?? 'PENDING'}
+                currentStatus={order['status'] ?? 'PENDING'}
                 onStatusChange={onUpdateStatus}
             />
 
@@ -207,7 +209,7 @@ const OrderDetailView = ({
                                 <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Nama</p>
-                                    <p className="font-medium">{order.customer_name}</p>
+                                    <p className="font-medium">{order['customer_name']}</p>
                                 </div>
                             </div>
 
@@ -301,7 +303,7 @@ const OrderDetailView = ({
                 <CardContent>
                     <div className="space-y-3">
                         {(order as OrderWithRelations).items?.map(item => (
-                            <div key={item.id} className="border rounded-lg p-4">
+                            <div key={item['id']} className="border rounded-lg p-4">
                                 <div className="flex justify-between items-start gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-start justify-between">
@@ -370,4 +372,4 @@ const OrderDetailView = ({
     )
 }
 
-export default OrderDetailView
+export { OrderDetailView }

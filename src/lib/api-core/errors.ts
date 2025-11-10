@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import type { APIError } from './types'
+
+import type { APIError } from '@/lib/api-core/types'
 
 /**
  * Error Handling Module
@@ -44,8 +45,8 @@ export function createAPIErrorResponse(error: APIError): NextResponse {
     {
       success: false,
       error: error.message,
-      code: error.code
+      code: error['code']
     },
-    { status: error.statusCode }
+    { status: error['statusCode'] }
   )
 }

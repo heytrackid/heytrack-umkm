@@ -1,10 +1,13 @@
 'use client'
 
+import { Package, Plus, XCircle } from 'lucide-react'
+
+import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Package, Plus, XCircle } from 'lucide-react'
-import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
-import { OrderCard } from './OrderCard'
+import { OrderCard } from '@/modules/orders/components/OrdersPage/OrderCard'
+
+
 
 
 
@@ -69,7 +72,7 @@ export const OrdersList = ({
         <div className="space-y-4">
             {orders.map((order) => (
                 <OrderCard
-                    key={order.id}
+                    key={order['id']}
                     order={order}
                     onView={onViewOrder}
                     onEdit={onEditOrder}

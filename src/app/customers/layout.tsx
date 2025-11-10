@@ -6,6 +6,6 @@ const CustomersLayout = ({
     children,
 }: {
     children: ReactNode
-}) => <>{children}</>
+}): JSX.Element => <>{children}</>
 
 export default CustomersLayout

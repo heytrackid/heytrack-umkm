@@ -1,12 +1,15 @@
 'use client'
 
+import { Settings, RotateCcw } from 'lucide-react'
+import { useState, useRef } from 'react'
+
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
 import { useSettings } from '@/contexts/settings-context'
-import { Settings, RotateCcw } from 'lucide-react'
-import { useState } from 'react'
-import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
+
+
 
 
 
@@ -21,6 +24,7 @@ interface RegionalSettingsProps {
 export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettingsProps) => {
   const { settings: contextSettings, currencies, updateCurrency, resetToDefault } = useSettings()
   const [isResetting, setIsResetting] = useState(false)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Safety check for currencies
   if (!currencies || !Array.isArray(currencies) || currencies.length === 0) {
@@ -40,10 +44,10 @@ export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettings
   }
 
   const handleResetCurrency = () => {
-    void setIsResetting(true)
+    setIsResetting(true)
     resetToDefault()
-    setTimeout(() => {
-      void setIsResetting(false)
+    timeoutRef.current = setTimeout(() => {
+      setIsResetting(false)
     }, 500)
   }
 
@@ -83,14 +87,14 @@ export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettings
               onChange={(e) => {
                 const selected = currencies.find(c => c.code === e.target.value)
                 if (selected) {
-                  void updateCurrency(selected)
+                  updateCurrency(selected)
                   onSettingChange('general', 'currency', selected.code)
                   onSettingChange('ui', 'currency', selected.code)
                 }
               }}
             >
               {Array.isArray(currencies) && currencies.map(currency => (
-                <option key={currency.code} value={currency.code}>
+                <option key={currency['code']} value={currency['code']}>
                   {currency.name} ({currency.symbol})
                 </option>
               ))}

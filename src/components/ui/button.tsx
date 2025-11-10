@@ -1,7 +1,37 @@
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+
+import { cn } from '@/lib/utils'
+
 import type { ComponentProps } from 'react'
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
+
+// Haptic feedback utility for mobile devices
+const triggerHapticFeedback = (type: 'heavy' | 'light' | 'medium' = 'light') => {
+  if (typeof window !== 'undefined' && 'navigator' in window) {
+    try {
+      if ('vibrate' in navigator) {
+        const patterns: Record<string, number[]> = {
+          light: [10],
+          medium: [20],
+          heavy: [30]
+        }
+        navigator.vibrate(patterns[type] ?? [10])
+      }
+       
+      else if ('hapticFeedback' in (window as Record<string, any>)) {
+        const hapticTypes: Record<string, string> = {
+          light: 'impactLight',
+          medium: 'impactMedium',
+          heavy: 'impactHeavy'
+        }
+         
+        ;(window as Record<string, any>)['hapticFeedback'].impact(hapticTypes[type])
+      }
+    } catch {
+      // Silently fail if haptic feedback is not supported
+    }
+  }
+}
 
 
 
@@ -40,18 +70,30 @@ const Button = ({
   variant,
   size,
   asChild = false,
+  hapticFeedback = false,
+  hapticType = 'light',
   ...props
 }: ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
+    hapticFeedback?: boolean
+    hapticType?: 'heavy' | 'light' | 'medium'
   }) => {
   const Comp = asChild ? Slot :"button"
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (hapticFeedback) {
+      triggerHapticFeedback(hapticType)
+    }
+    props.onClick?.(event)
+  }
 
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
+      onClick={handleClick}
     />
   )
 }

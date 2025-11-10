@@ -1,8 +1,9 @@
 'use client';
 
 import { forwardRef, type ComponentProps, type ComponentType, type HTMLAttributes } from 'react'
-import * as RechartsPrimitive from "recharts"
-import { cn } from "@/lib/utils"
+import * as RechartsPrimitive from 'recharts'
+
+import { cn } from '@/lib/utils'
 
 
 
@@ -33,7 +34,7 @@ const ChartTooltipContent = forwardRef<
   HTMLAttributes<HTMLDivElement> & {
     _hideLabel?: boolean
     _hideIndicator?: boolean
-    _indicator?: "line" | "dot" | "dashed"
+    _indicator?: "dashed" | "dot" | "line"
     _active?: boolean
     _payload?: unknown
     _label?: unknown

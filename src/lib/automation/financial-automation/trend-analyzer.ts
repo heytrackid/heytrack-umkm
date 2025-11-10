@@ -1,5 +1,6 @@
 import type { SaleData, ExpenseData, FinancialTrend } from '@/lib/automation/types'
-import type { WeeklyData } from './types'
+
+import type { WeeklyData } from '@/lib/automation/financial-automation/types'
 
 /**
  * Trend Analyzer Module
@@ -60,13 +61,13 @@ export class TrendAnalyzer {
   static calculateGrowthRate(values: number[]): number {
     if (values.length < 2) {return 0}
 
-    const firstValue = values[0]
-    const lastValue = values[values.length - 1]
+    const firstValue = values[0] ?? 0
+    const lastValue = values[values.length - 1] ?? 0
     const periods = values.length - 1
 
     if (firstValue <= 0) {return 0}
 
-    return Math.pow(lastValue / firstValue, 1 / periods) - 1
+    return (lastValue / firstValue)**(1 / periods) - 1
   }
 
   /**
@@ -74,7 +75,7 @@ export class TrendAnalyzer {
    */
   static calculateProjectionConfidence(
     historicalData: Array<{ revenue: number; expenses: number }>
-  ): 'High' | 'Medium' | 'Low' {
+  ): 'High' | 'Low' | 'Medium' {
     const revenueVariability = this.calculateVariability(historicalData.map(d => d.revenue))
 
     if (revenueVariability < 0.1) {return 'High'}
@@ -86,8 +87,9 @@ export class TrendAnalyzer {
    * Calculate coefficient of variation (variability measure)
    */
   private static calculateVariability(values: number[]): number {
+    if (values.length === 0) {return 0}
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length
+    const variance = values.reduce((sum, val) => sum + (val - mean)**2, 0) / values.length
     return Math.sqrt(variance) / mean // Coefficient of variation
   }
 
@@ -117,7 +119,11 @@ export class TrendAnalyzer {
     const monthlyAverages: Record<number, { revenue: number; count: number }> = {}
 
     trends.forEach(trend => {
-      const month = parseInt(trend.period.split('-W')[0].slice(-2)) // Extract month from period
+      const periodValue = trend.period ?? ''
+      const [periodPart = ''] = periodValue.split('-W')
+      const monthSegment = periodPart.slice(-2)
+      const month = parseInt(monthSegment, 10)
+      if (Number.isNaN(month)) {return}
       if (!monthlyAverages[month]) {
         monthlyAverages[month] = { revenue: 0, count: 0 }
       }
@@ -139,7 +145,7 @@ export class TrendAnalyzer {
     const lowMonths = sortedMonths.slice(-2).map(m => m.month)
 
     // Calculate seasonality strength (coefficient of variation)
-    const variances = monthlyRevenues.map(m => Math.pow(m.revenue - overallAverage, 2))
+    const variances = monthlyRevenues.map(m => (m.revenue - overallAverage)**2)
     const variance = variances.reduce((sum, v) => sum + v, 0) / variances.length
     const seasonalityStrength = Math.sqrt(variance) / overallAverage
 

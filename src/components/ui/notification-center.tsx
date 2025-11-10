@@ -1,18 +1,24 @@
 'use client'
 
-import { useState } from 'react'
-import { Button } from './button'
-import { Badge } from './badge'
-import { ScrollArea } from './scroll-area'
-import { cn } from '@/lib/utils'
 import { Bell, X, Check, ExternalLink } from 'lucide-react'
-import type { Notification, NotificationPriority } from '@/lib/notifications/notification-types'
-import { animations } from '@/lib/animations'
+import { useRouter } from 'next/navigation'
+import { useState, useCallback } from 'react'
+
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { animations } from '@/lib/animations'
+import type { Notification, NotificationPriority } from '@/lib/notifications/notification-types'
+import { cn } from '@/lib/utils'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+
+
+
 
 interface NotificationCenterProps {
   notifications: Notification[]
@@ -31,6 +37,7 @@ export const NotificationCenter = ({
   onNotificationClick,
   className
 }: NotificationCenterProps) => {
+  const router = useRouter()
   const [filterPriority, setFilterPriority] = useState<NotificationPriority | 'all'>('all')
   const [open, setOpen] = useState(false)
 
@@ -41,15 +48,15 @@ export const NotificationCenter = ({
     return n.priority === filterPriority
   })
 
-  const handleNotificationClick = (notification: Notification) => {
-    onMarkAsRead(notification.id)
+  const handleNotificationClick = useCallback((notification: Notification) => {
+    onMarkAsRead(notification['id'])
     onNotificationClick?.(notification)
-    
+
     // Navigate if has action URL
     if (notification.actionUrl) {
-      window.location.href = notification.actionUrl
+      router.push(notification.actionUrl)
     }
-  }
+  }, [onMarkAsRead, onNotificationClick, router])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -129,10 +136,10 @@ export const NotificationCenter = ({
             <div className="divide-y">
               {filteredNotifications.map((notification, index) => (
                 <NotificationItem
-                  key={notification.id}
+                  key={notification['id']}
                   notification={notification}
                   onClick={() => handleNotificationClick(notification)}
-                  onMarkAsRead={() => onMarkAsRead(notification.id)}
+                  onMarkAsRead={() => onMarkAsRead(notification['id'])}
                   index={index}
                 />
               ))}
@@ -160,7 +167,7 @@ const NotificationItem = ({ notification, onClick, onMarkAsRead, index }: Notifi
     low: 'border-l-blue-500 bg-gray-50 dark:bg-gray-950/20'
   }
 
-  const timeAgo = getTimeAgo(notification.timestamp)
+  const timeAgo = getTimeAgo(notification['timestamp'])
 
   return (
     <div

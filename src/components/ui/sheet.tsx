@@ -1,9 +1,11 @@
 'use client';
 
-import type { ComponentProps } from 'react'
 import * as SheetPrimitive from"@radix-ui/react-dialog"
 import { XIcon } from"lucide-react"
+
 import { cn } from"@/lib/utils"
+
+import type { ComponentProps } from 'react'
 
 
 
@@ -42,7 +44,7 @@ const SheetContent = ({
   side ="right",
   ...props
 }: ComponentProps<typeof SheetPrimitive.Content> & {
-  side?:"top" |"right" |"bottom" |"left"
+  side?:"bottom" | "left" | "right" | "top"
 }) => (
     <SheetPortal>
       <SheetOverlay />
@@ -56,9 +58,9 @@ const SheetContent = ({
           side ==="left" &&
            "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
           side ==="top" &&
-           "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b",
+           "data-[state-closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b",
           side ==="bottom" &&
-           "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t",
+           "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t rounded-t-[20px] sm:rounded-t-xl pb-[env(safe-area-inset-bottom)]",
           className
         )}
         {...props}
@@ -75,7 +77,7 @@ const SheetContent = ({
 const SheetHeader = ({ className, ...props }: ComponentProps<'div'>) => (
     <div
       data-slot="sheet-header"
-      className={cn("flex flex-col gap-1.5 p-4", className)}
+      className={cn("flex flex-col gap-1.5 p-5 sm:p-4", className)}
       {...props}
     />
   )

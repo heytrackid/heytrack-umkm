@@ -16,7 +16,7 @@ export { withAuth } from './auth'
  * Combine multiple middleware functions
  */
 export function withMiddleware(
-  ...middlewares: Array<(request: NextRequest) => Promise<NextResponse | null> | NextResponse | null>
+  ...middlewares: Array<(request: NextRequest) => NextResponse | Promise<NextResponse | null> | null>
 ) {
   return async (request: NextRequest): Promise<NextResponse | null> => {
     for (const middleware of middlewares) {

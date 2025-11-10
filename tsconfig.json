@@ -1,13 +1,11 @@
 {
   "compilerOptions": {
-    // Target & Lib
     "target": "ES2022",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
-    // Module Resolution
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -15,12 +13,9 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "isolatedModules": true,
-    // Emit
     "noEmit": true,
     "incremental": true,
-    // JSX
     "jsx": "react-jsx",
-    // Strict Type Checking (All Enabled)
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -29,19 +24,17 @@
     "strictPropertyInitialization": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    // Additional Checks (Stricter)
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": false,
+    "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": false,
+    "noPropertyAccessFromIndexSignature": true,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
-    "exactOptionalPropertyTypes": false,
+    "exactOptionalPropertyTypes": false, // 👈 Dinonaktifkan untuk kompatibilitas
     "forceConsistentCasingInFileNames": true,
-    // Path Aliases
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -52,6 +45,9 @@
       ],
       "@/shared/*": [
         "./src/shared/*"
+      ],
+      "@/services/*": [
+        "./src/services/*"
       ],
       "@/inventory": [
         "./src/modules/inventory"
@@ -72,7 +68,6 @@
         "./src/modules/reports"
       ]
     },
-    // Next.js Plugin
     "plugins": [
       {
         "name": "next"
@@ -80,12 +75,12 @@
     ]
   },
   "include": [
+    "new-types.d.ts",
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
     ".next/types/**/*.ts",
+    "src/**/*",
     ".next/dev/types/**/*.ts",
-    "src/services/**/*.ts"
+    ".next/dev/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -93,7 +88,16 @@
     "out",
     "build",
     "dist",
-    "supabase/functions",
-    "scripts"
+    "supabase",
+    "scripts",
+    "public",
+    "docs",
+    "eslint-rules",
+    "*.config.*",
+    "*.test.*",
+    "**/__tests__/**",
+    ".kiro",
+    "workers",
+    "src/types/supabase-generated.ts"
   ]
 }

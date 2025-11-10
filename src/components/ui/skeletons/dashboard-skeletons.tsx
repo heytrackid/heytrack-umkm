@@ -1,7 +1,7 @@
 'use client'
 
-import { cn } from "@/lib/utils"
-import { Skeleton, SkeletonText, SkeletonButton, SkeletonChart } from "@/components/ui/skeleton"
+import { Skeleton, SkeletonText, SkeletonButton, SkeletonChart } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 interface SkeletonProps {
   className?: string

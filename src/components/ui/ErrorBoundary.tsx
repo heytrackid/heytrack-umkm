@@ -1,7 +1,8 @@
 'use client'
 
-import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
+import { Component, type ErrorInfo, type ReactNode } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { createClientLogger } from '@/lib/client-logger'
 
@@ -55,7 +56,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   override render() {
     if (this.state.hasError) {
-      if (this.props.fallback) {
+      if (this.props.fallback !== undefined) {
         return this.props.fallback
       }
 

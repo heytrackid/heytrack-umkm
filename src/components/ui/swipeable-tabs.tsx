@@ -1,11 +1,15 @@
 'use client'
 
-import React, { type ComponentProps, useState, useEffect, useRef } from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { cn } from '@/lib/utils'
-import { Button } from './button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import React, { type ComponentProps, useState, useEffect, useRef } from 'react'
+
 import { useSwipeableTabs } from '@/hooks/useSwipeableTabs'
+import { cn } from '@/lib/utils'
+
+import { Button } from '@/components/ui/button'
+
+
 
 interface SwipeableTabsProps extends ComponentProps<typeof TabsPrimitive.Root> {
   children: React.ReactNode
@@ -59,17 +63,12 @@ const SwipeableTabsList = ({
   ...props
 }: SwipeableTabsListProps) => {
   const [isMobile, setIsMobile] = useState(false)
-  const [isScrollable, setIsScrollable] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const childrenArray = React.Children.toArray(children)
 
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768)
-      if (containerRef.current) {
-        // Check if content overflows the container
-        setIsScrollable(containerRef.current.scrollWidth > containerRef.current.clientWidth)
-      }
     }
 
     checkIfMobile()
@@ -89,11 +88,11 @@ const SwipeableTabsList = ({
     }
   }
 
-  // Only show scroll buttons on mobile when content is scrollable
-  const showScrollButtons = isMobile && isScrollable && enableSwipe
+  // Always show scroll buttons on mobile for better UX, regardless of scrollable state
+  const showScrollButtons = isMobile && enableSwipe
 
   return (
-    <div className="relative">
+    <div className="relative w-full overflow-hidden">
       {showScrollButtons && (
         <Button
           variant="ghost"
@@ -181,7 +180,10 @@ const SwipeableTabsContentContainer = ({
     currentIndex,
     tabValues.length,
     (newIndex) => {
-      onValueChange(tabValues[newIndex])
+      const newValue = tabValues[newIndex]
+      if (newValue !== undefined) {
+        onValueChange(newValue)
+      }
     },
     {
       threshold: 50,

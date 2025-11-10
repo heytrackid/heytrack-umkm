@@ -1,9 +1,11 @@
  
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { ChefHat, Plus, Sparkles, BookOpen } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
 
 
@@ -11,7 +13,9 @@ interface EnhancedEmptyStateProps {
     onAdd: () => void
 }
 
-export const EnhancedEmptyState = ({ onAdd }: EnhancedEmptyStateProps) => (
+export const EnhancedEmptyState = ({ onAdd }: EnhancedEmptyStateProps) => {
+  const router = useRouter()
+  return (
         <div className="space-y-6">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -49,7 +53,7 @@ export const EnhancedEmptyState = ({ onAdd }: EnhancedEmptyStateProps) => (
                                 <Plus className="h-5 w-5 mr-2" />
                                 Tambah Resep Pertama
                             </Button>
-                            <Button variant="outline" size="lg" onClick={() => window.location.href = '/recipes/ai-generator'}>
+                            <Button variant="outline" size="lg" onClick={() => router.push('/recipes/ai-generator')}>
                                 <Sparkles className="h-5 w-5 mr-2" />
                                 Coba AI Generator
                             </Button>
@@ -74,3 +78,4 @@ export const EnhancedEmptyState = ({ onAdd }: EnhancedEmptyStateProps) => (
             </Card>
         </div>
     )
+}

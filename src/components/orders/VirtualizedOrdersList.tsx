@@ -1,13 +1,18 @@
 'use client'
 
-import React, { memo, useMemo } from 'react'
 import { Clock, DollarSign, Phone, Eye, Edit, Trash2 } from 'lucide-react'
+import { memo, useMemo } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { OrderStatusBadge, OrderProgress } from './OrderStatusBadge'
-import { useCurrency } from '@/hooks/useCurrency'
 import { VirtualizedTable } from '@/components/ui/virtualized-table'
-import type { Order } from '@/types'
+import { useCurrency } from '@/hooks/useCurrency'
+
+import type { Order } from '@/types/index'
+
+import { OrderStatusBadge, OrderProgress } from '@/components/orders/OrderStatusBadge'
+
+
 
 interface VirtualizedOrdersListProps {
   orders: Order[]
@@ -21,15 +26,15 @@ interface VirtualizedOrdersListProps {
 // Cell renderers defined outside component to avoid unstable nested components
 const renderOrderNoCell = (order: Order) => (
   <div>
-    <div className="font-medium">{order.order_no}</div>
-    <div className="text-sm text-muted-foreground">{order.customer_name}</div>
+    <div className="font-medium">{order['order_no']}</div>
+    <div className="text-sm text-muted-foreground">{order['customer_name']}</div>
   </div>
 )
 
 const renderStatusCell = (order: Order) => (
   <div className="flex flex-col gap-1">
-    <OrderStatusBadge status={order.status ?? 'PENDING'} compact />
-    <OrderProgress currentStatus={order.status ?? 'PENDING'} />
+    <OrderStatusBadge status={order['status'] ?? 'PENDING'} compact />
+    <OrderProgress currentStatus={order['status'] ?? 'PENDING'} />
   </div>
 )
 
@@ -42,7 +47,7 @@ const renderDeliveryDateCell = (order: Order) => (
 
 const renderCustomerCell = (order: Order) => (
   <div>
-    <div>{order.customer_name}</div>
+    <div>{order['customer_name']}</div>
     {order.customer_phone && (
       <div className="flex items-center gap-1 text-sm text-muted-foreground">
         <Phone className="h-3 w-3" />
@@ -52,14 +57,20 @@ const renderCustomerCell = (order: Order) => (
   </div>
 )
 
-const renderAmountCell = (formatCurrency: (amount: number) => string) => (order: Order) => (
-  <div className="flex items-center gap-2">
-    <DollarSign className="h-4 w-4 text-muted-foreground" />
-    <span className="font-medium">
-      {formatCurrency(order.total_amount ?? 0)}
-    </span>
-  </div>
-)
+const renderAmountCell = (formatCurrency: (amount: number) => string) => {
+  const CellComponent = (order: Order) => (
+    <div className="flex items-center gap-2">
+      <DollarSign className="h-4 w-4 text-muted-foreground" />
+      <span className="font-medium">
+        {formatCurrency(order.total_amount ?? 0)}
+      </span>
+    </div>
+  )
+  
+  CellComponent.displayName = 'renderAmountCell'
+  
+  return CellComponent
+}
 
 const renderPriorityCell = (order: Order) => {
   const getPriorityInfo = (priority: string) => {
@@ -85,36 +96,42 @@ const renderActionsCell = (
   onEditOrder: (orderId: string) => void,
   onDeleteOrder: (orderId: string) => void,
   onUpdateStatus: (orderId: string, status: string) => void
-) => (order: Order) => (
-  <div className="flex items-center gap-2">
-    <select
-      value={order.status ?? 'PENDING'}
-      onChange={(e) => onUpdateStatus(order.id, e.target.value)}
-      className="bg-transparent border border-input rounded px-2 py-1 text-sm"
-    >
-      <option value="PENDING">Menunggu</option>
-      <option value="CONFIRMED">Dikonfirmasi</option>
-      <option value="IN_PROGRESS">Dalam Proses</option>
-      <option value="READY">Siap</option>
-      <option value="DELIVERED">Terkirim</option>
-      <option value="CANCELLED">Dibatalkan</option>
-    </select>
-    <Button size="sm" variant="outline" onClick={() => onViewOrder(order.id)}>
-      <Eye className="h-4 w-4" />
-    </Button>
-    <Button size="sm" variant="outline" onClick={() => onEditOrder(order.id)}>
-      <Edit className="h-4 w-4" />
-    </Button>
-    <Button
-      size="sm"
-      variant="outline"
-      onClick={() => onDeleteOrder(order.id)}
-      className="text-red-500 hover:text-red-700"
-    >
-      <Trash2 className="h-4 w-4" />
-    </Button>
-  </div>
-)
+) => {
+  const CellComponent = (order: Order) => (
+    <div className="flex items-center gap-2">
+      <select
+        value={order['status'] ?? 'PENDING'}
+        onChange={(e) => onUpdateStatus(order['id'], e.target.value)}
+        className="bg-transparent border border-input rounded px-2 py-1 text-sm"
+      >
+        <option value="PENDING">Menunggu</option>
+        <option value="CONFIRMED">Dikonfirmasi</option>
+        <option value="IN_PROGRESS">Dalam Proses</option>
+        <option value="READY">Siap</option>
+        <option value="DELIVERED">Terkirim</option>
+        <option value="CANCELLED">Dibatalkan</option>
+      </select>
+      <Button size="sm" variant="outline" onClick={() => onViewOrder(order['id'])}>
+        <Eye className="h-4 w-4" />
+      </Button>
+      <Button size="sm" variant="outline" onClick={() => onEditOrder(order['id'])}>
+        <Edit className="h-4 w-4" />
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => onDeleteOrder(order['id'])}
+        className="text-red-500 hover:text-red-700"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    </div>
+  )
+  
+  CellComponent.displayName = 'renderActionsCell'
+  
+  return CellComponent
+}
 
 // ✅ PERFORMANCE: Progressive enhancement for large lists using VirtualizedTable
 const VirtualizedOrdersList = memo(({
@@ -171,7 +188,7 @@ const VirtualizedOrdersList = memo(({
       <div className="border rounded-lg p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-4 bg-gray-200 rounded w-1/4" />
-          {[...Array(8)].map((_, i) => (
+          {Array.from({ length: 8 }, (_, i) => (
             <div key={i} className="h-4 bg-gray-200 rounded" />
           ))}
         </div>
@@ -191,4 +208,4 @@ const VirtualizedOrdersList = memo(({
 
 VirtualizedOrdersList.displayName = 'VirtualizedOrdersList'
 
-export default VirtualizedOrdersList
+export { VirtualizedOrdersList }

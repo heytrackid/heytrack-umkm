@@ -37,7 +37,7 @@ interface HppCalculationResult {
 }
 
 self.onmessage = (e: MessageEvent<HppCalculationInput>) => {
-  const { ingredients, operationalCost, batchSize } = e.data
+  const { ingredients, operationalCost, batchSize } = e['data']
 
   try {
     // Calculate material cost
@@ -67,12 +67,12 @@ self.onmessage = (e: MessageEvent<HppCalculationInput>) => {
     }
 
     self.postMessage({ success: true, data: result })
-  } catch (err) {
+  } catch (error) {
     self.postMessage({
       success: false,
-      error: err instanceof Error ? err.message : 'Calculation failed'
+      error: error instanceof Error ? error.message : 'Calculation failed'
     })
   }
 }
 
-export {}
+

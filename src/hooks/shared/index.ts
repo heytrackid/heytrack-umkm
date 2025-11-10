@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useSupabaseCRUD } from '@/hooks/supabase'
+
+import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useToast } from '@/hooks/use-toast'
+
 import type { Database } from '@/types/database'
 
 
@@ -12,18 +14,18 @@ import type { Database } from '@/types/database'
  */
 type TablesMap = Database['public']['Tables']
 
-type _TableRow<TTable extends keyof TablesMap> = TablesMap[TTable]['Row']
 type TableInsert<TTable extends keyof TablesMap> = TablesMap[TTable]['Insert']
 type TableUpdate<TTable extends keyof TablesMap> = TablesMap[TTable]['Update']
 
+ 
 export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable) {
-  const { create: createRecord, update: updateRecord, delete: deleteRecord } = useSupabaseCRUD(tableName)
+  const { create: createRecord, update: updateRecord, remove: deleteRecord } = useSupabaseCRUD(tableName)
   const { toast } = useToast()
 
   const [loading, setLoading] = useState(false)
 
   const create = useCallback(async (data: TableInsert<TTable>) => {
-    void setLoading(true)
+    setLoading(true)
     try {
       const result = await createRecord(data)
       toast({
@@ -31,20 +33,20 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
         description: "Data berhasil ditambahkan",
       })
       return result
-    } catch (err) {
+    } catch (error) {
       toast({
         title: "Error",
         description: "Gagal menambahkan data",
         variant: "destructive",
       })
-      throw err
+      throw error
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [createRecord, toast])
 
   const update = useCallback(async (id: string, data: TableUpdate<TTable>) => {
-    void setLoading(true)
+    setLoading(true)
     try {
       const result = await updateRecord(id, data)
       toast({
@@ -52,20 +54,20 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
         description: "Data berhasil diperbarui",
       })
       return result
-    } catch (err) {
+    } catch (error) {
       toast({
         title: "Error",
         description: "Gagal memperbarui data",
         variant: "destructive",
       })
-      throw err
+      throw error
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [updateRecord, toast])
 
   const remove = useCallback(async (id: string) => {
-    void setLoading(true)
+    setLoading(true)
     try {
       const result = await deleteRecord(id)
       toast({
@@ -73,15 +75,15 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
         description: "Data berhasil dihapus",
       })
       return result
-    } catch (err) {
+    } catch (error) {
       toast({
         title: "Error",
         description: "Gagal menghapus data",
         variant: "destructive",
       })
-      throw err
+      throw error
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }, [deleteRecord, toast])
 
@@ -104,17 +106,17 @@ export function useConfirmDialog() {
     confirmText?: string
     cancelText?: string
     type?: 'default' | 'destructive'
-    onConfirm: () => void | Promise<void>
+    onConfirm: () => Promise<void> | void
   } | null>(null)
 
   const openDialog = useCallback((dialogConfig: NonNullable<typeof config>) => {
-    void setConfig(dialogConfig)
-    void setIsOpen(true)
+    setConfig(dialogConfig)
+    setIsOpen(true)
   }, [])
 
   const closeDialog = useCallback(() => {
-    void setIsOpen(false)
-    void setConfig(null)
+    setIsOpen(false)
+    setConfig(null)
   }, [])
 
   const handleConfirm = useCallback(async () => {
@@ -161,22 +163,22 @@ export function useFormState<T extends Record<string, unknown>>(initialValues: T
 
   const updateValue = useCallback(<K extends keyof T>(key: K, value: T[K]) => {
     setValues(prev => ({ ...prev, [key]: value }))
-    void setIsDirty(true)
+    setIsDirty(true)
   }, [])
 
   const updateValues = useCallback((updates: Partial<T>) => {
     setValues(prev => ({ ...prev, ...updates }))
-    void setIsDirty(true)
+    setIsDirty(true)
   }, [])
 
   const reset = useCallback(() => {
-    void setValues(initialValues)
-    void setIsDirty(false)
+    setValues(initialValues)
+    setIsDirty(false)
   }, [initialValues])
 
   const resetTo = useCallback((newValues: T) => {
-    void setValues(newValues)
-    void setIsDirty(false)
+    setValues(newValues)
+    setIsDirty(false)
   }, [])
 
   return {
@@ -201,6 +203,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
 
     try {
       const item = window.localStorage.getItem(key)
+       
       return item ? JSON.parse(item) : defaultValue
     } catch (_error) {
       return defaultValue
@@ -210,23 +213,23 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
   const setStoredValue = useCallback((newValue: T | ((prev: T) => T)) => {
     try {
       const valueToStore = newValue instanceof Function ? newValue(value) : newValue
-      void setValue(valueToStore)
+      setValue(valueToStore)
 
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore))
       }
-    } catch (_err) {
+    } catch (_error) {
       // Storage _error handled silently
     }
   }, [key, value])
 
   const removeValue = useCallback(() => {
     try {
-      void setValue(defaultValue)
+      setValue(defaultValue)
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(key)
       }
-    } catch (_err) {
+    } catch (_error) {
       // Storage _error handled silently
     }
   }, [key, defaultValue])

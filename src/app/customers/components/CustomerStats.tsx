@@ -1,10 +1,12 @@
 // Customer Stats Component - Lazy Loaded
 // Displays customer statistics and metrics cards
 
+import { UserPlus, Users } from 'lucide-react'
+
 import { Card, CardContent } from '@/components/ui/card'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useSettings } from '@/contexts/settings-context'
-import { UserPlus, Users } from 'lucide-react'
+
 import type { Row } from '@/types/database'
 
 type Customer = Row<'customers'>
@@ -26,7 +28,7 @@ const CustomerStats = ({
   customers,
   isLoading,
   isMobile
-}: CustomerStatsProps) => {
+}: CustomerStatsProps): JSX.Element => {
   const { formatCurrency, settings } = useSettings()
 
   const stats: CustomerStatsData = {
@@ -97,4 +99,4 @@ const CustomerStats = ({
   )
 }
 
-export default CustomerStats
+export { CustomerStats }

@@ -1,18 +1,21 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Plus } from 'lucide-react'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useToast } from '@/hooks/use-toast'
-import { Plus } from 'lucide-react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { IngredientPurchaseInsertSchema, type IngredientPurchaseInsert } from '@/lib/validations/database-validations'
-import type { AvailableIngredient } from './types'
-import { uiLogger } from '@/lib/logger'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useToast } from '@/hooks/use-toast'
+import { uiLogger } from '@/lib/logger'
+import { IngredientPurchaseInsertSchema, type IngredientPurchaseInsert } from '@/lib/validations/database-validations'
+
+import type { AvailableIngredient } from '@/app/ingredients/purchases/components/types'
+
 
 interface PurchaseFormProps {
   ingredients: AvailableIngredient[]
@@ -20,14 +23,14 @@ interface PurchaseFormProps {
     ingredient_id: string
     quantity: number
     unit_price: number
-    supplier?: string
-    purchase_date?: string
-    notes?: string
+    supplier: string | null | undefined
+    purchase_date: string | undefined
+    notes: string | null | undefined
   }) => void
   onSuccess: () => void
 }
 
-const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) => {
+const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps): JSX.Element => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { toast } = useToast()
 
@@ -49,9 +52,9 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
         ingredient_id: data.ingredient_id,
         quantity: data.quantity,
         unit_price: data.unit_price,
-        supplier: data.supplier ?? undefined,
+        supplier: data.supplier,
         purchase_date: data.purchase_date,
-        notes: data.notes ?? undefined
+        notes: data.notes
       })
 
       // Reset form
@@ -64,19 +67,20 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
         notes: ''
       })
 
-      void setIsDialogOpen(false)
+      setIsDialogOpen(false)
       onSuccess()
-    } catch (err: unknown) {
-      const error = err as Error
-      uiLogger.error({ error }, 'Error creating purchase')
+    } catch (error) {
+      const normalizedError = error instanceof Error ? error : new Error(String(error))
+      uiLogger.error({ error: normalizedError }, 'Error creating purchase')
       toast({
         title: 'Gagal',
-        description: 'Gagal menambahkan pembelian',
+        description: normalizedError.message || 'Gagal menambahkan pembelian',
         variant: 'destructive',
       })
     }
   }
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const watchedQty = form.watch('quantity')
   const watchedPrice = form.watch('unit_price')
   const total = watchedQty && watchedPrice ? watchedQty * watchedPrice : 0
@@ -110,7 +114,7 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
                 </SelectTrigger>
                 <SelectContent>
                   {ingredients.map((ing) => (
-                    <SelectItem key={ing.id} value={ing.id}>
+                    <SelectItem key={ing['id']} value={ing['id']}>
                       {ing.name} ({ing.unit})
                     </SelectItem>
                   ))}
@@ -209,4 +213,4 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) =
   )
 }
 
-export default PurchaseForm
+export { PurchaseForm }

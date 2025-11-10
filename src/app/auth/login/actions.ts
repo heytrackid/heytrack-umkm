@@ -1,12 +1,12 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { authLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/server'
 
-export async function login(formData: FormData) {
+export async function login(formData: FormData): Promise<{ error?: string } | never> {
     const supabase = await createClient()
 
     const email = formData.get('email') as string
@@ -28,9 +28,9 @@ export async function login(formData: FormData) {
     if (error) {
         authLogger.error({ 
             email, 
-            errorCode: error.code,
+            errorCode: error['code'],
             errorMessage: error.message,
-            errorStatus: error.status,
+            errorStatus: error['status'],
             errorName: error.name,
             errorDetails: JSON.stringify(error),
             timestamp: new Date().toISOString()
@@ -59,9 +59,9 @@ export async function login(formData: FormData) {
             authLogger.warn({
                 email,
                 originalError: error.message,
-                errorCode: error.code,
+                errorCode: error['code'],
                 errorName: error.name,
-                errorStatus: error.status,
+                errorStatus: error['status'],
                 errorDetails: error
             }, 'Unknown authentication error encountered')
         }
@@ -74,27 +74,3 @@ export async function login(formData: FormData) {
     redirect('/dashboard')
 }
 
-export async function loginWithGoogle() {
-    const supabase = await createClient()
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            redirectTo: `${process.env['NEXT_PUBLIC_SITE_URL'] ?? 'http://localhost:3000'}/auth/callback`,
-        },
-    })
-
-    if (error) {
-        authLogger.error({ 
-            error: error.message, 
-            errorCode: error.code 
-        }, 'Google OAuth login failed')
-        return { error: error.message }
-    }
-
-    if (data.url) {
-        redirect(data.url)
-    }
-    
-    return { error: 'Failed to initiate Google login' }
-}

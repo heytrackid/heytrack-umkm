@@ -22,7 +22,7 @@ export interface NotificationPreferencesForm {
   alert_enabled: boolean
   
   // Priority filter
-  min_priority: 'low' | 'normal' | 'high' | 'urgent'
+  min_priority: 'high' | 'low' | 'normal' | 'urgent'
   
   // Sound settings
   sound_enabled: boolean
@@ -36,7 +36,7 @@ export interface NotificationPreferencesForm {
   // Email settings
   email_enabled: boolean
   email_digest: boolean
-  email_digest_frequency: 'realtime' | 'hourly' | 'daily' | 'weekly'
+  email_digest_frequency: 'daily' | 'hourly' | 'realtime' | 'weekly'
   
   // Quiet hours
   quiet_hours_enabled: boolean

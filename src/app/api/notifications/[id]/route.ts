@@ -1,20 +1,24 @@
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
+
 /**
  * PATCH /api/notifications/[id] - Update notification (mark as read/dismiss)
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+
  import { apiLogger } from '@/lib/logger'
  import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
- import { withSecurity, SecurityPresets } from '@/utils/security'
+ import { NotificationUpdateSchema } from '@/lib/validations/domains/notification'
+ import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
 
-// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
-export const runtime = 'nodejs'
 
 async function putHandler(
   request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     const { id: notificationId } = params
@@ -30,10 +34,23 @@ async function putHandler(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { is_read, is_dismissed } = body
+    const body = await request.json() as unknown
 
-    if (typeof is_read !== 'boolean' && typeof is_dismissed !== 'boolean') {
+    // Validate request body
+    const validation = NotificationUpdateSchema.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: 'Invalid request data',
+          details: validation.error.issues
+        },
+        { status: 400 }
+      )
+    }
+
+    const { is_read, is_dismissed } = validation.data
+
+    if (is_read === undefined && is_dismissed === undefined) {
       return NextResponse.json(
         { error: 'Invalid update data. Must provide is_read or is_dismissed' },
         { status: 400 }
@@ -61,7 +78,7 @@ async function putHandler(
       .from('notifications')
       .update(updateData)
       .eq('id', notificationId)
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .select()
       .single()
 

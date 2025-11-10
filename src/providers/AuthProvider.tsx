@@ -1,11 +1,13 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { useSupabase } from '@/providers/SupabaseProvider'
+
 import type { Session, User } from '@supabase/supabase-js'
-import { useRouter } from 'next/navigation'
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
 const authLogger = createClientLogger('Auth')
 
@@ -24,7 +26,7 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
+export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const [authState, setAuthState] = useState<AuthContextType>({
     user: null,
     session: null,
@@ -40,7 +42,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
 
     // Get initial session with error handling
-    const getSession = async () => {
+    const getSession = async (): Promise<void> => {
       try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
@@ -56,18 +58,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           return
         }
 
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-        if (userError) {
-          authLogger.error({ error: userError }, 'User error:')
-        }
-
         setAuthState(prev => ({
           ...prev,
-          user: user ?? null,
+          user: session?.user ?? null,
           session: session ?? null,
           isLoading: false,
-          isAuthenticated: !!user,
+          isAuthenticated: Boolean(session?.user),
         }))
       } catch (error: unknown) {
         const message = getErrorMessage(error)
@@ -94,7 +90,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           user: session?.user ?? null,
           session: session ?? null,
           isLoading: false,
-          isAuthenticated: !!session?.user,
+          isAuthenticated: Boolean(session?.user),
         }))
 
         // Refresh router on auth changes
@@ -104,17 +100,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         // Handle session expiry - redirect to login with reason
         if (event === 'SIGNED_OUT' && !session) {
-          void router.push('/auth/login?reason=session_expired')
+          router.push('/auth/login?reason=session_expired')
         }
       }
     )
 
-    return () => {
+    return (): void => {
       subscription?.unsubscribe()
     }
   }, [router, supabase.auth])
 
-  const signOut = async () => {
+  const signOut = useCallback(async (): Promise<void> => {
     try {
       await supabase.auth.signOut()
       setAuthState(prev => ({
@@ -124,14 +120,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isLoading: false,
         isAuthenticated: false,
       }))
-      void router.push('/auth/login')
+      router.push('/auth/login')
     } catch (error: unknown) {
       const message = getErrorMessage(error)
       authLogger.error({ error: message }, 'Sign out error:')
     }
-  }
+  }, [router, supabase.auth])
 
-  const refreshSession = async () => {
+  const refreshSession = useCallback(async (): Promise<void> => {
     try {
       const { data: { session }, error } = await supabase.auth.refreshSession()
       
@@ -143,27 +139,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         ...prev,
         session: session ?? null,
         user: session?.user ?? prev.user,
-        isAuthenticated: !!session?.user,
+        isAuthenticated: Boolean(session?.user),
       }))
     } catch (error: unknown) {
       const message = getErrorMessage(error)
       authLogger.error({ error: message }, 'Session refresh error:')
+      // If refresh failed, clear session and redirect to login
+      import('@/lib/auth/session-handler').then(m => m.handleSessionExpired())
     }
-  }
+  }, [supabase.auth])
 
-  const value = {
+  const value = useMemo(() => ({
     user: authState.user,
     session: authState.session,
     isLoading: authState.isLoading,
     isAuthenticated: authState.isAuthenticated,
     signOut,
     refreshSession
-  }
+  }), [authState.user, authState.session, authState.isLoading, authState.isAuthenticated, signOut, refreshSession])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext)
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')

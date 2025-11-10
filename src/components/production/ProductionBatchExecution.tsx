@@ -1,18 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { differenceInMinutes, format } from 'date-fns'
+import { useEffect, useState } from 'react'
+
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 
-const logger = createClientLogger('ProductionBatchExecution')
-
 import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
-import ProductionOverview from './components/ProductionOverview'
-import ActiveBatchesList from './components/ActiveBatchesList'
-import BatchDetails from './components/BatchDetails'
-import CompletedBatches from './components/CompletedBatches'
-import { PRODUCTION_STEPS, QUALITY_CHECKS, type BatchExecutionState } from './components/types'
+
+import { ActiveBatchesList } from '@/components/production/components/ActiveBatchesList'
+import { BatchDetails } from '@/components/production/components/BatchDetails'
+import { CompletedBatches } from '@/components/production/components/CompletedBatches'
+import { ProductionOverview } from '@/components/production/components/ProductionOverview'
+import { PRODUCTION_STEPS, QUALITY_CHECKS, type BatchExecutionState } from '@/components/production/components/types'
+
+
+const logger = createClientLogger('ProductionBatchExecution')
 
 // Import constants that are still needed
 
@@ -39,7 +42,7 @@ const ProductionBatchExecution = ({
   // Auto-refresh every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      void updateBatchProgress()
+      updateBatchProgress()
     }, 30000)
 
     return () => {
@@ -50,12 +53,12 @@ const ProductionBatchExecution = ({
 
   // Initialize execution states for active batches
   useEffect(() => {
-    const activeBatches = batches.filter(b => b.status === 'IN_PROGRESS')
+    const activeBatches = batches.filter(b => b['status'] === 'IN_PROGRESS')
     const newStates = new Map(executionStates)
 
     for (const batch of activeBatches) {
-      if (!newStates.has(batch.id)) {
-        newStates.set(batch.id, {
+      if (!newStates.has(batch['id'])) {
+        newStates.set(batch['id'], {
           batch,
           actualProgress: 0,
           currentStep: 'prep',
@@ -65,7 +68,7 @@ const ProductionBatchExecution = ({
       }
     }
 
-    void setExecutionStates(newStates)
+    setExecutionStates(newStates)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [batches])
 
@@ -74,7 +77,7 @@ const ProductionBatchExecution = ({
     let hasUpdates = false
 
     for (const [_batchId, state] of newStates.entries()) {
-      if (state.batch.status === 'IN_PROGRESS' && state.startTime) {
+      if (state.batch['status'] === 'IN_PROGRESS' && state.startTime) {
         const elapsed = differenceInMinutes(new Date(), state.startTime)
         const estimatedDuration = state.batch?.estimated_duration ?? 60 // fallback to 60 minutes if not provided
         const newProgress = Math.min(100, (elapsed / estimatedDuration) * 100)
@@ -85,7 +88,7 @@ const ProductionBatchExecution = ({
           // Update current step based on progress
           const stepIndex = Math.floor((newProgress / 100) * PRODUCTION_STEPS.length)
           const currentStep = PRODUCTION_STEPS[Math.min(stepIndex, PRODUCTION_STEPS.length - 1)]
-          state.currentStep = currentStep?.key || 'prep'
+          state.currentStep = currentStep?.key ?? 'prep'
 
           hasUpdates = true
         }
@@ -113,13 +116,13 @@ const ProductionBatchExecution = ({
     }
 
     const newStates = new Map(executionStates)
-    newStates.set(batch.id, newState)
-    void setExecutionStates(newStates)
+    newStates.set(batch['id'], newState)
+    setExecutionStates(newStates)
 
-    onBatchUpdate?.(batch.id, { status: 'IN_PROGRESS' })
+    onBatchUpdate?.(batch['id'], { status: 'IN_PROGRESS' })
     toast({
       title: 'Batch Started',
-      description: `Started production of ${batch.recipe_id || 'Batch'}`,
+      description: `Started production of ${batch.recipe_id ?? 'Batch'}`,
     })
   }
 
@@ -136,12 +139,12 @@ const ProductionBatchExecution = ({
 
     const newStates = new Map(executionStates)
     newStates.set(batchId, newState)
-    void setExecutionStates(newStates)
+    setExecutionStates(newStates)
 
     onBatchUpdate?.(batchId, { status: 'PLANNED' })
     toast({
       title: 'Batch Paused',
-      description: `Paused production of ${state.batch.recipe_id || 'Batch'}`,
+      description: `Paused production of ${state.batch.recipe_id ?? 'Batch'}`,
     })
   }
 
@@ -178,7 +181,7 @@ const ProductionBatchExecution = ({
 
       const newStates = new Map(executionStates)
       newStates.set(batchId, newState)
-      void setExecutionStates(newStates)
+      setExecutionStates(newStates)
 
       // Update production progress in the system
       // Note: UpdateProductionProgress is not defined in the service, so we'll just log for now
@@ -187,10 +190,10 @@ const ProductionBatchExecution = ({
       onBatchUpdate?.(batchId, { status: 'COMPLETED', completed_at: completedAt.toISOString() })
       toast({
         title: 'Batch Completed',
-        description: `Completed production of ${state.batch.recipe_id || 'Batch'}`,
+        description: `Completed production of ${state.batch.recipe_id ?? 'Batch'}`,
       })
-    } catch (err: unknown) {
-      logger.error({ error: err }, 'Error completing batch:')
+     } catch (error) {
+      logger.error({ error }, 'Error completing batch:')
       toast({
         title: 'Error',
         description: 'Failed to complete batch',
@@ -204,14 +207,14 @@ const ProductionBatchExecution = ({
     if (!state) { return }
 
     const updatedChecks = state.qualityChecks.map(check =>
-      check.id === checkId
-        ? {
-          ...check,
-          completed: true,
-          passed,
-          timestamp: new Date().toISOString(),
-          notes
-        }
+      check['id'] === checkId
+         ? {
+           ...check,
+           completed: true,
+           passed,
+           timestamp: new Date().toISOString(),
+           notes: notes ?? ''
+         }
         : check
     )
 
@@ -226,7 +229,7 @@ const ProductionBatchExecution = ({
 
     const newStates = new Map(executionStates)
     newStates.set(batchId, newState)
-    void setExecutionStates(newStates)
+    setExecutionStates(newStates)
   }
 
   const addNote = (batchId: string) => {
@@ -242,9 +245,9 @@ const ProductionBatchExecution = ({
 
     const newStates = new Map(executionStates)
     newStates.set(batchId, newState)
-    void setExecutionStates(newStates)
+    setExecutionStates(newStates)
 
-    void setCurrentNotes('')
+    setCurrentNotes('')
     toast({
       title: 'Note Added',
       description: 'Production note has been added',
@@ -263,10 +266,10 @@ const ProductionBatchExecution = ({
           executionStates={executionStates}
           selectedBatch={selectedBatch}
           onBatchSelect={(batchId) => {
-            void setSelectedBatch(batchId)
+            setSelectedBatch(batchId)
             onBatchSelect?.(batchId)
           }}
-          onBatchUpdate={onBatchUpdate}
+          {...(onBatchUpdate ? { onBatchUpdate } : {})}
           onStartBatch={handleStartBatch}
           onPauseBatch={handlePauseBatch}
           onCompleteBatch={handleCompleteBatch}
@@ -290,4 +293,4 @@ const ProductionBatchExecution = ({
   )
 }
 
-export default ProductionBatchExecution
+export { ProductionBatchExecution }

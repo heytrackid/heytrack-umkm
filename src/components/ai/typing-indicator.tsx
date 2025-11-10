@@ -1,7 +1,7 @@
 
 'use client'
 
-export const TypingIndicator = () => (
+export const TypingIndicator = (): JSX.Element => (
     <div className="flex items-center gap-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg w-fit">
       <div className="flex gap-1">
         <div 

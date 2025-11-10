@@ -1,6 +1,6 @@
 'use client'
 
-const IngredientsCRUDSkeleton = (): JSX.Element => (
+export const IngredientsCRUDSkeleton = (): JSX.Element => (
   <div className="border rounded-lg p-6">
     <div className="animate-pulse space-y-4">
       <div className="h-10 bg-muted rounded" />
@@ -10,5 +10,3 @@ const IngredientsCRUDSkeleton = (): JSX.Element => (
     </div>
   </div>
 )
-
-export default IngredientsCRUDSkeleton

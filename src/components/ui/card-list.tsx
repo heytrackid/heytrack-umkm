@@ -1,7 +1,9 @@
 import { cn } from '@/lib/utils'
+
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+
 import type { ReactNode } from 'react'
-import { Badge } from './badge'
-import { Card, CardContent } from './card'
 
 /**
  * Card List Component
@@ -37,7 +39,7 @@ export const CardList = <T extends CardListItem>({
     <div className={cn("space-y-3", className)}>
       {items.map((item) => (
         <Card
-          key={item.id}
+          key={item['id']}
           className={cn(
             "transition-all hover:shadow-md",
             onItemClick && "cursor-pointer"
@@ -60,12 +62,12 @@ interface DataCardProps {
   description?: string
   badge?: {
     label: string
-    variant?: 'default' | 'secondary' | 'destructive' | 'outline'
+    variant?: 'default' | 'destructive' | 'outline' | 'secondary'
   }
   actions?: ReactNode
   metadata?: Array<{
     label: string
-    value: string | number
+    value: number | string
   }>
 }
 

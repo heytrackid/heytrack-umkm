@@ -1,20 +1,26 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { getErrorMessage } from '@/lib/type-guards'
-import { apiLogger } from '@/lib/logger'
-import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations'
-import type { Insert } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security'
-import { typed } from '@/types/type-utilities'
-
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
+
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { apiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
+import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations'
+import type { Insert } from '@/types/database'
+import { typed } from '@/types/type-utilities'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
+
+
+
+
 
 // Note: 'sales' table doesn't exist - sales data is tracked through orders and order_items
 // type Sale = SalesTable
 
 // Define the original GET function
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url)
 
   // Validate query parameters
@@ -49,8 +55,8 @@ async function GET(request: NextRequest) {
     )
   }
 
-  const { page, limit, search, sort_by, sort_order } = paginationValidation.data
-  const { start_date, end_date, recipe_id } = salesQueryValidation.data
+  const { page, limit, search, sort_by, sort_order } = paginationValidation['data']
+  const { start_date, end_date, recipe_id } = salesQueryValidation['data']
 
    try {
      const supabase = typed(await createClient())
@@ -70,7 +76,7 @@ async function GET(request: NextRequest) {
         *
       `)
       .eq('record_type', 'INCOME')
-      .eq('user_id', user.id)
+      .eq('user_id', user['id'])
       .range(offset, offset + limit - 1)
 
     // Add filters
@@ -100,7 +106,7 @@ async function GET(request: NextRequest) {
     if (error) {throw error;}
 
     // Get total count
-    let countQuery = supabase.from('financial_records').select('*', { count: 'exact', head: true }).eq('record_type', 'INCOME').eq('user_id', user.id)
+    let countQuery = supabase.from('financial_records').select('id', { count: 'exact', head: true }).eq('record_type', 'INCOME').eq('user_id', user['id'])
 
     // Apply same filters to count query
     if (search) {
@@ -134,7 +140,7 @@ async function GET(request: NextRequest) {
 }
 
 // Define the original POST function
-async function POST(request: NextRequest) {
+async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = typed(await createClient())
 
@@ -143,7 +149,7 @@ async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }    // The request body is already sanitized by the security middleware
-    const body = await request.json()
+    const body = await request.json() as unknown
 
     // Validate request body
     const validation = SalesInsertSchema.safeParse(body)
@@ -157,17 +163,17 @@ async function POST(request: NextRequest) {
       )
     }
 
-    const validatedData = validation.data
+    const validatedData = validation['data']
 
     // Map sales data to financial_records structure
     const insertPayload: Insert<'financial_records'> = {
       amount: validatedData.total_amount,
       category: 'Sales',
-      description: `Sale of recipe ${validatedData.recipe_id}${validatedData.customer_name ? ` to ${validatedData.customer_name}` : ''}`,
+      description: `Sale of recipe ${validatedData.recipe_id}${validatedData['customer_name'] ? ` to ${validatedData['customer_name']}` : ''}`,
       date: validatedData.date,
       reference: validatedData.recipe_id,
       type: 'INCOME',
-      user_id: user.id
+      user_id: user['id']
     }
 
     const { data: sale, error } = await supabase

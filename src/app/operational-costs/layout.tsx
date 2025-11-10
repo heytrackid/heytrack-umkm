@@ -7,6 +7,6 @@ const DynamicLayout = ({
   children,
 }: {
   children: ReactNode
-}) => <>{children}</>
+}): JSX.Element => <>{children}</>
 
 export default DynamicLayout

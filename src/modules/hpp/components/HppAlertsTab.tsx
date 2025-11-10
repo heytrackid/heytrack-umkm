@@ -1,20 +1,23 @@
 'use client'
 
+import { formatDistanceToNow } from 'date-fns'
+import { id } from 'date-fns/locale'
+import { AlertTriangle, Bell, CheckCircle, Info, X } from 'lucide-react'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
-import { formatDistanceToNow } from 'date-fns'
-import { id } from 'date-fns/locale'
-import { AlertTriangle, Bell, CheckCircle, Info, X } from 'lucide-react'
-import { useHppOverview } from '../hooks/useHppOverview'
+import { useHppOverview, type HppOverviewData } from '@/modules/hpp/hooks/useHppOverview'
 
 interface HppAlertsTabProps {
   className?: string
 }
 
-export const HppAlertsTab = ({ className }: HppAlertsTabProps) => {
+type HppAlert = HppOverviewData['recentAlerts'][number]
+
+export const HppAlertsTab = ({ className }: HppAlertsTabProps): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const {
     data: overview,
@@ -23,7 +26,7 @@ export const HppAlertsTab = ({ className }: HppAlertsTabProps) => {
     isLoading
   } = useHppOverview()
 
-  const getAlertIcon = (severity: string) => {
+  const getAlertIcon = (severity: string): JSX.Element => {
     switch (severity) {
       case 'high':
       case 'critical':
@@ -37,7 +40,7 @@ export const HppAlertsTab = ({ className }: HppAlertsTabProps) => {
     }
   }
 
-  const getAlertVariant = (severity: string) => {
+  const getAlertVariant = (severity: string): 'destructive' | 'default' | 'secondary' | 'outline' => {
     switch (severity) {
       case 'high':
       case 'critical':
@@ -69,7 +72,7 @@ export const HppAlertsTab = ({ className }: HppAlertsTabProps) => {
     )
   }
 
-  const recentAlerts = overview?.recentAlerts ?? []
+  const recentAlerts: HppAlert[] = overview?.recentAlerts ?? []
   const unreadCount = overview?.unreadAlerts ?? 0
 
   return (
@@ -109,9 +112,9 @@ export const HppAlertsTab = ({ className }: HppAlertsTabProps) => {
           </div>
         ) : (
           <div className="space-y-3">
-            {recentAlerts.map((alert) => (
+            {recentAlerts.map((alert: HppAlert) => (
               <Alert
-                key={alert.id}
+                key={alert['id']}
                 className={`relative ${!alert.is_read ? 'border-l-4 border-l-orange-500' : ''}`}
               >
                 <div className="flex items-start justify-between">
@@ -133,7 +136,7 @@ export const HppAlertsTab = ({ className }: HppAlertsTabProps) => {
                         {alert.message}
                       </AlertDescription>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{alert.recipe_name}</span>
+                        <span>{alert['recipe_name']}</span>
                         {alert.new_value && (
                           <span>Nilai: {formatCurrency(alert.new_value)}</span>
                         )}
@@ -150,7 +153,7 @@ export const HppAlertsTab = ({ className }: HppAlertsTabProps) => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => markAlertAsRead.mutate(alert.id)}
+                      onClick={() => markAlertAsRead.mutate(alert['id'])}
                       disabled={markAlertAsRead.isPending}
                       className="ml-2 h-8 w-8 p-0"
                     >
