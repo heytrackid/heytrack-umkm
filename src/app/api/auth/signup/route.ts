@@ -63,20 +63,4 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-const devAuthSecurity = {
-  ...SecurityPresets.enhanced(),
-  enableCSRFProtection: true,
-  allowedOrigins: [
-    process['env']['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:3001',
-    'http://127.0.0.1:3001',
-    'http://localhost:3002',
-    'http://127.0.0.1:3002',
-    'https://ndelok.heytrack.id',
-    'https://app.heytrack.id'
-  ]
-}
-
-export const POST = createSecureHandler(postHandler, 'POST /api/auth/signup', devAuthSecurity)
+export const POST = createSecureHandler(postHandler, 'POST /api/auth/signup', SecurityPresets.enhanced())

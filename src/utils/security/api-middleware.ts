@@ -457,6 +457,17 @@ export const SecurityPresets = {
     validateContentType: true,
     allowedContentTypes: ['application/json'],
     enableCSRFProtection: true,
+    allowedOrigins: [
+      process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3001',
+      'http://localhost:3002',
+      'http://127.0.0.1:3002',
+      'https://ndelok.heytrack.id',
+      'https://app.heytrack.id'
+    ],
     rateLimit: { maxRequests: 50, windowMs: 15 * 60 * 1000 }, // 50 requests per 15 minutes
     checkForSQLInjection: true,  // Explicit: YES SQL injection checks
     checkForXSS: true           // Explicit: YES XSS checks
