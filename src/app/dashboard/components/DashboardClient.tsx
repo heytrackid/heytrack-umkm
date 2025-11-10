@@ -69,50 +69,9 @@ const OnboardingWizard = dynamic(
 )
 
 // Dynamically import heavy dashboard components to improve initial page load
-const HppDashboardWidget = dynamic(
-  () => import('./HppDashboardWidget').then(m => ({ default: m.HppDashboardWidget })),
-  {
-    loading: () => <div className="h-64 sm:h-80 bg-gray-100 animate-pulse rounded-lg" />,
-    ssr: false
-  }
-)
-
-const RecentOrdersSection = dynamic(
-  () => import('./RecentOrdersSection').then(m => ({ default: m.RecentOrdersSection })),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        <div className="h-12 bg-gray-100 animate-pulse rounded" />
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
-          ))}
-        </div>
-      </div>
-    ),
-    ssr: false
-  }
-)
 
 // Use the stable lazy loading wrapper instead of direct dynamic import
-import { StatsCardsSectionWithSuspense } from './lazy-dashboard-components'
-
-const StockAlertsSection = dynamic(
-  () => import('./StockAlertsSection').then(m => ({ default: m.StockAlertsSection })),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        <div className="h-12 bg-gray-100 animate-pulse rounded" />
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
-          ))}
-        </div>
-      </div>
-    ),
-    ssr: false
-  }
-)
+import { StatsCardsSectionWithSuspense, StockAlertsSectionWithSuspense, HppDashboardWidgetWithSuspense, RecentOrdersSectionWithSuspense } from './lazy-dashboard-components'
 
 // Optimized data fetching - single API call
 const fetchDashboardData = async (): Promise<DashboardData> => {
@@ -475,7 +434,7 @@ export const DashboardClient = (_props: DashboardClientProps) => {
                 </div>
               </div>
             }>
-              <RecentOrdersSection orders={dashboardData?.orders?.recent ?? []} />
+              <RecentOrdersSectionWithSuspense orders={dashboardData?.orders?.recent ?? []} />
             </Suspense>
 
             {/* Low Stock Alert */}
@@ -489,7 +448,7 @@ export const DashboardClient = (_props: DashboardClientProps) => {
                 </div>
               </div>
             }>
-              <StockAlertsSection lowStockItems={dashboardData?.inventory?.lowStockAlerts ?? []} />
+              <StockAlertsSectionWithSuspense lowStockItems={dashboardData?.inventory?.lowStockAlerts ?? []} />
             </Suspense>
           </div>
 
@@ -507,7 +466,7 @@ export const DashboardClient = (_props: DashboardClientProps) => {
               </CardContent>
             </Card>
           }>
-            <HppDashboardWidget />
+            <HppDashboardWidgetWithSuspense />
           </Suspense>
         </div>
 

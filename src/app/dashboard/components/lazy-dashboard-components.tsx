@@ -1,6 +1,7 @@
 // Lazy loaded dashboard components for improved performance
 
 import dynamic from 'next/dynamic'
+import { RecentOrdersSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 
 // Define props interface to replace 'any' types
 type DashboardComponentProps = Record<string, unknown>;
@@ -49,7 +50,7 @@ const LazyStatsCardsSection = dynamic(() =>
 
 const LazyStockAlertsSection = dynamic(() =>
   import('./StockAlertsSection').then(m => m.StockAlertsSection), {
-    loading: () => <StockAlertsSkeleton />
+    loading: () => <StockAlertSkeleton />
   }
 )
 
@@ -58,16 +59,7 @@ const HppDashboardWidgetWithSuspenseComponent = (): JSX.Element => (
   <LazyHppDashboardWidget />
 )
 
-const RecentOrdersSkeleton = (): JSX.Element => (
-  <div className="space-y-4">
-    <div className="h-12 bg-gray-100 animate-pulse rounded" />
-    <div className="space-y-3">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
-      ))}
-    </div>
-  </div>
-)
+
 
 const RecentOrdersSectionWithSuspenseComponent = (props: DashboardComponentProps): JSX.Element => (
   <LazyRecentOrdersSection {...props} />
@@ -85,16 +77,7 @@ const StatsCardsSectionWithSuspenseComponent = (props: DashboardComponentProps):
   <LazyStatsCardsSection {...(props as unknown as StatsCardsProps)} />
 )
 
-const StockAlertsSkeleton = (): JSX.Element => (
-  <div className="space-y-4">
-    <div className="h-12 bg-gray-100 animate-pulse rounded" />
-    <div className="space-y-3">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
-      ))}
-    </div>
-  </div>
-)
+
 
 const StockAlertsSectionWithSuspenseComponent = (props: DashboardComponentProps): JSX.Element => (
   <LazyStockAlertsSection {...props} />

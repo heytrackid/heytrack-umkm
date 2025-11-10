@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
     process.env['VERCEL_GIT_COMMIT_SHA']?.slice(0, 10) || `build-${Date.now()}`,
 
   // 🔥 Turbopack: disabled to fix HMR issues
-  turbopack: false,
+  turbopack: {},
 
     experimental: {
       typedEnv: true,
