@@ -49,7 +49,7 @@ const LazyStatsCardsSection = dynamic(() =>
 )
 
 const LazyStockAlertsSection = dynamic(() =>
-  import('./StockAlertsSection').then(mod => ({ default: mod.StockAlertsSection })), {
+  import('./StockAlertsSection').then(mod => mod.default), {
     loading: () => <StockAlertSkeleton />
   }
 )
