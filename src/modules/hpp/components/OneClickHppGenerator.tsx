@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
+import { createClient } from '@/utils/supabase/client'
 
 export function OneClickHppGenerator(): JSX.Element {
   const [vertical, setVertical] = useState<'fnb'|'beauty'|'fashion'|'services'|'general'>('fnb')
@@ -21,23 +22,85 @@ export function OneClickHppGenerator(): JSX.Element {
       toast({ title: 'Deskripsi belum diisi', description: 'Tuliskan deskripsi bisnis Anda.' })
       return
     }
+    if (content.length < 10) {
+      toast({ title: 'Deskripsi terlalu pendek', description: 'Tuliskan minimal 10 karakter deskripsi bisnis Anda.' })
+      return
+    }
+
+    // Check authentication
+    try {
+      const supabase = await createClient()
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (error || !user) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Silakan login terlebih dahulu untuk menggunakan fitur ini.',
+          variant: 'destructive'
+        })
+        return
+      }
+    } catch (authError) {
+      console.error('Auth check failed:', authError)
+      toast({
+        title: 'Authentication Error',
+        description: 'Gagal memverifikasi autentikasi. Silakan coba lagi.',
+        variant: 'destructive'
+      })
+      return
+    }
+
     setLoading(true)
     try {
       setStep('calling-ai')
+
+      // Log request for debugging
+      console.log('Bootstrap request:', { businessDescription: content.substring(0, 50) + '...', vertical })
+
       const res = await fetch('/api/ai/bootstrap', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessDescription: content, vertical })
+        headers: {
+          'Content-Type': 'application/json',
+          // Ensure credentials are included for authentication
+          'credentials': 'include'
+        },
+        body: JSON.stringify({
+          businessDescription: content,
+          vertical,
+          currency: 'IDR' // Explicitly set currency
+        })
       })
+
       setStep('seeding')
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Gagal generate')
+
+      let data
+      try {
+        data = await res.json()
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError)
+        throw new Error(`Server error (${res.status}): Invalid response format`)
+      }
+
+      if (!res.ok) {
+        console.error('API Error:', { status: res.status, data })
+        throw new Error(data.error || data.message || `HTTP ${res.status}: ${res.statusText}`)
+      }
+
       setStep('calculating')
-      toast({ title: 'Berhasil!', description: `Dibuat ${data.ingredientCount} bahan & ${data.recipeIds.length} resep.` })
+      toast({
+        title: 'Berhasil!',
+        description: `Dibuat ${data.ingredientCount || 0} bahan & ${data.recipeIds?.length || 0} resep.`
+      })
     } catch (e) {
-      toast({ title: 'Gagal', description: e instanceof Error ? e.message : 'Terjadi kesalahan' })
+      console.error('Bootstrap generation failed:', e)
+      const errorMessage = e instanceof Error ? e.message : 'Terjadi kesalahan tidak diketahui'
+      toast({
+        title: 'Gagal Generate HPP',
+        description: errorMessage,
+        variant: 'destructive'
+      })
     } finally {
       setLoading(false)
+      setStep('idle')
     }
   }, [desc, vertical, toast])
 
