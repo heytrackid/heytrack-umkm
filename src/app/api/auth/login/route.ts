@@ -69,7 +69,7 @@ const devAuthSecurity = {
     'http://localhost:3002',
     'http://127.0.0.1:3002',
     'https://ndelok.heytrack.id',
-    'https://heytrack.id'
+    'https://app.heytrack.id'
   ]
 }
 
