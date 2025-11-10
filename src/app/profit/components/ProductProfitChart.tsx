@@ -32,7 +32,7 @@ const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) =
           <p className="font-medium mb-2">{payload[0]?.payload?.name ?? 'Unknown'}</p>
           <div className="space-y-1 text-sm">
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-gray-500" />
+              <div className="h-3 w-3 rounded-full bg-muted0" />
               <span>Pendapatan: {formatCurrency((payload[0]?.value ?? 0))}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -40,7 +40,7 @@ const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) =
               <span>HPP (COGS): {formatCurrency((payload[1]?.value ?? 0))}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-gray-500" />
+              <div className="h-3 w-3 rounded-full bg-muted0" />
               <span>Laba: {formatCurrency((payload[2]?.value ?? 0))}</span>
             </div>
           </div>
@@ -108,14 +108,14 @@ export const ProductProfitChart = ({
                   <input
                     type="date"
                     value={startDate}
-                    onChange={(e) => onStartDateChange(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => onStartDateChange(e.target.value)}
                     className={`h-9 ${isMobile ? 'flex-1' : 'w-[130px]'} rounded-md border border-input bg-background px-2 text-xs`}
                     placeholder="Mulai"
                   />
                   <input
                     type="date"
                     value={endDate}
-                    onChange={(e) => onEndDateChange(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => onEndDateChange(e.target.value)}
                     className={`h-9 ${isMobile ? 'flex-1' : 'w-[130px]'} rounded-md border border-input bg-background px-2 text-xs`}
                     placeholder="Akhir"
                   />

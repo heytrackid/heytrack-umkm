@@ -1,6 +1,6 @@
 'use client'
-import { Upload, Download, FileText, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
-import { useState, useRef } from 'react'
+import { AlertCircle, CheckCircle2, Download, FileText, Loader2, Upload } from 'lucide-react'
+import { useRef, useState } from 'react'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -140,7 +140,7 @@ export const ImportDialog = ({
 
                 <div className="space-y-4">
                     {/* Download Template */}
-                    <div className="p-4 bg-muted border border-border rounded-lg">
+                    <div className="p-4 bg-muted border border-border/20 rounded-lg">
                         <div className="flex items-start gap-3">
                             <FileText className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
@@ -154,7 +154,7 @@ export const ImportDialog = ({
                                     variant="outline"
                                     size="sm"
                                     onClick={handleDownloadTemplate}
-                                    className="bg-white"
+                                    className="bg-background"
                                 >
                                     <Download className="w-4 h-4 mr-2" />
                                     Download Template
@@ -262,3 +262,5 @@ export const ImportDialog = ({
         </Dialog>
     )
 }
+
+

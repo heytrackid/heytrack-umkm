@@ -24,15 +24,15 @@ interface ProfitMetricsProps {
 
 // Helper functions for trend display
 const getTrendIcon = (value: number) => {
-    if (value > 0) { return <ArrowUpRight className="h-4 w-4 text-gray-600" /> }
+    if (value > 0) { return <ArrowUpRight className="h-4 w-4 text-muted-foreground" /> }
     if (value < 0) { return <ArrowDownRight className="h-4 w-4 text-red-600" /> }
-    return <Minus className="h-4 w-4 text-gray-400" />
+    return <Minus className="h-4 w-4 text-muted-foreground" />
 }
 
 const getTrendColor = (value: number) => {
-    if (value > 0) { return 'text-gray-600' }
+    if (value > 0) { return 'text-muted-foreground' }
     if (value < 0) { return 'text-red-600' }
-    return 'text-gray-600'
+    return 'text-muted-foreground'
 }
 
 // Metric cards component
@@ -173,7 +173,7 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
                             ({formatCurrency(summary.total_operating_expenses)})
                         </span>
                     </div>
-                    <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-950 rounded-lg border-2 border-gray-300">
+                    <div className="flex justify-between items-center p-4 bg-muted rounded-lg border-2 border-border/20">
                         <span className="font-bold text-lg">= Net Profit</span>
                         <span className={`text-xl font-bold ${summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {formatCurrency(summary.net_profit)}

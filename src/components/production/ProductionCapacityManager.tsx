@@ -57,7 +57,7 @@ const DEFAULT_CONSTRAINTS: ProductionConstraints = {
   cleanup_time_minutes: 10
 }
 
-const ProductionCapacityManager = ({
+export const ProductionCapacityManager = ({
   onCapacityUpdate,
   className = ''
 }: ProductionCapacityManagerProps): JSX.Element => {
@@ -243,13 +243,13 @@ const ProductionCapacityManager = ({
         {efficiencyMetrics && (
           <div className="grid grid-cols-4 gap-4 mt-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+              <div className="text-2xl font-bold text-muted-foreground">
                 {efficiencyMetrics.current_utilization}%
               </div>
               <div className="text-xs text-muted-foreground">Current Utilization</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+              <div className="text-2xl font-bold text-muted-foreground">
                 {Math.round(efficiencyMetrics.peak_capacity)}
               </div>
               <div className="text-xs text-muted-foreground">Peak Capacity/Hr</div>
@@ -261,7 +261,7 @@ const ProductionCapacityManager = ({
               <div className="text-xs text-muted-foreground mt-1">Bottleneck</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+              <div className="text-2xl font-bold text-muted-foreground">
                 {efficiencyMetrics.optimization_score}
               </div>
               <div className="text-xs text-muted-foreground">Efficiency Score</div>
@@ -371,7 +371,7 @@ const ProductionCapacityManager = ({
                       <Input
                         type="number"
                         value={constraints.setup_time_minutes}
-                        onChange={(e) => updateConstraint('setup_time_minutes', parseInt(e.target.value) || 0)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateConstraint('setup_time_minutes', parseInt(e.target.value) || 0)}
                         min={0}
                         max={60}
                       />
@@ -381,7 +381,7 @@ const ProductionCapacityManager = ({
                       <Input
                         type="number"
                         value={constraints.cleanup_time_minutes}
-                        onChange={(e) => updateConstraint('cleanup_time_minutes', parseInt(e.target.value) || 0)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateConstraint('cleanup_time_minutes', parseInt(e.target.value) || 0)}
                         min={0}
                         max={30}
                       />
@@ -466,7 +466,7 @@ const ProductionCapacityManager = ({
                     <Input
                       type="time"
                       value={constraints.shift_start}
-                      onChange={(e) => updateConstraint('shift_start', e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateConstraint('shift_start', e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -474,7 +474,7 @@ const ProductionCapacityManager = ({
                     <Input
                       type="time"
                       value={constraints.shift_end}
-                      onChange={(e) => updateConstraint('shift_end', e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateConstraint('shift_end', e.target.value)}
                     />
                   </div>
                 </div>
@@ -510,14 +510,14 @@ const ProductionCapacityManager = ({
                       type="time"
 
                       value={newBreakStart}
-                      onChange={(e) => setNewBreakStart(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewBreakStart(e.target.value)}
                       className="flex-1"
                     />
                     <Input
                       type="time"
 
                       value={newBreakEnd}
-                      onChange={(e) => setNewBreakEnd(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewBreakEnd(e.target.value)}
                       className="flex-1"
                     />
                     <Button
@@ -560,8 +560,8 @@ const ProductionCapacityManager = ({
                     <div className="space-y-2">
                       <h4 className="font-semibold">Optimization Recommendations</h4>
                       {efficiencyMetrics.recommendations.map((rec, index: number) => (
-                        <div key={index} className="flex items-start gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded">
-                          <Zap className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" />
+                        <div key={index} className="flex items-start gap-2 p-2 bg-secondary rounded">
+                          <Zap className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                           <span className="text-sm">{rec}</span>
                         </div>
                       ))}
@@ -569,20 +569,20 @@ const ProductionCapacityManager = ({
 
                     {/* Capacity Planning */}
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded">
-                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Optimal Capacity</div>
-                        <div className="text-lg font-bold text-gray-600 dark:text-gray-400">
+                      <div className="p-3 bg-secondary rounded">
+                        <div className="text-sm font-medium text-muted-foreground">Optimal Capacity</div>
+                        <div className="text-lg font-bold text-muted-foreground">
                           {Math.round(efficiencyMetrics.peak_capacity * 0.85)} units/day
                         </div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400">85% efficiency target</div>
+                        <div className="text-xs text-muted-foreground">85% efficiency target</div>
                       </div>
 
-                      <div className="p-3 bg-gray-50 rounded">
-                        <div className="text-sm font-medium text-gray-800">Current Performance</div>
-                        <div className="text-lg font-bold text-gray-600">
+                      <div className="p-3 bg-muted rounded">
+                        <div className="text-sm font-medium text-foreground">Current Performance</div>
+                        <div className="text-lg font-bold text-muted-foreground">
                           {efficiencyMetrics.optimization_score}/100
                         </div>
-                        <div className="text-xs text-gray-600">Efficiency Score</div>
+                        <div className="text-xs text-muted-foreground">Efficiency Score</div>
                       </div>
                     </div>
                   </>
@@ -596,4 +596,3 @@ const ProductionCapacityManager = ({
   )
 }
 
-export { ProductionCapacityManager }

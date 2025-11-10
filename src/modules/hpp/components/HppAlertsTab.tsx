@@ -36,7 +36,7 @@ export const HppAlertsTab = ({ className }: HppAlertsTabProps): JSX.Element => {
       case 'low':
         return <Info className="h-4 w-4 text-blue-500" />
       default:
-        return <Bell className="h-4 w-4 text-gray-500" />
+        return <Bell className="h-4 w-4 text-muted-foreground" />
     }
   }
 

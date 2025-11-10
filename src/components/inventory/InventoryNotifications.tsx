@@ -137,7 +137,7 @@ export const InventoryNotifications = (): JSX.Element => {
       case undefined:
       case null:
       default:
-        return <ShoppingCart className="h-4 w-4 text-gray-500" />
+        return <ShoppingCart className="h-4 w-4 text-muted-foreground" />
     }
   }
 
@@ -217,7 +217,7 @@ export const InventoryNotifications = (): JSX.Element => {
               {notifications.map((notification) => (
                 <div
                   key={notification['id']}
-                  className={`p-4 border rounded-lg ${!notification.is_read ? 'bg-gray-50 dark:bg-gray-950/20 border-gray-300' : 'bg-card'
+                  className={`p-4 border rounded-lg ${!notification.is_read ? 'bg-muted/20 border-border/20' : 'bg-card'
                     }`}
                 >
                   <div className="flex items-start justify-between gap-3">

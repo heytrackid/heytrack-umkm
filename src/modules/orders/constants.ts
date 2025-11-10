@@ -1,6 +1,6 @@
 import { formatCurrentCurrency } from '@/lib/currency'
 
-import type { PaymentStatus, PaymentMethod, DeliveryMethod } from '@/modules/orders/types'
+import type { DeliveryMethod, PaymentMethod, PaymentStatus } from '@/modules/orders/types'
 import type { OrderStatus } from '@/types/database'
 
 
@@ -46,8 +46,8 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
 }> = {
   PENDING: {
     label: 'Menunggu Konfirmasi',
-    color: 'text-gray-600 dark:text-gray-400',
-    bgColor: 'bg-gray-100 dark:bg-gray-800',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     description: 'Menunggu konfirmasi dari customer atau admin',
     nextStatuses: ['CONFIRMED', 'CANCELLED'],
     allowEdit: true,
@@ -55,8 +55,8 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
   },
   CONFIRMED: {
     label: 'Dikonfirmasi',
-    color: 'text-gray-600 dark:text-gray-400', 
-    bgColor: 'bg-gray-100 dark:bg-gray-800',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     description: 'Order sudah dikonfirmasi, siap untuk produksi',
     nextStatuses: ['IN_PROGRESS', 'CANCELLED'],
     allowEdit: false,
@@ -64,8 +64,8 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
   },
   IN_PROGRESS: {
     label: 'Sedang Diproduksi',
-    color: 'text-gray-600 dark:text-gray-400',
-    bgColor: 'bg-gray-100 dark:bg-gray-800', 
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     description: 'Order sedang dalam proses produksi',
     nextStatuses: ['READY', 'CANCELLED'],
     allowEdit: false,
@@ -82,8 +82,8 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
   },
   DELIVERED: {
     label: 'Selesai',
-    color: 'text-gray-600 dark:text-gray-400',
-    bgColor: 'bg-gray-100 dark:bg-gray-800',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     description: 'Order sudah selesai dan diterima customer',
     nextStatuses: [],
     allowEdit: false,
@@ -91,8 +91,8 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
   },
   CANCELLED: {
     label: 'Dibatalkan',
-    color: 'text-gray-600 dark:text-gray-400',
-    bgColor: 'bg-gray-100 dark:bg-gray-800',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     description: 'Order dibatalkan',
     nextStatuses: [],
     allowEdit: false,
@@ -109,26 +109,26 @@ export const PAYMENT_STATUS_CONFIG: Record<PaymentStatus, {
 }> = {
   PENDING: {
     label: 'Belum Dibayar',
-    color: 'text-gray-600 dark:text-gray-400',
-    bgColor: 'bg-gray-100 dark:bg-gray-800',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     description: 'Belum ada pembayaran yang diterima'
   },
   PARTIAL: {
     label: 'Dibayar Sebagian',
-    color: 'text-gray-600 dark:text-gray-400',
-    bgColor: 'bg-gray-100 dark:bg-gray-800', 
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     description: 'Sudah dibayar sebagian (DP)'
   },
   PAID: {
     label: 'Lunas',
-    color: 'text-gray-600 dark:text-gray-400',
-    bgColor: 'bg-gray-100 dark:bg-gray-800',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     description: 'Sudah dibayar lunas'
   },
   REFUNDED: {
     label: 'Dikembalikan',
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-100',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     description: 'Pembayaran sudah dikembalikan'
   }
 }
@@ -210,15 +210,15 @@ export const DELIVERY_METHOD_CONFIG: Record<DeliveryMethod, {
 export const ORDER_PRIORITY_CONFIG = {
   low: {
     label: 'Rendah',
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-100',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     icon: '⬇️',
     description: 'Tidak urgent'
   },
   normal: {
     label: 'Normal',
-    color: 'text-gray-600 dark:text-gray-400',
-    bgColor: 'bg-gray-100 dark:bg-gray-800',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     icon: '➡️',
     description: 'Prioritas normal'
   },
@@ -231,8 +231,8 @@ export const ORDER_PRIORITY_CONFIG = {
   },
   urgent: {
     label: 'Urgent',
-    color: 'text-gray-600 dark:text-gray-400',
-    bgColor: 'bg-gray-100 dark:bg-gray-800',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-secondary',
     icon: '🚨',
     description: 'Sangat urgent, butuh perhatian khusus'
   }
@@ -348,9 +348,7 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = Object.entri
 
 // Export all for easy access
 export {
-  ORDER_STATUS_CONFIG as ORDER_STATUSES,
-  PAYMENT_STATUS_CONFIG as PAYMENT_STATUSES,
-  PAYMENT_METHOD_CONFIG as PAYMENT_METHODS,
   DELIVERY_METHOD_CONFIG as DELIVERY_METHODS,
-  ORDER_PRIORITY_CONFIG as ORDER_PRIORITIES
+  ORDER_PRIORITY_CONFIG as ORDER_PRIORITIES, ORDER_STATUS_CONFIG as ORDER_STATUSES, PAYMENT_METHOD_CONFIG as PAYMENT_METHODS, PAYMENT_STATUS_CONFIG as PAYMENT_STATUSES
 }
+

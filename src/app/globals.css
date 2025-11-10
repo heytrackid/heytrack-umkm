@@ -60,26 +60,31 @@
   --chart-4: oklch(0.6 0 0);
   --chart-5: oklch(0.7 0 0);
 
+  /* Syntax highlighting colors */
+  --syntax-line-number: oklch(0.556 0 0);
+  --syntax-border: oklch(0.922 0 0);
+
 }
 
 .dark {
-  --background: oklch(0.05 0 0);
-  --foreground: oklch(0.95 0 0);
-  --card: oklch(0.08 0 0);
-  --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(0.08 0 0);
-  --popover-foreground: oklch(0.95 0 0);
+  /* Vercel-inspired dark mode - Pure black with subtle borders */
+  --background: oklch(0 0 0);           /* Pure black #000000 */
+  --foreground: oklch(0.93 0 0);        /* Light gray #EDEDED */
+  --card: oklch(0.04 0 0);              /* Slightly lighter #0A0A0A */
+  --card-foreground: oklch(0.93 0 0);   /* Light gray #EDEDED */
+  --popover: oklch(0.07 0 0);           /* Elevated #111111 */
+  --popover-foreground: oklch(0.93 0 0);
   --primary: oklch(0.8 0 0);
   --primary-foreground: oklch(0.1 0 0);
-  --secondary: oklch(0.15 0 0);
-  --secondary-foreground: oklch(0.9 0 0);
-  --muted: oklch(0.15 0 0);
-  --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.15 0 0);
-  --accent-foreground: oklch(0.9 0 0);
+  --secondary: oklch(0.07 0 0);         /* Elevated #111111 */
+  --secondary-foreground: oklch(0.93 0 0);
+  --muted: oklch(0.07 0 0);             /* Elevated #111111 */
+  --muted-foreground: oklch(0.53 0 0);  /* Medium gray #888888 */
+  --accent: oklch(0.07 0 0);
+  --accent-foreground: oklch(0.93 0 0);
   --destructive: oklch(0.6 0 0);
-  --border: oklch(0.25 0 0);
-  --input: oklch(0.25 0 0);
+  --border: oklch(0.1 0 0);             /* Very subtle border rgba(255,255,255,0.1) */
+  --input: oklch(0.04 0 0);             /* Card color #0A0A0A */
   --ring: oklch(0.5 0 0);
   --chart-1: oklch(0.4 0 0);
   --chart-2: oklch(0.5 0 0);
@@ -87,12 +92,22 @@
   --chart-4: oklch(0.3 0 0);
   --chart-5: oklch(0.7 0 0);
 
+  /* Syntax highlighting colors for dark mode */
+  --syntax-line-number: oklch(0.53 0 0);
+  --syntax-border: oklch(0.1 0 0);
+
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  
+  /* Force all borders to use theme color - Vercel style */
+  .dark * {
+    border-color: var(--border);
+  }
+  
   html {
     @apply h-full;
   }
@@ -203,23 +218,23 @@
   /* Dialog/Modal z-index and styling - should be above navigation */
   [data-radix-dialog-overlay] {
     z-index: 100 !important;
-    background-color: rgba(0, 0, 0, 0.5) !important;
+    background-color: color-mix(in oklch, var(--background) 50%, transparent) !important;
   }
 
   .dark [data-radix-dialog-overlay] {
-    background-color: rgba(0, 0, 0, 0.7) !important;
+    background-color: color-mix(in oklch, var(--background) 70%, transparent) !important;
   }
 
   [data-radix-dialog-content] {
     z-index: 101 !important;
-    background-color: hsl(var(--background)) !important;
-    color: hsl(var(--foreground)) !important;
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
   }
 
   /* Ensure dialog text is visible in dark mode */
   .dark [data-radix-dialog-content] {
-    background-color: hsl(var(--card)) !important;
-    color: hsl(var(--card-foreground)) !important;
+    background-color: var(--card) !important;
+    color: var(--card-foreground) !important;
   }
 
   /* Force all text elements inside dialog to be visible */
@@ -248,113 +263,125 @@
   .dark [data-radix-dialog-content] span,
   .dark [data-radix-dialog-content] div,
   .dark [data-radix-dialog-content] label {
-    color: hsl(var(--card-foreground)) !important;
+    color: var(--card-foreground) !important;
   }
 
   /* Dialog title and description */
   [data-radix-dialog-title] {
-    color: hsl(var(--foreground)) !important;
+    color: var(--foreground) !important;
   }
 
   .dark [data-radix-dialog-title] {
-    color: hsl(var(--card-foreground)) !important;
+    color: var(--card-foreground) !important;
   }
 
   [data-radix-dialog-description] {
-    color: hsl(var(--muted-foreground)) !important;
+    color: var(--muted-foreground) !important;
   }
 
   /* Muted text in dialogs */
   .dark [data-radix-dialog-content] .text-muted-foreground {
-    color: hsl(var(--muted-foreground)) !important;
+    color: var(--muted-foreground) !important;
   }
 
   /* Popover z-index - should be above navigation but below dialogs */
   [data-radix-popover-content] {
     z-index: 60 !important;
-    background-color: hsl(var(--popover)) !important;
-    color: hsl(var(--popover-foreground)) !important;
+    background-color: var(--popover) !important;
+    color: var(--popover-foreground) !important;
   }
 
   /* Dropdown menu z-index */
   [data-radix-dropdown-menu-content] {
     z-index: 60 !important;
-    background-color: hsl(var(--popover)) !important;
-    color: hsl(var(--popover-foreground)) !important;
+    background-color: var(--popover) !important;
+    color: var(--popover-foreground) !important;
   }
 
   /* Select content */
   [data-radix-select-content] {
-    background-color: hsl(var(--popover)) !important;
-    color: hsl(var(--popover-foreground)) !important;
+    background-color: var(--popover) !important;
+    color: var(--popover-foreground) !important;
   }
 
   /* Alert Dialog styling */
   [data-radix-alert-dialog-overlay] {
     z-index: 100 !important;
-    background-color: rgba(0, 0, 0, 0.5) !important;
+    background-color: color-mix(in oklch, var(--background) 50%, transparent) !important;
   }
 
   .dark [data-radix-alert-dialog-overlay] {
-    background-color: rgba(0, 0, 0, 0.7) !important;
+    background-color: color-mix(in oklch, var(--background) 70%, transparent) !important;
   }
 
   [data-radix-alert-dialog-content] {
     z-index: 101 !important;
-    background-color: hsl(var(--background)) !important;
-    color: hsl(var(--foreground)) !important;
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
   }
 
   .dark [data-radix-alert-dialog-content] {
-    background-color: hsl(var(--card)) !important;
-    color: hsl(var(--card-foreground)) !important;
+    background-color: var(--card) !important;
+    color: var(--card-foreground) !important;
   }
 
   /* Force all text in alert dialog to be visible */
   .dark [data-radix-alert-dialog-content] * {
-    color: hsl(var(--card-foreground)) !important;
+    color: var(--card-foreground) !important;
   }
 
   /* Ensure all form elements are visible in dark mode */
   .dark input,
   .dark textarea,
   .dark select {
-    background-color: hsl(var(--input)) !important;
-    color: hsl(var(--foreground)) !important;
-    border-color: hsl(var(--border)) !important;
+    background-color: var(--input) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
   }
 
   .dark input::placeholder,
   .dark textarea::placeholder {
-    color: hsl(var(--muted-foreground)) !important;
+    color: var(--muted-foreground) !important;
   }
 
   /* Form elements inside dialogs */
   .dark [data-radix-dialog-content] input,
   .dark [data-radix-dialog-content] textarea,
   .dark [data-radix-dialog-content] select {
-    background-color: hsl(var(--input)) !important;
-    color: hsl(var(--foreground)) !important;
-    border-color: hsl(var(--border)) !important;
+    background-color: var(--input) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
   }
 
   .dark [data-radix-alert-dialog-content] input,
   .dark [data-radix-alert-dialog-content] textarea,
   .dark [data-radix-alert-dialog-content] select {
-    background-color: hsl(var(--input)) !important;
-    color: hsl(var(--foreground)) !important;
-    border-color: hsl(var(--border)) !important;
+    background-color: var(--input) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
   }
 
   /* Labels in dark mode */
   .dark label {
-    color: hsl(var(--foreground)) !important;
+    color: var(--foreground) !important;
   }
 
   /* Card text in dark mode */
   .dark .card,
   .dark [class*="card"] {
-    color: hsl(var(--card-foreground)) !important;
+    color: var(--card-foreground) !important;
+  }
+
+  /* Vercel-style card enhancements */
+  .dark .card {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: none !important;
+  }
+
+  .dark .card:hover {
+    border-color: oklch(0.15 0 0) !important;  /* rgba(255,255,255,0.15) */
+    box-shadow: 0 0 0 1px oklch(0.15 0 0) !important;
   }
 
   /* Override hardcoded gray text colors in dark mode */
@@ -363,7 +390,7 @@
   .dark .text-gray-700,
   .dark .text-gray-800,
   .dark .text-gray-900 {
-    color: hsl(var(--foreground)) !important;
+    color: var(--foreground) !important;
   }
 
   .dark .text-slate-500,
@@ -371,12 +398,12 @@
   .dark .text-slate-700,
   .dark .text-slate-800,
   .dark .text-slate-900 {
-    color: hsl(var(--foreground)) !important;
+    color: var(--foreground) !important;
   }
 
   /* Override hardcoded black text in dark mode */
   .dark .text-black {
-    color: hsl(var(--foreground)) !important;
+    color: var(--foreground) !important;
   }
 
   /* Ensure all headings are visible in dark mode */
@@ -386,7 +413,7 @@
   .dark h4,
   .dark h5,
   .dark h6 {
-    color: hsl(var(--foreground)) !important;
+    color: var(--foreground) !important;
   }
 
   /* Ensure paragraphs and spans are visible */
@@ -397,48 +424,75 @@
 
   /* Background colors that need adjustment in dark mode */
   .dark .bg-gray-50 {
-    background-color: hsl(var(--muted)) !important;
+    background-color: var(--muted) !important;
   }
 
   .dark .bg-gray-100 {
-    background-color: hsl(var(--muted)) !important;
+    background-color: var(--muted) !important;
   }
 
   .dark .bg-gray-800 {
-    background-color: hsl(var(--card)) !important;
+    background-color: var(--card) !important;
   }
 
   .dark .bg-gray-900 {
-    background-color: hsl(var(--background)) !important;
+    background-color: var(--background) !important;
   }
 
   .dark .bg-gray-950 {
-    background-color: hsl(var(--background)) !important;
+    background-color: var(--background) !important;
   }
 
-  /* Border colors in dark mode */
+  /* Border colors in dark mode - Vercel style (very subtle) */
   .dark .border-gray-200,
   .dark .border-gray-300,
   .dark .border-gray-400 {
-    border-color: hsl(var(--border)) !important;
+    border-color: var(--border) !important;
   }
 
   .dark .border-gray-700,
   .dark .border-gray-800 {
-    border-color: hsl(var(--border)) !important;
+    border-color: var(--border) !important;
+  }
+  
+  /* Ensure all borders use the theme color in dark mode */
+  .dark [class*="border-"] {
+    border-color: var(--border);
+  }
+  
+  /* Override for specific border utilities */
+  .dark .border {
+    border-color: var(--border) !important;
+  }
+  
+  /* Force all input, textarea, select borders in dark mode */
+  .dark input,
+  .dark textarea,
+  .dark select,
+  .dark [data-slot="input"],
+  .dark [data-slot="textarea"],
+  .dark [data-slot="select"] {
+    border-color: var(--border) !important;
+  }
+  
+  /* Focus states should use ring color, not border */
+  .dark input:focus-visible,
+  .dark textarea:focus-visible,
+  .dark select:focus-visible {
+    border-color: var(--ring) !important;
   }
 
   /* Ensure buttons with gray backgrounds are visible */
   .dark .bg-gray-100.text-gray-800,
   .dark .bg-gray-100.text-gray-700 {
-    background-color: hsl(var(--secondary)) !important;
-    color: hsl(var(--secondary-foreground)) !important;
+    background-color: var(--secondary) !important;
+    color: var(--secondary-foreground) !important;
   }
 
   /* Fix status badges in dark mode */
   .dark [class*="bg-gray-100"][class*="text-gray"] {
-    background-color: hsl(var(--secondary)) !important;
-    color: hsl(var(--secondary-foreground)) !important;
+    background-color: var(--secondary) !important;
+    color: var(--secondary-foreground) !important;
   }
 
   /* Word breaking utilities for chat messages */
@@ -509,13 +563,13 @@
     }
   }
 
-  /* Enhanced border visibility for dark mode */
+  /* Enhanced border visibility for dark mode - Vercel style */
   .border-subtle {
-    border-color: oklch(0.3 0 0);
+    border-color: oklch(0.85 0 0);
   }
 
   .dark .border-subtle {
-    border-color: oklch(0.3 0 0);
+    border-color: oklch(0.08 0 0);  /* Very subtle */
   }
 
   /* Slightly more visible border for dark mode cards and components */
@@ -524,7 +578,7 @@
   }
 
   .dark .border-enhanced {
-    border-color: oklch(0.35 0 0);
+    border-color: oklch(0.1 0 0);  /* Standard Vercel border */
   }
 
   /* For elements that need even more visibility in dark mode */
@@ -533,7 +587,7 @@
   }
 
   .dark .border-prominent {
-    border-color: oklch(0.4 0 0);
+    border-color: oklch(0.15 0 0);  /* Hover state border */
   }
 
   /* Consistent vertical spacing between label and control */
@@ -708,18 +762,18 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted));
+    background: var(--muted);
     border-radius: 3px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.5);
+    background: color-mix(in oklch, var(--muted-foreground) 50%, transparent);
   }
 
   /* Firefox scrollbar */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted)) transparent;
+    scrollbar-color: var(--muted) transparent;
   }
 
   /* Smooth scroll behavior */
@@ -731,21 +785,21 @@
 
 /* Toast Custom Styles (CSP-compliant) */
 .toast-custom {
-  background: hsl(var(--background)) !important;
-  color: hsl(var(--foreground)) !important;
-  border: 1px solid hsl(var(--border)) !important;
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 0.625rem !important;
   z-index: 9999 !important;
 }
 
 .toast-custom[data-type="success"] {
-  --toast-icon-primary: hsl(var(--primary));
-  --toast-icon-secondary: hsl(var(--primary-foreground));
+  --toast-icon-primary: var(--primary);
+  --toast-icon-secondary: var(--primary-foreground);
 }
 
 .toast-custom[data-type="error"] {
-  --toast-icon-primary: #ef4444;
-  --toast-icon-secondary: #ffffff;
+  --toast-icon-primary: oklch(0.6 0.2 25);
+  --toast-icon-secondary: oklch(1 0 0);
 }
 
 /* ============================================================================

@@ -5,12 +5,13 @@ import Link from 'next/link'
 import { type FormEvent, useEffect } from 'react'
 
 import { useRegistration } from '@/app/auth/register/hooks/useRegistration'
+import { TurnstileWidget } from '@/components/security/TurnstileWidget'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
+import { useTurnstile } from '@/hooks/useTurnstile'
 
 import { PasswordRequirements } from '@/app/auth/register/components/PasswordRequirements'
 import { PasswordStrengthIndicator } from '@/app/auth/register/components/PasswordStrengthIndicator'
@@ -49,8 +50,16 @@ export const RegistrationForm = ({
     clearFieldError,
     handleSubmit
   } = useRegistration()
-  
 
+  // Turnstile integration
+  const {
+    isVerified,
+    isVerifying,
+    error: turnstileError,
+    handleVerify,
+    verifyToken,
+    reset: resetTurnstile,
+  } = useTurnstile()
 
   // Notify parent of success
   useEffect(() => {
@@ -59,16 +68,27 @@ export const RegistrationForm = ({
     }
   }, [success, onSuccess])
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    // Verify Turnstile first
+    const verified = await verifyToken()
+    if (!verified) {
+      return
+    }
 
     const formData = new FormData(e.currentTarget)
 
-    handleSubmit(formData)
+    const result = await handleSubmit(formData)
+    
+    // Reset Turnstile if registration failed
+    if (!result) {
+      resetTurnstile()
+    }
   }
 
   return (
-    <Card className="shadow-xl border-slate-200 dark:border-slate-800">
+    <Card className="shadow-xl border">
       <CardHeader className="space-y-1 pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
         <CardTitle className="text-xl sm:text-2xl text-center">Bergabung Sekarang</CardTitle>
         <CardDescription className="text-center text-sm sm:text-base">
@@ -116,7 +136,7 @@ export const RegistrationForm = ({
               />
             </div>
             {fieldErrors.email && (
-              <p id="email-error" className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in" role="alert">
+               <p id="email-error" className="text-sm text-destructive animate-fade-in" role="alert">
                 {fieldErrors.email}
               </p>
             )}
@@ -134,7 +154,7 @@ export const RegistrationForm = ({
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Minimal 8 karakter"
                 value={password}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   onPasswordChange(e.target.value)
                   clearFieldError('password')
                 }}
@@ -162,7 +182,7 @@ export const RegistrationForm = ({
               </Button>
             </div>
             {fieldErrors.password && (
-              <p id="password-error" className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in" role="alert">
+               <p id="password-error" className="text-sm text-destructive animate-fade-in" role="alert">
                 {fieldErrors.password}
               </p>
             )}
@@ -183,7 +203,7 @@ export const RegistrationForm = ({
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Ulangi password"
                 value={confirmPassword}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   onConfirmPasswordChange(e.target.value)
                   clearFieldError('confirmPassword')
                 }}
@@ -213,7 +233,7 @@ export const RegistrationForm = ({
             {fieldErrors.confirmPassword && (
               <p
                 id="confirm-password-error"
-                className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in"
+                 className="text-sm text-destructive animate-fade-in"
                 role="alert"
               >
                 {fieldErrors.confirmPassword}
@@ -221,22 +241,46 @@ export const RegistrationForm = ({
             )}
           </div>
 
+          {/* Turnstile CAPTCHA */}
+          <TurnstileWidget
+            onVerify={handleVerify}
+            onExpire={resetTurnstile}
+            className="flex justify-center"
+            theme="auto"
+            size="normal"
+          />
 
+          {turnstileError && (
+            <p className="text-sm text-destructive text-center animate-fade-in">
+              {turnstileError}
+            </p>
+          )}
 
           <Button
             type="submit"
             className="w-full h-11 text-base font-medium bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
-            disabled={isPending}
+            disabled={isPending || isVerifying || !isVerified}
           >
             {isPending ? (
               <span className="flex items-center justify-center">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 <span className="animate-pulse">Mendaftarkan...</span>
               </span>
+            ) : isVerifying ? (
+              <span className="flex items-center justify-center">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span>Memverifikasi...</span>
+              </span>
             ) : (
               'Daftar'
             )}
           </Button>
+
+          {isVerified && !isPending && (
+            <div className="text-sm text-green-600 dark:text-green-400 text-center animate-fade-in">
+              ✓ Verifikasi keamanan berhasil
+            </div>
+          )}
         </form>
 
         <div className="text-center text-sm sm:text-base">

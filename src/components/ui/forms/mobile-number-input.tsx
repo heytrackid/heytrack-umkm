@@ -126,7 +126,7 @@ export const MobileNumberInput = ({
           type="number"
           placeholder={placeholder}
           value={currentValue}
-          onChange={(e) => handleInputChange(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
             setIsFocused(false)

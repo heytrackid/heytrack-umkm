@@ -35,7 +35,7 @@ export const DateTimeSettings = ({ settings, onSettingChange }: DateTimeSettings
           id="dateFormat"
           className="w-full p-2 border border-input rounded-md bg-background"
           value={settings.ui.dateFormat}
-          onChange={(e) =>
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
             onSettingChange('ui', 'dateFormat', e.target.value as DateFormatOption)
           }
         >
@@ -50,7 +50,7 @@ export const DateTimeSettings = ({ settings, onSettingChange }: DateTimeSettings
           id="timeFormat"
           className="w-full p-2 border border-input rounded-md bg-background"
           value={settings.ui.timeFormat}
-          onChange={(e) =>
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
             onSettingChange('ui', 'timeFormat', e.target.value as TimeFormatOption)
           }
         >

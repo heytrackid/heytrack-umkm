@@ -96,11 +96,11 @@ export const DetailField = ({ label, value, className, copyable: _copyable }: De
 
   return (
     <div className={`flex justify-between items-start py-2 ${className ?? ''}`}>
-      <span className="text-sm font-medium text-gray-600 min-w-0 flex-1">
+      <span className="text-sm font-medium text-muted-foreground min-w-0 flex-1">
         {label}
       </span>
       <span
-        className={`text-sm text-gray-900 ml-4 text-right ${_copyable ? 'cursor-pointer hover:text-blue-600' : ''}`}
+        className={`text-sm text-foreground ml-4 text-right ${_copyable ? 'cursor-pointer hover:text-blue-600' : ''}`}
         onClick={handleCopy}
       >
         {value}
@@ -132,12 +132,12 @@ export const DetailGrid = ({ fields, columns = 2 }: DetailGridProps) => {
       {fields.map((field, index) => (
         <div
           key={index}
-          className={`p-4 bg-gray-50 rounded-lg ${field.span ? `md:col-span-${field.span}` : ''}`}
+          className={`p-4 bg-muted rounded-lg ${field.span ? `md:col-span-${field.span}` : ''}`}
         >
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             {field.label}
           </div>
-          <div className="text-sm font-semibold text-gray-900">
+          <div className="text-sm font-semibold text-foreground">
             {field.value}
           </div>
         </div>
@@ -228,8 +228,8 @@ export const DetailTabs = ({ tabs, activeTab, onTabChange }: DetailTabsProps) =>
             key={tab['id']}
             onClick={() => onTabChange(tab['id'])}
             className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${activeTab === tab['id']
-              ? 'border-blue-500 text-gray-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              ? 'border-blue-500 text-muted-foreground'
+              : 'border-transparent text-muted-foreground hover:text-muted-foreground hover:border-border/20'
               }`}
           >
             {tab.label}
@@ -282,7 +282,7 @@ export const DetailTimeline = ({ items, title = "Riwayat Aktivitas" }: DetailTim
     <DetailSection title={title}>
       <div className="space-y-4">
         {items.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-4">
+          <p className="text-sm text-muted-foreground text-center py-4">
             Belum ada aktivitas tercatat
           </p>
         ) : (
@@ -293,30 +293,30 @@ export const DetailTimeline = ({ items, title = "Riwayat Aktivitas" }: DetailTim
             return (
               <div key={item['id']} className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                    <Icon className="w-4 h-4 text-gray-600" />
+                  <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+                    <Icon className="w-4 h-4 text-muted-foreground" />
                   </div>
-                  {!isLast && <div className="w-px h-8 bg-gray-200 mt-2" />}
+                  {!isLast && <div className="w-px h-8 bg-muted mt-2" />}
                 </div>
 
                 <div className="flex-1 pb-8">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900">
+                      <h4 className="text-sm font-medium text-foreground">
                         {item.title}
                       </h4>
                       {item.description && (
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           {item.description}
                         </p>
                       )}
                     </div>
-                    <time className="text-xs text-gray-500">
+                    <time className="text-xs text-muted-foreground">
                       {new Date(item['timestamp']).toLocaleString('id-ID')}
                     </time>
                   </div>
                   {item.user && (
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Oleh: {item.user}
                     </p>
                   )}

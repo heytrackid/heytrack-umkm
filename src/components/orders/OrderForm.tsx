@@ -30,7 +30,7 @@ interface OrderFormProps {
   loading?: boolean
 }
 
-const OrderForm = ({
+export const OrderForm = ({
   order,
   onSave,
   onCancel,
@@ -171,7 +171,7 @@ const OrderForm = ({
               <Label>Nama Pelanggan *</Label>
               <Input
                 value={formData['customer_name']}
-                onChange={(e) => handleInputChange('customer_name', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('customer_name', e.target.value)}
                 placeholder=""
               />
             </div>
@@ -180,7 +180,7 @@ const OrderForm = ({
               <Label>Nomor Telepon *</Label>
               <Input
                 value={formData.customer_phone}
-                onChange={(e) => handleInputChange('customer_phone', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('customer_phone', e.target.value)}
                 placeholder=""
               />
             </div>
@@ -191,7 +191,7 @@ const OrderForm = ({
               <Label>Alamat Pengiriman</Label>
               <Textarea
                 value={formData.customer_address ?? ''}
-                onChange={(e) => handleInputChange('customer_address', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('customer_address', e.target.value)}
                 placeholder=""
                 rows={3}
               />
@@ -211,7 +211,7 @@ const OrderForm = ({
                 <Input
                   type="date"
                   value={formData.delivery_date}
-                  onChange={(e) => handleInputChange('delivery_date', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('delivery_date', e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
                 />
               </div>
@@ -221,7 +221,7 @@ const OrderForm = ({
                 <Input
                   type="time"
                   value={formData.delivery_time}
-                  onChange={(e) => handleInputChange('delivery_time', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('delivery_time', e.target.value)}
                 />
               </div>
             </div>
@@ -247,7 +247,7 @@ const OrderForm = ({
               <Label>Catatan Pesanan</Label>
               <Textarea
                 value={formData.notes ?? ''}
-                onChange={(e) => handleInputChange('notes', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('notes', e.target.value)}
                 placeholder=""
                 rows={3}
               />
@@ -305,7 +305,7 @@ const OrderForm = ({
                       <Input
                         type="number"
                         value={item.quantity}
-                        onChange={(e) => updateOrderItem(index, 'quantity', parseInt(e.target.value) || 0)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'quantity', parseInt(e.target.value) || 0)}
                         min="1"
                       />
                     </div>
@@ -315,7 +315,7 @@ const OrderForm = ({
                       <Input
                         type="number"
                         value={item.unit_price}
-                        onChange={(e) => updateOrderItem(index, 'unit_price', parseFloat(e.target.value.replace(',', '.')) || 0)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'unit_price', parseFloat(e.target.value.replace(',', '.')) || 0)}
                         min="0"
                       />
                     </div>
@@ -336,7 +336,7 @@ const OrderForm = ({
                     <Label>Catatan (Opsional)</Label>
                     <Input
                       value={item.special_requests ?? ''}
-                      onChange={(e) => updateOrderItem(index, 'special_requests', e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'special_requests', e.target.value)}
                       placeholder=""
                     />
                   </div>
@@ -372,4 +372,3 @@ const OrderForm = ({
   )
 }
 
-export { OrderForm }

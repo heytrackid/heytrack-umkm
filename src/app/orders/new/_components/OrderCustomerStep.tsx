@@ -17,7 +17,7 @@ interface OrderCustomerStepProps {
   onSelectCustomer: (customer: Customer) => void
 }
 
-const OrderCustomerStep = ({
+export const OrderCustomerStep = ({
   formData,
   customers,
   onInputChange,
@@ -28,7 +28,7 @@ const OrderCustomerStep = ({
       <h3 className="text-lg font-medium">Informasi Pelanggan Pelanggan</h3>
       {customers.length > 0 && (
         <Select
-          onValueChange={(value) => {
+          onValueChange={(value: string) => {
             const customer = customers.find((c) => c['id'] === value)
             if (customer) {
               onSelectCustomer(customer)
@@ -55,7 +55,7 @@ const OrderCustomerStep = ({
         <Input
           id="customer_name"
           value={formData['customer_name']}
-          onChange={(e) => onInputChange('customer_name', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('customer_name', e.target.value)}
           required
         />
       </div>
@@ -65,7 +65,7 @@ const OrderCustomerStep = ({
           id="customer_phone"
           type="tel"
           value={formData.customer_phone}
-          onChange={(e) => onInputChange('customer_phone', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('customer_phone', e.target.value)}
         />
       </div>
       <div>
@@ -74,7 +74,7 @@ const OrderCustomerStep = ({
           id="customer_email"
           type="email"
           value={formData.customer_email}
-          onChange={(e) => onInputChange('customer_email', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('customer_email', e.target.value)}
         />
       </div>
       <div>
@@ -83,7 +83,7 @@ const OrderCustomerStep = ({
           id="order_date"
           type="date"
           value={formData.order_date}
-          onChange={(e) => onInputChange('order_date', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('order_date', e.target.value)}
           required
         />
       </div>
@@ -94,7 +94,7 @@ const OrderCustomerStep = ({
       <Textarea
         id="customer_address"
         value={formData.customer_address}
-        onChange={(e) => onInputChange('customer_address', e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onInputChange('customer_address', e.target.value)}
         rows={3}
       />
     </div>
@@ -104,7 +104,7 @@ const OrderCustomerStep = ({
         <Label htmlFor="priority">Prioritas</Label>
         <Select
           value={formData.priority}
-          onValueChange={(value) => onInputChange('priority', value)}
+          onValueChange={(value: string) => onInputChange('priority', value)}
         >
           <SelectTrigger>
             <SelectValue />
@@ -121,11 +121,9 @@ const OrderCustomerStep = ({
         <Input
           id="notes"
           value={formData.notes}
-          onChange={(e) => onInputChange('notes', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('notes', e.target.value)}
         />
       </div>
     </div>
   </div>
 )
-
-export { OrderCustomerStep }

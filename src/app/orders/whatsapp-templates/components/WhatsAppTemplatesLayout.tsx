@@ -15,12 +15,12 @@ import { useToast } from '@/hooks/use-toast'
 import { uiLogger } from '@/lib/client-logger'
 
 // Lazy load heavy components
-const TemplatesTable = lazy(() => import('./TemplatesTable').then(m => ({ default: m.TemplatesTable })))
-const TemplateForm = lazy(() => import('./TemplateForm').then(m => ({ default: m.TemplateForm })))
-const TemplatePreview = lazy(() => import('./TemplatePreview').then(m => ({ default: m.TemplatePreview })))
+const TemplatesTable = lazy(() => import('./TemplatesTable').then(module => ({ default: module.TemplatesTable })))
+const TemplateForm = lazy(() => import('./TemplateForm').then(module => ({ default: module.TemplateForm })))
+const TemplatePreview = lazy(() => import('./TemplatePreview').then(module => ({ default: module.TemplatePreview })))
 
 
-const WhatsAppTemplatesPage = () => {
+const WhatsAppTemplatesLayout = () => {
     const [templates, setTemplates] = useState<WhatsAppTemplate[]>([])
     const [loading, setLoading] = useState(true)
     const [showDialog, setShowDialog] = useState(false)
@@ -244,7 +244,7 @@ const WhatsAppTemplatesPage = () => {
                             WhatsApp Templates
                         </h1>
                     </div>
-                    <div className="h-96 bg-gray-100 rounded animate-pulse" />
+                    <div className="h-96 bg-muted rounded animate-pulse" />
                 </div>
             </AppLayout>
         )
@@ -290,18 +290,18 @@ const WhatsAppTemplatesPage = () => {
 
                 {/* Info Card - Show only if no templates */}
                 {templates.length === 0 && !loading && (
-                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-xl p-6 shadow-sm">
+                     <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-border/20 rounded-xl p-6 shadow-sm">
                         <div className="flex items-start gap-4">
                             <div className="flex-shrink-0">
-                                <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
-                                    <MessageCircle className="h-6 w-6 text-gray-600" />
+                                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                                    <MessageCircle className="h-6 w-6 text-muted-foreground" />
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-bold text-gray-900 text-lg mb-2">
+                                <h3 className="font-bold text-foreground text-lg mb-2">
                                     🎉 Mulai dengan Template Siap Pakai!
                                 </h3>
-                                <p className="text-gray-800 mb-4">
+                                <p className="text-muted-foreground mb-4">
                                     Kami sudah siapkan 8 template WhatsApp yang friendly dan profesional untuk kamu.
                                     Tinggal klik tombol di bawah, edit sesuai kebutuhan, dan langsung bisa dipakai!
                                 </p>
@@ -313,7 +313,7 @@ const WhatsAppTemplatesPage = () => {
                                     >
                                         {generatingDefaults ? (
                                             <>
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-background mr-2" />
                                                 Membuat Template...
                                             </>
                                         ) : (
@@ -334,9 +334,9 @@ const WhatsAppTemplatesPage = () => {
                                         Atau Buat dari Nol
                                     </Button>
                                 </div>
-                                <div className="mt-4 pt-4 border-t border-gray-300">
-                                    <p className="text-sm font-semibold text-gray-900 mb-2">Template yang akan dibuat:</p>
-                                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                                 <div className="mt-4 pt-4 border-t border-border/20">
+                                    <p className="text-sm font-semibold text-foreground mb-2">Template yang akan dibuat:</p>
+                                    <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
                                         <div>✅ Konfirmasi Pesanan</div>
                                         <div>✅ Pesanan Siap</div>
                                         <div>✅ Reminder Pembayaran</div>
@@ -354,10 +354,10 @@ const WhatsAppTemplatesPage = () => {
 
                 {/* Info Card - Show if has templates */}
                 {templates.length > 0 && (
-                    <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
-                        <h3 className="font-semibold text-gray-900 mb-2">💡 Cara Menggunakan Template</h3>
-                        <ul className="text-sm text-gray-800 space-y-1">
-                            <li>• Buat template dengan variabel dinamis seperti <code className="bg-gray-100 px-1 rounded">{'{customer_name}'}</code></li>
+                     <div className="bg-muted border border-border/20 rounded-lg p-4">
+                        <h3 className="font-semibold text-foreground mb-2">💡 Cara Menggunakan Template</h3>
+                        <ul className="text-sm text-foreground space-y-1">
+                            <li>• Buat template dengan variabel dinamis seperti <code className="bg-muted px-1 rounded">{'{customer_name}'}</code></li>
                             <li>• Variabel akan otomatis diganti dengan data pesanan saat mengirim pesan</li>
                             <li>• Set template sebagai default untuk digunakan secara otomatis</li>
                             <li>• Gunakan preview untuk melihat hasil akhir dengan data contoh</li>
@@ -366,10 +366,10 @@ const WhatsAppTemplatesPage = () => {
                 )}
 
                 {/* Templates Table */}
-                <Suspense fallback={<div className="h-96 bg-gray-100 rounded animate-pulse" />}>
+                <Suspense fallback={<div className="h-96 bg-muted rounded animate-pulse" />}>
                     <TemplatesTable
                         templates={templates}
-                        loading={loading}
+                        isLoading={loading}
                         onEdit={handleEdit}
                         onDelete={handleDeleteRequest}
                         onToggleDefault={handleToggleDefault}
@@ -417,4 +417,4 @@ const WhatsAppTemplatesPage = () => {
     )
 }
 
-export { WhatsAppTemplatesPage }
+export { WhatsAppTemplatesLayout }

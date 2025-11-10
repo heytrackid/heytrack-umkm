@@ -170,14 +170,14 @@ export function createCheckboxColumn<T>(): ColumnDef<T> {
       <input
         type="checkbox"
         checked={table.getIsAllPageRowsSelected()}
-        onChange={(e) => table.toggleAllPageRowsSelected(Boolean(e.target.checked))}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => table.toggleAllPageRowsSelected(Boolean(e.target.checked))}
       />
     ),
     cell: ({ row }): React.ReactNode => (
       <input
         type="checkbox"
         checked={row.getIsSelected()}
-        onChange={(e) => row.toggleSelected(Boolean(e.target.checked))}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => row.toggleSelected(Boolean(e.target.checked))}
       />
     ),
   }

@@ -140,7 +140,7 @@ export const SmartIngredientSelector = ({
         if ((ingredient.current_stock || 0) < minimumStock) {
             return { label: 'Menipis', color: 'bg-yellow-500' }
         }
-        return { label: 'Tersedia', color: 'bg-gray-500' }
+        return { label: 'Tersedia', color: 'bg-muted0' }
     }
 
     return (
@@ -191,7 +191,7 @@ export const SmartIngredientSelector = ({
                     <Input
                         placeholder="Cari bahan..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                         className="pl-9"
                     />
                 </div>
@@ -200,7 +200,7 @@ export const SmartIngredientSelector = ({
                 {suggestedIngredients.length > 0 && (
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                            <Sparkles className="h-4 w-4 text-gray-500" />
+                            <Sparkles className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm font-semibold">Bahan yang Disarankan</span>
                             <Badge variant="secondary" className="text-xs">
                                 Untuk {productType}
@@ -215,7 +215,7 @@ export const SmartIngredientSelector = ({
                                 return (
                                     <div
                                         key={ingredient['id']}
-                                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border'
+                                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border/20'
                                             }`}
                                         onClick={() => toggleIngredient(ingredient['id'])}
                                     >
@@ -260,7 +260,7 @@ export const SmartIngredientSelector = ({
                                 return (
                                     <div
                                         key={ingredient['id']}
-                                        className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border'
+                                        className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border/20'
                                             }`}
                                         onClick={() => toggleIngredient(ingredient['id'])}
                                     >
@@ -316,7 +316,7 @@ export const SmartIngredientSelector = ({
                                                 min="0"
                                                 step="0.1"
                                                 value={quantity}
-                                                onChange={(e) => updateQuantity(ingredientId, parseFloat(e.target.value.replace(',', '.')) || 0)}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateQuantity(ingredientId, parseFloat(e.target.value.replace(',', '.')) || 0)}
                                                 className="w-20 h-8 text-sm"
                                                 placeholder="Qty"
                                             />

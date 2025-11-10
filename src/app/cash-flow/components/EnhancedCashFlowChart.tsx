@@ -38,10 +38,10 @@ const CustomTooltip = (props: TooltipContentProps<any, any>): JSX.Element | null
                 <div className="space-y-1.5 text-sm">
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
-                            <div className="h-3 w-3 rounded-full bg-gray-500" />
+                            <div className="h-3 w-3 rounded-full bg-muted0" />
                             <span>Pemasukan</span>
                         </div>
-                        <span className="font-semibold text-gray-600">
+                        <span className="font-semibold text-muted-foreground">
                             Rp {data.income.toLocaleString('id-ID')}
                         </span>
                     </div>
@@ -56,10 +56,10 @@ const CustomTooltip = (props: TooltipContentProps<any, any>): JSX.Element | null
                     </div>
                     <div className="flex items-center justify-between gap-4 pt-1 border-t">
                         <div className="flex items-center gap-2">
-                            <div className="h-3 w-3 rounded-full bg-gray-500" />
+                            <div className="h-3 w-3 rounded-full bg-muted0" />
                             <span>Net</span>
                         </div>
-                        <span className={`font-semibold ${data.net >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
+                        <span className={`font-semibold ${data.net >= 0 ? 'text-muted-foreground' : 'text-red-600'}`}>
                             Rp {data.net.toLocaleString('id-ID')}
                         </span>
                     </div>
@@ -369,14 +369,14 @@ const EnhancedCashFlowChart = ({
                                         <input
                                             type="date"
                                             value={startDate}
-                                            onChange={(e) => onStartDateChange(e.target.value)}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onStartDateChange(e.target.value)}
                                             className={`h-9 ${isMobile ? 'flex-1' : 'w-[130px]'} rounded-md border border-input bg-background px-2 text-xs`}
                                             placeholder="Mulai"
                                         />
                                         <input
                                             type="date"
                                             value={endDate}
-                                            onChange={(e) => onEndDateChange(e.target.value)}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onEndDateChange(e.target.value)}
                                             className={`h-9 ${isMobile ? 'flex-1' : 'w-[130px]'} rounded-md border border-input bg-background px-2 text-xs`}
                                             placeholder="Akhir"
                                         />
@@ -407,13 +407,13 @@ const EnhancedCashFlowChart = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div>
                                     <p className="text-xs text-muted-foreground mb-1">Rata-rata Net</p>
-                                    <p className={`text-sm font-semibold ${stats.avgNet >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
+                                    <p className={`text-sm font-semibold ${stats.avgNet >= 0 ? 'text-muted-foreground' : 'text-red-600'}`}>
                                         Rp {stats.avgNet.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground mb-1">Net Tertinggi</p>
-                                    <p className="text-sm font-semibold text-gray-600">
+                                    <p className="text-sm font-semibold text-muted-foreground">
                                         Rp {stats.highestNet.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
                                     </p>
                                 </div>
@@ -425,7 +425,7 @@ const EnhancedCashFlowChart = ({
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground mb-1">Saldo Akhir</p>
-                                    <p className={`text-sm font-semibold ${(chartData[chartData.length - 1]?.net ?? 0) >= 0 ? 'text-gray-600' : 'text-red-600'}`}>
+                                    <p className={`text-sm font-semibold ${(chartData[chartData.length - 1]?.net ?? 0) >= 0 ? 'text-muted-foreground' : 'text-red-600'}`}>
                                         Rp {(chartData[chartData.length - 1]?.net ?? 0).toLocaleString('id-ID', { maximumFractionDigits: 0 })}
                                     </p>
                                 </div>

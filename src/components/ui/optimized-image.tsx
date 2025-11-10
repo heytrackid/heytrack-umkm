@@ -33,8 +33,8 @@ const OptimizedImage = ({
 
   if (hasError) {
     return (
-      <div className="bg-gray-200 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
-        <span className="text-gray-500">Image unavailable</span>
+      <div className="bg-muted border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+        <span className="text-muted-foreground">Image unavailable</span>
       </div>
     )
   }
@@ -60,7 +60,7 @@ const OptimizedImage = ({
         {...props}
       />
       {isLoading && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+        <div className="absolute inset-0 bg-muted animate-pulse" />
       )}
     </div>
   )

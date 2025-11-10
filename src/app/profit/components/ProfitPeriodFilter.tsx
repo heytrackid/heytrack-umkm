@@ -63,7 +63,7 @@ export const ProfitPeriodFilter = ({
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => onStartDateChange(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onStartDateChange(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
             </div>
@@ -72,7 +72,7 @@ export const ProfitPeriodFilter = ({
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => onEndDateChange(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onEndDateChange(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
             </div>

@@ -37,14 +37,14 @@ export const EmptyState = ({
   const content = (
     <div className="text-center py-12">
       {Icon && (
-        <Icon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+        <Icon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
       )}
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <h3 className="text-lg font-semibold text-foreground mb-2">
         {title}
       </h3>
 
-      <p className="text-gray-600 mb-6 max-w-md mx-auto">
+      <p className="text-muted-foreground mb-6 max-w-md mx-auto">
         {description}
       </p>
 
@@ -79,12 +79,12 @@ export const EmptyState = ({
     return (
       <div className="text-center py-8">
         {Icon && (
-          <Icon className="mx-auto h-8 w-8 text-gray-400 mb-3" />
+          <Icon className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
         )}
-        <h4 className="text-sm font-medium text-gray-900 mb-1">
+        <h4 className="text-sm font-medium text-foreground mb-1">
           {title}
         </h4>
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-muted-foreground">
           {description}
         </p>
       </div>
@@ -219,11 +219,11 @@ export const ErrorState = ({
     <div className="text-center">
       <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <h3 className="text-lg font-semibold text-foreground mb-2">
         {title}
       </h3>
 
-      <p className="text-gray-600 mb-6 max-w-md mx-auto">
+      <p className="text-muted-foreground mb-6 max-w-md mx-auto">
         {message}
       </p>
 

@@ -98,7 +98,7 @@ const getDurationClass = (duration: number): string => {
     return 'text-muted-foreground'
 }
 
-const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
+export const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
     const [metrics, setMetrics] = useState<SystemMetrics | null>(null)
     const [performanceLogs, setPerformanceLogs] = useState<PerformanceLog[]>([])
     const [errorLogs, setErrorLogs] = useState<ErrorLog[]>([])
@@ -287,7 +287,7 @@ const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
                     <Card>
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                <TrendingUp className="h-4 w-4 text-gray-500" />
+                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
                                 Total Revenue
                             </CardTitle>
                         </CardHeader>
@@ -687,4 +687,3 @@ const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
     )
 }
 
-export { AdminDashboard }

@@ -22,7 +22,7 @@ interface StatCardProps {
   }
 }
 
-const MemoizedStatCard = memo(({
+export const MemoizedStatCard = memo(({
   title,
   value,
   description,
@@ -41,7 +41,7 @@ const MemoizedStatCard = memo(({
         )}
         {trend && (
           <div
-            className={`text-xs ${trend.isPositive ? 'text-gray-600' : 'text-red-600'}`}
+            className={`text-xs ${trend.isPositive ? 'text-muted-foreground' : 'text-red-600'}`}
           >
             {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
           </div>
@@ -85,7 +85,7 @@ interface ListCardProps<T> {
   emptyMessage?: string
 }
 
-export const MemoizedListCard = memo(<T,>({ 
+const MemoizedListCard = memo(<T,>({ 
   items,
   renderItem,
   keyExtractor,
@@ -110,5 +110,6 @@ export const MemoizedListCard = memo(<T,>({
 
 MemoizedListCard.displayName = 'MemoizedListCard'
 
-export { MemoizedStatCard, MemoizedDataCard }
+
+export { MemoizedDataCard, MemoizedListCard }
 

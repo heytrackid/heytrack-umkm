@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-import type { ApiSuccessResponse, ApiErrorResponse, PaginatedResponse } from '@/lib/api-core/types'
+import type { ApiErrorResponse, ApiSuccessResponse, PaginatedResponse } from '@/lib/api-core/types'
 
 /**
  * API Response Module
@@ -28,13 +28,13 @@ export function createSuccessResponse<T>(
 export function createErrorResponse(
   error: string,
   statusCode = 400,
-  errors?: string[]
+  errors?: string[] | undefined
 ): NextResponse<ApiErrorResponse> {
   return NextResponse.json(
     {
       success: false,
       error,
-      errors
+      errors: errors ?? undefined
     },
     { status: statusCode }
   )

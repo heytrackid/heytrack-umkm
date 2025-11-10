@@ -122,14 +122,14 @@ export const SettingsPanel = ({
             </Select>
 
             {/* Method explanation */}
-            <div className="mt-2 p-3 bg-gray-50 rounded-lg text-xs">
+            <div className="mt-2 p-3 bg-muted rounded-lg text-xs">
               <div className="flex items-center gap-2 mb-1">
                 <span>{methodInfo.icon}</span>
                 <span className="font-medium">{methodInfo.name}</span>
               </div>
-              <p className="text-gray-600 mb-2">{methodInfo.description}</p>
+              <p className="text-muted-foreground mb-2">{methodInfo.description}</p>
               <div className="grid grid-cols-1 gap-1">
-                <p className="text-gray-600">✅ {methodInfo.pros}</p>
+                <p className="text-muted-foreground">✅ {methodInfo.pros}</p>
                 <p className="text-orange-600">⚠️ {methodInfo.cons}</p>
               </div>
             </div>
@@ -146,11 +146,11 @@ export const SettingsPanel = ({
             <Input
               type="number"
               value={profitMarginPercent}
-              onChange={(e) => onProfitMarginChange(Number(e.target.value))}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onProfitMarginChange(Number(e.target.value))}
               className="mt-2"
 
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted mt-1">
               Rekomendasi: 25-40% untuk produk UMKM
             </p>
           </div>
@@ -160,7 +160,7 @@ export const SettingsPanel = ({
             <input
               type="checkbox"
               checked={includeOperationalCosts}
-              onChange={(e) => onIncludeOperationalCostsChange(e.target.checked)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onIncludeOperationalCostsChange(e.target.checked)}
               className="rounded"
             />
             <UMKMTooltip
@@ -184,10 +184,10 @@ export const SettingsPanel = ({
         <CardContent>
           <div className="space-y-2">
             <h3 className="font-semibold">Pilih resep untuk kalkulasi</h3>
-            <p className="text-sm text-gray-600">Hasil: - porsi</p>
+            <p className="text-sm text-muted-foreground">Hasil: - porsi</p>
             <div className="space-y-1">
               <p className="text-xs font-medium">Bahan-bahan:</p>
-              <p className="text-xs text-gray-500 italic">Tidak ada resep yang dipilih</p>
+              <p className="text-xs text-muted italic">Tidak ada resep yang dipilih</p>
             </div>
           </div>
         </CardContent>
@@ -195,3 +195,5 @@ export const SettingsPanel = ({
     </div>
   )
 }
+
+

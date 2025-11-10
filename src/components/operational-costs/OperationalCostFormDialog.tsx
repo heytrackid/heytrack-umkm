@@ -160,7 +160,7 @@ export const OperationalCostFormDialog = ({
                                 <Input
                                     id="description"
                                     value={formData.description ?? ''}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, description: e.target.value })}
                                     placeholder="Contoh: Listrik Bulanan"
                                     required
                                 />
@@ -195,7 +195,7 @@ export const OperationalCostFormDialog = ({
                                     min="0"
                                     step="1"
                                     value={formData.amount ?? ''}
-                                    onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value.replace(',', '.')) || 0 })}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, amount: parseFloat(e.target.value.replace(',', '.')) || 0 })}
                                     placeholder="0"
                                     required
                                 />
@@ -225,7 +225,7 @@ export const OperationalCostFormDialog = ({
                             <Textarea
                                 id="notes"
                                 value={formData.notes ?? ''}
-                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, notes: e.target.value })}
                                 placeholder="Catatan tambahan tentang biaya ini..."
                                 rows={3}
                             />

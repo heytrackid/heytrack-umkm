@@ -12,7 +12,7 @@ interface ProductionOverviewProps {
   batches: ProductionBatch[]
 }
 
-const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
+export const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
   const completedBatches = batches.filter(b => b['status'] === 'COMPLETED').slice(0, 5)
 
   return (
@@ -24,7 +24,7 @@ const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
               <p className="text-sm text-muted-foreground">Active Batches</p>
               <p className="text-2xl font-bold">{batches.filter(b => b['status'] === 'IN_PROGRESS').length}</p>
             </div>
-            <Play className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+            <Play className="h-8 w-8 text-muted-foreground" />
           </div>
         </CardContent>
       </Card>
@@ -36,7 +36,7 @@ const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
               <p className="text-sm text-muted-foreground">Scheduled</p>
               <p className="text-2xl font-bold">{batches.filter(b => b['status'] === 'PLANNED').length}</p>
             </div>
-            <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+            <Clock className="h-8 w-8 text-muted-foreground" />
           </div>
         </CardContent>
       </Card>
@@ -48,7 +48,7 @@ const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
               <p className="text-sm text-muted-foreground">Completed Today</p>
               <p className="text-2xl font-bold">{completedBatches.length}</p>
             </div>
-            <CheckCircle className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+            <CheckCircle className="h-8 w-8 text-muted-foreground" />
           </div>
         </CardContent>
       </Card>
@@ -56,4 +56,3 @@ const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
   )
 }
 
-export { ProductionOverview }

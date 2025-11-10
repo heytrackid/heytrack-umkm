@@ -27,7 +27,7 @@ import { useEnhancedCashFlow } from '@/app/cash-flow/hooks/useEnhancedCashFlow'
 // Summary cards skeleton component
 const SummaryCardsSkeleton = (): JSX.Element[] => (
   Array.from({ length: 3 }, (_, i) => (
-    <div key={`summary-card-${i}`} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
+    <div key={`summary-card-${i}`} className="h-24 bg-muted animate-pulse rounded-lg" />
   ))
 )
 
@@ -137,39 +137,43 @@ const CashFlowPage = (): JSX.Element => {
         />
 
         {/* Mobile DateRangePicker */}
-        <div className="md:hidden">
-          <DateRangePicker
-            onChange={(range: DateRangeValue) => {
-              const params = new URLSearchParams(window.location.search)
-              if (range.from) params.set('from', range.from.toISOString())
-              if (range.to) params.set('to', range.to.toISOString())
-              const url = `${window.location.pathname}?${params.toString()}`
-              window.history.replaceState(null, '', url)
-            }}
-          />
+        <div className="md:hidden mb-4">
+          <Card>
+            <CardContent className="p-4">
+              <DateRangePicker
+                onChange={(range: DateRangeValue) => {
+                  const params = new URLSearchParams(window.location.search)
+                  if (range.from) params.set('from', range.from.toISOString())
+                  if (range.to) params.set('to', range.to.toISOString())
+                  const url = `${window.location.pathname}?${params.toString()}`
+                  window.history.replaceState(null, '', url)
+                }}
+              />
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content - Single Suspense boundary for parallel loading */}
-        <Suspense fallback={
-          <div className="space-y-6">
-            {/* Filters Loading */}
-            <div className="h-32 bg-gray-100 animate-pulse rounded-lg" />
+         {/* Main Content - Single Suspense boundary for parallel loading */}
+         <Suspense fallback={
+           <div className="space-y-6">
+             {/* Filters Loading */}
+             <div className="h-32 bg-muted animate-pulse rounded-lg" />
 
-            {/* Summary Cards Loading */}
-            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
-              <SummaryCardsSkeleton />
-            </div>
+             {/* Summary Cards Loading */}
+             <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
+               <SummaryCardsSkeleton />
+             </div>
 
-            {/* Chart Loading */}
-            <div className="h-80 bg-gray-100 animate-pulse rounded-lg" />
+             {/* Chart Loading */}
+             <div className={`h-80 bg-muted animate-pulse rounded-lg ${isMobile ? 'h-64' : 'h-80'}`} />
 
-            {/* Transactions Loading */}
-            <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
+             {/* Transactions Loading */}
+             <div className={`bg-muted animate-pulse rounded-lg ${isMobile ? 'h-80' : 'h-96'}`} />
 
-            {/* Category Breakdown Loading */}
-            <div className="h-48 bg-gray-100 animate-pulse rounded-lg" />
-          </div>
-        }>
+             {/* Category Breakdown Loading */}
+             <div className={`h-48 bg-muted animate-pulse rounded-lg ${isMobile ? 'h-40' : 'h-48'}`} />
+           </div>
+         }>
           {/* Enhanced Transaction Form Dialog */}
           <EnhancedTransactionForm
             isOpen={isAddDialogOpen}
@@ -186,37 +190,48 @@ const CashFlowPage = (): JSX.Element => {
             onOpenChange={setIsCategoryDialogOpen}
           />
 
-          {/* Quick Actions for Mobile */}
-          {isMobile && (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    variant="outline"
-                    className="h-20 flex-col gap-2"
-                    onClick={() => {
-                      setTransactionType('income')
-                      setIsAddDialogOpen(true)
-                    }}
-                  >
-                    <ArrowUpCircle className="h-6 w-6 text-gray-600" />
-                    <span className="text-sm">Pemasukan</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-20 flex-col gap-2"
-                    onClick={() => {
-                      setTransactionType('expense')
-                      setIsAddDialogOpen(true)
-                    }}
-                  >
-                    <ArrowDownCircle className="h-6 w-6 text-red-600" />
-                    <span className="text-sm">Pengeluaran</span>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+           {/* Quick Actions for Mobile */}
+           {isMobile && (
+             <Card className="border-2 border-dashed border-primary/20">
+               <CardContent className="pt-6">
+                 <h3 className="font-semibold mb-4 text-center">Aksi Cepat</h3>
+                 <div className="grid grid-cols-2 gap-3">
+                   <Button
+                     variant="default"
+                     className="h-20 flex-col gap-2 bg-green-600 hover:bg-green-700"
+                     onClick={() => {
+                       setTransactionType('income')
+                       setIsAddDialogOpen(true)
+                     }}
+                   >
+                     <ArrowUpCircle className="h-6 w-6" />
+                     <span className="text-sm font-medium">Pemasukan</span>
+                   </Button>
+                   <Button
+                     variant="default"
+                     className="h-20 flex-col gap-2 bg-red-600 hover:bg-red-700"
+                     onClick={() => {
+                       setTransactionType('expense')
+                       setIsAddDialogOpen(true)
+                     }}
+                   >
+                     <ArrowDownCircle className="h-6 w-6" />
+                     <span className="text-sm font-medium">Pengeluaran</span>
+                   </Button>
+                 </div>
+                 <div className="mt-4 pt-4 border-t border-border/20">
+                   <Button
+                     variant="outline"
+                     className="w-full"
+                     onClick={() => setIsCategoryDialogOpen(true)}
+                   >
+                     <Settings className="h-4 w-4 mr-2" />
+                     Kelola Kategori
+                   </Button>
+                 </div>
+               </CardContent>
+             </Card>
+           )}
 
           {/* Filters */}
           <FilterPeriod
@@ -231,40 +246,43 @@ const CashFlowPage = (): JSX.Element => {
             isMobile={isMobile}
           />
 
-          {/* Enhanced Summary Cards */}
-          <EnhancedSummaryCards
-            summary={summary}
-            comparison={comparison}
-            formatCurrency={formatCurrency}
-            isMobile={isMobile}
-          />
+           {/* Main Content Layout */}
+           <div className={`space-y-6 ${isMobile ? 'space-y-4' : 'space-y-6'}`}>
+             {/* Enhanced Summary Cards */}
+             <EnhancedSummaryCards
+               summary={summary}
+               comparison={comparison}
+               formatCurrency={formatCurrency}
+               isMobile={isMobile}
+             />
 
-          {/* Enhanced Cash Flow Trend Chart */}
-          <EnhancedCashFlowChart
-            chartData={chartData}
-            selectedPeriod={selectedPeriod}
-            onPeriodChange={setSelectedPeriod}
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
-            isMobile={isMobile}
-          />
+             {/* Enhanced Cash Flow Trend Chart */}
+             <EnhancedCashFlowChart
+               chartData={chartData}
+               selectedPeriod={selectedPeriod}
+               onPeriodChange={setSelectedPeriod}
+               startDate={startDate}
+               endDate={endDate}
+               onStartDateChange={setStartDate}
+               onEndDateChange={setEndDate}
+               isMobile={isMobile}
+             />
 
-          {/* Enhanced Transactions List */}
-          <EnhancedTransactionList
-            transactions={transactions}
-            onDeleteTransaction={handleDeleteTransaction}
-            formatCurrency={formatCurrency}
-            loading={loading}
-          />
+             {/* Enhanced Transactions List */}
+             <EnhancedTransactionList
+               transactions={transactions}
+               onDeleteTransaction={handleDeleteTransaction}
+               formatCurrency={formatCurrency}
+               loading={loading}
+             />
 
-          {/* Category Breakdown */}
-          <CategoryBreakdown
-            summary={summary}
-            formatCurrency={formatCurrency}
-            isMobile={isMobile}
-          />
+             {/* Category Breakdown */}
+             <CategoryBreakdown
+               summary={summary}
+               formatCurrency={formatCurrency}
+               isMobile={isMobile}
+             />
+           </div>
         </Suspense>
       </div>
     </AppLayout>

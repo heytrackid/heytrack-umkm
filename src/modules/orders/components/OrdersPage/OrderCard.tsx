@@ -38,13 +38,13 @@ export const OrderCard = ({ order, onView, onEdit, onUpdateStatus }: OrderCardPr
     })
 
     const getStatusColor = (status: OrderStatus | null) => {
-        if (!status) { return 'bg-gray-100 text-gray-800' }
+        if (!status) { return 'bg-muted text-muted-foreground' }
         const _config = ORDER_STATUS_CONFIG[status]
-        if (!_config) { return 'bg-gray-100 text-gray-800' }
+        if (!_config) { return 'bg-muted text-muted-foreground' }
         return _config.color
     }
 
-    const getPaymentStatusColor = (_status: PaymentStatus | null) => 'bg-gray-100 text-gray-800'
+    const getPaymentStatusColor = (_status: PaymentStatus | null) => 'bg-muted text-muted-foreground'
 
     const paymentStatusLabel = order.payment_status && order.payment_status in PAYMENT_STATUS_LABELS
         ? PAYMENT_STATUS_LABELS[order.payment_status as keyof typeof PAYMENT_STATUS_LABELS]

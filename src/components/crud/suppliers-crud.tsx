@@ -165,8 +165,8 @@ export const SuppliersCRUD = (): JSX.Element => {
 
   if (error) {
     return (
-      <div className="bg-gray-100 dark:bg-gray-800 border border-red-200 rounded-md p-4">
-        <p className="text-gray-600 dark:text-gray-400">Error loading suppliers: {error}</p>
+      <div className="bg-secondary border border-red-200 rounded-md p-4">
+        <p className="text-muted-foreground">Error loading suppliers: {error}</p>
       </div>
     );
   }

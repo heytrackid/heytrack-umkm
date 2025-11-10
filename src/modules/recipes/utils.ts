@@ -170,7 +170,7 @@ export function getDifficultyInfo(difficulty: string | null) {
   if (!difficulty) {
     return {
       label: 'Unknown',
-      color: 'bg-gray-100 text-gray-800',
+      color: 'bg-secondary text-secondary-foreground',
       icon: '⚫',
       description: 'Tingkat kesulitan tidak diketahui'
     }
@@ -180,28 +180,28 @@ export function getDifficultyInfo(difficulty: string | null) {
     case 'easy':
       return {
         label: 'Mudah',
-        color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+        color: 'bg-secondary text-muted-foreground',
         icon: '🟢',
         description: 'Cocok untuk pemula'
       }
     case 'medium':
       return {
         label: 'Sedang',
-        color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+        color: 'bg-secondary text-muted-foreground',
         icon: '🟡',
         description: 'Memerlukan sedikit pengalaman'
       }
     case 'hard':
       return {
         label: 'Sulit',
-        color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+        color: 'bg-secondary text-muted-foreground',
         icon: '🔴',
         description: 'Untuk baker berpengalaman'
       }
     default:
       return {
         label: 'Unknown',
-        color: 'bg-gray-100 text-gray-800',
+        color: 'bg-secondary text-secondary-foreground',
         icon: '⚫',
         description: 'Tingkat kesulitan tidak diketahui'
       }

@@ -98,7 +98,7 @@ const EnhancedSummaryCards = ({
                             <Button
                                 variant="link"
                                 size="sm"
-                                className="h-auto p-0 text-xs hover:text-gray-600"
+                                className="h-auto p-0 text-xs hover:text-muted-foreground"
                                 onClick={scrollToTransactions}
                             >
                                 Lihat detail →

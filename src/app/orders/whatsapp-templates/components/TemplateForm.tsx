@@ -190,7 +190,7 @@ const TemplateForm = ({
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Template Defaults */}
                     {!editingTemplate && (
-                        <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
+                        <div className="bg-muted border border-border/20 rounded-lg p-4">
                             <Label className="flex items-center gap-2 mb-2">
                                 <Info className="h-4 w-4" />
                                 Mulai dengan Template Default
@@ -218,7 +218,7 @@ const TemplateForm = ({
                             <Input
                                 id="name"
                                 value={formData.name}
-                                onChange={(e) => handleInputChange('name', e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('name', e.target.value)}
                                 placeholder="Contoh: Konfirmasi Pesanan Baru"
                                 required
                             />
@@ -228,7 +228,7 @@ const TemplateForm = ({
                             <Label htmlFor="category">Kategori *</Label>
                             <Select
                                 value={formData.category}
-                                onValueChange={(value) => handleInputChange('category', value)}
+                                onValueChange={(value: string) => handleInputChange('category', value)}
                             >
                                 <SelectTrigger>
                                     <SelectValue />
@@ -249,7 +249,7 @@ const TemplateForm = ({
                         <Input
                             id="description"
                             value={formData.description}
-                            onChange={(e) => handleInputChange('description', e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('description', e.target.value)}
                             placeholder="Jelaskan kapan template ini digunakan"
                         />
                     </div>
@@ -261,14 +261,14 @@ const TemplateForm = ({
                             <Textarea
                                 id="template_content"
                                 value={formData.template_content}
-                                onChange={(e) => handleInputChange('template_content', e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('template_content', e.target.value)}
                                 rows={12}
                                 placeholder="Halo {customer_name}!&#10;&#10;Pesanan Anda telah dikonfirmasi:&#10;{order_items}&#10;&#10;Total: {total_amount}"
                                 required
                                 className="font-mono text-sm"
                             />
                             <p className="text-xs text-muted-foreground">
-                                Gunakan format <code className="bg-gray-100 px-1 rounded">{'{variable_name}'}</code> untuk data dinamis
+                                Gunakan format <code className="bg-secondary px-1 rounded">{'{variable_name}'}</code> untuk data dinamis
                             </p>
 
                             {formData.template_content && (
@@ -288,7 +288,7 @@ const TemplateForm = ({
                         {/* Available Variables */}
                         <div className="space-y-2">
                             <Label>Variabel yang Tersedia</Label>
-                            <div className="border rounded-lg p-3 max-h-[400px] overflow-y-auto bg-gray-50">
+                            <div className="border rounded-lg p-3 max-h-[400px] overflow-y-auto bg-muted">
                                 <Accordion type="single" collapsible className="w-full">
                                     <AccordionItem value="order">
                                         <AccordionTrigger className="text-sm font-medium">
@@ -312,14 +312,14 @@ const TemplateForm = ({
                                                                 onClick={() => copyVariable(variable.name)}
                                                             >
                                                                 {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-gray-600" />
+                                                                    <Check className="h-3 w-3 text-muted-foreground" />
                                                                 ) : (
                                                                     <Copy className="h-3 w-3" />
                                                                 )}
                                                             </Button>
                                                         </div>
                                                         <p className="text-muted-foreground">{variable.description}</p>
-                                                        <p className="text-gray-500">Contoh: {variable.example}</p>
+                                                        <p className="text-muted-foreground">Contoh: {variable.example}</p>
                                                     </div>
                                                 ))}
                                             </div>
@@ -348,14 +348,14 @@ const TemplateForm = ({
                                                                 onClick={() => copyVariable(variable.name)}
                                                             >
                                                                 {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-gray-600" />
+                                                                    <Check className="h-3 w-3 text-muted-foreground" />
                                                                 ) : (
                                                                     <Copy className="h-3 w-3" />
                                                                 )}
                                                             </Button>
                                                         </div>
                                                         <p className="text-muted-foreground">{variable.description}</p>
-                                                        <p className="text-gray-500">Contoh: {variable.example}</p>
+                                                        <p className="text-muted-foreground">Contoh: {variable.example}</p>
                                                     </div>
                                                 ))}
                                             </div>
@@ -384,14 +384,14 @@ const TemplateForm = ({
                                                                 onClick={() => copyVariable(variable.name)}
                                                             >
                                                                 {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-gray-600" />
+                                                                    <Check className="h-3 w-3 text-muted-foreground" />
                                                                 ) : (
                                                                     <Copy className="h-3 w-3" />
                                                                 )}
                                                             </Button>
                                                         </div>
                                                         <p className="text-muted-foreground">{variable.description}</p>
-                                                        <p className="text-gray-500">Contoh: {variable.example}</p>
+                                                        <p className="text-muted-foreground">Contoh: {variable.example}</p>
                                                     </div>
                                                 ))}
                                             </div>
@@ -420,14 +420,14 @@ const TemplateForm = ({
                                                                 onClick={() => copyVariable(variable.name)}
                                                             >
                                                                 {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-gray-600" />
+                                                                    <Check className="h-3 w-3 text-muted-foreground" />
                                                                 ) : (
                                                                     <Copy className="h-3 w-3" />
                                                                 )}
                                                             </Button>
                                                         </div>
                                                         <p className="text-muted-foreground">{variable.description}</p>
-                                                        <p className="text-gray-500">Contoh: {variable.example}</p>
+                                                        <p className="text-muted-foreground">Contoh: {variable.example}</p>
                                                     </div>
                                                 ))}
                                             </div>
@@ -456,14 +456,14 @@ const TemplateForm = ({
                                                                 onClick={() => copyVariable(variable.name)}
                                                             >
                                                                 {copiedVariable === variable.name ? (
-                                                                    <Check className="h-3 w-3 text-gray-600" />
+                                                                    <Check className="h-3 w-3 text-muted-foreground" />
                                                                 ) : (
                                                                     <Copy className="h-3 w-3" />
                                                                 )}
                                                             </Button>
                                                         </div>
                                                         <p className="text-muted-foreground">{variable.description}</p>
-                                                        <p className="text-gray-500">Contoh: {variable.example}</p>
+                                                        <p className="text-muted-foreground">Contoh: {variable.example}</p>
                                                     </div>
                                                 ))}
                                             </div>
@@ -479,7 +479,7 @@ const TemplateForm = ({
                             <input
                                 type="checkbox"
                                 checked={formData.is_active}
-                                onChange={(e) => handleInputChange('is_active', e.target.checked)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('is_active', e.target.checked)}
                                 className="rounded"
                             />
                             <span className="text-sm">Template Aktif</span>
@@ -489,7 +489,7 @@ const TemplateForm = ({
                             <input
                                 type="checkbox"
                                 checked={formData.is_default}
-                                onChange={(e) => handleInputChange('is_default', e.target.checked)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('is_default', e.target.checked)}
                                 className="rounded"
                             />
                             <span className="text-sm">Set sebagai Default</span>

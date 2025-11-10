@@ -36,7 +36,7 @@ export const NumberCurrencySettings = ({ settings, onSettingChange }: NumberCurr
             id="numberFormat"
             className="w-full p-2 border border-input rounded-md bg-background"
             value={settings.ui.numberFormat}
-            onChange={(e) => onSettingChange('ui', 'numberFormat', e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onSettingChange('ui', 'numberFormat', e.target.value)}
           >
             <option value="1.234.567,89">1.234.567,89 (Indonesia)</option>
             <option value="1,234,567.89">1,234,567.89 (US)</option>
@@ -49,7 +49,7 @@ export const NumberCurrencySettings = ({ settings, onSettingChange }: NumberCurr
             id="uiCurrency"
             className="w-full p-2 border border-input rounded-md bg-background"
             value={currentSettings.currency['code']}
-            onChange={(e) => {
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               const selectedCurrency = currencies.find(c => c['code'] === e.target.value)
               if (selectedCurrency) {
                 updateCurrency(selectedCurrency)

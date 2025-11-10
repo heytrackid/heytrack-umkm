@@ -408,12 +408,14 @@ function ExpensiveComponent({ data, filter }) {
   return <div>{/* render filteredData */}</div>
 }
 
-// Lazy loading for routes
+// Lazy loading for routes (with named exports)
 import dynamic from 'next/dynamic'
 
-const HeavyComponent = dynamic(() => import('@/components/HeavyComponent'), {
-  loading: () => <div>Loading...</div>
-})
+const HeavyComponent = dynamic(() =>
+  import('@/components/HeavyComponent').then(mod => ({ default: mod.HeavyComponent })), {
+    loading: () => <div>Loading...</div>
+  }
+)
 
 // Virtual scrolling for large lists
 import { FixedSizeList as List } from 'react-window'
@@ -441,6 +443,7 @@ function VirtualizedList({ items }) {
 - **Security Middleware**: Use `withSecurity()` wrapper on all API routes
 - **Proper Logging**: Use `createClientLogger()`/`createServerLogger()` instead of `console`
 - **Absolute Imports**: Never use relative imports (`../`), always use `@/` aliases
+- **Named Exports**: Use named exports for all components, hooks, utils, services, and types
 - **Error Boundaries**: Wrap components that might throw errors
 - **Accessibility**: Follow JSX A11y rules for screen readers
 - **Performance**: Keep bundle size optimized, use lazy loading for heavy components
@@ -452,19 +455,39 @@ function VirtualizedList({ items }) {
 - **Secret Exposure**: Never log or expose API keys, passwords, or sensitive data
 - **Dangerous HTML**: No `dangerouslySetInnerHTML` without sanitization
 - **Enums**: Use const objects or union types instead of TypeScript enums
-- **Default Exports**: Use named exports only
+- **Default Exports**: NEVER use default exports except for Next.js special files (page.tsx, layout.tsx, route.ts, error.tsx)
 - **PropTypes**: Use TypeScript interfaces instead of prop-types package
 - **Semicolons**: Never use semicolons (breaks Prettier formatting)
 - **Double Quotes**: Always use single quotes
 - **Var Declarations**: Use `const`/`let`, never `var`
 
+### Export Strategy (CRITICAL)
+- **Named Exports (99% of cases)**: Use for ALL components, hooks, utils, services, types
+  ```tsx
+  // ✅ CORRECT
+  export function Button() { }
+  export function useAuth() { }
+  export class OrderService { }
+  export type User = { }
+  ```
+- **Default Exports (ONLY for Next.js requirements)**: Pages, layouts, API routes, error pages
+  ```tsx
+  // ✅ ONLY for Next.js special files
+  export default function OrdersPage() { }      // page.tsx
+  export default function OrdersLayout() { }    // layout.tsx
+  export default async function GET() { }       // route.ts
+  export default function Error() { }           // error.tsx
+  ```
+- **Rationale**: Named exports provide better tree-shaking, refactoring safety, IDE auto-import accuracy, and consistency
+- **Lazy Loading**: For dynamic imports with named exports, use `.then(mod => ({ default: mod.ComponentName }))` pattern
+
 ### Module-Specific Rules
 - **API Routes**: Must have `runtime = 'nodejs'`, use `handleAPIError()`, wrap with `withSecurity()`
-- **Components**: Client components need `'use client'`, use proper TypeScript interfaces
-- **Services**: Class-based with proper error handling and logging
-- **Hooks**: Follow Rules of Hooks, proper dependency arrays
-- **Types**: Keep in separate files, use consistent naming patterns
-- **Utils**: Pure functions, comprehensive error handling
+- **Components**: Client components need `'use client'`, use proper TypeScript interfaces, **ALWAYS use named exports**
+- **Services**: Class-based with proper error handling and logging, **use named exports**
+- **Hooks**: Follow Rules of Hooks, proper dependency arrays, **use named exports**
+- **Types**: Keep in separate files, use consistent naming patterns, **use named exports**
+- **Utils**: Pure functions, comprehensive error handling, **use named exports**
 - **Tests**: Use Vitest with jsdom environment, follow testing-library patterns</content>
 <parameter name="filePath">AGENTS.md
 

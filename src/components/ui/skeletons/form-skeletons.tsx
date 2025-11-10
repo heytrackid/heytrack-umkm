@@ -61,7 +61,7 @@ export const RecipeFormSkeleton = ({ className }: SkeletonProps) => (
         </div>
         
         {Array.from({ length: 3 }, (_, i) => (
-          <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
+          <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-border/20  rounded-lg">
             <SelectFieldSkeleton />
             <FormFieldSkeleton />
             <FormFieldSkeleton />
@@ -112,7 +112,7 @@ export const OrderFormSkeleton = ({ className }: SkeletonProps) => (
         </div>
         
         {Array.from({ length: 2 }, (_, i) => (
-          <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
+          <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-border/20  rounded-lg">
             <SelectFieldSkeleton />
             <FormFieldSkeleton />
             <FormFieldSkeleton />
@@ -165,7 +165,7 @@ export const SettingsFormSkeleton = ({ className }: SkeletonProps) => (
         <SkeletonText className="h-6 w-32" />
         <div className="space-y-4">
           {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
+            <div key={i} className="flex items-center justify-between p-4 border border-border/20  rounded-lg">
               <div className="space-y-1">
                 <SkeletonText className="h-4 w-32" />
                 <SkeletonText className="h-3 w-48" />
@@ -228,7 +228,7 @@ export const ModalFormSkeleton = ({ className }: SkeletonProps) => (
       </div>
       
       {/* Modal Footer */}
-      <div className="flex justify-end space-x-2 pt-4 border-t border-gray-200 dark:border-gray-800">
+      <div className="flex justify-end space-x-2 pt-4 border-t border-border/20 ">
         <SkeletonButton className="w-20" />
         <SkeletonButton className="w-24" />
       </div>

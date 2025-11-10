@@ -31,25 +31,25 @@ interface StatsCardsProps {
 
 // Lazy load dashboard components with proper chunk names for better bundle analysis
 const LazyHppDashboardWidget = dynamic(() =>
-  import('./HppDashboardWidget').then(m => m.HppDashboardWidget), {
-    loading: () => <div className="h-80 bg-gray-100 animate-pulse rounded-lg" />
+  import('./HppDashboardWidget').then(mod => ({ default: mod.HppDashboardWidget })), {
+    loading: () => <div className="h-80 bg-muted animate-pulse rounded-lg" />
   }
 )
 
 const LazyRecentOrdersSection = dynamic(() =>
-  import('./RecentOrdersSection').then(m => m.RecentOrdersSection), {
+  import('./RecentOrdersSection').then(mod => ({ default: mod.RecentOrdersSection })), {
     loading: () => <RecentOrdersSkeleton />
   }
 )
 
 const LazyStatsCardsSection = dynamic(() =>
-  import('./StatsCardsSection').then(m => m.StatsCardsSection), {
+  import('./StatsCardsSection').then(mod => ({ default: mod.StatsCardsSection })), {
     loading: () => <StatsCardsSkeleton />
   }
 )
 
 const LazyStockAlertsSection = dynamic(() =>
-  import('./StockAlertsSection').then(m => m.StockAlertsSection), {
+  import('./StockAlertsSection').then(mod => ({ default: mod.StockAlertsSection })), {
     loading: () => <StockAlertSkeleton />
   }
 )
@@ -68,7 +68,7 @@ const RecentOrdersSectionWithSuspenseComponent = (props: DashboardComponentProps
 const StatsCardsSkeleton = (): JSX.Element => (
   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
     {Array.from({ length: 4 }, (_, i) => (
-      <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
+      <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
     ))}
   </div>
 )

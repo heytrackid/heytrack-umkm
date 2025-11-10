@@ -247,7 +247,7 @@ export const getStatusColor = (status: string): string => {
     delivered: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800'
   }
-  return colorMap[status] || 'bg-gray-100 text-gray-800'
+  return colorMap[status] || 'bg-secondary text-secondary-foreground'
 }
 
 export const calculatePercentage = (value: number, total: number): number => total === 0 ? 0 : Math.round((value / total) * 100)

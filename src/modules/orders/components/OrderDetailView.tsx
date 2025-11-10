@@ -108,12 +108,12 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
                   <span>Total:</span>
                   <span>{formatCurrency(totalAmount)}</span>
                 </div>
-                <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Dibayar:</span>
                   <span>{formatCurrency(paidAmount)}</span>
                 </div>
                 {outstandingAmount > 0 && (
-                  <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                  <div className="flex justify-between text-muted-foreground">
                     <span>Sisa:</span>
                     <span>{formatCurrency(outstandingAmount)}</span>
                   </div>

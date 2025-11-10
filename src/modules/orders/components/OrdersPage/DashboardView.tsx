@@ -35,9 +35,9 @@ export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => 
     })
 
     const getStatusColor = (status: string | null) => {
-        if (!status) { return 'bg-gray-100 text-gray-800' }
+        if (!status) { return 'bg-muted text-muted-foreground' }
         const _config = ORDER_STATUS_CONFIG[status as keyof typeof ORDER_STATUS_CONFIG]
-        if (!_config) { return 'bg-gray-100 text-gray-800' }
+        if (!_config) { return 'bg-muted text-muted-foreground' }
         return _config.color
     }
 
@@ -54,7 +54,7 @@ export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => 
                 <CardContent>
                     {orders.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 text-center">
-                            <ShoppingCart className="h-12 w-12 text-gray-400 mb-3" />
+                            <ShoppingCart className="h-12 w-12 text-muted-foreground mb-3" />
                             <h3 className="font-semibold text-lg mb-1">Belum Ada Pesanan</h3>
                             <p className="text-sm text-muted-foreground mb-4">
                                 Mulai buat pesanan pertama Anda
@@ -111,7 +111,7 @@ export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => 
                                         <span>{config.label}</span>
                                         <span>{count} ({percentage.toFixed(1)}%)</span>
                                     </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="w-full bg-muted rounded-full h-2">
                                         <div
                                             className={`h-2 rounded-full ${config.color.replace('text-', 'bg-')}`}
                                             style={{ width: `${percentage}%` }}

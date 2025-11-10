@@ -25,7 +25,7 @@ export const UMKMTooltip = ({ title, content, children }: UMKMTooltipProps) => (
         <TooltipTrigger asChild>
           <div className="flex items-center gap-1 cursor-help">
             {children}
-            <HelpCircle className="h-4 w-4 text-gray-400" />
+            <HelpCircle className="h-4 w-4 text-muted-foreground" />
           </div>
         </TooltipTrigger>
         <TooltipContent className="max-w-80 p-4">
@@ -37,3 +37,4 @@ export const UMKMTooltip = ({ title, content, children }: UMKMTooltipProps) => (
       </Tooltip>
     </TooltipProvider>
   )
+

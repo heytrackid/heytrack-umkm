@@ -9,7 +9,7 @@ import type { ComponentProps } from 'react';
 
 
 
-const Label = ({
+export const Label = ({
   className,
   ...props
 }: ComponentProps<typeof LabelPrimitive.Root>) => (
@@ -23,5 +23,5 @@ const Label = ({
     />
   )
 
-export { Label };
+
 

@@ -10,7 +10,7 @@ import type { ComponentProps } from 'react'
 
 
 
-const Select = ({
+export const Select = ({
   ...props
 }: ComponentProps<typeof SelectPrimitive.Root>) => <SelectPrimitive.Root data-slot="select" {...props} />
 
@@ -155,8 +155,8 @@ const SelectScrollDownButton = ({
     </SelectPrimitive.ScrollDownButton>
   )
 
+
 export {
-  Select,
   SelectContent,
   SelectGroup,
   SelectItem,

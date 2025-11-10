@@ -324,7 +324,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                                 <Input
                                     id="name"
                                     value={formData.name ?? ''}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
                                     placeholder="Contoh: Roti Tawar Premium"
                                     required
                                 />
@@ -352,13 +352,13 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
 
                         <div className="space-y-2">
                             <Label htmlFor="description">Deskripsi</Label>
-                            <Textarea
-                                id="description"
-                                value={formData.description ?? ''}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                placeholder="Deskripsi singkat tentang resep ini..."
-                                rows={3}
-                            />
+                             <Textarea
+                                 id="description"
+                                 value={formData.description ?? ''}
+                                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, description: e.target.value })}
+                                 placeholder="Deskripsi singkat tentang resep ini..."
+                                 rows={3}
+                             />
                         </div>
 
                         <div className="grid gap-4 md:grid-cols-4">
@@ -369,7 +369,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                                     type="number"
                                     min="1"
                                     value={formData.servings ?? 1}
-                                    onChange={(e) =>
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                         setFormData({ ...formData, servings: parseInt(e.target.value) || 1 })
                                     }
                                 />
@@ -382,7 +382,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                                     type="number"
                                     min="0"
                                     value={formData.prep_time ?? 0}
-                                    onChange={(e) =>
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                         setFormData({ ...formData, prep_time: parseInt(e.target.value) || 0 })
                                     }
                                 />
@@ -395,7 +395,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                                     type="number"
                                     min="0"
                                     value={formData.cook_time ?? 0}
-                                    onChange={(e) =>
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                         setFormData({ ...formData, cook_time: parseInt(e.target.value) || 0 })
                                     }
                                 />
@@ -463,7 +463,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                                             step="0.01"
                                             placeholder="Jumlah"
                                             value={ri.quantity || ''}
-                                            onChange={(e) =>
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                                 updateIngredient(index, 'quantity', parseFloat(e.target.value.replace(',', '.')) || 0)
                                             }
                                         />
@@ -487,7 +487,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                                         <Input
                                             placeholder="Catatan (opsional)"
                                             value={ri.notes ?? ''}
-                                            onChange={(e) => updateIngredient(index, 'notes', e.target.value)}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateIngredient(index, 'notes', e.target.value)}
                                         />
                                     </div>
 
@@ -497,7 +497,7 @@ export const RecipeFormPage = ({ mode, recipeId, onSuccess, onCancel, isDialog =
                                         size="sm"
                                         onClick={() => removeIngredient(index)}
                                     >
-                                        <Trash2 className="h-4 w-4 text-gray-600" />
+                                        <Trash2 className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                 </div>
                             ))

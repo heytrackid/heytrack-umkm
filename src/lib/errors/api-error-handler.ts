@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server'
 
 import {
-
-  AppError,
-  ValidationError,
-  AuthenticationError,
-  AuthorizationError,
-  NotFoundError,
-  DatabaseError,
-  ExternalServiceError,
-  RateLimitError
+    AppError,
+    AuthenticationError,
+    AuthorizationError,
+    DatabaseError,
+    ExternalServiceError,
+    NotFoundError,
+    RateLimitError,
+    ValidationError
 } from '@/lib/errors/app-error'
 
 import { apiLogger } from '@/lib/logger'
@@ -25,9 +24,9 @@ export type { AppError }
 
 interface ErrorResponse {
   error: string
-  code?: string
+  code?: string | undefined
   status: number
-  details?: Record<string, unknown>
+  details?: Record<string, unknown> | undefined
   timestamp: string
 }
 
@@ -46,9 +45,9 @@ export function handleAPIError(error: unknown, context?: string): NextResponse {
   if (error instanceof AppError) {
     const errorResponse: ErrorResponse = {
       error: error.message,
-      code: error['code'],
+      code: error['code'] ?? undefined,
       status: error['status'],
-      details: error.details,
+      details: error.details ?? undefined,
       timestamp: error['timestamp'],
     };
 

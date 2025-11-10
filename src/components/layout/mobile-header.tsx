@@ -45,7 +45,7 @@ interface MobileHeaderProps {
 
 }
 
-const MobileHeader = ({
+export const MobileHeader = ({
   title,
   showBackButton,
   onBackClick,
@@ -130,7 +130,7 @@ const MobileHeader = ({
     <header
       className={cn(
         "sticky top-0 z-50",
-        "bg-background/95 backdrop-blur-sm border-b border-border",
+        "bg-background/95 backdrop-blur-sm border-b border-border/20",
         "transition-transform duration-300 ease-in-out",
         "supports-[backdrop-filter]:bg-background/60",
         className
@@ -183,7 +183,7 @@ const MobileHeader = ({
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                     placeholder={searchPlaceholder}
                     className="pl-9 pr-9"
                     autoFocus
@@ -247,7 +247,7 @@ const MobileHeader = ({
 
           {/* User Authentication */}
           {loading && (
-            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+            <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />
           )}
           
           {!loading && user && (
@@ -300,7 +300,7 @@ const MobileHeader = ({
   )
 }
 
-export { MobileHeader }// Pre-built header variants for common use cases
+ // Pre-built header variants for common use cases
 export const DashboardHeader = (): JSX.Element => (
   <MobileHeader
     title="Dashboard"

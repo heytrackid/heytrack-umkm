@@ -330,7 +330,7 @@ const ProfitReportPage = () => {
               </Card>
 
               {/* Info Card Loading */}
-              <Card className="border-gray-300 bg-gray-50 dark:bg-gray-950 dark:border-gray-800">
+              <Card className="border-border/20 bg-muted ">
                 <CardContent className="pt-6">
                   <div className="animate-pulse space-y-4">
                     <div className="h-4 bg-muted rounded w-1/2" />

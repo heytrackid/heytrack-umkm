@@ -50,12 +50,12 @@ export const SearchInput = ({
 
   return (
     <div className={`relative ${className ?? ''}`}>
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         type="text"
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
         className="pl-10 pr-10"
       />
       {showClear && value && (
@@ -63,7 +63,7 @@ export const SearchInput = ({
           variant="ghost"
           size="sm"
           onClick={handleClear}
-          className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100"
+          className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-secondary"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -121,7 +121,7 @@ export const SortButton = ({ label, field, currentSort, onSort }: SortButtonProp
       variant="ghost"
       size="sm"
       onClick={handleClick}
-      className={`flex items-center gap-2 ${isActive ? 'bg-gray-100' : ''}`}
+      className={`flex items-center gap-2 ${isActive ? 'bg-secondary' : ''}`}
     >
       {label}
       <Icon className="h-3 w-3" />
@@ -145,7 +145,7 @@ export const ActiveFilters = ({ filters, onRemoveFilter, filterLabels = {} }: Ac
 
   return (
     <div className="flex flex-wrap gap-2 mb-4">
-      <span className="text-sm text-gray-600 self-center">Filter aktif:</span>
+      <span className="text-sm text-muted-foreground self-center">Filter aktif:</span>
       {activeFilters.map(([key, value]) => (
         <Badge key={key} variant="secondary" className="flex items-center gap-1">
           {filterLabels[key] ?? key}: {String(value)}
@@ -153,7 +153,7 @@ export const ActiveFilters = ({ filters, onRemoveFilter, filterLabels = {} }: Ac
             variant="ghost"
             size="sm"
             onClick={() => onRemoveFilter(key)}
-            className="h-4 w-4 p-0 hover:bg-gray-200 ml-1"
+            className="h-4 w-4 p-0 hover:bg-muted ml-1"
           >
             <X className="h-3 w-3" />
           </Button>
@@ -230,7 +230,7 @@ export const BulkActionsBar = ({ selectedCount, totalCount, actions, onClearSele
   if (selectedCount === 0) { return null }
 
   return (
-    <Card className="border-gray-300 bg-gray-50">
+    <Card className="border-border/20 bg-muted">
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

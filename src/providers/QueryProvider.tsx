@@ -73,7 +73,7 @@ export const cachePresets = {
   }
 }
 
-const QueryProvider = ({ children }: { children: ReactNode }): JSX.Element => {
+export const QueryProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   // Create a new QueryClient instance for each request to ensure data is not shared
   const [queryClient] = useState(() => createQueryClient())
 
@@ -84,4 +84,3 @@ const QueryProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   )
 }
 
-export { QueryProvider }

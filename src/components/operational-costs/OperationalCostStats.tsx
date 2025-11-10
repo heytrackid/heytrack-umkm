@@ -37,7 +37,7 @@ export const OperationalCostStats = ({
                             <p className="text-2xl font-bold">{totalCosts}</p>
                             <p className="text-xs text-muted-foreground">item biaya</p>
                         </div>
-                        <Receipt className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                        <Receipt className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </CardContent>
             </Card>
@@ -50,7 +50,7 @@ export const OperationalCostStats = ({
                             <p className="text-2xl font-bold">{fixedCosts}</p>
                             <p className="text-xs text-muted-foreground">biaya rutin</p>
                         </div>
-                        <TrendingUp className="h-8 w-8 text-gray-600" />
+                        <TrendingUp className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </CardContent>
             </Card>
@@ -63,7 +63,7 @@ export const OperationalCostStats = ({
                             <p className="text-2xl font-bold">{variableCosts}</p>
                             <p className="text-xs text-muted-foreground">biaya tidak tetap</p>
                         </div>
-                        <BarChart3 className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                        <BarChart3 className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </CardContent>
             </Card>
@@ -76,10 +76,12 @@ export const OperationalCostStats = ({
                             <p className="text-2xl font-bold">{formatCurrency(totalMonthly)}</p>
                             <p className="text-xs text-muted-foreground">per bulan</p>
                         </div>
-                        <DollarSign className="h-8 w-8 text-gray-600" />
+                        <DollarSign className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </CardContent>
             </Card>
         </div>
     )
 }
+
+

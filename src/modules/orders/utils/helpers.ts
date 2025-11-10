@@ -31,8 +31,8 @@ export function getPriorityInfo(_priority: string) {
     default:
       return {
         label: 'Normal',
-        color: 'text-gray-600',
-        bgColor: 'bg-gray-100'
+        color: 'text-muted-foreground',
+        bgColor: 'bg-secondary'
       }
   }
 }

@@ -13,7 +13,7 @@ import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-type TypedSupabaseClient = ReturnType<typeof typed>
+type TypedSupabaseClient = SupabaseClient<Database>
 
 type OrderRow = Database['public']['Tables']['orders']['Row']
 type CustomerRow = Database['public']['Tables']['customers']['Row']
@@ -114,8 +114,9 @@ interface DashboardResponse {
   lastUpdated: string
 }
 
-function getTypedSupabase(): Promise<TypedSupabaseClient> {
-  return createClient().then(client => typed(client))
+async function getTypedSupabase(): Promise<TypedSupabaseClient> {
+  const client = await createClient()
+  return typed(client)
 }
 
 async function requireUserId(supabase: SupabaseClient<Database>): Promise<string> {
@@ -493,6 +494,6 @@ async function GET(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedGET = withSecurity(GET, SecurityPresets.basic())
 
 export { securedGET as GET }

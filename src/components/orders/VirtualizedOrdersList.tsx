@@ -5,6 +5,7 @@ import { memo, useMemo } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { SkeletonText } from '@/components/ui/skeleton'
 import { VirtualizedTable } from '@/components/ui/virtualized-table'
 import { useCurrency } from '@/hooks/useCurrency'
 
@@ -80,7 +81,7 @@ const renderPriorityCell = (order: Order) => {
       case 'medium':
         return { label: 'Sedang', color: 'bg-yellow-100 text-yellow-800' }
       default:
-        return { label: 'Normal', color: 'bg-gray-100 text-gray-800' }
+        return { label: 'Normal', color: 'bg-muted text-muted-foreground' }
     }
   }
 
@@ -101,7 +102,7 @@ const renderActionsCell = (
     <div className="flex items-center gap-2">
       <select
         value={order['status'] ?? 'PENDING'}
-        onChange={(e) => onUpdateStatus(order['id'], e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onUpdateStatus(order['id'], e.target.value)}
         className="bg-transparent border border-input rounded px-2 py-1 text-sm"
       >
         <option value="PENDING">Menunggu</option>
@@ -134,7 +135,7 @@ const renderActionsCell = (
 }
 
 // ✅ PERFORMANCE: Progressive enhancement for large lists using VirtualizedTable
-const VirtualizedOrdersList = memo(({
+export const VirtualizedOrdersList = memo(({
   orders,
   onViewOrder,
   onEditOrder,
@@ -186,10 +187,10 @@ const VirtualizedOrdersList = memo(({
   if (loading) {
     return (
       <div className="border rounded-lg p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/4" />
+        <div className="space-y-4">
+          <SkeletonText className="h-4 w-1/4" />
           {Array.from({ length: 8 }, (_, i) => (
-            <div key={i} className="h-4 bg-gray-200 rounded" />
+            <SkeletonText key={i} className="h-4 w-full" />
           ))}
         </div>
       </div>
@@ -208,4 +209,3 @@ const VirtualizedOrdersList = memo(({
 
 VirtualizedOrdersList.displayName = 'VirtualizedOrdersList'
 
-export { VirtualizedOrdersList }

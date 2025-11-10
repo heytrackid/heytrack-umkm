@@ -35,8 +35,8 @@ export const renderLoadingState = (): JSX.Element => (
 export const renderErrorState = (router: ReturnType<typeof useRouter>): JSX.Element => (
   <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
     <div className="text-center">
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Terjadi Kesalahan</h2>
-      <p className="text-gray-600 mb-6">Gagal memuat data dashboard. Silakan coba lagi.</p>
+      <h2 className="text-2xl font-bold text-foreground mb-2">Terjadi Kesalahan</h2>
+      <p className="text-muted-foreground mb-6">Gagal memuat data dashboard. Silakan coba lagi.</p>
       <LoadingButton onClick={() => router.refresh()}>
         Coba Lagi
       </LoadingButton>
@@ -49,8 +49,8 @@ export const renderEmptyState = (
 ): JSX.Element => (
   <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
     <div className="text-center">
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Selamat Datang!</h2>
-      <p className="text-gray-600 mb-6">
+      <h2 className="text-2xl font-bold text-foreground mb-2">Selamat Datang!</h2>
+      <p className="text-muted-foreground mb-6">
         Mari mulai mengelola bisnis kuliner Anda dengan HeyTrack.
       </p>
 

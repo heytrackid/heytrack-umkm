@@ -21,7 +21,7 @@ interface InventoryStats {
   outOfStock: number
 }
 
-const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps) => {
+export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps) => {
   const { formatCurrency } = useCurrency()
   const { data: ingredients } = useSupabaseCRUD<'ingredients'>('ingredients')
 
@@ -126,7 +126,7 @@ const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps) => {
                   <span className="text-green-600">Adekuat</span>
                   <span>{adequateStock} item</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="w-full bg-muted rounded-full h-2.5">
                    <div
                      className="bg-green-600 h-2.5 rounded-full"
                      style={{ width: `${((adequateStock / totalItems) * 100) || 0}%` }}
@@ -139,7 +139,7 @@ const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps) => {
                   <span className="text-orange-600">Stok Rendah</span>
                   <span>{inventoryStats.lowStock} item</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="w-full bg-muted rounded-full h-2.5">
                    <div
                      className="bg-orange-500 h-2.5 rounded-full"
                      style={{ width: `${((inventoryStats.lowStock / totalItems) * 100) || 0}%` }}
@@ -152,7 +152,7 @@ const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps) => {
                   <span className="text-red-600">Habis</span>
                   <span>{inventoryStats.outOfStock} item</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="w-full bg-muted rounded-full h-2.5">
                    <div
                      className="bg-red-500 h-2.5 rounded-full"
                      style={{ width: `${((inventoryStats.outOfStock / totalItems) * 100) || 0}%` }}
@@ -219,5 +219,3 @@ const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps) => {
     </div>
   )
 }
-
-export { InventoryReport }

@@ -32,7 +32,7 @@ interface ActiveBatchesListProps {
   onCompleteBatch: (batchId: string) => void
 }
 
-const ActiveBatchesList = ({
+export const ActiveBatchesList = ({
   batches,
   executionStates,
   selectedBatch,
@@ -44,11 +44,11 @@ const ActiveBatchesList = ({
 }: ActiveBatchesListProps) => {
   const getStatusColor = (status: ProductionStatus) => {
     switch (status) {
-      case 'PLANNED': return 'bg-gray-500'
-      case 'IN_PROGRESS': return 'bg-gray-500'
-      case 'COMPLETED': return 'bg-gray-500'
-      case 'CANCELLED': return 'bg-gray-400'
-      default: return 'bg-gray-500'
+      case 'PLANNED': return 'bg-muted0'
+      case 'IN_PROGRESS': return 'bg-muted0'
+      case 'COMPLETED': return 'bg-muted0'
+      case 'CANCELLED': return 'bg-muted'
+      default: return 'bg-muted0'
     }
   }
 
@@ -128,7 +128,7 @@ const ActiveBatchesList = ({
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={(e) => {
+                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                               e.stopPropagation()
       onPauseBatch(batch['id'])
                             }}
@@ -139,7 +139,7 @@ const ActiveBatchesList = ({
                           <Button
                             variant="default"
                             size="sm"
-                            onClick={(e) => {
+                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                               e.stopPropagation()
                               onCompleteBatch(batch['id'])
                             }}
@@ -157,7 +157,7 @@ const ActiveBatchesList = ({
                         <Button
                           variant="default"
                           size="sm"
-                          onClick={(e) => {
+                          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                             e.stopPropagation()
                             onStartBatch(batch)
                           }}
@@ -184,4 +184,3 @@ const ActiveBatchesList = ({
   )
 }
 
-export { ActiveBatchesList }

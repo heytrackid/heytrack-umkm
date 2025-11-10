@@ -18,7 +18,7 @@ import { ProfitReportTabs } from '@/app/reports/components/ProfitReportTabs'
 import type { ProfitReportProps, ProfitData, PeriodType, ChartType, SelectedDataPoint } from '@/app/reports/components/ProfitReportTypes'
 
 // Main component
-const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
+export const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
     const { formatCurrency } = useCurrency()
     const { isMobile } = useResponsive()
     const [loading, setLoading] = useState(true)
@@ -253,5 +253,3 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
         </div>
     )
 }
-
-export { EnhancedProfitReport }

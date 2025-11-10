@@ -316,8 +316,8 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
                 </div>
                 {/* Loading skeleton */}
                 <div className="animate-pulse space-y-4">
-                    <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded" />
-                    <div className="h-40 bg-gray-200 dark:bg-gray-700 rounded" />
+                    <div className="h-20 bg-muted rounded" />
+                    <div className="h-40 bg-muted rounded" />
                 </div>
             </div>
         )
@@ -348,17 +348,17 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
             <OperationalCostStats costs={costs || []} formatCurrency={formatCurrency} calculateMonthlyCost={calculateMonthlyCost} />
 
             {/* Info Card */}
-            <Card className="bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800">
+            <Card className="bg-muted/20 border-border/20 ">
                 <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                        <div className="bg-gray-100 dark:bg-gray-800/50 p-2 rounded-lg flex-shrink-0">
-                            <Receipt className="h-5 w-5 text-gray-600" />
+                        <div className="bg-secondary/50 p-2 rounded-lg flex-shrink-0">
+                            <Receipt className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="flex-1">
-                            <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">
+                            <h3 className="font-medium text-foreground mb-1">
                                 💡 Mengapa Biaya Operasional Penting?
                             </h3>
-                            <p className="text-sm text-gray-800 dark:text-gray-200">
+                            <p className="text-sm text-foreground dark:text-gray-200">
                                 Biaya operasional digunakan untuk menghitung HPP dan harga jual yang akurat. Semakin lengkap data
                                 biaya, semakin tepat perhitungan harga jual produk Anda.
                             </p>
@@ -377,7 +377,7 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
                             <Input
                                 placeholder="Cari biaya operasional..."
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                                 className="pl-9"
                             />
                         </div>
@@ -436,11 +436,11 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
                         <Card key={`operational-cost-skeleton-${skeletonIndex}`}>
                             <CardContent className="p-6">
                                 <div className="space-y-3">
-                                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/4" />
+                                    <div className="h-6 bg-muted rounded animate-pulse" />
+                                    <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
                                     <div className="flex gap-2">
-                                        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
-                                        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16" />
+                                        <div className="h-6 bg-muted rounded animate-pulse w-20" />
+                                        <div className="h-6 bg-muted rounded animate-pulse w-16" />
                                     </div>
                                 </div>
                             </CardContent>
@@ -541,7 +541,7 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
                                                         Edit
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
-                                                    <DropdownMenuItem onClick={() => handleDelete(cost)} className="text-gray-600">
+                                                    <DropdownMenuItem onClick={() => handleDelete(cost)} className="text-muted-foreground">
                                                         <Trash2 className="h-4 w-4 mr-2" />
                                                         Hapus
                                                     </DropdownMenuItem>
@@ -560,12 +560,12 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
                                         {/* Badges */}
                                         <div className="flex flex-wrap gap-2">
                                             {cost.recurring && (
-                                                <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                                                <Badge variant="outline" className="bg-muted text-muted-foreground border-border/20">
                                                     Tetap
                                                 </Badge>
                                             )}
                                             {!cost.recurring && (
-                                                <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                                                <Badge variant="outline" className="bg-muted text-muted-foreground border-border/20">
                                                     Variabel
                                                 </Badge>
                                             )}
@@ -625,3 +625,5 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
         </div>
     )
 }
+
+

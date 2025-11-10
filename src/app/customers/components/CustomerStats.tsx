@@ -66,7 +66,7 @@ const CustomerStats = ({
 
       <Card>
         <CardContent className="p-4 text-center">
-          <UserPlus className="h-8 w-8 text-gray-600 mx-auto mb-2" />
+          <UserPlus className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
           <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
             {stats.active}
           </div>
@@ -76,7 +76,7 @@ const CustomerStats = ({
 
       <Card>
         <CardContent className="p-4 text-center">
-          <div className="h-8 w-8 text-gray-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">
+          <div className="h-8 w-8 text-muted-foreground mx-auto mb-2 flex items-center justify-center font-bold text-lg">
             {settings.currency.symbol}
           </div>
           <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>

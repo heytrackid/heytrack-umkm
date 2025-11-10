@@ -26,7 +26,7 @@ interface BatchDetailsProps {
   onQualityCheck: (batchId: string, checkId: string, passed: boolean, notes?: string) => void
 }
 
-const BatchDetails = ({
+export const BatchDetails = ({
   selectedBatch,
   batches,
   executionStates,
@@ -155,7 +155,7 @@ const BatchDetails = ({
             <div className="flex gap-2">
               <Textarea
                 value={currentNotes}
-                onChange={(e) => onNotesChange(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onNotesChange(e.target.value)}
                 className="flex-1"
                 rows={2}
               />
@@ -173,4 +173,3 @@ const BatchDetails = ({
   )
 }
 
-export { BatchDetails }

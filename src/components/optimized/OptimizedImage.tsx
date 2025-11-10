@@ -43,19 +43,14 @@ export const OptimizedImage = ({
         style={{ width, height }}
       >
         <span className="text-muted-foreground text-sm">Failed to load image</span>
-     </div>
+      </div>
    );
 }
 
   const resolvedWidth = width ?? 1
   const resolvedHeight = height ?? 1
 
-  const imageClass = `
-    duration-300 ease-in-out
-    ${isLoading ? 'scale-105 blur-sm' : 'scale-100 blur-0'}
-    ${objectFit === 'cover' ? 'object-cover' : ''}
-    ${objectFit === 'contain' ? 'object-contain' : ''}
-  `
+  const imageClass = `duration-300 ease-in-out ${isLoading ? 'scale-105 blur-sm' : 'scale-100 blur-0'} ${objectFit === 'cover' ? 'object-cover' : ''} ${objectFit === 'contain' ? 'object-contain' : ''}`
 
   return (
     <div className={`relative overflow-hidden ${className}`}>

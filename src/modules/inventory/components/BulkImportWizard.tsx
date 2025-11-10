@@ -194,13 +194,13 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
                     const isCompleted = index < currentIndex
                     const isCurrent = index === currentIndex
                     const getCircleClasses = () => {
-                        if (isCompleted || isCurrent) {return 'bg-gray-500 text-white'}
-                        return 'bg-gray-200 text-gray-500'
+                        if (isCompleted || isCurrent) {return 'bg-primary text-primary-foreground'}
+                        return 'bg-muted text-muted-foreground'
                     }
                     const circleClasses = getCircleClasses()
                     const connectorClasses = index < currentIndex
-                        ? 'bg-gray-500'
-                        : 'bg-gray-200'
+                        ? 'bg-muted0'
+                        : 'bg-muted'
 
                     return (
                         <div key={step['id']} className="flex items-center flex-1">
@@ -251,7 +251,7 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
 
                         {/* Upload Area */}
                         <div
-                            className="border-2 border-dashed rounded-lg p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-gray-50/50 transition-colors"
+                            className="border-2 border-dashed rounded-lg p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-muted/50 transition-colors"
                             onClick={() => fileInputRef.current?.click()}
                         >
                             <input
@@ -261,15 +261,15 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
                                 onChange={handleFileSelect}
                                 className="hidden"
                             />
-                            <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                            <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                             <p className="font-medium mb-2">Click to upload or drag and drop</p>
                             <p className="text-sm text-muted-foreground">CSV file only (max 5MB)</p>
                         </div>
 
                         {/* Format Guide */}
-                        <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-300">
+                        <div className="p-4 bg-muted rounded-lg border border-border/20">
                             <p className="font-semibold text-sm mb-2">📋 Format CSV:</p>
-                            <div className="text-xs space-y-1 text-gray-800 dark:text-gray-200">
+                            <div className="text-xs space-y-1 text-foreground">
                                 <p>• <strong>name</strong>: Nama bahan (required)</p>
                                 <p>• <strong>unit</strong>: Satuan (kg, g, l, ml, pcs, dozen)</p>
                                 <p>• <strong>price_per_unit</strong>: Harga per unit (number)</p>
@@ -287,8 +287,8 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
                 <Card>
                     <CardContent className="py-12">
                         <div className="text-center space-y-4">
-                            <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center animate-pulse">
-                                <FileText className="h-8 w-8 text-gray-600" />
+                            <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center animate-pulse">
+                                <FileText className="h-8 w-8 text-muted-foreground" />
                             </div>
                             <div>
                                 <p className="font-semibold text-lg">Memvalidasi Data...</p>
@@ -305,11 +305,11 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
             {currentStep === 'review' && (
                 <div className="space-y-4">
                     {/* Summary */}
-                    <Card className="border-2 border-gray-300 bg-gray-50/50">
+                    <Card className="border-2 border-border/20 bg-muted/50">
                         <CardContent className="p-4">
                             <div className="grid grid-cols-3 gap-4 text-center">
                                 <div>
-                                    <div className="text-2xl font-bold text-gray-600">{validCount}</div>
+                                    <div className="text-2xl font-bold text-muted-foreground">{validCount}</div>
                                     <div className="text-xs text-muted-foreground">Valid</div>
                                 </div>
                                 <div>
@@ -337,7 +337,7 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
                                         className={`p-3 rounded-lg border ${
                                           row.errors.length > 0 
                                             ? 'bg-red-50 border-red-200' 
-                                            : row.warnings.length > 0 ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-300'
+                                            : row.warnings.length > 0 ? 'bg-orange-50 border-orange-200' : 'bg-muted border-border/20'
                                           }`}
                                     >
                                         <div className="flex items-start justify-between mb-2">
@@ -354,7 +354,7 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
                                                 </div>
                                             </div>
                                             {row.errors.length === 0 && row.warnings.length === 0 && (
-                                                <CheckCircle className="h-5 w-5 text-gray-600" />
+                                                <CheckCircle className="h-5 w-5 text-muted-foreground" />
                                             )}
                                             {row.errors.length > 0 && (
                                                 <X className="h-5 w-5 text-red-600" />
@@ -414,8 +414,8 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
                 <Card>
                     <CardContent className="py-12">
                         <div className="text-center space-y-6">
-                            <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
-                                <Upload className="h-8 w-8 text-gray-600 animate-bounce" />
+                            <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
+                                <Upload className="h-8 w-8 text-muted-foreground animate-bounce" />
                             </div>
                             <div>
                                 <p className="font-semibold text-lg mb-2">Importing Data...</p>
@@ -433,14 +433,14 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
 
             {/* Complete Step */}
             {currentStep === 'complete' && (
-                <Card className="border-2 border-gray-300 bg-gray-50/50">
+                <Card className="border-2 border-border/20 bg-muted/50">
                     <CardContent className="py-12">
                         <div className="text-center space-y-6">
-                            <div className="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
-                                <CheckCircle className="h-10 w-10 text-gray-600" />
+                            <div className="w-20 h-20 mx-auto bg-muted rounded-full flex items-center justify-center">
+                                <CheckCircle className="h-10 w-10 text-muted-foreground" />
                             </div>
                             <div>
-                                <p className="font-bold text-2xl text-gray-900 mb-2">Import Berhasil!</p>
+                                <p className="font-bold text-2xl text-foreground mb-2">Import Berhasil!</p>
                                 <p className="text-muted-foreground">
                                     {importResults.success} items berhasil diimport
                                     {importResults.failed > 0 && `, ${importResults.failed} items gagal`}

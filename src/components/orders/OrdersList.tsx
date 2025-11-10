@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { SkeletonText } from '@/components/ui/skeleton'
 import { SwipeActions } from '@/components/ui/mobile-gestures'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 import { useCurrency } from '@/hooks/useCurrency'
@@ -44,7 +45,7 @@ interface OrdersListProps {
  * - useCallback for event handlers
  * - useMemo for expensive calculations
  */
-const OrdersList = memo(({
+export const OrdersList = memo(({
   orders,
   onViewOrder,
   onEditOrder,
@@ -78,9 +79,9 @@ const OrdersList = memo(({
           <Card key={`skeleton-${i}`} className="animate-pulse">
             <CardContent className="p-4">
               <div className="space-y-3">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+                <SkeletonText className="h-4 w-3/4" />
+                <SkeletonText className="h-3 w-1/2" />
+                <SkeletonText className="h-3 w-2/3" />
               </div>
             </CardContent>
           </Card>
@@ -267,7 +268,7 @@ const OrdersList = memo(({
                       <td className="py-3">
                         <select
                           value={order['status'] ?? 'PENDING'}
-                          onChange={(e) => handleStatusChange(order['id'], e.target.value as OrderStatus)}
+                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleStatusChange(order['id'], e.target.value as OrderStatus)}
                           className="bg-transparent border border-input rounded px-2 py-1 text-sm"
                         >
                           <option value="PENDING">Menunggu</option>
@@ -337,4 +338,3 @@ const OrdersList = memo(({
 
 OrdersList.displayName = 'OrdersList'
 
-export { OrdersList }

@@ -32,26 +32,26 @@ export const MainResultsCard = ({ calculationResult, formatCurrency }: MainResul
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+          <div className="text-center p-4 bg-muted/20 rounded-lg border border-border/20 ">
             <UMKMTooltip
               title="HPP Per Porsi"
               content="Berapa biaya untuk membuat 1 porsi produk. Ini adalah cost minimum sebelum profit."
             >
-              <p className="text-sm text-gray-600">HPP Per Porsi</p>
+              <p className="text-sm text-muted-foreground">HPP Per Porsi</p>
             </UMKMTooltip>
-            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <p className="text-2xl font-bold text-foreground">
               {formatCurrency(calculationResult.calculations.hppPerUnit)}
             </p>
           </div>
 
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+          <div className="text-center p-4 bg-muted/20 rounded-lg border border-border/20 ">
             <UMKMTooltip
               title="Harga Jual Saran"
               content="Harga jual yang disarankan sudah termasuk target keuntungan Anda."
             >
-              <p className="text-sm text-gray-600">Harga Jual Saran</p>
+              <p className="text-sm text-muted-foreground">Harga Jual Saran</p>
             </UMKMTooltip>
-            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <p className="text-2xl font-bold text-foreground">
               {formatCurrency(calculationResult.calculations.suggestedSellingPrice)}
             </p>
             <Badge variant="secondary" className="mt-1 text-xs">
@@ -59,29 +59,29 @@ export const MainResultsCard = ({ calculationResult, formatCurrency }: MainResul
             </Badge>
           </div>
 
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+          <div className="text-center p-4 bg-muted/20 rounded-lg border border-border/20 ">
             <UMKMTooltip
               title="Total HPP"
               content="Total biaya untuk membuat seluruh batch resep ini."
             >
-              <p className="text-sm text-gray-600">Total HPP</p>
+              <p className="text-sm text-muted-foreground">Total HPP</p>
             </UMKMTooltip>
-            <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <p className="text-xl font-bold text-foreground">
               {formatCurrency(calculationResult.calculations.totalHPP)}
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted mt-1">
               {calculationResult.servings} porsi
             </p>
           </div>
 
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+          <div className="text-center p-4 bg-muted/20 rounded-lg border border-border/20 ">
             <UMKMTooltip
               title="Profit Per Porsi"
               content="Keuntungan bersih yang Anda dapat dari setiap porsi yang terjual."
             >
-              <p className="text-sm text-gray-600">Profit Per Porsi</p>
+              <p className="text-sm text-muted-foreground">Profit Per Porsi</p>
             </UMKMTooltip>
-            <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <p className="text-xl font-bold text-foreground">
               {formatCurrency(
                 calculationResult.calculations.suggestedSellingPrice -
                 calculationResult.calculations.hppPerUnit
@@ -92,3 +92,5 @@ export const MainResultsCard = ({ calculationResult, formatCurrency }: MainResul
       </CardContent>
     </Card>
   )
+
+

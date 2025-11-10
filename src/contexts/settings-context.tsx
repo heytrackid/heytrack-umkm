@@ -63,7 +63,7 @@ const defaultSettings: Settings = {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
-export const SettingsProvider = ({ children }: { children: ReactNode }): JSX.Element => {
+const SettingsProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   const [settings, setSettings] = useState<Settings>(() => {
     if (typeof window === 'undefined') {
       return defaultSettings
@@ -128,10 +128,13 @@ export const SettingsProvider = ({ children }: { children: ReactNode }): JSX.Ele
   )
 }
 
-export function useSettings(): SettingsContextType {
+function useSettings(): SettingsContextType {
   const context = useContext(SettingsContext)
   if (context === undefined) {
     throw new Error('useSettings must be used within a SettingsProvider')
   }
   return context
 }
+
+export { SettingsProvider }
+export { useSettings }

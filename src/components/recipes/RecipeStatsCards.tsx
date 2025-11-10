@@ -80,7 +80,7 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
                                 <p className="text-xs text-muted-foreground">dari {totalRecipes} total</p>
                             )}
                         </div>
-                        <ChefHat className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                        <ChefHat className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </CardContent>
             </Card>
@@ -95,7 +95,7 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
                             </p>
                             <p className="text-xs text-muted-foreground">rata-rata</p>
                         </div>
-                        <TrendingUp className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                        <TrendingUp className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </CardContent>
             </Card>
@@ -110,7 +110,7 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
                                 {categoryCount[mostCommonCategory] ?? 0} resep
                             </p>
                         </div>
-                        <BarChart3 className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                        <BarChart3 className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </CardContent>
             </Card>

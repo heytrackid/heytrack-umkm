@@ -178,7 +178,7 @@ export const SharedStatsCards = ({
           {stat.trend && (
             <div className="mt-4 flex items-center text-xs">
               <span
-                className={`font-medium ${stat.trend.isPositive ? 'text-gray-600' : 'text-red-600'
+                className={`font-medium ${stat.trend.isPositive ? 'text-muted-foreground' : 'text-red-600'
                   }`}
               >
                 {stat.trend.isPositive ? '+' : ''}{stat.trend.value}%
@@ -409,8 +409,10 @@ export const StatusBadge = ({
       >
         {text}
       </Badge>
-    )
-  }
+  )
+}
+
+
 
   return (
     <Badge className={`${colorClass} ${sizeClasses[size]} ${className}`}>

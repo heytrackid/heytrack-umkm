@@ -46,7 +46,7 @@ interface EnhancedOrderFormProps {
 
 type Recipe = Row<'recipes'>
 
-const EnhancedOrderForm = ({
+export const EnhancedOrderForm = ({
     order,
     onSave,
     onCancel,
@@ -230,14 +230,14 @@ const EnhancedOrderForm = ({
                                 className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${currentStep === step
                                     ? 'border-primary bg-primary text-white'
                                     : currentStep > step
-                                        ? 'border-green-500 bg-gray-500 text-white'
-                                        : 'border-gray-300 text-gray-400'
+                                        ? 'border-green-500 bg-muted0 text-white'
+                                        : 'border-border/20 text-muted-foreground'
                                     }`}
                             >
                                 {step}
                             </button>
                             {step < 3 && (
-                                <div className={`w-12 h-0.5 ${currentStep > step ? 'bg-gray-500' : 'bg-gray-300'}`} />
+                                <div className={`w-12 h-0.5 ${currentStep > step ? 'bg-muted0' : 'bg-muted'}`} />
                             )}
                         </div>
                     ))}
@@ -280,7 +280,7 @@ const EnhancedOrderForm = ({
                             </Label>
                             <Input
                                 value={formData['customer_name']}
-                                onChange={(e) => handleInputChange('customer_name', e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('customer_name', e.target.value)}
                                 placeholder="Masukkan nama pelanggan"
                                 className="text-base"
                             />
@@ -293,7 +293,7 @@ const EnhancedOrderForm = ({
                             </Label>
                             <Input
                                 value={formData.customer_phone}
-                                onChange={(e) => handleInputChange('customer_phone', e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('customer_phone', e.target.value)}
                                 placeholder="08xx xxxx xxxx"
                                 className="text-base"
                             />
@@ -308,7 +308,7 @@ const EnhancedOrderForm = ({
                             </Label>
                             <Textarea
                                 value={formData.customer_address ?? ''}
-                                onChange={(e) => handleInputChange('customer_address', e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('customer_address', e.target.value)}
                                 placeholder="Masukkan alamat lengkap"
                                 rows={3}
                                 className="text-base"
@@ -338,7 +338,7 @@ const EnhancedOrderForm = ({
                             <Input
                                 type="date"
                                 value={formData.delivery_date}
-                                onChange={(e) => handleInputChange('delivery_date', e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('delivery_date', e.target.value)}
                                 min={new Date().toISOString().split('T')[0]}
                                 className="text-base"
                             />
@@ -355,7 +355,7 @@ const EnhancedOrderForm = ({
                             <Input
                                 type="time"
                                 value={formData.delivery_time}
-                                onChange={(e) => handleInputChange('delivery_time', e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('delivery_time', e.target.value)}
                                 className="text-base"
                             />
                         </div>
@@ -378,7 +378,7 @@ const EnhancedOrderForm = ({
                                 <SelectContent>
                                     <SelectItem value="low">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-2 w-2 rounded-full bg-gray-400" />
+                                            <div className="h-2 w-2 rounded-full bg-muted" />
                                             Biasa
                                         </div>
                                     </SelectItem>
@@ -402,7 +402,7 @@ const EnhancedOrderForm = ({
                             <Label>Catatan Pesanan (Opsional)</Label>
                             <Textarea
                                 value={formData.notes ?? ''}
-                                onChange={(e) => handleInputChange('notes', e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('notes', e.target.value)}
                                 placeholder="Tambahkan catatan khusus untuk pesanan ini"
                                 rows={3}
                                 className="text-base"
@@ -426,7 +426,7 @@ const EnhancedOrderForm = ({
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                                     placeholder="Cari produk..."
                                     className="pl-10 text-base"
                                 />
@@ -529,7 +529,7 @@ const EnhancedOrderForm = ({
                                                 <Label className="text-sm">Catatan Item (Opsional)</Label>
                                                 <Input
                                                     value={item.special_requests ?? ''}
-                                                    onChange={(e) => updateOrderItem(index, 'special_requests', e.target.value)}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'special_requests', e.target.value)}
                                                     placeholder="Contoh: Tanpa gula, extra pedas"
                                                     className="text-sm"
                                                 />
@@ -604,4 +604,3 @@ const EnhancedOrderForm = ({
     )
 }
 
-export { EnhancedOrderForm }

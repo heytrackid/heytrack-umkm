@@ -138,7 +138,7 @@ export const PricingCalculatorCard = ({
                 )}
 
                 {/* Current Cost */}
-                <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+                <div className="p-4 bg-muted/20 rounded-lg">
                     <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">Biaya Produksi</span>
                         <span className="text-lg font-semibold">{formatCurrency(totalCost)}</span>
@@ -192,7 +192,7 @@ export const PricingCalculatorCard = ({
                             <Input
                                 type="number"
                                 value={manualPrice}
-                                onChange={(e) => setManualPrice(Number(e.target.value))}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setManualPrice(Number(e.target.value))}
                                 placeholder="Masukkan harga jual"
                                 min={totalCost}
                                 step={1000}
@@ -201,7 +201,7 @@ export const PricingCalculatorCard = ({
                                 Minimal: {formatCurrency(totalCost)} (biaya produksi)
                             </p>
                             {manualPrice < totalCost && (
-                                <p className="text-xs text-gray-600">
+                                <p className="text-xs text-destructive">
                                     ⚠️ Harga jual tidak boleh lebih rendah dari biaya produksi
                                 </p>
                             )}
@@ -210,13 +210,13 @@ export const PricingCalculatorCard = ({
                 </SwipeableTabs>
 
                 {/* Display Price */}
-                <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-900/20 rounded-lg border-2 border-gray-300 dark:border-gray-800">
+                <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-900/20 rounded-lg border-2 border-border/20 ">
                     <div className="flex items-start justify-between mb-4">
                         <div>
                             <div className="text-sm text-muted-foreground mb-1">
                                 Harga Jual {mode === 'manual' ? 'yang Anda Masukkan' : 'yang Disarankan'}
                             </div>
-                            <div className="text-4xl font-bold text-gray-600">
+                            <div className="text-4xl font-bold text-foreground">
                                 {formatCurrency(displayPrice)}
                             </div>
                         </div>
@@ -227,25 +227,25 @@ export const PricingCalculatorCard = ({
                     </div>
 
                     {/* Breakdown */}
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg space-y-2 text-sm">
+                    <div className="bg-card p-4 rounded-lg space-y-2 text-sm">
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Biaya Produksi</span>
                             <span className="font-medium">{formatCurrency(totalCost)}</span>
                         </div>
-                        <div className="flex justify-between text-gray-600">
+                        <div className="flex justify-between text-muted-foreground">
                             <span>Keuntungan ({displayMargin.toFixed(0)}%)</span>
                             <span className="font-semibold">+ {formatCurrency(profit)}</span>
                         </div>
                         <div className="flex justify-between pt-2 border-t font-semibold">
                             <span>Harga Jual</span>
-                            <span className="text-gray-600">{formatCurrency(displayPrice)}</span>
+                            <span className="text-foreground">{formatCurrency(displayPrice)}</span>
                         </div>
                     </div>
 
                     {/* Profit per item */}
                     <div className="mt-3 text-center">
                         <span className="text-sm text-muted-foreground">Keuntungan per produk: </span>
-                        <span className="text-lg font-bold text-gray-600">
+                        <span className="text-lg font-bold text-foreground">
                             {formatCurrency(profit)}
                         </span>
                     </div>

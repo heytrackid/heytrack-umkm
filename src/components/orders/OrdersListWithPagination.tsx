@@ -117,12 +117,12 @@ export const OrdersListWithPagination = (): JSX.Element => {
 
     const getStatusBadge = (status: OrderStatus) => {
         const statusConfig: Record<OrderStatus, { label: string; icon: React.ComponentType<{ className?: string }>; className: string }> = {
-            PENDING: { label: 'Pending', icon: Clock as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
-            CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
-            IN_PROGRESS: { label: 'Sedang Diproses', icon: Package as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
-            READY: { label: 'Siap', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
-            DELIVERED: { label: 'Terkirim', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
-            CANCELLED: { label: 'Dibatalkan', icon: XCircle as React.ComponentType<{ className?: string }>, className: 'bg-gray-100 text-gray-700' },
+            PENDING: { label: 'Pending', icon: Clock as React.ComponentType<{ className?: string }>, className: 'bg-muted text-muted-foreground' },
+            CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-blue-50 text-blue-700' },
+            IN_PROGRESS: { label: 'Sedang Diproses', icon: Package as React.ComponentType<{ className?: string }>, className: 'bg-yellow-50 text-yellow-700' },
+            READY: { label: 'Siap', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-green-50 text-green-700' },
+            DELIVERED: { label: 'Terkirim', icon: CheckCircle as React.ComponentType<{ className?: string }>, className: 'bg-green-50 text-green-700' },
+            CANCELLED: { label: 'Dibatalkan', icon: XCircle as React.ComponentType<{ className?: string }>, className: 'bg-destructive/10 text-destructive' },
         }
 
         const _config = statusConfig[status] || statusConfig.PENDING
@@ -162,7 +162,7 @@ export const OrdersListWithPagination = (): JSX.Element => {
                             <Input
                                 placeholder="Cari nomor pesanan atau nama pelanggan..."
                                 value={searchTerm}
-                                onChange={(e) => handleSearch(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
                                 className="pl-9"
                             />
                         </div>
@@ -193,8 +193,8 @@ export const OrdersListWithPagination = (): JSX.Element => {
                         <Card key={i}>
                             <CardContent className="p-6">
                                 <div className="space-y-3">
-                                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/4" />
+                                    <div className="h-6 bg-muted rounded animate-pulse" />
+                                    <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
                                 </div>
                             </CardContent>
                         </Card>

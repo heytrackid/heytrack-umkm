@@ -328,7 +328,7 @@ export const ContextAwareChatbot = (): JSX.Element => {
             <Input
               ref={inputRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
               placeholder="Tanya apa aja... strategi marketing, pricing, atau analisis profit 💬"
               disabled={isLoading}
               className="flex-1 bg-background"

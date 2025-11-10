@@ -7,14 +7,14 @@ import type { ComponentProps } from 'react'
 
 
 
-const Table = ({ className, ...props }: ComponentProps<'table'>) => (
+export const Table = ({ className, ...props }: ComponentProps<'table'>) => (
     <div
       data-slot="table-container"
       className="relative w-full overflow-x-auto"
     >
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-sm border border-border", className)}
+        className={cn("w-full caption-bottom text-sm border border-border/20", className)}
         {...props}
       />
     </div>
@@ -61,8 +61,8 @@ const TableRow = ({ className, ...props }: ComponentProps<'tr'>) => (
 const TableHead = ({ className, ...props }: ComponentProps<'th'>) => (
     <th
       data-slot="table-head"
-      className={cn(
-       "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap border-r border-border [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] [&:last-child]:border-r-0",
+       className={cn(
+        "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap border-r border-border/20 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] [&:last-child]:border-r-0",
         className
       )}
       {...props}
@@ -73,7 +73,7 @@ const TableCell = ({ className, ...props }: ComponentProps<'td'>) => (
     <td
       data-slot="table-cell"
       className={cn(
-       "p-2 align-middle whitespace-nowrap border-r border-border [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] [&:last-child]:border-r-0",
+        "p-2 align-middle whitespace-nowrap border-r border-border/20 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] [&:last-child]:border-r-0",
         className
       )}
       {...props}
@@ -91,8 +91,8 @@ const TableCaption = ({
     />
   )
 
+
 export {
-  Table,
   TableHeader,
   TableBody,
   TableFooter,

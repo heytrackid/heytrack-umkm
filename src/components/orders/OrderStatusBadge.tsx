@@ -60,7 +60,7 @@ const statusConfig = {
     confirmed: {
         label: 'Siap Produksi',
         icon: CheckCircle,
-        color: 'bg-gray-100 text-gray-800 border-gray-400',
+        color: 'bg-blue-50 text-blue-700 border-blue-200',
         nextAction: 'Mulai Produksi',
         nextActionVariant: 'default' as const,
         description: 'Order sudah dikonfirmasi, siap diproduksi'
@@ -68,7 +68,7 @@ const statusConfig = {
     in_production: {
         label: 'Sedang Diproduksi',
         icon: Loader2,
-        color: 'bg-gray-100 text-gray-800 border-gray-400',
+        color: 'bg-yellow-50 text-yellow-700 border-yellow-200',
         nextAction: 'Tandai Selesai',
         nextActionVariant: 'default' as const,
         description: 'Sedang dalam proses produksi',
@@ -77,7 +77,7 @@ const statusConfig = {
     completed: {
         label: 'Selesai',
         icon: Package,
-        color: 'bg-gray-100 text-gray-800 border-gray-400',
+        color: 'bg-green-50 text-green-700 border-green-200',
         nextAction: 'Kirim ke Customer',
         nextActionVariant: 'outline' as const,
         description: 'Produksi selesai, siap dikirim'
@@ -85,7 +85,7 @@ const statusConfig = {
     delivered: {
         label: 'Terkirim',
         icon: Truck,
-        color: 'bg-gray-100 text-emerald-800 border-emerald-300',
+        color: 'bg-secondary text-emerald-800 border-emerald-300',
         nextAction: null,
         description: 'Order sudah diterima customer'
     },
@@ -217,9 +217,9 @@ export const OrderProgress = memo(({ currentStatus, className }: OrderProgressPr
                         <div className="flex flex-col items-center">
                             <div className={cn(
                                 'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors',
-                                isCompleted
-                                    ? 'bg-gray-500 border-green-500 text-white'
-                                    : 'bg-gray-100 border-gray-300 text-gray-400',
+                                 isCompleted
+                                     ? 'bg-green-500 border-green-500 text-white'
+                                     : 'bg-muted border-border/20 text-muted-foreground',
                                 isCurrent && 'ring-2 ring-green-200'
                             )}>
                                 {isCompleted ? (
@@ -228,10 +228,10 @@ export const OrderProgress = memo(({ currentStatus, className }: OrderProgressPr
                                     <div className="w-2 h-2 rounded-full bg-current" />
                                 )}
                             </div>
-                            <span className={cn(
-                                'text-xs mt-1 font-medium',
-                                isCompleted ? 'text-gray-600' : 'text-gray-400'
-                            )}>
+                             <span className={cn(
+                                 'text-xs mt-1 font-medium',
+                                 isCompleted ? 'text-muted-foreground' : 'text-muted-foreground'
+                             )}>
                                 {step.label}
                             </span>
                         </div>
@@ -239,7 +239,7 @@ export const OrderProgress = memo(({ currentStatus, className }: OrderProgressPr
                         {index < steps.length - 1 && (
                             <div className={cn(
                                 'w-12 h-0.5 mx-2 transition-colors',
-                                index < currentIndex ? 'bg-gray-500' : 'bg-gray-300'
+                                index < currentIndex ? 'bg-muted0' : 'bg-muted'
                             )} />
                         )}
                     </div>

@@ -23,7 +23,7 @@ interface OrderSummaryProps {
   onCancel: () => void
 }
 
-const OrderSummary = ({
+export const OrderSummary = ({
   formData,
   orderItems,
   subtotal,
@@ -123,5 +123,3 @@ const OrderSummary = ({
     </Card>
   )
 }
-
-export { OrderSummary }

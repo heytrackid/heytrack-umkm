@@ -74,7 +74,7 @@ const IngredientPurchasesLayout = (): JSX.Element => {
             description="Kelola riwayat pembelian bahan baku"
           />
 
-          <div className="h-96 bg-gray-100 rounded animate-pulse" />
+          <div className="h-96 bg-muted rounded animate-pulse" />
         </div>
       </AppLayout>
     )

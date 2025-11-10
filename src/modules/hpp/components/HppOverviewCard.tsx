@@ -79,26 +79,26 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {/* Produk Dihitung */}
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
-                        <div className="text-2xl font-bold text-gray-600 mb-1">
+                    <div className="p-4 bg-muted/20 rounded-lg border border-border/20 ">
+                        <div className="text-2xl font-bold text-foreground mb-1">
                             {overview.recipesWithHpp}/{overview.totalRecipes}
                         </div>
                         <div className="text-xs text-muted-foreground mb-2">Produk Dihitung</div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                        <div className="w-full bg-muted dark:bg-muted rounded-full h-1.5">
                             <div
-                                className="bg-gray-600 h-1.5 rounded-full transition-all"
+                                className="bg-primary h-1.5 rounded-full transition-all"
                                 style={{ width: `${completionPercentage}%` }}
                             />
                         </div>
                     </div>
 
                     {/* Biaya Rata-rata */}
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
-                        <div className="text-2xl font-bold text-gray-600 mb-1">
+                    <div className="p-4 bg-muted/20 rounded-lg border border-border/20 ">
+                        <div className="text-2xl font-bold text-foreground mb-1">
                             {formatCurrency(overview.averageHpp)}
                         </div>
                         <div className="text-xs text-muted-foreground">Biaya Rata-rata</div>
-                        <div className="flex items-center gap-1 mt-1 text-xs text-gray-600">
+                        <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                             <TrendingUp className="h-3 w-3" />
                             <span>Per produk</span>
                         </div>
@@ -107,34 +107,34 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps): JSX.Element
                     {/* Peringatan */}
                     <div className={`p-4 rounded-lg border ${overview.unreadAlerts > 0
                         ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
-                        : 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
+                        : 'bg-muted/20 border-border/20 '
                         }`}>
-                        <div className="text-2xl font-bold mb-1 text-gray-600">
+                        <div className="text-2xl font-bold mb-1 text-muted-foreground">
                             {overview.unreadAlerts}
                         </div>
                         <div className="text-xs text-muted-foreground">Peringatan Baru</div>
                         <div className="flex items-center gap-1 mt-1 text-xs">
                             {overview.unreadAlerts > 0 ? (
                                 <>
-                                    <Bell className="h-3 w-3 text-gray-600" />
-                                    <span className="text-gray-600">Perlu tindakan</span>
+                                    <Bell className="h-3 w-3 text-muted-foreground" />
+                                    <span className="text-muted-foreground">Perlu tindakan</span>
                                 </>
                             ) : (
                                 <>
-                                    <CheckCircle className="h-3 w-3 text-gray-600" />
-                                    <span className="text-gray-600">Semua aman</span>
+                                    <CheckCircle className="h-3 w-3 text-muted-foreground" />
+                                    <span className="text-muted-foreground">Semua aman</span>
                                 </>
                             )}
                         </div>
                     </div>
 
                     {/* Progress */}
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
-                        <div className="text-2xl font-bold text-gray-600 mb-1">
+                    <div className="p-4 bg-muted/20 rounded-lg border border-border/20 ">
+                        <div className="text-2xl font-bold text-foreground mb-1">
                             {completionPercentage}%
                         </div>
                         <div className="text-xs text-muted-foreground">Progress</div>
-                        <div className="flex items-center gap-1 mt-1 text-xs text-gray-600">
+                        <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                             <Calculator className="h-3 w-3" />
                             <span>Kelengkapan data</span>
                         </div>

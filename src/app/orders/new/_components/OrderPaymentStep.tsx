@@ -13,7 +13,7 @@ interface OrderPaymentStepProps {
   onInputChange: (field: keyof OrderFormData, value: boolean | number | string) => void
 }
 
-const OrderPaymentStep = ({
+export const OrderPaymentStep = ({
   formData,
   onInputChange
 }: OrderPaymentStepProps) => (
@@ -25,7 +25,7 @@ const OrderPaymentStep = ({
         <Label htmlFor="payment_method">Metode Pembayaran</Label>
         <Select
           value={formData.payment_method}
-          onValueChange={(value) => onInputChange('payment_method', value)}
+          onValueChange={(value: string) => onInputChange('payment_method', value)}
         >
           <SelectTrigger>
             <SelectValue />
@@ -46,7 +46,7 @@ const OrderPaymentStep = ({
           type="number"
           min="0"
           value={formData.discount_amount}
-          onChange={(e) => {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             const parsedDiscount = Number.parseFloat(e.target.value.replace(',', '.'))
             onInputChange('discount_amount', Number.isNaN(parsedDiscount) ? 0 : parsedDiscount)
           }}
@@ -62,7 +62,7 @@ const OrderPaymentStep = ({
           max="100"
           step="0.1"
           value={formData.tax_rate}
-          onChange={(e) => {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             const parsedTax = Number.parseFloat(e.target.value.replace(',', '.'))
             onInputChange('tax_rate', Number.isNaN(parsedTax) ? 0 : parsedTax)
           }}
@@ -71,5 +71,3 @@ const OrderPaymentStep = ({
     </div>
   </div>
 )
-
-export { OrderPaymentStep }

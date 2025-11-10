@@ -54,6 +54,7 @@ export const exportToPDF = ({ profitData, dateRange, formatCurrency }: ExportToP
     const escapedGrossProfit = HtmlEscaper.escape(formatCurrency(profitData.summary.gross_profit))
     const escapedNetProfit = HtmlEscaper.escape(formatCurrency(profitData.summary.net_profit))
 
+    // PDF export styles - inline styles required for PDF generation
     const htmlContent = `
         <!DOCTYPE html>
         <html>

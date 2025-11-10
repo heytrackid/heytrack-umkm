@@ -72,8 +72,8 @@ export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettings
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-950 rounded-md border border-gray-300 dark:border-gray-800">
-          <p className="text-sm text-gray-800 dark:text-gray-200">
+        <div className="mb-4 p-3 bg-muted rounded-md border border-border/20 ">
+          <p className="text-sm text-foreground dark:text-gray-200">
             <strong>Mata Uang Saat Ini:</strong> {contextSettings?.currency?.name || 'IDR'} ({contextSettings?.currency?.symbol || 'Rp'})
           </p>
         </div>
@@ -84,7 +84,7 @@ export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettings
             <select
               className="w-full p-2 border border-input rounded-md bg-background"
               value={contextSettings?.currency?.code || settings.general.currency}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 const selected = currencies.find(c => c.code === e.target.value)
                 if (selected) {
                   updateCurrency(selected)
@@ -105,7 +105,7 @@ export const RegionalSettings = ({ settings, onSettingChange }: RegionalSettings
             <select
               className="w-full p-2 border border-input rounded-md bg-background"
               value={settings.general.timezone}
-              onChange={(e) => onSettingChange('general', 'timezone', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onSettingChange('general', 'timezone', e.target.value)}
             >
               <option value="Asia/Jakarta">Jakarta (UTC+7)</option>
               <option value="Asia/Makassar">Makassar (UTC+8)</option>

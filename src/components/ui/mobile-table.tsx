@@ -1,24 +1,26 @@
 'use client'
 
 import {
-  MoreHorizontal,
-  Search,
-  SortAsc,
-  SortDesc} from 'lucide-react'
-import { type ReactNode, useState, useCallback, useMemo, memo } from 'react'
+    MoreHorizontal,
+    Search,
+    SortAsc,
+    SortDesc
+} from 'lucide-react'
+import { memo, type ReactNode, useCallback, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 
 import { Input } from '@/components/ui/input'
+import { SkeletonText } from '@/components/ui/skeleton'
 
 // Types for mobile table
 export interface MobileTableColumn<T extends Record<string, unknown> = Record<string, unknown>> {
@@ -118,9 +120,9 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
           <Card key={i} className="animate-pulse">
             <CardContent className="p-4">
               <div className="space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-3 bg-gray-200 rounded w-1/2" />
-                <div className="h-3 bg-gray-200 rounded w-2/3" />
+                <SkeletonText className="h-4 w-3/4" />
+                <SkeletonText className="h-3 w-1/2" />
+                <SkeletonText className="h-3 w-2/3" />
               </div>
             </CardContent>
           </Card>
@@ -149,11 +151,11 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
     return (
       <div className="mb-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             placeholder={searchPlaceholder ?? 'Cari...'}
             value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
             className="pl-10"
           />
         </div>
@@ -198,7 +200,7 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
           key={index}
           className={cn(
             "transition-all hover:shadow-md cursor-pointer",
-            onRowClick && "hover:bg-gray-50"
+            onRowClick && "hover:bg-muted"
           )}
           onClick={() => onRowClick?.(item)}
         >
@@ -221,22 +223,22 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
               {actions && actions.length > 0 && (
                 <div className="flex gap-2 pt-3 border-t">
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="flex-1">
-                        <MoreHorizontal className="h-4 w-4 mr-2" />
-                        Aksi
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {actions
-                        .filter(action => !action.show || action.show(item))
-                        .map((action, actionIndex) => (
-                          <DropdownMenuItem
-                            key={actionIndex}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              action.onClick(item)
-                            }}
+                     <DropdownMenuTrigger asChild>
+                       <Button variant="outline" size="sm" className="flex-1">
+                         <MoreHorizontal className="h-4 w-4 mr-2" />
+                         Aksi
+                       </Button>
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent align="end">
+                       {actions
+                         .filter(action => !action.show || action.show(item))
+                         .map((action, actionIndex) => (
+                           <DropdownMenuItem
+                             key={actionIndex}
+                             onClick={(e) => {
+                               e.stopPropagation()
+                               action.onClick(item)
+                             }}
                             className={cn(
                               action.variant === 'destructive' && "text-destructive"
                             )}
@@ -265,14 +267,14 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
   const renderTableView = () => (
     <div className="border rounded-lg overflow-hidden">
       <table className="w-full">
-        <thead className="bg-gray-50">
+        <thead className="bg-muted">
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
                 className={cn(
-                  "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
-                  sortable && column.sortable && "cursor-pointer hover:bg-gray-100",
+                  "px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider",
+                  sortable && column.sortable && "cursor-pointer hover:bg-muted/50",
                   column.className
                 )}
                 onClick={() => sortable && column.sortable && handleSort(column.key)}
@@ -285,18 +287,18 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
               </th>
             ))}
             {actions && actions.length > 0 && (
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+               <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Aksi
               </th>
             )}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody className="divide-y divide-border">
           {filteredData.map((item, rowIndex) => (
             <tr
               key={rowIndex}
               className={cn(
-                "hover:bg-gray-50",
+                "hover:bg-muted",
                 onRowClick && "cursor-pointer"
               )}
               onClick={() => onRowClick?.(item)}
@@ -316,21 +318,21 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
               {actions && actions.length > 0 && (
                 <td className="px-4 py-3 text-right text-sm">
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {actions
-                        .filter(action => !action.show || action.show(item))
-                        .map((action, actionIndex) => (
-                          <DropdownMenuItem
-                            key={actionIndex}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              action.onClick(item)
-                            }}
+                     <DropdownMenuTrigger asChild>
+                       <Button variant="ghost" size="sm">
+                         <MoreHorizontal className="h-4 w-4" />
+                       </Button>
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent align="end">
+                       {actions
+                         .filter(action => !action.show || action.show(item))
+                         .map((action, actionIndex) => (
+                           <DropdownMenuItem
+                             key={actionIndex}
+                             onClick={(e) => {
+                               e.stopPropagation()
+                               action.onClick(item)
+                             }}
                             className={cn(
                               action.variant === 'destructive' && "text-destructive"
                             )}

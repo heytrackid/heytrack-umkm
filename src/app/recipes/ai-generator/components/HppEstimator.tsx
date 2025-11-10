@@ -95,8 +95,8 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
     const marginStatus = getMarginStatus(margin)
 
     const getMarginColor = () => {
-        if (margin >= 50) {return 'text-gray-600 bg-gray-50 dark:bg-gray-900/20'}
-        if (margin >= 30) {return 'text-gray-600 bg-gray-50 dark:bg-gray-900/20'}
+        if (margin >= 50) {return 'text-muted-foreground bg-muted/20'}
+        if (margin >= 30) {return 'text-muted-foreground bg-muted/20'}
         if (margin >= 20) {return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20'}
         return 'text-red-600 bg-red-50 dark:bg-red-900/20'
     }
@@ -337,7 +337,7 @@ export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: Hpp
 
                         <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Profit per porsi</span>
-                            <span className="font-semibold text-gray-600">
+                            <span className="font-semibold text-muted-foreground">
                                 {formatCurrency((targetPrice - estimatedHPP) / servings)}
                             </span>
                         </div>

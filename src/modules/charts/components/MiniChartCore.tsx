@@ -47,7 +47,7 @@ interface MiniChartCoreProps {
   className?: string
 }
 
-const MiniChartCore = ({
+export const MiniChartCore = ({
   data,
   type = 'line',
   dataKey,
@@ -79,4 +79,3 @@ const MiniChartCore = ({
   </div>
 )
 
-export { MiniChartCore }

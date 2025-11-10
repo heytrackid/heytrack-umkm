@@ -25,6 +25,7 @@ import {
 import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { SkeletonText } from '@/components/ui/skeleton'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 import { VirtualizedTable } from '@/components/ui/virtualized-table'
 
@@ -227,10 +228,10 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
     return (
       <Card className={className}>
         <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-1/4" />
+          <div className="space-y-4">
+            <SkeletonText className="h-4 w-1/4" />
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-4 bg-gray-200 rounded" />
+              <SkeletonText key={i} className="h-4 w-full" />
             ))}
           </div>
         </CardContent>
@@ -284,7 +285,7 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
             <Input
               placeholder={searchPlaceholder}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>

@@ -110,33 +110,33 @@ export function formatRelativeTime(
 export function getStatusColor(status: string): string {
   const statusColors: Record<string, string> = {
     // Order statuses
-    PENDING: 'bg-gray-100 text-gray-800',
-    CONFIRMED: 'bg-gray-100 text-gray-800',
-    IN_PROGRESS: 'bg-gray-100 text-gray-800',
-    READY: 'bg-gray-100 text-gray-800',
-    DELIVERED: 'bg-gray-100 text-gray-800',
-    CANCELLED: 'bg-gray-100 text-gray-800',
+    PENDING: 'bg-secondary text-secondary-foreground',
+    CONFIRMED: 'bg-secondary text-secondary-foreground',
+    IN_PROGRESS: 'bg-secondary text-secondary-foreground',
+    READY: 'bg-secondary text-secondary-foreground',
+    DELIVERED: 'bg-secondary text-secondary-foreground',
+    CANCELLED: 'bg-secondary text-secondary-foreground',
 
     // Payment statuses
-    UNPAID: 'bg-gray-100 text-gray-800',
-    PAID: 'bg-gray-100 text-gray-800',
-    PARTIAL: 'bg-gray-100 text-gray-800',
-    REFUNDED: 'bg-gray-100 text-gray-800',
+    UNPAID: 'bg-secondary text-secondary-foreground',
+    PAID: 'bg-secondary text-secondary-foreground',
+    PARTIAL: 'bg-secondary text-secondary-foreground',
+    REFUNDED: 'bg-secondary text-secondary-foreground',
 
     // Inventory statuses
-    IN_STOCK: 'bg-gray-100 text-gray-800',
-    LOW_STOCK: 'bg-gray-100 text-gray-800',
-    OUT_OF_STOCK: 'bg-gray-100 text-gray-800',
-    OVER_STOCK: 'bg-gray-100 text-gray-800',
+    IN_STOCK: 'bg-secondary text-secondary-foreground',
+    LOW_STOCK: 'bg-secondary text-secondary-foreground',
+    OUT_OF_STOCK: 'bg-secondary text-secondary-foreground',
+    OVER_STOCK: 'bg-secondary text-secondary-foreground',
 
     // Generic statuses
-    ACTIVE: 'bg-gray-100 text-gray-800',
-    INACTIVE: 'bg-gray-100 text-gray-800',
-    DRAFT: 'bg-gray-100 text-gray-800',
-    PUBLISHED: 'bg-gray-100 text-gray-800',
+    ACTIVE: 'bg-secondary text-secondary-foreground',
+    INACTIVE: 'bg-secondary text-secondary-foreground',
+    DRAFT: 'bg-secondary text-secondary-foreground',
+    PUBLISHED: 'bg-secondary text-secondary-foreground',
   }
 
-  return statusColors[status] || 'bg-gray-100 text-gray-800'
+  return statusColors[status] || 'bg-secondary text-secondary-foreground'
 }
 
 export function getStatusText(status: string): string {

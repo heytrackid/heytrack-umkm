@@ -251,13 +251,13 @@ export const EnhancedRecipesPage = (): JSX.Element => {
     const getDifficultyColor = (difficulty: string) => {
         switch (difficulty) {
             case 'easy':
-                return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                return 'bg-muted text-muted-foreground'
             case 'medium':
                 return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
             case 'hard':
                 return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
             default:
-                return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                return 'bg-muted text-muted-foreground'
         }
     }
 
@@ -317,7 +317,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                             <Input
                                 placeholder="Cari resep..."
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                                 className="pl-9"
                             />
                         </div>
@@ -388,11 +388,11 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                         <Card key={i}>
                             <CardContent className="p-6">
                                 <div className="space-y-3">
-                                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/4" />
+                                    <div className="h-6 bg-muted rounded animate-pulse" />
+                                    <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
                                     <div className="flex gap-2">
-                                        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16" />
-                                        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16" />
+                                        <div className="h-6 bg-muted rounded animate-pulse w-16" />
+                                        <div className="h-6 bg-muted rounded animate-pulse w-16" />
                                     </div>
                                 </div>
                             </CardContent>
@@ -482,7 +482,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                                             )}
                                         </div>
                                         <DropdownMenu>
-                                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                            <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
                                                 <Button variant="ghost" size="sm">
                                                     <MoreVertical className="h-4 w-4" />
                                                 </Button>
@@ -490,33 +490,33 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem onClick={(e) => {
+                                                <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                                                     e.stopPropagation()
                                                     handleView(recipe)
                                                 }}>
                                                     <Eye className="h-4 w-4 mr-2" />
                                                     Lihat Detail
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleEdit(recipe)
-                                                }}>
+                                                 <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                                                     e.stopPropagation()
+                                                     handleEdit(recipe)
+                                                 }}>
                                                     <Edit className="h-4 w-4 mr-2" />
                                                     Edit
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleCalculateHPP(recipe)
-                                                }}>
+                                                 <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLElement>) => {
+                                                     e.stopPropagation()
+                                                     handleEdit(recipe)
+                                                 }}>
                                                     <Calculator className="h-4 w-4 mr-2" />
                                                     Hitung HPP
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        handleDelete(recipe)
-                                                    }}
+                                                 <DropdownMenuItem
+                                                     onClick={(e: React.MouseEvent<HTMLElement>) => {
+                                                         e.stopPropagation()
+                                                         handleDelete(recipe)
+                                                     }}
                                                     className="text-red-600"
                                                 >
                                                     <Trash2 className="h-4 w-4 mr-2" />
@@ -595,3 +595,5 @@ export const EnhancedRecipesPage = (): JSX.Element => {
         </div >
     )
 }
+
+

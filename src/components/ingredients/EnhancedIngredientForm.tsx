@@ -25,10 +25,10 @@ interface EnhancedIngredientFormProps {
 }
 
 export const EnhancedIngredientForm = ({
-    form,
-    mode,
-    initialData
-}: EnhancedIngredientFormProps) => {
+     form,
+     mode,
+     initialData
+ }: EnhancedIngredientFormProps) => {
     const { formatCurrency } = useSettings()
     const { watch, formState: { errors }, setValue } = form
 
@@ -244,5 +244,7 @@ export const EnhancedIngredientForm = ({
                 </Card>
             )}
         </div>
-    )
-}
+     )
+ }
+
+

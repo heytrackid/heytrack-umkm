@@ -190,11 +190,11 @@ const HppDashboardWidget = (): JSX.Element | null => {
                   </div>
                   <div className="flex items-center gap-2">
                     {change.direction === 'increase' ? (
-                      <TrendingUp className="h-4 w-4 text-red-500" />
+                      <TrendingUp className="h-4 w-4 text-destructive" />
                     ) : (
-                      <TrendingDown className="h-4 w-4 text-gray-500" />
+                      <TrendingDown className="h-4 w-4 text-muted-foreground" />
                     )}
-                    <span className={`font-semibold ${change.direction === 'increase' ? 'text-red-600' : 'text-gray-600'
+                    <span className={`font-semibold ${change.direction === 'increase' ? 'text-destructive' : 'text-muted-foreground'
                       }`}>
                       {change.direction === 'increase' ? '+' : ''}{change.change_percentage}%
                     </span>

@@ -81,13 +81,13 @@ const UMKMTooltip = ({ title, content, children }: { title: string, content: str
       <TooltipTrigger asChild>
         <div className="flex items-center gap-1 cursor-help">
           {children}
-          <Info className="h-3 w-3 text-gray-400" />
+          <Info className="h-3 w-3 text-muted-foreground" />
         </div>
       </TooltipTrigger>
       <TooltipContent className="max-w-80 p-3">
         <div className="space-y-1">
           <h4 className="font-semibold text-sm">{title}</h4>
-          <p className="text-xs text-gray-600">{content}</p>
+          <p className="text-xs text-muted-foreground">{content}</p>
         </div>
       </TooltipContent>
     </Tooltip>
@@ -148,7 +148,7 @@ export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClient
   const getHealthBadge = (health: string): JSX.Element => {
     switch (health) {
       case 'healthy':
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-green-200"><CheckCircle2 className="w-3 h-3 mr-1" />Sehat</Badge>
+        return <Badge className="bg-muted text-foreground hover:bg-green-200"><CheckCircle2 className="w-3 h-3 mr-1" />Sehat</Badge>
       case 'warning':
         return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200"><AlertTriangle className="w-3 h-3 mr-1" />Perhatian</Badge>
       case 'error':
@@ -170,8 +170,8 @@ export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClient
           <Card key={i}>
             <CardContent className="pt-6">
               <div className="animate-pulse space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-3 bg-gray-200 rounded w-1/2" />
+                <div className="h-4 bg-muted rounded w-3/4" />
+                <div className="h-3 bg-muted rounded w-1/2" />
               </div>
             </CardContent>
           </Card>
@@ -206,7 +206,7 @@ export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClient
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Auto-Sync Keuangan</h2>
-          <p className="text-gray-600 text-sm">
+          <p className="text-muted-foreground text-sm">
             Sinkronisasi otomatis transaksi ke catatan keuangan
           </p>
         </div>
@@ -226,18 +226,18 @@ export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClient
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <UMKMTooltip
-                  title="Status Sinkronisasi"
-                  content="Menunjukkan apakah sistem auto-sync sedang aktif dan berjalan dengan baik"
-                >
-                  <p className="text-sm font-medium text-gray-600">Status Sync</p>
-                </UMKMTooltip>
+                 <UMKMTooltip
+                   title="Status Sinkronisasi"
+                   content="Menunjukkan apakah sistem auto-sync sedang aktif dan berjalan dengan baik"
+                 >
+                   <p className="text-sm font-medium text-muted-foreground">Status Sync</p>
+                 </UMKMTooltip>
                 <div className="mt-2">
                   {getHealthBadge(data['status'].syncHealth)}
                 </div>
-              </div>
-              <Activity className="h-8 w-8 text-gray-600" />
-            </div>
+               </div>
+               <Activity className="h-8 w-8 text-muted-foreground" />
+             </div>
           </CardContent>
         </Card>
 
@@ -245,16 +245,16 @@ export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClient
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <UMKMTooltip
-                  title="Total Tersinkronisasi"
-                  content="Jumlah transaksi yang sudah otomatis masuk ke catatan keuangan dalam 30 hari terakhir"
-                >
-                  <p className="text-sm font-medium text-gray-600">Total Synced</p>
-                </UMKMTooltip>
+                 <UMKMTooltip
+                   title="Total Tersinkronisasi"
+                   content="Jumlah transaksi yang sudah otomatis masuk ke catatan keuangan dalam 30 hari terakhir"
+                 >
+                   <p className="text-sm font-medium text-muted-foreground">Total Synced</p>
+                 </UMKMTooltip>
                 <p className="text-2xl font-bold">{data['status'].totalSynced}</p>
-              </div>
-              <Zap className="h-8 w-8 text-gray-600" />
-            </div>
+               </div>
+               <Zap className="h-8 w-8 text-muted-foreground" />
+             </div>
           </CardContent>
         </Card>
 
@@ -262,12 +262,12 @@ export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClient
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <UMKMTooltip
-                  title="Skor Kesehatan"
-                  content="Indikator seberapa baik sistem auto-sync berjalan (0-100)"
-                >
-                  <p className="text-sm font-medium text-gray-600">Health Score</p>
-                </UMKMTooltip>
+                 <UMKMTooltip
+                   title="Skor Kesehatan"
+                   content="Indikator seberapa baik sistem auto-sync berjalan (0-100)"
+                 >
+                   <p className="text-sm font-medium text-muted-foreground">Health Score</p>
+                 </UMKMTooltip>
                 <div className="mt-2 space-y-2">
                   <p className="text-lg font-bold">{data.recommendations.healthScore}/100</p>
                   <Progress value={data.recommendations.healthScore} className="h-2" />
@@ -281,18 +281,18 @@ export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClient
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <UMKMTooltip
-                  title="Last Sync"
-                  content="Waktu terakhir sistem melakukan sinkronisasi otomatis"
-                >
-                  <p className="text-sm font-medium text-gray-600">Last Sync</p>
-                </UMKMTooltip>
+                 <UMKMTooltip
+                   title="Last Sync"
+                   content="Waktu terakhir sistem melakukan sinkronisasi otomatis"
+                 >
+                   <p className="text-sm font-medium text-muted-foreground">Last Sync</p>
+                 </UMKMTooltip>
                 <p className="text-sm font-medium">
                   {data['status'].lastSyncTime ? formatDate(data['status'].lastSyncTime) : 'Belum ada'}
                 </p>
-              </div>
-              <Clock className="h-8 w-8 text-gray-600" />
-            </div>
+               </div>
+               <Clock className="h-8 w-8 text-muted-foreground" />
+             </div>
           </CardContent>
         </Card>
       </div>
@@ -309,12 +309,12 @@ export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClient
           <CardContent>
             <div className="space-y-3">
               {data.recommendations.recommendations.map((rec, index: number) => (
-                <Alert key={index} className={rec.includes('✅') ? 'border-gray-300 bg-gray-50' : ''}>
-                  <AlertDescription className="flex items-center">
-                    {rec.includes('✅') ?
-                      <CheckCircle2 className="h-4 w-4 text-gray-600 mr-2 flex-shrink-0" /> :
-                      <Info className="h-4 w-4 text-gray-600 mr-2 flex-shrink-0" />
-                    }
+                <Alert key={index} className={rec.includes('✅') ? 'border-border/20 bg-muted' : ''}>
+                   <AlertDescription className="flex items-center">
+                     {rec.includes('✅') ?
+                       <CheckCircle2 className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" /> :
+                       <Info className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
+                     }
                     {rec}
                   </AlertDescription>
                 </Alert>
@@ -329,7 +329,7 @@ export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClient
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-gray-600" />
+              <DollarSign className="h-5 w-5 text-muted-foreground" />
               Ringkasan Cashflow (30 Hari)
             </CardTitle>
           </CardHeader>
@@ -345,19 +345,19 @@ export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClient
                     {formatCurrency(data.cashflow.totalExpenses)}
                   </p>
                 </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Pemasukan</span>
-                    <TrendingUp className="h-4 w-4 text-gray-600" />
-                  </div>
-                  <p className="text-xl font-bold text-gray-800">
-                    {formatCurrency(data.cashflow.totalIncome)}
-                  </p>
-                </div>
+                 <div className="p-3 bg-muted rounded-lg">
+                   <div className="flex items-center justify-between">
+                     <span className="text-sm font-medium text-muted-foreground">Pemasukan</span>
+                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                   </div>
+                   <p className="text-xl font-bold text-foreground">
+                     {formatCurrency(data.cashflow.totalIncome)}
+                   </p>
+                 </div>
               </div>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm font-medium text-gray-700">Net Cashflow</span>
-                <p className={`text-xl font-bold ${data.cashflow.netCashflow >= 0 ? 'text-gray-800' : 'text-red-800'}`}>
+              <div className="p-3 bg-muted rounded-lg">
+                <span className="text-sm font-medium text-muted-foreground">Net Cashflow</span>
+                <p className={`text-xl font-bold ${data.cashflow.netCashflow >= 0 ? 'text-foreground' : 'text-red-800'}`}>
                   {formatCurrency(data.cashflow.netCashflow)}
                 </p>
               </div>
@@ -368,30 +368,30 @@ export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClient
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-gray-600" />
+              <Eye className="h-5 w-5 text-muted-foreground" />
               Transaksi Auto-Sync Terbaru
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {data.recentTransactions.slice(0, 5).map((tx) => (
-                <div key={tx['id']} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium">
-                      {tx.source === 'stock_transaction' ? '📦 Pembelian Bahan' :
-                        tx.source === 'operational_cost' ? '🏭 Biaya Operasional' :
-                          tx.source === 'order_completion' ? '💰 Penjualan' : tx.source}
-                    </p>
-                    <p className="text-xs text-gray-600">{formatDate(tx.syncedAt)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold">{formatCurrency(tx.amount)}</p>
-                    <p className="text-xs text-gray-500">{tx.reference}</p>
-                  </div>
-                </div>
-              ))}
+               {data.recentTransactions.slice(0, 5).map((tx) => (
+                 <div key={tx['id']} className="flex items-center justify-between p-2 bg-muted rounded-lg">
+                   <div>
+                     <p className="text-sm font-medium">
+                       {tx.source === 'stock_transaction' ? '📦 Pembelian Bahan' :
+                         tx.source === 'operational_cost' ? '🏭 Biaya Operasional' :
+                           tx.source === 'order_completion' ? '💰 Penjualan' : tx.source}
+                     </p>
+                     <p className="text-xs text-muted-foreground">{formatDate(tx.syncedAt)}</p>
+                   </div>
+                   <div className="text-right">
+                     <p className="text-sm font-bold">{formatCurrency(tx.amount)}</p>
+                     <p className="text-xs text-muted">{tx.reference}</p>
+                   </div>
+                 </div>
+               ))}
               {data.recentTransactions.length === 0 && (
-                <p className="text-center text-gray-500 py-4">Belum ada transaksi auto-sync</p>
+                <p className="text-center text-muted-foreground py-4">Belum ada transaksi auto-sync</p>
               )}
             </div>
           </CardContent>

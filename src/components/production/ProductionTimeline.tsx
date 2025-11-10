@@ -44,10 +44,10 @@ interface TimelineGridConfig {
 
 
 const STATUS_COLORS: Record<ProductionStatus | 'blocked', string> = {
-  PLANNED: 'bg-gray-400',
-  IN_PROGRESS: 'bg-gray-500',
-  COMPLETED: 'bg-gray-500',
-  CANCELLED: 'bg-gray-400',
+  PLANNED: 'bg-muted',
+  IN_PROGRESS: 'bg-muted0',
+  COMPLETED: 'bg-muted0',
+  CANCELLED: 'bg-muted',
   blocked: 'bg-red-300'
 }
 
@@ -117,7 +117,7 @@ const getStatusActionLabel = (status: ProductionStatus): string => {
   return 'Reset'
 }
 
-const ProductionTimeline = ({
+export const ProductionTimeline = ({
   schedulingResult,
   onBatchSelect,
   onBatchStatusChange,
@@ -345,12 +345,12 @@ const ProductionTimeline = ({
               if (currentOffsetMinutes >= 0 && currentOffsetMinutes <= differenceInMinutes(timelineGrid.endDate, timelineGrid.startDate)) {
                 return (
                   <div
-                    className="absolute top-0 h-full w-0.5 bg-gray-100 dark:bg-gray-800 z-20"
+                    className="absolute top-0 h-full w-0.5 bg-secondary z-20"
                     style={{
                       left: (currentOffsetMinutes / 60) * timelineGrid.pixelsPerHour
                     }}
                   >
-                    <div className="absolute -top-1 -left-1 w-2 h-2 bg-gray-100 dark:bg-gray-800 rounded-full" />
+                    <div className="absolute -top-1 -left-1 w-2 h-2 bg-secondary rounded-full" />
                   </div>
                 )
               }
@@ -401,7 +401,7 @@ const ProductionTimeline = ({
                       <Tooltip key={slot.batch_id}>
                         <TooltipTrigger asChild>
                           <div
-                            className={`absolute top-1 h-10 rounded cursor-pointer border-2 transition-all duration-200 ${STATUS_COLORS[batch['status'] as ProductionStatus] ?? 'bg-gray-400'
+                            className={`absolute top-1 h-10 rounded cursor-pointer border-2 transition-all duration-200 ${STATUS_COLORS[batch['status'] as ProductionStatus] ?? 'bg-muted'
                               } ${selectedBatch === batch['id']
                                 ? 'border-primary scale-105'
                                 : 'border-transparent hover:border-primary/50'
@@ -424,13 +424,13 @@ const ProductionTimeline = ({
                             {/* Status indicator */}
                             <div className="absolute -top-1 -right-1">
                               {batch['status'] === 'COMPLETED' && (
-                                <CheckCircle className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
+                                <CheckCircle className="h-3 w-3 text-muted-foreground bg-background rounded-full" />
                               )}
                               {batch['status'] === 'IN_PROGRESS' && (
-                                <Play className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
+                                <Play className="h-3 w-3 text-muted-foreground bg-background rounded-full" />
                               )}
                               {batch['status'] === 'PLANNED' && (
-                                <Clock className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
+                                <Clock className="h-3 w-3 text-muted-foreground bg-background rounded-full" />
                               )}
                             </div>
                           </div>
@@ -452,7 +452,7 @@ const ProductionTimeline = ({
                                 size="sm"
                                 variant="outline"
                                 className="h-6 text-xs"
-                                onClick={(e) => {
+                                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                                   e.stopPropagation()
                                   handleStatusToggle(batch)
                                 }}
@@ -474,15 +474,15 @@ const ProductionTimeline = ({
         {/* Timeline legend */}
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-gray-400 rounded" />
+            <div className="w-3 h-3 bg-muted rounded" />
             <span>Planned</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-gray-500 rounded" />
+            <div className="w-3 h-3 bg-muted0 rounded" />
             <span>In Progress</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-gray-500 rounded" />
+            <div className="w-3 h-3 bg-muted0 rounded" />
             <span>Completed</span>
           </div>
           <div className="flex items-center gap-2">
@@ -493,27 +493,27 @@ const ProductionTimeline = ({
           <Separator orientation="vertical" className="h-4" />
 
           <div className="flex items-center gap-2">
-            <Flame className="h-4 w-4 text-gray-500" />
+            <Flame className="h-4 w-4 text-muted-foreground" />
             <span>Flame</span>
           </div>
           <div className="flex items-center gap-2">
-            <ChefHat className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <ChefHat className="h-4 w-4 text-muted-foreground" />
             <span>Mixer</span>
           </div>
           <div className="flex items-center gap-2">
-            <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <Package className="h-4 w-4 text-muted-foreground" />
             <span>Other</span>
           </div>
         </div>
 
         {/* Warnings and suggestions */}
         {activeResult.warnings && activeResult.warnings.length > 0 && (
-          <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 border border-yellow-200 rounded-lg">
-            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium mb-2">
+          <div className="mt-4 p-3 bg-secondary border border-yellow-200 rounded-lg">
+            <div className="flex items-center gap-2 text-foreground font-medium mb-2">
               <AlertTriangle className="h-4 w-4" />
               Peringatan Penjadwalan
             </div>
-            <ul className="text-sm text-gray-700 space-y-1">
+            <ul className="text-sm text-muted-foreground space-y-1">
               {activeResult.warnings.map((warning, index: number) => (
                 <li key={index}>• {warning}</li>
               ))}
@@ -607,4 +607,4 @@ const ProductionTimeline = ({
   )
 }
 
-export { ProductionTimeline }
+

@@ -23,7 +23,7 @@ const Context = createContext<SupabaseContext | undefined>(undefined)
  *   <App />
  * </SupabaseProvider>
  */
-const SupabaseProvider = ({ children }: { children: ReactNode }) => {
+export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   const [supabase, setSupabase] = useState<SupabaseClient<Database> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
@@ -96,7 +96,7 @@ const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   )
 }
 
-export { SupabaseProvider }/**
+ /**
  * Hook untuk mengakses Supabase client
  * @throws Error jika digunakan di luar SupabaseProvider
  * @example

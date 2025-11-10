@@ -162,7 +162,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                     {/* Recipe Selection */}
                     <div className="space-y-2">
                         <Label htmlFor="recipe">
-                            Resep <span className="text-gray-500">*</span>
+                            Resep <span className="text-muted-foreground">*</span>
                         </Label>
                         {loadingRecipes ? (
                             <div className="flex items-center justify-center py-4">
@@ -171,7 +171,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                         ) : (
                             <Select
                                 value={formData.recipe_id}
-                                onValueChange={(value) => setFormData({ ...formData, recipe_id: value })}
+                                onValueChange={(value: string) => setFormData({ ...formData, recipe_id: value })}
                             >
                                 <SelectTrigger id="recipe">
                                     <SelectValue placeholder="Pilih resep" />
@@ -196,7 +196,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                     {/* Quantity */}
                     <div className="space-y-2">
                         <Label htmlFor="quantity">
-                            Jumlah Produksi <span className="text-gray-500">*</span>
+                            Jumlah Produksi <span className="text-muted-foreground">*</span>
                         </Label>
                         <Input
                             id="quantity"
@@ -205,14 +205,14 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                             min="0"
                             placeholder="0"
                             value={formData.quantity}
-                            onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, quantity: e.target.value })}
                         />
                     </div>
 
                     {/* Planned Date */}
                     <div className="space-y-2">
                         <Label>
-                            Tanggal Rencana Produksi <span className="text-gray-500">*</span>
+                            Tanggal Rencana Produksi <span className="text-muted-foreground">*</span>
                         </Label>
                         <Popover>
                             <PopoverTrigger asChild>
@@ -249,7 +249,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                             id="notes"
                             placeholder="Tambahkan catatan untuk batch produksi ini..."
                             value={formData.notes}
-                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, notes: e.target.value })}
                             rows={3}
                         />
                     </div>

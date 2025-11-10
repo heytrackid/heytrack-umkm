@@ -30,6 +30,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { SkeletonText } from '@/components/ui/skeleton'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 import { VirtualizedTable } from '@/components/ui/virtualized-table'
 import { useMobile } from '@/utils/responsive'
@@ -106,7 +107,7 @@ const createActionsCell = <T extends Record<string, unknown>>(
             className="text-red-600"
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete
+            Hapus
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
@@ -283,10 +284,10 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-1/4" />
+          <div className="space-y-4">
+            <SkeletonText className="h-4 w-1/4" />
             {Array.from({length: 5}).map((_, i) => (
-              <div key={i} className="h-4 bg-gray-200 rounded" />
+              <SkeletonText key={i} className="h-4 w-full" />
             ))}
           </div>
         </CardContent>
@@ -307,14 +308,14 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
             <div className={`flex gap-2 ${isMobile ? 'w-full' : ''}`}>
               {exportData && (
                 <Button variant="outline" size={isMobile ? "sm" : "sm"} onClick={handleExport} className={isMobile ? 'flex-1' : ''}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
+                   <Download className="h-4 w-4 mr-2" />
+                   Ekspor
                 </Button>
               )}
               {onAdd && (
                 <Button onClick={onAdd} size={isMobile ? "sm" : "default"} className={isMobile ? 'flex-1' : ''}>
                   <Plus className="h-4 w-4 mr-2" />
-                  {addButtonText ?? "Add Data"}
+                   {addButtonText ?? "Tambah Data"}
                 </Button>
               )}
             </div>
@@ -329,9 +330,9 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
           <div className={`relative ${isMobile ? 'w-full' : 'flex-1'}`}>
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={searchPlaceholder ?? "Search..."}
+              placeholder={searchPlaceholder ?? "Cari..."}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
               className="pl-9"
               size={isMobile ? 14 : 14}
             />
@@ -368,7 +369,7 @@ export const SimpleDataTable = <T extends Record<string, unknown>, TValue = T[ke
         {/* Virtualized Table */}
         {sortedData.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">{emptyMessage ?? "No data available"}</p>
+            <p className="text-muted-foreground">{emptyMessage ?? "Tidak ada data tersedia"}</p>
           </div>
         ) : (
           <VirtualizedTable

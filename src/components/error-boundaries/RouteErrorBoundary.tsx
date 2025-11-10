@@ -25,7 +25,7 @@ interface State {
   retryCount: number
 }
 
-export class RouteErrorBoundary extends Component<Props, State> {
+class RouteErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
@@ -83,12 +83,12 @@ export class RouteErrorBoundary extends Component<Props, State> {
               <div className="mx-auto mb-4 w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center">
                 <AlertCircle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
               </div>
-              <CardTitle className="text-lg text-gray-900 dark:text-gray-100">
+              <CardTitle className="text-lg text-foreground">
                 Page Error
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-600 dark:text-gray-400 text-center text-sm">
+              <p className="text-muted-foreground text-center text-sm">
                 Something went wrong while loading {routeName}. This might be a temporary issue.
               </p>
 
@@ -105,8 +105,8 @@ export class RouteErrorBoundary extends Component<Props, State> {
               </Button>
 
               {this.state.error && (
-                <details className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs">
-                  <summary className="cursor-pointer text-gray-700 dark:text-gray-300 mb-2">
+                <details className="bg-secondary p-3 rounded text-xs">
+                  <summary className="cursor-pointer text-muted-foreground mb-2">
                     Error Details
                   </summary>
                   <div className="text-red-600 dark:text-red-400 font-mono">
@@ -123,6 +123,8 @@ export class RouteErrorBoundary extends Component<Props, State> {
     return this.props.children
   }
 }
+
+export { RouteErrorBoundary }
 
 // Higher-order component for wrapping routes
 export function withRouteErrorBoundary<P extends object>(

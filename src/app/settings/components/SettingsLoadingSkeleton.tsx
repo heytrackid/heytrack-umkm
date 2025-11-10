@@ -19,7 +19,7 @@ export const SettingsLoadingSkeleton = () => (
             {/* Tab headers skeleton */}
             <div className="flex space-x-2">
               {Array.from({ length: 5 }, (_, i) => (
-                <div key={i} className="h-9 w-20 bg-gray-200 rounded-md animate-pulse" />
+                <div key={i} className="h-9 w-20 bg-muted rounded-md animate-pulse" />
               ))}
             </div>
 

@@ -16,9 +16,9 @@ const InsightsTabContent = ({ isMobile }: InsightsTabContentProps): JSX.Element 
         <CardTitle>Cost Optimization Opportunities</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+        <div className="p-4 bg-muted/20 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="h-5 w-5 text-gray-600" />
+            <TrendingUp className="h-5 w-5 text-muted-foreground" />
             <span className="font-semibold">Supplier Negotiation</span>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -26,9 +26,9 @@ const InsightsTabContent = ({ isMobile }: InsightsTabContentProps): JSX.Element 
           </p>
         </div>
 
-        <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+        <div className="p-4 bg-muted/20 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="h-5 w-5 text-gray-600" />
+            <TrendingUp className="h-5 w-5 text-muted-foreground" />
             <span className="font-semibold">Recipe Optimization</span>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -36,9 +36,9 @@ const InsightsTabContent = ({ isMobile }: InsightsTabContentProps): JSX.Element 
           </p>
         </div>
 
-        <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+        <div className="p-4 bg-muted/20 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="h-5 w-5 text-gray-600" />
+            <TrendingUp className="h-5 w-5 text-muted-foreground" />
             <span className="font-semibold">Seasonal Pricing</span>
           </div>
           <p className="text-sm text-muted-foreground">

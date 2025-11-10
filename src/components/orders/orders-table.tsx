@@ -35,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { SkeletonText } from '@/components/ui/skeleton'
 import {
   Table,
   TableBody,
@@ -44,8 +45,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useCurrency } from '@/hooks/useCurrency'
-
-import type { OrdersTable } from '@/types/database'
 
 import type { OrderItem, Order } from '@/components/orders/types'
 
@@ -64,7 +63,7 @@ interface OrdersTableProps {
   onBulkAction?: (action: string, orderIds: string[]) => void
 }
 
-const OrdersTable = ({
+export const OrdersTableComponent = ({
   orders,
   loading = false,
   onViewOrder,
@@ -80,24 +79,24 @@ const OrdersTable = ({
 
   // Status configurations
   const statusConfig = {
-    'PENDING': { label: 'Pending', color: 'bg-gray-100 text-gray-700', textColor: 'text-gray-700' },
-    'CONFIRMED': { label: 'Dikonfirmasi', color: 'bg-gray-200 text-gray-800', textColor: 'text-gray-800' },
-    'IN_PROGRESS': { label: 'Sedang Diproses', color: 'bg-gray-200 text-gray-800', textColor: 'text-gray-800' },
-    'READY': { label: 'Siap Diantar', color: 'bg-gray-200 text-gray-800', textColor: 'text-gray-800' },
-    'DELIVERED': { label: 'Dikirim', color: 'bg-gray-100 text-gray-800', textColor: 'text-gray-800' },
+    'PENDING': { label: 'Pending', color: 'bg-muted text-muted-foreground', textColor: 'text-muted-foreground' },
+    'CONFIRMED': { label: 'Dikonfirmasi', color: 'bg-blue-50 text-blue-700', textColor: 'text-blue-700' },
+    'IN_PROGRESS': { label: 'Sedang Diproses', color: 'bg-yellow-50 text-yellow-700', textColor: 'text-yellow-700' },
+    'READY': { label: 'Siap Diantar', color: 'bg-green-50 text-green-700', textColor: 'text-green-700' },
+    'DELIVERED': { label: 'Dikirim', color: 'bg-green-50 text-green-700', textColor: 'text-green-700' },
     'CANCELLED': { label: 'Dibatalkan', color: 'bg-destructive/10 text-destructive', textColor: 'text-destructive' }
   }
 
   const paymentStatusConfig = {
-    'UNPAID': { label: 'Belum Dibayar', color: 'bg-gray-100 text-gray-700' },
-    'PARTIAL': { label: 'Dibayar Sebagian', color: 'bg-gray-200 text-gray-800' },
-    'PAID': { label: 'Lunas', color: 'bg-gray-200 text-gray-800' }
+    'UNPAID': { label: 'Belum Dibayar', color: 'bg-red-50 text-red-700' },
+    'PARTIAL': { label: 'Dibayar Sebagian', color: 'bg-yellow-50 text-yellow-700' },
+    'PAID': { label: 'Lunas', color: 'bg-green-50 text-green-700' }
   }
 
   const priorityConfig = {
-    'low': { label: 'Rendah', color: 'bg-gray-100 text-gray-700' },
-    'normal': { label: 'Normal', color: 'bg-gray-200 text-gray-800' },
-    'high': { label: 'Tinggi', color: 'bg-gray-300 text-gray-900' }
+    'low': { label: 'Rendah', color: 'bg-secondary text-secondary-foreground' },
+    'normal': { label: 'Normal', color: 'bg-muted text-muted-foreground' },
+    'high': { label: 'Tinggi', color: 'bg-muted text-foreground' }
   }
 
   // Selection handlers
@@ -200,7 +199,7 @@ const OrdersTable = ({
               <TableRow key={i}>
                 {[1, 2, 3, 4, 5, 6, 7].map((j) => (
                   <TableCell key={j}>
-                    <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                    <SkeletonText className="h-4 w-full" />
                   </TableCell>
                 ))}
               </TableRow>
@@ -215,7 +214,7 @@ const OrdersTable = ({
     <>
       {/* Bulk Actions Bar */}
       {selectedOrders.length > 0 && (
-        <div className="flex items-center justify-between p-4 bg-muted border border-border rounded-lg mb-4">
+        <div className="flex items-center justify-between p-4 bg-muted border border-border/20 rounded-lg mb-4">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">
               {selectedOrders.length} pesanan dipilih
@@ -300,7 +299,7 @@ const OrdersTable = ({
       {/* Data Table */}
       <div className="border rounded-lg overflow-hidden">
         <Table>
-          <TableHeader className="bg-gray-50">
+          <TableHeader className="bg-muted">
             <TableRow>
               <TableHead className="w-12">
                 <Checkbox
@@ -519,4 +518,3 @@ const OrdersTable = ({
   )
 }
 
-export { OrdersTable }

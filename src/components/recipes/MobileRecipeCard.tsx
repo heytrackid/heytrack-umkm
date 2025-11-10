@@ -57,7 +57,7 @@ export const MobileRecipeCard = ({
                         )}
                     </div>
                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
                             <Button variant="ghost" size="sm">
                                 <MoreVertical className="h-4 w-4" />
                             </Button>
@@ -65,14 +65,14 @@ export const MobileRecipeCard = ({
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={(e) => {
+                            <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                                 e.stopPropagation()
                                 onView(recipe)
                             }}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 Lihat Detail
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => {
+                            <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                                 e.stopPropagation()
                                 onEdit(recipe)
                             }}>
@@ -119,3 +119,4 @@ export const MobileRecipeCard = ({
         </CardContent>
     </Card>
 )
+

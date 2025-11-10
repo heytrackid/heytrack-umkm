@@ -75,7 +75,9 @@ export const EnhancedEmptyState = ({ onAdd }: EnhancedEmptyStateProps) => {
                         </div>
                     </div>
                 </CardContent>
-            </Card>
-        </div>
-    )
+        </Card>
+    </div>
+  )
 }
+
+

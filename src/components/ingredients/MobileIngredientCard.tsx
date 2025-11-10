@@ -40,12 +40,12 @@ interface MobileIngredientCardProps {
  * - Swipe-friendly design
  */
 export const MobileIngredientCard = ({
-    ingredient,
-    onView: _onView,
-    onEdit,
-    onDelete,
-    onQuickBuy
-}: MobileIngredientCardProps) => {
+     ingredient,
+     onView: _onView,
+     onEdit,
+     onDelete,
+     onQuickBuy
+ }: MobileIngredientCardProps) => {
     const { formatCurrency } = useSettings()
     const [isExpanded, setIsExpanded] = useState(false)
 
@@ -125,7 +125,7 @@ export const MobileIngredientCard = ({
                             {ingredient.description && (
                                 <div className="text-sm">
                                     <p className="text-muted-foreground mb-1">Deskripsi</p>
-                                    <p className="text-gray-700">{ingredient.description}</p>
+                                    <p className="text-muted-foreground">{ingredient.description}</p>
                                 </div>
                             )}
 
@@ -186,8 +186,10 @@ export const MobileIngredientCard = ({
                 </div>
             </CardContent>
         </Card>
-    )
-}
+     )
+ }
+
+
 
 /**
  * Mobile Ingredient List

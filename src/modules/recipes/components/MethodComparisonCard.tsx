@@ -68,8 +68,8 @@ export const MethodComparisonCard = ({ calculationResult, formatCurrency, select
             <div
               key={alternative.method}
               className={`flex items-center justify-between p-3 rounded-lg border ${alternative.method === selectedPricingMethod
-                ? 'border-gray-300 bg-gray-50'
-                : 'border-gray-200'
+                ? 'border-border/20 bg-muted'
+                : 'border-border/20'
                 }`}
             >
               <div className="flex-1">
@@ -85,7 +85,7 @@ export const MethodComparisonCard = ({ calculationResult, formatCurrency, select
                     <Badge variant="secondary" className="text-xs">Rekomendasi</Badge>
                   )}
                 </div>
-                <p className="text-xs text-gray-600 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {alternative.methodDescription}
                 </p>
               </div>
@@ -93,7 +93,7 @@ export const MethodComparisonCard = ({ calculationResult, formatCurrency, select
                 <p className="font-semibold">
                   {formatCurrency(alternative.costPerUnit)}
                 </p>
-                <p className="text-xs text-gray-500">per porsi</p>
+                <p className="text-xs text-muted">per porsi</p>
               </div>
             </div>
           )
@@ -102,3 +102,5 @@ export const MethodComparisonCard = ({ calculationResult, formatCurrency, select
     </CardContent>
   </Card>
 )
+
+

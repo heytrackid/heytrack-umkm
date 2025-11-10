@@ -23,14 +23,14 @@ export const StepSkeleton = ({ className, steps = 3, currentStep = 1 }: StepSkel
               "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
               i + 1 <= currentStep
                 ? "bg-primary text-primary-foreground"
-                : "bg-gray-200 text-gray-600"
+                : "bg-muted text-muted-foreground"
             )}>
               {i + 1}
             </div>
             {i < steps - 1 && (
               <div className={cn(
                 "w-12 h-0.5 mx-2",
-                i + 1 < currentStep ? "bg-primary" : "bg-gray-200"
+                i + 1 < currentStep ? "bg-primary" : "bg-muted"
               )} />
             )}
           </div>

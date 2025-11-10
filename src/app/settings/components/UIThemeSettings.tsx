@@ -39,7 +39,7 @@ export const UIThemeSettings = ({ settings, onSettingChange }: UIThemeSettingsPr
             id="theme"
             className="w-full p-2 border border-input rounded-md bg-background"
             value={settings.ui.theme}
-            onChange={(e) =>
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               onSettingChange('ui', 'theme', e.target.value as ThemeOption)
             }
           >
@@ -54,7 +54,7 @@ export const UIThemeSettings = ({ settings, onSettingChange }: UIThemeSettingsPr
             id="language"
             className="w-full p-2 border border-input rounded-md bg-background"
             value={settings.ui.language}
-            onChange={(e) => {
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               const selected = languages.find(l => l['code'] === e.target.value)
               if (selected) {
                 updateLanguage(selected)

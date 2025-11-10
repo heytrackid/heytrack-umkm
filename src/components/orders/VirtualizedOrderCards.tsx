@@ -28,12 +28,12 @@ interface VirtualizedOrderCardsProps {
 
 const getStatusBadge = (status: string) => {
   const statusConfig: Record<string, { label: string; icon: ComponentType<{ className?: string }>; className: string }> = {
-    PENDING: { label: 'Pending', icon: Clock, className: 'bg-gray-100 text-gray-700' },
-    CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle, className: 'bg-gray-100 text-gray-700' },
-    IN_PROGRESS: { label: 'Sedang Diproses', icon: Package, className: 'bg-gray-100 text-gray-700' },
-    READY: { label: 'Siap', icon: CheckCircle, className: 'bg-gray-100 text-gray-700' },
-    DELIVERED: { label: 'Terkirim', icon: CheckCircle, className: 'bg-gray-100 text-gray-700' },
-    CANCELLED: { label: 'Dibatalkan', icon: XCircle, className: 'bg-gray-100 text-gray-700' },
+    PENDING: { label: 'Pending', icon: Clock, className: 'bg-muted text-muted-foreground' },
+    CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle, className: 'bg-blue-50 text-blue-700' },
+    IN_PROGRESS: { label: 'Sedang Diproses', icon: Package, className: 'bg-yellow-50 text-yellow-700' },
+    READY: { label: 'Siap', icon: CheckCircle, className: 'bg-green-50 text-green-700' },
+    DELIVERED: { label: 'Terkirim', icon: CheckCircle, className: 'bg-green-50 text-green-700' },
+    CANCELLED: { label: 'Dibatalkan', icon: XCircle, className: 'bg-red-50 text-red-700' },
   }
 
   const config = statusConfig[status] ?? statusConfig['PENDING']

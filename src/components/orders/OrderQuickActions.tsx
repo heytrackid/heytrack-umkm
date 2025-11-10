@@ -19,7 +19,7 @@ interface OrderQuickActionsProps {
     order: Order
 }
 
-const OrderQuickActions = ({ order }: OrderQuickActionsProps) => {
+export const OrderQuickActions = ({ order }: OrderQuickActionsProps) => {
     const [copiedField, setCopiedField] = useState<string | null>(null)
 
     const copyToClipboard = async (text: string, field: string) => {
@@ -136,4 +136,3 @@ const OrderQuickActions = ({ order }: OrderQuickActionsProps) => {
     )
 }
 
-export { OrderQuickActions }

@@ -12,7 +12,7 @@ export const AuthFormSkeleton = (): JSX.Element => (
                     <Skeleton className="h-4 w-48 mx-auto" />
                 </div>
 
-                <Card className="shadow-xl border-slate-200 dark:border-slate-800">
+                <Card className="shadow-xl border">
                     <CardHeader className="space-y-1 pb-4">
                         <Skeleton className="h-8 w-48 mx-auto" />
                         <Skeleton className="h-4 w-64 mx-auto" />

@@ -122,7 +122,7 @@ const FinancialChart = ({ data, compact = false, formatCurrency, colors }: {
     <Card className="w-full">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center space-x-2">
-          <DollarSign className="h-5 w-5 text-gray-600" />
+          <DollarSign className="h-5 w-5 text-muted-foreground" />
           <span>Financial Performance</span>
         </CardTitle>
       </CardHeader>
@@ -131,23 +131,23 @@ const FinancialChart = ({ data, compact = false, formatCurrency, colors }: {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
               <div className="text-xl font-bold">{formatCurrency(data.revenue)}</div>
-              <div className="text-sm text-gray-500">Revenue</div>
+              <div className="text-sm text-muted-foreground">Revenue</div>
             </div>
             <div>
               <div className="text-xl font-bold">{formatCurrency(data.costs)}</div>
-              <div className="text-sm text-gray-500">Costs</div>
+              <div className="text-sm text-muted-foreground">Costs</div>
             </div>
             <div>
-              <div className="text-xl font-bold text-gray-600">
+              <div className="text-xl font-bold text-muted-foreground">
                 {formatCurrency(data.revenue - data.costs)}
               </div>
-              <div className="text-sm text-gray-500">Profit</div>
+              <div className="text-sm text-muted-foreground">Profit</div>
             </div>
             <div>
-              <div className="text-xl font-bold text-gray-600">
+              <div className="text-xl font-bold text-muted-foreground">
                 {data.profitMargin.toFixed(1)}%
               </div>
-              <div className="text-sm text-gray-500">Margin</div>
+              <div className="text-sm text-muted-foreground">Margin</div>
             </div>
           </div>
 
@@ -172,7 +172,7 @@ const FinancialChart = ({ data, compact = false, formatCurrency, colors }: {
           {!compact && (
             <div className="space-y-2">
               <h4 className="font-medium">Key Insights</h4>
-              <ul className="list-disc list-inside text-sm space-y-1 text-gray-600">
+              <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
                 <li>Revenue is growing steadily with {data.profitMargin.toFixed(1)}% profit margin</li>
                 <li>Consider optimizing costs to increase profitability</li>
                 <li>Diversifying product offerings can boost revenue streams</li>
@@ -186,22 +186,22 @@ const FinancialChart = ({ data, compact = false, formatCurrency, colors }: {
 }
 
 const InventoryChart = ({ data: _data, compact: _compact }: { data: InventoryData; compact?: boolean }): JSX.Element => (
-  <Card><CardContent className="p-4"><div className="text-sm text-gray-500">Inventory visualization</div></CardContent></Card>
+  <Card><CardContent className="p-4"><div className="text-sm text-muted-foreground">Inventory visualization</div></CardContent></Card>
 )
 
 const CustomerChart = ({ data: _data, compact: _compact }: { data: CustomerData; compact?: boolean }): JSX.Element => (
-  <Card><CardContent className="p-4"><div className="text-sm text-gray-500">Customer visualization</div></CardContent></Card>
+  <Card><CardContent className="p-4"><div className="text-sm text-muted-foreground">Customer visualization</div></CardContent></Card>
 )
 
 const ProductChart = ({ data: _data, compact: _compact }: { data: ProductData; compact?: boolean }): JSX.Element => (
-  <Card><CardContent className="p-4"><div className="text-sm text-gray-500">Product visualization</div></CardContent></Card>
+  <Card><CardContent className="p-4"><div className="text-sm text-muted-foreground">Product visualization</div></CardContent></Card>
 )
 
 const AnalysisChart = ({ data: _data, compact: _compact }: { data: AnalysisData; compact?: boolean }): JSX.Element => (
-  <Card><CardContent className="p-4"><div className="text-sm text-gray-500">Analysis visualization</div></CardContent></Card>
+  <Card><CardContent className="p-4"><div className="text-sm text-muted-foreground">Analysis visualization</div></CardContent></Card>
 )
 
-const DataVisualization = ({ type, data, compact = false }: DataVisualizationProps): JSX.Element => {
+export const DataVisualization = ({ type, data, compact = false }: DataVisualizationProps): JSX.Element => {
   const { formatCurrency } = useCurrency()
   const colors = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']
 
@@ -263,7 +263,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
   return (
     <Card>
       <CardContent className="p-4">
-        <div className="text-center text-gray-500">
+        <div className="text-center text-muted-foreground">
           Data visualization not available for this type or data validation failed.
         </div>
       </CardContent>
@@ -271,4 +271,3 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
   )
 }
 
-export { DataVisualization }

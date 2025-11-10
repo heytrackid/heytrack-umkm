@@ -1,5 +1,8 @@
 export { ChatHeader } from './ChatHeader'
 export { ChatInput } from './ChatInput'
+export { ConversationTemplates } from './ConversationTemplates'
+export { DataCard } from './DataCard'
+export { FeedbackWidget } from './FeedbackWidget'
 export { MessageBubble } from './MessageBubble'
 export { MessageList } from './MessageList'
 export { SuggestionChips } from './SuggestionChips'

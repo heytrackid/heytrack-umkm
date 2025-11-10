@@ -1,214 +1,112 @@
 'use client'
 
- 
-import dynamic from 'next/dynamic'
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
-import { ChartLegend } from '@/components/charts/LazyCharts'
+import { ChartBarInteractive } from '@/components/charts'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { ChartConfig } from '@/components/ui/chart'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useInventoryTrends } from '@/hooks/useInventoryTrends'
+import { AlertCircle, Package } from 'lucide-react'
 
-type TrendChartConfig = Record<string, { label: string; color: string }>
-
-// Dynamically import recharts components to reduce bundle size
-const LineChart = dynamic(
-  () => import('recharts').then(mod => mod.LineChart),
-  {
-    ssr: false,
-    loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
-  }
-)
-const Line = dynamic(
-  () => import('recharts').then(mod => mod.Line),
-  { ssr: false }
-)
-const XAxis = dynamic(
-  () => import('recharts').then(mod => mod.XAxis),
-  { ssr: false }
-)
-const YAxis = dynamic(
-  () => import('recharts').then(mod => mod.YAxis),
-  { ssr: false }
-)
-const CartesianGrid = dynamic(
-  () => import('recharts').then(mod => mod.CartesianGrid),
-  { ssr: false }
-)
-const ResponsiveContainer = dynamic(
-  () => import('recharts').then(mod => mod.ResponsiveContainer),
-  {
-    ssr: false,
-    loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
-  }
-)
-
-/**
- * Inventory trend data point
- */
-interface InventoryTrendDataPoint {
-  month: string
-  stock: number
-  purchases: number
-  usage: number
-  waste: number
-}
-
-const inventoryData: InventoryTrendDataPoint[] = [
-  {
-    month: "Jan",
-    stock: 850,
-    purchases: 1200,
-    usage: 1100,
-    waste: 50,
-  },
-  {
-    month: "Feb",
-    stock: 950,
-    purchases: 1500,
-    usage: 1300,
-    waste: 80,
-  },
-  {
-    month: "Mar",
-    stock: 1150,
-    purchases: 1800,
-    usage: 1600,
-    waste: 70,
-  },
-  {
-    month: "Apr",
-    stock: 1350,
-    purchases: 1600,
-    usage: 1400,
-    waste: 60,
-  },
-  {
-    month: "May",
-    stock: 1550,
-    purchases: 2000,
-    usage: 1800,
-    waste: 90,
-  },
-  {
-    month: "Jun",
-    stock: 1660,
-    purchases: 1900,
-    usage: 1700,
-    waste: 110,
-  },
-]
-
-/**
- * Props for InventoryTrendsChart component
- */
 interface InventoryTrendsChartProps {
-  data?: InventoryTrendDataPoint[]
-  config?: TrendChartConfig
-  height?: number
-  className?: string
+  days?: number
 }
 
-const chartConfig: TrendChartConfig = {
-  stock: {
-    label: "Stok Tersedia",
-    color: "#22c55e",
-  },
+const chartConfig = {
   purchases: {
-    label: "Pembelian",
-    color: "#3b82f6",
+    label: 'Jumlah Pembelian',
+    color: 'hsl(var(--chart-1))',
   },
-  usage: {
-    label: "Pemakaian",
-    color: "#f59e0b",
+  cost: {
+    label: 'Total Biaya',
+    color: 'hsl(var(--chart-2))',
   },
-  waste: {
-    label: "Waste",
-    color: "#ef4444",
-  },
-}
+} satisfies ChartConfig
 
-export function InventoryTrendsChart({
-  data = inventoryData,
-  config = chartConfig,
-  height = 400,
-  className
-}: InventoryTrendsChartProps) {
+export function InventoryTrendsChart({ days = 30 }: InventoryTrendsChartProps) {
+  const { data, isLoading, error } = useInventoryTrends({ days })
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-[300px] w-full" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Gagal memuat data inventori. Silakan coba lagi.
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
+  if (!data?.trends || data.trends.length === 0) {
+    return (
+      <Alert>
+        <Package className="h-4 w-4" />
+        <AlertDescription>
+          Belum ada data pembelian bahan baku. Mulai dengan mencatat pembelian.
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
   return (
-    <ChartContainer _config={config} className={className}>
-      <ResponsiveContainer width="100%" height={height}>
-        <LineChart
-          accessibilityLayer
-          data={data}
-          margin={{
-            left: 12,
-            right: 12,
-          }}
-        >
-          <CartesianGrid vertical={false} />
-          <XAxis
-            dataKey="month"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
-          />
-          <YAxis
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => `${value}`}
-          />
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent />}
-          />
-          <Line
-            dataKey="stock"
-            type="monotone"
-            stroke="#22c55e"
-            strokeWidth={3}
-            dot={{
-              fill: "#22c55e",
-              strokeWidth: 2,
-              r: 4,
-            }}
-            activeDot={{
-              r: 6,
-              stroke: "#22c55e",
-              strokeWidth: 2,
-            }}
-          />
-          <Line
-            dataKey="purchases"
-            type="monotone"
-            stroke="#3b82f6"
-            strokeWidth={2}
-            strokeDasharray="5 5"
-            dot={false}
-          />
-          <Line
-            dataKey="usage"
-            type="monotone"
-            stroke="#f59e0b"
-            strokeWidth={2}
-            strokeDasharray="3 3"
-            dot={false}
-          />
-          <Line
-            dataKey="waste"
-            type="monotone"
-            stroke="#ef4444"
-            strokeWidth={2}
-            dot={{
-              fill: "#ef4444",
-              strokeWidth: 2,
-              r: 3,
-            }}
-          />
-          <ChartLegend />
-        </LineChart>
-      </ResponsiveContainer>
-    </ChartContainer>
+    <div className="space-y-4">
+      {/* Summary Cards */}
+      {data.summary && (
+        <div className="grid grid-cols-3 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Bahan
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{data.summary.totalIngredients}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Stok Menipis
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-destructive">
+                {data.summary.lowStockCount}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Pembelian
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{data.summary.totalPurchases}</div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Chart */}
+      <div className="min-h-[400px]">
+        <ChartBarInteractive
+          data={data.trends}
+          config={chartConfig}
+          title="Tren Pembelian Inventori"
+          description={`Data ${days} hari terakhir`}
+          defaultChart="purchases"
+        />
+      </div>
+    </div>
   )
 }

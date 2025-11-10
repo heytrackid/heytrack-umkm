@@ -69,7 +69,7 @@ export const MobileTextarea = ({
           placeholder={placeholder}
           value={value}
           defaultValue={defaultValue}
-          onChange={(e) => onChange?.(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange?.(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
             setIsFocused(false)

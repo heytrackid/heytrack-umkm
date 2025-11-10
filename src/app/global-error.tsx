@@ -18,51 +18,23 @@ const GlobalError = ({ error, reset }: GlobalErrorProps): JSX.Element => {
   return (
     <html>
       <body>
-        <div
-          style={{
-            display: 'flex',
-            minHeight: '100vh',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            fontFamily: 'system-ui, sans-serif',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '1rem',
-              textAlign: 'center',
-            }}
-          >
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 600 }}>
+        <div className="flex min-h-screen flex-col items-center justify-center p-4 font-sans">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <h2 className="text-xl font-semibold">
               Terjadi Kesalahan
             </h2>
-            <p style={{ color: '#666', maxWidth: '28rem' }}>
+            <p className="text-muted-foreground max-w-md">
               Maaf, terjadi kesalahan pada aplikasi. Silakan muat ulang halaman
               atau hubungi dukungan.
             </p>
             {error.digest && (
-              <p style={{ fontSize: '0.875rem', color: '#999' }}>
+              <p className="text-sm text-muted-foreground">
                 Kode Error: {error.digest}
               </p>
             )}
             <button
               onClick={reset}
-              style={{
-                marginTop: '1rem',
-                padding: '0.5rem 1rem',
-                backgroundColor: '#000',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-              }}
+              className="mt-4 px-4 py-2 bg-black text-white rounded-md text-sm font-medium cursor-pointer hover:bg-gray-800 transition-colors"
             >
               Coba Lagi
             </button>

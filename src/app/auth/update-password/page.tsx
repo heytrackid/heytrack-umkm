@@ -39,7 +39,7 @@ const UpdatePasswordPage = (): JSX.Element => {
   }
 
   const passwordStrength = getPasswordStrength(password)
-  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-gray-500']
+  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-muted0']
   const strengthLabels = ['Sangat Lemah', 'Lemah', 'Sedang', 'Kuat', 'Sangat Kuat']
 
   const passwordRequirements = [
@@ -100,11 +100,11 @@ const UpdatePasswordPage = (): JSX.Element => {
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
-        <Card className="w-full max-w-md shadow-xl border-slate-200 dark:border-slate-800 animate-fade-in-scale">
+        <Card className="w-full max-w-md shadow-xl border animate-fade-in-scale">
           <CardContent className="pt-6 pb-6 sm:pt-8 sm:pb-8 px-4 sm:px-6">
             <div className="text-center space-y-4">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 dark:bg-gray-900/30 rounded-full flex items-center justify-center mx-auto animate-success-pulse">
-                <CheckCircle className="h-7 w-7 sm:h-8 sm:w-8 text-gray-600 dark:text-gray-400" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-secondary rounded-full flex items-center justify-center mx-auto animate-success-pulse">
+                <CheckCircle className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground" />
               </div>
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -144,7 +144,7 @@ const UpdatePasswordPage = (): JSX.Element => {
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Buat password baru</p>
         </div>
 
-        <Card className="shadow-xl border-slate-200 dark:border-slate-800">
+        <Card className="shadow-xl border">
           <CardHeader className="space-y-1 pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
             <CardTitle className="text-xl sm:text-2xl text-center">Reset Password</CardTitle>
             <CardDescription className="text-center text-sm sm:text-base">
@@ -171,7 +171,7 @@ const UpdatePasswordPage = (): JSX.Element => {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Minimal 8 karakter"
                     value={password}
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setPassword(e.target.value)
                       clearFieldError('password')
                     }}
@@ -199,7 +199,7 @@ const UpdatePasswordPage = (): JSX.Element => {
                   </Button>
                 </div>
                 {fieldErrors.password && (
-                  <p id="password-error" className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in" role="alert">
+                  <p id="password-error" className="text-sm text-destructive animate-fade-in" role="alert">
                     {fieldErrors.password}
                   </p>
                 )}
@@ -231,11 +231,11 @@ const UpdatePasswordPage = (): JSX.Element => {
                     {passwordRequirements.map((req) => (
                       <div key={req.label} className="flex items-center gap-2 text-xs transition-all duration-200">
                         {req.met ? (
-                          <Check className="h-3 w-3 text-gray-600 dark:text-gray-400 transition-all duration-200" />
+                          <Check className="h-3 w-3 text-muted-foreground transition-all duration-200" />
                         ) : (
                           <X className="h-3 w-3 text-slate-400 transition-all duration-200" />
                         )}
-                        <span className={`transition-colors duration-200 ${req.met ? 'text-gray-600 dark:text-gray-400' : 'text-slate-500'}`}>
+                        <span className={`transition-colors duration-200 ${req.met ? 'text-muted-foreground' : 'text-muted'}`}>
                           {req.label}
                         </span>
                       </div>
@@ -256,7 +256,7 @@ const UpdatePasswordPage = (): JSX.Element => {
                     type={showConfirmPassword ? 'text' : 'password'}
                     placeholder="Ulangi password baru"
                     value={confirmPassword}
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setConfirmPassword(e.target.value)
                       clearFieldError('confirmPassword')
                     }}

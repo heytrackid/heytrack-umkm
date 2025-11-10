@@ -1,13 +1,13 @@
 'use client'
 
 import {
-  BarChart3,
-  Download,
-  Package,
-  PiggyBank,
-  Printer,
-  ShoppingCart,
-  TrendingUp
+    BarChart3,
+    Download,
+    Package,
+    PiggyBank,
+    Printer,
+    ShoppingCart,
+    TrendingUp
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -129,8 +129,8 @@ export const AdvancedReporting = ({
               Export {isExporting && '...'}
             </Button>
             {isExporting && (
-              <div className="absolute inset-0 bg-black/20 rounded-md flex items-center justify-center">
-                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="absolute inset-0 bg-black/20 dark:bg-black/40 rounded-md flex items-center justify-center">
+                 <div className="h-4 w-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
               </div>
             )}
           </div>
@@ -228,7 +228,7 @@ export const AdvancedReporting = ({
             {sampleData.topProducts.map((product, index) => (
               <div key={index} className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-3">
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-medium">
+                  <div className="bg-secondary rounded-full w-8 h-8 flex items-center justify-center text-sm font-medium">
                     {index + 1}
                   </div>
                   <span className="font-medium">{product.name}</span>

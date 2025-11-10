@@ -164,7 +164,7 @@ const NotificationItem = ({ notification, onClick, onMarkAsRead, index }: Notifi
     critical: 'border-l-red-500 bg-red-50 dark:bg-red-950/20',
     high: 'border-l-orange-500 bg-orange-50 dark:bg-orange-950/20',
     medium: 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-950/20',
-    low: 'border-l-blue-500 bg-gray-50 dark:bg-gray-950/20'
+    low: 'border-l-blue-500 bg-muted/20'
   }
 
   const timeAgo = getTimeAgo(notification['timestamp'])
@@ -207,7 +207,7 @@ const NotificationItem = ({ notification, onClick, onMarkAsRead, index }: Notifi
                 variant="link"
                 size="sm"
                 className="h-auto p-0 text-xs"
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.stopPropagation()
                   onClick()
                 }}
@@ -225,7 +225,7 @@ const NotificationItem = ({ notification, onClick, onMarkAsRead, index }: Notifi
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 flex-shrink-0"
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
               e.stopPropagation()
               onMarkAsRead()
             }}

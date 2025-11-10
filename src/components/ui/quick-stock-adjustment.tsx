@@ -107,10 +107,10 @@ export const QuickStockAdjustment = ({
             type="number"
             placeholder="0"
             value={customAmount}
-            onChange={(e) => setCustomAmount(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomAmount(e.target.value)}
             disabled={disabled || isAdjusting}
             className="text-center"
-            onKeyDown={(e) => {
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === 'Enter') {
                 void handleCustomAdjust()
               }

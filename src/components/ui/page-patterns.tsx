@@ -92,10 +92,10 @@ export const AlertBanner = ({
   icon: Icon
 }: AlertBannerProps) => {
   const styles = {
-    info: 'bg-gray-50 border-gray-300 text-gray-800',
+    info: 'bg-muted border-border/20 text-foreground',
     warning: 'bg-orange-50 border-orange-200 text-orange-800',
     error: 'bg-red-50 border-red-200 text-red-800',
-    success: 'bg-gray-50 border-gray-300 text-gray-800'
+    success: 'bg-muted border-border/20 text-foreground'
   }
 
 
@@ -161,8 +161,8 @@ export const LoadingState = ({
 }: LoadingStateProps) => (
   <div className={`flex items-center justify-center p-8 ${className ?? ''}`}>
     <div className="flex items-center gap-3">
-      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
-      <span className="text-gray-600">{message}</span>
+      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-foreground" />
+      <span className="text-muted-foreground">{message}</span>
     </div>
   </div>
 )
@@ -187,12 +187,12 @@ export const EmptyState = ({
 }: EmptyStateProps) => (
   <div className={`text-center p-8 ${className ?? ''}`}>
     {Icon && (
-      <Icon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+      <Icon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
     )}
-    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+    <h3 className="text-lg font-semibold text-foreground mb-2">
       {title}
     </h3>
-    <p className="text-gray-600 mb-4 max-w-md mx-auto">
+    <p className="text-muted-foreground mb-4 max-w-md mx-auto">
       {description}
     </p>
     {action}

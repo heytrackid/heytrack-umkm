@@ -94,7 +94,7 @@ export const ItemsSection = ({
                                                 <select
                                                     className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
                                                     value={item.recipe_id}
-                                                    onChange={(e) => onUpdateItem(index, 'recipe_id', e.target.value)}
+                                                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onUpdateItem(index, 'recipe_id', e.target.value)}
                                                 >
                                                     {availableRecipes.map(recipe => (
                                                         <option key={recipe['id']} value={recipe['id']}>
@@ -121,7 +121,7 @@ export const ItemsSection = ({
                                                     type="number"
                                                     className="text-sm mt-1"
                                                     value={item.quantity}
-                                                    onChange={(e) => onUpdateItem(index, 'quantity', e.target.value)}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => onUpdateItem(index, 'quantity', e.target.value)}
                                                     min="1"
                                                 />
                                             </div>
@@ -141,7 +141,7 @@ export const ItemsSection = ({
                                                 type="number"
                                                 className="text-sm mt-1"
                                                 value={item.unit_price}
-                                                onChange={(e) => onUpdateItem(index, 'unit_price', e.target.value)}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onUpdateItem(index, 'unit_price', e.target.value)}
                                                 min="0"
                                                 step="500"
                                             />
@@ -157,7 +157,7 @@ export const ItemsSection = ({
                                             <select
                                                 className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
                                                 value={item.recipe_id}
-                                                onChange={(e) => onUpdateItem(index, 'recipe_id', e.target.value)}
+                                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onUpdateItem(index, 'recipe_id', e.target.value)}
                                             >
                                                 {availableRecipes.map(recipe => (
                                                     <option key={recipe['id']} value={recipe['id']}>
@@ -172,7 +172,7 @@ export const ItemsSection = ({
                                                 type="number"
                                                 className="text-sm mt-1"
                                                 value={item.quantity}
-                                                onChange={(e) => onUpdateItem(index, 'quantity', e.target.value)}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onUpdateItem(index, 'quantity', e.target.value)}
                                                 min="1"
                                             />
                                         </div>
@@ -182,7 +182,7 @@ export const ItemsSection = ({
                                                 type="number"
                                                 className="text-sm mt-1"
                                                 value={item.unit_price}
-                                                onChange={(e) => onUpdateItem(index, 'unit_price', e.target.value)}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onUpdateItem(index, 'unit_price', e.target.value)}
                                                 min="0"
                                                 step="500"
                                             />

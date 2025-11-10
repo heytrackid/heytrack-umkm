@@ -11,11 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
  */
 export const EducationalFooter = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card className="border-gray-300 bg-gray-50">
+      <Card className="border-border/20 bg-muted">
         <CardHeader>
-          <CardTitle className="text-gray-800 text-sm">💡 Tips Penetapan Harga untuk UMKM</CardTitle>
+          <CardTitle className="text-foreground text-sm">💡 Tips Penetapan Harga untuk UMKM</CardTitle>
         </CardHeader>
-        <CardContent className="text-gray-700 text-xs space-y-2">
+        <CardContent className="text-muted-foreground text-xs space-y-2">
           <p><strong>Margin 25-30%:</strong> Untuk produk harian seperti roti, kue kering</p>
           <p><strong>Margin 35-50%:</strong> Untuk produk premium, custom cake, wedding cake</p>
           <p><strong>Selalu cek kompetitor:</strong> Jangan terlalu jauh dari harga pasar</p>
@@ -23,11 +23,11 @@ export const EducationalFooter = () => (
         </CardContent>
       </Card>
 
-      <Card className="border-gray-300 bg-gray-50">
+      <Card className="border-border/20 bg-muted">
         <CardHeader>
-          <CardTitle className="text-gray-800 text-sm">🎯 Cara Pakai Hasil HPP</CardTitle>
+          <CardTitle className="text-foreground text-sm">🎯 Cara Pakai Hasil HPP</CardTitle>
         </CardHeader>
-        <CardContent className="text-gray-700 text-xs space-y-2">
+        <CardContent className="text-muted-foreground text-xs space-y-2">
           <p><strong>Harga Retail:</strong> Langsung pakai harga jual saran</p>
           <p><strong>Harga Grosir:</strong> HPP + margin 15-20% saja</p>
           <p><strong>Harga Reseller:</strong> HPP + margin 10-15%</p>
@@ -36,3 +36,5 @@ export const EducationalFooter = () => (
       </Card>
     </div>
   )
+
+

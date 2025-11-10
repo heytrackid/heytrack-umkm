@@ -96,7 +96,7 @@ const RecipeGeneratorForm = ({
             id="productName"
             placeholder="Contoh: Roti Tawar Premium"
             value={productName}
-            onChange={(e) => setProductName(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProductName(e.target.value)}
             className={productName && !isProductNameValid ? "border-red-500 focus:border-red-500" : ""}
           />
           {productName && !isProductNameValid && (
@@ -147,7 +147,7 @@ const RecipeGeneratorForm = ({
             max="100"
             placeholder="Contoh: 12"
             value={servings}
-            onChange={(e) => setServings(parseInt(e.target.value) || 1)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setServings(parseInt(e.target.value) || 1)}
             className={servings > 0 && !isServingsValid ? "border-red-500 focus:border-red-500" : ""}
           />
           {servings > 0 && !isServingsValid && (
@@ -171,7 +171,7 @@ const RecipeGeneratorForm = ({
             id="targetPrice"
             placeholder="Contoh: 15000"
             value={targetPrice}
-            onChange={(e) => setTargetPrice(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTargetPrice(e.target.value)}
             className={targetPrice && !isTargetPriceValid ? "border-red-500 focus:border-red-500" : ""}
           />
           <p className="text-xs text-muted-foreground">
@@ -224,7 +224,7 @@ const RecipeGeneratorForm = ({
           <Textarea
             placeholder="Contoh: coklat premium, keju cheddar, kismis"
             value={selectedIngredients.join(', ')}
-            onChange={(e) => setSelectedIngredients(
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setSelectedIngredients(
               e.target.value.split(',').map(s => s.trim()).filter(Boolean)
             )}
             rows={3}

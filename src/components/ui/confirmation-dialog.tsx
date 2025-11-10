@@ -33,7 +33,7 @@ const variantConfig = {
   default: {
     icon: CheckCircle,
     confirmButtonClass: "bg-primary hover:bg-primary/90",
-    iconColor: "text-gray-500"
+    iconColor: "text-muted-foreground"
   },
   destructive: {
     icon: Trash2,
@@ -42,8 +42,8 @@ const variantConfig = {
   },
   success: {
     icon: CheckCircle,
-    confirmButtonClass: "bg-gray-500 hover:bg-green-600 text-white",
-    iconColor: "text-gray-500"
+    confirmButtonClass: "bg-muted0 hover:bg-green-600 text-white",
+    iconColor: "text-muted-foreground"
   },
   warning: {
     icon: AlertTriangle,
@@ -83,9 +83,9 @@ export const ConfirmationDialog = ({
 
   const getBgColor = () => {
     if (variant === 'destructive') {return 'bg-red-100'}
-    if (variant === 'success') {return 'bg-gray-100'}
+    if (variant === 'success') {return 'bg-secondary'}
     if (variant === 'warning') {return 'bg-orange-100'}
-    return 'bg-gray-100'
+    return 'bg-secondary'
   }
 
   return (

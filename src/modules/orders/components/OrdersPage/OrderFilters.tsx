@@ -56,7 +56,7 @@ export const OrderFilters = ({
                                 <Input
                                     placeholder="Cari nama pelanggan atau nomor pesanan..."
                                     value={filters.customer_search ?? ''}
-                                    onChange={(e) => onFilterChange({ ...filters, customer_search: e.target.value })}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => onFilterChange({ ...filters, customer_search: e.target.value })}
                                     className="pl-8"
                                 />
                             </div>

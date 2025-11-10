@@ -59,7 +59,7 @@ export const BottomSheet = ({
     <div className="fixed inset-0 z-50 flex items-end">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 animate-in fade-in duration-200"
+        className="absolute inset-0 bg-black/50 dark:bg-black/70 animate-in fade-in duration-200"
         onClick={handleBackdropClick}
       />
 

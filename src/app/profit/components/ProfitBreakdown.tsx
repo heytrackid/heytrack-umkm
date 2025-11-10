@@ -63,7 +63,7 @@ export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProp
           </span>
         </div>
         
-        <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-950 rounded-lg border-2 border-gray-300">
+        <div className="flex justify-between items-center p-4 bg-muted rounded-lg border-2 border-border/20">
           <div className="flex items-center gap-2">
             <TrendingUp className={`h-5 w-5 ${summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
             <span className="text-lg font-bold">Laba Bersih</span>

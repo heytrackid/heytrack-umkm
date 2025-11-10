@@ -67,11 +67,11 @@ const MobileCustomerCard = ({
         {/* Contact */}
         <div className="space-y-1">
           <div className="flex items-center gap-1 text-sm">
-            <Mail className="h-3 w-3 text-gray-400 flex-shrink-0" />
+            <Mail className="h-3 w-3 text-muted-foreground flex-shrink-0" />
             <span className="truncate">{customer.email}</span>
           </div>
           <div className="flex items-center gap-1 text-sm">
-            <Phone className="h-3 w-3 text-gray-400 flex-shrink-0" />
+            <Phone className="h-3 w-3 text-muted-foreground flex-shrink-0" />
             <span>{customer.phone}</span>
           </div>
         </div>
@@ -80,7 +80,7 @@ const MobileCustomerCard = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Total Belanja</p>
-            <p className="font-medium text-gray-600">
+            <p className="font-medium text-muted-foreground">
               {formatCurrency(customer.total_spent ?? 0)}
             </p>
           </div>
@@ -96,7 +96,7 @@ const MobileCustomerCard = ({
         {customer.last_order_date && (
           <div>
             <p className="text-sm text-muted-foreground">Order Terakhir</p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {customer.last_order_date}
             </p>
           </div>

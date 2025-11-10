@@ -21,13 +21,13 @@ interface StockBadgeProps {
 type StockStatus = 'low' | 'normal' | 'out'
 
 /**
- * Stock Badge Component
- *
- * Visual indicator for stock status with color coding:
- * - Red: Out of stock (0)
- * - Yellow: Low stock (<= min)
- * - Green: Normal stock (> min)
- */
+  * Stock Badge Component
+  *
+  * Visual indicator for stock status with color coding:
+  * - Red: Out of stock (0)
+  * - Yellow: Low stock (<= min)
+  * - Green: Normal stock (> min)
+  */
 export const StockBadge = memo(({
     currentStock,
     minStock,
@@ -59,9 +59,9 @@ export const StockBadge = memo(({
         },
         normal: {
             label: 'Normal',
-            color: 'bg-gray-100 text-gray-800 border-gray-300',
+            color: 'bg-muted text-muted-foreground border-border/20',
             icon: CheckCircle,
-            iconColor: 'text-gray-600'
+            iconColor: 'text-muted-foreground'
         }
     }
 
@@ -89,7 +89,7 @@ export const StockBadge = memo(({
                 {showIcon && <Icon className={cn('w-3 h-3 mr-1', config.iconColor)} />}
                 {config.label}
             </Badge>
-             <span className="text-sm text-gray-600">
+             <span className="text-sm text-muted-foreground">
                  {currentStock} / {minStock} {unit}
              </span>
          </div>
@@ -116,7 +116,7 @@ export const CompactStockIndicator = memo(({
     const colors = {
         out: 'bg-red-500',
         low: 'bg-yellow-500',
-        normal: 'bg-gray-500'
+        normal: 'bg-muted0'
     }
 
     return (
@@ -130,3 +130,4 @@ export const CompactStockIndicator = memo(({
 })
 
 CompactStockIndicator.displayName = 'CompactStockIndicator'
+

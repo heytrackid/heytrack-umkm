@@ -44,3 +44,5 @@ export const RecommendationsCard = ({ calculationResult }: RecommendationsCardPr
     </Card>
   )
 }
+
+

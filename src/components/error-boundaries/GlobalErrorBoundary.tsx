@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { AlertTriangle, Home, RefreshCw } from 'lucide-react'
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -84,24 +84,24 @@ export class GlobalErrorBoundary extends Component<Props, State> {
 
       // Default error UI
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-muted flex items-center justify-center p-4">
           <Card className="w-full max-w-lg">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
                 <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
-              <CardTitle className="text-xl text-gray-900 dark:text-gray-100">
+              <CardTitle className="text-xl text-foreground">
                 Oops! Something went wrong
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-600 dark:text-gray-400 text-center">
+              <p className="text-muted-foreground text-center">
                 We encountered an unexpected error. Our team has been notified and is working to fix this issue.
               </p>
 
               {this.state.error && (
-                <details className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs font-mono">
-                  <summary className="cursor-pointer text-gray-700 dark:text-gray-300 mb-2">
+                <details className="bg-secondary p-3 rounded text-xs font-mono">
+                  <summary className="cursor-pointer text-foreground mb-2">
                     Error Details (Development Only)
                   </summary>
                   <div className="space-y-2 text-red-600 dark:text-red-400">
@@ -136,7 +136,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
                 </Button>
               </div>
 
-              <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+              <div className="text-center text-xs text-muted-foreground dark:text-muted-foreground">
                 Error ID: {this.state.errorId ?? 'Unknown'}
               </div>
             </CardContent>

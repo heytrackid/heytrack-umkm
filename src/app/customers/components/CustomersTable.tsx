@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
+import { CustomersTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { useResponsive } from '@/hooks/useResponsive'
 
 import type { Row } from '@/types/database'
@@ -27,6 +28,7 @@ interface CustomersTableProps {
   onAddNew: () => void
   formatCurrency: (amount: number) => string
   isMobile: boolean
+  isLoading?: boolean
 }
 
 interface MobileCustomerCardProps {
@@ -88,11 +90,11 @@ const MobileCustomerCard = ({
           {/* Contact */}
           <div className="space-y-1">
             <div className="flex items-center gap-1 text-sm">
-              <Mail className="h-3 w-3 text-gray-400 flex-shrink-0" />
+              <Mail className="h-3 w-3 text-muted-foreground flex-shrink-0" />
               <span className="truncate">{customer.email}</span>
             </div>
             <div className="flex items-center gap-1 text-sm">
-              <Phone className="h-3 w-3 text-gray-400 flex-shrink-0" />
+              <Phone className="h-3 w-3 text-muted-foreground flex-shrink-0" />
               <span>{customer.phone}</span>
             </div>
           </div>
@@ -101,7 +103,7 @@ const MobileCustomerCard = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Belanja</p>
-              <p className="font-medium text-gray-600">
+              <p className="font-medium text-muted-foreground">
                 {formatCurrency(customer.total_spent ?? 0)}
               </p>
             </div>
@@ -117,7 +119,7 @@ const MobileCustomerCard = ({
           {customer.last_order_date && (
             <div>
               <p className="text-sm text-muted-foreground">Order Terakhir</p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 {customer.last_order_date}
               </p>
             </div>
@@ -141,7 +143,8 @@ const CustomersTable = ({
   onDelete,
   onAddNew,
   formatCurrency,
-  isMobile
+  isMobile,
+  isLoading = false
 }: CustomersTableProps): JSX.Element => {
   const { isMobile: responsiveIsMobile } = useResponsive()
   const mobile = isMobile || responsiveIsMobile
@@ -177,6 +180,10 @@ const CustomersTable = ({
     )
   }
 
+  if (isLoading) {
+    return <CustomersTableSkeleton rows={10} />
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -184,7 +191,7 @@ const CustomersTable = ({
           <Users className="h-5 w-5" />
           Daftar Pelanggan
         </CardTitle>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Kelola informasi pelanggan Anda
         </p>
       </CardHeader>
@@ -207,23 +214,23 @@ const CustomersTable = ({
             <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-12">
+                <TableHead className="bg-muted/50 w-12">
                   <Checkbox
                     checked={selectedItems.length === customers.length && customers.length > 0}
                     onCheckedChange={onSelectAll}
                   />
                 </TableHead>
-                <TableHead>Nama</TableHead>
-                <TableHead>Kontak</TableHead>
-                <TableHead>Total Belanja</TableHead>
-                <TableHead>Total Order</TableHead>
-                <TableHead>Order Terakhir</TableHead>
-                <TableHead className="w-32">Aksi</TableHead>
+                <TableHead className="bg-muted/50">Nama</TableHead>
+                <TableHead className="bg-muted/50">Kontak</TableHead>
+                <TableHead className="bg-muted/50">Total Belanja</TableHead>
+                <TableHead className="bg-muted/50">Total Order</TableHead>
+                <TableHead className="bg-muted/50">Order Terakhir</TableHead>
+                <TableHead className="bg-muted/50 text-center w-32">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedCustomers.map((customer) => (
-                <TableRow key={customer['id']} className="hover:bg-gray-50">
+                <TableRow key={customer['id']} className="hover:bg-muted">
                   <TableCell>
                     <Checkbox
                       checked={selectedItems.includes(customer['id'].toString())}
@@ -241,17 +248,17 @@ const CustomersTable = ({
                   <TableCell>
                     <div className="space-y-1">
                       <div className="flex items-center gap-1 text-sm">
-                        <Mail className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                        <Mail className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                         <span className="truncate-desktop-only">{customer.email}</span>
                       </div>
                       <div className="flex items-center gap-1 text-sm">
-                        <Phone className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                        <Phone className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                         <span className="text-wrap-mobile">{customer.phone}</span>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="font-medium text-gray-600">
+                    <span className="font-medium text-muted-foreground">
                       {formatCurrency(customer.total_spent ?? 0)}
                     </span>
                   </TableCell>
@@ -261,7 +268,7 @@ const CustomersTable = ({
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-muted-foreground">
                       {customer.last_order_date}
                     </span>
                   </TableCell>
@@ -292,7 +299,7 @@ const CustomersTable = ({
                             onClick={() => onDelete(customer)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
+                            Hapus
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

@@ -21,24 +21,24 @@ const DynamicChart = dynamic(
   () => import(/* webpackChunkName: "mini-chart-core" */ './MiniChartCore').then(m => ({ default: m.MiniChartCore })),
   {
     loading: () => (
-      <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded animate-pulse">
-        <span className="text-xs text-gray-400">Loading chart...</span>
+      <div className="flex items-center justify-center bg-muted rounded animate-pulse">
+        <span className="text-xs text-muted-foreground">Loading chart...</span>
       </div>
     ),
     ssr: false
   }
 )
 
-const MiniChart = (props: MiniChartProps): JSX.Element => {
+export const MiniChart = (props: MiniChartProps): JSX.Element => {
   const { data, height = 60, className = '' } = props
 
   if (!data || data.length === 0) {
     return (
       <div
-        className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded ${className}`}
+        className={`flex items-center justify-center bg-muted rounded ${className}`}
         style={{ height }}
       >
-        <span className="text-xs text-gray-400">Tidak ada data</span>
+        <span className="text-xs text-muted-foreground">Tidak ada data</span>
       </div>
     )
   }
@@ -46,8 +46,8 @@ const MiniChart = (props: MiniChartProps): JSX.Element => {
   return (
     <div className={className} style={{ height }}>
       <Suspense fallback={
-        <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded animate-pulse" style={{ height }}>
-          <span className="text-xs text-gray-400">Loading...</span>
+        <div className="flex items-center justify-center bg-muted rounded animate-pulse" style={{ height }}>
+          <span className="text-xs text-muted-foreground">Loading...</span>
         </div>
       }>
         <DynamicChart {...props} />
@@ -56,4 +56,3 @@ const MiniChart = (props: MiniChartProps): JSX.Element => {
   )
 }
 
-export { MiniChart }

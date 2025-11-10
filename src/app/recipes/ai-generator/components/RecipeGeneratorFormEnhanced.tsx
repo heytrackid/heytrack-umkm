@@ -120,7 +120,7 @@ const RecipeGeneratorFormEnhanced = ({
           <Input
             id="productName"
             value={productName}
-            onChange={(e) => setProductName(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProductName(e.target.value)}
             placeholder="Contoh: Roti Tawar Premium, Brownies Coklat"
             disabled={loading}
           />
@@ -165,7 +165,7 @@ const RecipeGeneratorFormEnhanced = ({
               id="servings"
               type="number"
               value={servings}
-              onChange={(e) => setServings(parseInt(e.target.value) || 1)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setServings(parseInt(e.target.value) || 1)}
               min={1}
               disabled={loading}
               className="flex-1"
@@ -202,7 +202,7 @@ const RecipeGeneratorFormEnhanced = ({
                   id="targetPrice"
                   type="number"
                   value={targetPrice}
-                  onChange={(e) => setTargetPrice(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTargetPrice(e.target.value)}
                   placeholder="Contoh: 25000"
                   disabled={loading}
                   className="flex-1"
@@ -264,10 +264,10 @@ const RecipeGeneratorFormEnhanced = ({
               <Sparkles className="h-4 w-4 text-white" />
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">
+              <p className="text-xs font-medium text-foreground mb-1">
                 💡 Cara Kerja AI
               </p>
-              <p className="text-xs text-gray-800 dark:text-gray-200">
+              <p className="text-xs text-foreground dark:text-gray-200">
                 AI akan menyesuaikan resep berdasarkan {mode === 'quick' ? 'jenis produk & jumlah hasil' : 'target harga jual & bahan yang Anda pilih'}.
                 Setiap hasil bisa berbeda untuk memberikan variasi terbaik.
               </p>

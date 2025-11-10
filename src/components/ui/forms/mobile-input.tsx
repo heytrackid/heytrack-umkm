@@ -87,7 +87,7 @@ export const MobileInput = ({
           placeholder={placeholder}
           value={value}
           defaultValue={defaultValue}
-          onChange={(e) => onChange?.(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange?.(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
             setIsFocused(false)

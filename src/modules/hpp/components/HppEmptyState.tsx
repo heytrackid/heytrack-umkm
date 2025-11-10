@@ -13,7 +13,7 @@ export const HppEmptyState = (): JSX.Element => {
     const router = useRouter()
 
     return (
-        <Card className="border-2 border-dashed border-gray-400 dark:border-gray-700 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
+        <Card className="border-2 border-dashed border-border/20  bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
             <CardContent className="py-12">
                 <div className="text-center max-w-2xl mx-auto">
                     <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-500 to-gray-1000 rounded-full flex items-center justify-center">
@@ -27,10 +27,10 @@ export const HppEmptyState = (): JSX.Element => {
 
                     {/* Benefits Grid */}
                     <div className="grid md:grid-cols-2 gap-4 mb-8">
-                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border text-left">
+                        <div className="bg-card p-4 rounded-lg border text-left">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center flex-shrink-0">
-                                    <Calculator className="h-5 w-5 text-gray-600" />
+                                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                                    <Calculator className="h-5 w-5 text-muted-foreground" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold mb-1">Hitung Modal Otomatis</h4>
@@ -41,10 +41,10 @@ export const HppEmptyState = (): JSX.Element => {
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border text-left">
+                        <div className="bg-card p-4 rounded-lg border text-left">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center flex-shrink-0">
-                                    <TrendingUp className="h-5 w-5 text-gray-600" />
+                                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                                    <TrendingUp className="h-5 w-5 text-muted-foreground" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold mb-1">Saran Harga Jual</h4>
@@ -55,10 +55,10 @@ export const HppEmptyState = (): JSX.Element => {
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border text-left">
+                        <div className="bg-card p-4 rounded-lg border text-left">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center flex-shrink-0">
-                                    <BarChart3 className="h-5 w-5 text-gray-600" />
+                                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                                    <BarChart3 className="h-5 w-5 text-muted-foreground" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold mb-1">Bandingkan Produk</h4>
@@ -69,10 +69,10 @@ export const HppEmptyState = (): JSX.Element => {
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border text-left">
+                        <div className="bg-card p-4 rounded-lg border text-left">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center flex-shrink-0">
-                                    <Bell className="h-5 w-5 text-gray-600" />
+                                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                                    <Bell className="h-5 w-5 text-muted-foreground" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold mb-1">Peringatan Otomatis</h4>
@@ -106,14 +106,14 @@ export const HppEmptyState = (): JSX.Element => {
                     </div>
 
                     {/* Quick Tip */}
-                    <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800 text-left">
+                    <div className="mt-8 p-4 bg-muted/20 rounded-lg border border-border/20  text-left">
                         <div className="flex items-start gap-2">
-                            <Lightbulb className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                            <Lightbulb className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                             <div className="text-sm">
-                                <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                                <p className="font-semibold text-foreground mb-1">
                                     💡 Tips: Pastikan Harga Bahan Sudah Diisi
                                 </p>
-                                <p className="text-gray-800 dark:text-gray-200">
+                                <p className="text-muted-foreground">
                                     Sebelum menghitung HPP, pastikan semua bahan sudah memiliki harga.
                                     Kunjungi halaman <button onClick={() => router.push('/ingredients')} className="underline font-medium">Bahan Baku</button> untuk update harga.
                                 </p>

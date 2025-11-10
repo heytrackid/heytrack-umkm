@@ -321,7 +321,7 @@ export const useConfirmationModal = () => {
           <div className="flex justify-end gap-2">
             <button
               onClick={hideConfirmation}
-              className="px-4 py-2 text-sm border rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-sm border rounded-md hover:bg-muted"
             >
               {config.cancelText}
             </button>

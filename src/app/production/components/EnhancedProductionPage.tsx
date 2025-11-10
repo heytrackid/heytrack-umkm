@@ -24,13 +24,13 @@ const LazyProductionFormDialog = dynamic(
   {
     loading: () => (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4">
+        <div className="bg-card rounded-lg p-8 max-w-md w-full mx-4">
           <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mx-auto" />
+            <div className="h-6 bg-muted rounded w-1/2 mx-auto" />
             <div className="space-y-2">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
-              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded mt-4" />
+              <div className="h-4 bg-muted rounded" />
+              <div className="h-4 bg-muted rounded" />
+              <div className="h-10 bg-muted rounded mt-4" />
             </div>
           </div>
         </div>
@@ -63,7 +63,7 @@ const isProductionWithRecipeArray = (value: unknown): value is ProductionWithRec
 const STATUS_CONFIG = {
     PLANNED: {
         label: 'Direncanakan',
-        color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
+        color: 'bg-secondary text-secondary-foreground dark:bg-gray-900/20 dark:text-gray-300',
         icon: Calendar
     },
     IN_PROGRESS: {
@@ -73,7 +73,7 @@ const STATUS_CONFIG = {
     },
     COMPLETED: {
         label: 'Selesai',
-        color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
+        color: 'bg-secondary text-secondary-foreground dark:bg-gray-900/20 dark:text-gray-300',
         icon: CheckCircle
     },
     CANCELLED: {
@@ -338,7 +338,7 @@ const EnhancedProductionPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">Total Batch</p>
                                 <p className="text-2xl font-bold">{stats.total}</p>
                             </div>
-                            <Package className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                            <Package className="h-8 w-8 text-muted-foreground" />
                         </div>
                     </CardContent>
                 </Card>
@@ -350,7 +350,7 @@ const EnhancedProductionPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">Direncanakan</p>
                                 <p className="text-2xl font-bold">{stats.planned}</p>
                             </div>
-                            <Calendar className="h-8 w-8 text-gray-600" />
+                            <Calendar className="h-8 w-8 text-muted-foreground" />
                         </div>
                     </CardContent>
                 </Card>
@@ -374,7 +374,7 @@ const EnhancedProductionPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">Selesai</p>
                                 <p className="text-2xl font-bold">{stats.completed}</p>
                             </div>
-                            <CheckCircle className="h-8 w-8 text-gray-600" />
+                            <CheckCircle className="h-8 w-8 text-muted-foreground" />
                         </div>
                     </CardContent>
                 </Card>
@@ -386,7 +386,7 @@ const EnhancedProductionPage = () => {
                                 <p className="text-sm font-medium text-muted-foreground">Total Cost</p>
                                 <p className="text-lg font-bold">{formatCurrency(stats.totalCost)}</p>
                             </div>
-                            <TrendingUp className="h-8 w-8 text-gray-600" />
+                            <TrendingUp className="h-8 w-8 text-muted-foreground" />
                         </div>
                     </CardContent>
                 </Card>
@@ -403,7 +403,7 @@ const EnhancedProductionPage = () => {
                                     <Input
                                         placeholder="Cari batch number atau produk..."
                                         value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                                         className="pl-8"
                                     />
                                 </div>
@@ -646,7 +646,7 @@ const ProductionCard = ({
             {production.actual_cost && (
                 <div className="pt-3 border-t">
                     <p className="text-sm text-muted-foreground">Actual Cost</p>
-                    <p className="text-lg font-bold text-gray-600">
+                    <p className="text-lg font-bold text-muted-foreground">
                         {formatCurrency(production.actual_cost)}
                     </p>
                 </div>

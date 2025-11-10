@@ -39,11 +39,11 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">Total Pesanan</p>
                             <p className="text-2xl font-bold">{stats.total_orders}</p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <p className="text-xs text-muted-foreground mt-1">
                                 {stats.order_growth}% dari periode sebelumnya
                             </p>
                         </div>
-                        <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                        <ShoppingCart className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </CardContent>
             </Card>
@@ -54,11 +54,11 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">Total Pendapatan</p>
                             <p className="text-2xl font-bold">{formatCurrency(stats.total_revenue)}</p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <p className="text-xs text-muted-foreground mt-1">
                                 {stats.revenue_growth}% dari periode sebelumnya
                             </p>
                         </div>
-                        <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                        <DollarSign className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </CardContent>
             </Card>
@@ -71,7 +71,7 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
                             <p className="text-2xl font-bold">{formatCurrency(stats.average_order_value)}</p>
                             <p className="text-xs text-muted-foreground mt-1">per pesanan</p>
                         </div>
-                        <BarChart3 className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                        <BarChart3 className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </CardContent>
             </Card>

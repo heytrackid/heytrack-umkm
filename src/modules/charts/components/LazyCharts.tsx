@@ -24,7 +24,7 @@ import type { ComponentType, ReactNode } from 'react'
 export type LazyChartComponent<T = Record<string, unknown>> = ComponentType<T>
 
 const chartLoadingFallback = (): ReactNode => (
-  <div className="p-4 text-center text-gray-500">Loading chart...</div>
+  <div className="p-4 text-center text-muted-foreground">Loading chart...</div>
 )
 
 const defaultChartFallback = chartLoadingFallback()

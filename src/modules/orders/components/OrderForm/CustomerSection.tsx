@@ -77,7 +77,7 @@ export const CustomerSection = ({
                         <Input
                             placeholder="Ketik nama atau nomor telepon..."
                             value={customerSearch}
-                            onChange={(e) => setCustomerSearch(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomerSearch(e.target.value)}
                             className="mt-1"
                         />
                         {customerSearch && (
@@ -111,7 +111,7 @@ export const CustomerSection = ({
                         id="customerName"
                         placeholder="Contoh: Ibu Siti"
                         value={formData['customer_name']}
-                        onChange={(e) => {
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             onInputChange('customer_name', e.target.value)
                             if (fieldErrors['customer_name']) { onClearError('customer_name') }
                         }}
@@ -132,7 +132,7 @@ export const CustomerSection = ({
                         id="customerPhone"
                         placeholder="Contoh: 08123456789"
                         value={formData.customer_phone}
-                        onChange={(e) => onInputChange('customer_phone', e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('customer_phone', e.target.value)}
                         className="mt-1"
                     />
                 </div>
@@ -144,7 +144,7 @@ export const CustomerSection = ({
                     id="customerAddress"
                     placeholder="Contoh: Jl. Merdeka No. 123, Jakarta Pusat"
                     value={formData.customer_address}
-                    onChange={(e) => onInputChange('customer_address', e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onInputChange('customer_address', e.target.value)}
                     className="mt-1"
                 />
             </div>
@@ -156,7 +156,7 @@ export const CustomerSection = ({
                         id="orderDate"
                         type="date"
                         value={formData.order_date}
-                        onChange={(e) => onInputChange('order_date', e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('order_date', e.target.value)}
                         required
                         className="mt-1"
                     />
@@ -166,7 +166,7 @@ export const CustomerSection = ({
                     <select
                         className="w-full p-2 border border-input rounded-md bg-background mt-1"
                         value={formData.priority}
-                        onChange={(e) => onInputChange('priority', e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onInputChange('priority', e.target.value)}
                     >
                         <option value="low">Rendah</option>
                         <option value="normal">Normal</option>

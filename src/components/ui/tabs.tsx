@@ -44,7 +44,7 @@ const TabsTrigger = ({
        "inline-flex h-8 flex-1 items-center justify-center gap-2 rounded-md border border-transparent px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all",
        "text-muted-foreground hover:text-foreground",
        "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-       "dark:data-[state=active]:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-200",
+       "dark:data-[state=active]:bg-gray-800 dark:text-muted-foreground dark:hover:text-gray-200",
        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
        "disabled:pointer-events-none disabled:opacity-50",
        "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-4",

@@ -12,7 +12,7 @@ export function useRegistration(): {
   success: boolean
   isPending: boolean
   clearFieldError: (field: keyof FieldErrors) => void
-  handleSubmit: (formData: FormData) => void
+  handleSubmit: (formData: FormData) => Promise<boolean>
 } {
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<ErrorAction | null>(null)
@@ -51,7 +51,7 @@ export function useRegistration(): {
     return errors
   }
 
-  const handleSubmit = (formData: FormData): void => {
+  const handleSubmit = async (formData: FormData): Promise<boolean> => {
     setError('')
     setErrorAction(null)
     setFieldErrors({})
@@ -65,39 +65,44 @@ export function useRegistration(): {
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors)
-      return
+      return false
     }
 
-    startTransition(async () => {
-      try {
-        const response = await fetch('/api/auth/signup', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email,
-            password,
-            fullName: email.split('@')[0], // Use email prefix as name
-          }),
-          credentials: 'include', // Include cookies for authentication
-        })
+    return new Promise((resolve) => {
+      startTransition(async () => {
+        try {
+          const response = await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email,
+              password,
+              fullName: email.split('@')[0], // Use email prefix as name
+            }),
+            credentials: 'include', // Include cookies for authentication
+          })
 
-        const data = await response.json() as unknown
+          const data = await response.json() as unknown
 
-        if (!response.ok) {
-          const authError = getAuthErrorMessage((data as { error?: string }).error ?? 'Registration failed')
-          setError(authError.message)
-          if (authError.action) {
-            setErrorAction(authError.action)
+          if (!response.ok) {
+            const authError = getAuthErrorMessage((data as { error?: string }).error ?? 'Registration failed')
+            setError(authError.message)
+            if (authError.action) {
+              setErrorAction(authError.action)
+            }
+            resolve(false)
+            return
           }
-          return
-        }
 
-        setSuccess(true)
-      } catch (_error) {
-        setError('Network error. Please try again.')
-      }
+          setSuccess(true)
+          resolve(true)
+        } catch (_error) {
+          setError('Network error. Please try again.')
+          resolve(false)
+        }
+      })
     })
   }
 

@@ -6,19 +6,19 @@ import { id as idLocale } from 'date-fns/locale'
 import {
     AlertCircle,
     AlertTriangle,
+    Check,
     CheckCircle,
+    DollarSign,
+    Factory,
     Info,
     Package,
-    ShoppingCart,
-    Factory,
-    DollarSign,
-    Settings,
-    X,
-    Check,
     RefreshCw,
+    Settings,
+    ShoppingCart,
+    X,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useRef, useState, useCallback } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -56,7 +56,7 @@ const typeColors = {
     info: 'text-muted-foreground',
     warning: 'text-yellow-500',
     error: 'text-red-500',
-    success: 'text-gray-500',
+    success: 'text-muted-foreground',
     alert: 'text-orange-500',
 }
 
@@ -222,7 +222,7 @@ export const NotificationList = ({
                                             <div
                                                 className={cn(
                                                     'p-4 hover:bg-muted/50 cursor-pointer transition-colors border-l-4',
-                                                    !notification.is_read && 'bg-gray-50/50 dark:bg-gray-900/30',
+                                                    !notification.is_read && 'bg-muted/30',
                                                     priorityColor
                                                 )}
                                                 onClick={() => handleNotificationClick(notification)}
@@ -265,7 +265,7 @@ export const NotificationList = ({
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="sm"
-                                                                    onClick={(e) => handleMarkAsRead(e, notification['id'])}
+                                                                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleMarkAsRead(e, notification['id'])}
                                                                     className="h-6 px-2 text-xs"
                                                                 >
                                                                     <Check className="h-3 w-3 mr-1" />
@@ -275,7 +275,7 @@ export const NotificationList = ({
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                onClick={(e) => handleDismiss(e, notification['id'])}
+                                                                onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleDismiss(e, notification['id'])}
                                                                 className="h-6 px-2 text-xs text-red-600 hover:text-red-700"
                                                             >
                                                                 <X className="h-3 w-3 mr-1" />
@@ -304,7 +304,7 @@ export const NotificationList = ({
                                     key={notification['id']}
                                     className={cn(
                                         'p-4 hover:bg-muted/50 cursor-pointer transition-colors border-l-4',
-                                        !notification.is_read && 'bg-gray-50/50',
+                                        !notification.is_read && 'bg-muted/30',
                                         priorityColor
                                     )}
                                     onClick={() => handleNotificationClick(notification)}
@@ -330,7 +330,7 @@ export const NotificationList = ({
                                                     </h4>
                                                 </div>
                                                 {!notification.is_read && (
-                                                    <div className="h-2 w-2 rounded-full bg-gray-500 flex-shrink-0" />
+                                                    <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />
                                                 )}
                                             </div>
 
@@ -352,7 +352,7 @@ export const NotificationList = ({
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-7 w-7"
-                                                            onClick={(e) => handleMarkAsRead(e, notification['id'])}
+                                                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleMarkAsRead(e, notification['id'])}
                                                         >
                                                             <Check className="h-3.5 w-3.5" />
                                                         </Button>
@@ -361,7 +361,7 @@ export const NotificationList = ({
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-7 w-7"
-                                                        onClick={(e) => handleDismiss(e, notification['id'])}
+                                                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleDismiss(e, notification['id'])}
                                                     >
                                                         <X className="h-3.5 w-3.5" />
                                                     </Button>

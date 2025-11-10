@@ -30,9 +30,9 @@ const getStockStatus = (current: number, min: number): StockStatus => {
 const getStockColor = (status: StockStatus) => {
     switch (status) {
         case 'critical': return 'text-destructive bg-destructive/10 border-destructive/20'
-        case 'low': return 'text-gray-700 bg-gray-100 border-gray-200'
-        case 'normal': return 'text-gray-600 bg-gray-50 border-gray-200'
-        case 'good': return 'text-gray-600 bg-gray-50 border-gray-200'
+        case 'low': return 'text-foreground bg-muted border-border/20'
+        case 'normal': return 'text-muted-foreground bg-muted border-border/20'
+        case 'good': return 'text-muted-foreground bg-muted border-border/20'
     }
 }
 
@@ -100,41 +100,41 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-gray-200 bg-gray-50">
+                <Card className="border-2 border-border/20 bg-muted">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                            <TrendingDown className="h-5 w-5 text-gray-600" />
+                            <TrendingDown className="h-5 w-5 text-muted-foreground" />
                             <Badge variant="secondary" className="text-xs">
                                 Warning
                             </Badge>
                         </div>
-                        <div className="text-2xl font-bold text-gray-700">{lowCount}</div>
+                        <div className="text-2xl font-bold text-foreground">{lowCount}</div>
                         <div className="text-xs text-muted-foreground mt-1">Stok Rendah</div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-gray-200 bg-gray-50">
+                <Card className="border-2 border-border/20 bg-muted">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                            <Package className="h-5 w-5 text-gray-600" />
+                            <Package className="h-5 w-5 text-muted-foreground" />
                             <Badge variant="secondary" className="text-xs">
                                 OK
                             </Badge>
                         </div>
-                        <div className="text-2xl font-bold text-gray-700">{normalCount}</div>
+                        <div className="text-2xl font-bold text-foreground">{normalCount}</div>
                         <div className="text-xs text-muted-foreground mt-1">Stok Normal</div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-gray-200 bg-gray-50">
+                <Card className="border-2 border-border/20 bg-muted">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                            <CheckCircle className="h-5 w-5 text-gray-600" />
+                            <CheckCircle className="h-5 w-5 text-muted-foreground" />
                             <Badge variant="secondary" className="text-xs">
                                 Good
                             </Badge>
                         </div>
-                        <div className="text-2xl font-bold text-gray-700">{goodCount}</div>
+                        <div className="text-2xl font-bold text-foreground">{goodCount}</div>
                         <div className="text-xs text-muted-foreground mt-1">Stok Baik</div>
                     </CardContent>
                 </Card>
@@ -151,7 +151,7 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
                 <CardContent>
                     <div className="space-y-4">
                         {/* Visual Bar */}
-                        <div className="relative h-12 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div className="relative h-12 bg-muted rounded-full overflow-hidden">
                             {criticalCount > 0 && (
                                 <div
                                     className="absolute h-full bg-gradient-to-r from-red-500 to-red-600 flex items-center justify-center text-white text-xs font-medium"
@@ -206,11 +206,11 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
                                 <span>🟠 Rendah ({lowCount})</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-gray-500" />
+                                <div className="w-3 h-3 rounded-full bg-muted0" />
                                 <span>🔵 Normal ({normalCount})</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-gray-500" />
+                                <div className="w-3 h-3 rounded-full bg-muted0" />
                                 <span>🟢 Baik ({goodCount})</span>
                             </div>
                         </div>
@@ -244,7 +244,7 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
                                     const value = currentStock * (ing.price_per_unit || 0)
 
                                     return (
-                                        <div key={ing['id']} className="p-3 bg-white dark:bg-gray-900 rounded-lg border">
+                                        <div key={ing['id']} className="p-3 bg-card rounded-lg border">
                                             <div className="flex items-start justify-between mb-2">
                                                 <div className="flex-1">
                                                     <div className="font-medium">{ing.name}</div>
@@ -273,7 +273,7 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
             })}
 
             {/* Total Value Summary */}
-            <Card className="border-2 border-gray-300 bg-gradient-to-br from-gray-50/50 to-gray-100/50">
+            <Card className="border-2 border-border/20 bg-gradient-to-br from-gray-50/50 to-gray-100/50">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -282,7 +282,7 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
                             </div>
                             <div>
                                 <div className="text-sm text-muted-foreground">Total Nilai Inventory</div>
-                                <div className="text-3xl font-bold text-gray-600">
+                                <div className="text-3xl font-bold text-foreground">
                                     {formatCurrency(totalValue)}
                                 </div>
                             </div>

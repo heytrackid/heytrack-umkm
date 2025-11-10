@@ -267,7 +267,7 @@ export const CustomerDialog = ({ open, onOpenChange, customer, onSuccess }: Cust
                                 </Label>
                                 <Select
                                     value={customerType ?? 'regular'}
-                                    onValueChange={(value) => setValue('customer_type', value as 'regular' | 'retail' | 'vip' | 'wholesale')}
+                                    onValueChange={(value: string) => setValue('customer_type', value as 'regular' | 'retail' | 'vip' | 'wholesale')}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Pilih tipe pelanggan" />

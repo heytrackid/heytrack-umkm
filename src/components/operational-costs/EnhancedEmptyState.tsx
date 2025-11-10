@@ -59,14 +59,14 @@ export const EnhancedEmptyState = ({ onAdd, onQuickSetup }: EnhancedEmptyStatePr
             </div>
 
             {/* Quick Tip */}
-            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-300 dark:border-gray-800 text-left w-full max-w-md">
+            <div className="mt-6 p-4 bg-muted rounded-lg border border-border/20  text-left w-full max-w-md">
                 <div className="flex items-start gap-2">
-                    <Lightbulb className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                    <Lightbulb className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                     <div className="text-sm">
-                        <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                        <p className="font-semibold text-foreground mb-1">
                             💡 Tips: Catat Semua Biaya
                         </p>
-                        <p className="text-gray-800 dark:text-gray-200">
+                        <p className="text-muted-foreground">
                             Catat biaya tetap (sewa, gaji) dan variabel (listrik, transport) untuk perhitungan HPP yang lebih akurat.
                         </p>
                     </div>
@@ -75,3 +75,4 @@ export const EnhancedEmptyState = ({ onAdd, onQuickSetup }: EnhancedEmptyStatePr
         </CardContent>
     </Card>
 )
+

@@ -22,9 +22,9 @@ interface SwipeableCardProps {
 }
 
 const ACTION_COLORS = {
-  blue: 'bg-gray-500 text-white',
+  blue: 'bg-muted0 text-white',
   red: 'bg-red-500 text-white',
-  green: 'bg-gray-500 text-white',
+  green: 'bg-muted0 text-white',
   yellow: 'bg-yellow-500 text-white'
 }
 

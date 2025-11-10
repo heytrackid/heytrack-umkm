@@ -38,7 +38,7 @@ interface OrderDetailViewProps {
     onUpdateStatus: (status: OrderStatus) => void
 }
 
-const OrderDetailView = ({
+export const OrderDetailView = ({
     order,
     onEdit,
     onDelete,
@@ -372,4 +372,3 @@ const OrderDetailView = ({
     )
 }
 
-export { OrderDetailView }

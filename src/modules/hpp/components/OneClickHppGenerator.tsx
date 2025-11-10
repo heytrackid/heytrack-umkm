@@ -60,9 +60,9 @@ export function OneClickHppGenerator(): JSX.Element {
         return
       }
     } catch (authError) {
-      logger.error({ authError }, 'Authentication check failed')
+      logger.error({ authError }, 'Pemeriksaan otentikasi gagal')
       toast({
-        title: 'Authentication Error',
+        title: 'Kesalahan Otentikasi',
         description: 'Gagal memverifikasi autentikasi. Silakan coba lagi.',
         variant: 'destructive'
       })
@@ -101,8 +101,8 @@ export function OneClickHppGenerator(): JSX.Element {
       try {
         data = await res.json()
       } catch (parseError) {
-        logger.error({ parseError, status: res.status }, 'Failed to parse API response')
-        throw new Error(`Server error (${res.status}): Invalid response format`)
+        logger.error({ parseError, status: res.status }, 'Gagal mengurai respons API')
+        throw new Error(`Kesalahan server (${res.status}): Format respons tidak valid`)
       }
 
       if (!res.ok) {

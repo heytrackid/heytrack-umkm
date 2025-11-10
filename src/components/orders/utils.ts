@@ -20,7 +20,7 @@ export const paymentStatuses: Record<PaymentStatus, StatusInfo> = {
 }
 
 export const priorities: Record<Priority, StatusInfo> = {
-  'low': { label: 'Rendah', color: 'bg-gray-100 text-gray-800' },
+  'low': { label: 'Rendah', color: 'bg-secondary text-secondary-foreground' },
   'normal': { label: 'Normal', color: 'bg-blue-100 text-blue-800' },
   'high': { label: 'Tinggi', color: 'bg-red-100 text-red-800' },
   'urgent': { label: 'Mendesak', color: 'bg-purple-100 text-purple-800' }

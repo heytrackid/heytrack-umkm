@@ -16,6 +16,8 @@ import type { ReactElement, ReactNode } from 'react';
 
 import "./globals.css";
 
+
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -55,6 +57,7 @@ const RootLayout = async ({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100svh] m-0 p-0 w-full`}
+        suppressHydrationWarning
       >
         <SupabaseProvider>
           <AuthProvider>
@@ -73,8 +76,8 @@ const RootLayout = async ({
                       enableNetworkAware
                       debug={false}
                       >
-                        <GlobalErrorBoundary>
-                      {/* Header temporarily disabled during development */}
+                         <GlobalErrorBoundary>
+                       {/* Header temporarily disabled during development */}
                       {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
                       <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
                         🚧 Development Mode - Auth Disabled

@@ -274,13 +274,13 @@ const HppReportsPage = (): JSX.Element => {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center">
-                        <div className="text-3xl font-bold text-gray-600">
+                        <div className="text-3xl font-bold text-muted-foreground">
                           {analytics.totalRecipes}
                         </div>
                         <div className="text-sm text-muted-foreground">Total Recipes</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-3xl font-bold text-gray-600">
+                        <div className="text-3xl font-bold text-muted-foreground">
                           {analytics.totalCalculations}
                         </div>
                         <div className="text-sm text-muted-foreground">Calculations</div>
@@ -311,7 +311,7 @@ const HppReportsPage = (): JSX.Element => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+                      <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
                         <span className="text-sm font-medium">High Margin (30%+)</span>
                         <Badge variant="secondary">{analytics.marginAnalysis.high} recipes</Badge>
                       </div>
@@ -389,7 +389,7 @@ const HppReportsPage = (): JSX.Element => {
                       id="start-date"
                       type="date"
                       value={config.dateRange.start}
-                      onChange={(e) => setConfig(prev => ({
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                         ...prev,
                         dateRange: { ...prev.dateRange, start: e.target.value }
                       }))}
@@ -401,7 +401,7 @@ const HppReportsPage = (): JSX.Element => {
                       id="end-date"
                       type="date"
                       value={config.dateRange.end}
-                      onChange={(e) => setConfig(prev => ({
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                         ...prev,
                         dateRange: { ...prev.dateRange, end: e.target.value }
                       }))}
@@ -414,7 +414,7 @@ const HppReportsPage = (): JSX.Element => {
                   <Label>Export Format</Label>
                   <Select
                     value={config.format}
-                    onValueChange={(value) => {
+                    onValueChange={(value: string) => {
                       if (isExportFormat(value)) {
                         setConfig(prev => ({ ...prev, format: value }))
                       }
@@ -446,7 +446,7 @@ const HppReportsPage = (): JSX.Element => {
                           type="checkbox"
                           id={metric.value}
                           checked={config.metrics.includes(metric.value)}
-                          onChange={(e) => {
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             const { checked } = e.target
                             setConfig(prev => {
                               if (checked) {
@@ -519,9 +519,9 @@ const HppReportsPage = (): JSX.Element => {
                   <CardTitle>Cost Optimization Opportunities</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+                  <div className="p-4 bg-muted/20 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="h-5 w-5 text-gray-600" />
+                      <TrendingUp className="h-5 w-5 text-muted-foreground" />
                       <span className="font-semibold">Supplier Negotiation</span>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -529,9 +529,9 @@ const HppReportsPage = (): JSX.Element => {
                     </p>
                   </div>
 
-                  <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+                  <div className="p-4 bg-muted/20 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="h-5 w-5 text-gray-600" />
+                      <TrendingUp className="h-5 w-5 text-muted-foreground" />
                       <span className="font-semibold">Recipe Optimization</span>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -539,9 +539,9 @@ const HppReportsPage = (): JSX.Element => {
                     </p>
                   </div>
 
-                  <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+                  <div className="p-4 bg-muted/20 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="h-5 w-5 text-gray-600" />
+                      <TrendingUp className="h-5 w-5 text-muted-foreground" />
                       <span className="font-semibold">Seasonal Pricing</span>
                     </div>
                     <p className="text-sm text-muted-foreground">

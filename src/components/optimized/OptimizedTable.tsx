@@ -53,7 +53,7 @@ const OptimizedTableRowComponent = <T extends { id: number | string }>({
   }, [onView, item])
 
   return (
-    <TableRow className="hover:bg-gray-50">
+    <TableRow className="hover:bg-muted">
       <TableCell>
         <Checkbox checked={isSelected} onCheckedChange={handleSelect} />
       </TableCell>
@@ -132,9 +132,9 @@ const BulkActionsBar = memo(({
   if (selectedCount === 0) { return null }
 
   return (
-    <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-300 rounded-lg">
+    <div className="flex items-center justify-between p-4 bg-muted border border-border/20 rounded-lg">
       <div className="flex items-center gap-4">
-        <span className="text-sm font-medium text-gray-800">
+        <span className="text-sm font-medium text-foreground">
           {selectedCount} item dipilih
         </span>
         <Badge variant="secondary" className="text-xs">
@@ -144,7 +144,7 @@ const BulkActionsBar = memo(({
           variant="ghost"
           size="sm"
           onClick={onClearSelection}
-          className="text-gray-600 hover:text-gray-800"
+          className="text-muted-foreground hover:text-foreground"
         >
           Batal
         </Button>
@@ -186,6 +186,7 @@ interface OptimizedTableProps<T extends { id: number | string }> {
   emptyStateComponent?: ReactNode
   title?: string
   description?: string
+  isLoading?: boolean
 }
 
 const OptimizedTableComponent = <T extends { id: number | string }>({
@@ -198,6 +199,7 @@ const OptimizedTableComponent = <T extends { id: number | string }>({
   onBulkEdit,
   onBulkDelete,
   onEdit,
+  isLoading = false,
   onDelete,
   onView,
   formatValue,
@@ -217,6 +219,19 @@ const OptimizedTableComponent = <T extends { id: number | string }>({
     }).slice(0, 2)
     return names.join(', ') + (items.length > 2 ? ` +${items.length - 2} lainnya` : '')
   }, [data])
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="animate-pulse space-y-4 p-4 border rounded-md">
+          <div className="h-4 bg-muted rounded w-1/4" />
+          {Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="h-4 bg-muted rounded" />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   if (data.length === 0) {
     return emptyStateComponent ?? <div>Tidak ada data</div>

@@ -15,9 +15,9 @@ interface SkeletonProps {
 // Skeleton untuk Orders Table
 export const OrdersTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <div className="rounded-lg border border-border/20 overflow-hidden">
         {/* Table Header */}
-        <div className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="border-b border-border/20 bg-muted/50 p-4">
           <div className="flex items-center justify-between">
             <div className="flex space-x-4">
               <SkeletonText className="h-4 w-16" />
@@ -30,7 +30,7 @@ export const OrdersTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { r
         </div>
         
         {/* Table Body */}
-        <div className="divide-y divide-gray-200 dark:divide-gray-800">
+        <div className="divide-y divide-border">
           {Array.from({ length: rows }, (_, i) => (
             <div key={i} className="p-4">
               <div className="flex items-center justify-between">
@@ -56,9 +56,9 @@ export const OrdersTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { r
 // Skeleton untuk Customers Table
 export const CustomersTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <div className="rounded-lg border border-border/20 overflow-hidden">
         {/* Table Header */}
-        <div className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="border-b border-border/20 bg-muted/50 p-4">
           <div className="flex space-x-4">
             <SkeletonText className="h-4 w-8" />
             <SkeletonText className="h-4 w-32" />
@@ -69,7 +69,7 @@ export const CustomersTableSkeleton = ({ className, rows = 5 }: SkeletonProps & 
         </div>
         
         {/* Table Body */}
-        <div className="divide-y divide-gray-200 dark:divide-gray-800">
+        <div className="divide-y divide-border">
           {Array.from({ length: rows }, (_, i) => (
             <div key={i} className="p-4">
               <div className="flex items-center space-x-4">
@@ -92,9 +92,9 @@ export const CustomersTableSkeleton = ({ className, rows = 5 }: SkeletonProps & 
 // Skeleton untuk Inventory Table
 export const InventoryTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <div className="rounded-lg border border-border/20 overflow-hidden">
         {/* Table Header */}
-        <div className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="border-b border-border/20 bg-muted/50 p-4">
           <div className="flex space-x-4">
             <SkeletonText className="h-4 w-32" />
             <SkeletonText className="h-4 w-20" />
@@ -106,7 +106,7 @@ export const InventoryTableSkeleton = ({ className, rows = 5 }: SkeletonProps & 
         </div>
         
         {/* Table Body */}
-        <div className="divide-y divide-gray-200 dark:divide-gray-800">
+        <div className="divide-y divide-border">
           {Array.from({ length: rows }, (_, i) => (
             <div key={i} className="p-4">
               <div className="flex items-center space-x-4">
@@ -133,9 +133,9 @@ export const InventoryTableSkeleton = ({ className, rows = 5 }: SkeletonProps & 
 // Skeleton untuk Recipes Table
 export const RecipesTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
-      <div className="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <div className="rounded-lg border border-border/20 overflow-hidden">
         {/* Table Header */}
-        <div className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="border-b border-border/20 bg-muted/50 p-4">
           <div className="flex space-x-4">
             <SkeletonText className="h-4 w-32" />
             <SkeletonText className="h-4 w-20" />
@@ -146,7 +146,7 @@ export const RecipesTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { 
         </div>
         
         {/* Table Body */}
-        <div className="divide-y divide-gray-200 dark:divide-gray-800">
+        <div className="divide-y divide-border">
           {Array.from({ length: rows }, (_, i) => (
             <div key={i} className="p-4">
               <div className="flex items-center space-x-4">
@@ -171,7 +171,7 @@ export const RecipesTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { 
 export const ListViewSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("space-y-4", className)}>
       {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="rounded-lg border border-gray-200 dark:border-gray-800 p-4">
+        <div key={i} className="rounded-lg border border-border/20 p-4">
           <div className="flex items-center space-x-4">
             <SkeletonAvatar className="h-10 w-10" />
             <div className="flex-1 space-y-2">
@@ -211,7 +211,7 @@ export const RecipeTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { r
     <div className={cn("", className)}>
       <div className="rounded-md border">
         {/* Table Header */}
-        <div className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="border-b border-border/20 bg-muted/50 p-4">
           <div className="flex space-x-4">
             <SkeletonText className="h-4 w-8" />
             <SkeletonText className="h-4 w-32" />
@@ -223,7 +223,7 @@ export const RecipeTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { r
         </div>
         
         {/* Table Body */}
-        <div className="divide-y divide-gray-200 dark:divide-gray-800">
+        <div className="divide-y divide-border">
           {Array.from({ length: rows }, (_, i) => (
             <div key={i} className="p-4">
               <div className="flex items-center space-x-4">

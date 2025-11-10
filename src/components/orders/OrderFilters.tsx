@@ -17,7 +17,7 @@ interface OrderFiltersProps {
   onReset: () => void
 }
 
-const OrderFilters = ({
+export const OrderFilters = ({
   filters,
   onFiltersChange,
   onReset
@@ -46,7 +46,7 @@ const OrderFilters = ({
             <Input
               placeholder=""
               value={filters.searchTerm}
-              onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('searchTerm', e.target.value)}
               className="pl-10"
             />
           </div>
@@ -106,7 +106,7 @@ const OrderFilters = ({
               <Input
                 type="date"
                 value={filters.dateFrom ?? ''}
-                onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('dateFrom', e.target.value)}
                 placeholder=""
               />
             </div>
@@ -116,7 +116,7 @@ const OrderFilters = ({
               <Input
                 type="date"
                 value={filters.dateTo ?? ''}
-                onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('dateTo', e.target.value)}
                 placeholder=""
               />
             </div>
@@ -171,7 +171,7 @@ const OrderFilters = ({
                 variant="ghost"
                 size="sm"
                 onClick={onReset}
-                className="text-gray-600 hover:text-gray-700"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <X className="h-4 w-4 mr-2" />
                 Reset Filter
@@ -184,4 +184,3 @@ const OrderFilters = ({
   )
 }
 
-export { OrderFilters }

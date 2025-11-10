@@ -194,7 +194,7 @@ export const WhatsAppFollowUp = ({
       <DialogContent className="w-[calc(100%-2rem)] max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-gray-600" />
+            <MessageCircle className="h-5 w-5 text-muted-foreground" />
             WhatsApp Follow-up untuk {order['customer_name']}
           </DialogTitle>
         </DialogHeader>
@@ -247,7 +247,7 @@ export const WhatsAppFollowUp = ({
 
                 {/* Template Info */}
                 {!isCustomTemplate && (
-                  <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
                     {templates.find(t => t['id'] === selectedTemplate)?.description}
                   </div>
                 )}
@@ -258,7 +258,7 @@ export const WhatsAppFollowUp = ({
                     <Label>Detail Pembayaran</Label>
                     <Input
                       value={paymentDetails}
-                      onChange={(e) => setPaymentDetails(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPaymentDetails(e.target.value)}
 
                     />
                   </div>
@@ -270,7 +270,7 @@ export const WhatsAppFollowUp = ({
                   <Input
 
                     value={businessSettings.businessNumber}
-                    onChange={(e) => setBusinessSettings({
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBusinessSettings({
                       ...businessSettings,
                       businessNumber: e.target.value
                     })}
@@ -318,15 +318,15 @@ export const WhatsAppFollowUp = ({
                     <Label>Tulis Pesan Custom</Label>
                     <Textarea
                       value={customMessage}
-                      onChange={(e) => setCustomMessage(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCustomMessage(e.target.value)}
 
                       className="min-h-[200px]"
                     />
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
-                      <div className="text-sm text-gray-800 whitespace-pre-wrap font-mono">
+                    <div className="bg-muted border border-border/20 rounded-lg p-4">
+                      <div className="text-sm text-foreground whitespace-pre-wrap font-mono">
                         {generatedMessage || 'Generating message...'}
                       </div>
                     </div>
@@ -358,7 +358,7 @@ export const WhatsAppFollowUp = ({
                   </SwipeableTabsList>
 
                   <SwipeableTabsContent value="regular" className="space-y-4">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       Buka WhatsApp regular dengan pesan yang sudah disiapkan
                     </div>
                     <Button
@@ -372,12 +372,12 @@ export const WhatsAppFollowUp = ({
                   </SwipeableTabsContent>
 
                   <SwipeableTabsContent value="business" className="space-y-4">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       Buka WhatsApp Business dengan pesan yang sudah disiapkan
                     </div>
                     <Button
                       onClick={() => handleSend('business')}
-                      className="w-full gap-2 bg-green-800 hover:bg-gray-900"
+                      className="w-full gap-2 bg-green-800 hover:bg-primary"
                       disabled={!generatedMessage && !customMessage}
                     >
                       <Send className="h-4 w-4" />
@@ -388,15 +388,15 @@ export const WhatsAppFollowUp = ({
 
                 {/* URL Preview */}
                 <div className="mt-4 space-y-2">
-                  <Label className="text-xs text-gray-500">Generated URLs (for debugging):</Label>
+                  <Label className="text-xs text-muted">Generated URLs (for debugging):</Label>
                   <div className="space-y-1">
                     {getWhatsAppURLs().whatsapp && (
-                      <div className="text-xs font-mono bg-gray-100 p-2 rounded break-all">
+                      <div className="text-xs font-mono bg-secondary p-2 rounded break-all">
                         <strong>Regular:</strong> {getWhatsAppURLs().whatsapp.substring(0, 100)}...
                       </div>
                     )}
                     {getWhatsAppURLs().business && (
-                      <div className="text-xs font-mono bg-gray-100 p-2 rounded break-all">
+                      <div className="text-xs font-mono bg-secondary p-2 rounded break-all">
                         <strong>Business:</strong> {getWhatsAppURLs().business.substring(0, 100)}...
                       </div>
                     )}
@@ -410,3 +410,5 @@ export const WhatsAppFollowUp = ({
     </Dialog>
   );
 };
+
+;

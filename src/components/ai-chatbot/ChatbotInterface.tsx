@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 import { createClientLogger } from '@/lib/client-logger';
 
-import { useChatHistory } from '@/hooks/useChatHistory';
 import { DataVisualization } from '@/components/ai-chatbot/DataVisualization';
+import { useChatHistory } from '@/hooks/useChatHistory';
 
 
 const logger = createClientLogger('ChatbotInterface')
@@ -35,7 +35,7 @@ interface ChatbotInterfaceProps {
   onToggleMinimize?: () => void;
 }
 
-const ChatbotInterface = ({
+export const ChatbotInterface = ({
   userId,
   className = '',
   isMinimized = false,
@@ -296,9 +296,9 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
     const isSystem = message.role === 'system';
 
     const getAvatarBgColor = () => {
-      if (isUser) {return 'bg-gray-500'}
-      if (isSystem) {return 'bg-gray-500'}
-      return 'bg-gray-500'
+      if (isUser) {return 'bg-muted0'}
+      if (isSystem) {return 'bg-muted0'}
+      return 'bg-muted0'
     }
 
     return (
@@ -317,7 +317,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
           <div className={`px-4 py-3 rounded-2xl w-full break-words overflow-hidden shadow-sm ${
             isUser
               ? 'bg-gradient-to-br from-gray-500 to-gray-600 text-white'
-              : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
+                : 'bg-gradient-to-br from-muted to-muted/80 text-foreground border border-border/20'
             }`}>
             <div className="whitespace-pre-wrap text-sm leading-relaxed break-words overflow-wrap-anywhere word-break-break-word prose prose-sm max-w-none">
               {message.content}
@@ -366,7 +366,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
           </div>
 
           {/* Timestamp */}
-          <div className="text-xs text-gray-500 mt-1">
+          <div className="text-xs text-muted-foreground mt-1">
             {new Date(message['timestamp']).toLocaleTimeString('id-ID', {
               hour: '2-digit',
               minute: '2-digit'
@@ -381,14 +381,14 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
    
   const QuickActions = (): JSX.Element => (
     <div className="p-3 bg-gradient-to-r from-gray-50 to-gray-100 border-t">
-      <p className="text-xs font-medium text-gray-700 mb-2">💡 Coba tanyakan:</p>
+      <p className="text-xs font-medium text-muted-foreground mb-2">💡 Coba tanyakan:</p>
       <div className="flex flex-wrap gap-2">
         <Button
           variant="outline"
           size="sm"
           onClick={() => handleSendMessage('Resep apa yang paling menguntungkan?')}
           disabled={isLoading}
-          className="text-xs h-8 bg-white hover:bg-gray-50"
+          className="text-xs h-8 bg-background hover:bg-muted"
         >
           <BarChart3 className="h-3 w-3 mr-1" />
           Analisis Profit
@@ -398,7 +398,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
           size="sm"
           onClick={() => handleSendMessage('Gimana cara ningkatin penjualan?')}
           disabled={isLoading}
-          className="text-xs h-8 bg-white hover:bg-gray-50"
+          className="text-xs h-8 bg-background hover:bg-muted"
         >
           <Users className="h-3 w-3 mr-1" />
           Strategi Marketing
@@ -408,7 +408,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
           size="sm"
           onClick={() => handleSendMessage('Stok bahan apa yang harus direstock?')}
           disabled={isLoading}
-          className="text-xs h-8 bg-white hover:bg-gray-50"
+          className="text-xs h-8 bg-background hover:bg-muted"
         >
           <Package className="h-3 w-3 mr-1" />
           Cek Stok
@@ -418,7 +418,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
           size="sm"
           onClick={() => handleSendMessage('Harga jual yang pas untuk produk baru berapa?')}
           disabled={isLoading}
-          className="text-xs h-8 bg-white hover:bg-yellow-50"
+          className="text-xs h-8 bg-background hover:bg-muted"
         >
           <DollarSign className="h-3 w-3 mr-1" />
           Pricing Strategy
@@ -430,7 +430,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
   if (isMinimized) {
     return (
       <Card className={`fixed bottom-4 right-4 w-80  border-2 ${className}`}>
-        <CardHeader className="p-4 bg-gray-500 text-white rounded-t-lg flex flex-row items-center justify-between">
+        <CardHeader className="p-4 bg-muted0 text-white rounded-t-lg flex flex-row items-center justify-between">
           <div className="flex items-center space-x-2">
             <Bot className="h-5 w-5" />
             <h3 className="font-semibold text-sm">Asisten UMKM AI</h3>
@@ -441,14 +441,14 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
               variant="ghost"
               size="sm"
               onClick={onToggleMinimize}
-              className="text-white hover:bg-gray-600 h-8 w-8 p-0"
+              className="text-white hover:bg-primary h-8 w-8 p-0"
             >
               <Maximize2 className="h-4 w-4" />
             </Button>
           )}
         </CardHeader>
         <CardContent className="p-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Klik untuk memulai percakapan dengan asisten AI Anda.
           </p>
         </CardContent>
@@ -463,7 +463,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
         <div className="flex items-center space-x-3">
           <div className="relative">
             <Bot className="h-6 w-6 animate-pulse" />
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse" />
+             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-background animate-pulse" />
           </div>
           <div>
             <h3 className="font-bold text-base">HeyTrack AI Assistant</h3>
@@ -514,14 +514,14 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center animate-pulse">
                     <Bot className="h-4 w-4 text-white" />
                   </div>
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-3 rounded-2xl border border-gray-200 shadow-sm">
+                   <div className="bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-3 rounded-2xl border border-border/20 shadow-sm">
                     <div className="flex items-center space-x-2">
                       <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
-                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                        <div className="w-2 h-2 bg-muted0 rounded-full animate-bounce" />
+                        <div className="w-2 h-2 bg-muted0 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                        <div className="w-2 h-2 bg-muted0 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
                       </div>
-                      <span className="text-xs text-gray-600 ml-2">AI sedang berpikir...</span>
+                      <span className="text-xs text-muted-foreground ml-2">AI sedang berpikir...</span>
                     </div>
                   </div>
                 </div>
@@ -536,13 +536,13 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
         {messages.length > 1 && <QuickActions />}
 
         {/* Input area */}
-        <div className="p-4 border-t bg-white flex-shrink-0">
+        <div className="p-4 border-t bg-background flex-shrink-0">
           <div className="flex space-x-2">
             <Input
               ref={inputRef}
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   void handleSendMessage();
@@ -560,7 +560,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
               <Send className="h-4 w-4" />
             </Button>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             Ketik pesan atau gunakan aksi cepat di atas.
           </p>
         </div>
@@ -569,4 +569,5 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
   );
 }
 
-export { ChatbotInterface }
+
+

@@ -221,11 +221,11 @@ export const RecipeEditor = ({
     return (
         <div className="space-y-6">
             {/* Header */}
-            <Card className="border-2 border-gray-300 dark:border-gray-800 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
+            <Card className="border-2 border-border/20  bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
-                            <ChefHat className="h-6 w-6 text-gray-600" />
+                             <ChefHat className="h-6 w-6 text-muted-foreground" />
                             {initialData ? 'Edit Resep' : 'Resep Baru'}
                         </CardTitle>
                         <div className="flex gap-2">
@@ -242,20 +242,20 @@ export const RecipeEditor = ({
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-gray-600">{recipe.ingredients.length}</div>
+                        <div className="text-center p-3 bg-card rounded-lg border">
+                             <div className="text-lg font-bold text-foreground">{recipe.ingredients.length}</div>
                             <div className="text-xs text-muted-foreground">Bahan</div>
                         </div>
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-gray-600">{recipe.steps.length}</div>
+                        <div className="text-center p-3 bg-card rounded-lg border">
+                             <div className="text-lg font-bold text-foreground">{recipe.steps.length}</div>
                             <div className="text-xs text-muted-foreground">Langkah</div>
                         </div>
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
+                        <div className="text-center p-3 bg-card rounded-lg border">
                             <div className="text-lg font-bold text-orange-600">{totalTime} min</div>
                             <div className="text-xs text-muted-foreground">Total Waktu</div>
                         </div>
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-gray-600">{formatCurrency(totalCost)}</div>
+                        <div className="text-center p-3 bg-card rounded-lg border">
+                             <div className="text-lg font-bold text-foreground">{formatCurrency(totalCost)}</div>
                             <div className="text-xs text-muted-foreground">Est. HPP</div>
                         </div>
                     </div>
@@ -274,7 +274,7 @@ export const RecipeEditor = ({
                             <Input
                                 id="name"
                                 value={recipe.name}
-                                onChange={(e) => setRecipe({ ...recipe, name: e.target.value })}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipe({ ...recipe, name: e.target.value })}
                                 placeholder="Contoh: Roti Sobek Coklat"
                             />
                         </div>
@@ -284,7 +284,7 @@ export const RecipeEditor = ({
                             <Textarea
                                 id="description"
                                 value={recipe.description}
-                                onChange={(e) => setRecipe({ ...recipe, description: e.target.value })}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRecipe({ ...recipe, description: e.target.value })}
                                 placeholder="Deskripsi singkat tentang produk ini..."
                                 rows={3}
                             />
@@ -313,7 +313,7 @@ export const RecipeEditor = ({
                                     id="servings"
                                     type="number"
                                     value={recipe.servings}
-                                    onChange={(e) => setRecipe({ ...recipe, servings: Number(e.target.value) })}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipe({ ...recipe, servings: Number(e.target.value) })}
                                     min={1}
                                 />
                                 <Badge variant="outline" className="px-3 flex items-center">
@@ -330,7 +330,7 @@ export const RecipeEditor = ({
                                     id="prep_time"
                                     type="number"
                                     value={recipe.prep_time_minutes}
-                                    onChange={(e) => setRecipe({ ...recipe, prep_time_minutes: Number(e.target.value) })}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipe({ ...recipe, prep_time_minutes: Number(e.target.value) })}
                                     min={0}
                                 />
                                 <Badge variant="outline" className="px-3 flex items-center">
@@ -347,7 +347,7 @@ export const RecipeEditor = ({
                                     id="cook_time"
                                     type="number"
                                     value={recipe.cook_time_minutes}
-                                    onChange={(e) => setRecipe({ ...recipe, cook_time_minutes: Number(e.target.value) })}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipe({ ...recipe, cook_time_minutes: Number(e.target.value) })}
                                     min={0}
                                 />
                                 <Badge variant="outline" className="px-3 flex items-center">
@@ -373,7 +373,7 @@ export const RecipeEditor = ({
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {/* Add Ingredient Form */}
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed">
+                    <div className="p-4 bg-muted rounded-lg border-2 border-dashed">
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                             <div className="md:col-span-5">
                                 <Label className="text-xs">Bahan</Label>
@@ -406,7 +406,7 @@ export const RecipeEditor = ({
                                 <Input
                                     type="number"
                                     value={newIngredient.quantity || ''}
-                                    onChange={(e) => setNewIngredient({ ...newIngredient, quantity: Number(e.target.value) })}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewIngredient({ ...newIngredient, quantity: Number(e.target.value) })}
                                     placeholder="0"
                                     min={0}
                                     step={0.1}
@@ -417,7 +417,7 @@ export const RecipeEditor = ({
                                 <Label className="text-xs">Satuan</Label>
                                 <Input
                                     value={newIngredient.unit}
-                                    onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
                                     placeholder="gram"
                                 />
                             </div>
@@ -439,7 +439,7 @@ export const RecipeEditor = ({
                             const ingredientKey = ing.ingredient_id || `${ing['ingredient_name']}-${idx}`
 
                             return (
-                                <div key={ingredientKey} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-lg border">
+                                <div key={ingredientKey} className="flex items-center gap-3 p-3 bg-card rounded-lg border">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className="font-medium">{ing['ingredient_name']}</span>
@@ -478,13 +478,13 @@ export const RecipeEditor = ({
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {/* Add Step Form */}
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed">
+                    <div className="p-4 bg-muted rounded-lg border-2 border-dashed">
                         <div className="space-y-3">
                             <div>
                                 <Label className="text-xs">Instruksi</Label>
                                 <Textarea
                                     value={newStep.instruction}
-                                    onChange={(e) => setNewStep({ ...newStep, instruction: e.target.value })}
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewStep({ ...newStep, instruction: e.target.value })}
                                     placeholder="Contoh: Campurkan tepung, gula, dan garam dalam wadah besar..."
                                     rows={2}
                                 />
@@ -496,7 +496,7 @@ export const RecipeEditor = ({
                                         <Input
                                             type="number"
                                             value={newStep.duration_minutes || ''}
-                                            onChange={(e) => setNewStep({ ...newStep, duration_minutes: Number(e.target.value) })}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewStep({ ...newStep, duration_minutes: Number(e.target.value) })}
                                             placeholder="0"
                                             min={0}
                                         />
@@ -521,7 +521,7 @@ export const RecipeEditor = ({
                         {recipe.steps.map((step, idx) => {
                             const stepKey = step['id'] ?? `step-${step.step_number}-${idx}`
                             return (
-                                <div key={stepKey} className="flex gap-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
+                                <div key={stepKey} className="flex gap-3 p-4 bg-card rounded-lg border">
                                     <div className="flex flex-col gap-2">
                                         <Button
                                             variant="ghost"
@@ -532,7 +532,7 @@ export const RecipeEditor = ({
                                         >
                                             ↑
                                         </Button>
-                                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center font-bold text-gray-600">
+                                         <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground">
                                             {step.step_number}
                                         </div>
                                         <Button
@@ -582,7 +582,7 @@ export const RecipeEditor = ({
                 <CardContent>
                     <Textarea
                         value={recipe.notes}
-                        onChange={(e) => setRecipe({ ...recipe, notes: e.target.value })}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRecipe({ ...recipe, notes: e.target.value })}
                         placeholder="Tips, variasi, atau catatan penting lainnya..."
                         rows={4}
                     />

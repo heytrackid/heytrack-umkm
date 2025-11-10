@@ -14,7 +14,7 @@ interface CompletedBatchesProps {
   batches: ProductionBatch[]
 }
 
-const CompletedBatches = ({ batches }: CompletedBatchesProps) => {
+export const CompletedBatches = ({ batches }: CompletedBatchesProps) => {
   const completedBatches = batches.filter(b => b['status'] === 'COMPLETED').slice(0, 5)
 
   if (completedBatches.length === 0) {
@@ -35,7 +35,7 @@ const CompletedBatches = ({ batches }: CompletedBatchesProps) => {
             <div key={batch['id']} className="p-3 border rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium">{batch['recipe_name']}</h4>
-                <Badge className="bg-gray-100 dark:bg-gray-8000 text-white">Completed</Badge>
+                <Badge className="bg-secondary0 text-white">Completed</Badge>
               </div>
               <p className="text-sm text-muted-foreground">
                 Quantity: {batch.quantity}
@@ -53,4 +53,3 @@ const CompletedBatches = ({ batches }: CompletedBatchesProps) => {
   )
 }
 
-export { CompletedBatches }

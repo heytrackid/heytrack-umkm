@@ -61,11 +61,11 @@ const ResetPasswordPage = (): JSX.Element => {
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
-        <Card className="w-full max-w-md shadow-xl border-slate-200 dark:border-slate-800 animate-fade-in-scale">
+        <Card className="w-full max-w-md shadow-xl border animate-fade-in-scale">
           <CardContent className="pt-6 pb-6 sm:pt-8 sm:pb-8 px-4 sm:px-6">
             <div className="text-center space-y-4">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 dark:bg-gray-900/30 rounded-full flex items-center justify-center mx-auto animate-success-pulse">
-                <CheckCircle className="h-7 w-7 sm:h-8 sm:w-8 text-gray-600 dark:text-gray-400" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-secondary rounded-full flex items-center justify-center mx-auto animate-success-pulse">
+                <CheckCircle className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground" />
               </div>
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -112,7 +112,7 @@ const ResetPasswordPage = (): JSX.Element => {
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Reset password Anda</p>
         </div>
 
-        <Card className="shadow-xl border-slate-200 dark:border-slate-800">
+        <Card className="shadow-xl border">
           <CardHeader className="space-y-1 pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
             <CardTitle className="text-xl sm:text-2xl text-center">Lupa Password?</CardTitle>
             <CardDescription className="text-center text-sm sm:text-base">
@@ -155,7 +155,7 @@ const ResetPasswordPage = (): JSX.Element => {
                     required
                     disabled={isPending}
                     value={email}
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setEmail(e.target.value)
                       clearFieldError()
                     }}

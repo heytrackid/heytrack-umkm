@@ -1,192 +1,126 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+import { differenceInDays } from 'date-fns'
+import { AlertCircle } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { DateRange } from 'react-day-picker'
 
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
-import { ChartLegend } from '@/components/charts/LazyCharts'
-import { formatCurrentCurrency } from '@/lib/currency'
+import { ChartLineInteractive } from '@/components/charts'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { ChartConfig } from '@/components/ui/chart'
+import { DateRangePickerWithPresets } from '@/components/ui/date-range-picker'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useFinancialTrends } from '@/hooks/useFinancialTrends'
 
-// Dynamically import recharts components to reduce bundle size
-const LineChart = dynamic(
-  () => import('recharts').then(mod => mod.LineChart),
-  {
-    ssr: false,
-    loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
-  }
-)
-const Line = dynamic(
-  () => import('recharts').then(mod => mod.Line),
-  { ssr: false }
-)
-const XAxis = dynamic(
-  () => import('recharts').then(mod => mod.XAxis),
-  { ssr: false }
-)
-const YAxis = dynamic(
-  () => import('recharts').then(mod => mod.YAxis),
-  { ssr: false }
-)
-const CartesianGrid = dynamic(
-  () => import('recharts').then(mod => mod.CartesianGrid),
-  { ssr: false }
-)
-
-const financialData = [
-  {
-    month: "Jan",
-    revenue: 12000,
-    expenses: 8000,
-    profit: 4000,
-    hpp: 6000,
-  },
-  {
-    month: "Feb",
-    revenue: 15000,
-    expenses: 9500,
-    profit: 5500,
-    hpp: 7500,
-  },
-  {
-    month: "Mar",
-    revenue: 18000,
-    expenses: 11000,
-    profit: 7000,
-    hpp: 8800,
-  },
-  {
-    month: "Apr",
-    revenue: 16500,
-    expenses: 10200,
-    profit: 6300,
-    hpp: 8100,
-  },
-  {
-    month: "May",
-    revenue: 20000,
-    expenses: 12000,
-    profit: 8000,
-    hpp: 9600,
-  },
-  {
-    month: "Jun",
-    revenue: 22000,
-    expenses: 13000,
-    profit: 9000,
-    hpp: 10400,
-  },
-]
+interface FinancialTrendsChartProps {
+  days?: number
+  showDatePicker?: boolean
+}
 
 const chartConfig = {
   revenue: {
-    label: "Pendapatan",
-    color: "#22c55e",
-  },
-  expenses: {
-    label: "Pengeluaran",
-    color: "#ef4444",
+    label: 'Pendapatan',
+    color: 'hsl(var(--chart-1))',
   },
   profit: {
-    label: "Keuntungan",
-    color: "#3b82f6",
+    label: 'Keuntungan',
+    color: 'hsl(var(--chart-2))',
+  },
+  expenses: {
+    label: 'Pengeluaran',
+    color: 'hsl(var(--chart-3))',
   },
   hpp: {
-    label: "HPP",
-    color: "#f59e0b",
+    label: 'HPP',
+    color: 'hsl(var(--chart-4))',
   },
+} satisfies ChartConfig
+
+export function FinancialTrendsChart({ 
+  days: initialDays = 90,
+  showDatePicker = true 
+}: FinancialTrendsChartProps) {
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+  
+  const days = useMemo(() => {
+    if (dateRange?.from && dateRange?.to) {
+      return differenceInDays(dateRange.to, dateRange.from) + 1
+    }
+    return initialDays
+  }, [dateRange, initialDays])
+
+  const { data, isLoading, error } = useFinancialTrends({ days })
+
+  const filteredData = useMemo(() => {
+    if (!data || data.length === 0) return []
+    if (!dateRange?.from || !dateRange?.to) return data
+
+    return data.filter((item) => {
+      const itemDate = new Date(item.date)
+      return itemDate >= dateRange.from! && itemDate <= dateRange.to!
+    })
+  }, [data, dateRange])
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-[300px] w-full" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Gagal memuat data tren keuangan. Silakan coba lagi.
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Tren Keuangan</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Belum ada data keuangan. Mulai dengan membuat pesanan atau mencatat pengeluaran.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {showDatePicker && (
+        <div className="flex justify-end">
+          <DateRangePickerWithPresets
+            value={dateRange}
+            onChange={setDateRange}
+            placeholder="Pilih rentang tanggal"
+            className="w-full sm:w-[300px]"
+          />
+        </div>
+      )}
+      <div className="min-h-[400px]">
+        <ChartLineInteractive
+          data={filteredData}
+          config={chartConfig}
+          title="Tren Keuangan"
+          description={`Menampilkan ${filteredData.length} hari data - Klik tab untuk switch`}
+          defaultChart="revenue"
+        />
+      </div>
+    </div>
+  )
 }
-
-const FinancialTrendsChart = (): JSX.Element => (
-  <ChartContainer _config={chartConfig}>
-    <LineChart
-      accessibilityLayer
-      data={financialData}
-      margin={{
-        left: 12,
-        right: 12,
-      }}
-    >
-      <CartesianGrid vertical={false} />
-      <XAxis
-        dataKey="month"
-        tickLine={false}
-        axisLine={false}
-        tickMargin={8}
-        tickFormatter={(value) => value.slice(0, 3)}
-      />
-      <YAxis
-        tickLine={false}
-        axisLine={false}
-        tickMargin={8}
-        tickFormatter={(value) => formatCurrentCurrency(Number(value))}
-      />
-      <ChartTooltip
-        cursor={false}
-        formatter={(value: number | string) => formatCurrentCurrency(Number(value))}
-        content={<ChartTooltipContent />}
-      />
-      <Line
-        dataKey="revenue"
-        type="monotone"
-        stroke="#22c55e"
-        strokeWidth={3}
-        dot={{
-          fill: "#22c55e",
-          strokeWidth: 2,
-          r: 4,
-        }}
-        activeDot={{
-          r: 6,
-          stroke: "#22c55e",
-          strokeWidth: 2,
-        }}
-      />
-      <Line
-        dataKey="expenses"
-        type="monotone"
-        stroke="#ef4444"
-        strokeWidth={3}
-        dot={{
-          fill: "#ef4444",
-          strokeWidth: 2,
-          r: 4,
-        }}
-        activeDot={{
-          r: 6,
-          stroke: "#ef4444",
-          strokeWidth: 2,
-        }}
-      />
-      <Line
-        dataKey="profit"
-        type="monotone"
-        stroke="#3b82f6"
-        strokeWidth={3}
-        dot={{
-          fill: "#3b82f6",
-          strokeWidth: 2,
-          r: 4,
-        }}
-        activeDot={{
-          r: 6,
-          stroke: "#3b82f6",
-          strokeWidth: 2,
-        }}
-      />
-      <Line
-        dataKey="hpp"
-        type="monotone"
-        stroke="#f59e0b"
-        strokeWidth={2}
-        strokeDasharray="5 5"
-        dot={false}
-      />
-      <ChartLegend />
-    </LineChart>
-  </ChartContainer>
-)
-
-export { FinancialTrendsChart }

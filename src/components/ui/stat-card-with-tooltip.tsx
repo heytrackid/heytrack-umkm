@@ -60,7 +60,7 @@ export const StatCardWithTooltip = ({
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
         {trend && (
-          <p className={`text-xs ${trend.isPositive ? 'text-gray-600' : 'text-red-600'}`}>
+          <p className={`text-xs ${trend.isPositive ? 'text-muted-foreground' : 'text-red-600'}`}>
             {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}% dari kemarin
           </p>
         )}

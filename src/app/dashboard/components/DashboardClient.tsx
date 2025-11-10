@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { BarChart3, Calculator, ChefHat, Package, ShoppingCart, Sparkles, Plus, Users } from 'lucide-react'
+import { BarChart3, Calculator, ChefHat, Package, Plus, Settings, ShoppingCart, Sparkles, Users } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -9,7 +9,11 @@ import { Suspense, useEffect, useMemo, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 
 import { LoadingButton } from '@/components/ui/loading-button'
 import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
@@ -18,6 +22,8 @@ import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 
+import { FinancialTrendsChart } from '@/modules/charts/components/FinancialTrendsChart'
+import { InventoryTrendsChart } from '@/modules/charts/components/InventoryTrendsChart'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
 
 interface DashboardData {
@@ -62,7 +68,7 @@ interface DashboardClientProps {
 
 // Lazy load OnboardingWizard - only needed for new users
 const OnboardingWizard = dynamic(
-  () => import('@/components/onboarding/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })),
+  () => import('@/components/onboarding/OnboardingWizard').then(mod => ({ default: mod.OnboardingWizard })),
   {
     loading: () => <div className="animate-pulse bg-muted rounded-lg h-64 sm:h-96" />
   }
@@ -71,7 +77,7 @@ const OnboardingWizard = dynamic(
 // Dynamically import heavy dashboard components to improve initial page load
 
 // Use the stable lazy loading wrapper instead of direct dynamic import
-import { StatsCardsSectionWithSuspense, StockAlertsSectionWithSuspense, HppDashboardWidgetWithSuspense, RecentOrdersSectionWithSuspense } from './lazy-dashboard-components'
+import { HppDashboardWidgetWithSuspense, RecentOrdersSectionWithSuspense, StatsCardsSectionWithSuspense, StockAlertsSectionWithSuspense } from './lazy-dashboard-components'
 
 // Optimized data fetching - single API call
 const fetchDashboardData = async (): Promise<DashboardData> => {
@@ -80,7 +86,7 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
   })
 
   if (!response.ok) {
-    throw new Error('Failed to fetch dashboard data')
+    throw new Error('Gagal memuat data dashboard')
   }
 
   return response.json()
@@ -158,7 +164,7 @@ const renderEmptyState = (): JSX.Element => (
           </LoadingButton>
           <LoadingButton variant="outline" asChild className="h-24 flex-col gap-2">
             <a href="/orders">
-              <ShoppingCart className="h-6 w-6 text-orange-600" />
+              <ShoppingCart className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">Pesanan</span>
             </a>
           </LoadingButton>
@@ -167,8 +173,8 @@ const renderEmptyState = (): JSX.Element => (
         {/* Feature Highlights */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto pt-6 text-left">
           <div className="flex gap-3 items-start">
-            <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
-              <Calculator className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <div className="w-8 h-8 rounded-lg bg-muted dark:bg-muted flex items-center justify-center flex-shrink-0">
+              <Calculator className="h-4 w-4 text-muted-foreground" />
             </div>
             <div>
               <h4 className="font-medium text-sm mb-1">HPP Otomatis</h4>
@@ -178,8 +184,8 @@ const renderEmptyState = (): JSX.Element => (
             </div>
           </div>
           <div className="flex gap-3 items-start">
-            <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
-              <BarChart3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <div className="w-8 h-8 rounded-lg bg-muted dark:bg-muted flex items-center justify-center flex-shrink-0">
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </div>
             <div>
               <h4 className="font-medium text-sm mb-1">Analisis Profit</h4>
@@ -189,8 +195,8 @@ const renderEmptyState = (): JSX.Element => (
             </div>
           </div>
           <div className="flex gap-3 items-start">
-            <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
-              <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <div className="w-8 h-8 rounded-lg bg-muted dark:bg-muted flex items-center justify-center flex-shrink-0">
+              <Package className="h-4 w-4 text-muted-foreground" />
             </div>
             <div>
               <h4 className="font-medium text-sm mb-1">Kelola Stok</h4>
@@ -245,7 +251,7 @@ const renderQuickActions = (router: ReturnType<typeof useRouter>): JSX.Element =
           <Package className="h-6 w-6" />
           <div>
             <div className="font-medium text-sm">Tambah Bahan</div>
-            <div className="text-xs opacity-80">Update inventory</div>
+            <div className="text-xs opacity-80">Perbarui Inventori</div>
           </div>
         </LoadingButton>
         <LoadingButton
@@ -286,13 +292,22 @@ const renderQuickActions = (router: ReturnType<typeof useRouter>): JSX.Element =
   </Card>
 )
 
-export const DashboardClient = (_props: DashboardClientProps) => {
+export const DashboardClient = ({ initialData }: DashboardClientProps) => {
   const { formatCurrency } = useCurrency()
-  const [currentTime, setCurrentTime] = useState(new Date())
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [widgetVisibility, setWidgetVisibility] = useState({
+    statsCards: true,
+    recentOrders: true,
+    stockAlerts: true,
+    financialChart: true,
+    inventoryChart: true,
+    hppWidget: true,
+    quickActions: true
+  })
 
   // Use server-fetched data as initial data, then refresh with client-side query
   const {
@@ -302,7 +317,7 @@ export const DashboardClient = (_props: DashboardClientProps) => {
   } = useQuery({
     queryKey: ['dashboard', 'all-data'],
     queryFn: fetchDashboardData,
-    initialData: undefined,
+    initialData,
     staleTime: 30000,
     gcTime: 300000,
     retry: 1,
@@ -313,14 +328,7 @@ export const DashboardClient = (_props: DashboardClientProps) => {
   // Enable smart preloading for dashboard
   usePagePreloading('dashboard')
 
-  // Update current time every minute
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 60000)
 
-    return () => clearInterval(interval)
-  }, [])
 
   // Handle session expiry
   useEffect(() => {
@@ -383,15 +391,21 @@ export const DashboardClient = (_props: DashboardClientProps) => {
         />
 
         {/* Header */}
-        <PageHeader
-          title="Beranda"
-          description={`${currentTime.toLocaleDateString('id-ID', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })}${user?.email ? `, Selamat datang kembali, ${user.email.split('@')[0] ?? 'User'}! 👋` : ''}`}
-        />
+        <div className="flex items-center justify-between">
+          <PageHeader
+            title="Beranda"
+            description={`Selamat datang di dashboard${user?.email ? `, ${user.email.split('@')[0] ?? 'User'}` : ''}`}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSettings(true)}
+            className="ml-4"
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Pengaturan
+          </Button>
+        </div>
 
         {/* Empty State */}
         {hasNoData && renderEmptyState()}
@@ -399,79 +413,184 @@ export const DashboardClient = (_props: DashboardClientProps) => {
         {/* Main Dashboard Content */}
         <div className="space-y-6">
           {/* Stats Cards */}
-          <StatsCardsSectionWithSuspense
-              stats={{
-                revenue: {
-                  total: dashboardData?.revenue?.total ?? 0,
-                  growth: dashboardData?.revenue?.growth ?? '0',
-                  trend: dashboardData?.revenue?.trend ?? 'up'
-                },
-                orders: {
-                  total: dashboardData?.orders?.total ?? 0,
-                  active: dashboardData?.orders?.active ?? 0
-                },
-                customers: {
-                  total: dashboardData?.customers?.total ?? 0,
-                  vip: dashboardData?.customers?.vip ?? 0
-                },
-                inventory: {
-                  total: dashboardData?.inventory?.total ?? 0,
-                  lowStock: dashboardData?.inventory?.lowStock ?? 0
-                }
-              }}
-              formatCurrency={formatCurrency}
-            />
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Recent Orders */}
+          {widgetVisibility.statsCards && (
             <Suspense fallback={
-              <div className="space-y-4">
-                <div className="h-12 bg-gray-100 animate-pulse rounded" />
-                <div className="space-y-3">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
-                  ))}
-                </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                {Array.from({ length: 4 }, (_, i) => (
+                  <StatsCardSkeleton key={`skeleton-${i}`} />
+                ))}
               </div>
             }>
-              <RecentOrdersSectionWithSuspense orders={dashboardData?.orders?.recent ?? []} />
+              <StatsCardsSectionWithSuspense
+                stats={{
+                  revenue: {
+                    total: dashboardData?.revenue?.total ?? 0,
+                    growth: dashboardData?.revenue?.growth ?? '0',
+                    trend: dashboardData?.revenue?.trend ?? 'up'
+                  },
+                  orders: {
+                    total: dashboardData?.orders?.total ?? 0,
+                    active: dashboardData?.orders?.active ?? 0
+                  },
+                  customers: {
+                    total: dashboardData?.customers?.total ?? 0,
+                    vip: dashboardData?.customers?.vip ?? 0
+                  },
+                  inventory: {
+                    total: dashboardData?.inventory?.total ?? 0,
+                    lowStock: dashboardData?.inventory?.lowStock ?? 0
+                  }
+                }}
+                formatCurrency={formatCurrency}
+              />
             </Suspense>
+          )}
 
-            {/* Low Stock Alert */}
+          {(widgetVisibility.recentOrders || widgetVisibility.stockAlerts) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Recent Orders */}
+              {widgetVisibility.recentOrders && (
+                <Suspense fallback={<RecentOrdersSkeleton />}>
+                  <RecentOrdersSectionWithSuspense orders={dashboardData?.orders?.recent ?? []} />
+                </Suspense>
+              )}
+
+              {/* Low Stock Alert */}
+              {widgetVisibility.stockAlerts && (
+                <Suspense fallback={<StockAlertSkeleton />}>
+                  <StockAlertsSectionWithSuspense lowStockItems={dashboardData?.inventory?.lowStockAlerts ?? []} />
+                </Suspense>
+              )}
+            </div>
+          )}
+
+          {/* Financial Trends Chart */}
+          {widgetVisibility.financialChart && (
             <Suspense fallback={
-              <div className="space-y-4">
-                <div className="h-12 bg-gray-100 animate-pulse rounded" />
-                <div className="space-y-3">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={`skeleton-${i}`} className="h-16 bg-gray-100 animate-pulse rounded" />
-                  ))}
-                </div>
+              <div className="space-y-3">
+                <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+                <div className="h-[300px] bg-muted animate-pulse rounded-lg" />
               </div>
             }>
-              <StockAlertsSectionWithSuspense lowStockItems={dashboardData?.inventory?.lowStockAlerts ?? []} />
+              <FinancialTrendsChart days={90} />
             </Suspense>
-          </div>
+          )}
+
+          {/* Inventory Trends Chart */}
+          {widgetVisibility.inventoryChart && (
+            <Suspense fallback={
+              <div className="space-y-3">
+                <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+                <div className="h-[300px] bg-muted animate-pulse rounded-lg" />
+              </div>
+            }>
+              <InventoryTrendsChart days={30} />
+            </Suspense>
+          )}
 
           {/* HPP Dashboard Widget */}
-          <Suspense fallback={
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Analisis HPP
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
-              </CardContent>
-            </Card>
-          }>
-            <HppDashboardWidgetWithSuspense />
-          </Suspense>
+          {widgetVisibility.hppWidget && (
+            <Suspense fallback={
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Analisis HPP
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 bg-muted animate-pulse rounded-lg" />
+                </CardContent>
+              </Card>
+            }>
+              <HppDashboardWidgetWithSuspense />
+            </Suspense>
+          )}
         </div>
 
         {/* Quick Actions */}
-        {renderQuickActions(router)}
+        {widgetVisibility.quickActions && renderQuickActions(router)}
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettings} onOpenChange={setShowSettings}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Pengaturan Dashboard</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="stats-cards">Kartu Statistik</Label>
+                <Switch
+                  id="stats-cards"
+                  checked={widgetVisibility.statsCards}
+                  onCheckedChange={(checked) =>
+                    setWidgetVisibility(prev => ({ ...prev, statsCards: checked }))
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="financial-chart">Chart Keuangan</Label>
+                <Switch
+                  id="financial-chart"
+                  checked={widgetVisibility.financialChart}
+                  onCheckedChange={(checked) =>
+                    setWidgetVisibility(prev => ({ ...prev, financialChart: checked }))
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="inventory-chart">Chart Inventori</Label>
+                <Switch
+                  id="inventory-chart"
+                  checked={widgetVisibility.inventoryChart}
+                  onCheckedChange={(checked) =>
+                    setWidgetVisibility(prev => ({ ...prev, inventoryChart: checked }))
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="recent-orders">Pesanan Terbaru</Label>
+                <Switch
+                  id="recent-orders"
+                  checked={widgetVisibility.recentOrders}
+                  onCheckedChange={(checked) =>
+                    setWidgetVisibility(prev => ({ ...prev, recentOrders: checked }))
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="stock-alerts">Alert Stok</Label>
+                <Switch
+                  id="stock-alerts"
+                  checked={widgetVisibility.stockAlerts}
+                  onCheckedChange={(checked) =>
+                    setWidgetVisibility(prev => ({ ...prev, stockAlerts: checked }))
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="hpp-widget">Widget HPP</Label>
+                <Switch
+                  id="hpp-widget"
+                  checked={widgetVisibility.hppWidget}
+                  onCheckedChange={(checked) =>
+                    setWidgetVisibility(prev => ({ ...prev, hppWidget: checked }))
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="quick-actions">Aksi Cepat</Label>
+                <Switch
+                  id="quick-actions"
+                  checked={widgetVisibility.quickActions}
+                  onCheckedChange={(checked) =>
+                    setWidgetVisibility(prev => ({ ...prev, quickActions: checked }))
+                  }
+                />
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   )

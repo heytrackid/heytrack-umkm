@@ -42,7 +42,7 @@ export const OrdersList = ({
             <Card>
                 <CardContent className="py-16">
                     <div className="text-center">
-                        <Package className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                        <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
                         <h3 className="text-lg font-semibold mb-2">
                             {hasFilters ? 'Tidak Ada Pesanan yang Cocok' : 'Belum Ada Pesanan'}
                         </h3>

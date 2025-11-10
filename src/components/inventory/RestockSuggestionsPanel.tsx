@@ -60,7 +60,7 @@ export const RestockSuggestionsPanel = (): JSX.Element => {
             case 'MEDIUM':
                 return <Info className="h-4 w-4 text-yellow-500" />
             default:
-                return <Info className="h-4 w-4 text-gray-500" />
+                return <Info className="h-4 w-4 text-muted-foreground" />
         }
     }
 
@@ -156,3 +156,5 @@ export const RestockSuggestionsPanel = (): JSX.Element => {
         </Card>
     )
 }
+
+

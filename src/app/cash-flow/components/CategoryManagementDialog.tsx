@@ -116,8 +116,8 @@ const CategoryManagementDialog = ({ isOpen, onOpenChange }: CategoryManagementDi
                 <Input
                   placeholder="Nama kategori baru"
                   value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') addCategory('income') }}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCategoryName(e.target.value)}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') addCategory('income') }}
                 />
                 <Button onClick={() => addCategory('income')} size="sm">
                   <Plus className="h-4 w-4" />
@@ -134,8 +134,8 @@ const CategoryManagementDialog = ({ isOpen, onOpenChange }: CategoryManagementDi
                       <>
                         <Input
                           value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === 'Enter') { updateCategory(category.id, editValue); setEditingId(null); setEditValue(''); } }}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditValue(e.target.value)}
+                          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') { updateCategory(category.id, editValue); setEditingId(null); setEditValue(''); } }}
                           onBlur={() => { updateCategory(category.id, editValue); setEditingId(null); setEditValue(''); }}
                           autoFocus
                         />
@@ -172,8 +172,8 @@ const CategoryManagementDialog = ({ isOpen, onOpenChange }: CategoryManagementDi
                 <Input
                   placeholder="Nama kategori baru"
                   value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') addCategory('expense') }}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCategoryName(e.target.value)}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') addCategory('expense') }}
                 />
                 <Button onClick={() => addCategory('expense')} size="sm">
                   <Plus className="h-4 w-4" />
@@ -190,8 +190,8 @@ const CategoryManagementDialog = ({ isOpen, onOpenChange }: CategoryManagementDi
                       <>
                         <Input
                           value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === 'Enter') { updateCategory(category.id, editValue); setEditingId(null); setEditValue(''); } }}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditValue(e.target.value)}
+                          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') { updateCategory(category.id, editValue); setEditingId(null); setEditValue(''); } }}
                           onBlur={() => { updateCategory(category.id, editValue); setEditingId(null); setEditValue(''); }}
                           autoFocus
                         />

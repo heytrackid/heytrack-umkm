@@ -27,6 +27,40 @@ const isDevelopment = (): boolean => {
 }
 
 /**
+ * Safe console wrapper to prevent logging errors from breaking the app
+ */
+const safeConsole = {
+  log: (...args: unknown[]): void => {
+    try {
+      console.log(...args)
+    } catch {
+      // Silently fail if console is not available or throws
+    }
+  },
+  error: (...args: unknown[]): void => {
+    try {
+      console.error(...args)
+    } catch {
+      // Silently fail if console is not available or throws
+    }
+  },
+  warn: (...args: unknown[]): void => {
+    try {
+      console.warn(...args)
+    } catch {
+      // Silently fail if console is not available or throws
+    }
+  },
+  debug: (...args: unknown[]): void => {
+    try {
+      console.debug(...args)
+    } catch {
+      // Silently fail if console is not available or throws
+    }
+  }
+}
+
+/**
  * Client-safe logger with Pino-compatible API
  */
 class ClientLogger {
@@ -66,12 +100,12 @@ class ClientLogger {
     }
 
     // Use appropriate console method
-     
+
     const getConsoleMethod = () => {
-      if (level === 'error') {return console.error}
-      if (level === 'warn') {return console.warn}
-      if (level === 'debug') {return console.debug}
-      return console.log
+      if (level === 'error') {return safeConsole.error}
+      if (level === 'warn') {return safeConsole.warn}
+      if (level === 'debug') {return safeConsole.debug}
+      return safeConsole.log
     }
     const consoleMethod = getConsoleMethod()
      
@@ -81,20 +115,31 @@ class ClientLogger {
         // Sanitize data to prevent circular reference issues
         const sanitizeData = (obj: LogContext): LogContext => {
           // Special handling for Error objects
-          if (obj instanceof Error) {
-            return {
-              message: obj.message,
-              name: obj.name,
-              stack: obj.stack ? '[Error Stack]' : undefined,
-              // Add other enumerable properties if they exist
-              ...Object.fromEntries(
-                Object.entries(obj).map(([key, value]) => [
-                  key,
-                  typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
-                    ? value
-                    : '[Complex Property]'
-                ])
-              )
+          if (obj instanceof Error && typeof obj.message === 'string' && typeof obj.name === 'string') {
+            try {
+              return {
+                message: obj.message,
+                name: obj.name,
+                stack: obj.stack ? '[Error Stack]' : undefined,
+                // Add other enumerable properties if they exist
+                ...Object.fromEntries(
+                  Object.entries(obj).map(([key, value]) => [
+                    key,
+                    typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+                      ? value
+                      : '[Complex Property]'
+                  ])
+                )
+              }
+            } catch (serializationError) {
+              // If Object.entries fails, return a safe fallback
+              return {
+                message: obj.message || '[No message]',
+                name: obj.name || 'Error',
+                stack: obj.stack ? '[Error Stack]' : undefined,
+                error: '[Error object serialization failed]',
+                serializationError: serializationError instanceof Error ? serializationError.message : String(serializationError)
+              }
             }
           }
 

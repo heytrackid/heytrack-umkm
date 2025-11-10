@@ -34,8 +34,8 @@ export interface ApiSuccessResponse<T = unknown> {
 export interface ApiErrorResponse {
   success: false
   error: string
-  errors?: string[]
-  code?: string
+  errors?: string[] | undefined
+  code?: string | undefined
 }
 
 export interface PaginatedResponse<T> {

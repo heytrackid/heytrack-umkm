@@ -335,7 +335,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 <Input
                   placeholder="Ketik nama atau nomor telepon..."
                   value={customerSearch}
-                  onChange={(e) => setCustomerSearch(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomerSearch(e.target.value)}
                   className="mt-1"
                 />
                 {customerSearch && (
@@ -369,7 +369,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 id="customerName"
                 placeholder="Contoh: Ibu Siti"
                 value={formData['customer_name']}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   handleInputChange('customer_name', e.target.value)
                   if (fieldErrors['customer_name']) {
                     setFieldErrors(prev => {
@@ -396,7 +396,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 id="customerPhone"
                 placeholder="Contoh: 08123456789"
                 value={formData.customer_phone}
-                onChange={(e) => handleInputChange('customer_phone', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('customer_phone', e.target.value)}
                 className="mt-1"
               />
             </div>
@@ -407,7 +407,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               id="customerAddress"
               placeholder="Contoh: Jl. Merdeka No. 123, Jakarta Pusat"
               value={formData.customer_address}
-              onChange={(e) => handleInputChange('customer_address', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('customer_address', e.target.value)}
               className="mt-1"
             />
           </div>
@@ -418,7 +418,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 id="orderDate"
                 type="date"
                 value={formData.order_date}
-                onChange={(e) => handleInputChange('order_date', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('order_date', e.target.value)}
                 required
                 className="mt-1"
               />
@@ -428,7 +428,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               <select
                 className="w-full p-2 border border-input rounded-md bg-background mt-1"
                 value={formData.priority ?? 'normal'}
-                onChange={(e) => handleInputChange('priority', e.target.value as Order['priority'])}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('priority', e.target.value as Order['priority'])}
               >
                 {Object.entries(ORDER_PRIORITIES).map(([key, config]) => (
                   <option key={key} value={key}>{config.label}</option>
@@ -471,7 +471,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
 
           {orderItems.length === 0 ? (
             <div className="text-center py-12">
-              <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+              <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-semibold mb-2">Belum Ada Item Pesanan</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 Tambahkan produk yang dipesan oleh pelanggan
@@ -495,7 +495,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                             <select
                               className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
                               value={item.recipe_id}
-                              onChange={(e) => handleRecipeSelect(index, e.target.value)}
+                              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleRecipeSelect(index, e.target.value)}
                             >
                               {availableRecipes.map(recipe => (
                                 <option key={recipe['id']} value={recipe['id']}>
@@ -522,14 +522,14 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                               type="number"
                               className="text-sm mt-1"
                               value={item.quantity}
-                              onChange={(e) => updateOrderItem(index, 'quantity', e.target.value)}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'quantity', e.target.value)}
                               min="1"
                             />
                           </div>
                           <div>
                             <Label className="text-xs font-medium text-muted-foreground">Total</Label>
                             <Input
-                              className="text-sm font-medium mt-1 bg-gray-50"
+                              className="text-sm font-medium mt-1 bg-muted"
                               value={formatCurrency(item.total_price)}
                               readOnly
                             />
@@ -542,7 +542,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                             type="number"
                             className="text-sm mt-1"
                             value={item.unit_price}
-                            onChange={(e) => updateOrderItem(index, 'unit_price', e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'unit_price', e.target.value)}
                             min="0"
                             step="500"
                           />
@@ -556,9 +556,9 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                           <Label className="text-xs font-medium text-muted-foreground">Produk</Label>
                           <select
                             className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
-                            value={item.recipe_id}
-                            onChange={(e) => handleRecipeSelect(index, e.target.value)}
-                          >
+                              value={item.recipe_id}
+                              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleRecipeSelect(index, e.target.value)}
+                            >
                             {availableRecipes.map(recipe => (
                               <option key={recipe['id']} value={recipe['id']}>
                                 {recipe.name}
@@ -572,7 +572,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                             type="number"
                             className="text-sm mt-1"
                             value={item.quantity}
-                            onChange={(e) => updateOrderItem(index, 'quantity', e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'quantity', e.target.value)}
                             min="1"
                           />
                         </div>
@@ -582,7 +582,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                             type="number"
                             className="text-sm mt-1"
                             value={item.unit_price}
-                            onChange={(e) => updateOrderItem(index, 'unit_price', e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateOrderItem(index, 'unit_price', e.target.value)}
                             min="0"
                             step="500"
                           />
@@ -590,7 +590,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                         <div>
                           <Label className="text-xs font-medium text-muted-foreground">Total</Label>
                           <Input
-                            className="text-sm font-medium mt-1 bg-gray-50"
+                            className="text-sm font-medium mt-1 bg-muted"
                             value={formatCurrency(item.total_price)}
                             readOnly
                           />
@@ -628,7 +628,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 id="deliveryDate"
                 type="date"
                 value={formData.delivery_date}
-                onChange={(e) => handleInputChange('delivery_date', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('delivery_date', e.target.value)}
                 className="mt-1"
               />
             </div>
@@ -638,7 +638,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 id="deliveryTime"
                 type="time"
                 value={formData.delivery_time}
-                onChange={(e) => handleInputChange('delivery_time', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('delivery_time', e.target.value)}
                 className="mt-1"
               />
             </div>
@@ -649,7 +649,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 type="number"
                 placeholder="0"
                 value={formData.delivery_fee}
-                onChange={(e) => handleInputChange('delivery_fee', safeNumber(e.target.value, 0))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('delivery_fee', safeNumber(e.target.value, 0))}
                 min="0"
                 step="1000"
                 className="mt-1"
@@ -662,7 +662,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               id="notes"
               placeholder="Contoh: Pesanan untuk acara ulang tahun"
               value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('notes', e.target.value)}
               className="mt-1"
             />
           </div>
@@ -672,7 +672,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               id="specialInstructions"
               placeholder="Contoh: Tolong dikemas dengan box premium"
               value={formData.special_instructions}
-              onChange={(e) => handleInputChange('special_instructions', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('special_instructions', e.target.value)}
               className="mt-1"
             />
           </div>
@@ -685,7 +685,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               <select
                 className="w-full p-2 border border-input rounded-md bg-background mt-1"
                 value={formData.payment_method}
-                onChange={(e) => handleInputChange('payment_method', e.target.value as PaymentMethod)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('payment_method', e.target.value as PaymentMethod)}
               >
                 <option value="CASH">Tunai</option>
                 <option value="BANK_TRANSFER">Transfer Bank</option>
@@ -701,7 +701,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 type="number"
                 placeholder="0"
                 value={formData.discount}
-                onChange={(e) => handleInputChange('discount', safeNumber(e.target.value, 0))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('discount', safeNumber(e.target.value, 0))}
                 min="0"
                 className="mt-1"
               />
@@ -713,7 +713,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 type="number"
                 placeholder="0"
                 value={formData.tax_amount}
-                onChange={(e) => handleInputChange('tax_amount', safeNumber(e.target.value, 0))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('tax_amount', safeNumber(e.target.value, 0))}
                 min="0"
                 max="100"
                 className="mt-1"
@@ -726,7 +726,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 type="number"
                 placeholder="0"
                 value={formData.paid_amount}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   handleInputChange('paid_amount', safeNumber(e.target.value, 0))
                   if (fieldErrors['paid_amount']) {
                     setFieldErrors(prev => {

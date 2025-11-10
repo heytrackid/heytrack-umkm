@@ -56,7 +56,7 @@ export const PaymentSection = ({
                     <select
                         className="w-full p-2 border border-input rounded-md bg-background mt-1"
                         value={formData.payment_method}
-                        onChange={(e) => onInputChange('payment_method', e.target.value as PaymentMethod)}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onInputChange('payment_method', e.target.value as PaymentMethod)}
                     >
                         <option value="cash">Tunai</option>
                         <option value="transfer">Transfer Bank</option>
@@ -72,7 +72,7 @@ export const PaymentSection = ({
                         type="number"
                         placeholder="0"
                         value={formData.discount}
-                        onChange={(e) => onInputChange('discount', safeNumber(e.target.value, 0))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('discount', safeNumber(e.target.value, 0))}
                         min="0"
                         className="mt-1"
                     />
@@ -84,7 +84,7 @@ export const PaymentSection = ({
                         type="number"
                         placeholder="0"
                         value={formData.tax_amount}
-                        onChange={(e) => onInputChange('tax_amount', safeNumber(e.target.value, 0))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('tax_amount', safeNumber(e.target.value, 0))}
                         min="0"
                         max="100"
                         className="mt-1"
@@ -97,7 +97,7 @@ export const PaymentSection = ({
                         type="number"
                         placeholder="0"
                         value={formData.paid_amount}
-                        onChange={(e) => {
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             onInputChange('paid_amount', safeNumber(e.target.value, 0))
                             if (fieldErrors['paid_amount']) { onClearError('paid_amount') }
                         }}

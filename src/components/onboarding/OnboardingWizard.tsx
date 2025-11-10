@@ -42,7 +42,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     icon: <Package className="h-8 w-8" />,
     action: 'Tambah Bahan',
     href: '/ingredients',
-    color: 'bg-gray-500'
+    color: 'bg-muted0'
   },
   {
     id: 'recipes',
@@ -51,7 +51,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     icon: <ChefHat className="h-8 w-8" />,
     action: 'Buat Resep',
     href: '/recipes/new',
-    color: 'bg-gray-500'
+    color: 'bg-muted0'
   },
   {
     id: 'hpp',
@@ -60,7 +60,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     icon: <Calculator className="h-8 w-8" />,
     action: 'Hitung HPP',
     href: '/hpp',
-    color: 'bg-gray-500'
+    color: 'bg-muted0'
   },
   {
     id: 'orders',
@@ -78,7 +78,7 @@ interface OnboardingWizardProps {
   onOpenChange: (open: boolean) => void
 }
 
-const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) => {
+export const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) => {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<string[]>([])
@@ -158,12 +158,12 @@ const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) => {
               className={cn(
                 'flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all hover:border-primary',
                 currentStep === index ? 'border-primary bg-primary/5' : 'border-transparent',
-                completedSteps.includes(step['id']) && 'bg-gray-50 border-gray-300'
+                completedSteps.includes(step['id']) && 'bg-muted border-border/20'
               )}
             >
               <div className={cn(
                 'relative rounded-full p-2 text-white',
-                completedSteps.includes(step['id']) ? 'bg-gray-500' : step.color
+                completedSteps.includes(step['id']) ? 'bg-muted0' : step.color
               )}>
                 {completedSteps.includes(step['id']) ? (
                   <CheckCircle2 className="h-4 w-4" />
@@ -196,7 +196,7 @@ const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) => {
                       {currentStepData.title}
                     </h3>
                     {completedSteps.includes(currentStepData['id']) && (
-                      <CheckCircle2 className="h-5 w-5 text-gray-500" />
+                      <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
                     )}
                   </div>
                   <p className="text-muted-foreground">
@@ -216,8 +216,8 @@ const OnboardingWizard = ({ open, onOpenChange }: OnboardingWizardProps) => {
               </Button>
 
               {/* Tips */}
-              <div className="bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-lg p-4">
-                <p className="text-sm text-gray-900 dark:text-gray-100">
+              <div className="bg-muted border border-border/20  rounded-lg p-4">
+                <p className="text-sm text-foreground">
                   <strong>💡 Tips:</strong> {getStepTip(currentStepData['id'])}
                 </p>
               </div>
@@ -265,4 +265,3 @@ function getStepTip(stepId: string): string {
   return tips[stepId] ?? 'Ikuti langkah-langkah untuk setup yang optimal.'
 }
 
-export { OnboardingWizard }

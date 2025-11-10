@@ -22,7 +22,7 @@ interface OrderItemsStepProps {
   onReorderItems?: (fromIndex: number, toIndex: number) => void
 }
 
-const OrderItemsStep = ({
+export const OrderItemsStep = ({
   orderItems,
   availableRecipes,
   subtotal,
@@ -103,7 +103,7 @@ const OrderItemsStep = ({
                     <Label htmlFor={`recipe-${index}`}>Resep</Label>
                     <Select
                       value={item.recipe_id}
-                      onValueChange={(value) => onUpdateItem(index, 'recipe_id', value)}
+                      onValueChange={(value: string) => onUpdateItem(index, 'recipe_id', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih resep" />
@@ -126,7 +126,7 @@ const OrderItemsStep = ({
                       type="number"
                       min="1"
                       value={item.quantity}
-                      onChange={(e) => onUpdateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onUpdateItem(index, 'quantity', parseInt(e.target.value) || 1)}
                       placeholder="1"
                     />
                   </div>
@@ -140,7 +140,7 @@ const OrderItemsStep = ({
                       min="0"
                       step="1000"
                       value={item.unit_price}
-                      onChange={(e) => onUpdateItem(index, 'unit_price', parseFloat(e.target.value.replace(',', '.')) || 0)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onUpdateItem(index, 'unit_price', parseFloat(e.target.value.replace(',', '.')) || 0)}
                       placeholder="0"
                     />
                   </div>
@@ -162,7 +162,7 @@ const OrderItemsStep = ({
                   <Input
                     id={`requests-${index}`}
                      value={item.special_requests ?? ''}
-                    onChange={(e) => onUpdateItem(index, 'special_requests', e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => onUpdateItem(index, 'special_requests', e.target.value)}
                     placeholder="Contoh: Tidak pakai bawang, lebih manis"
                   />
                 </div>
@@ -198,5 +198,3 @@ const OrderItemsStep = ({
     </div>
   )
 }
-
-export { OrderItemsStep }

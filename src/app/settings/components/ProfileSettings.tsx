@@ -51,7 +51,7 @@ export const ProfileSettings = ({ settings, onSettingChange }: ProfileSettingsPr
             <Input
               id="fullName"
               value={settings.user.fullName}
-              onChange={(e) => onSettingChange('user', 'fullName', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSettingChange('user', 'fullName', e.target.value)}
             />
           </div>
           <div>
@@ -59,7 +59,7 @@ export const ProfileSettings = ({ settings, onSettingChange }: ProfileSettingsPr
             <select
               className="w-full p-2 border border-input rounded-md bg-background"
               value={settings.user.role}
-              onChange={(e) => onSettingChange('user', 'role', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onSettingChange('user', 'role', e.target.value)}
             >
               <option value="Owner">Pemilik</option>
               <option value="Manager">Manajer</option>
@@ -75,7 +75,7 @@ export const ProfileSettings = ({ settings, onSettingChange }: ProfileSettingsPr
               id="userEmail"
               type="email"
               value={settings.user.email}
-              onChange={(e) => onSettingChange('user', 'email', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSettingChange('user', 'email', e.target.value)}
             />
           </div>
           <div>
@@ -83,7 +83,7 @@ export const ProfileSettings = ({ settings, onSettingChange }: ProfileSettingsPr
             <Input
               id="userPhone"
               value={settings.user.phone}
-              onChange={(e) => onSettingChange('user', 'phone', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSettingChange('user', 'phone', e.target.value)}
             />
           </div>
         </div>

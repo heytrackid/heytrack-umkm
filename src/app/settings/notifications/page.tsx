@@ -534,8 +534,8 @@ const NotificationSettingsPage = () => {
                                         <input
                                             type="time"
                                             value={preferences.quiet_hours_start?.substring(0, 5) ?? '22:00'}
-                                            onChange={(e) => updatePreference('quiet_hours_start', `${e.target.value}:00`)}
-                                            className="w-full px-3 py-2 border rounded-md dark:bg-background dark:border-border"
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updatePreference('quiet_hours_start', `${e.target.value}:00`)}
+                                            className="w-full px-3 py-2 border rounded-md dark:bg-background dark:border-border/20"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -543,8 +543,8 @@ const NotificationSettingsPage = () => {
                                         <input
                                             type="time"
                                             value={preferences.quiet_hours_end?.substring(0, 5) ?? '07:00'}
-                                            onChange={(e) => updatePreference('quiet_hours_end', `${e.target.value}:00`)}
-                                            className="w-full px-3 py-2 border rounded-md dark:bg-background dark:border-border"
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updatePreference('quiet_hours_end', `${e.target.value}:00`)}
+                                            className="w-full px-3 py-2 border rounded-md dark:bg-background dark:border-border/20"
                                         />
                                     </div>
                                 </div>

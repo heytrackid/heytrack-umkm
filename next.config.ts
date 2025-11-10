@@ -72,7 +72,6 @@ const nextConfig: NextConfig = {
       'react-resizable-panels',
       'react-hot-toast',
       'sonner',
-      'cmdk',
       'input-otp',
     ],
     optimisticClientCache: false,

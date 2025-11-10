@@ -16,13 +16,15 @@ interface MessageListProps {
   isLoading: boolean
   scrollAreaRef: RefObject<HTMLDivElement>
   onSuggestionClick: (suggestion: string) => void
+  onFeedbackSubmit?: (messageId: string, rating: number, comment?: string) => void
 }
 
 export const MessageList = ({
   messages,
   isLoading,
   scrollAreaRef,
-  onSuggestionClick
+  onSuggestionClick,
+  onFeedbackSubmit
 }: MessageListProps): React.JSX.Element => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const virtualizerRef = useRef<HTMLDivElement>(null)
@@ -107,12 +109,13 @@ export const MessageList = ({
                         transform: `translateY(${virtualItem.start}px)`,
                       }}
                     >
-                      <div className="mb-6">
-                        <MessageBubble
-                          message={message}
-                          onSuggestionClick={onSuggestionClick}
-                        />
-                      </div>
+                       <div className="mb-6">
+                         <MessageBubble
+                           message={message}
+                           onSuggestionClick={onSuggestionClick}
+                           onFeedbackSubmit={onFeedbackSubmit}
+                         />
+                       </div>
                     </div>
                   )
                 })}
@@ -133,13 +136,14 @@ export const MessageList = ({
           ) : (
             // Regular rendering for short conversations
             <div ref={scrollAreaRef} className="px-4 py-6 space-y-6">
-              {messages.map((message) => (
-                <MessageBubble
-                  key={message.id}
-                  message={message}
-                  onSuggestionClick={onSuggestionClick}
-                />
-              ))}
+               {messages.map((message) => (
+                 <MessageBubble
+                   key={message.id}
+                   message={message}
+                   onSuggestionClick={onSuggestionClick}
+                   onFeedbackSubmit={onFeedbackSubmit}
+                 />
+               ))}
 
               {isLoading ? <TypingIndicator /> : null}
             </div>

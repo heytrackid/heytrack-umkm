@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 
 import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
-import { OrdersTable as OrdersTableComponent } from '@/components/orders/orders-table'
+import { OrdersTableComponent } from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'

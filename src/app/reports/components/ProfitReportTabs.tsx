@@ -131,21 +131,21 @@ const ProductsTab: React.FC<{
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5 text-gray-600" />
+                        <TrendingUp className="h-5 w-5 text-muted-foreground" />
                         Top 5 Produk Paling Menguntungkan
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-3">
                         {profitData.top_profitable_products.map((product: ProfitData['top_profitable_products'][0], index: number) => (
-                            <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-green-950 rounded-lg">
+                            <div key={index} className="flex justify-between items-center p-3 bg-muted dark:bg-green-950 rounded-lg">
                                 <div>
                                     <p className="font-medium">{product.product_name}</p>
                                     <p className="text-sm text-muted-foreground">
                                         Margin: {product.gross_margin.toFixed(1)}%
                                     </p>
                                 </div>
-                                <p className="font-bold text-gray-600">
+                                <p className="font-bold text-muted-foreground">
                                     {formatCurrency(product.gross_profit)}
                                 </p>
                             </div>

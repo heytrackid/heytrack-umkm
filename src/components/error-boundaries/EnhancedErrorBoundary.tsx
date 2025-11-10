@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button } from '@/components/ui/button';
-import { createClientLogger } from '@/lib/client-logger'
+import { createClientLogger } from '@/lib/client-logger';
 
 const logger = createClientLogger('EnhancedErrorBoundary');
 
@@ -23,7 +23,7 @@ interface ErrorBoundaryProps {
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
-class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -96,5 +96,3 @@ class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBou
     return this.props.children;
   }
 }
-
-export { EnhancedErrorBoundary }

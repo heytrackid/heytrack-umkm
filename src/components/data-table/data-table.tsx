@@ -212,7 +212,7 @@ export const DataTable = <TData, TValue>({
               <p className="text-sm font-medium">Rows per page</p>
               <select
                 value={table.getState().pagination.pageSize}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   table.setPageSize(Number(e.target.value))
                 }}
                 className="h-8 w-[70px] rounded border border-input bg-background px-2 py-1 text-sm"

@@ -93,7 +93,7 @@ const mainTabs = [
   }
 ]
 
-const AppLayout = memo(({
+export const AppLayout = memo(({
   children
 }: AppLayoutProps) => {
   const { user, isLoading: loading, isAuthenticated } = useAuth()
@@ -288,7 +288,7 @@ const AppLayout = memo(({
 
           {/* User Authentication */}
           {loading && (
-            <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
+            <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
           )}
 
           {!loading && user && (
@@ -356,4 +356,3 @@ const AppLayout = memo(({
 
 AppLayout.displayName = 'AppLayout'
 
-export { AppLayout }

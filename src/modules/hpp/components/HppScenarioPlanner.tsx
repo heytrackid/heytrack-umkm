@@ -156,7 +156,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
     return (
         <div className="space-y-4">
             {/* Header */}
-            <Card className="border-2 border-gray-300 dark:border-gray-800 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
+            <Card className="border-2 border-border/20  bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
@@ -172,20 +172,20 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
+                        <div className="text-center p-3 bg-card rounded-lg border">
                             <div className="text-lg font-bold">{formatCurrency(currentCost)}</div>
                             <div className="text-xs text-muted-foreground">HPP Saat Ini</div>
                         </div>
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
+                        <div className="text-center p-3 bg-card rounded-lg border">
                             <div className="text-lg font-bold">{formatCurrency(sellingPrice)}</div>
                             <div className="text-xs text-muted-foreground">Harga Jual</div>
                         </div>
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-gray-600">{currentMargin.toFixed(1)}%</div>
+                        <div className="text-center p-3 bg-card rounded-lg border">
+                            <div className="text-lg font-bold text-foreground">{currentMargin.toFixed(1)}%</div>
                             <div className="text-xs text-muted-foreground">Margin Saat Ini</div>
                         </div>
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-gray-600">{scenarios.length}</div>
+                        <div className="text-center p-3 bg-card rounded-lg border">
+                            <div className="text-lg font-bold text-foreground">{scenarios.length}</div>
                             <div className="text-xs text-muted-foreground">Skenario Aktif</div>
                         </div>
                     </div>
@@ -196,7 +196,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-gray-600" />
+                        <Sparkles className="h-5 w-5 text-muted-foreground" />
                         Skenario Cepat
                     </CardTitle>
                 </CardHeader>
@@ -261,7 +261,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
                                 <Input
                                     type="number"
                                     value={changePercent}
-                                    onChange={(e) => setChangePercent(Number(e.target.value))}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChangePercent(Number(e.target.value))}
                                     placeholder="10"
                                 />
                                 <Button onClick={addScenario} disabled={!selectedIngredient}>
@@ -271,7 +271,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
                         </div>
                     </div>
 
-                    <div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-900/20 p-3 rounded-lg">
+                    <div className="text-xs text-muted-foreground bg-muted/20 p-3 rounded-lg">
                         💡 <strong>Tips:</strong> Gunakan nilai negatif (contoh: -10) untuk simulasi penurunan harga atau efisiensi penggunaan bahan.
                     </div>
                 </CardContent>
@@ -293,7 +293,7 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
                                     key={scenario['id']}
                                     className={`p-4 rounded-lg border-2 ${isNegative
                                         ? 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10'
-                                        : 'border-gray-300 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/10'
+                                        : 'border-border/20  bg-muted/50'
                                         }`}
                                 >
                                     <div className="flex items-start justify-between mb-3">
@@ -324,30 +324,30 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
                                     </div>
 
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                        <div className="text-center p-2 bg-white dark:bg-gray-900 rounded">
+                                        <div className="text-center p-2 bg-card rounded">
                                             <div className="text-sm font-bold">
                                                 {formatCurrency(scenario.impact.newCost)}
                                             </div>
                                             <div className="text-xs text-muted-foreground">HPP Baru</div>
                                         </div>
 
-                                        <div className="text-center p-2 bg-white dark:bg-gray-900 rounded">
-                                            <div className="text-sm font-bold text-gray-600">
+                                        <div className="text-center p-2 bg-card rounded">
+                                            <div className="text-sm font-bold text-foreground">
                                                 {scenario.impact.costDiff > 0 ? '+' : ''}
                                                 {formatCurrency(scenario.impact.costDiff)}
                                             </div>
                                             <div className="text-xs text-muted-foreground">Selisih</div>
                                         </div>
 
-                                        <div className="text-center p-2 bg-white dark:bg-gray-900 rounded">
+                                        <div className="text-center p-2 bg-card rounded">
                                             <div className="text-sm font-bold">
                                                 {scenario.impact.newMargin.toFixed(1)}%
                                             </div>
                                             <div className="text-xs text-muted-foreground">Margin Baru</div>
                                         </div>
 
-                                        <div className="text-center p-2 bg-white dark:bg-gray-900 rounded">
-                                            <div className="text-sm font-bold text-gray-600">
+                                        <div className="text-center p-2 bg-card rounded">
+                                            <div className="text-sm font-bold text-foreground">
                                                 {marginImpact > 0 ? '+' : ''}
                                                 {marginImpact.toFixed(1)}%
                                             </div>
@@ -356,9 +356,9 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
                                     </div>
 
                                     {scenario.impact.newMargin < 30 && (
-                                        <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-900/20 rounded border border-gray-200 dark:border-gray-800 flex items-start gap-2">
-                                            <AlertTriangle className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
-                                            <p className="text-xs text-gray-800 dark:text-gray-200">
+                                        <div className="mt-3 p-2 bg-muted/20 rounded border border-border/20  flex items-start gap-2">
+                                            <AlertTriangle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                                            <p className="text-xs text-foreground">
                                                 <strong>Peringatan:</strong> Margin di bawah 30% berisiko untuk sustainability bisnis.
                                                 Pertimbangkan untuk menaikkan harga jual atau cari supplier alternatif.
                                             </p>
@@ -376,8 +376,8 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
                 <Card className="border-2 border-dashed">
                     <CardContent className="py-12">
                         <div className="text-center space-y-4">
-                            <div className="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                                <Calculator className="h-8 w-8 text-gray-400" />
+                            <div className="w-16 h-16 mx-auto bg-secondary rounded-full flex items-center justify-center">
+                                <Calculator className="h-8 w-8 text-muted-foreground" />
                             </div>
                             <div>
                                 <p className="font-semibold mb-1">Belum Ada Skenario</p>

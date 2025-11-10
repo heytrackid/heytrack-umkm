@@ -6,7 +6,7 @@
  */
 
 // Core recipe components
-export { SmartPricingAssistant as SmartPricingAssistant } from './components/SmartPricingAssistant'
+export { SmartPricingAssistant } from './components/SmartPricingAssistant'
 
 // Extracted HPP calculator components
 export { UMKMTooltip } from './components/UMKMTooltip'
@@ -17,7 +17,7 @@ export { RecommendationsCard } from './components/RecommendationsCard'
 export { EducationalFooter } from './components/EducationalFooter'
 
 // Lazy loaded recipe components
-export { 
+export {
   LazySmartPricingAssistant,
   preloadRecipeComponents,
   RecipeDashboardWithProgressiveLoading,

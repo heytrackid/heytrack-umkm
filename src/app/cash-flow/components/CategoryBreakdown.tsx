@@ -15,10 +15,10 @@ interface CategoryBreakdownProps {
 
 // Color palette for categories (consistent with charts)
 const categoryColors = [
-  'bg-gray-500',
-  'bg-gray-500',
+  'bg-muted0',
+  'bg-muted0',
   'bg-yellow-500',
-  'bg-gray-500',
+  'bg-muted0',
   'bg-pink-500',
   'bg-indigo-500',
   'bg-orange-500',
@@ -79,7 +79,7 @@ const CategoryBreakdown = ({ summary, formatCurrency, isMobile }: CategoryBreakd
                           <Badge variant="secondary" className="text-xs">
                             {percentage.toFixed(0)}%
                           </Badge>
-                          <span className="font-semibold text-gray-600">
+                          <span className="font-semibold text-muted-foreground">
                             {formatCurrency(amount)}
                           </span>
                         </div>
@@ -135,7 +135,7 @@ const CategoryBreakdown = ({ summary, formatCurrency, isMobile }: CategoryBreakd
 
             {/* Insight Alert */}
             {hasHighExpenseWarning && (
-              <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-500/30 rounded-lg">
                 <div className="flex gap-2">
                   <AlertTriangle className="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" />
                   <div className="text-xs">

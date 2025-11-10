@@ -4,7 +4,7 @@ import type { ComponentProps } from 'react'
 
 
 
-const Input = ({ className, type, ...props }: ComponentProps<'input'>) => (
+export const Input = ({ className, type, ...props }: ComponentProps<'input'>) => (
     <input
       type={type}
       data-slot="input"
@@ -18,4 +18,4 @@ const Input = ({ className, type, ...props }: ComponentProps<'input'>) => (
     />
   )
 
-export { Input }
+

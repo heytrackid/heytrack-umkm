@@ -74,14 +74,14 @@ export const ProductProfitabilityChart = ({
                     <input
                       type="date"
                       value={filters.startDate}
-                      onChange={(e) => onFiltersChange({ startDate: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onFiltersChange({ startDate: e.target.value })}
                       className={`h-9 ${isMobile ? 'w-full' : 'w-[130px]'} rounded-md border border-input bg-background px-2 text-xs`}
                       placeholder="Mulai"
                     />
                     <input
                       type="date"
                       value={filters.endDate}
-                      onChange={(e) => onFiltersChange({ endDate: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onFiltersChange({ endDate: e.target.value })}
                       className={`h-9 ${isMobile ? 'w-full' : 'w-[130px]'} rounded-md border border-input bg-background px-2 text-xs`}
                       placeholder="Akhir"
                     />

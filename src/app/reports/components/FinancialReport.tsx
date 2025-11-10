@@ -19,7 +19,7 @@ interface FinancialReportProps {
   }
 }
 
-const FinancialReport = ({ dateRange }: FinancialReportProps) => {
+export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
   const { formatCurrency } = useCurrency()
   const { data: financialRecords } = useSupabaseCRUD<'financial_records'>('financial_records')
 
@@ -65,7 +65,7 @@ const FinancialReport = ({ dateRange }: FinancialReportProps) => {
             <TrendingUp className="h-5 w-5 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-600">
+            <div className="text-2xl font-bold text-muted-foreground">
               {formatCurrency(financialStats.totalIncome)}
             </div>
             <p className="text-xs text-muted-foreground">+{incomeGrowth}% dari periode sebelumnya</p>
@@ -166,7 +166,7 @@ const FinancialReport = ({ dateRange }: FinancialReportProps) => {
                   {((financialStats.totalExpense / (financialStats.totalIncome || 1)) * 100).toFixed(1)}%
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="w-full bg-muted rounded-full h-2.5">
                  <div
                    className="bg-red-600 h-2.5 rounded-full"
                    style={{
@@ -179,7 +179,7 @@ const FinancialReport = ({ dateRange }: FinancialReportProps) => {
                 <span>Profit Margin</span>
                 <span className="font-medium">{profitMargin.toFixed(1)}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="w-full bg-muted rounded-full h-2.5">
                  <div
                    className="bg-green-600 h-2.5 rounded-full"
                    style={{
@@ -202,5 +202,3 @@ const FinancialReport = ({ dateRange }: FinancialReportProps) => {
     </div>
   )
 }
-
-export { FinancialReport }

@@ -87,7 +87,7 @@ export const Modal = ({
         onClick={handleBackdropClick}
       >
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+          className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity"
           aria-hidden="true"
         />
 
@@ -101,7 +101,7 @@ export const Modal = ({
           ref={modalRef}
           tabIndex={-1}
           className={`
-            relative inline-block w-full transform overflow-hidden rounded-lg bg-white text-left align-bottom  transition-all sm:my-8 sm:align-middle
+            relative inline-block w-full transform overflow-hidden rounded-lg bg-background text-left align-bottom transition-all sm:my-8 sm:align-middle
             ${fullScreenOnMobile
               ? 'h-full sm:h-auto sm:max-h-[90vh]'
               : 'max-h-[90vh] sm:max-h-[85vh]'
@@ -111,17 +111,17 @@ export const Modal = ({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-200 bg-gray-50">
-            <h2
-              id="modal-title"
-              className="text-base sm:text-lg font-semibold text-gray-900 pr-8 text-wrap-mobile"
-            >
-              {title}
-            </h2>
+          <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-border/20 bg-muted">
+              <h2
+                id="modal-title"
+                className="text-base sm:text-lg font-semibold text-foreground pr-8 text-wrap-mobile"
+              >
+                {title}
+              </h2>
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="absolute right-3 top-3 sm:right-4 sm:top-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-full p-1 transition-colors"
+                className="absolute right-3 top-3 sm:right-4 sm:top-4 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full p-1 transition-colors"
                 aria-label=""
               >
                 <X className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -213,28 +213,28 @@ export const Drawer = ({
         className={`flex min-h-screen ${positionClasses[position].container} sm:items-center sm:justify-center sm:p-4`}
         onClick={handleBackdropClick}
       >
-        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" aria-hidden="true" />
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity" aria-hidden="true" />
 
         <div
           ref={drawerRef}
           className={`
-            relative bg-white  transform transition-all
+            relative bg-background transform transition-all
             ${positionClasses[position].panel}
           `}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-200">
-            <h2
-              id="drawer-title"
-              className="text-lg font-semibold text-gray-900 text-wrap-mobile pr-8"
-            >
-              {title}
-            </h2>
+          <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-border/20">
+              <h2
+                id="drawer-title"
+                className="text-lg font-semibold text-foreground text-wrap-mobile pr-8"
+              >
+                {title}
+              </h2>
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-full p-1 transition-colors"
+                className="text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full p-1 transition-colors"
                 aria-label=""
               >
                 <X className="h-6 w-6" />

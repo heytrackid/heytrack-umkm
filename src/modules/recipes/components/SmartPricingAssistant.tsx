@@ -37,7 +37,7 @@ export interface SmartPricingAssistantProps {
   onPriceUpdate: (price: number, margin: number) => void
 }
 
-const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPriceUpdate }) => {
+export const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPriceUpdate }) => {
 
   const { formatCurrency } = useCurrency()
   const [analysis, setAnalysis] = useState<SmartPricingAnalysis | null>(null)
@@ -161,7 +161,7 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
   return (
     <div className="space-y-6">
       {/* Enhanced Quick Overview with Status */}
-      <Card className="border-2 border-gray-300 dark:border-gray-800 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
+      <Card className="border-2 border-border/20  bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -189,18 +189,18 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
               onClick={analyzePricing}
               disabled={loading}
             >
-              {loading ? 'Menganalisis...' : '🔄 Refresh'}
+              {loading ? 'Menganalisis...' : '🔄 Segarkan'}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="border-gray-300 dark:border-gray-800">
+            <Card className="border-border/20 ">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-600 mb-1">
-                    {formatCurrency(analysis.breakdown.totalCost)}
-                  </div>
+                   <div className="text-2xl font-bold text-foreground mb-1">
+                     {formatCurrency(analysis.breakdown.totalCost)}
+                   </div>
                   <div className="text-xs text-muted-foreground mb-2">Total HPP</div>
                   <Badge variant="outline" className="text-xs">
                     Modal Produksi
@@ -209,12 +209,12 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
               </CardContent>
             </Card>
 
-            <Card className="border-gray-300 dark:border-gray-800">
+            <Card className="border-border/20 ">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-600 mb-1">
-                    {formatCurrency(analysis.pricing.standard.price)}
-                  </div>
+                   <div className="text-2xl font-bold text-foreground mb-1">
+                     {formatCurrency(analysis.pricing.standard.price)}
+                   </div>
                   <div className="text-xs text-muted-foreground mb-2">Harga Optimal</div>
                   <Badge variant="outline" className="text-xs gap-1">
                     <Target className="h-3 w-3" />
@@ -224,12 +224,12 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
               </CardContent>
             </Card>
 
-            <Card className="border-gray-300 dark:border-gray-800">
+            <Card className="border-border/20 ">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-600 mb-1">
-                    {analysis.pricing.standard.margin}%
-                  </div>
+                   <div className="text-2xl font-bold text-foreground mb-1">
+                     {analysis.pricing.standard.margin}%
+                   </div>
                   <div className="text-xs text-muted-foreground mb-2">Margin Profit</div>
                   <Badge
                     variant={analysis.pricing.standard.margin >= 50 ? "default" : "secondary"}
@@ -257,7 +257,7 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
           </div>
 
           {/* Quick Insights */}
-          <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-lg border">
+          <div className="mt-4 p-4 bg-card rounded-lg border">
             <div className="flex items-start gap-3">
               <Lightbulb className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm">
@@ -311,9 +311,9 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
                     <div className="space-y-1 text-xs">
                       <div className="flex justify-between">
                         <span>Profit:</span>
-                        <span className="font-medium text-gray-600 dark:text-gray-400">
-                          {formatCurrency(data.price - analysis.breakdown.totalCost)}
-                        </span>
+                         <span className="font-medium text-muted-foreground">
+                           {formatCurrency(data.price - analysis.breakdown.totalCost)}
+                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Break-even:</span>
@@ -325,7 +325,7 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
                     <Button
                       size="sm"
                       className="w-full mt-3"
-                      onClick={(e) => {
+                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                         e.stopPropagation()
                         handleApplyPrice(tier)
                       }}
@@ -354,7 +354,7 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
                     id="custom-price"
                     type="number"
                     value={customPrice}
-                    onChange={(e) => setCustomPrice(Number(e.target.value))}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomPrice(Number(e.target.value))}
 
                   />
                 </div>
@@ -364,9 +364,9 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
                       <div>Margin: <span className="font-medium">
                         {((customPrice - analysis.breakdown.totalCost) / customPrice * 100).toFixed(1)}%
                       </span></div>
-                      <div>Profit: <span className="font-medium text-gray-600 dark:text-gray-400">
-                        {formatCurrency(customPrice - analysis.breakdown.totalCost)}
-                      </span></div>
+                       <div>Profit: <span className="font-medium text-muted-foreground">
+                         {formatCurrency(customPrice - analysis.breakdown.totalCost)}
+                       </span></div>
                     </>
                   )}
                 </div>
@@ -462,11 +462,11 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
 
         {/* Enhanced Recommendations Tab */}
         <SwipeableTabsContent value="recommendations" className="space-y-4">
-          <Card className="border-2 border-gray-300 dark:border-gray-800">
+          <Card className="border-2 border-border/20 ">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center">
-                  <Lightbulb className="h-5 w-5 text-gray-600" />
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                   <Lightbulb className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
                   <div>Rekomendasi Pricing AI</div>
@@ -479,39 +479,39 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
             <CardContent>
               <div className="space-y-3">
                 {analysis.recommendations.map((rec: string, index: number) => (
-                  <div key={index} className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-300 dark:border-gray-800">
+                  <div key={index} className="flex items-start gap-3 p-4 bg-muted/20 rounded-lg border border-border/20 ">
                     <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
                       {index + 1}
                     </div>
                     <div className="flex-1">
                       <p className="text-sm">{rec}</p>
                     </div>
-                    <CheckCircle className="h-5 w-5 text-gray-600 flex-shrink-0" />
+                     <CheckCircle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                   </div>
                 ))}
               </div>
 
               {/* Action Items */}
-              <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900/20 dark:to-gray-950/20 rounded-lg border-2 border-gray-300 dark:border-gray-800">
+              <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900/20 dark:to-gray-950/20 rounded-lg border-2 border-border/20 ">
                 <h4 className="font-semibold mb-3 flex items-center gap-2">
                   <Target className="h-4 w-4" />
                   Langkah Selanjutnya:
                 </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-start gap-2">
-                    <span className="text-gray-600 font-bold">1.</span>
+                     <span className="text-muted-foreground font-bold">1.</span>
                     <span>Pilih tier pricing yang sesuai dengan target pasar Anda</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-gray-600 font-bold">2.</span>
+                     <span className="text-muted-foreground font-bold">2.</span>
                     <span>Test harga dengan sample kecil customer terlebih dahulu</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-gray-600 font-bold">3.</span>
+                     <span className="text-muted-foreground font-bold">3.</span>
                     <span>Monitor feedback dan sesuaikan jika diperlukan</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-gray-600 font-bold">4.</span>
+                     <span className="text-muted-foreground font-bold">4.</span>
                     <span>Review pricing setiap bulan atau saat ada perubahan biaya bahan</span>
                   </div>
                 </div>
@@ -531,26 +531,26 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center">
-                      <CheckCircle className="h-4 w-4 text-gray-600" />
+                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+                       <CheckCircle className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <h4 className="font-semibold">Keunggulan Pricing Anda</h4>
                   </div>
                   <div className="space-y-2 text-sm">
-                    <div className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-900/20 rounded">
-                      <span className="text-gray-600">✓</span>
+                    <div className="flex items-start gap-2 p-2 bg-muted/20 rounded">
+                       <span className="text-muted-foreground">✓</span>
                       <span>Margin sehat {analysis.pricing.standard.margin}% untuk sustainability bisnis</span>
                     </div>
-                    <div className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-900/20 rounded">
-                      <span className="text-gray-600">✓</span>
+                    <div className="flex items-start gap-2 p-2 bg-muted/20 rounded">
+                       <span className="text-muted-foreground">✓</span>
                       <span>Harga kompetitif di segment pasar Anda</span>
                     </div>
-                    <div className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-900/20 rounded">
-                      <span className="text-gray-600">✓</span>
+                    <div className="flex items-start gap-2 p-2 bg-muted/20 rounded">
+                       <span className="text-muted-foreground">✓</span>
                       <span>Cover semua cost operasional + profit yang layak</span>
                     </div>
-                    <div className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-900/20 rounded">
-                      <span className="text-gray-600">✓</span>
+                    <div className="flex items-start gap-2 p-2 bg-muted/20 rounded">
+                       <span className="text-muted-foreground">✓</span>
                       <span>Fleksibilitas untuk promo tanpa rugi</span>
                     </div>
                   </div>
@@ -558,26 +558,26 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center">
-                      <Lightbulb className="h-4 w-4 text-gray-600" />
+                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+                       <Lightbulb className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <h4 className="font-semibold">Tips Optimasi Harga</h4>
                   </div>
                   <div className="space-y-2 text-sm">
-                    <div className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-900/20 rounded">
-                      <span className="text-gray-600">💡</span>
+                    <div className="flex items-start gap-2 p-2 bg-muted/20 rounded">
+                       <span className="text-muted-foreground">💡</span>
                       <span>Monitor harga kompetitor secara berkala</span>
                     </div>
-                    <div className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-900/20 rounded">
-                      <span className="text-gray-600">💡</span>
+                    <div className="flex items-start gap-2 p-2 bg-muted/20 rounded">
+                       <span className="text-muted-foreground">💡</span>
                       <span>Test price sensitivity dengan A/B testing</span>
                     </div>
-                    <div className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-900/20 rounded">
-                      <span className="text-gray-600">💡</span>
+                    <div className="flex items-start gap-2 p-2 bg-muted/20 rounded">
+                       <span className="text-muted-foreground">💡</span>
                       <span>Fokus pada value proposition, bukan harga murah</span>
                     </div>
-                    <div className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-900/20 rounded">
-                      <span className="text-gray-600">💡</span>
+                    <div className="flex items-start gap-2 p-2 bg-muted/20 rounded">
+                       <span className="text-muted-foreground">💡</span>
                       <span>Pertimbangkan bundling untuk increase average order value</span>
                     </div>
                   </div>
@@ -585,7 +585,7 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
               </div>
 
               {/* Competitive Analysis */}
-              <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-500/30">
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm">
@@ -607,6 +607,3 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
     </div>
   )
 }
-
-
-export { SmartPricingAssistant }

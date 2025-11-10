@@ -2,9 +2,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 
 
-import { generateNonce, getStrictCSP } from '@/lib/csp'
-import { middlewareLogger } from '@/lib/logger'
-import { updateSession } from '@/utils/supabase/middleware'
+import { generateNonce, getStrictCSP } from './src/lib/csp'
+import { middlewareLogger } from './src/lib/logger'
+import { updateSession } from './src/utils/supabase/middleware'
 
 import type { User } from '@supabase/supabase-js'
 

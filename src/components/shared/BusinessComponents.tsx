@@ -79,7 +79,7 @@ export const InventoryAlerts = ({
     return (
       <Card className={className}>
         <CardContent className="p-6 text-center">
-          <CheckCircle className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+          <CheckCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="font-semibold mb-2">All Good!</h3>
           <p className="text-muted-foreground">
             No inventory alerts at this time.
@@ -176,8 +176,8 @@ export const StockLevelIndicator = ({
   const getStatusColor = () => {
     if (currentStock <= 0) { return 'bg-red-500' }
     if (currentStock <= minStock) { return 'bg-orange-500' }
-    if (maxStock && currentStock >= maxStock) { return 'bg-gray-500' }
-    return 'bg-gray-500'
+    if (maxStock && currentStock >= maxStock) { return 'bg-muted0' }
+    return 'bg-muted0'
   }
 
   const getStatusText = () => {
@@ -247,14 +247,14 @@ export const MetricCard = ({
           <p className="text-2xl font-bold">
             {value}
           </p>
-          {change && (
-            <div className="flex items-center mt-2 text-sm">
-              {change.trend === 'up' && <TrendingUp className="h-4 w-4 text-gray-500 mr-1" />}
-              {change.trend === 'down' && <TrendingDown className="h-4 w-4 text-red-500 mr-1" />}
-              <span className={`${change.trend === 'up' ? 'text-gray-600' :
-                change.trend === 'down' ? 'text-red-600' :
-                  'text-muted-foreground'
-                }`}>
+           {change && (
+             <div className="flex items-center mt-2 text-sm">
+               {change.trend === 'up' && <TrendingUp className="h-4 w-4 text-muted-foreground mr-1" />}
+               {change.trend === 'down' && <TrendingDown className="h-4 w-4 text-red-500 mr-1" />}
+               <span className={`${change.trend === 'up' ? 'text-muted-foreground' :
+                 change.trend === 'down' ? 'text-red-600' :
+                   'text-muted-foreground'
+                 }`}>
                 {change.value > 0 && '+'}{change.value}% {change.label}
               </span>
             </div>
@@ -319,7 +319,7 @@ export const ProfitabilityCalculator = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Revenue</p>
-            <p className="text-lg font-semibold text-gray-600">
+            <p className="text-lg font-semibold text-muted-foreground">
               {formatCurrency(data.revenue)}
             </p>
           </div>
@@ -353,7 +353,7 @@ export const ProfitabilityCalculator = ({
             {data.otherIncome && (
               <div className="flex justify-between">
                 <span>Other Income</span>
-                <span className="font-medium text-gray-600">
+                <span className="font-medium text-muted-foreground">
                   +{formatCurrency(data.otherIncome)}
                 </span>
               </div>
@@ -371,7 +371,7 @@ export const ProfitabilityCalculator = ({
             <div className="border-t pt-3">
               <div className="flex justify-between font-semibold">
                 <span>Net Income</span>
-                <span className={calculations.netIncome >= 0 ? 'text-gray-600' : 'text-red-600'}>
+                <span className={calculations.netIncome >= 0 ? 'text-foreground' : 'text-red-600'}>
                   {formatCurrency(calculations.netIncome)}
                   <span className="text-sm text-muted-foreground ml-2">
                     ({calculations.netMargin.toFixed(1)}%)
@@ -481,7 +481,7 @@ export const SalesPerformanceChart = ({
               <p className="text-sm text-muted-foreground">Orders</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-600">
+              <p className="text-2xl font-bold text-muted-foreground">
                 {data.length > 0 ? formatCurrency(
                   data.reduce((sum, d) => sum + d.sales, 0) / data.length
                 ) : '0'}
@@ -521,15 +521,15 @@ export const CustomerInsights = ({
   className = ""
 }: CustomerInsightsProps) => {
   const typeConfig = {
-    high_value: { icon: DollarSign, color: 'text-gray-600', bgColor: 'bg-gray-100' },
-    frequent: { icon: ShoppingCart, color: 'text-gray-600', bgColor: 'bg-gray-100' },
-    new: { icon: Users, color: 'text-gray-600', bgColor: 'bg-gray-100' },
+    high_value: { icon: DollarSign, color: 'text-muted-foreground', bgColor: 'bg-muted' },
+    frequent: { icon: ShoppingCart, color: 'text-muted-foreground', bgColor: 'bg-muted' },
+    new: { icon: Users, color: 'text-muted-foreground', bgColor: 'bg-muted' },
     churn_risk: { icon: AlertTriangle, color: 'text-red-600', bgColor: 'bg-red-100' },
-    loyal: { icon: CheckCircle, color: 'text-emerald-600', bgColor: 'bg-gray-100' }
+    loyal: { icon: CheckCircle, color: 'text-emerald-600', bgColor: 'bg-muted' }
   }
 
   const priorityColors = {
-    low: 'border-gray-300 bg-gray-50',
+    low: 'border-border/20 bg-muted',
     medium: 'border-yellow-200 bg-yellow-50',
     high: 'border-red-200 bg-red-50'
   }

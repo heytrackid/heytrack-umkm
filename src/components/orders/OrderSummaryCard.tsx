@@ -30,7 +30,7 @@ interface OrderSummaryCardProps {
 }
 
 // ✅ OPTIMIZED: Memoized component
-const OrderSummaryCard = memo(({
+export const OrderSummaryCard = memo(({
     order,
     onClick,
     showActions: _showActions = false
@@ -143,4 +143,3 @@ const OrderSummaryCard = memo(({
 
 OrderSummaryCard.displayName = 'OrderSummaryCard'
 
-export { OrderSummaryCard }

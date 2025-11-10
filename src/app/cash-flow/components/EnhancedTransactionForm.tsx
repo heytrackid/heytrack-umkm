@@ -156,8 +156,8 @@ const EnhancedTransactionForm = ({
                     <DialogTitle className="flex items-center gap-2 text-wrap-mobile">
                         {transactionType === 'income' ? (
                             <>
-                                <div className="p-2 bg-gray-100 dark:bg-gray-900 rounded-lg flex-shrink-0">
-                                    <ArrowUpCircle className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                                <div className="p-2 bg-secondary dark:bg-gray-900 rounded-lg flex-shrink-0">
+                                    <ArrowUpCircle className="h-5 w-5 text-muted-foreground" />
                                 </div>
                                 Tambah Pemasukan
                             </>
@@ -208,7 +208,7 @@ const EnhancedTransactionForm = ({
                                         : 'Contoh: Pembelian tepung terigu 10kg'
                                 }
                                 value={formData.description}
-                                onChange={(e) => handleFieldChange('description', e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleFieldChange('description', e.target.value)}
                                 onBlur={() => handleFieldBlur('description')}
                                 className={errors['description'] && touched['description'] ? 'border-red-500' : ''}
                                 rows={3}
@@ -231,7 +231,7 @@ const EnhancedTransactionForm = ({
                             </Label>
                             <Select
                                 value={formData.category}
-                                onValueChange={(value) => handleFieldChange('category', value)}
+                                onValueChange={(value: string) => handleFieldChange('category', value)}
                             >
                                 <SelectTrigger
                                     id="category"
@@ -270,7 +270,7 @@ const EnhancedTransactionForm = ({
                                     type="text"
                                     placeholder="0"
                                     value={formData.amount ? formatCurrencyInput(formData.amount) : ''}
-                                    onChange={(e) => {
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                         const value = e.target.value.replace(/[^0-9]/g, '')
                                         handleFieldChange('amount', value)
                                     }}
@@ -302,7 +302,7 @@ const EnhancedTransactionForm = ({
                                     id="date"
                                     type="date"
                                     value={formData.date}
-                                    onChange={(e) => handleFieldChange('date', e.target.value)}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFieldChange('date', e.target.value)}
                                     onBlur={() => handleFieldBlur('date')}
                                     max={new Date().toISOString().split('T')[0]}
                                     className={`pl-10 ${errors['date'] && touched['date'] ? 'border-red-500' : ''}`}

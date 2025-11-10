@@ -159,6 +159,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 </tr>`)
                 .join('')
 
+            // PDF export styles - inline styles required for PDF generation
             const htmlContent = `
                 <html>
                     <head>
@@ -219,11 +220,11 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
     return (
         <div className="space-y-4">
             {/* Summary Card */}
-            <Card className="border-2 border-gray-300 dark:border-gray-800 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
+            <Card className="border-2 border-border/20  bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
-                            <TrendingUp className="h-5 w-5 text-gray-600" />
+                            <TrendingUp className="h-5 w-5 text-foreground" />
                             Ringkasan HPP - {recipe.name}
                         </CardTitle>
                         <Button variant="outline" size="sm" onClick={exportToPDF}>
@@ -234,28 +235,28 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="text-center p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-2xl font-bold text-gray-600">
+                        <div className="text-center p-4 bg-card rounded-lg border">
+                            <div className="text-2xl font-bold text-foreground">
                                 {formatCurrency(ingredientCost)}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">Bahan Baku</div>
-                            <div className="text-xs font-medium text-gray-600 mt-1">
+                            <div className="text-xs font-medium text-muted-foreground mt-1">
                                 {ingredientSharePercent.toFixed(0)}% dari total
                             </div>
                         </div>
 
-                        <div className="text-center p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-2xl font-bold text-gray-600">
+                        <div className="text-center p-4 bg-card rounded-lg border">
+                            <div className="text-2xl font-bold text-foreground">
                                 {formatCurrency(totalOperational)}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">Operasional</div>
-                            <div className="text-xs font-medium text-gray-600 mt-1">
+                            <div className="text-xs font-medium text-muted-foreground mt-1">
                                 {operationalSharePercent.toFixed(0)}% dari total
                             </div>
                         </div>
 
-                        <div className="text-center p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-2xl font-bold text-gray-600">
+                        <div className="text-center p-4 bg-card rounded-lg border">
+                            <div className="text-2xl font-bold text-foreground">
                                 {formatCurrency(totalCost)}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">Total HPP</div>
@@ -264,8 +265,8 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                             </Badge>
                         </div>
 
-                        <div className="text-center p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-2xl font-bold text-gray-600">
+                        <div className="text-center p-4 bg-card rounded-lg border">
+                            <div className="text-2xl font-bold text-foreground">
                                 {marginPercent.toFixed(0)}%
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">Margin</div>
@@ -284,7 +285,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                             <span className="font-medium">Komposisi Biaya</span>
                             <span className="text-muted-foreground">Total: {formatCurrency(totalCost)}</span>
                         </div>
-                        <div className="relative h-8 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div className="relative h-8 bg-muted rounded-full overflow-hidden">
                             <div
                                 className="absolute h-full bg-gradient-to-r from-gray-500 to-gray-600 flex items-center justify-center text-white text-xs font-medium"
                                 style={{ width: `${ingredientSharePercent}%` }}
@@ -312,12 +313,12 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
             {/* Ingredient Breakdown */}
             <Card>
                 <CardHeader
-                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+                    className="cursor-pointer hover:bg-muted transition-colors"
                     onClick={() => toggleSection('ingredients')}
                 >
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
-                            <Package className="h-5 w-5 text-gray-600" />
+                            <Package className="h-5 w-5 text-foreground" />
                             Detail Bahan Baku
                             <Badge variant="secondary">{formatCurrency(ingredientCost)}</Badge>
                         </CardTitle>
@@ -387,12 +388,12 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
             {/* Operational Costs Breakdown */}
             <Card>
                 <CardHeader
-                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+                    className="cursor-pointer hover:bg-muted transition-colors"
                     onClick={() => toggleSection('operational')}
                 >
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
-                            <Zap className="h-5 w-5 text-gray-600" />
+                            <Zap className="h-5 w-5 text-foreground" />
                             Biaya Operasional
                             <Badge variant="secondary">{formatCurrency(totalOperational)}</Badge>
                         </CardTitle>
@@ -406,10 +407,10 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 {expandedSections.has('operational') && (
                     <CardContent className="space-y-3">
                         {[
-                            { label: 'Tenaga Kerja', value: opCosts.labor, icon: Users, color: 'text-gray-600' },
-                            { label: 'Utilitas (Listrik, Air, Gas)', value: opCosts.utilities, icon: Zap, color: 'text-gray-600' },
-                            { label: 'Packaging & Kemasan', value: opCosts.packaging, icon: Package, color: 'text-gray-600' },
-                            { label: 'Overhead Lainnya', value: opCosts.overhead, icon: TrendingUp, color: 'text-gray-600' },
+                            { label: 'Tenaga Kerja', value: opCosts.labor, icon: Users, color: 'text-muted-foreground' },
+                            { label: 'Utilitas (Listrik, Air, Gas)', value: opCosts.utilities, icon: Zap, color: 'text-muted-foreground' },
+                            { label: 'Packaging & Kemasan', value: opCosts.packaging, icon: Package, color: 'text-muted-foreground' },
+                            { label: 'Overhead Lainnya', value: opCosts.overhead, icon: TrendingUp, color: 'text-muted-foreground' },
                         ].map((item) => {
                             const percent = (item.value / totalOperational) * 100
                             const Icon = item.icon
@@ -418,7 +419,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                                 <div key={item.label} className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <Icon className={`h-4 w-4 ${item.color}`} />
+                                            <Icon className="h-4 w-4 text-foreground" />
                                             <span className="text-sm font-medium">{item.label}</span>
                                             <Badge variant="outline" className="text-xs">
                                                 {percent.toFixed(1)}%
@@ -431,8 +432,8 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                             )
                         })}
 
-                        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
-                            <p className="text-xs text-gray-800 dark:text-gray-200">
+                        <div className="mt-4 p-3 bg-muted/20 rounded-lg border border-border/20 ">
+                            <p className="text-xs text-foreground dark:text-muted-foreground">
                                 💡 <strong>Tips:</strong> Biaya operasional dihitung sebagai persentase dari biaya bahan baku.
                                 Anda bisa customize nilai ini di halaman Settings untuk hasil yang lebih akurat.
                             </p>
@@ -443,29 +444,29 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
 
             {/* Profit Analysis */}
             {sellingPrice > 0 && (
-                <Card className="border-2 border-gray-300 dark:border-gray-800">
+                <Card className="border-2 border-border/20 ">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <TrendingUp className="h-5 w-5 text-gray-600" />
+                            <TrendingUp className="h-5 w-5 text-foreground" />
                             Analisis Profit
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-3 gap-4">
-                            <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
-                                <div className="text-xl font-bold text-gray-600">
+                            <div className="text-center p-4 bg-muted/20 rounded-lg">
+                                <div className="text-xl font-bold text-foreground">
                                     {formatCurrency(sellingPrice)}
                                 </div>
                                 <div className="text-xs text-muted-foreground mt-1">Harga Jual</div>
                             </div>
                             <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                                <div className="text-xl font-bold text-gray-600">
+                                <div className="text-xl font-bold text-foreground">
                                     {formatCurrency(totalCost)}
                                 </div>
                                 <div className="text-xs text-muted-foreground mt-1">Total HPP</div>
                             </div>
-                            <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
-                                <div className="text-xl font-bold text-gray-600">
+                            <div className="text-center p-4 bg-muted/20 rounded-lg">
+                                <div className="text-xl font-bold text-foreground">
                                     {formatCurrency(profit)}
                                 </div>
                                 <div className="text-xs text-muted-foreground mt-1">Profit Bersih</div>
@@ -475,13 +476,13 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                         <div className="space-y-2">
                             <div className="flex justify-between text-sm">
                                 <span>Margin Profit</span>
-                                <span className="font-bold text-gray-600">{marginPercent.toFixed(1)}%</span>
+                                <span className="font-bold text-foreground">{marginPercent.toFixed(1)}%</span>
                             </div>
                             <Progress value={marginPercent} className="h-3" />
                         </div>
 
                         <div className="grid grid-cols-2 gap-3 text-sm">
-                            <div className="p-3 bg-white dark:bg-gray-900 rounded-lg border">
+                            <div className="p-3 bg-card rounded-lg border">
                                 <div className="text-muted-foreground mb-1">Break-even Point</div>
                                 <div className="font-bold">
                                     {profit > 0 ? Math.ceil(100000 / profit) : '-'} unit
@@ -490,7 +491,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                                     untuk profit Rp 100.000
                                 </div>
                             </div>
-                            <div className="p-3 bg-white dark:bg-gray-900 rounded-lg border">
+                            <div className="p-3 bg-card rounded-lg border">
                                 <div className="text-muted-foreground mb-1">Target Harian</div>
                                 <div className="font-bold">
                                     {profit > 0 ? Math.ceil(500000 / profit) : '-'} unit

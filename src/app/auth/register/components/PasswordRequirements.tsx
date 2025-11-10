@@ -16,11 +16,11 @@ export const PasswordRequirements = ({ password }: PasswordRequirementsProps): J
       {passwordRequirements.map((req) => (
         <div key={req.label} className="flex items-center gap-2 text-xs transition-all duration-200">
           {req.met ? (
-            <Check className="h-3 w-3 text-gray-600 dark:text-gray-400 transition-all duration-200" />
+            <Check className="h-3 w-3 text-muted-foreground transition-all duration-200" />
           ) : (
             <X className="h-3 w-3 text-slate-400 transition-all duration-200" />
           )}
-          <span className={`transition-colors duration-200 ${req.met ? 'text-gray-600 dark:text-gray-400' : 'text-slate-500'
+          <span className={`transition-colors duration-200 ${req.met ? 'text-muted-foreground' : 'text-slate-500'
             }`}>
             {req.label}
           </span>

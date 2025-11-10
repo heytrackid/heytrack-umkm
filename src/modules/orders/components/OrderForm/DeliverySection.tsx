@@ -36,7 +36,7 @@ export const DeliverySection = ({ formData, onInputChange }: DeliverySectionProp
                         id="deliveryDate"
                         type="date"
                         value={formData.delivery_date}
-                        onChange={(e) => onInputChange('delivery_date', e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('delivery_date', e.target.value)}
                         className="mt-1"
                     />
                 </div>
@@ -46,7 +46,7 @@ export const DeliverySection = ({ formData, onInputChange }: DeliverySectionProp
                         id="deliveryTime"
                         type="time"
                         value={formData.delivery_time}
-                        onChange={(e) => onInputChange('delivery_time', e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('delivery_time', e.target.value)}
                         className="mt-1"
                     />
                 </div>
@@ -57,7 +57,7 @@ export const DeliverySection = ({ formData, onInputChange }: DeliverySectionProp
                         type="number"
                         placeholder="0"
                         value={formData.delivery_fee}
-                        onChange={(e) => onInputChange('delivery_fee', safeNumber(e.target.value, 0))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('delivery_fee', safeNumber(e.target.value, 0))}
                         min="0"
                         step="1000"
                         className="mt-1"
@@ -70,7 +70,7 @@ export const DeliverySection = ({ formData, onInputChange }: DeliverySectionProp
                     id="notes"
                     placeholder="Contoh: Pesanan untuk acara ulang tahun"
                     value={formData.notes}
-                    onChange={(e) => onInputChange('notes', e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onInputChange('notes', e.target.value)}
                     className="mt-1"
                 />
             </div>
@@ -80,7 +80,7 @@ export const DeliverySection = ({ formData, onInputChange }: DeliverySectionProp
                     id="specialInstructions"
                     placeholder="Contoh: Tolong dikemas dengan box premium"
                     value={formData.special_instructions}
-                    onChange={(e) => onInputChange('special_instructions', e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onInputChange('special_instructions', e.target.value)}
                     className="mt-1"
                 />
             </div>

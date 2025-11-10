@@ -76,7 +76,7 @@ export const FormField = (props: FormFieldProps) => {
       return `${baseInputClasses} border-destructive text-foreground placeholder-muted-foreground focus:ring-destructive focus:border-destructive bg-background`;
     }
     if (hasSuccess) {
-      return `${baseInputClasses} border-border text-foreground placeholder-muted-foreground focus:ring-primary focus:border-primary bg-background`;
+      return `${baseInputClasses} border-border/20 text-foreground placeholder-muted-foreground focus:ring-primary focus:border-primary bg-background`;
     }
     return `${baseInputClasses} border-input text-foreground placeholder-muted-foreground focus:ring-ring focus:border-ring hover:border-ring bg-background`;
   };
@@ -317,14 +317,14 @@ export const FormSection = ({
 }: FormSectionProps) => (
   <div className={`space-y-4 sm:space-y-6 ${className}`}>
     {(title ?? description) && (
-      <div className="border-b border-gray-200 pb-4">
+      <div className="border-b border-border/20 pb-4">
         {title && (
-          <h3 className="text-lg font-medium text-gray-900 sm:text-xl">
+          <h3 className="text-lg font-medium text-foreground sm:text-xl">
             {title}
           </h3>
         )}
         {description && (
-          <p className="mt-1 text-sm text-gray-600 sm:text-base">
+          <p className="mt-1 text-sm text-muted-foreground sm:text-base">
             {description}
           </p>
         )}
@@ -356,9 +356,9 @@ export const FormActions = ({
   sticky = false,
 }: FormActionsProps) => {
   const containerClasses = `
-    ${sticky ? 'sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 sm:relative sm:border-t-0 sm:p-0 z-10 shadow-lg sm:shadow-none' : ''}
+    ${sticky ? 'sticky bottom-0 left-0 right-0 bg-background border-t border-border/20 p-4 sm:relative sm:border-t-0 sm:p-0 z-10 shadow-lg sm:shadow-none' : ''}
     ${fullWidthOnMobile ? 'flex flex-col-reverse sm:flex-row sm:justify-end space-y-3 space-y-reverse sm:space-y-0 sm:space-x-3' : 'flex justify-end space-x-3'}
-    mt-6 pt-4 ${!sticky ? 'border-t border-gray-200' : ''}
+    mt-6 pt-4 ${!sticky ? 'border-t border-border/20' : ''}
   `;
 
   const buttonBaseClasses = `
@@ -370,8 +370,8 @@ export const FormActions = ({
 
   const cancelButtonClasses = `
     ${buttonBaseClasses}
-    text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-indigo-500
-    active:bg-gray-100
+    text-foreground bg-background border border-border/20 hover:bg-muted focus:ring-ring
+    active:bg-muted
   `;
 
   const submitButtonClasses = `
@@ -438,21 +438,21 @@ export const ConfirmDialog = ({
   const typeStyles = {
     danger: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
     warning: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500',
-    info: 'bg-gray-600 hover:bg-blue-700 focus:ring-blue-500',
+    info: 'bg-primary hover:bg-blue-700 focus:ring-blue-500',
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-        <div className="relative bg-white rounded-lg  max-w-md w-full">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity" onClick={onClose} />
+        <div className="relative bg-background rounded-lg max-w-md w-full">
           <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">{title}</h3>
-            <p className="text-sm text-gray-600 mb-6">{message}</p>
+            <h3 className="text-lg font-medium text-foreground mb-4">{title}</h3>
+            <p className="text-sm text-muted-foreground mb-6">{message}</p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="px-4 py-2 text-sm font-medium text-foreground bg-background border border-border/20 rounded-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring"
               >
                 {cancelText}
               </button>

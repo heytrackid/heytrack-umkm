@@ -68,7 +68,7 @@ export const ConfirmDialog = ({
             <p>{description}</p>
 
             {consequences.length > 0 && (
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-500/30">
                 <div className="flex items-start gap-2">
                   <svg className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -88,14 +88,14 @@ export const ConfirmDialog = ({
             {requireConfirmation && (
               <div className="space-y-2">
                 <p className="text-sm">
-                  Ketik <strong className="font-mono bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded">{confirmationText}</strong> untuk konfirmasi
+                  Ketik <strong className="font-mono bg-secondary px-1 py-0.5 rounded">{confirmationText}</strong> untuk konfirmasi
                 </p>
                 <input
                   type="text"
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
                   placeholder={`Ketik "${confirmationText}"`}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border/20  rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   autoFocus
                 />
               </div>

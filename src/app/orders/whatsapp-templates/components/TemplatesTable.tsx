@@ -7,12 +7,13 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { SkeletonText } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 
 
 interface TemplatesTableProps {
     templates: WhatsAppTemplate[]
-    loading: boolean
+    isLoading?: boolean
     onEdit: (template: WhatsAppTemplate) => void
     onDelete: (template: WhatsAppTemplate) => void
     onToggleDefault: (template: WhatsAppTemplate) => void
@@ -22,7 +23,7 @@ interface TemplatesTableProps {
 
 const TemplatesTable = ({
     templates,
-    loading,
+    isLoading = false,
     onEdit,
     onDelete,
     onToggleDefault,
@@ -32,12 +33,12 @@ const TemplatesTable = ({
     const getCategoryLabel = (category: string) => TEMPLATE_CATEGORIES.find((cat) => cat.value === category)?.label ?? category
 
     const renderTableRows = () => {
-        if (loading) {
+        if (isLoading) {
             return Array.from({ length: 5 }, (_, rowIndex) => (
                 <TableRow key={`skeleton-${rowIndex}`}>
                     {Array.from({ length: 5 }, (_, cellIndex) => (
                         <TableCell key={`skeleton-cell-${rowIndex}-${cellIndex}`}>
-                            <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                            <SkeletonText className="h-4 w-full" />
                         </TableCell>
                     ))}
                 </TableRow>
@@ -117,8 +118,8 @@ const TemplatesTable = ({
                 <TableCell>
                     <Badge
                         className={template.is_active
-                            ? 'bg-gray-100 text-gray-800'
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-secondary text-secondary-foreground'
+                            : 'bg-secondary text-secondary-foreground'
                         }
                     >
                         {template.is_active ? 'Aktif' : 'Nonaktif'}
@@ -182,11 +183,11 @@ const TemplatesTable = ({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Nama Template</TableHead>
-                            <TableHead>Kategori</TableHead>
-                            <TableHead>Variables</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="w-12">Actions</TableHead>
+                            <TableHead className="bg-muted/50">Nama Template</TableHead>
+                            <TableHead className="bg-muted/50">Kategori</TableHead>
+                            <TableHead className="bg-muted/50">Variables</TableHead>
+                            <TableHead className="bg-muted/50">Status</TableHead>
+                            <TableHead className="bg-muted/50 text-center w-32">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>{renderTableRows()}</TableBody>

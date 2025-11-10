@@ -249,7 +249,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                                 <Input
                                     placeholder="Cari bahan baku..."
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                                     className="pl-9"
                                 />
                             </div>
@@ -425,7 +425,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                                                                 <DropdownMenuItem
                                                                     onClick={() => handleQuickBuy(item)}
                                                                     disabled={currentStock > minStock}
-                                                                    className={currentStock <= minStock ? 'bg-gray-50 text-gray-700 focus:bg-gray-100 focus:text-gray-800' : ''}
+                                                                    className={currentStock <= minStock ? 'bg-muted text-muted-foreground focus:bg-muted/80 focus:text-muted-foreground' : ''}
                                                                 >
                                                                     <ShoppingCart className="h-4 w-4 mr-2" />
                                                                     {currentStock <= minStock ? 'Quick Reorder' : 'Stok Cukup'}
@@ -517,3 +517,5 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
 }
 
 export const EnhancedIngredientsPage = memo(EnhancedIngredientsPageComponent)
+
+

@@ -61,13 +61,13 @@ const AnalyticsTabContent = ({ analytics, loading, formatCurrency }: AnalyticsTa
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
-              <div className="text-3xl font-bold text-gray-600">
+              <div className="text-3xl font-bold text-muted-foreground">
                 {analytics.totalRecipes}
               </div>
               <div className="text-sm text-muted-foreground">Total Recipes</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-gray-600">
+              <div className="text-3xl font-bold text-muted-foreground">
                 {analytics.totalCalculations}
               </div>
               <div className="text-sm text-muted-foreground">Calculations</div>
@@ -98,7 +98,7 @@ const AnalyticsTabContent = ({ analytics, loading, formatCurrency }: AnalyticsTa
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
               <span className="text-sm font-medium">High Margin (30%+)</span>
               <Badge variant="secondary">{analytics.marginAnalysis.high} recipes</Badge>
             </div>

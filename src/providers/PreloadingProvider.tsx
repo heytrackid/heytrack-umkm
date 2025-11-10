@@ -71,7 +71,7 @@ const PreloadingDebugPanel = (): JSX.Element => {
         <button
           onClick={() => setShowDebug(true)}
           className="bg-black text-white px-2 py-1 rounded text-xs"
-          title="Press Ctrl+Shift+P to toggle"
+          title="Tekan Ctrl+Shift+P untuk beralih"
         >
           {isPreloading ? '🔄' : '📊'} Debug
         </button>
@@ -130,7 +130,7 @@ const PreloadingDebugPanel = (): JSX.Element => {
         </div>
       )}
 
-      <div className="mt-2 text-gray-400 text-xs">
+      <div className="mt-2 text-muted-foreground text-xs">
         Ctrl+Shift+P to toggle
       </div>
     </div>

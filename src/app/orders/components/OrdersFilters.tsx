@@ -42,7 +42,7 @@ const OrdersFilters = ({
             <Input
               placeholder=""
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
               className="pl-8"
             />
           </div>
@@ -68,7 +68,7 @@ const OrdersFilters = ({
             type="date"
             placeholder=""
             value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDateFrom(e.target.value)}
             className="flex-1 sm:w-[140px]"
           />
           <span className="text-muted-foreground flex-shrink-0">-</span>
@@ -76,7 +76,7 @@ const OrdersFilters = ({
             type="date"
             placeholder=""
             value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDateTo(e.target.value)}
             className="flex-1 sm:w-[140px]"
           />
         </div>

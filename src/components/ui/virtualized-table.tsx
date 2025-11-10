@@ -14,13 +14,15 @@ interface VirtualizedTableProps<T> {
   }>
   rowHeight?: number
   className?: string
+  isLoading?: boolean
 }
 
 export const VirtualizedTable = <T extends Record<string, unknown>>({
   data,
   columns,
   rowHeight: defaultRowHeight = 50,
-  className = ''
+  className = '',
+  isLoading = false
 }: VirtualizedTableProps<T>) => {
   const { isMobile } = useResponsive()
   const rowHeight = isMobile ? 60 : defaultRowHeight
@@ -49,6 +51,19 @@ export const VirtualizedTable = <T extends Record<string, unknown>>({
     estimateSize: () => rowHeight,
     overscan: 5,
   });
+
+  if (isLoading) {
+    return (
+      <div className={`border rounded-lg overflow-hidden ${className}`}>
+        <div className="animate-pulse space-y-4 p-4">
+          <div className="h-4 bg-muted rounded w-1/4" />
+          {Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="h-4 bg-muted rounded" />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={`border rounded-lg overflow-hidden ${className}`}>

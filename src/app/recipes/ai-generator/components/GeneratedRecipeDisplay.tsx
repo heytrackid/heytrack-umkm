@@ -92,14 +92,14 @@ const GeneratedRecipeDisplay = ({
               <span>HPP per Unit</span>
               <span>{formatCurrency(recipe.hpp.hppPerUnit)}</span>
             </div>
-            <div className="mt-4 p-3 bg-gray-50 dark:bg-green-950 rounded-lg">
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <div className="mt-4 p-3 bg-muted dark:bg-green-950 rounded-lg">
+              <p className="text-sm font-medium text-foreground">
                 💡 Rekomendasi Harga Jual
               </p>
-              <p className="text-2xl font-bold text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-2xl font-bold text-muted-foreground mt-1">
                 {formatCurrency(recipe.hpp.suggestedSellingPrice)}
               </p>
-              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Margin: ~{recipe.hpp.estimatedMargin}% (Sehat!)
               </p>
             </div>

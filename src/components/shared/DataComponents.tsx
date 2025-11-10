@@ -65,7 +65,7 @@ export const SearchInput = ({
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         value={localValue}
-        onChange={(e) => setLocalValue(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalValue(e.target.value)}
         placeholder={placeholder}
         className="pl-10 pr-10"
       />
@@ -272,7 +272,7 @@ export const BulkActions = ({
   if (selectedIds.length === 0) { return null }
 
   return (
-    <Card className={cn("border-gray-300 bg-gray-50", className)}>
+    <Card className={cn("border-border/20 bg-muted", className)}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

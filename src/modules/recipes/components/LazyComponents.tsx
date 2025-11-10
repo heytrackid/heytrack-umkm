@@ -12,16 +12,16 @@ export interface SmartPricingAssistantPropsWithIndex extends SmartPricingAssista
 }
 
 // Create lazy component with proper typing
-const LazySmartPricingAssistantComponent = lazy(() => import('./SmartPricingAssistant').then(m => ({ default: m.SmartPricingAssistant })))
+const LazySmartPricingAssistantComponent = lazy(() => import('./SmartPricingAssistant').then(module => ({ default: module.SmartPricingAssistant })))
 
 // Wrapper component that provides proper typing and suspense boundary
-const LazySmartPricingAssistant = (props: SmartPricingAssistantPropsWithIndex) => (
+export const LazySmartPricingAssistant = (props: SmartPricingAssistantPropsWithIndex) => (
   <Suspense fallback={<CardSkeleton />}>
     <LazySmartPricingAssistantComponent {...props} />
   </Suspense>
 )
 
-export { LazySmartPricingAssistant }
+
 
 export async function preloadRecipeComponents() {
   await import('./SmartPricingAssistant')

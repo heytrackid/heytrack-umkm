@@ -165,7 +165,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
   }, [])
 
   return (
-    <div className="relative z-40 border-b border-border bg-background">
+    <div className="relative z-40 border-b border-border/20 bg-background">
       {/* Left shadow */}
       {showLeftShadow && (
         <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-gradient-to-r from-background via-background/80 to-transparent" />
@@ -243,7 +243,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
               {/* Dropdown menu */}
               {isOpen && tab.items && (
                 <div
-                  className="fixed z-50 mt-0 min-w-[200px] rounded-md border border-border bg-popover p-1 shadow-lg"
+                  className="fixed z-50 mt-0 min-w-[200px] rounded-md border border-border/20 bg-popover p-1 shadow-lg"
                   style={{
                     top: `${dropdownPositions[tab.label]?.top ?? 0}px`,
                     left: `${dropdownPositions[tab.label]?.left ?? 0}px`,
@@ -291,3 +291,5 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
     </div>
   )
 }
+
+

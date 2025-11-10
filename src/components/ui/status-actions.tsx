@@ -144,10 +144,10 @@ export const ActionButtons = ({
         variant={variant}
         size={size}
         onClick={onMore}
-        title="More Actions"
+        title="Lebih Banyak Aksi"
       >
         <MoreHorizontal className="h-4 w-4" />
-        {showLabels && <span className="ml-1">More</span>}
+        {showLabels && <span className="ml-1">Lebih Banyak</span>}
       </Button>
     )}
   </div>

@@ -89,7 +89,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
     return (
         <div className="space-y-4">
             {/* Header */}
-            <Card className="border-2 border-gray-300 dark:border-gray-800 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
+            <Card className="border-2 border-border/20  bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
@@ -105,19 +105,19 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-gray-600">{baseServings}</div>
+                        <div className="text-center p-3 bg-card rounded-lg border">
+                             <div className="text-lg font-bold text-foreground">{baseServings}</div>
                             <div className="text-xs text-muted-foreground">Resep Asli</div>
                         </div>
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-gray-600">{totalServings}</div>
+                        <div className="text-center p-3 bg-card rounded-lg border">
+                             <div className="text-lg font-bold text-foreground">{totalServings}</div>
                             <div className="text-xs text-muted-foreground">Target Produksi</div>
                         </div>
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                            <div className="text-lg font-bold text-gray-600">{scaleFactor.toFixed(1)}x</div>
+                        <div className="text-center p-3 bg-card rounded-lg border">
+                             <div className="text-lg font-bold text-foreground">{scaleFactor.toFixed(1)}x</div>
                             <div className="text-xs text-muted-foreground">Scale Factor</div>
                         </div>
-                        <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-lg border">
+                        <div className="text-center p-3 bg-card rounded-lg border">
                             <div className="text-lg font-bold text-orange-600">{formatCurrency(scaledCost)}</div>
                             <div className="text-xs text-muted-foreground">Total Biaya</div>
                         </div>
@@ -167,7 +167,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                 id="servings"
                                 type="number"
                                 value={targetServings}
-                                onChange={(e) => {
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     const value = Number(e.target.value)
                                     setTargetServings(Number.isFinite(value) ? Math.max(1, value) : 1)
                                 }}
@@ -184,7 +184,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                 id="batches"
                                 type="number"
                                 value={targetBatches}
-                                onChange={(e) => {
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     const value = Number(e.target.value)
                                     setTargetBatches(Number.isFinite(value) ? Math.max(1, value) : 1)
                                 }}
@@ -212,7 +212,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                             </div>
                             <div>
                                 <div className="text-muted-foreground">Total Biaya</div>
-                                <div className="font-bold text-lg text-gray-600">{formatCurrency(scaledCost)}</div>
+                                 <div className="font-bold text-lg text-foreground">{formatCurrency(scaledCost)}</div>
                             </div>
                             <div>
                                 <div className="text-muted-foreground">Biaya per Porsi</div>
@@ -229,7 +229,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
 
             {/* Stock Availability Check */}
             {hasStockIssues && (
-                <Card className="border-2 border-yellow-200 dark:border-yellow-800 bg-yellow-50/50 dark:bg-yellow-900/10">
+                <Card className="border-2 border-yellow-500/30 bg-yellow-50/50 dark:bg-yellow-900/10">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
                             <Package className="h-5 w-5" />
@@ -242,7 +242,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                 Beberapa bahan tidak mencukupi untuk produksi ini:
                             </p>
                             {stockIssues.map((issue) => (
-                                <div key={issue} className="text-sm p-2 bg-white dark:bg-gray-900 rounded border border-yellow-200 dark:border-yellow-800">
+                                <div key={issue} className="text-sm p-2 bg-card rounded border border-yellow-500/30">
                                     {issue}
                                 </div>
                             ))}
@@ -265,7 +265,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                         </CardTitle>
                         <Button variant="outline" size="sm" onClick={exportShoppingList}>
                             <Download className="h-4 w-4 mr-2" />
-                            Export Shopping List
+                            Ekspor Daftar Belanja
                         </Button>
                     </div>
                 </CardHeader>
@@ -273,12 +273,12 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Bahan</TableHead>
-                                <TableHead className="text-right">Resep Asli</TableHead>
-                                <TableHead className="text-right">Kebutuhan</TableHead>
-                                <TableHead className="text-right">Stock</TableHead>
-                                <TableHead className="text-right">Biaya</TableHead>
-                                <TableHead className="text-center">Status</TableHead>
+                                <TableHead className="bg-muted/50">Bahan</TableHead>
+                                <TableHead className="bg-muted/50 text-right">Resep Asli</TableHead>
+                                <TableHead className="bg-muted/50 text-right">Kebutuhan</TableHead>
+                                <TableHead className="bg-muted/50 text-right">Stock</TableHead>
+                                <TableHead className="bg-muted/50 text-right">Biaya</TableHead>
+                                <TableHead className="bg-muted/50 text-center">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -304,7 +304,7 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                                             {scaledQty.toFixed(2)} {ri.unit}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <span className={isEnough ? 'text-gray-600' : 'text-red-600'}>
+                                             <span className={isEnough ? 'text-muted-foreground' : 'text-red-600'}>
                                                 {stock.toFixed(2)} {ri.unit}
                                             </span>
                                         </TableCell>
@@ -329,14 +329,14 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                     </Table>
 
                     {/* Total */}
-                    <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border-t-2 border-blue-500">
+                    <div className="mt-4 p-4 bg-muted rounded-lg border-t-2 border-blue-500">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <DollarSign className="h-5 w-5 text-gray-600" />
+                                 <DollarSign className="h-5 w-5 text-muted-foreground" />
                                 <span className="font-semibold">Total Biaya Produksi</span>
                             </div>
                             <div className="text-right">
-                                <div className="text-2xl font-bold text-gray-600">
+                                 <div className="text-2xl font-bold text-foreground">
                                     {formatCurrency(scaledCost)}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
@@ -357,20 +357,20 @@ export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-3 text-sm">
-                        <div className="flex items-start gap-2 p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
-                            <span className="text-gray-600 font-bold">1.</span>
+                        <div className="flex items-start gap-2 p-3 bg-muted/20 rounded-lg">
+                             <span className="text-muted-foreground font-bold">1.</span>
                             <span>Siapkan semua bahan sebelum mulai produksi untuk efisiensi maksimal</span>
                         </div>
-                        <div className="flex items-start gap-2 p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
-                            <span className="text-gray-600 font-bold">2.</span>
+                        <div className="flex items-start gap-2 p-3 bg-muted/20 rounded-lg">
+                             <span className="text-muted-foreground font-bold">2.</span>
                             <span>Gunakan timbangan digital untuk akurasi takaran, terutama untuk batch besar</span>
                         </div>
-                        <div className="flex items-start gap-2 p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
-                            <span className="text-gray-600 font-bold">3.</span>
+                        <div className="flex items-start gap-2 p-3 bg-muted/20 rounded-lg">
+                             <span className="text-muted-foreground font-bold">3.</span>
                             <span>Bagi produksi menjadi beberapa batch kecil jika kapasitas alat terbatas</span>
                         </div>
-                        <div className="flex items-start gap-2 p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
-                            <span className="text-gray-600 font-bold">4.</span>
+                        <div className="flex items-start gap-2 p-3 bg-muted/20 rounded-lg">
+                             <span className="text-muted-foreground font-bold">4.</span>
                             <span>Catat waktu mulai dan selesai setiap batch untuk tracking efisiensi</span>
                         </div>
                     </div>

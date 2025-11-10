@@ -55,7 +55,7 @@ const statusFlow: Array<{
         }
     ]
 
-const OrderStatusTimeline = ({
+export const OrderStatusTimeline = ({
     currentStatus,
     onStatusChange
 }: OrderStatusTimelineProps) => {
@@ -111,8 +111,8 @@ const OrderStatusTimeline = ({
                                             className={`flex items-start gap-3 p-3 rounded-lg border-2 transition-all ${isActive
                                                 ? 'border-primary bg-primary/5'
                                                 : isCompleted
-                                                    ? 'border-border bg-muted'
-                                                    : 'border-gray-200'
+                                                    ? 'border-border/20 bg-muted'
+                                                    : 'border-border/20'
                                                 } ${isClickable ? 'cursor-pointer hover:border-primary' : ''}`}
                                             onClick={() => isClickable && handleStatusClick(step['status'])}
                                         >
@@ -138,7 +138,7 @@ const OrderStatusTimeline = ({
                                             )}
                                         </div>
                                         {index < statusFlow.length - 1 && (
-                                            <div className="ml-6 h-8 w-0.5 bg-gray-200" />
+                                            <div className="ml-6 h-8 w-0.5 bg-muted" />
                                         )}
                                     </div>
                                 )
@@ -198,7 +198,7 @@ const OrderStatusTimeline = ({
                                                     ? 'border-primary bg-primary text-white scale-110'
                                                     : isCompleted
                                                         ? 'border-foreground bg-foreground text-background'
-                                                        : 'border-gray-300 bg-white text-gray-400'
+                                                        : 'border-border/20 bg-background text-muted-foreground'
                                                     } ${isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
                                             >
                                                 {isCompleted ? (
@@ -252,4 +252,4 @@ const OrderStatusTimeline = ({
     )
 }
 
-export { OrderStatusTimeline }
+

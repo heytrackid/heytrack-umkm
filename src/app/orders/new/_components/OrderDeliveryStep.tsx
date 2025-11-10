@@ -14,7 +14,7 @@ interface OrderDeliveryStepProps {
   onInputChange: (field: keyof OrderFormData, value: boolean | number | string) => void
 }
 
-const OrderDeliveryStep = ({
+export const OrderDeliveryStep = ({
   formData,
   onInputChange
 }: OrderDeliveryStepProps) => (
@@ -26,7 +26,7 @@ const OrderDeliveryStep = ({
         <Label htmlFor="delivery_method">Metode Pengiriman</Label>
         <Select
           value={formData.delivery_method}
-          onValueChange={(value) => onInputChange('delivery_method', value)}
+          onValueChange={(value: string) => onInputChange('delivery_method', value)}
         >
           <SelectTrigger>
             <SelectValue />
@@ -46,7 +46,7 @@ const OrderDeliveryStep = ({
             type="number"
             min="0"
             value={formData.delivery_fee}
-            onChange={(e) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const parsedValue = Number.parseFloat(e.target.value.replace(',', '.'))
               onInputChange('delivery_fee', Number.isNaN(parsedValue) ? 0 : parsedValue)
             }}
@@ -60,7 +60,7 @@ const OrderDeliveryStep = ({
           id="delivery_date"
           type="date"
           value={formData.delivery_date}
-          onChange={(e) => onInputChange('delivery_date', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('delivery_date', e.target.value)}
         />
       </div>
 
@@ -70,7 +70,7 @@ const OrderDeliveryStep = ({
           id="delivery_time"
           type="time"
           value={formData.delivery_time}
-          onChange={(e) => onInputChange('delivery_time', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange('delivery_time', e.target.value)}
         />
       </div>
     </div>
@@ -81,7 +81,7 @@ const OrderDeliveryStep = ({
         <Textarea
           id="delivery_address"
           value={formData.delivery_address}
-          onChange={(e) => onInputChange('delivery_address', e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onInputChange('delivery_address', e.target.value)}
           rows={3}
         />
       </div>
@@ -92,11 +92,9 @@ const OrderDeliveryStep = ({
       <Textarea
         id="special_instructions"
         value={formData.special_instructions}
-        onChange={(e) => onInputChange('special_instructions', e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onInputChange('special_instructions', e.target.value)}
         rows={3}
       />
     </div>
   </div>
 )
-
-export { OrderDeliveryStep }

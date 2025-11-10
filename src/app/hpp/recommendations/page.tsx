@@ -109,13 +109,13 @@ const HppRecommendationsPage = (): JSX.Element => {
   const getRecommendationTypeIcon = (type: string) => {
     switch (type) {
       case 'COST_OPTIMIZATION':
-        return <TrendingUp className="h-4 w-4 text-gray-500" />
+        return <TrendingUp className="h-4 w-4 text-muted-foreground" />
       case 'SUPPLIER_CHANGE':
-        return <Lightbulb className="h-4 w-4 text-gray-500" />
+        return <Lightbulb className="h-4 w-4 text-muted-foreground" />
       case 'RECIPE_ADJUSTMENT':
-        return <Sparkles className="h-4 w-4 text-gray-500" />
+        return <Sparkles className="h-4 w-4 text-muted-foreground" />
       default:
-        return <AlertTriangle className="h-4 w-4 text-gray-500" />
+        return <AlertTriangle className="h-4 w-4 text-muted-foreground" />
     }
   }
 
@@ -142,7 +142,7 @@ const HppRecommendationsPage = (): JSX.Element => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-600">
+              <div className="text-3xl font-bold text-muted-foreground">
                 {recommendations.length}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -159,7 +159,7 @@ const HppRecommendationsPage = (): JSX.Element => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-600">
+              <div className="text-3xl font-bold text-muted-foreground">
                 {recommendations.filter(r => !r.is_implemented).length}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -176,7 +176,7 @@ const HppRecommendationsPage = (): JSX.Element => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-600">
+              <div className="text-3xl font-bold text-muted-foreground">
                 {recommendations.filter(r => r.is_implemented).length}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -193,7 +193,7 @@ const HppRecommendationsPage = (): JSX.Element => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-600">
+              <div className="text-3xl font-bold text-muted-foreground">
                 {formatCurrency(totalPotentialSavings)}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -210,7 +210,7 @@ const HppRecommendationsPage = (): JSX.Element => {
               <label className="text-sm font-medium">Filter:</label>
               <Select
                 value={filter}
-                onValueChange={(value) => {
+                onValueChange={(value: string) => {
                   if (value === 'all' || value === 'pending' || value === 'implemented') {
                     setFilter(value)
                   }
@@ -245,7 +245,7 @@ const HppRecommendationsPage = (): JSX.Element => {
                 <Card>
                   <CardContent className="py-8">
                     <div className="text-center text-muted-foreground">
-                      <Lightbulb className="h-12 w-12 mx-auto mb-4 text-gray-500" />
+                      <Lightbulb className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                       <h3 className="text-lg font-semibold mb-2">No Recommendations</h3>
                       <p>No cost optimization recommendations available at this time.</p>
                       <p className="text-sm mt-2">Recommendations will be generated based on your HPP analysis.</p>
@@ -272,7 +272,7 @@ const HppRecommendationsPage = (): JSX.Element => {
                             {rec.priority}
                           </Badge>
                           {rec.is_implemented && (
-                            <Badge variant="outline" className="text-gray-600">
+                            <Badge variant="outline" className="text-muted-foreground">
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Implemented
                             </Badge>
@@ -291,7 +291,7 @@ const HppRecommendationsPage = (): JSX.Element => {
                         {rec.potential_savings > 0 && (
                           <div className="flex items-center gap-2 text-sm">
                             <span className="font-medium">Potential Savings:</span>
-                            <Badge variant="secondary" className="text-gray-600">
+                            <Badge variant="secondary" className="text-muted-foreground">
                               {formatCurrency(rec.potential_savings)}
                             </Badge>
                           </div>
@@ -336,7 +336,7 @@ const HppRecommendationsPage = (): JSX.Element => {
               <div className="space-y-3">
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-gray-500" />
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
                     <span className="font-semibold">Supplier Cost Reduction</span>
                     <Badge variant="default">High</Badge>
                   </div>
@@ -347,7 +347,7 @@ const HppRecommendationsPage = (): JSX.Element => {
 
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Lightbulb className="h-4 w-4 text-gray-500" />
+                    <Lightbulb className="h-4 w-4 text-muted-foreground" />
                     <span className="font-semibold">Recipe Optimization</span>
                     <Badge variant="secondary">Medium</Badge>
                   </div>
@@ -358,7 +358,7 @@ const HppRecommendationsPage = (): JSX.Element => {
 
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-4 w-4 text-gray-500" />
+                    <Sparkles className="h-4 w-4 text-muted-foreground" />
                     <span className="font-semibold">Bulk Purchasing</span>
                     <Badge variant="outline">Low</Badge>
                   </div>

@@ -334,7 +334,7 @@ const AIRecipeGeneratorPage = () => {
               <h1 className="text-3xl font-bold">AI Recipe Generator</h1>
             </div>
           </div>
-          <div className="h-96 bg-gray-100 rounded animate-pulse" />
+          <div className="h-96 bg-muted rounded animate-pulse" />
         </div>
       </AppLayout>
     )

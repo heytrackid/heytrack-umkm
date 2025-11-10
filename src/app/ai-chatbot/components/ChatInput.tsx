@@ -1,5 +1,6 @@
 import { Send, Loader2 } from 'lucide-react'
 import { type FormEvent } from 'react'
+import type { ChangeEvent, KeyboardEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,7 +28,7 @@ export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInp
   }
 
   return (
-    <div className="border-t border-border bg-background px-4 py-4 safe-bottom">
+    <div className="border-t border-border/20 bg-background px-4 py-4 safe-bottom">
       <div className="space-y-3 max-w-4xl mx-auto">
         {/* Quick Suggestions */}
         <SuggestionChips
@@ -42,12 +43,12 @@ export const ChatInput = ({ input, setInput, onSendMessage, isLoading }: ChatInp
               <TooltipTrigger asChild>
                 <Input
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                   onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
                   placeholder="Tanyakan apa saja tentang bisnis UMKM kuliner Anda..."
                   className="flex-1 input-mobile focus-mobile"
                   disabled={isLoading}
                   aria-label="Kolom input pesan"
-                  onKeyDown={(e) => {
+                   onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                     if (e.key === 'Enter' && !e.shiftKey && input.trim()) {
                       e.preventDefault()
                       onSendMessage()

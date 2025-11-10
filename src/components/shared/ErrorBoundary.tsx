@@ -35,7 +35,7 @@ interface ErrorBoundaryState {
  * - Reset functionality
  * - Production-safe error reporting
  */
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private resetTimeoutId: NodeJS.Timeout | null = null
 
   constructor(props: ErrorBoundaryProps) {
@@ -174,6 +174,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return this.props.children
   }
 }
+
+export { ErrorBoundary }
 
 /**
  * Higher-Order Component for wrapping components with error boundary

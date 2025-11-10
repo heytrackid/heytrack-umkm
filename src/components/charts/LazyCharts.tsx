@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { ResponsiveContainer } from 'recharts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -23,17 +24,23 @@ const ChartSkeleton = (): JSX.Element => (
     </div>
 )
 
-// Chart Components - Lazy loaded with next/dynamic for SSR compatibility
+// Lazy load recharts components to avoid HMR issues with individual imports
 export const LazyLineChart = dynamic(
-    () => import('recharts').then(mod => mod.LineChart),
+    async () => {
+        const mod = await import('recharts')
+        return { default: mod.LineChart }
+    },
     {
         loading: () => <ChartSkeleton />,
-        ssr: false, // Charts don't need SSR
+        ssr: false,
     }
 )
 
 export const LazyBarChart = dynamic(
-    () => import('recharts').then(mod => mod.BarChart),
+    async () => {
+        const mod = await import('recharts')
+        return { default: mod.BarChart }
+    },
     {
         loading: () => <ChartSkeleton />,
         ssr: false,
@@ -41,7 +48,10 @@ export const LazyBarChart = dynamic(
 )
 
 export const LazyPieChart = dynamic(
-    () => import('recharts').then(mod => mod.PieChart),
+    async () => {
+        const mod = await import('recharts')
+        return { default: mod.PieChart }
+    },
     {
         loading: () => <ChartSkeleton />,
         ssr: false,
@@ -49,7 +59,10 @@ export const LazyPieChart = dynamic(
 )
 
 export const LazyAreaChart = dynamic(
-    () => import('recharts').then(mod => mod.AreaChart),
+    async () => {
+        const mod = await import('recharts')
+        return { default: mod.AreaChart }
+    },
     {
         loading: () => <ChartSkeleton />,
         ssr: false,
@@ -57,27 +70,30 @@ export const LazyAreaChart = dynamic(
 )
 
 export const LazyComposedChart = dynamic(
-    () => import('recharts').then(mod => mod.ComposedChart),
+    async () => {
+        const mod = await import('recharts')
+        return { default: mod.ComposedChart }
+    },
     {
         loading: () => <ChartSkeleton />,
         ssr: false,
     }
 )
 
-// Chart Elements - Lazy loaded
-export const Line = dynamic(() => import('recharts').then(mod => mod.Line))
-export const Bar = dynamic(() => import('recharts').then(mod => mod.Bar))
-export const Pie = dynamic(() => import('recharts').then(mod => mod.Pie))
-export const Area = dynamic(() => import('recharts').then(mod => mod.Area))
-export const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis))
-export const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis))
-export const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid))
-export const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip))
-export const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer))
-export const Cell = dynamic(() => import('recharts').then(mod => mod.Cell))
+// Chart Elements - Direct imports for better HMR compatibility
+export { Line, Bar, Pie, Area, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts'
+export { ResponsiveContainer }
 
-// Legend - Static export (small component, no need for lazy loading)
-export { Legend as ChartLegend } from 'recharts'
+// Legend - Lazy loaded for HMR compatibility
+export const ChartLegend = dynamic(
+  async () => {
+    const mod = await import('recharts')
+    return { default: mod.Legend }
+  },
+  {
+    ssr: false, // Charts don't need SSR
+  }
+)
 
 // Chart Bundle Preloader
 export const preloadChartBundle = () =>

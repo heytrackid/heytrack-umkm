@@ -129,7 +129,7 @@ const RecentOrdersSection = ({
                   className="flex items-center gap-1"
                 >
                   <X className="h-4 w-4" />
-                  Clear
+                  Hapus
                 </Button>
               )}
             </div>

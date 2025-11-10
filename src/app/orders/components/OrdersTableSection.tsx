@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { LoadingButton } from '@/components/ui/loading-button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { OrdersTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { useToast } from '@/hooks/index'
 
 import type { Row } from '@/types/database'
@@ -20,10 +21,12 @@ const OrdersTableSection = ({
   orders,
   formatCurrency,
   formatDate,
+  isLoading = false,
 }: {
   orders: OrderForTable[]
   formatCurrency: (n: number) => string
   formatDate: (d: string) => string
+  isLoading?: boolean
 }) => {
 
   // Pagination state
@@ -39,17 +42,17 @@ const OrdersTableSection = ({
   const { toast } = useToast()
 
   const ORDER_STATUS_CONFIG: Record<string, { label: string; color: string }> = useMemo(() => ({
-    PENDING: { label: "Pending", color: 'bg-gray-100 text-gray-800' },
-    CONFIRMED: { label: "Confirmed", color: 'bg-gray-200 text-gray-900' },
-    IN_PROGRESS: { label: "In Production", color: 'bg-gray-300 text-gray-900' },
-    COMPLETED: { label: "Completed", color: 'bg-gray-400 text-white' },
-    CANCELLED: { label: "Cancelled", color: 'bg-gray-500 text-white' }
+    PENDING: { label: "Pending", color: 'bg-secondary text-secondary-foreground' },
+    CONFIRMED: { label: "Confirmed", color: 'bg-muted text-foreground' },
+    IN_PROGRESS: { label: "In Production", color: 'bg-muted text-foreground' },
+    COMPLETED: { label: "Completed", color: 'bg-muted text-white' },
+    CANCELLED: { label: "Cancelled", color: 'bg-muted0 text-white' }
   }), [])
 
   const PAYMENT_STATUS_CONFIG: Record<string, { label: string; color: string }> = useMemo(() => ({
-    UNPAID: { label: "Unpaid", color: 'bg-gray-100 text-gray-800' },
-    PARTIAL: { label: "Partial", color: 'bg-gray-200 text-gray-900' },
-    PAID: { label: "Paid", color: 'bg-gray-300 text-gray-900' }
+    UNPAID: { label: "Unpaid", color: 'bg-secondary text-secondary-foreground' },
+    PARTIAL: { label: "Partial", color: 'bg-muted text-foreground' },
+    PAID: { label: "Paid", color: 'bg-muted text-foreground' }
   }), [])
 
   // Calculate pagination
@@ -114,19 +117,23 @@ const OrdersTableSection = ({
     setDeleteDialogOpen(true)
   }
 
+  if (isLoading) {
+    return <OrdersTableSkeleton rows={10} />
+  }
+
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>No. Pesanan</TableHead>
-            <TableHead>Pelanggan</TableHead>
-            <TableHead>Tanggal Order</TableHead>
-            <TableHead>Tanggal Kirim</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Payment</TableHead>
-            <TableHead className="text-right">Total</TableHead>
-            <TableHead className="text-center">Aksi</TableHead>
+            <TableHead className="bg-muted/50">No. Pesanan</TableHead>
+            <TableHead className="bg-muted/50">Pelanggan</TableHead>
+            <TableHead className="bg-muted/50">Tanggal Order</TableHead>
+            <TableHead className="bg-muted/50">Tanggal Kirim</TableHead>
+            <TableHead className="bg-muted/50">Status</TableHead>
+            <TableHead className="bg-muted/50">Payment</TableHead>
+            <TableHead className="bg-muted/50 text-right">Total</TableHead>
+            <TableHead className="bg-muted/50 text-center w-32">Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -144,12 +151,12 @@ const OrdersTableSection = ({
               <TableCell>{order.order_date ? formatDate(order.order_date) : '-'}</TableCell>
               <TableCell>{order.delivery_date ? formatDate(order.delivery_date) : '-'}</TableCell>
               <TableCell>
-                <span className={`text-xs px-2 py-1 rounded ${order['status'] ? ORDER_STATUS_CONFIG[order['status']]?.color : 'bg-gray-100 text-gray-800'}`}>
+                <span className={`text-xs px-2 py-1 rounded ${order['status'] ? ORDER_STATUS_CONFIG[order['status']]?.color : 'bg-secondary text-secondary-foreground'}`}>
                   {order['status'] ? (ORDER_STATUS_CONFIG[order['status']]?.label ?? order['status']) : 'Unknown'}
                 </span>
               </TableCell>
               <TableCell>
-                <span className={`text-xs px-2 py-1 rounded ${order.payment_status ? PAYMENT_STATUS_CONFIG[order.payment_status]?.color : 'bg-gray-100 text-gray-800'}`}>
+                <span className={`text-xs px-2 py-1 rounded ${order.payment_status ? PAYMENT_STATUS_CONFIG[order.payment_status]?.color : 'bg-secondary text-secondary-foreground'}`}>
                   {order.payment_status ? (PAYMENT_STATUS_CONFIG[order.payment_status]?.label ?? order.payment_status) : 'Unknown'}
                 </span>
               </TableCell>

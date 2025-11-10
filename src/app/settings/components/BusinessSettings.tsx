@@ -33,7 +33,7 @@ export const BusinessSettings = ({ settings, onSettingChange }: BusinessSettings
             id="defaultTax"
             type="number"
             value={settings.system.defaultTax}
-            onChange={(e) =>
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               onSettingChange('system', 'defaultTax', Number(e.target.value))
             }
           />
@@ -44,7 +44,7 @@ export const BusinessSettings = ({ settings, onSettingChange }: BusinessSettings
             id="lowStockThreshold"
             type="number"
             value={settings.system.lowStockThreshold}
-            onChange={(e) =>
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               onSettingChange('system', 'lowStockThreshold', Number(e.target.value))
             }
           />

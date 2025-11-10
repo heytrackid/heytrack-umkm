@@ -1,13 +1,13 @@
-import { cn } from"@/lib/utils"
+import { cn } from "@/lib/utils"
 
 import type { ComponentProps } from 'react'
 
 
 
-const Card = ({ className, ...props }: ComponentProps<'div'>) => (
+export const Card = ({ className, ...props }: ComponentProps<'div'>) => (
     <div
       className={cn(
-       "rounded-lg border bg-card text-card-foreground",
+        "rounded-lg border bg-card text-card-foreground shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg hover:border-border/60 transition-all duration-200",
         className
       )}
       {...props}
@@ -50,11 +50,8 @@ const CardFooter = ({ className, ...props }: ComponentProps<'div'>) => (
     />
   )
 
+
 export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardDescription,
-  CardContent,
+    CardContent, CardDescription, CardFooter, CardHeader, CardTitle
 }
+

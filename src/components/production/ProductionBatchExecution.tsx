@@ -26,7 +26,7 @@ interface ProductionBatchExecutionProps {
   className?: string
 }
 
-const ProductionBatchExecution = ({
+export const ProductionBatchExecution = ({
   batches,
   onBatchUpdate,
   onBatchSelect,
@@ -293,4 +293,3 @@ const ProductionBatchExecution = ({
   )
 }
 
-export { ProductionBatchExecution }
