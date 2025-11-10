@@ -8,8 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { createClient } from '@/utils/supabase/client'
+import { createClientLogger } from '@/lib/client-logger'
 
 export function OneClickHppGenerator(): JSX.Element {
+  const logger = createClientLogger('OneClickHppGenerator')
   const [vertical, setVertical] = useState<'fnb'|'beauty'|'fashion'|'services'|'general'>('fnb')
   const [desc, setDesc] = useState('')
   const [loading, setLoading] = useState(false)
@@ -40,7 +42,7 @@ export function OneClickHppGenerator(): JSX.Element {
         return
       }
     } catch (authError) {
-      console.error('Auth check failed:', authError)
+      logger.error({ authError }, 'Authentication check failed')
       toast({
         title: 'Authentication Error',
         description: 'Gagal memverifikasi autentikasi. Silakan coba lagi.',
@@ -54,7 +56,12 @@ export function OneClickHppGenerator(): JSX.Element {
       setStep('calling-ai')
 
       // Log request for debugging
-      console.log('Bootstrap request:', { businessDescription: content.substring(0, 50) + '...', vertical })
+      logger.info({
+        message: 'Starting bootstrap generation',
+        businessDescription: content.substring(0, 50) + '...',
+        vertical,
+        contentLength: content.length
+      })
 
       const res = await fetch('/api/ai/bootstrap', {
         method: 'POST',
@@ -76,22 +83,45 @@ export function OneClickHppGenerator(): JSX.Element {
       try {
         data = await res.json()
       } catch (parseError) {
-        console.error('Failed to parse response:', parseError)
+        logger.error({ parseError, status: res.status }, 'Failed to parse API response')
         throw new Error(`Server error (${res.status}): Invalid response format`)
       }
 
       if (!res.ok) {
-        console.error('API Error:', { status: res.status, data })
-        throw new Error(data.error || data.message || `HTTP ${res.status}: ${res.statusText}`)
+        logger.error({
+          status: res.status,
+          data,
+          requestData: { businessDescription: content.substring(0, 50) + '...', vertical }
+        }, 'API request failed')
+
+        // Show detailed validation errors if available
+        if (data.code === 'VALIDATION_ERROR' && data.details?.issues) {
+          const issues = data.details.issues.map((issue: any) =>
+            `${issue.path?.join('.') || 'unknown'}: ${issue.message}`
+          ).join('; ')
+          throw new Error(`Validasi gagal: ${issues}`)
+        }
+
+        throw new Error(data.error || `HTTP ${res.status}: ${res.statusText}`)
       }
 
       setStep('calculating')
+      logger.info({
+        ingredientCount: data.ingredientCount || 0,
+        recipeCount: data.recipeIds?.length || 0
+      }, 'Bootstrap generation successful')
+
       toast({
         title: 'Berhasil!',
         description: `Dibuat ${data.ingredientCount || 0} bahan & ${data.recipeIds?.length || 0} resep.`
       })
     } catch (e) {
-      console.error('Bootstrap generation failed:', e)
+      logger.error({
+        error: e,
+        businessDescription: content.substring(0, 50) + '...',
+        vertical
+      }, 'Bootstrap generation failed')
+
       const errorMessage = e instanceof Error ? e.message : 'Terjadi kesalahan tidak diketahui'
       toast({
         title: 'Gagal Generate HPP',
@@ -102,7 +132,7 @@ export function OneClickHppGenerator(): JSX.Element {
       setLoading(false)
       setStep('idle')
     }
-  }, [desc, vertical, toast])
+  }, [desc, vertical, toast, logger])
 
   return (
     <Card>
