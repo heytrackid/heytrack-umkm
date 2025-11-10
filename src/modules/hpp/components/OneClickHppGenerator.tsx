@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { CheckCircle } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import { createClient } from '@/utils/supabase/client'
 import { createClientLogger } from '@/lib/client-logger'
@@ -16,6 +18,12 @@ export function OneClickHppGenerator(): JSX.Element {
   const [desc, setDesc] = useState('')
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState<'idle'|'calling-ai'|'seeding'|'calculating'>('idle')
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false)
+  const [generationResult, setGenerationResult] = useState<{
+    ingredientCount: number
+    recipeCount: number
+    recipeIds: string[]
+  } | null>(null)
   const { toast } = useToast()
 
   const handleGenerate = useCallback(async () => {
@@ -111,6 +119,14 @@ export function OneClickHppGenerator(): JSX.Element {
         recipeCount: data.recipeIds?.length || 0
       }, 'Bootstrap generation successful')
 
+      // Store results for success dialog
+      setGenerationResult({
+        ingredientCount: data.ingredientCount || 0,
+        recipeCount: data.recipeIds?.length || 0,
+        recipeIds: data.recipeIds || []
+      })
+      setSuccessDialogOpen(true)
+
       toast({
         title: 'Berhasil!',
         description: `Dibuat ${data.ingredientCount || 0} bahan & ${data.recipeIds?.length || 0} resep.`
@@ -135,6 +151,7 @@ export function OneClickHppGenerator(): JSX.Element {
   }, [desc, vertical, toast, logger])
 
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle>Generate HPP 1 Klik</CardTitle>
@@ -169,5 +186,57 @@ export function OneClickHppGenerator(): JSX.Element {
         </Button>
       </CardContent>
     </Card>
+
+    {/* Success Confirmation Dialog */}
+    <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            HPP Berhasil Digenerate!
+          </DialogTitle>
+          <DialogDescription>
+            Data bisnis Anda telah berhasil dibuat dan siap digunakan.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">
+                {generationResult?.ingredientCount}
+              </div>
+              <div className="text-sm text-muted-foreground">Bahan Baku</div>
+            </div>
+            <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">
+                {generationResult?.recipeCount}
+              </div>
+              <div className="text-sm text-muted-foreground">Resep</div>
+            </div>
+          </div>
+
+          <div className="text-sm text-muted-foreground">
+            <p>• Bahan baku siap digunakan untuk produksi</p>
+            <p>• Resep HPP telah dihitung otomatis</p>
+            <p>• Biaya operasional telah dikonfigurasi</p>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setSuccessDialogOpen(false)}>
+            Tutup
+          </Button>
+          <Button onClick={() => {
+            setSuccessDialogOpen(false)
+            // Optional: Navigate to recipes page
+            // router.push('/recipes')
+          }}>
+            Lihat Resep
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }
