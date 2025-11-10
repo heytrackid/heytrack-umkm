@@ -5,7 +5,6 @@ import { CheckCircle } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
@@ -14,7 +13,7 @@ import { createClientLogger } from '@/lib/client-logger'
 
 export function OneClickHppGenerator(): JSX.Element {
   const logger = createClientLogger('OneClickHppGenerator')
-  const [vertical, setVertical] = useState<'fnb'|'beauty'|'fashion'|'services'|'general'>('fnb')
+  const VERTICAL = 'fnb' as const // Focus on UMKM F&B only
   const [desc, setDesc] = useState('')
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState<'idle'|'calling-ai'|'seeding'|'calculating'>('idle')
@@ -29,11 +28,22 @@ export function OneClickHppGenerator(): JSX.Element {
   const handleGenerate = useCallback(async () => {
     const content = desc.trim()
     if (!content) {
-      toast({ title: 'Deskripsi belum diisi', description: 'Tuliskan deskripsi bisnis Anda.' })
+      toast({ title: 'Deskripsi belum diisi', description: 'Ceritakan bisnis kuliner Anda.' })
       return
     }
-    if (content.length < 10) {
-      toast({ title: 'Deskripsi terlalu pendek', description: 'Tuliskan minimal 10 karakter deskripsi bisnis Anda.' })
+    if (content.length < 20) {
+      toast({ title: 'Deskripsi kurang detail', description: 'Ceritakan bisnis kuliner Anda lebih detail (minimal 20 karakter).' })
+      return
+    }
+
+    // Check for Indonesian culinary keywords
+    const hasCulinaryKeywords = /nasi|ayam|ikan|sayur|sambal|gulai|rendang|warung|kafe|restoran|catering|kuliner|makanan|minuman/i.test(content)
+    if (!hasCulinaryKeywords) {
+      toast({
+        title: 'Bisnis kuliner?',
+        description: 'Pastikan deskripsi mengandung kata kunci kuliner seperti nasi, ayam, warung, kafe, dll.',
+        variant: 'destructive'
+      })
       return
     }
 
@@ -67,7 +77,7 @@ export function OneClickHppGenerator(): JSX.Element {
       logger.info({
         message: 'Starting bootstrap generation',
         businessDescription: content.substring(0, 50) + '...',
-        vertical,
+        vertical: VERTICAL,
         contentLength: content.length
       })
 
@@ -80,7 +90,7 @@ export function OneClickHppGenerator(): JSX.Element {
         },
         body: JSON.stringify({
           businessDescription: content,
-          vertical,
+          vertical: VERTICAL,
           currency: 'IDR' // Explicitly set currency
         })
       })
@@ -99,7 +109,7 @@ export function OneClickHppGenerator(): JSX.Element {
         logger.error({
           status: res.status,
           data,
-          requestData: { businessDescription: content.substring(0, 50) + '...', vertical }
+          requestData: { businessDescription: content.substring(0, 50) + '...', vertical: VERTICAL }
         }, 'API request failed')
 
         // Show detailed validation errors if available
@@ -135,7 +145,7 @@ export function OneClickHppGenerator(): JSX.Element {
       logger.error({
         error: e,
         businessDescription: content.substring(0, 50) + '...',
-        vertical
+        vertical: VERTICAL
       }, 'Bootstrap generation failed')
 
       const errorMessage = e instanceof Error ? e.message : 'Terjadi kesalahan tidak diketahui'
@@ -148,7 +158,7 @@ export function OneClickHppGenerator(): JSX.Element {
       setLoading(false)
       setStep('idle')
     }
-  }, [desc, vertical, toast, logger])
+  }, [desc, toast, logger])
 
   return (
     <>
@@ -157,28 +167,17 @@ export function OneClickHppGenerator(): JSX.Element {
         <CardTitle>Generate HPP 1 Klik</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Select value={vertical} onValueChange={v => setVertical(v as any)}>
-          <SelectTrigger><SelectValue placeholder="Pilih industri" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="fnb">Food & Beverage (F&B)</SelectItem>
-            <SelectItem value="beauty">Beauty / Cosmetics</SelectItem>
-            <SelectItem value="fashion">Fashion</SelectItem>
-            <SelectItem value="services">Services</SelectItem>
-            <SelectItem value="general">General</SelectItem>
-          </SelectContent>
-        </Select>
-
         <Textarea
           value={desc}
           onChange={e => setDesc(e.target.value)}
-          placeholder="Ceritakan bisnis Anda (contoh: Warung kopi specialty, menu espresso-based, target mahasiswa & karyawan, lokasi Bandung, kapasitas 80 cup/hari, takeaway)"
+          placeholder="Deskripsikan bisnis kuliner Anda (contoh: Warung nasi padang dengan 15 menu utama, target keluarga dan pekerja kantoran, lokasi Jakarta Selatan, kapasitas 50 porsi/hari, harga rata-rata Rp 25.000/porsi)"
           rows={4}
         />
 
         <div className="text-sm text-muted-foreground">
-          {step === 'calling-ai' && 'Menghubungi AI untuk menyusun data awal...'}
-          {step === 'seeding' && 'Menyimpan bahan, biaya operasional, dan resep...'}
-          {step === 'calculating' && 'Menghitung HPP untuk resep yang dibuat...'}
+          {step === 'calling-ai' && 'Menganalisis bisnis kuliner Anda...'}
+          {step === 'seeding' && 'Menyusun resep dan bahan baku khas UMKM...'}
+          {step === 'calculating' && 'Menghitung harga pokok penjualan untuk menu Anda...'}
         </div>
 
         <Button onClick={handleGenerate} disabled={loading}>
@@ -193,10 +192,10 @@ export function OneClickHppGenerator(): JSX.Element {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-green-600" />
-            HPP Berhasil Digenerate!
+            Menu & HPP Warung Berhasil Dibuat!
           </DialogTitle>
           <DialogDescription>
-            Data bisnis Anda telah berhasil dibuat dan siap digunakan.
+            Resep dan bahan baku khas UMKM telah siap. Mulai jualan hari ini!
           </DialogDescription>
         </DialogHeader>
 
@@ -217,9 +216,10 @@ export function OneClickHppGenerator(): JSX.Element {
           </div>
 
           <div className="text-sm text-muted-foreground">
-            <p>• Bahan baku siap digunakan untuk produksi</p>
-            <p>• Resep HPP telah dihitung otomatis</p>
-            <p>• Biaya operasional telah dikonfigurasi</p>
+            <p>• Bahan baku lokal siap digunakan untuk memasak</p>
+            <p>• Resep dengan takaran praktis untuk dapur UMKM</p>
+            <p>• HPP dihitung untuk margin keuntungan warung</p>
+            <p>• Biaya operasional sesuai skala usaha kecil</p>
           </div>
         </div>
 
@@ -232,7 +232,7 @@ export function OneClickHppGenerator(): JSX.Element {
             // Optional: Navigate to recipes page
             // router.push('/recipes')
           }}>
-            Lihat Resep
+            Kelola Menu Warung
           </Button>
         </div>
       </DialogContent>
