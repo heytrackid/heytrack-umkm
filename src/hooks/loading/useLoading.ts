@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 
-import type { LoadingState, UseLoadingReturn } from './types'
+import type { LoadingState, UseLoadingReturn } from '@/hooks/loading/types'
 
 
 

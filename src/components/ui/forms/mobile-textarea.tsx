@@ -5,8 +5,8 @@ import { useState } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 
-import { Label } from '../label'
-import { Textarea } from '../textarea'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 /**
  * Mobile Textarea Component

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
-import type { Customer } from './types'
+import type { Customer } from '@/app/customers/components/types'
 
 interface CustomerSearchFiltersProps {
   searchTerm: string
@@ -94,4 +94,4 @@ const CustomerSearchFilters = ({
   )
 }
 
-export default CustomerSearchFilters
+export { CustomerSearchFilters }

@@ -12,7 +12,7 @@
  * import { ContextAwareAI } from '@/lib/ai-chatbot-enhanced'
  * 
  * // New way (recommended)
- * import { ContextAwareAI } from '@/lib/ai-chatbot'
+ * import { ContextAwareAI } from '@/lib/ai-chatbot/index'
  */
 
 // Re-export everything from new modular structure

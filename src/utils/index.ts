@@ -4,8 +4,8 @@
  * Barrel export for utility functions
  * 
  * Usage:
- *   import { isMobile, isTablet } from '@/utils'
- *   import { createClient } from '@/lib/auth'
+ *   import { isMobile, isTablet } from '@/utils/index'
+ *   import { createClient } from '@/lib/auth/index'
  */
 
 // ==========================================================

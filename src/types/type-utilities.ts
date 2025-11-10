@@ -1,4 +1,4 @@
-import type { Database, Row, TableName, OrderStatus, ProductionStatus } from './database'
+import type { Database, Row, TableName, OrderStatus, ProductionStatus } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 

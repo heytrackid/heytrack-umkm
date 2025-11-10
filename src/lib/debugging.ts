@@ -1,4 +1,4 @@
-import {serializeError } from './logger';
+import {serializeError } from '@/lib/logger';
 
 import type pino from 'pino';
 
@@ -430,4 +430,3 @@ export function detailedErrorLog(
   debugLogger.logDetailed(message, { level: 'error', includeTimestamp: true }, logData);
 }
 
-export default debugLogger;

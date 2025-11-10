@@ -1,8 +1,8 @@
-import { EmailService } from './email'
-import { SmartNotificationSystem } from './notifications'
-import { WhatsAppService } from './whatsapp'
+import { EmailService } from '@/lib/communications/email'
+import { SmartNotificationSystem } from '@/lib/communications/notifications'
+import { WhatsAppService } from '@/lib/communications/whatsapp'
 
-import type { CommunicationConfig, OrderData, SmartNotification } from './types'
+import type { CommunicationConfig, OrderData, SmartNotification } from '@/lib/communications/types'
 
 
 /**

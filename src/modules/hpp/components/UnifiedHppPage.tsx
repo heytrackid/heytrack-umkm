@@ -16,6 +16,7 @@ import { HppScenarioPlanner } from '@/modules/hpp/components/HppScenarioPlanner'
 import { PricingCalculatorCard } from '@/modules/hpp/components/PricingCalculatorCard'
 import { ProductComparisonCard } from '@/modules/hpp/components/ProductComparisonCard'
 import { RecipeSelector } from '@/modules/hpp/components/RecipeSelector'
+import { OneClickHppGenerator } from '@/modules/hpp/components/OneClickHppGenerator'
 import { useUnifiedHpp } from '@/modules/hpp/hooks/useUnifiedHpp'
 
 
@@ -63,7 +64,7 @@ export const UnifiedHppPage = memo(() => {
     return () => {
       // Cleanup if no recipe or no change
     }
-  }, [recipe?.id, recipe?.margin_percentage])  
+   }, [recipe])
 
   const handleRecipeSelect = useCallback((recipeId: string) => {
     if (recipeId === 'new') {
@@ -98,6 +99,9 @@ export const UnifiedHppPage = memo(() => {
       <div className="space-y-6">
         {/* Overview Card - Always visible */}
         {overview && <HppOverviewCard overview={overview} />}
+
+        {/* One-click generator */}
+        <OneClickHppGenerator />
 
         {/* Recipe Selector - Prominent position */}
         <RecipeSelector

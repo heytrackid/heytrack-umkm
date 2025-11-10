@@ -1,13 +1,11 @@
 import { lazy, Suspense } from 'react'
 
-import { StockAlertsSkeleton } from './StockAlertsSkeleton'
+import { StockAlertsSkeleton } from '@/app/dashboard/components/StockAlertsSkeleton'
 
-import type { DashboardComponentProps } from './lazy-types'
+import type { DashboardComponentProps } from '@/app/dashboard/components/lazy-types'
 
 
-const LazyStockAlertsSection = lazy(() =>
-  import('./StockAlertsSection')
-)
+const LazyStockAlertsSection = lazy(() => import('./StockAlertsSection').then(m => ({ default: m.StockAlertsSection })))
 
 const StockAlertsSectionWithSuspense = (props: DashboardComponentProps): JSX.Element => (
   <Suspense fallback={<StockAlertsSkeleton />}>
@@ -15,4 +13,4 @@ const StockAlertsSectionWithSuspense = (props: DashboardComponentProps): JSX.Ele
   </Suspense>
 )
 
-export default StockAlertsSectionWithSuspense
+export { StockAlertsSectionWithSuspense }

@@ -5,18 +5,18 @@ import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
 import { useOrderLogic } from '@/app/orders/new/hooks/useOrderLogic'
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { Badge } from '@/components/ui/badge'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import PrefetchLink from '@/components/ui/prefetch-link'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { OrderFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 
 
 // Lazy load wizard step components
-const OrderCustomerStep = dynamic(() => import('./_components/OrderCustomerStep'), {
+const OrderCustomerStep = dynamic(() => import('./_components/OrderCustomerStep').then(m => ({ default: m.OrderCustomerStep })), {
   loading: () => (
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -29,7 +29,7 @@ const OrderCustomerStep = dynamic(() => import('./_components/OrderCustomerStep'
   )
 })
 
-const OrderItemsStep = dynamic(() => import('./_components/OrderItemsStep'), {
+const OrderItemsStep = dynamic(() => import('./_components/OrderItemsStep').then(m => ({ default: m.OrderItemsStep })), {
   loading: () => (
     <div className="space-y-4">
       <div className="h-12 bg-muted animate-pulse rounded" />
@@ -42,7 +42,7 @@ const OrderItemsStep = dynamic(() => import('./_components/OrderItemsStep'), {
   )
 })
 
-const OrderDeliveryStep = dynamic(() => import('./_components/OrderDeliveryStep'), {
+const OrderDeliveryStep = dynamic(() => import('./_components/OrderDeliveryStep').then(m => ({ default: m.OrderDeliveryStep })), {
   loading: () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -54,7 +54,7 @@ const OrderDeliveryStep = dynamic(() => import('./_components/OrderDeliveryStep'
   )
 })
 
-const OrderPaymentStep = dynamic(() => import('./_components/OrderPaymentStep'), {
+const OrderPaymentStep = dynamic(() => import('./_components/OrderPaymentStep').then(m => ({ default: m.OrderPaymentStep })), {
   loading: () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -66,7 +66,7 @@ const OrderPaymentStep = dynamic(() => import('./_components/OrderPaymentStep'),
   )
 })
 
-const OrderSummary = dynamic(() => import('./_components/OrderSummary'), {
+const OrderSummary = dynamic(() => import('./_components/OrderSummary').then(m => ({ default: m.OrderSummary })), {
   loading: () => (
     <div className="space-y-4">
       <div className="h-32 bg-muted animate-pulse rounded" />

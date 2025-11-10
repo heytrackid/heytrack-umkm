@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import type { ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 import { createClientLogger } from '@/lib/client-logger';
 
-import { useChatHistory } from '../../hooks/useChatHistory';
-import DataVisualization from './DataVisualization';
+import { useChatHistory } from '@/hooks/useChatHistory';
+import { DataVisualization } from '@/components/ai-chatbot/DataVisualization';
 
 
 const logger = createClientLogger('ChatbotInterface')
@@ -569,4 +569,4 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
   );
 }
 
-export default ChatbotInterface;
+export { ChatbotInterface }

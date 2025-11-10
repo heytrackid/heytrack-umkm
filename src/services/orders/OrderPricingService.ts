@@ -1,5 +1,5 @@
 import 'server-only'
-import { ORDER_CONFIG } from '@/lib/constants'
+import { ORDER_CONFIG } from '@/lib/constants/index'
 import { dbLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { OrderItemCalculation, OrderPricing } from '@/modules/orders/types'

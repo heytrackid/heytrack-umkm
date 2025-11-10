@@ -11,7 +11,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, safeNumber } from '@/lib/type-guards'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

@@ -1,6 +1,6 @@
-import { formatCurrentCurrency } from '@/shared'
+import { formatCurrentCurrency } from '@/shared/index'
 
-import type { OrderStatus, PaymentStatus, Priority, StatusInfo } from './types'
+import type { OrderStatus, PaymentStatus, Priority, StatusInfo } from '@/components/orders/types'
 
 
 // Order Status Configurations

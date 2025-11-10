@@ -5,9 +5,9 @@ import { queryLogger } from '@/lib/client-logger'
 import { getErrorMessage, isOrder } from '@/lib/type-guards'
 import { cachePresets } from '@/providers/QueryProvider'
 
-import { generateOrderNo } from './utils'
+import { generateOrderNo } from '@/components/orders/utils'
 
-import type { OrderFilters, OrderFormData, OrderStats, OrderStatus, OrderWithItems } from './types'
+import type { OrderFilters, OrderFormData, OrderStats, OrderStatus, OrderWithItems } from '@/components/orders/types'
 
 
 

@@ -8,7 +8,7 @@ import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
 import type { Row } from '@/types/database'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

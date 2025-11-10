@@ -1,7 +1,7 @@
 import { apiLogger } from '@/lib/logger'
 
-import { BusinessAI } from './business'
-import { NLPProcessor } from './nlp-processor'
+import { BusinessAI } from '@/lib/ai/business'
+import { NLPProcessor } from '@/lib/ai/nlp-processor'
 
 /**
  * AI Module - Main Export

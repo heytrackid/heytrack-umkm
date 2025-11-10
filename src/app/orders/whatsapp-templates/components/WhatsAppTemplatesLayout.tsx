@@ -5,19 +5,19 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect, useCallback, Suspense, lazy } from 'react'
 
 import { type WhatsAppTemplate } from '@/app/orders/whatsapp-templates/components/types'
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import PrefetchLink from '@/components/ui/prefetch-link'
-import { useAuth } from '@/hooks'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
 import { uiLogger } from '@/lib/client-logger'
 
 // Lazy load heavy components
-const TemplatesTable = lazy(() => import('./TemplatesTable'))
-const TemplateForm = lazy(() => import('./TemplateForm'))
-const TemplatePreview = lazy(() => import('./TemplatePreview'))
+const TemplatesTable = lazy(() => import('./TemplatesTable').then(m => ({ default: m.TemplatesTable })))
+const TemplateForm = lazy(() => import('./TemplateForm').then(m => ({ default: m.TemplateForm })))
+const TemplatePreview = lazy(() => import('./TemplatePreview').then(m => ({ default: m.TemplatePreview })))
 
 
 const WhatsAppTemplatesPage = () => {
@@ -417,4 +417,4 @@ const WhatsAppTemplatesPage = () => {
     )
 }
 
-export default WhatsAppTemplatesPage
+export { WhatsAppTemplatesPage }

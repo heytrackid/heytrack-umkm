@@ -1,4 +1,4 @@
-import type { Row } from './database'
+import type { Row } from '@/types/database'
 
 
 

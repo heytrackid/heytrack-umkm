@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui'
-import { useAuth } from '@/hooks'
+import { BreadcrumbPatterns, PageBreadcrumb } from '@/components/ui/index'
+import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
 import { useIngredientPurchases, useCreateIngredientPurchase } from '@/hooks/useIngredientPurchases'
 import { useIngredients } from '@/hooks/useIngredients'
@@ -13,11 +13,11 @@ import { apiLogger as _apiLogger } from '@/lib/logger'
 
 import type { Insert } from '@/types/database'
 
-import PurchaseForm from './PurchaseForm'
-import PurchasesTable from './PurchasesTable'
-import PurchaseStats from './PurchaseStats'
+import { PurchaseForm } from '@/app/ingredients/purchases/components/PurchaseForm'
+import { PurchasesTable } from '@/app/ingredients/purchases/components/PurchasesTable'
+import { PurchaseStats } from '@/app/ingredients/purchases/components/PurchaseStats'
 
-import type { IngredientPurchase as _IngredientPurchase, AvailableIngredient as _AvailableIngredient } from './types'
+import type { IngredientPurchase as _IngredientPurchase, AvailableIngredient as _AvailableIngredient } from '@/app/ingredients/purchases/components/types'
 
 
 
@@ -107,4 +107,4 @@ const IngredientPurchasesLayout = (): JSX.Element => {
   )
 }
 
-export default IngredientPurchasesLayout
+export { IngredientPurchasesLayout }

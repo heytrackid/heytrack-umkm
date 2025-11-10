@@ -8,7 +8,7 @@ import { cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import type { Update } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 

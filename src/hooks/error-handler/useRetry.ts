@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 
-import { useErrorHandler } from './useErrorHandler'
+import { useErrorHandler } from '@/hooks/error-handler/useErrorHandler'
 
 interface UseRetryReturn {
   retry: <T>(asyncFn: () => Promise<T>, onRetry?: (count: number, error: Error) => void) => Promise<T | null>

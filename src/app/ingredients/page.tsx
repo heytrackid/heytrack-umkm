@@ -6,31 +6,22 @@ import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
 
 import { generateIngredientsTemplate, parseIngredientsCSV } from '@/components/import/csv-helpers'
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { BreadcrumbPatterns, PageBreadcrumb, StatCardPatterns, StatsCards } from '@/components/ui'
+import { BreadcrumbPatterns, PageBreadcrumb, StatCardPatterns, StatsCards } from '@/components/ui/index'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/hooks'
+import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
 import { useIngredients } from '@/hooks/useIngredients'
+import { IngredientsCRUDSkeleton as ImportedIngredientsCRUDSkeleton } from '@/app/ingredients/components/IngredientsCRUDSkeleton'
 
 import type { Row } from '@/types/database'
 
 
 // Lazy load heavy components
-const IngredientsCRUDSkeleton = (): JSX.Element => (
-  <div className="border rounded-lg p-6">
-    <div className="animate-pulse space-y-4">
-      <div className="h-10 bg-muted rounded" />
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={`row-${i}`} className="h-16 bg-muted rounded" />
-      ))}
-    </div>
-  </div>
-)
 
 const IngredientsCRUD = dynamic(() => import('@/components/ingredients/EnhancedIngredientsPage').then(mod => ({ default: mod.EnhancedIngredientsPage })), {
-  loading: () => <IngredientsCRUDSkeleton />,
+  loading: () => <ImportedIngredientsCRUDSkeleton />,
   ssr: false
 })
 
@@ -215,7 +206,7 @@ const IngredientsPage = () => {
         )}
 
         {/* Main Content */}
-        <Suspense fallback={<IngredientsCRUDSkeleton />}>
+        <Suspense fallback={<ImportedIngredientsCRUDSkeleton />}>
           <IngredientsCRUD onAdd={() => setShowAddDialog(true)} />
         </Suspense>
 

@@ -2,7 +2,7 @@
 import { productionLogger } from '@/lib/logger'
 import { isIngredient } from '@/lib/type-guards'
 
-import type { ProductionBatch } from './types'
+import type { ProductionBatch } from '@/lib/business-services/types'
 
 
 

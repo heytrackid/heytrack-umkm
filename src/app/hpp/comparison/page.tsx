@@ -3,12 +3,13 @@
 import { BarChart3, Package, Target, TrendingDown, TrendingUp, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
-import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader, SharedStatsCards } from '@/components/shared/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DateRangePicker, type DateRangeValue } from '@/components/ui/date-range'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
@@ -54,17 +55,23 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory])
 
-  const loadComparisonData = async () => {
+  const loadComparisonData = async (): Promise<void> => {
     try {
       setLoading(true)
 
       // Get recipes with HPP data
-      const params = new URLSearchParams()
-      if (selectedCategory !== 'all') {
-        params.append('category', selectedCategory)
-      }
+     const params = new URLSearchParams()
+     if (selectedCategory !== 'all') {
+       params.append('category', selectedCategory)
+     }
+     // Forward date range params if present
+     const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+     const from = urlParams?.get('from')
+     const to = urlParams?.get('to')
+     if (from) params.set('from', from)
+     if (to) params.set('to', to)
 
-      const response = await fetch(`/api/hpp/comparison?${params.toString()}`, {
+     const response = await fetch(`/api/hpp/comparison?${params.toString()}`, {
         credentials: 'include', // Include cookies for authentication
       })
       if (response.ok) {
@@ -122,10 +129,23 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
   return (
     <AppLayout pageTitle="Comparison Analytics">
       <div className="container mx-auto p-6 space-y-6">
-        <PageHeader
-          title="Recipe Comparison"
-          description="Benchmarking dan analisis komparatif antar resep"
-        />
+        <div className="flex items-center justify-between gap-3">
+         <PageHeader
+           title="Recipe Comparison"
+           description="Benchmarking dan analisis komparatif antar resep"
+         />
+         <div className="hidden md:block">
+           <DateRangePicker
+             onChange={(range: DateRangeValue) => {
+               const params = new URLSearchParams(window.location.search)
+               if (range.from) params.set('from', range.from.toISOString())
+               if (range.to) params.set('to', range.to.toISOString())
+               const url = `${window.location.pathname}?${params.toString()}`
+               window.history.replaceState(null, '', url)
+             }}
+           />
+         </div>
+       </div>
 
         {/* Stats Cards */}
         <SharedStatsCards

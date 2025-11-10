@@ -7,7 +7,7 @@ import { apiLogger } from '@/lib/logger'
 import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { NextRequest, NextResponse } from 'next/server'

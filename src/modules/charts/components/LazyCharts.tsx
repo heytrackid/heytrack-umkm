@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 
 import { serializeError, uiLogger } from '@/lib/logger'
 
-import type { MiniChartProps } from './MiniChart'
+import type { MiniChartProps } from '@/modules/charts/components/MiniChart'
 import type { ComponentType, ReactNode } from 'react'
 
 
@@ -31,7 +31,7 @@ const defaultChartFallback = chartLoadingFallback()
 
 // Dynamically import chart components with loading fallback
 export const LazyFinancialTrendsChart = dynamic(
-  () => import('./FinancialTrendsChart'),
+  () => import('./FinancialTrendsChart').then(m => ({ default: m.FinancialTrendsChart })),
   {
     loading: chartLoadingFallback,
     ssr: false // Disable server-side rendering for chart components
@@ -39,7 +39,7 @@ export const LazyFinancialTrendsChart = dynamic(
 )
 
 export const LazyInventoryTrendsChart = dynamic(
-  () => import('./InventoryTrendsChart'),
+  () => import('./InventoryTrendsChart').then(m => ({ default: m.InventoryTrendsChart })),
   {
     loading: chartLoadingFallback,
     ssr: false
@@ -47,7 +47,7 @@ export const LazyInventoryTrendsChart = dynamic(
 )
 
 export const LazyMiniChart = dynamic(
-  () => import('./MiniChart'),
+  () => import('./MiniChart').then(m => ({ default: m.MiniChart })),
   {
     loading: chartLoadingFallback,
     ssr: false

@@ -2,7 +2,7 @@
 
 import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from 'react'
 
-import { globalLazyLoadingUtils } from '@/components/lazy'
+import { globalLazyLoadingUtils } from '@/components/lazy/index'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import {
   DataTableSkeleton,

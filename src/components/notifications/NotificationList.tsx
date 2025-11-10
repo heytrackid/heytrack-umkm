@@ -90,6 +90,7 @@ export const NotificationList = ({
     // Use virtual scrolling for large notification lists (>30 items)
     const useVirtualScrolling = filteredNotifications.length > 30
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const virtualizer = useVirtualizer({
         count: filteredNotifications.length,
         getScrollElement: () => parentRef.current,

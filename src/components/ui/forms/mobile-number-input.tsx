@@ -6,9 +6,9 @@ import { useState } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 
-import { Button } from '../button'
-import { Input } from '../input'
-import { Label } from '../label'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 /**
  * Mobile Number Input Component

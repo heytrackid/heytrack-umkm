@@ -23,9 +23,9 @@ import { SwipeActions } from '@/components/ui/mobile-gestures'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 import { useCurrency } from '@/hooks/useCurrency'
 
-import { getPaymentInfo, getPriorityInfo } from './utils'
+import { getPaymentInfo, getPriorityInfo } from '@/components/orders/utils'
 
-import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
+import type { Order, OrderStatus, PaymentStatus, Priority } from '@/components/orders/types'
 
 interface OrdersListProps {
   orders: Order[]
@@ -337,4 +337,4 @@ const OrdersList = memo(({
 
 OrdersList.displayName = 'OrdersList'
 
-export default OrdersList
+export { OrdersList }

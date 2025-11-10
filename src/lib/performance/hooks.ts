@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { createClientLogger } from '@/lib/client-logger'
 
-import { performanceMonitor } from './performance-monitoring'
+import { performanceMonitor } from '@/lib/performance/performance-monitoring'
 
 // Performance monitoring hooks for React components with enhanced memory leak prevention
 

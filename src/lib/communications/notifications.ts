@@ -1,7 +1,7 @@
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ClientFile')
-import type { SmartNotification, NotificationRule, NotificationConfig } from './types'
+import type { SmartNotification, NotificationRule, NotificationConfig } from '@/lib/communications/types'
 
 
 /**

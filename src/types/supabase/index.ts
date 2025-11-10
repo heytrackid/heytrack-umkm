@@ -18,7 +18,7 @@
  */
 
 // Re-export everything for backward compatibility
-export * from './common'
+export * from '@/types/supabase/common'
 export * from './enums'
 
 // For now, re-export from the original generated file

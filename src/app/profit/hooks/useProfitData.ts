@@ -77,7 +77,13 @@ export function useProfitData() {
   }
 
   // Get dates for the SWR key
-  const { calculatedStartDate, calculatedEndDate } = getCalculatedDates()
+  const base = getCalculatedDates()
+  // Override with URL params if present
+  const urlParams = (typeof window !== 'undefined') ? new URLSearchParams(window.location.search) : null
+  const urlFrom = urlParams?.get('from')?.slice(0, 10) || undefined
+  const urlTo = urlParams?.get('to')?.slice(0, 10) || undefined
+  const calculatedStartDate = urlFrom ?? base.calculatedStartDate
+  const calculatedEndDate = urlTo ?? base.calculatedEndDate
 
    // SWR key and fetcher
    const swrKey = calculatedStartDate && calculatedEndDate

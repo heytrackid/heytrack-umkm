@@ -13,9 +13,9 @@ import { animations } from '@/lib/animations'
 import type { Notification, NotificationPriority } from '@/lib/notifications/notification-types'
 import { cn } from '@/lib/utils'
 
-import { Badge } from './badge'
-import { Button } from './button'
-import { ScrollArea } from './scroll-area'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 
 

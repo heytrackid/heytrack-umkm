@@ -11,7 +11,7 @@ import { getErrorMessage, safeNumber, safeString } from '@/lib/type-guards'
 import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { PostgrestError } from '@supabase/supabase-js'

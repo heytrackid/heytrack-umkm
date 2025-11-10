@@ -26,6 +26,7 @@ export const VirtualScroll = <T,>({
 }: VirtualScrollProps<T>) => {
     const parentRef = useRef<HTMLDivElement>(null)
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const virtualizer = useVirtualizer({
         count: items.length,
         getScrollElement: () => parentRef.current,
@@ -79,7 +80,9 @@ export const useVirtualScroll = <T,>(
     containerRef: React.RefObject<HTMLElement>,
     itemHeight: number,
     overscan = 5
-) => useVirtualizer({
+) =>
+  // eslint-disable-next-line react-hooks/incompatible-library
+  useVirtualizer({
         count: items.length,
         getScrollElement: () => containerRef.current,
         estimateSize: () => itemHeight,

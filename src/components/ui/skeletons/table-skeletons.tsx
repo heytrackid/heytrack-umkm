@@ -5,8 +5,8 @@ import {
   SkeletonButton,
   SkeletonAvatar,
   SkeletonTable
-} from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
+} from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 interface SkeletonProps {
   className?: string

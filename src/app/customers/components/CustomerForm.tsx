@@ -367,4 +367,4 @@ const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps): JSX
     )
 }
 
-export default CustomerForm
+export { CustomerForm }

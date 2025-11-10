@@ -6,13 +6,13 @@ import type {
   FinancialAnalysis
 } from '@/lib/automation/types'
 
-import { AlertGenerator } from './alert-generator'
-import { BreakEvenAnalyzer } from './break-even-analyzer'
-import { MetricsCalculator } from './metrics-calculator'
-import { PricingOptimizer } from './pricing-optimizer'
-import { ProjectionEngine } from './projection-engine'
-import { RecommendationEngine } from './recommendation-engine'
-import { TrendAnalyzer } from './trend-analyzer'
+import { AlertGenerator } from '@/lib/automation/financial-automation/alert-generator'
+import { BreakEvenAnalyzer } from '@/lib/automation/financial-automation/break-even-analyzer'
+import { MetricsCalculator } from '@/lib/automation/financial-automation/metrics-calculator'
+import { PricingOptimizer } from '@/lib/automation/financial-automation/pricing-optimizer'
+import { ProjectionEngine } from '@/lib/automation/financial-automation/projection-engine'
+import { RecommendationEngine } from '@/lib/automation/financial-automation/recommendation-engine'
+import { TrendAnalyzer } from '@/lib/automation/financial-automation/trend-analyzer'
 
 /**
  * Financial Automation System Orchestrator
@@ -25,7 +25,7 @@ import type {
   PricingOptimizationResult,
   HistoricalData,
   ProjectionResult
-} from './types'
+} from '@/lib/automation/financial-automation/types'
 
 export class FinancialAutomation {
   constructor(private readonly config: AutomationConfig) {}

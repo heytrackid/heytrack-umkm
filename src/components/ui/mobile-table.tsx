@@ -14,11 +14,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu'
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 
-import { Input } from './input'
+import { Input } from '@/components/ui/input'
 
 // Types for mobile table
 export interface MobileTableColumn<T extends Record<string, unknown> = Record<string, unknown>> {

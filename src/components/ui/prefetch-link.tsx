@@ -65,5 +65,4 @@ export const PrefetchLink = ({
   )
 }
 
-// Export as default for easier migration
-export default PrefetchLink
+

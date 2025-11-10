@@ -609,4 +609,4 @@ const SmartPricingAssistant: FC<SmartPricingAssistantProps> = ({ recipe, onPrice
 }
 
 
-export default SmartPricingAssistant
+export { SmartPricingAssistant }

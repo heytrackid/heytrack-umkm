@@ -4,7 +4,7 @@ import type {
     Tables as SupabaseTables,
     TablesInsert as SupabaseTablesInsert,
     TablesUpdate as SupabaseTablesUpdate,
-} from './supabase-generated'
+} from '@/types/supabase-generated'
 
 // Core Supabase-generated helpers
 export type {

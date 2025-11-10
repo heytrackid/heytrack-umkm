@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { EnhancedOperationalCostsPage } from '@/components/operational-costs/EnhancedOperationalCostsPage'
 import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 

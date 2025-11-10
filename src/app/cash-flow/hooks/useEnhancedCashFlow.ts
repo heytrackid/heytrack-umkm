@@ -159,6 +159,16 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [transactionType, setTransactionType] = useState<'expense' | 'income'>('expense')
 
+  // Sync with URL params if available on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') {return}
+    const params = new URLSearchParams(window.location.search)
+    const from = params.get('from')
+    const to = params.get('to')
+    if (from) { setStartDate(from.slice(0, 10)) }
+    if (to) { setEndDate(to.slice(0, 10)) }
+  }, [])
+
   // Fetch cash flow data
   const fetchCashFlowData = useCallback(async (): Promise<void> => {
     setLoading(true)

@@ -1,11 +1,11 @@
 import { automationLogger } from '@/lib/logger'
 
-import { FinancialNotifications } from './financial-notifications'
-import { InventoryNotifications } from './inventory-notifications'
-import { MaintenanceNotifications } from './maintenance-notifications'
-import { NotificationFilter } from './notification-filter'
-import { OrderNotifications } from './order-notifications'
-import { SeasonalNotifications } from './seasonal-notifications'
+import { FinancialNotifications } from '@/lib/automation/notification-system/financial-notifications'
+import { InventoryNotifications } from '@/lib/automation/notification-system/inventory-notifications'
+import { MaintenanceNotifications } from '@/lib/automation/notification-system/maintenance-notifications'
+import { NotificationFilter } from '@/lib/automation/notification-system/notification-filter'
+import { OrderNotifications } from '@/lib/automation/notification-system/order-notifications'
+import { SeasonalNotifications } from '@/lib/automation/notification-system/seasonal-notifications'
 
 import type {
 
@@ -22,7 +22,7 @@ import type {
   Equipment,
   UserPreferences,
   NotificationSummary
-} from './types'
+} from '@/lib/automation/notification-system/types'
 
 export class NotificationSystem {
   constructor(private readonly config: AutomationConfig) {}

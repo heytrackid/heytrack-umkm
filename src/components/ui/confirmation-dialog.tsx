@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Trash2, CheckCircle, type LucideIcon } from "lucide-react"
+import { AlertTriangle, Trash2, CheckCircle, type LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import {
@@ -12,9 +12,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { LoadingButton } from "@/components/ui/loading-button"
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { LoadingButton } from '@/components/ui/loading-button'
 
 interface ConfirmationDialogProps {
   open: boolean

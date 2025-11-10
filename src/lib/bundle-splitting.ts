@@ -151,10 +151,10 @@ export class BundleMonitor {
 
 // Export common lazy-loaded components
 export const LazyCharts = {
-  BarChart: lazyLoad(() => import('@/components/ui/charts/bar-chart').then(mod => ({ default: mod.default }))),
-  LineChart: lazyLoad(() => import('@/components/ui/charts/line-chart').then(mod => ({ default: mod.default }))),
-  PieChart: lazyLoad(() => import('@/components/ui/charts/pie-chart').then(mod => ({ default: mod.default }))),
-  AreaChart: lazyLoad(() => import('@/components/ui/charts/area-chart').then(mod => ({ default: mod.default }))),
+  BarChart: lazyLoad(() => import('@/components/ui/charts/bar-chart').then(mod => ({ default: mod.MobileBarChart }))),
+  LineChart: lazyLoad(() => import('@/components/ui/charts/line-chart').then(mod => ({ default: mod.MobileLineChart }))),
+  PieChart: lazyLoad(() => import('@/components/ui/charts/pie-chart').then(mod => ({ default: mod.MobilePieChart }))),
+  AreaChart: lazyLoad(() => import('@/components/ui/charts/area-chart').then(mod => ({ default: mod.MobileAreaChart }))),
 }
 
 export const LazyPages = {

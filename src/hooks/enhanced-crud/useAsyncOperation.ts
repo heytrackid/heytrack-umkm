@@ -6,7 +6,7 @@ import { errorToast, infoToast, successToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('Hook')
-import type { AsyncOperationOptions } from './types'
+import type { AsyncOperationOptions } from '@/hooks/enhanced-crud/types'
 
 interface UseAsyncOperationReturn {
   execute: <T>(operation: () => Promise<T>, options?: AsyncOperationOptions) => Promise<T | null>

@@ -9,7 +9,7 @@ import { triggerWorkflow } from '@/lib/automation/workflows/index'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/database'
-import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security'
+import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 
 const VALID_STATUSES = [

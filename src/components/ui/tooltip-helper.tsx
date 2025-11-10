@@ -1,11 +1,11 @@
-import { HelpCircle } from "lucide-react"
+import { HelpCircle } from 'lucide-react'
 
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from '@/components/ui/tooltip'
 
 interface TooltipHelperProps {
     content: string

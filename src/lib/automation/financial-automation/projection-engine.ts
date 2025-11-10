@@ -1,6 +1,6 @@
-import { TrendAnalyzer } from './trend-analyzer'
+import { TrendAnalyzer } from '@/lib/automation/financial-automation/trend-analyzer'
 
-import type { HistoricalData, ProjectionResult, FinancialProjection } from './types'
+import type { HistoricalData, ProjectionResult, FinancialProjection } from '@/lib/automation/financial-automation/types'
 
 /**
  * Projection Engine Module

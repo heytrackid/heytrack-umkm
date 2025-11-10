@@ -2,7 +2,7 @@ import { inventoryLogger } from '@/lib/logger'
 
 import type { Row } from '@/types/database'
 
-import type { ReorderSummary } from './types'
+import type { ReorderSummary } from '@/lib/business-services/types'
 
 
 /**

@@ -29,7 +29,7 @@ export { DataTable } from './data-table/data-table'
 export { useReactTable } from '@tanstack/react-table'
 
 // Layout Components
-export { default as AppLayout } from './layout/app-layout'
+export { AppLayout as AppLayout } from './layout/app-layout'
 
 
 

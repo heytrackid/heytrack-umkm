@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 
-import { useIngredients } from '@/hooks'
+import { useIngredients } from '@/hooks/index'
 
 import type { Row } from '@/types/database'
 

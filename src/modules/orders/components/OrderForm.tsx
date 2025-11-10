@@ -15,7 +15,7 @@ import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTr
 import { Textarea } from '@/components/ui/textarea'
 import { warningToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
-import { ORDER_CONFIG, ORDER_PRIORITIES } from '@/lib/constants'
+import { ORDER_CONFIG, ORDER_PRIORITIES } from '@/lib/constants/index'
 import { safeNumber } from '@/lib/type-guards'
 import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
 

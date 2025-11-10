@@ -1,6 +1,6 @@
 import { useState, useTransition } from 'react'
 
-import type { ErrorAction, FieldErrors } from '@/app/auth/register/types'
+import type { ErrorAction, FieldErrors } from '@/app/auth/register/types/index'
 import { getAuthErrorMessage, validateEmail, validatePassword, validatePasswordMatch } from '@/app/auth/register/utils/validation'
 
 // import { signup } from '@/app/auth/register/actions' // Replaced with API call

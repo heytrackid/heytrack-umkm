@@ -366,4 +366,4 @@ const CustomersTable = ({
   )
 }
 
-export default CustomersTable
+export { CustomersTable }

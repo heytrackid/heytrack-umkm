@@ -3,8 +3,8 @@
 import { Calculator, DollarSign, Package, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
-import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader, SharedStatsCards } from '@/components/shared/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,10 +16,9 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { useRecipes } from '@/hooks/useRecipes'
 import { dbLogger } from '@/lib/logger'
 
-import type { Recipe } from '@/types'
+import type { Recipe } from '@/types/index'
 
-// Force dynamic rendering to avoid SSG issues
-export const dynamic = 'force-dynamic'
+// Force dynamic rendering to avoid SSG issues (move to server wrapper if needed)
 
 const calculatorBreadcrumbs = [
   { label: 'Dashboard', href: '/' },

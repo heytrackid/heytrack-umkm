@@ -4,7 +4,7 @@ import { ArrowUpCircle, ArrowDownCircle, AlertCircle, Loader2, Calendar } from '
 import { useState } from 'react'
 
 import { type TransactionFormData } from '@/app/cash-flow/constants'
-import { useCategories } from '../hooks/useCategories'
+import { useCategories } from '@/app/cash-flow/hooks/useCategories'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
@@ -362,4 +362,4 @@ const EnhancedTransactionForm = ({
     )
 }
 
-export default EnhancedTransactionForm
+export { EnhancedTransactionForm }

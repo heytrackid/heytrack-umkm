@@ -8,9 +8,9 @@ import { LazyBarChart, LazyLineChart, LazyAreaChart, Bar, Line, Area, XAxis, YAx
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
 
-import { CustomTooltip } from './CustomTooltip'
+import { CustomTooltip } from '@/app/profit/components/CustomTooltip'
 
-import type { ProductChartData, ProfitFilters, PeriodType } from './types'
+import type { ProductChartData, ProfitFilters, PeriodType } from '@/app/profit/components/types'
 
 interface ProductProfitabilityChartProps {
   chartData: ProductChartData[]

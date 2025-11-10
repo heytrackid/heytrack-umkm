@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 async function postHandler(_request: NextRequest): Promise<NextResponse> {

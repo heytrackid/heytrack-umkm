@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button'
 import { VirtualizedTable } from '@/components/ui/virtualized-table'
 import { useCurrency } from '@/hooks/useCurrency'
 
-import type { Order } from '@/types'
+import type { Order } from '@/types/index'
 
-import { OrderStatusBadge, OrderProgress } from './OrderStatusBadge'
+import { OrderStatusBadge, OrderProgress } from '@/components/orders/OrderStatusBadge'
 
 
 
@@ -208,4 +208,4 @@ const VirtualizedOrdersList = memo(({
 
 VirtualizedOrdersList.displayName = 'VirtualizedOrdersList'
 
-export default VirtualizedOrdersList
+export { VirtualizedOrdersList }

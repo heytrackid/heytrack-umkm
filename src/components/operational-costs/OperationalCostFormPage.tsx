@@ -18,7 +18,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useToast } from '@/hooks/use-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
 

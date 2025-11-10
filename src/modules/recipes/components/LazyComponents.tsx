@@ -4,7 +4,7 @@ import { Suspense, useEffect, lazy } from 'react'
 
 import { CardSkeleton, ChartSkeleton } from '@/components/lazy/LazyWrapper'
 
-import type { SmartPricingAssistantProps } from './SmartPricingAssistant'
+import type { SmartPricingAssistantProps } from '@/modules/recipes/components/SmartPricingAssistant'
 
 // Define explicit prop interface with index signature for ComponentType compatibility
 export interface SmartPricingAssistantPropsWithIndex extends SmartPricingAssistantProps {
@@ -12,7 +12,7 @@ export interface SmartPricingAssistantPropsWithIndex extends SmartPricingAssista
 }
 
 // Create lazy component with proper typing
-const LazySmartPricingAssistantComponent = lazy(() => import('./SmartPricingAssistant'))
+const LazySmartPricingAssistantComponent = lazy(() => import('./SmartPricingAssistant').then(m => ({ default: m.SmartPricingAssistant })))
 
 // Wrapper component that provides proper typing and suspense boundary
 const LazySmartPricingAssistant = (props: SmartPricingAssistantPropsWithIndex) => (

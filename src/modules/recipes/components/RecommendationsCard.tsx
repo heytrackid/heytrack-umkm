@@ -5,7 +5,7 @@ import { Lightbulb, Info } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import type { HPPCalculationResult } from '@/modules/recipes/types'
+import type { HPPCalculationResult } from '@/modules/recipes/types/index'
 
 
 

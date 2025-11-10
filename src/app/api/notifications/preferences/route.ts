@@ -7,7 +7,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { NotificationPreferencesUpdateSchema } from '@/lib/validations/domains/notification-preferences'
 import { DEFAULT_NOTIFICATION_PREFERENCES } from '@/types/domain/notification-preferences'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 

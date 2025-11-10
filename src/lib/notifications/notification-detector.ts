@@ -6,7 +6,7 @@ import {
   type Notification, 
   type NotificationType,
   NOTIFICATION_CONFIGS 
-} from './notification-types'
+} from '@/lib/notifications/notification-types'
 
 
 // Generate unique notification ID

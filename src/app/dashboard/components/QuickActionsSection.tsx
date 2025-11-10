@@ -87,4 +87,4 @@ const QuickActionsSection = (): JSX.Element => {
   )
 }
 
-export default QuickActionsSection
+export { QuickActionsSection }

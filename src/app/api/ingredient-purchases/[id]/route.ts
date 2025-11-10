@@ -7,7 +7,7 @@ import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID, isRecord, extractFirst } from '@/lib/type-guards'
 import type { IngredientPurchaseUpdate } from '@/lib/validations/database-validations'
 import type { Update, Insert } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { NextRequest, NextResponse } from 'next/server'

@@ -53,4 +53,4 @@ const CompletedBatches = ({ batches }: CompletedBatchesProps) => {
   )
 }
 
-export default CompletedBatches
+export { CompletedBatches }

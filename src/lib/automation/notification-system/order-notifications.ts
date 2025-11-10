@@ -1,4 +1,4 @@
-import type { SmartNotification, OrderForNotification } from './types'
+import type { SmartNotification, OrderForNotification } from '@/lib/automation/notification-system/types'
 
 /**
  * Order Notifications Module

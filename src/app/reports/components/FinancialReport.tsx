@@ -1,7 +1,7 @@
 import { TrendingUp, TrendingDown, DollarSign, PiggyBank } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useCurrency } from '@/hooks/useCurrency'
 
 import type { Row } from '@/types/database'
@@ -203,4 +203,4 @@ const FinancialReport = ({ dateRange }: FinancialReportProps) => {
   )
 }
 
-export default FinancialReport
+export { FinancialReport }

@@ -6,7 +6,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { FinancialRecordUpdateSchema, type FinancialRecordUpdate } from '@/lib/validations/domains/finance'
 import type { Update } from '@/types/database'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

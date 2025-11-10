@@ -23,9 +23,10 @@ import {
 } from '@/components/ui/tooltip'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
+import { HtmlEscaper } from '@/utils/security/index'
 
 import type { RecipeWithCosts } from '@/modules/hpp/hooks/useUnifiedHpp'
-import type { RecipeIngredientWithPrice } from '@/modules/hpp/types'
+import type { RecipeIngredientWithPrice } from '@/modules/hpp/types/index'
 
 
 
@@ -124,37 +125,41 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                 throw new Error('Export hanya tersedia di browser')
             }
 
+            // Escape all dynamic content to prevent XSS
+            const escapedRecipeName = HtmlEscaper.escape(recipe.name)
+            const escapedExportDate = HtmlEscaper.escape(new Date().toLocaleString('id-ID'))
+            const escapedIngredientCost = HtmlEscaper.escape(formatCurrency(ingredientCost))
+            const escapedOperationalCost = HtmlEscaper.escape(formatCurrency(totalOperational))
+            const escapedTotalCost = HtmlEscaper.escape(formatCurrency(totalCost))
+            const escapedSellingPrice = HtmlEscaper.escape(formatCurrency(sellingPrice))
+            const escapedMargin = HtmlEscaper.escape(marginPercent.toFixed(2))
+
             const summary = `
-                <h1>Ringkasan HPP - ${recipe.name}</h1>
-                <p>Diekspor pada: ${new Date().toLocaleString('id-ID')}</p>
+                <h1>Ringkasan HPP - ${escapedRecipeName}</h1>
+                <p>Diekspor pada: ${escapedExportDate}</p>
                 <table>
-                    <tr><th>HPP Bahan</th><td>${formatCurrency(ingredientCost)}</td></tr>
-                    <tr><th>Biaya Operasional</th><td>${formatCurrency(totalOperational)}</td></tr>
-                    <tr><th>Total HPP</th><td>${formatCurrency(totalCost)}</td></tr>
-                    <tr><th>Harga Jual</th><td>${formatCurrency(sellingPrice)}</td></tr>
-                    <tr><th>Margin</th><td>${marginPercent.toFixed(2)}%</td></tr>
+                    <tr><th>HPP Bahan</th><td>${escapedIngredientCost}</td></tr>
+                    <tr><th>Biaya Operasional</th><td>${escapedOperationalCost}</td></tr>
+                    <tr><th>Total HPP</th><td>${escapedTotalCost}</td></tr>
+                    <tr><th>Harga Jual</th><td>${escapedSellingPrice}</td></tr>
+                    <tr><th>Margin</th><td>${escapedMargin}%</td></tr>
                 </table>
                 <h2>Komponen Operasional</h2>
                 <ul>
-                    ${Object.entries(opCosts).map(([key, value]) => `<li>${key.toUpperCase()}: ${formatCurrency(value)}</li>`).join('')}
+                    ${Object.entries(opCosts).map(([key, value]) => `<li>${HtmlEscaper.escape(key.toUpperCase())}: ${HtmlEscaper.escape(formatCurrency(value))}</li>`).join('')}
                 </ul>
             `
 
             const ingredientRows = ingredients
                 .map((item) => `<tr>
-                    <td>${item.name}</td>
-                    <td>${item.quantity} ${item.unit}</td>
-                    <td>${formatCurrency(item.unit_price)}</td>
-                    <td>${formatCurrency(item.unit_price * item.quantity)}</td>
+                    <td>${HtmlEscaper.escape(item.name)}</td>
+                    <td>${HtmlEscaper.escape(item.quantity)} ${HtmlEscaper.escape(item.unit)}</td>
+                    <td>${HtmlEscaper.escape(formatCurrency(item.unit_price))}</td>
+                    <td>${HtmlEscaper.escape(formatCurrency(item.unit_price * item.quantity))}</td>
                 </tr>`)
                 .join('')
 
-            const exportWindow = window.open('', '_blank', 'width=1024,height=768')
-            if (!exportWindow) {
-                throw new Error('Pop-up diblokir oleh browser')
-            }
-
-            exportWindow.document.write(`
+            const htmlContent = `
                 <html>
                     <head>
                         <title>HeyTrack - Ringkasan HPP</title>
@@ -165,6 +170,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                             th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
                             th { background: #f3f4f6; }
                             ul { padding-left: 20px; }
+                            @media print { body { margin: 0; } }
                         </style>
                     </head>
                     <body>
@@ -181,13 +187,21 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                             </thead>
                             <tbody>${ingredientRows}</tbody>
                         </table>
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                setTimeout(function() { window.close(); }, 1000);
+                            }
+                        </script>
                     </body>
                 </html>
-            `)
-            exportWindow.document.close()
-            exportWindow.focus()
-            exportWindow.print()
-            exportWindow.close()
+            `
+
+            // Use secure Blob approach instead of document.write
+            const secureWindow = HtmlEscaper.openSecureWindow(htmlContent, '_blank')
+            if (!secureWindow) {
+                throw new Error('Pop-up diblokir oleh browser')
+            }
 
             toast({
                 title: 'Export siap',

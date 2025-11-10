@@ -249,4 +249,4 @@ export const securityLogger = createClientLogger('Security')
 
 // Default export
 const logger = new ClientLogger()
-export default logger
+export { logger }

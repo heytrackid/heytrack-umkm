@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from '@/components/ui/tooltip'
 
-import type { CashFlowSummary } from '../constants'
+import type { CashFlowSummary } from '@/app/cash-flow/constants'
 
 interface EnhancedSummaryCardsProps {
     summary: CashFlowSummary | null
@@ -236,4 +236,4 @@ const EnhancedSummaryCards = ({
     )
 }
 
-export default EnhancedSummaryCards
+export { EnhancedSummaryCards }

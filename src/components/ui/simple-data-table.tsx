@@ -21,7 +21,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import {
     Select,
@@ -29,7 +29,7 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
+} from '@/components/ui/select'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 import { VirtualizedTable } from '@/components/ui/virtualized-table'
 import { useMobile } from '@/utils/responsive'

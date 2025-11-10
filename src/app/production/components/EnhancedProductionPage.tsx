@@ -681,4 +681,4 @@ const ProductionCard = ({
     </Card>
 )
 
-export default EnhancedProductionPage
+export { EnhancedProductionPage }

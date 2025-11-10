@@ -4,13 +4,14 @@ import { Download, Loader2, AlertCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { StatsSkeleton } from '@/components/ui'
+import { DateRangePicker, type DateRangeValue } from '@/components/ui/date-range'
+import { StatsSkeleton } from '@/components/ui/index'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import PrefetchLink from '@/components/ui/prefetch-link'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 
@@ -26,7 +27,7 @@ import {
   IngredientCostsTable,
   OperatingExpenses,
   ProfitBreakdown
-} from './components'
+} from '@/app/profit/components/index'
 
 
 // Loading component for chart
@@ -162,7 +163,18 @@ const ProfitReportPage = () => {
           title="Laporan Laba Riil"
           description="Analisis keuntungan dengan metode WAC (Weighted Average Cost)"
           action={
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <div className="hidden md:block">
+                <DateRangePicker
+                  onChange={(range: DateRangeValue) => {
+                    const params = new URLSearchParams(window.location.search)
+                    if (range.from) params.set('from', range.from.toISOString())
+                    if (range.to) params.set('to', range.to.toISOString())
+                    const url = `${window.location.pathname}?${params.toString()}`
+                    window.history.replaceState(null, '', url)
+                  }}
+                />
+              </div>
               <Button
                 variant="outline"
                 onClick={() => exportReport('csv')}

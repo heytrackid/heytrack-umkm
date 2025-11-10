@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { apiCache } from './cache'
-import { handleAPIError, createAPIErrorResponse } from './errors'
-import { extractPagination } from './pagination'
-import { createErrorResponse, createSuccessResponse } from './responses'
-import { validateRequestData, validateRequestOrRespond } from './validation'
+import { apiCache } from '@/lib/api-core/cache'
+import { handleAPIError, createAPIErrorResponse } from '@/lib/api-core/errors'
+import { extractPagination } from '@/lib/api-core/pagination'
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
+import { validateRequestData, validateRequestOrRespond } from '@/lib/api-core/validation'
 
-import type { RouteHandlerConfig, RouteHandlerContext } from './types'
+import type { RouteHandlerConfig, RouteHandlerContext } from '@/lib/api-core/types'
 import type { z } from 'zod'
 
 /**

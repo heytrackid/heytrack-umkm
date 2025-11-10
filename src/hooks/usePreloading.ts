@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 
-import { preloadChartBundle, preloadModalComponent } from '@/components/lazy/index'
+import { preloadModalComponent } from '@/components/lazy/index'
 
 /**
  * Consolidated Preloading Hooks
@@ -64,7 +64,7 @@ export const useAdvancedButtonPreloading = () => {
   }, [])
 
   const preloadChartOnHover = useCallback(() => {
-    preloadChartBundle().catch(() => {})
+    // Chart bundle preloading temporarily disabled
   }, [])
 
   return {

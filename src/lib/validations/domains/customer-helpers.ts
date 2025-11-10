@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 import type { Insert, Update } from '@/types/database'
 
-import { CustomerInsertSchema } from './customer'
+import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
 
 
 

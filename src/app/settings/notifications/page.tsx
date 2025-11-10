@@ -4,7 +4,7 @@ import { Bell, Clock, Layers, Volume2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import {
     Breadcrumb,
     BreadcrumbItem,

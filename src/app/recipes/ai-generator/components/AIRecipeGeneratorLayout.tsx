@@ -4,11 +4,11 @@ import { ChefHat, Sparkles, Zap, ArrowLeft, ArrowRight, CheckCircle } from 'luci
 import { useRouter } from 'next/navigation'
 import { useState, useEffect, useCallback } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { useAuth } from '@/hooks'
+import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { typedInsert } from '@/lib/supabase-client'
@@ -18,15 +18,15 @@ import { useSupabase } from '@/providers/SupabaseProvider'
 
 import type { Insert, Row } from '@/types/database'
 
-import GeneratedRecipeDisplay from './GeneratedRecipeDisplay'
-import { HppEstimator } from './HppEstimator'
-import RecipeGeneratorForm from './RecipeGeneratorForm'
-import RecipePreviewCard from './RecipePreviewCard'
-import { SmartIngredientSelector } from './SmartIngredientSelector'
+import { GeneratedRecipeDisplay } from '@/app/recipes/ai-generator/components/GeneratedRecipeDisplay'
+import { HppEstimator } from '@/app/recipes/ai-generator/components/HppEstimator'
+import { RecipeGeneratorForm } from '@/app/recipes/ai-generator/components/RecipeGeneratorForm'
+import { RecipePreviewCard } from '@/app/recipes/ai-generator/components/RecipePreviewCard'
+import { SmartIngredientSelector } from '@/app/recipes/ai-generator/components/SmartIngredientSelector'
 
 
 
-import type { GeneratedRecipe, AvailableIngredient } from './types'
+import type { GeneratedRecipe, AvailableIngredient } from '@/app/recipes/ai-generator/components/types'
 
 // AI Recipe Generator Layout - Enhanced Interactive Version
 // Improved UX with live preview, quick mode, and better guidance
@@ -669,4 +669,4 @@ const AIRecipeGeneratorPage = () => {
   )
 }
 
-export default AIRecipeGeneratorPage
+export { AIRecipeGeneratorPage }

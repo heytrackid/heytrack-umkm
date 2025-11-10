@@ -5,10 +5,11 @@ import { useEffect } from 'react'
 
 import { PageHeader } from '@/components/layout/PageHeader'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
-import { useAuth } from '@/hooks'
+import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
+import { DateRangePicker, type DateRangeValue } from '@/components/ui/date-range'
 
-import { ReportsLayout } from './components/ReportsLayout'
+import { ReportsLayout } from '@/app/reports/components/ReportsLayout'
 
 
 // Reports Page - Code Split Version
@@ -19,6 +20,18 @@ import { ReportsLayout } from './components/ReportsLayout'
 
 const ReportsPage = () => {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
+  // Extract initial date range from URL for consistency across pages
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const from = params.get('from')
+    const to = params.get('to')
+    // If needed, dispatch to state/store for children
+    // For now, we just ensure URL contains ISO strings
+    if (from || to) {
+      const url = `${window.location.pathname}?${params.toString()}`
+      window.history.replaceState(null, '', url)
+    }
+  }, [])
   const { toast } = useToast()
   const router = useRouter()
 
@@ -39,10 +52,7 @@ const ReportsPage = () => {
     return (
       <div className="space-y-6 p-6">
         {/* Header - Always visible */}
-        <PageHeader
-          title="Laporan"
-          description="Analisis performa bisnis Anda"
-        />
+        <PageHeader title="Laporan" description="Analisis performa bisnis Anda" />
 
         {/* Stats skeleton */}
         <div className="grid gap-4 md:grid-cols-4">
@@ -61,7 +71,25 @@ const ReportsPage = () => {
     )
   }
 
-  return <ReportsLayout />
+  return (
+    <div className="space-y-4 p-6">
+      <div className="flex items-center justify-between gap-3">
+        <PageHeader title="Laporan" description="Analisis performa bisnis Anda" />
+        <div className="w-full sm:w-auto">
+          <DateRangePicker
+            onChange={(range: DateRangeValue) => {
+              const params = new URLSearchParams(window.location.search)
+              if (range.from) params.set('from', range.from.toISOString())
+              if (range.to) params.set('to', range.to.toISOString())
+              const url = `${window.location.pathname}?${params.toString()}`
+              window.history.replaceState(null, '', url)
+            }}
+          />
+        </div>
+      </div>
+      <ReportsLayout />
+    </div>
+  )
 }
 
 export default ReportsPage

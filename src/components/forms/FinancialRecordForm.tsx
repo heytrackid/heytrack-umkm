@@ -19,7 +19,7 @@ import {
 
 import type { Row } from '@/types/database'
 
-import { FormField } from './shared/FormField'
+import { FormField } from '@/components/forms/shared/FormField'
 
 
 type FinancialRecord = Row<'financial_records'>
@@ -81,6 +81,7 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
               {...(form.formState.errors['type']?.message ? { error: form.formState.errors['type'].message } : {})}
             >
               <Select
+                // eslint-disable-next-line react-hooks/incompatible-library
                 value={form.watch('type')}
                 onValueChange={(value) => {
                   if (value === 'INCOME' || value === 'EXPENSE') {

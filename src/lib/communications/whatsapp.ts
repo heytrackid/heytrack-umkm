@@ -3,7 +3,7 @@ import { createClientLogger } from '@/lib/client-logger'
 const logger = createClientLogger('ClientFile')
 import { formatCurrentCurrency } from '@/lib/currency'
 
-import type { WhatsAppTemplate, WhatsAppConfig, OrderData } from './types'
+import type { WhatsAppTemplate, WhatsAppConfig, OrderData } from '@/lib/communications/types'
 
 
 /**

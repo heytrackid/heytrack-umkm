@@ -72,4 +72,4 @@ const OrderPaymentStep = ({
   </div>
 )
 
-export default OrderPaymentStep
+export { OrderPaymentStep }

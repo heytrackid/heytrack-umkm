@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 
-import type { AIAnalysisState, FinancialAnalysisRequest } from './types'
+import type { AIAnalysisState, FinancialAnalysisRequest } from '@/hooks/ai-powered/types'
 
 
 

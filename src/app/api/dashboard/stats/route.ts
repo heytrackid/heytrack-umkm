@@ -8,7 +8,7 @@ import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, safeString } from '@/lib/type-guards'
 import type { Database, OrderStatus } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { SecurityPresets, withSecurity } from '@/utils/security'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -255,14 +255,31 @@ async function fetchDashboardData(
     supabase.from('financial_records').select('amount').eq('user_id', userId).eq('type', 'EXPENSE')
   ])
 
+  // Granular error checks per query
+  const checkAndLog = (name: string, result: { error?: { message?: string } | null }) => {
+    if (result && result.error) {
+      const errMsg = typeof result.error.message === 'string' ? result.error.message : 'Unknown error'
+      apiLogger.error({ query: name, error: result.error }, 'Dashboard data query failed')
+      throw new Error(`${name} query failed: ${errMsg}`)
+    }
+  }
+
+  checkAndLog('orders', ordersResult)
+  checkAndLog('currentPeriodOrders', currentPeriodOrdersResult)
+  checkAndLog('comparisonOrders', comparisonOrdersResult)
+  checkAndLog('customers', customersResult)
+  checkAndLog('ingredients', ingredientsResult)
+  checkAndLog('recipes', recipesResult)
+  checkAndLog('expenses', expensesResult)
+
   return {
-    orders: ordersResult.data ?? [],
-    currentPeriodOrders: currentPeriodOrdersResult.data ?? [],
-    comparisonOrders: comparisonOrdersResult.data ?? [],
-    customers: customersResult.data ?? [],
-    ingredients: ingredientsResult.data ?? [],
-    recipes: recipesResult.data ?? [],
-    expenses: expensesResult.data ?? []
+    orders: (ordersResult as any).data ?? [],
+    currentPeriodOrders: (currentPeriodOrdersResult as any).data ?? [],
+    comparisonOrders: (comparisonOrdersResult as any).data ?? [],
+    customers: (customersResult as any).data ?? [],
+    ingredients: (ingredientsResult as any).data ?? [],
+    recipes: (recipesResult as any).data ?? [],
+    expenses: (expensesResult as any).data ?? []
   }
 }
 
@@ -417,25 +434,61 @@ function buildDashboardResponse(
 }
 
 async function GET(request: NextRequest): Promise<NextResponse> {
+  const startedAt = Date.now()
   try {
-    const filters = buildDateFilters(new URL(request.url).searchParams)
-    const supabase = await getTypedSupabase()
-    const userId = await requireUserId(supabase)
+    const url = new URL(request.url)
+    const filters = buildDateFilters(url.searchParams)
+    apiLogger.info({ path: url.pathname, filters }, 'GET /api/dashboard/stats - Start')
 
+    const supabase = await getTypedSupabase()
+    apiLogger.debug('Supabase client initialized')
+
+    let userId: string
+    try {
+      userId = await requireUserId(supabase)
+      apiLogger.info({ userId }, 'Authenticated user for dashboard stats')
+    } catch (authError) {
+      apiLogger.warn({ error: getErrorMessage(authError) }, 'Unauthorized access to dashboard stats')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const dataStartedAt = Date.now()
     const dashboardData = await fetchDashboardData(supabase, userId, filters)
+    apiLogger.info({
+      durationMs: Date.now() - dataStartedAt,
+      counts: {
+        orders: dashboardData.orders.length,
+        currentPeriodOrders: dashboardData.currentPeriodOrders.length,
+        customers: dashboardData.customers.length,
+        ingredients: dashboardData.ingredients.length,
+        recipes: dashboardData.recipes.length,
+        expenses: dashboardData.expenses.length,
+      }
+    }, 'Fetched raw dashboard data')
+
     const stats = calculateStats(dashboardData)
     const inventory = buildInventoryOverview(dashboardData.ingredients)
     const recentOrders = buildRecentOrders(dashboardData.orders)
     const popularRecipes = buildPopularRecipes(dashboardData.recipes)
 
-    const response = NextResponse.json(
-      buildDashboardResponse(stats, inventory, recentOrders, popularRecipes)
-    )
+    const payload = buildDashboardResponse(stats, inventory, recentOrders, popularRecipes)
+    apiLogger.info({
+      durationTotalMs: Date.now() - startedAt,
+      summary: {
+        revenueTotal: payload.revenue.total,
+        ordersTotal: payload.orders.total,
+        customersTotal: payload.customers.total,
+        inventoryTotal: payload.inventory.total,
+        recipesTotal: payload.recipes.total,
+      }
+    }, 'Built dashboard response')
+
+    const response = NextResponse.json(payload)
     // Add caching for dashboard stats (5 minutes stale-while-revalidate)
     response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
     return response
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error fetching dashboard stats')
+    apiLogger.error({ error, durationTotalMs: Date.now() - startedAt }, 'Error fetching dashboard stats')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }

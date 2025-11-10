@@ -1,8 +1,8 @@
-import { CommunicationsManager } from './manager'
-import { SmartNotificationSystem } from './notifications'
-import { WhatsAppService } from './whatsapp'
+import { CommunicationsManager } from '@/lib/communications/manager'
+import { SmartNotificationSystem } from '@/lib/communications/notifications'
+import { WhatsAppService } from '@/lib/communications/whatsapp'
 
-import type { SmartNotification } from './types'
+import type { SmartNotification } from '@/lib/communications/types'
 
 
 /**

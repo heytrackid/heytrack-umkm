@@ -1,6 +1,6 @@
 import type { SaleData, ExpenseData, FinancialTrend } from '@/lib/automation/types'
 
-import type { WeeklyData } from './types'
+import type { WeeklyData } from '@/lib/automation/financial-automation/types'
 
 /**
  * Trend Analyzer Module

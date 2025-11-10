@@ -4,7 +4,7 @@ import { lazy, Suspense } from 'react'
 
 import { DataTableSkeleton } from '@/components/ui/skeletons'
 
-import type { DataTableProps } from '../data-table/data-table'
+import type { DataTableProps } from '@/components/data-table/data-table'
 
 // Lazy load the DataTable component
 const LazyDataTableComponent = lazy(() =>

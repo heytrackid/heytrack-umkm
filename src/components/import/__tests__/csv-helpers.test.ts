@@ -1,4 +1,4 @@
-import { parseCSV } from '../csv-helpers'
+import { parseCSV } from '@/components/import/csv-helpers'
 import { describe, it, expect } from 'vitest'
 
 

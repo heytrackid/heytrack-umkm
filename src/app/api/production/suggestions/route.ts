@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
 import { ProductionBatchService } from '@/services/production/ProductionBatchService'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

@@ -12,7 +12,7 @@ import {
   positiveNumber,
   rupiah,
   percentage
-} from './base-validations'
+} from '@/lib/validations/base-validations'
 
 
 // Form validation schemas

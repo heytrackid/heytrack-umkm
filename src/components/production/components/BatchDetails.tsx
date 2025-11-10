@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 
 import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
 
-import type { BatchExecutionState } from './types'
+import type { BatchExecutionState } from '@/components/production/components/types'
 
 // Batch Details Component - Lazy Loaded
 // Displays detailed view of selected batch with quality control and notes
@@ -173,4 +173,4 @@ const BatchDetails = ({
   )
 }
 
-export default BatchDetails
+export { BatchDetails }

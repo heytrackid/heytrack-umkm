@@ -8,7 +8,7 @@ import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
 import type { Insert } from '@/types/database'
-import { SecurityPresets, withSecurity } from '@/utils/security'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 

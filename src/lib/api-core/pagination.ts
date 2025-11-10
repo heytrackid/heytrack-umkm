@@ -1,4 +1,4 @@
-import type { PaginationParams, PaginationState } from './types'
+import type { PaginationParams, PaginationState } from '@/lib/api-core/types'
 import type { NextRequest } from 'next/server'
 
 /**

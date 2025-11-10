@@ -47,7 +47,7 @@ import { useCurrency } from '@/hooks/useCurrency'
 
 import type { OrdersTable } from '@/types/database'
 
-import type { OrderItem, Order } from './types'
+import type { OrderItem, Order } from '@/components/orders/types'
 
 // Extended type for table display
 interface OrderWithItems extends Order {
@@ -519,4 +519,4 @@ const OrdersTable = ({
   )
 }
 
-export default OrdersTable
+export { OrdersTable }

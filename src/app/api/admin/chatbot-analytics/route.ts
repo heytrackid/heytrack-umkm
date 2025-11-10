@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { logger } from '@/lib/logger'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
-import { SecurityPresets, withSecurity } from '@/utils/security'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'

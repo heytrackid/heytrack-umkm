@@ -6,7 +6,7 @@ import { memo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import type { AvailableIngredient } from './types'
+import type { AvailableIngredient } from '@/app/recipes/ai-generator/components/types'
 
 // Recipe Preview Card - Shows live preview as user types
 // Helps users understand what they'll get before generating
@@ -308,4 +308,4 @@ const RecipePreviewCard = memo(({
 
 RecipePreviewCard.displayName = 'RecipePreviewCard'
 
-export default RecipePreviewCard
+export { RecipePreviewCard }

@@ -7,7 +7,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/logger';
 import { BusinessContextService } from '@/lib/services/BusinessContextService';
-import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server';
 
 /**

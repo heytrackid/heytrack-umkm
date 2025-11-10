@@ -596,4 +596,4 @@ const ProductionCapacityManager = ({
   )
 }
 
-export default ProductionCapacityManager
+export { ProductionCapacityManager }

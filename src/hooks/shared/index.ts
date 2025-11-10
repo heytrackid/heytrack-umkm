@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 
-import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useToast } from '@/hooks/use-toast'
 
 import type { Database } from '@/types/database'

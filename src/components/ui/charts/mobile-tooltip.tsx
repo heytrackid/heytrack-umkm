@@ -1,7 +1,7 @@
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 
-import type { TooltipEntry } from './types'
+import type { TooltipEntry } from '@/components/ui/charts/types'
 import type { ReactNode } from 'react'
 
 /**

@@ -124,4 +124,4 @@ const FilterPeriod = ({
   )
 }
 
-export default FilterPeriod
+export { FilterPeriod }

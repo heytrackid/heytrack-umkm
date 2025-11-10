@@ -6,7 +6,7 @@ import { useSupabase } from '@/providers/SupabaseProvider'
 
 import type { Row, TableName } from '@/types/database'
 
-import type { UseSupabaseQueryOptions, UseSupabaseQueryResult } from './types'
+import type { UseSupabaseQueryOptions, UseSupabaseQueryResult } from '@/hooks/supabase/types'
 
 interface RealtimePayload<T extends TableName> {
   eventType: 'DELETE' | 'INSERT' | 'UPDATE'

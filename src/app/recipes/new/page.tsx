@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { RecipeFormPage } from '@/components/recipes/RecipeFormPage'
 import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 

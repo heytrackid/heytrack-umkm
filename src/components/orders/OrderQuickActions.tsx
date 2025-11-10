@@ -12,7 +12,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
-import type { Order } from './types'
+import type { Order } from '@/components/orders/types'
 
 
 interface OrderQuickActionsProps {
@@ -136,4 +136,4 @@ const OrderQuickActions = ({ order }: OrderQuickActionsProps) => {
     )
 }
 
-export default OrderQuickActions
+export { OrderQuickActions }

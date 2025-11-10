@@ -4,7 +4,7 @@ export const runtime = 'nodejs'
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { SecurityPresets, withSecurity } from '@/utils/security'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 
 async function handleHealthCheck(_request: NextRequest): Promise<NextResponse> {
   try {

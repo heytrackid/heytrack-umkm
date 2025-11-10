@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import type { Insert } from '@/types/database'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

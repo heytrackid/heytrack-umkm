@@ -2,14 +2,14 @@
  * Authentication utilities and Supabase client management
  *
  * Usage:
- *   import { createClient, updateSession } from '@/lib/auth'
+ *   import { createClient, updateSession } from '@/lib/auth/index'
  */
 
 /**
  * Barrel export for Supabase utilities
  *
  * Usage:
- *   import { createClient, createServerClient } from '@/lib/auth'
+ *   import { createClient, createServerClient } from '@/lib/auth/index'
  */
 
 export { createClient } from '@/utils/supabase/client'

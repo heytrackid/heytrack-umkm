@@ -11,7 +11,7 @@ import {
 
 import type { Row } from '@/types/database'
 
-import { useIngredients } from './useIngredients'
+import { useIngredients } from '@/hooks/useIngredients'
 
 
 const STORAGE_KEY = 'heytrack_notifications'

@@ -319,4 +319,4 @@ const EnhancedTransactionList = ({
     )
 }
 
-export default EnhancedTransactionList
+export { EnhancedTransactionList }

@@ -1,10 +1,10 @@
 'use client'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
 import { TooltipHelper, UMKM_TOOLTIPS } from '@/components/ui/tooltip-helper'
-import { UnifiedHppPage } from '@/modules/hpp'
+import { UnifiedHppPage } from '@/modules/hpp/index'
 
 const HppPage = (): JSX.Element => (
     <AppLayout>

@@ -1,7 +1,7 @@
 import { apiLogger } from '@/lib/logger'
 
-import { AISecurity } from './security'
-import { AIService } from './service'
+import { AISecurity } from '@/lib/ai/security'
+import { AIService } from '@/lib/ai/service'
 
 /**
  * NLP Processor Module

@@ -6,7 +6,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { isValidUUID, isProductionBatch, extractFirst, isRecord, safeString } from '@/lib/type-guards'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

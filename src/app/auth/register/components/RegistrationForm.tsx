@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 
-import { PasswordRequirements } from './PasswordRequirements'
-import { PasswordStrengthIndicator } from './PasswordStrengthIndicator'
+import { PasswordRequirements } from '@/app/auth/register/components/PasswordRequirements'
+import { PasswordStrengthIndicator } from '@/app/auth/register/components/PasswordStrengthIndicator'
 
 
 

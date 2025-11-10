@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 
-import { resetPassword } from './actions'
+import { resetPassword } from '@/app/auth/reset-password/actions'
 
 const ResetPasswordPage = (): JSX.Element => {
   const [error, setError] = useState('')

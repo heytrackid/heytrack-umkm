@@ -4,7 +4,7 @@ import type { Insert, Row, TableName } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 import { createClient } from '@/utils/supabase/client'
 
-import type { BulkUpdateItem } from './types'
+import type { BulkUpdateItem } from '@/hooks/supabase/types'
 
 /**
  * Bulk operations for Supabase tables

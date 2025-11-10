@@ -17,9 +17,9 @@ import { useResponsive } from '@/hooks/useResponsive'
 import { validateOrderData } from '@/lib/validations/form-validations'
 
 
-import { calculateOrderTotal, normalizePriority } from './utils'
+import { calculateOrderTotal, normalizePriority } from '@/components/orders/utils'
 
-import type { Order, OrderFormData, OrderFormItem, Priority } from './types'
+import type { Order, OrderFormData, OrderFormItem, Priority } from '@/components/orders/types'
 
 
 
@@ -372,4 +372,4 @@ const OrderForm = ({
   )
 }
 
-export default OrderForm
+export { OrderForm }

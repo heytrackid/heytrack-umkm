@@ -1,6 +1,6 @@
 import { formatCurrency, getCurrentCurrency } from '@/lib/currency'
 
-import type { SmartNotification, FinancialMetrics, AutomationConfig } from './types'
+import type { SmartNotification, FinancialMetrics, AutomationConfig } from '@/lib/automation/notification-system/types'
 
 /**
  * Financial Notifications Module

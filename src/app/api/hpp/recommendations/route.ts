@@ -6,7 +6,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema } from '@/lib/validations'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

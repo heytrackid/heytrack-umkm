@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 
 import type { Row } from '@/types/database'
 
-import { RecipeFormPage } from './RecipeFormPage'
+import { RecipeFormPage } from '@/components/recipes/RecipeFormPage'
 
 type Recipe = Row<'recipes'>
 

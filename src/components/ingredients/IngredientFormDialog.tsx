@@ -11,7 +11,7 @@ import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/valid
 
 import type { Row } from '@/types/database'
 
-import { EnhancedIngredientForm } from './EnhancedIngredientForm'
+import { EnhancedIngredientForm } from '@/components/ingredients/EnhancedIngredientForm'
 
 
 

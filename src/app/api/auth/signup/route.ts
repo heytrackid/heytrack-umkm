@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { apiLogger, logError } from '@/lib/logger'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -63,4 +63,14 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const POST = createSecureHandler(postHandler, 'POST /api/auth/signup', SecurityPresets.enhanced())
+const devAuthSecurity = {
+  ...SecurityPresets.enhanced(),
+  enableCSRFProtection: true,
+  allowedOrigins: [
+    process['env']['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ]
+}
+
+export const POST = createSecureHandler(postHandler, 'POST /api/auth/signup', devAuthSecurity)

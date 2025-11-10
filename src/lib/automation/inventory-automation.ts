@@ -5,7 +5,7 @@ import type {
     InventoryAnalysis,
     InventoryStatus,
     ReorderUrgency
-} from './types'
+} from '@/lib/automation/types'
 
 export class InventoryAutomation {
   constructor(private readonly config: AutomationConfig) {}

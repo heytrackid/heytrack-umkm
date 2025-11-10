@@ -13,11 +13,11 @@ import {
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
-import { DeleteModal } from '@/components/ui'
+import { DeleteModal } from '@/components/ui/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuth } from '@/hooks'
+import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
 

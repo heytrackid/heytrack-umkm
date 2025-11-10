@@ -1,6 +1,6 @@
 'use client'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
 import { HppAlertsTab } from '@/modules/hpp/components/HppAlertsTab'

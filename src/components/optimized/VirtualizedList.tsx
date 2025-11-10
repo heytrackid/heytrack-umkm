@@ -2,7 +2,7 @@
 
 import { type ReactNode, memo } from 'react'
 
-import { useSimpleVirtualScroll } from '@/lib/performance'
+import { useSimpleVirtualScroll } from '@/lib/performance/index'
 
 /**
  * Virtualized List Component

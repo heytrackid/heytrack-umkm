@@ -144,6 +144,8 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     } catch (error: unknown) {
       const message = getErrorMessage(error)
       authLogger.error({ error: message }, 'Session refresh error:')
+      // If refresh failed, clear session and redirect to login
+      import('@/lib/auth/session-handler').then(m => m.handleSessionExpired())
     }
   }, [supabase.auth])
 

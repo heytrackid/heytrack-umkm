@@ -1,17 +1,13 @@
 
+import type { TooltipContentProps } from 'recharts'
+
 interface CustomTooltipProps {
   formatCurrency: (amount: number) => string
 }
 
-interface TooltipPayload {
-  payload?: {
-    name: string
-  }
-  value?: number
-}
-
 const CustomTooltip = ({ formatCurrency }: CustomTooltipProps) => {
-  const Component = ({ active, payload }: { active?: boolean; payload?: TooltipPayload[] }) => {
+  const Component = (props: TooltipContentProps<any, any>): JSX.Element | null => {
+    const { active, payload } = props
     if (active && payload?.length) {
       return (
         <div className="bg-background border rounded-lg p-3 shadow-lg">

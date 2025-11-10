@@ -85,4 +85,4 @@ const OrdersFilters = ({
   </Card>
 )
 
-export default OrdersFilters
+export { OrdersFilters }

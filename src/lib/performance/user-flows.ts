@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback, createElement } from 'react'
 
 import { createClientLogger } from '@/lib/client-logger'
 
-import { performanceMonitor } from './performance-monitoring'
+import { performanceMonitor } from '@/lib/performance/performance-monitoring'
 
 const perfLogger = createClientLogger('UserFlowMonitoring')
 

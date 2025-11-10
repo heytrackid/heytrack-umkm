@@ -3,10 +3,11 @@
 import { BarChart3 } from 'lucide-react'
 
 import { LazyBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
+import type { TooltipContentProps } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
 
-import { type ProfitPeriodType, type ChartDataPoint, profitPeriodOptions } from '../constants'
+import { type ProfitPeriodType, type ChartDataPoint, profitPeriodOptions } from '@/app/profit/constants'
 
 
 interface ProductProfitChartProps {
@@ -23,7 +24,8 @@ interface ProductProfitChartProps {
 
 // Tooltip component extracted to avoid defining components during render
 const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) => {
-  const TooltipComponent = ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { name: string } }> }) => {
+  const TooltipComponent = (props: TooltipContentProps<any, any>): JSX.Element | null => {
+    const { active, payload } = props
     if (active && payload?.length) {
       return (
         <div className="bg-background border rounded-lg p-3 shadow-lg">

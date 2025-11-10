@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp, TrendingDown, AlertCircle, HelpCircle } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
@@ -28,7 +29,7 @@ interface StatsCardsSectionProps {
   formatCurrency: (value: number) => string
 }
 
-const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): JSX.Element => {
+const StatsCardsSection = memo(({ stats, formatCurrency }: StatsCardsSectionProps): JSX.Element => {
   if (!stats) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -197,6 +198,8 @@ const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): J
       </div>
     </TooltipProvider>
   )
-}
+})
 
-export default StatsCardsSection
+StatsCardsSection.displayName = 'StatsCardsSection'
+
+export { StatsCardsSection }

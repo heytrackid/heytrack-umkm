@@ -14,9 +14,9 @@
  * - External Services: Third-party integrations
  * 
  * Usage Examples:
- *   import { cn, formatCurrentCurrency } from '@/lib'
+ *   import { cn, formatCurrentCurrency } from '@/lib/index'
  *   import { AppError, ValidationError } from '@/lib/errors'
- *   import { calculateHPP, detectAlerts } from '@/lib'
+ *   import { calculateHPP, detectAlerts } from '@/lib/index'
  */
 
 // ==========================================================

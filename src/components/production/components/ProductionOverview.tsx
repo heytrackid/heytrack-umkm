@@ -56,4 +56,4 @@ const ProductionOverview = ({ batches }: ProductionOverviewProps) => {
   )
 }
 
-export default ProductionOverview
+export { ProductionOverview }

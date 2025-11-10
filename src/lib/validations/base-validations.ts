@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import { apiLogger } from '@/lib/logger'
-import { InputSanitizer } from '@/utils/security'
+import { InputSanitizer } from '@/utils/security/index'
 
 
 // Base validation utilities and core schemas

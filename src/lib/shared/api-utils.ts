@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
-import { getErrorMessage } from '@/shared'
+import { getErrorMessage } from '@/shared/index'
 
 import type { ZodSchema } from 'zod'
 

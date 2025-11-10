@@ -5,19 +5,69 @@ import { logger } from '@/lib/logger'
 // Security Utilities
 // Input sanitization, validation, and security helpers
 
+// HTML Escaping utility for safe HTML generation
+export class HtmlEscaper {
+  // Escape HTML to prevent XSS in template generation
+  static escape(input: unknown): string {
+    if (input === null || input === undefined) {
+      return ''
+    }
+    
+    const str = String(input)
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;')
+  }
+  
+  // Create secure HTML content using Blob approach
+  static createSecureHtmlContent(htmlContent: string): { blob: Blob; url: string } {
+    const escapedHtml = htmlContent
+    const blob = new Blob([escapedHtml], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    return { blob, url }
+  }
+  
+  // Open secure window for export/print
+  static openSecureWindow(content: string, windowName = '_blank'): Window | null {
+    try {
+      const { url } = this.createSecureHtmlContent(content)
+      const windowFeatures = 'noopener,noreferrer,width=1024,height=768'
+      const secureWindow = window.open(url, windowName, windowFeatures)
+      
+      // Clean up blob URL after a short delay
+      setTimeout(() => {
+        URL.revokeObjectURL(url)
+      }, 1000)
+      
+      return secureWindow
+    } catch (error) {
+      logger.error({ error }, 'Failed to open secure window')
+      return null
+    }
+  }
+}
+
 // Input Sanitization (Basic client-safe version)
 export class InputSanitizer {
-  // Sanitize HTML input to prevent XSS (basic strip tags version)
+  // Sanitize HTML input to prevent XSS (escape-based approach - most secure)
   static sanitizeHtml(input: string): string {
-    // Basic HTML sanitization without DOMPurify (client-safe)
-    // For server-side with full DOMPurify, use @/utils/security/server
+    // Escape all HTML entities to prevent XSS - this is the safest approach
+    return this.escapeHtml(input)
+  }
+
+  // Escape HTML entities to prevent XSS
+  private static escapeHtml(input: string): string {
     return input
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-      .replace(/<embed[^>]*>/gi, '')
-      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
-      .trim()
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;')
   }
 
   // Sanitize for rich text (limited HTML)

@@ -2,7 +2,7 @@
  * Barrel export for Supabase utilities
  *
  * Usage:
- *   import { createClient, createServerClient } from '@/utils/supabase'
+ *   import { createClient, createServerClient } from '@/utils/supabase/index'
  */
 
 export { createClient } from './client'

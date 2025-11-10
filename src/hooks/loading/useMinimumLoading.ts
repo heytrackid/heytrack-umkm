@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 
-import type { UseMinimumLoadingReturn } from './types'
+import type { UseMinimumLoadingReturn } from '@/hooks/loading/types'
 
 
 

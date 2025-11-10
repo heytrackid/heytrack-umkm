@@ -10,7 +10,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { BusinessContextService } from '@/lib/services/BusinessContextService'
 import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
-import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

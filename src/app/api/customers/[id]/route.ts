@@ -11,7 +11,7 @@ import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import { CustomerUpdateSchema, type CustomerUpdateInput } from '@/lib/validations/domains/customer'
 import type { Update } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 

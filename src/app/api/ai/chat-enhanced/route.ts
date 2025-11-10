@@ -18,7 +18,7 @@ import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { RateLimiter, RATE_LIMITS } from '@/lib/services/RateLimiter'
 import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
 import type { Database } from '@/types/database'
-import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security'
+import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'

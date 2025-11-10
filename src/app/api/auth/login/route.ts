@@ -6,7 +6,7 @@ export const runtime = 'nodejs'
  import { z } from 'zod'
 
  import { apiLogger, logError } from '@/lib/logger'
- import { withSecurity, SecurityPresets } from '@/utils/security'
+ import { withSecurity, SecurityPresets } from '@/utils/security/index'
  import { createClient } from '@/utils/supabase/server'
 
 // ✅ Force Node.js runtime
@@ -57,4 +57,14 @@ async function loginPOST(request: NextRequest): Promise<NextResponse> {
     }
 }
 
-export const POST = withSecurity(loginPOST, SecurityPresets.enhanced())
+const devAuthSecurity = {
+  ...SecurityPresets.enhanced(),
+  enableCSRFProtection: true,
+  allowedOrigins: [
+    process['env']['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ]
+}
+
+export const POST = withSecurity(loginPOST, devAuthSecurity)

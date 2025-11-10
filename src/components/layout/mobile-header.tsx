@@ -18,7 +18,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { uiLogger } from '@/lib/logger'
@@ -300,9 +300,7 @@ const MobileHeader = ({
   )
 }
 
-export default MobileHeader
-
-// Pre-built header variants for common use cases
+export { MobileHeader }// Pre-built header variants for common use cases
 export const DashboardHeader = (): JSX.Element => (
   <MobileHeader
     title="Dashboard"

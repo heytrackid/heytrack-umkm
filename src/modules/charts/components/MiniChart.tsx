@@ -18,7 +18,7 @@ export interface MiniChartProps {
 
 // Dynamically import Recharts to reduce initial bundle size
 const DynamicChart = dynamic(
-  () => import(/* webpackChunkName: "mini-chart-core" */ './MiniChartCore'),
+  () => import(/* webpackChunkName: "mini-chart-core" */ './MiniChartCore').then(m => ({ default: m.MiniChartCore })),
   {
     loading: () => (
       <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded animate-pulse">
@@ -56,4 +56,4 @@ const MiniChart = (props: MiniChartProps): JSX.Element => {
   )
 }
 
-export default MiniChart
+export { MiniChart }

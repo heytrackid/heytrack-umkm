@@ -5,10 +5,10 @@ import { useState, useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields';
-import { CreateModal, EditModal, DeleteModal } from '@/components/ui';
+import { CreateModal, EditModal, DeleteModal } from '@/components/ui/index';
 import { SimpleDataTable, type SimpleColumn } from '@/components/ui/simple-data-table';
-import { useSuppliers } from '@/hooks';
-import { useSupabaseCRUD } from '@/hooks/supabase';
+import { useSuppliers } from '@/hooks/index';
+import { useSupabaseCRUD } from '@/hooks/supabase/index';
 import { createClientLogger } from '@/lib/client-logger'
 import { SupplierFormSchema, type SupplierForm } from '@/lib/validations/form-validations';
 

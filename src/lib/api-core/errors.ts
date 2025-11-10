@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-import type { APIError } from './types'
+import type { APIError } from '@/lib/api-core/types'
 
 /**
  * Error Handling Module

@@ -9,3 +9,4 @@ const DynamicLayout = ({
 }): JSX.Element => <>{children}</>
 
 export default DynamicLayout
+

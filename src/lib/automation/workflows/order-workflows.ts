@@ -5,7 +5,7 @@ import { getErrorMessage } from '@/lib/type-guards'
 import type { Row, Insert, Update, Database } from '@/types/database'
 import type { WorkflowContext, WorkflowResult } from '@/types/features/automation'
 
-import { triggerWorkflow } from './index'
+import { triggerWorkflow } from '@/lib/automation/workflows/index'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 

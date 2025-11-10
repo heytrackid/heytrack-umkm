@@ -12,14 +12,14 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { uiLogger } from '@/lib/logger'
-import { arrayCalculations } from '@/lib/performance'
+import { arrayCalculations } from '@/lib/performance/index'
 import { getErrorMessage } from '@/lib/type-guards'
 import { DashboardView } from '@/modules/orders/components/OrdersPage/DashboardView'
 import { OrderFilters } from '@/modules/orders/components/OrdersPage/OrderFilters'
 import { StatsCards } from '@/modules/orders/components/OrdersPage/StatsCards'
 import { StatusSummary } from '@/modules/orders/components/OrdersPage/StatusSummary'
 
-import { OrdersList } from './OrdersList'
+import { OrdersList } from '@/modules/orders/components/OrdersPage/OrdersList'
 
 
 
@@ -96,7 +96,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
     const { data: ordersData, isLoading: loading, error: queryError } = useQuery({
         queryKey: ['orders', 'all'],
         queryFn: async () => {
-            const response = await fetch('/api/orders', {
+            const response = await fetch(`/api/orders?${(() => { const p=new URLSearchParams(); const u=new URLSearchParams(typeof window!== 'undefined' ? window.location.search : ''); const f=u.get('from'); const t=u.get('to'); if (f) p.set('from', f); if (t) p.set('to', t); return p.toString(); })()}`, {
                 credentials: 'include', // Include cookies for authentication
             })
             if (!response.ok) { throw new Error('Failed to fetch orders') }
@@ -365,4 +365,4 @@ const OrdersPage = (_props: OrdersPageProps) => {
     )
 }
 
-export default OrdersPage
+export { OrdersPage }

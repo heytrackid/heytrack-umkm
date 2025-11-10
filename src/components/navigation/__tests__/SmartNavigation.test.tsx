@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { SmartBottomNav, NavItem } from '../SmartNavigation'
+import { SmartBottomNav, NavItem } from '@/components/navigation/SmartNavigation'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard } from 'lucide-react'
 

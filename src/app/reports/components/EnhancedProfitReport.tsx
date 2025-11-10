@@ -11,11 +11,11 @@ import { useResponsive } from '@/hooks/useResponsive'
 import { apiLogger } from '@/lib/logger'
 
 // Import our separated components
-import { exportToCSV, exportToPDF, printReport } from './ProfitReportExport'
-import { ProfitMetrics, ProfitBreakdown } from './ProfitReportMetrics'
-import { ProfitReportTabs } from './ProfitReportTabs'
+import { exportToCSV, exportToPDF, printReport } from '@/app/reports/components/ProfitReportExport'
+import { ProfitMetrics, ProfitBreakdown } from '@/app/reports/components/ProfitReportMetrics'
+import { ProfitReportTabs } from '@/app/reports/components/ProfitReportTabs'
 
-import type { ProfitReportProps, ProfitData, PeriodType, ChartType, SelectedDataPoint } from './ProfitReportTypes'
+import type { ProfitReportProps, ProfitData, PeriodType, ChartType, SelectedDataPoint } from '@/app/reports/components/ProfitReportTypes'
 
 // Main component
 const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
@@ -254,4 +254,4 @@ const EnhancedProfitReport = ({ dateRange }: ProfitReportProps) => {
     )
 }
 
-export default EnhancedProfitReport
+export { EnhancedProfitReport }

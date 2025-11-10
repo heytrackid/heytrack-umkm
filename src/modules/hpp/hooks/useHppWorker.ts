@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ClientFile')
-import type { HppCalculationResult, MaterialBreakdown } from '@/modules/hpp/types'
+import type { HppCalculationResult, MaterialBreakdown } from '@/modules/hpp/types/index'
 
 
 

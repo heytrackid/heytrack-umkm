@@ -1,7 +1,7 @@
 import { apiLogger } from '@/lib/logger'
 
-import { PromptBuilder } from './prompt-builder'
-import { AIService } from './service'
+import { PromptBuilder } from '@/lib/ai/prompt-builder'
+import { AIService } from '@/lib/ai/service'
 
 /**
  * Business AI Module

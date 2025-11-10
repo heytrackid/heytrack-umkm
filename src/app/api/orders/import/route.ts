@@ -9,7 +9,7 @@ import { cacheInvalidation } from '@/lib/cache'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import type { Database, Insert, OrderStatus } from '@/types/database'
-import { InputSanitizer, SecurityPresets, createSecureHandler } from '@/utils/security'
+import { InputSanitizer, SecurityPresets, createSecureHandler } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'

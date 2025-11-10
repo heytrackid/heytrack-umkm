@@ -9,7 +9,7 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { createClientLogger } from '@/lib/client-logger'
 import { formatCurrency as formatCurrencyUtil } from '@/lib/currency'
 
-import type { Currency } from '@/shared'
+import type { Currency } from '@/shared/index'
 
 import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 
@@ -145,4 +145,3 @@ export const HppCostTrendsChart = ({
 
 
 
-export default HppCostTrendsChart

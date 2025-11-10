@@ -6,7 +6,7 @@
  */
 
 // Core recipe components
-export { default as SmartPricingAssistant } from './components/SmartPricingAssistant'
+export { SmartPricingAssistant as SmartPricingAssistant } from './components/SmartPricingAssistant'
 
 // Extracted HPP calculator components
 export { UMKMTooltip } from './components/UMKMTooltip'

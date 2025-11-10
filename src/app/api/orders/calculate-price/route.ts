@@ -7,7 +7,7 @@ import { z } from 'zod'
 
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
-import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security'
+import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 const OrderItemSchema = z.object({

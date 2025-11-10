@@ -687,4 +687,4 @@ const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
     )
 }
 
-export default AdminDashboard
+export { AdminDashboard }

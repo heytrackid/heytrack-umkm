@@ -6,7 +6,7 @@
  */
 
 // Core order components
-export { default as OrdersPage } from './components/OrdersPage'
+export { OrdersPage as OrdersPage } from './components/OrdersPage'
 export { OrderForm } from './components/OrderForm'
 export { OrderDetailView } from './components/OrderDetailView'
 export { OrdersTableView } from './components/OrdersTableView'

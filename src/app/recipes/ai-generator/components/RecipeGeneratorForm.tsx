@@ -15,7 +15,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 
 
-import type { AvailableIngredient } from './types'
+import type { AvailableIngredient } from '@/app/recipes/ai-generator/components/types'
 
 interface RecipeGeneratorFormProps {
   productName: string
@@ -286,4 +286,4 @@ const RecipeGeneratorForm = ({
   )
 }
 
-export default RecipeGeneratorForm
+export { RecipeGeneratorForm }

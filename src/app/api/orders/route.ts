@@ -14,7 +14,7 @@ import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { createPaginationMeta } from '@/lib/validations/pagination'
 import type { Insert, Update, Database, OrderStatus } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -35,6 +35,8 @@ interface FetchOrdersParams {
   sort_order?: string
   status?: string | null
   user_id: string
+  from?: string
+  to?: string
 }
 
 const normalizeDateValue = (value?: string | null) => {
@@ -48,7 +50,7 @@ const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: 
   const { page, limit, search, sort_by, sort_order, status, user_id } = params
 
   // Create cache key based on query parameters
-  const cacheKey = `${cacheKeys.orders.list}:${user_id}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${status ?? ''}`
+  const cacheKey = `${cacheKeys.orders.list}:${user_id}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${status ?? ''}:${params.from ?? ''}:${params.to ?? ''}`
 
   return withCache(async () => {
     // Batch query for count and data in single operation
@@ -63,6 +65,16 @@ const fetchOrdersWithCache = async (supabase: SupabaseClient<Database>, params: 
 
     if (status) {
       query = query.eq('status', status as OrderStatus)
+    }
+
+    // Optional date range filter (created_at)
+    const fromDate = normalizeDateValue(params.from)
+    const toDate = normalizeDateValue(params.to)
+    if (fromDate) {
+      query = query.gte('created_at', fromDate)
+    }
+    if (toDate) {
+      query = query.lte('created_at', toDate)
     }
 
     const { data, error, count } = await query
@@ -111,6 +123,9 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       sort_order: searchParams.get('sort_order'),
     })
 
+    const from = searchParams.get('from') ?? undefined
+    const to = searchParams.get('to') ?? undefined
+
     if (!queryValidation.success) {
       return NextResponse.json(
         { error: 'Invalid query parameters', details: queryValidation.error.issues },
@@ -134,6 +149,10 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     if (sort_order !== undefined) {
       params.sort_order = sort_order
     }
+
+    // Attach date range filters if provided
+    if (from) params.from = from
+    if (to) params.to = to
 
     const { data: orders, count } = await fetchOrdersWithCache(supabase, params)
 

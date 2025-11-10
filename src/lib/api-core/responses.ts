@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-import type { ApiSuccessResponse, ApiErrorResponse, PaginatedResponse } from './types'
+import type { ApiSuccessResponse, ApiErrorResponse, PaginatedResponse } from '@/lib/api-core/types'
 
 /**
  * API Response Module

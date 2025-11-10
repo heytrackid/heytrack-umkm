@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 
-import { Badge } from './badge'
-import { Card, CardContent } from './card'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 
 import type { ReactNode } from 'react'
 

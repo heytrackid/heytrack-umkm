@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 
-import { SUGGESTIONS, type Message } from '@/app/ai-chatbot/types'
+import { SUGGESTIONS, type Message } from '@/app/ai-chatbot/types/index'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
 

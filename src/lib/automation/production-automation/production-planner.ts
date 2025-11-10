@@ -8,11 +8,11 @@ import type {
   AutomationConfig
 } from '@/lib/automation/types'
 
-import { AvailabilityChecker } from './availability-checker'
-import { ProductionRecommendations } from './recommendations'
-import { TimeCalculator } from './time-calculator'
+import { AvailabilityChecker } from '@/lib/automation/production-automation/availability-checker'
+import { ProductionRecommendations } from '@/lib/automation/production-automation/recommendations'
+import { TimeCalculator } from '@/lib/automation/production-automation/time-calculator'
 
-import type { OrderForProduction } from './types'
+import type { OrderForProduction } from '@/lib/automation/production-automation/types'
 
 /**
  * Production Planner Module

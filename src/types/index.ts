@@ -76,7 +76,7 @@ export * from './shared/utils'
 // ==========================================================
 
 // Import Row type for convenience aliases
-import type { Row } from './database'
+import type { Row } from '@/types/database'
 
 export type Ingredient = Row<'ingredients'>
 export type Recipe = Row<'recipes'>

@@ -29,7 +29,7 @@ import type {
   UserProfilesTable 
 } from '@/types/database';
 
-import type { ApiError, ApiResponse } from './api';
+import type { ApiError, ApiResponse } from '@/types/shared/api';
 
 // Type aliases for easier use in guards
 type Customer = CustomersTable;

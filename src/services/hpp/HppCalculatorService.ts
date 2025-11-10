@@ -86,7 +86,7 @@ export class HppCalculatorService {
 
       const recipeData = recipe
 
-      // Calculate material costs using WAC when available
+      // Calculate material costs (per batch) using WAC when available for each ingredient
       const material_breakdown: HppCalculationResult['material_breakdown'] = []
       let total_material_cost = 0
 
@@ -100,11 +100,13 @@ export class HppCalculatorService {
         }
         
         // Type assertion after validation
-        const validIngredient = ingredient as { id: string; name: string; price_per_unit: number; weighted_average_cost: number; unit: string }
+        const validIngredient = ingredient as { id: string; name: string; price_per_unit: number | null; weighted_average_cost: number | null; unit: string }
 
-        const quantity = Number(ri.quantity)
-        // Use WAC if available, otherwise use current price
-        const unit_price = Number(validIngredient.weighted_average_cost ?? validIngredient.price_per_unit ?? 0)
+        const quantity = Number(ri.quantity ?? 0)
+        // Use WAC if available (to avoid double-adjustment later), otherwise use current price
+        const unit_price = Number(
+          validIngredient.weighted_average_cost ?? validIngredient.price_per_unit ?? 0
+        )
         const total_cost = quantity * unit_price
 
         material_breakdown.push({
@@ -119,23 +121,32 @@ export class HppCalculatorService {
         total_material_cost += total_cost
       }
 
-      // Calculate labor cost from recent productions
-      const labor_cost = await this.calculateLaborCost(supabase, recipeId, userId)
+      const servings = recipeData.servings ?? 1
+      const material_cost_per_unit = servings > 0 ? total_material_cost / servings : total_material_cost
 
-      // Calculate overhead cost with production-based allocation
-      const overhead_cost = await this.calculateOverheadCost(supabase, recipeId, userId)
+      // Calculate labor cost (per unit) from recent productions
+      const labor_cost_per_unit = await this.calculateLaborCost(supabase, recipeId, userId)
 
-      // Apply WAC adjustment based on recipe quantities
-      const wac_adjustment = await this.calculateWacAdjustment(
+      // Calculate overhead cost (per unit) with production-based allocation
+      const overhead_cost_per_unit = await this.calculateOverheadCost(supabase, recipeId, userId)
+
+      // Apply WAC adjustment per unit only when ingredient did not already use weighted_average_cost
+      const wac_adjustment_per_unit = await this.calculateWacAdjustment(
         supabase,
         userId,
-        recipeIngredients as unknown as Array<RecipeIngredient & { ingredients: Ingredient | null }>
+        recipeIngredients as unknown as Array<RecipeIngredient & { ingredients: Ingredient | null }>,
+        servings
       )
 
-      // Calculate total HPP
-      const total_hpp = total_material_cost + labor_cost + overhead_cost + wac_adjustment
-      const servings = recipeData.servings ?? 1
-      const cost_per_unit = servings > 0 ? total_hpp / servings : total_hpp
+      // Final per-unit and per-batch totals
+      const cost_per_unit =
+        material_cost_per_unit + labor_cost_per_unit + overhead_cost_per_unit + wac_adjustment_per_unit
+      const total_hpp = servings > 0 ? cost_per_unit * servings : cost_per_unit
+
+      // Convert per-unit components back to per-batch totals for persistence
+      const labor_cost = labor_cost_per_unit * (servings || 1)
+      const overhead_cost = overhead_cost_per_unit * (servings || 1)
+      const wac_adjustment = wac_adjustment_per_unit * (servings || 1)
 
       const result: HppCalculationResult = {
         recipe_id: recipeId,
@@ -300,7 +311,8 @@ export class HppCalculatorService {
   private async calculateWacAdjustment(
     supabase: SupabaseClient<Database>,
     userId: string,
-    recipeIngredients: Array<RecipeIngredient & { ingredients: Ingredient | null }>
+    recipeIngredients: Array<RecipeIngredient & { ingredients: Ingredient | null }>,
+    servings: number
   ): Promise<number> {
     try {
       if (!recipeIngredients || recipeIngredients.length === 0) {
@@ -316,12 +328,16 @@ export class HppCalculatorService {
       }
 
       // Get recent purchase transactions for these ingredients
+      const cutoffDate = new Date()
+      cutoffDate.setDate(cutoffDate.getDate() - HPP_CONFIG.WAC_MAX_AGE_DAYS)
+
       const { data: transactions, error } = await supabase
         .from('stock_transactions')
-        .select('ingredient_id, quantity, unit_price, total_price')
+        .select('ingredient_id, quantity, unit_price, total_price, created_at')
         .in('ingredient_id', ingredientIds)
         .eq('user_id', userId)
         .eq('type', 'PURCHASE')
+        .gte('created_at', cutoffDate.toISOString())
         .order('created_at', { ascending: false })
         .limit(HPP_CONFIG.WAC_LOOKBACK_TRANSACTIONS)
 
@@ -332,10 +348,14 @@ export class HppCalculatorService {
 
       let totalAdjustment = 0
 
-      // Calculate WAC adjustment for each ingredient
+      // Calculate WAC adjustment per unit for each ingredient ONLY if we didn't already use weighted_average_cost
       for (const ri of recipeIngredients) {
         const ingredient = ri.ingredients
         if (!ingredient) {continue}
+
+        // If weighted_average_cost exists and was used for material unit_price, skip adjustment to avoid double counting
+        const hasWacPrice = (ingredient as unknown as { weighted_average_cost?: number | null }).weighted_average_cost
+        if (hasWacPrice !== null && hasWacPrice !== undefined) {continue}
 
         const ingredientTransactions = transactions.filter(
           t => t.ingredient_id === ri.ingredient_id
@@ -358,20 +378,21 @@ export class HppCalculatorService {
         const wac = totalValue / totalQuantity
         const currentPrice = Number(ingredient.price_per_unit ?? 0)
 
-        // Adjustment based on recipe quantity (not transaction quantity!)
-        const recipeQuantity = Number(ri.quantity ?? 0)
-        const adjustment = (wac - currentPrice) * recipeQuantity
+        // Adjustment per unit: (qty per unit) * (wac - currentPrice)
+        const quantityBatch = Number(ri.quantity ?? 0)
+        const qtyPerUnit = servings > 0 ? quantityBatch / servings : quantityBatch
+        const adjustmentPerUnit = (wac - currentPrice) * qtyPerUnit
 
-        totalAdjustment += adjustment
+        totalAdjustment += adjustmentPerUnit
 
         this.logger.debug({
-          ingredientId: ingredient['id'],
-          ingredientName: ingredient.name,
+          ingredientId: (ingredient as unknown as { id?: string }).id,
+          ingredientName: (ingredient as unknown as { name?: string }).name,
           wac,
           currentPrice,
-          recipeQuantity,
-          adjustment
-        }, 'WAC adjustment calculated for ingredient')
+          qtyPerUnit,
+          adjustmentPerUnit
+        }, 'WAC adjustment calculated per unit for ingredient')
       }
 
       return totalAdjustment

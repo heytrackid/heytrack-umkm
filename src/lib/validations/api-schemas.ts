@@ -15,7 +15,7 @@ import {
   OrderInsertSchema, 
   OrderUpdateSchema as DomainOrderUpdateSchema, 
   OrderStatusUpdateSchema
-} from './domains/order'
+} from '@/lib/validations/domains/order'
 
 // ==================================
 // Base Schemas

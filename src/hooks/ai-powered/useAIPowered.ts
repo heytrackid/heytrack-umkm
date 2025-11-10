@@ -2,13 +2,13 @@
 
 import { useCallback } from 'react'
 
-import { useCustomerAnalytics } from './useCustomerAnalytics'
-import { useFinancialAnalysis } from './useFinancialAnalysis'
-import { useInventoryOptimization } from './useInventoryOptimization'
-import { usePricingAnalysis } from './usePricingAnalysis'
-import { useSmartInsights } from './useSmartInsights'
+import { useCustomerAnalytics } from '@/hooks/ai-powered/useCustomerAnalytics'
+import { useFinancialAnalysis } from '@/hooks/ai-powered/useFinancialAnalysis'
+import { useInventoryOptimization } from '@/hooks/ai-powered/useInventoryOptimization'
+import { usePricingAnalysis } from '@/hooks/ai-powered/usePricingAnalysis'
+import { useSmartInsights } from '@/hooks/ai-powered/useSmartInsights'
 
-import type { AnalysisType } from './types'
+import type { AnalysisType } from '@/hooks/ai-powered/types'
 
 
 
@@ -119,4 +119,3 @@ export function useAIPowered(): {
   }
 }
 
-export default useAIPowered

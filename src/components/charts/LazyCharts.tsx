@@ -6,11 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
- * Lazy-loaded Chart Components
+ * Canonical Lazy-loaded Chart Components
+ * Single source of truth for all Recharts lazy loading
  * Reduces initial bundle size by loading charts only when needed
  */
-
-
 
 // Loading component for charts
 const ChartSkeleton = (): JSX.Element => (
@@ -24,7 +23,7 @@ const ChartSkeleton = (): JSX.Element => (
     </div>
 )
 
-// Lazy load Line Chart
+// Chart Components - Lazy loaded with next/dynamic for SSR compatibility
 export const LazyLineChart = dynamic(
     () => import('recharts').then(mod => mod.LineChart),
     {
@@ -33,7 +32,6 @@ export const LazyLineChart = dynamic(
     }
 )
 
-// Lazy load Bar Chart
 export const LazyBarChart = dynamic(
     () => import('recharts').then(mod => mod.BarChart),
     {
@@ -42,7 +40,6 @@ export const LazyBarChart = dynamic(
     }
 )
 
-// Lazy load Pie Chart
 export const LazyPieChart = dynamic(
     () => import('recharts').then(mod => mod.PieChart),
     {
@@ -51,7 +48,6 @@ export const LazyPieChart = dynamic(
     }
 )
 
-// Lazy load Area Chart
 export const LazyAreaChart = dynamic(
     () => import('recharts').then(mod => mod.AreaChart),
     {
@@ -60,7 +56,15 @@ export const LazyAreaChart = dynamic(
     }
 )
 
-// Export other Recharts components
+export const LazyComposedChart = dynamic(
+    () => import('recharts').then(mod => mod.ComposedChart),
+    {
+        loading: () => <ChartSkeleton />,
+        ssr: false,
+    }
+)
+
+// Chart Elements - Lazy loaded
 export const Line = dynamic(() => import('recharts').then(mod => mod.Line))
 export const Bar = dynamic(() => import('recharts').then(mod => mod.Bar))
 export const Pie = dynamic(() => import('recharts').then(mod => mod.Pie))
@@ -69,10 +73,16 @@ export const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis))
 export const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis))
 export const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid))
 export const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip))
-// Export Legend directly without dynamic loading to avoid typing issues
-export { Legend as ChartLegend } from 'recharts'
 export const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer))
 export const Cell = dynamic(() => import('recharts').then(mod => mod.Cell))
+
+// Legend - Static export (small component, no need for lazy loading)
+export { Legend as ChartLegend } from 'recharts'
+
+// Chart Bundle Preloader
+export const preloadChartBundle = () =>
+    // Preload the entire recharts bundle when user interacts with dashboard
+    import('recharts')
 
 /**
  * Wrapper component for lazy-loaded charts with error boundary
@@ -80,10 +90,16 @@ export const Cell = dynamic(() => import('recharts').then(mod => mod.Cell))
 interface LazyChartWrapperProps {
     title?: string
     description?: string
+    height?: string
     children: React.ReactNode
 }
 
-export const LazyChartWrapper = ({ title, description, children }: LazyChartWrapperProps): JSX.Element => (
+export const LazyChartWrapper = ({
+    title,
+    description,
+    height = 'h-[300px]',
+    children
+}: LazyChartWrapperProps): JSX.Element => (
     <Card>
         {(title ?? description) && (
             <CardHeader>
@@ -92,7 +108,48 @@ export const LazyChartWrapper = ({ title, description, children }: LazyChartWrap
             </CardHeader>
         )}
         <CardContent>
-            {children}
+            <div className={`w-full ${height}`}>
+                {children}
+            </div>
         </CardContent>
     </Card>
 )
+
+// Chart Type Detection for Dynamic Loading
+export type ChartType = 'area' | 'bar' | 'composed' | 'line' | 'pie'
+
+export interface ChartContainerProps {
+    type: ChartType
+    title?: string
+    height?: string
+    children: React.ReactNode
+    [key: string]: unknown
+}
+
+export const ChartContainer = ({
+    type,
+    title,
+    height = 'h-64',
+    children,
+    ...props
+}: ChartContainerProps) => {
+    const ChartComponents = {
+        line: LazyLineChart,
+        bar: LazyBarChart,
+        area: LazyAreaChart,
+        pie: LazyPieChart,
+        composed: LazyComposedChart
+    }
+
+    const ChartComponent = ChartComponents[type]
+
+    return (
+        <LazyChartWrapper title={title} height={height}>
+            <ResponsiveContainer width="100%" height="100%">
+                <ChartComponent {...props}>
+                    {children}
+                </ChartComponent>
+            </ResponsiveContainer>
+        </LazyChartWrapper>
+    )
+}

@@ -11,7 +11,7 @@ import { createPaginationMeta } from '@/lib/validations/pagination'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 

@@ -142,6 +142,7 @@ export const SharedForm = <T extends FieldValues>({
                         label={field.label}
                         name={field.name}
                         type={field['type']}
+                        // eslint-disable-next-line react-hooks/incompatible-library
                         value={form.watch(fieldPath) as unknown}
                         onChange={(_, value) => form.setValue(fieldPath, value as PathValue<T, Path<T>>)}
                         error={errorMessage}

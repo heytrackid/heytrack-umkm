@@ -1,6 +1,6 @@
 // Lazy loaded dashboard components for improved performance
 
-import { lazy, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 
 // Define props interface to replace 'any' types
 type DashboardComponentProps = Record<string, unknown>;
@@ -29,27 +29,33 @@ interface StatsCardsProps {
 }
 
 // Lazy load dashboard components with proper chunk names for better bundle analysis
-const LazyHppDashboardWidget = lazy(() => 
-  import('./HppDashboardWidget').then(module => ({ default: module.default }))
+const LazyHppDashboardWidget = dynamic(() =>
+  import('./HppDashboardWidget').then(m => m.HppDashboardWidget), {
+    loading: () => <div className="h-80 bg-gray-100 animate-pulse rounded-lg" />
+  }
 )
 
-const LazyRecentOrdersSection = lazy(() => 
-  import('./RecentOrdersSection').then(module => ({ default: module.default }))
+const LazyRecentOrdersSection = dynamic(() =>
+  import('./RecentOrdersSection').then(m => m.RecentOrdersSection), {
+    loading: () => <RecentOrdersSkeleton />
+  }
 )
 
-const LazyStatsCardsSection = lazy(() => 
-  import('./StatsCardsSection').then(module => ({ default: module.default }))
+const LazyStatsCardsSection = dynamic(() =>
+  import('./StatsCardsSection').then(m => m.StatsCardsSection), {
+    loading: () => <StatsCardsSkeleton />
+  }
 )
 
-const LazyStockAlertsSection = lazy(() => 
-  import('./StockAlertsSection').then(module => ({ default: module.default }))
+const LazyStockAlertsSection = dynamic(() =>
+  import('./StockAlertsSection').then(m => m.StockAlertsSection), {
+    loading: () => <StockAlertsSkeleton />
+  }
 )
 
-// Wrapper components that include Suspense boundaries
+// Wrapper components that include loading boundaries
 const HppDashboardWidgetWithSuspenseComponent = (): JSX.Element => (
-  <Suspense fallback={<div className="h-80 bg-gray-100 animate-pulse rounded-lg" />}>
-    <LazyHppDashboardWidget />
-  </Suspense>
+  <LazyHppDashboardWidget />
 )
 
 const RecentOrdersSkeleton = (): JSX.Element => (
@@ -64,9 +70,7 @@ const RecentOrdersSkeleton = (): JSX.Element => (
 )
 
 const RecentOrdersSectionWithSuspenseComponent = (props: DashboardComponentProps): JSX.Element => (
-  <Suspense fallback={<RecentOrdersSkeleton />}>
-    <LazyRecentOrdersSection {...props} />
-  </Suspense>
+  <LazyRecentOrdersSection {...props} />
 )
 
 const StatsCardsSkeleton = (): JSX.Element => (
@@ -78,9 +82,7 @@ const StatsCardsSkeleton = (): JSX.Element => (
 )
 
 const StatsCardsSectionWithSuspenseComponent = (props: DashboardComponentProps): JSX.Element => (
-  <Suspense fallback={<StatsCardsSkeleton />}>
-    <LazyStatsCardsSection {...(props as unknown as StatsCardsProps)} />
-  </Suspense>
+  <LazyStatsCardsSection {...(props as unknown as StatsCardsProps)} />
 )
 
 const StockAlertsSkeleton = (): JSX.Element => (
@@ -95,9 +97,7 @@ const StockAlertsSkeleton = (): JSX.Element => (
 )
 
 const StockAlertsSectionWithSuspenseComponent = (props: DashboardComponentProps): JSX.Element => (
-  <Suspense fallback={<StockAlertsSkeleton />}>
-    <LazyStockAlertsSection {...props} />
-  </Suspense>
+  <LazyStockAlertsSection {...props} />
 )
 
 export const HppDashboardWidgetWithSuspense = HppDashboardWidgetWithSuspenseComponent

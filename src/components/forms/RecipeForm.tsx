@@ -21,7 +21,7 @@ import {
 
 import type { Row } from '@/types/database'
 
-import { FormField } from './shared/FormField'
+import { FormField } from '@/components/forms/shared/FormField'
 
 
 type Recipe = Row<'recipes'>
@@ -146,6 +146,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
                 onValueChange={(value) => {
                   form.setValue('difficulty', value as 'EASY' | 'HARD' | 'MEDIUM')
                 }}
+                // eslint-disable-next-line react-hooks/incompatible-library
                 {...(form.watch('difficulty') ? { value: form.watch('difficulty') as string } : {})}
               
               >

@@ -7,7 +7,7 @@ import { apiLogger } from '@/lib/logger'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations'
 import { getErrorMessage } from '@/shared/guards'
 import type { Insert } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 

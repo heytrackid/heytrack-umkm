@@ -8,7 +8,7 @@ import { checkAdminPrivileges } from '@/lib/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { Insert } from '@/types/database'
-import { SecurityPresets, withSecurity } from '@/utils/security'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 interface ErrorBody {
@@ -199,15 +199,16 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
 const securedGET = withSecurity(GET, SecurityPresets.enhanced())
 
-// Custom config for error reporting - more permissive to accept error logs from various sources
+// Custom config for error reporting - selective validation to prevent false positives
 const securedPOST = withSecurity(POST, {
   sanitizeInputs: true,
   sanitizeQueryParams: true,
   validateContentType: true,
   allowedContentTypes: ['application/json', 'text/plain'], // Allow both JSON and text/plain for sendBeacon
+  enableCSRFProtection: false, // Allow error reports from various sources
   rateLimit: { maxRequests: 200, windowMs: 15 * 60 * 1000 }, // Higher limit for error reporting
-  checkForSQLInjection: false, // Error messages might contain SQL-like text
-  checkForXSS: false, // Error messages might contain HTML-like text
+  checkForSQLInjection: false, // Disable SQL injection checks for error messages
+  checkForXSS: false, // Use custom validation instead
 })
 
 export { securedGET as GET, securedPOST as POST }

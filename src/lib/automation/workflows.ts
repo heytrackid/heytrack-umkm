@@ -1,9 +1,9 @@
 import 'server-only'
-import { FinancialAutomation } from './financial-automation'
-import { InventoryAutomation } from './inventory-automation'
-import { NotificationSystem } from './notification-system'
-import { PricingAutomation } from './pricing-automation'
-import { ProductionAutomation } from './production-automation'
+import { FinancialAutomation } from '@/lib/automation/financial-automation'
+import { InventoryAutomation } from '@/lib/automation/inventory-automation'
+import { NotificationSystem } from '@/lib/automation/notification-system'
+import { PricingAutomation } from '@/lib/automation/pricing-automation'
+import { ProductionAutomation } from '@/lib/automation/production-automation'
 
 
 

@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, DollarSign, Package, ArrowUpRight, ArrowDownR
  
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import type { ProfitData } from './types'
+import type { ProfitData } from '@/app/profit/components/types'
 
 interface ProfitSummaryCardsProps {
   summary: ProfitData['summary']

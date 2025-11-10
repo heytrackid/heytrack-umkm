@@ -510,4 +510,4 @@ const TemplateForm = ({
     )
 }
 
-export default TemplateForm
+export { TemplateForm }

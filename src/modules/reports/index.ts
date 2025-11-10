@@ -29,4 +29,3 @@ export const ReportsModule = {
   }
 }
 
-export default ReportsModule

@@ -1,4 +1,4 @@
-import EnhancedErrorBoundary from '@/components/error-boundaries/EnhancedErrorBoundary';
+import { EnhancedErrorBoundary } from '@/components/error-boundaries/EnhancedErrorBoundary';
 
 import type { ReactNode } from 'react';
 
@@ -27,4 +27,4 @@ const ErrorBoundaryProvider: React.FC<ErrorBoundaryProviderProps> = ({
     </EnhancedErrorBoundary>
   );
 
-export default ErrorBoundaryProvider;
+export { ErrorBoundaryProvider }

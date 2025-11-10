@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import type { OrderFilters as OrderFiltersType } from './types'
+import type { OrderFilters as OrderFiltersType } from '@/components/orders/types'
 
 
 
@@ -184,4 +184,4 @@ const OrderFilters = ({
   )
 }
 
-export default OrderFilters
+export { OrderFilters }

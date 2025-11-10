@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-import type { IngredientPurchase } from './types'
+import type { IngredientPurchase } from '@/app/ingredients/purchases/components/types'
 
 // Purchases Table Component - Lazy Loaded
 // Displays ingredient purchase history in a table
@@ -70,4 +70,4 @@ const PurchasesTable = ({ purchases }: PurchasesTableProps): JSX.Element => (
   </Card>
 )
 
-export default PurchasesTable
+export { PurchasesTable }

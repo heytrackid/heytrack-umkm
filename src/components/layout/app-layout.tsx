@@ -356,4 +356,4 @@ const AppLayout = memo(({
 
 AppLayout.displayName = 'AppLayout'
 
-export default AppLayout
+export { AppLayout }

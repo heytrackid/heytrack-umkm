@@ -6,7 +6,7 @@ import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
 
 const logger = createClientLogger('Hook')
-import type { AppError, ErrorState } from './types'
+import type { AppError, ErrorState } from '@/hooks/error-handler/types'
 
 interface UseErrorHandlerReturn extends ErrorState {
   handleError: (error: unknown, context?: string) => AppError

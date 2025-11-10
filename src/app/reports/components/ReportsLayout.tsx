@@ -4,7 +4,7 @@ import { BarChart3, Calendar, AlertCircle, Filter, CheckCircle, TrendingUp, Shop
 import dynamic from 'next/dynamic'
 import { useState, type ReactNode } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 
-const SalesReport = dynamic(() => import('./SalesReport'), {
+const SalesReport = dynamic(() => import('./SalesReport').then(m => ({ default: m.SalesReport })), {
   loading: () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -36,7 +36,7 @@ const SalesReport = dynamic(() => import('./SalesReport'), {
   ssr: false
 })
 
-const InventoryReport = dynamic(() => import('./InventoryReport'), {
+const InventoryReport = dynamic(() => import('./InventoryReport').then(m => ({ default: m.InventoryReport })), {
   loading: () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -53,7 +53,7 @@ const InventoryReport = dynamic(() => import('./InventoryReport'), {
   ssr: false
 })
 
-const FinancialReport = dynamic(() => import('./FinancialReport'), {
+const FinancialReport = dynamic(() => import('./FinancialReport').then(m => ({ default: m.FinancialReport })), {
   loading: () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -70,7 +70,7 @@ const FinancialReport = dynamic(() => import('./FinancialReport'), {
   ssr: false
 })
 
-const EnhancedProfitReport = dynamic(() => import('./EnhancedProfitReport'), {
+const EnhancedProfitReport = dynamic(() => import('./EnhancedProfitReport').then(m => ({ default: m.EnhancedProfitReport })), {
   loading: () => (
     <div className="space-y-4">
       <div className="h-16 bg-muted/50 rounded animate-pulse" />

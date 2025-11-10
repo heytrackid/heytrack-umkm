@@ -17,7 +17,7 @@ import type {
     HppOverview,
     RecipeIngredientWithPrice,
     RecipeWithHpp,
-} from '@/modules/hpp/types'
+} from '@/modules/hpp/types/index'
 import type { Row } from '@/types/database'
 
 const logger = createClientLogger('ClientFile')

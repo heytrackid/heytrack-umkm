@@ -79,4 +79,4 @@ const MiniChartCore = ({
   </div>
 )
 
-export default MiniChartCore
+export { MiniChartCore }

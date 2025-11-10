@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { RecipeInsertSchema, type RecipeInsert, type RecipeUpdate } from './recipe'
+import { RecipeInsertSchema, type RecipeInsert, type RecipeUpdate } from '@/lib/validations/domains/recipe'
 
 
 /**

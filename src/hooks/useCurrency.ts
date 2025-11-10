@@ -1,6 +1,6 @@
 import { useSettings } from '@/contexts/settings-context'
 
-import type { Currency } from '@/shared'
+import type { Currency } from '@/shared/index'
 
 /**
  * Custom hook for currency formatting using settings context

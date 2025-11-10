@@ -2,7 +2,7 @@ import { dbLogger } from '@/lib/logger'
 
 import type { Insert, Database } from '@/types/database'
 
-import { executeTransaction, createOperation, type TransactionOperation } from './transactions'
+import { executeTransaction, createOperation, type TransactionOperation } from '@/lib/database/transactions'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 

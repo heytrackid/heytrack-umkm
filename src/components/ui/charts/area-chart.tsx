@@ -2,9 +2,9 @@ import { memo, lazy, Suspense } from 'react'
 
 import { useResponsive } from '@/hooks/useResponsive'
 
-import { BaseMobileChart } from './base-chart'
-import { MobileTooltip } from './mobile-tooltip'
-import { type BaseMobileChartProps, CHART_COLORS } from './types'
+import { BaseMobileChart } from '@/components/ui/charts/base-chart'
+import { MobileTooltip } from '@/components/ui/charts/mobile-tooltip'
+import { type BaseMobileChartProps, CHART_COLORS } from '@/components/ui/charts/types'
 
 // Lazy load recharts components
 const Area = lazy(() => import('recharts').then(mod => ({ default: mod.Area })))
@@ -120,4 +120,4 @@ const MobileAreaChart = memo(({
 
 MobileAreaChart.displayName = 'MobileAreaChart'
 
-export default MobileAreaChart
+export { MobileAreaChart }

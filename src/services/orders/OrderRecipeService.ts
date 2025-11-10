@@ -2,11 +2,11 @@ import type { RecipeOption, OrderPricing } from '@/modules/orders/types'
 
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
 
-import { InventoryUpdateService } from './InventoryUpdateService'
-import { OrderPricingService } from './OrderPricingService'
-import { OrderValidationService } from './OrderValidationService'
-import { ProductionTimeService } from './ProductionTimeService'
-import { RecipeRecommendationService } from './RecipeRecommendationService'
+import { InventoryUpdateService } from '@/services/orders/InventoryUpdateService'
+import { OrderPricingService } from '@/services/orders/OrderPricingService'
+import { OrderValidationService } from '@/services/orders/OrderValidationService'
+import { ProductionTimeService } from '@/services/orders/ProductionTimeService'
+import { RecipeRecommendationService } from '@/services/orders/RecipeRecommendationService'
 
 
 

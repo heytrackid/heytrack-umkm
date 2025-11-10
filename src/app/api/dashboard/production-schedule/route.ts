@@ -6,7 +6,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger, logError } from '@/lib/logger'
 import type { Database } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

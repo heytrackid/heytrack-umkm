@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 
 import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
 
-import type { BatchExecutionState } from './types'
+import type { BatchExecutionState } from '@/components/production/components/types'
 
 // Active Batches List Component - Lazy Loaded
 // Displays the list of active and scheduled production batches
@@ -184,4 +184,4 @@ const ActiveBatchesList = ({
   )
 }
 
-export default ActiveBatchesList
+export { ActiveBatchesList }

@@ -271,4 +271,4 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
   )
 }
 
-export default DataVisualization
+export { DataVisualization }

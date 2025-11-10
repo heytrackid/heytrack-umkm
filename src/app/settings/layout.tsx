@@ -10,3 +10,4 @@ const SettingsLayout = ({
 }) => <>{children}</>
 
 export default SettingsLayout
+

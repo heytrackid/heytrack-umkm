@@ -11,7 +11,7 @@ import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { safeNumber } from '@/lib/type-guards'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

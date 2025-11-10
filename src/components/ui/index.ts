@@ -4,9 +4,8 @@
  * Logically grouped UI components for better developer experience
  *
  * Usage:
- *   import { Button, Card, Dialog } from '@/components/ui'
- *   import { Button } from '@/components/ui/form' // Specific group import
- */
+ *   import { Button, Card, Dialog } from '@/components/ui/index'
+ *   import { Button } from '@/components/ui/form' // Specific group import */
 
 // ==========================================================
 // FORM COMPONENTS
@@ -15,7 +14,7 @@
 export {
   Button,
   buttonVariants
-} from './button'
+} from '@/components/ui/button'
 
 export {
   Input

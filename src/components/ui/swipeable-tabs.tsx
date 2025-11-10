@@ -7,7 +7,7 @@ import React, { type ComponentProps, useState, useEffect, useRef } from 'react'
 import { useSwipeableTabs } from '@/hooks/useSwipeableTabs'
 import { cn } from '@/lib/utils'
 
-import { Button } from './button'
+import { Button } from '@/components/ui/button'
 
 
 

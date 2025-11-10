@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 
-import { withSecurity, type SecurityConfig, SecurityPresets } from './api-middleware'
+import { withSecurity, type SecurityConfig, SecurityPresets } from '@/utils/security/api-middleware'
 
 type Handler<Params extends Record<string, unknown>> = (request: NextRequest, params: Params) => Promise<NextResponse>
 

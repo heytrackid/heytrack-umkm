@@ -1,8 +1,8 @@
 'use client'
 
-import { useSupabaseQuery } from './core'
+import { useSupabaseQuery } from '@/hooks/supabase/core'
 
-import type { UseSupabaseQueryOptions, UseSupabaseQueryResult } from './types'
+import type { UseSupabaseQueryOptions, UseSupabaseQueryResult } from '@/hooks/supabase/types'
 
 /**
  * Entity-specific hooks for common database operations

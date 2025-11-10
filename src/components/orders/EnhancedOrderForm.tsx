@@ -33,9 +33,9 @@ import { validateOrderData } from '@/lib/validations/form-validations'
 
 import type { Row } from '@/types/database'
 
-import { calculateOrderTotal, normalizePriority } from './utils'
+import { calculateOrderTotal, normalizePriority } from '@/components/orders/utils'
 
-import type { Order, OrderFormData, OrderFormItem, Priority } from './types'
+import type { Order, OrderFormData, OrderFormItem, Priority } from '@/components/orders/types'
 
 interface EnhancedOrderFormProps {
     order?: Order
@@ -604,4 +604,4 @@ const EnhancedOrderForm = ({
     )
 }
 
-export default EnhancedOrderForm
+export { EnhancedOrderForm }

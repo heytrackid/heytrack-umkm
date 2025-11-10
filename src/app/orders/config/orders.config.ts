@@ -364,4 +364,3 @@ export function createRegionalOrdersConfig(countryCode: string): OrdersModuleCon
   }
 }
 
-export default DEFAULT_ORDERS_CONFIG

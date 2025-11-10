@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, useCallback } from 'react'
 
 import { PageHeader } from '@/components/layout/PageHeader'
-import { DeleteModal } from '@/components/ui'
+import { DeleteModal } from '@/components/ui/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -46,9 +46,9 @@ import { useResponsive } from '@/hooks/useResponsive'
 
 import type { Row } from '@/types/database'
 
-import { MobileOperationalCostCard } from './MobileOperationalCostCard'
-import { OperationalCostFormDialog } from './OperationalCostFormDialog'
-import { OperationalCostStats } from './OperationalCostStats'
+import { MobileOperationalCostCard } from '@/components/operational-costs/MobileOperationalCostCard'
+import { OperationalCostFormDialog } from '@/components/operational-costs/OperationalCostFormDialog'
+import { OperationalCostStats } from '@/components/operational-costs/OperationalCostStats'
 
 import type { DateRange } from 'react-day-picker'
 

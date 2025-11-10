@@ -42,6 +42,7 @@ export const VirtualizedTable = <T extends Record<string, unknown>>({
     return () => window.removeEventListener('resize', updateHeight);
   }, []);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: data.length,
     getScrollElement: () => parentRef.current,

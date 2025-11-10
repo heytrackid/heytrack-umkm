@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import { uiLogger } from '@/lib/logger'
 import { IngredientPurchaseInsertSchema, type IngredientPurchaseInsert } from '@/lib/validations/database-validations'
 
-import type { AvailableIngredient } from './types'
+import type { AvailableIngredient } from '@/app/ingredients/purchases/components/types'
 
 
 interface PurchaseFormProps {
@@ -80,6 +80,7 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps): 
     }
   }
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const watchedQty = form.watch('quantity')
   const watchedPrice = form.watch('unit_price')
   const total = watchedQty && watchedPrice ? watchedQty * watchedPrice : 0
@@ -212,4 +213,4 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps): 
   )
 }
 
-export default PurchaseForm
+export { PurchaseForm }

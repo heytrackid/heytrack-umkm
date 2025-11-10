@@ -2,7 +2,7 @@ import { DollarSign, Package, ShoppingCart, TrendingUp, type LucideIcon } from '
 
 import { Card, CardContent } from '@/components/ui/card'
 
-import type { IngredientPurchase, PurchaseStats } from './types'
+import type { IngredientPurchase, PurchaseStats } from '@/app/ingredients/purchases/components/types'
 
 // Purchase Stats Component - Lazy Loaded
 // Displays purchase statistics and metrics cards
@@ -86,4 +86,4 @@ const PurchaseStats = ({ purchases }: PurchaseStatsProps): JSX.Element => {
   )
 }
 
-export default PurchaseStats
+export { PurchaseStats }

@@ -1,9 +1,9 @@
 import { apiLogger } from '@/lib/logger'
 import { formatValidationErrors } from '@/lib/validations'
 
-import { createErrorResponse } from './responses'
+import { createErrorResponse } from '@/lib/api-core/responses'
 
-import type { ValidationResult } from './types'
+import type { ValidationResult } from '@/lib/api-core/types'
 import type { NextRequest, NextResponse } from 'next/server'
 import type { z } from 'zod'
 

@@ -24,7 +24,7 @@ import { usePagination } from '@/hooks/usePagination'
 import type { PaginatedResponse } from '@/lib/validations/pagination'
 import type { Row, OrderStatus } from '@/types/database'
 
-import { VirtualizedOrderCards } from './VirtualizedOrderCards'
+import { VirtualizedOrderCards } from '@/components/orders/VirtualizedOrderCards'
 
 type Order = Row<'orders'>
 

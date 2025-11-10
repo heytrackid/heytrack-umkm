@@ -99,4 +99,4 @@ const OrderDeliveryStep = ({
   </div>
 )
 
-export default OrderDeliveryStep
+export { OrderDeliveryStep }

@@ -17,9 +17,9 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 
-import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
+import { getStatusInfo, getPaymentInfo, getPriorityInfo } from '@/components/orders/utils'
 
-import type { Order, PaymentStatus, Priority } from './types'
+import type { Order, PaymentStatus, Priority } from '@/components/orders/types'
 
 // ✅ OPTIMIZED: Memoized to prevent unnecessary re-renders in lists
 
@@ -143,4 +143,4 @@ const OrderSummaryCard = memo(({
 
 OrderSummaryCard.displayName = 'OrderSummaryCard'
 
-export default OrderSummaryCard
+export { OrderSummaryCard }

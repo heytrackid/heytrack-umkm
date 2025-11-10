@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { type PeriodType, type ChartDataPoint, periodOptions } from '@/app/cash-flow/constants'
 import { LazyLineChart, LazyBarChart, LazyAreaChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ChartLegend, ResponsiveContainer, Area } from '@/components/charts/LazyCharts'
+import type { TooltipContentProps } from 'recharts'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -23,12 +24,10 @@ interface EnhancedCashFlowChartProps {
 
 type ChartType = 'area' | 'bar' | 'line'
 
-interface TooltipPayload {
-    [key: string]: unknown;
-    payload?: ChartDataPoint;
-}
 
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayload[] }): JSX.Element | null => {
+
+const CustomTooltip = (props: TooltipContentProps<any, any>): JSX.Element | null => {
+    const { active, payload } = props
     if (active && payload?.length) {
         const data = payload[0]?.payload
         if (!data) { return null }
@@ -439,4 +438,4 @@ const EnhancedCashFlowChart = ({
     )
 }
 
-export default EnhancedCashFlowChart
+export { EnhancedCashFlowChart }

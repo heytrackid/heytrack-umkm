@@ -4,8 +4,8 @@
 import { AlertTriangle, Calculator, CheckCircle, DollarSign, Lightbulb, Target, TrendingUp } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
-import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader, SharedStatsCards } from '@/components/shared/index'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -438,4 +438,3 @@ const PricingAssistantPage = (): JSX.Element => {
 }
 
 export default PricingAssistantPage
-

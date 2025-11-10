@@ -7,7 +7,7 @@ import { z } from 'zod'
 
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import { SecurityPresets, createSecureHandler } from '@/utils/security'
+import { SecurityPresets, createSecureHandler } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 const WebVitalsSchema = z.object({

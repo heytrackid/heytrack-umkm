@@ -1,5 +1,5 @@
 import { Analytics } from '@vercel/analytics/next';
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from 'next/font/google';
 
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary';
 import { ThemeProvider } from '@/components/providers/theme-provider';
@@ -7,11 +7,11 @@ import { SettingsProvider } from '@/contexts/settings-context';
 import { getNonce } from '@/lib/nonce';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
-import QueryProvider from '@/providers/QueryProvider';
-import SupabaseProvider from '@/providers/SupabaseProvider';
+import { QueryProvider } from '@/providers/QueryProvider';
+import { SupabaseProvider } from '@/providers/SupabaseProvider';
 import { SWRProvider } from '@/providers/SWRProvider';
 
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 import type { ReactElement, ReactNode } from 'react';
 
 import "./globals.css";

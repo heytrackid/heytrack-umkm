@@ -96,9 +96,7 @@ const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   )
 }
 
-export default SupabaseProvider
-
-/**
+export { SupabaseProvider }/**
  * Hook untuk mengakses Supabase client
  * @throws Error jika digunakan di luar SupabaseProvider
  * @example

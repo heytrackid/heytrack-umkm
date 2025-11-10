@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from '@/components/ui/tooltip'
 
-import type { AvailableIngredient } from './types'
+import type { AvailableIngredient } from '@/app/recipes/ai-generator/components/types'
 
 // Enhanced Recipe Generator Form with Quick/Complete Mode
 // Improved UX with contextual placeholders and better guidance
@@ -305,4 +305,4 @@ const RecipeGeneratorFormEnhanced = ({
   )
 }
 
-export default RecipeGeneratorFormEnhanced
+export { RecipeGeneratorFormEnhanced }

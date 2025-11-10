@@ -288,7 +288,4 @@ export const apiDebugLogger = createApiDebugLogger();
 export const debugLogger = createDebugLogger('GlobalDebug');
 
 // Default export
-export default logger
-
-// Re-export for convenience
-export { logger }
+export { logger } // Re-export for convenience

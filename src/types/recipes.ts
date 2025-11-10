@@ -8,7 +8,7 @@ import type {
   RecipesUpdate,
   RecipeIngredientsInsert,
   RecipeIngredientsUpdate
-} from './database'
+} from '@/types/database'
 
 export type Recipe = RecipesTable
 export type RecipeInsert = RecipesInsert

@@ -76,4 +76,4 @@ const OrdersStatsSection = ({
   </div>
 )
 
-export default OrdersStatsSection
+export { OrdersStatsSection }

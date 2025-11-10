@@ -4,10 +4,10 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useState, Suspense, useCallback, useEffect } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { useAuth } from '@/providers/AuthProvider'
 
-import { useChatMessages, useAIService } from './hooks'
+import { useChatMessages, useAIService } from '@/app/ai-chatbot/hooks/index'
 
 // Lazy load heavy chatbot components
 const ChatHeader = dynamic(() => import('./components').then(mod => ({ default: mod.ChatHeader })), {
@@ -108,7 +108,7 @@ const AIChatbotPage = (): JSX.Element => {
   return (
     <AppLayout pageTitle="AI Chatbot">
       {/* Full viewport chat container with mobile optimizations */}
-      <div className="flex flex-col h-[calc(100vh-4rem)] safe-top">
+      <div className="flex flex-col h-[calc(100vh-4rem)] safe-top max-w-5xl mx-auto w-full">
         {/* Minimal header */}
         <div className="flex-shrink-0">
           <Suspense fallback={<div className="h-12 bg-muted animate-pulse" />}>

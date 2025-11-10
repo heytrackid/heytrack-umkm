@@ -99,4 +99,4 @@ const CustomerStats = ({
   )
 }
 
-export default CustomerStats
+export { CustomerStats }

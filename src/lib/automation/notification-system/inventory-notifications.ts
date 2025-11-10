@@ -1,4 +1,4 @@
-import type { SmartNotification, Ingredient } from './types'
+import type { SmartNotification, Ingredient } from '@/lib/automation/notification-system/types'
 
 /**
  * Inventory Notifications Module

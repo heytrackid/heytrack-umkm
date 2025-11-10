@@ -1,4 +1,4 @@
-import { formatCurrentCurrency } from '@/shared'
+import { formatCurrentCurrency } from '@/shared/index'
 
 import type {
 
@@ -10,7 +10,7 @@ import type {
   SmartPricingResult,
   CompetitivePricing,
   ProfitabilityAnalysis
-} from './types'
+} from '@/lib/automation/types'
 
 export class PricingAutomation {
   constructor(private readonly config: AutomationConfig) {}

@@ -18,7 +18,7 @@ import { useSupabase } from '@/providers/SupabaseProvider'
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
 import type { Notification } from '@/types/domain/notifications'
 
-import { NotificationList } from './NotificationList'
+import { NotificationList } from '@/components/notifications/NotificationList'
 
 
 const logger = createClientLogger('NotificationBell')

@@ -1,4 +1,4 @@
-import type { ProfitData, ProfitPeriodType, ChartDataPoint } from './constants'
+import type { ProfitData, ProfitPeriodType, ChartDataPoint } from '@/app/profit/constants'
 
 
 /**

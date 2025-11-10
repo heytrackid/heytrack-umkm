@@ -7,9 +7,9 @@ import type { TableName, Row, Insert, Update } from '@/types/database'
 import { getErrorMessage, typed } from '@/types/type-utilities'
 import { createClient as createSupabaseClient } from '@/utils/supabase/client'
 
-import { handleCRUDError, validateCRUDInputs, validateBulkInputs } from './utils'
+import { handleCRUDError, validateCRUDInputs, validateBulkInputs } from '@/hooks/enhanced-crud/utils'
 
-import type { EnhancedCRUDOptions } from './types'
+import type { EnhancedCRUDOptions } from '@/hooks/enhanced-crud/types'
 
 /**
  * Enhanced CRUD hook with toast notifications and error handling

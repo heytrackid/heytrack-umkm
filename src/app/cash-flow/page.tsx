@@ -2,26 +2,27 @@
 
 import { AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle, Settings } from 'lucide-react'
 import { Suspense, useState } from 'react'
+import { DateRangePicker, type DateRangeValue } from '@/components/ui/date-range'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { StatsSkeleton, CardSkeleton } from '@/components/ui'
+import { StatsSkeleton, CardSkeleton } from '@/components/ui/index'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb' 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import PrefetchLink from '@/components/ui/prefetch-link'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 
 // Import components directly - no lazy loading for better parallel loading
-import CategoryBreakdown from './components/CategoryBreakdown'
-import CategoryManagementDialog from './components/CategoryManagementDialog'
-import EnhancedCashFlowChart from './components/EnhancedCashFlowChart'
-import EnhancedSummaryCards from './components/EnhancedSummaryCards'
-import EnhancedTransactionForm from './components/EnhancedTransactionForm'
-import EnhancedTransactionList from './components/EnhancedTransactionList'
-import FilterPeriod from './components/FilterPeriod'
-import { useEnhancedCashFlow } from './hooks/useEnhancedCashFlow'
+import { CategoryBreakdown } from '@/app/cash-flow/components/CategoryBreakdown'
+import { CategoryManagementDialog } from '@/app/cash-flow/components/CategoryManagementDialog'
+import { EnhancedCashFlowChart } from '@/app/cash-flow/components/EnhancedCashFlowChart'
+import { EnhancedSummaryCards } from '@/app/cash-flow/components/EnhancedSummaryCards'
+import { EnhancedTransactionForm } from '@/app/cash-flow/components/EnhancedTransactionForm'
+import { EnhancedTransactionList } from '@/app/cash-flow/components/EnhancedTransactionList'
+import { FilterPeriod } from '@/app/cash-flow/components/FilterPeriod'
+import { useEnhancedCashFlow } from '@/app/cash-flow/hooks/useEnhancedCashFlow'
 
 // Summary cards skeleton component
 const SummaryCardsSkeleton = (): JSX.Element[] => (
@@ -134,6 +135,19 @@ const CashFlowPage = (): JSX.Element => {
             </div>
           }
         />
+
+        {/* Mobile DateRangePicker */}
+        <div className="md:hidden">
+          <DateRangePicker
+            onChange={(range: DateRangeValue) => {
+              const params = new URLSearchParams(window.location.search)
+              if (range.from) params.set('from', range.from.toISOString())
+              if (range.to) params.set('to', range.to.toISOString())
+              const url = `${window.location.pathname}?${params.toString()}`
+              window.history.replaceState(null, '', url)
+            }}
+          />
+        </div>
 
         {/* Main Content - Single Suspense boundary for parallel loading */}
         <Suspense fallback={
@@ -257,4 +271,5 @@ const CashFlowPage = (): JSX.Element => {
   )
 }
 
+export { CashFlowPage }
 export default CashFlowPage

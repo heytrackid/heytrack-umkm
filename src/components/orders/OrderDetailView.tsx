@@ -25,10 +25,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useCurrency } from '@/hooks/useCurrency'
 
-import OrderStatusTimeline from './OrderStatusTimeline'
-import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
+import { OrderStatusTimeline } from '@/components/orders/OrderStatusTimeline'
+import { getStatusInfo, getPaymentInfo, getPriorityInfo } from '@/components/orders/utils'
 
-import type { Order, OrderStatus, PaymentStatus, Priority } from './types'
+import type { Order, OrderStatus, PaymentStatus, Priority } from '@/components/orders/types'
 
 interface OrderDetailViewProps {
     order: Order
@@ -372,4 +372,4 @@ const OrderDetailView = ({
     )
 }
 
-export default OrderDetailView
+export { OrderDetailView }

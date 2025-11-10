@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 
-import type { AIAnalysisState, InventoryOptimizationRequest } from './types'
+import type { AIAnalysisState, InventoryOptimizationRequest } from '@/hooks/ai-powered/types'
 
 
 

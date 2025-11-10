@@ -9,7 +9,7 @@ import { prepareUpdate } from '@/lib/supabase/insert-helpers';
 import { extractFirst, getErrorMessage, isRecord, isValidUUID, safeString } from '@/lib/type-guards';
 import { UpdateExpenseSchema } from '@/lib/validations/api-schemas';
 import type { Database } from '@/types/database';
-import { SecurityPresets, withSecurity } from '@/utils/security';
+import { SecurityPresets, withSecurity } from '@/utils/security/index';
 import { createClient } from '@/utils/supabase/server';
 
 

@@ -3,10 +3,10 @@ import { automationLogger } from '@/lib/logger'
 
 import type { WorkflowEventData, WorkflowResult, AutomationConfig } from '@/types/features/automation'
 
-import { FinancialWorkflowHandlers } from './financial-workflows'
-import { HPPWorkflowHandlers } from './hpp-workflows'
-import { InventoryWorkflowHandlers } from './inventory-workflows'
-import { OrderWorkflowHandlers } from './order-workflows'
+import { FinancialWorkflowHandlers } from '@/lib/automation/workflows/financial-workflows'
+import { HPPWorkflowHandlers } from '@/lib/automation/workflows/hpp-workflows'
+import { InventoryWorkflowHandlers } from '@/lib/automation/workflows/inventory-workflows'
+import { OrderWorkflowHandlers } from '@/lib/automation/workflows/order-workflows'
 
 
 /**

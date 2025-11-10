@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, X } from 'lucide-react'
 
-import { incomeCategories, expenseCategories } from '../constants'
+import { incomeCategories, expenseCategories } from '@/app/cash-flow/constants'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -226,4 +226,4 @@ const CategoryManagementDialog = ({ isOpen, onOpenChange }: CategoryManagementDi
   )
 }
 
-export default CategoryManagementDialog
+export { CategoryManagementDialog }

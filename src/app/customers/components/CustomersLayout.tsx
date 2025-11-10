@@ -4,6 +4,4 @@
 'use client'
 
 
-const CustomersLayout = () => null
-
-export default CustomersLayout
+export const CustomersLayout = () => null

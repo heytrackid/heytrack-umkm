@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useResponsive } from '@/hooks/useResponsive'
 
-import type { OrderStatus } from './types'
+import type { OrderStatus } from '@/components/orders/types'
 
 
 
@@ -252,4 +252,4 @@ const OrderStatusTimeline = ({
     )
 }
 
-export default OrderStatusTimeline
+export { OrderStatusTimeline }

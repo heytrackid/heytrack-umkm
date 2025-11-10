@@ -16,7 +16,7 @@ import type {
   BatchPriority,
   QualityStatus
 } from '@/app/recipes/types/production.types'
-import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks'
+import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/index'
 import { formatCurrency, DEFAULT_CURRENCY, currencies, type Currency } from '@/lib/currency'
 import type { Row } from '@/types/database'
 import { isRecord } from '@/types/shared/guards'

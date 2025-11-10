@@ -6,9 +6,9 @@ import { useState, type ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { Badge } from './badge'
-import { Button } from './button'
-import { Checkbox } from './checkbox'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface BatchEditModeProps<T> {
   items: T[]

@@ -6,7 +6,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { GlobalExportService } from '@/lib/export/global-export'
 import { apiLogger } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 export const dynamic = 'force-dynamic'

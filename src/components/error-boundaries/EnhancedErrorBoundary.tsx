@@ -97,4 +97,4 @@ class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBou
   }
 }
 
-export default EnhancedErrorBoundary;
+export { EnhancedErrorBoundary }

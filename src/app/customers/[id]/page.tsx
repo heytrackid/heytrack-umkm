@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { use, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 import { Badge } from '@/components/ui/badge'
 import {
   Breadcrumb,
@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/supabase'
+import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useCurrency } from '@/hooks/useCurrency'
 
 // Helper function to get status variant
@@ -35,7 +35,7 @@ const getStatusVariant = (status: string): "default" | "destructive" | "secondar
   }
 }
 
-import type { Order } from '@/types'
+import type { Order } from '@/types/index'
 
 const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JSX.Element => {
   const { id } = use(params)

@@ -12,7 +12,7 @@ import { DateRangeQuerySchema, PaginationQuerySchema } from '@/lib/validations/d
 import { FinancialRecordInsertSchema, type FinancialRecordInsert } from '@/lib/validations/domains/finance'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { SecurityPresets, withSecurity } from '@/utils/security'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 

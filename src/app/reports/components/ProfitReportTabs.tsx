@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 
-import { ProfitChart, ExpensesPieChart, ComparisonChart } from './ProfitReportCharts'
-import { COLORS, type SelectedDataPoint, type ProfitData } from './ProfitReportTypes'
+import { ProfitChart, ExpensesPieChart, ComparisonChart } from '@/app/reports/components/ProfitReportCharts'
+import { COLORS, type SelectedDataPoint, type ProfitData } from '@/app/reports/components/ProfitReportTypes'
 
 interface PartialProfitData {
     summary: {

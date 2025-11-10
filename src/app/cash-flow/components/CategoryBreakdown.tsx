@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 
-import type { CashFlowSummary } from '../constants'
+import type { CashFlowSummary } from '@/app/cash-flow/constants'
 
 interface CategoryBreakdownProps {
   summary: CashFlowSummary | null
@@ -156,4 +156,4 @@ const CategoryBreakdown = ({ summary, formatCurrency, isMobile }: CategoryBreakd
   )
 }
 
-export default CategoryBreakdown
+export { CategoryBreakdown }

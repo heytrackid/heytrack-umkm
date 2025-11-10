@@ -4,11 +4,11 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useEffect, useRef, type RefObject } from 'react'
 
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
-import type { Message } from '@/app/ai-chatbot/types'
+import type { Message } from '@/app/ai-chatbot/types/index'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
-import { MessageBubble } from './MessageBubble'
-import { TypingIndicator } from './TypingIndicator'
+import { MessageBubble } from '@/app/ai-chatbot/components/MessageBubble'
+import { TypingIndicator } from '@/app/ai-chatbot/components/TypingIndicator'
 
 
 interface MessageListProps {
@@ -31,6 +31,7 @@ export const MessageList = ({
   // Use virtual scrolling for long conversations (>20 messages)
   const useVirtualScrolling = messages.length > 20
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: messages.length,
     getScrollElement: () => virtualizerRef.current,
@@ -77,7 +78,7 @@ export const MessageList = ({
       }
     >
       <div className="absolute inset-0 overflow-hidden">
-        <ScrollArea className="h-full w-full mobile-scroll">
+        <ScrollArea className="h-full w-full mobile-scroll" aria-label="Daftar percakapan">
           {useVirtualScrolling ? (
             // Virtual scrolling for long conversations
             <div

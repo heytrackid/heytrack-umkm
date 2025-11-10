@@ -2,9 +2,9 @@
 
 import { useCallback, useState } from 'react'
 
-import { useErrorHandler } from './useErrorHandler'
+import { useErrorHandler } from '@/hooks/error-handler/useErrorHandler'
 
-import type { AppError } from './types'
+import type { AppError } from '@/hooks/error-handler/types'
 
 interface UseAsyncErrorReturn {
   executeAsync: (asyncFn: () => Promise<void>) => Promise<void>

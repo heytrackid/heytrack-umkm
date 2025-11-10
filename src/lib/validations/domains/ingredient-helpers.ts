@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { IngredientInsertSchema, type IngredientInsert } from './ingredient'
+import { IngredientInsertSchema, type IngredientInsert } from '@/lib/validations/domains/ingredient'
 
 
 /**

@@ -1,12 +1,12 @@
 import { Bot, User } from 'lucide-react'
 import React from 'react'
 
-import type { Message } from '@/app/ai-chatbot/types'
+import type { Message } from '@/app/ai-chatbot/types/index'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-import { DataCard } from './DataCard'
+import { DataCard } from '@/app/ai-chatbot/components/DataCard'
 
 
 
@@ -92,18 +92,18 @@ export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps
         "max-w-[80%]",
         message.role === 'user' ? "ml-12" : "mr-12"
       )}>
-        {message.role === 'assistant' && (
-          <div className="flex items-start gap-3 mb-2">
-            <Avatar className="w-8 h-8 flex-shrink-0">
-              <AvatarFallback className="bg-primary/10">
-                <Bot className="h-4 w-4 text-primary" />
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm leading-relaxed text-foreground">{message.content}</p>
-            </div>
-          </div>
-        )}
+       {message.role === 'assistant' && (
+         <div className="flex items-start gap-3 mb-2">
+           <Avatar className="w-8 h-8 flex-shrink-0">
+             <AvatarFallback className="bg-primary/10" aria-label="Avatar asisten">
+               <Bot className="h-4 w-4 text-primary" />
+             </AvatarFallback>
+           </Avatar>
+           <div className="flex-1 min-w-0">
+             <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words">{message.content}</p>
+           </div>
+         </div>
+       )}
 
         {message.role === 'user' && (
           <div className="flex items-start gap-3 mb-2 justify-end">

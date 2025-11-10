@@ -8,7 +8,7 @@ import { getErrorMessage } from '@/lib/type-guards'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import type { Insert } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 

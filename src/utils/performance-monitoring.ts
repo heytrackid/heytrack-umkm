@@ -61,4 +61,4 @@ class PerformanceMonitoring {
   }
 }
 
-export default PerformanceMonitoring;
+export { PerformanceMonitoring }

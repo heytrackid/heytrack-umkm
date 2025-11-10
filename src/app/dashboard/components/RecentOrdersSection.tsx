@@ -1,4 +1,5 @@
 'use client'
+import { DateRangePicker } from '@/components/ui/date-range'
 
 import { Calendar, Filter, ShoppingCart, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -137,7 +138,17 @@ const RecentOrdersSection = ({
         {/* Date Range Picker */}
         {showDateFilter && showDatePicker && dateRange && (
           <div className="mt-4 p-4 border rounded-lg bg-muted/20">
-            {/* DateRangePicker removed */}
+            <div className="w-full md:w-auto">
+              <DateRangePicker
+                onChange={(range) => {
+                  const params = new URLSearchParams(window.location.search)
+                  if (range.from) params.set('from', range.from.toISOString())
+                  if (range.to) params.set('to', range.to.toISOString())
+                  const url = `${window.location.pathname}?${params.toString()}`
+                  window.history.replaceState(null, '', url)
+                }}
+              />
+            </div>
           </div>
         )}
       </CardHeader>
@@ -233,4 +244,4 @@ const RecentOrdersSection = ({
   )
 }
 
-export default RecentOrdersSection
+export { RecentOrdersSection }

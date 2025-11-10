@@ -3,8 +3,8 @@
 import { AlertTriangle, CheckCircle, Lightbulb, Sparkles, TrendingUp } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
-import { PageHeader } from '@/components/shared'
+import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/shared/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -376,4 +376,3 @@ const HppRecommendationsPage = (): JSX.Element => {
 }
 
 export default HppRecommendationsPage
-

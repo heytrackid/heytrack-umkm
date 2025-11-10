@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 
 import { useDebounce } from '@/hooks/useDebounce'
-import { useSupabaseQuery } from '@/hooks'
+import { useSupabaseQuery } from '@/hooks/index'
 
 interface UseHPPAlertsOptions {
   unreadOnly?: boolean

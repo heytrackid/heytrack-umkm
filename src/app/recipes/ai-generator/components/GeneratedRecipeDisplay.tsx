@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettings } from '@/contexts/settings-context'
 
-import type { GeneratedRecipe, AvailableIngredient } from './types'
+import type { GeneratedRecipe, AvailableIngredient } from '@/app/recipes/ai-generator/components/types'
 
 // Generated Recipe Display Component - Lazy Loaded
 // Displays the complete AI-generated recipe with all sections
@@ -209,4 +209,4 @@ const GeneratedRecipeDisplay = ({
   )
 }
 
-export default GeneratedRecipeDisplay
+export { GeneratedRecipeDisplay }

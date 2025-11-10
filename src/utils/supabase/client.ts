@@ -40,7 +40,7 @@ export async function createClient() {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value, options }) => {
-          document.cookie = `${name}=${value}; ${options?.domain ? `domain=${options.domain}; ` : ''}${options?.path ? `path=${options.path}; ` : ''}${options?.expires ? `expires=${options.expires.toUTCString()}; ` : ''}${options?.httpOnly ? 'httpOnly; ' : ''}${options?.secure ? 'secure; ' : ''}${options?.sameSite ? `sameSite=${options.sameSite}; ` : ''}`
+          document.cookie = `${name}=${value}; ${options?.domain ? `domain=${options.domain}; ` : ''}${options?.path ? `path=${options.path}; ` : ''}${options?.expires ? `expires=${options.expires.toUTCString()}; ` : ''}${options?.secure ? 'secure; ' : ''}${options?.sameSite ? `sameSite=${options.sameSite}; ` : ''}`
         })
       }
     },

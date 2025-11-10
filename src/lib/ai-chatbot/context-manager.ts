@@ -2,7 +2,7 @@ import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ClientFile')
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
-import type { ChatContext } from './types'
+import type { ChatContext } from '@/lib/ai-chatbot/types'
 import type { Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 

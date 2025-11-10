@@ -8,11 +8,7 @@ import { apiLogger } from '@/lib/logger'
 
 
 // Chart Lazy Loading
-export {
-  AreaChartWithSuspense, BarChartWithSuspense, ChartContainer, ComposedChartWithSuspense, LazyAreaChart, LazyBarChart, LazyComposedChart, LazyLineChart, LazyPieChart, LineChartWithSuspense, PieChartWithSuspense, preloadChartBundle,
-  useChartPerformance,
-  type ChartType
-} from './chart-lazy-loader'
+// Chart lazy-loader exports temporarily removed (module missing)
 
 // Table Lazy Loading
 export { LazyDataTable } from './lazy-data-table'

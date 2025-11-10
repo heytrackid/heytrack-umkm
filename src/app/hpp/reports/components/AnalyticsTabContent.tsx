@@ -5,7 +5,7 @@ import { LineChart } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { HppCostTrendsChart } from '@/modules/hpp'
+import { HppCostTrendsChart } from '@/modules/hpp/index'
 
 interface HppAnalytics {
   totalRecipes: number
@@ -160,4 +160,4 @@ const AnalyticsTabContent = ({ analytics, loading, formatCurrency }: AnalyticsTa
   )
 }
 
-export default AnalyticsTabContent
+export { AnalyticsTabContent }

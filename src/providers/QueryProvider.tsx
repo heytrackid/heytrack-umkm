@@ -84,4 +84,4 @@ const QueryProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   )
 }
 
-export default QueryProvider
+export { QueryProvider }

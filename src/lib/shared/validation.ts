@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { VALIDATION_MESSAGES } from './constants'
+import { VALIDATION_MESSAGES } from '@/lib/shared/constants'
 
 
 // Advanced validation utilities and rules

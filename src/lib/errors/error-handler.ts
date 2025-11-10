@@ -9,7 +9,7 @@ import {
   AuthorizationError,
   NotFoundError,
   DatabaseError,
-} from './app-error'; 
+} from '@/lib/errors/app-error'; 
 
 
 /**

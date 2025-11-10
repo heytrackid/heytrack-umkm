@@ -6,7 +6,7 @@ import { useState } from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { useToast } from '@/hooks'
+import { useToast } from '@/hooks/index'
 
 
 
@@ -95,4 +95,4 @@ const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
   )
 }
 
-export default OrdersQuickActions
+export { OrdersQuickActions }

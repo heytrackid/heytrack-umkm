@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import type { Recipe } from '@/types'
+import type { Recipe } from '@/types/index'
 
 
 interface OrderItemsStepProps {
@@ -199,4 +199,4 @@ const OrderItemsStep = ({
   )
 }
 
-export default OrderItemsStep
+export { OrderItemsStep }

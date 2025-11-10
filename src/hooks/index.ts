@@ -4,7 +4,7 @@
  * Provides convenient single-import access to all custom hooks
  * 
  * Usage:
- *   import { useResponsive, useSupabase, useAuth } from '@/hooks'
+ *   import { useResponsive, useSupabase, useAuth } from '@/hooks/index'
  */
 
 // UI Hooks
@@ -28,7 +28,7 @@ export {
 // Business Logic Hooks
 export { useCurrency } from './useCurrency'
 // export { useEnhancedCRUD } from './useEnhancedCRUD'
-// export { default as useAIPowered } from './useAIPowered'
+// export { UseAIPowered as useAIPowered } from './useAIPowered'
 
 // Performance Hooks
 export { useAdvancedButtonPreloading, useAdvancedLinkPreloading, useSimplePreload } from './usePreloading'

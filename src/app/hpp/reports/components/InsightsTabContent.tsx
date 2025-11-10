@@ -76,4 +76,4 @@ const InsightsTabContent = ({ isMobile }: InsightsTabContentProps): JSX.Element 
   </div>
 )
 
-export default InsightsTabContent
+export { InsightsTabContent }

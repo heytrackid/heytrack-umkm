@@ -2,10 +2,10 @@ import { AIClient, NLPProcessor } from '@/lib/ai'
 import { createClientLogger } from '@/lib/client-logger'
 
 const logger = createClientLogger('ClientFile')
-import { ContextManager } from './context-manager'
-import { ChatbotPromptBuilder } from './prompt-builder'
+import { ContextManager } from '@/lib/ai-chatbot/context-manager'
+import { ChatbotPromptBuilder } from '@/lib/ai-chatbot/prompt-builder'
 
-import type { AIResponse } from './types'
+import type { AIResponse } from '@/lib/ai-chatbot/types'
 
 /**
  * Context-Aware AI Chatbot

@@ -3,8 +3,8 @@
 import { Download, FileText, FileSpreadsheet, FileImage, Calendar, BarChart3, LineChart, Table, TrendingUp, type LucideIcon } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
-import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { AppLayout } from '@/components/layout/app-layout'
+import { PageHeader, SharedStatsCards } from '@/components/shared/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
 import { dbLogger } from '@/lib/logger'
-import { HppCostTrendsChart } from '@/modules/hpp'
+import { HppCostTrendsChart } from '@/modules/hpp/index'
 
 type HppExportFormat = 'csv' | 'excel' | 'json' | 'pdf'
 type HppExportMetric = 'alerts' | 'cost_breakdown' | 'hpp' | 'margin' | 'recommendations' | 'trends'
@@ -585,4 +585,3 @@ const HppReportsPage = (): JSX.Element => {
 }
 
 export default HppReportsPage
-

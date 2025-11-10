@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { createClientLogger } from '@/lib/client-logger'
-import { arrayCalculations } from '@/lib/performance'
+import { arrayCalculations } from '@/lib/performance/index'
 import { getErrorMessage } from '@/lib/type-guards'
 import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/types'
@@ -98,7 +98,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
   const { data: ordersData, isLoading: loading, error: queryError } = useQuery<Order[]>({
     queryKey: ['orders', 'all'],
     queryFn: async (): Promise<Order[]> => {
-      const response = await fetch('/api/orders', {
+      const response = await fetch(`/api/orders?${(() => { const p=new URLSearchParams(); const u=new URLSearchParams(typeof window!== 'undefined' ? window.location.search : ''); const f=u.get('from'); const t=u.get('to'); if (f) p.set('from', f); if (t) p.set('to', t); return p.toString(); })()}`, {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) { throw new Error('Failed to fetch orders') }
@@ -699,4 +699,4 @@ const OrdersPage = (_props: OrdersPageProps) => {
   )
 }
 
-export default OrdersPage
+export { OrdersPage }

@@ -1,7 +1,7 @@
-import { InventoryServices } from './inventory'
-import { ProductionServices } from './production'
+import { InventoryServices } from '@/lib/business-services/inventory'
+import { ProductionServices } from '@/lib/business-services/production'
 
-import type { ProductionBatch, ReorderSummary } from './types'
+import type { ProductionBatch, ReorderSummary } from '@/lib/business-services/types'
 
 
 /**

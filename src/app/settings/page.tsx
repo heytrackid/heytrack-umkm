@@ -2,15 +2,15 @@
 
 import { Suspense, lazy, useState } from 'react'
 
-import AppLayout from '@/components/layout/app-layout'
+import { AppLayout } from '@/components/layout/app-layout'
 
-import { SettingsLoadingSkeleton } from './components'
+import { SettingsLoadingSkeleton } from '@/app/settings/components/index'
 
 // Import core components directly for better performance
-import { SettingsHeader } from './components/layout/SettingsHeader'
-import { SettingsQuickLinks } from './components/SettingsQuickLinks'
-import { UnsavedChangesPrompt } from './components/UnsavedChangesPrompt'
-import { useSettingsManager } from './hooks'
+import { SettingsHeader } from '@/app/settings/components/layout/SettingsHeader'
+import { SettingsQuickLinks } from '@/app/settings/components/SettingsQuickLinks'
+import { UnsavedChangesPrompt } from '@/app/settings/components/UnsavedChangesPrompt'
+import { useSettingsManager } from '@/app/settings/hooks/index'
 
 // Only lazy load the heavy tabs component
 const SettingsTabs = lazy(() => import('./components/tabs/SettingsTabs').then(mod => ({ default: mod.SettingsTabs })))

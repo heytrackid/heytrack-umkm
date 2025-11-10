@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils'
 
 import type { Row } from '@/types/database'
 
-import { StockBadge, CompactStockIndicator } from './StockBadge'
+import { StockBadge, CompactStockIndicator } from '@/components/ingredients/StockBadge'
 
 
 type Ingredient = Row<'ingredients'>

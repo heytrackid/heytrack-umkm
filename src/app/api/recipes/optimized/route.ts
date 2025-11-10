@@ -9,7 +9,7 @@ export const runtime = 'nodejs'
 import { createCachedResponse, cachePresets } from '@/lib/api-cache'
 import { dbLogger } from '@/lib/logger'
 import { safeNumber, getErrorMessage } from '@/lib/type-guards'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { NextRequest, NextResponse } from 'next/server'

@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 
 import { Badge } from '@/components/ui/badge'
-import { useIngredients } from '@/hooks'
+import { useIngredients } from '@/hooks/index'
 
 import type { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
 import type { Row, Json } from '@/types/database'

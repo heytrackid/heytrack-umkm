@@ -265,4 +265,4 @@ function getStepTip(stepId: string): string {
   return tips[stepId] ?? 'Ikuti langkah-langkah untuk setup yang optimal.'
 }
 
-export default OnboardingWizard
+export { OnboardingWizard }

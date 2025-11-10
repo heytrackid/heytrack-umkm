@@ -1,4 +1,4 @@
-import type { AutomationConfig } from './types'
+import type { AutomationConfig } from '@/lib/automation/types'
 
 /**
  * Automation Engine - Main Entry Point

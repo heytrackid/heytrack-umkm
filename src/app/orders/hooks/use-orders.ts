@@ -13,7 +13,7 @@ import type {
   OrderTotalsBreakdown,
   InvoiceData
 } from '@/app/orders/types/orders.types'
-import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks'
+import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/index'
 import { formatCurrency, parseCurrencyString } from '@/lib/currency'
 
 import type { CatchError } from '@/types/common' 

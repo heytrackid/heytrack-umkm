@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { OrderInsertSchema, type OrderInsert, type OrderUpdate } from './order'
+import { OrderInsertSchema, type OrderInsert, type OrderUpdate } from '@/lib/validations/domains/order'
 
 
 /**

@@ -6,7 +6,7 @@ import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X, Plus } fro
 import { useRouter } from 'next/navigation'
 import { useState, useMemo, memo, useCallback } from 'react'
 
-import { DeleteModal } from '@/components/ui'
+import { DeleteModal } from '@/components/ui/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -32,8 +32,8 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
-import { useIngredients } from '@/hooks'
-import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useIngredients } from '@/hooks/index'
+import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
 import {
@@ -42,9 +42,9 @@ import {
 import type { Row } from '@/types/database'
 import { useMobile } from '@/utils/responsive'
 
-import { IngredientFormDialog } from './IngredientFormDialog'
-import { MobileIngredientList } from './MobileIngredientCard'
-import { StockBadge } from './StockBadge'
+import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog'
+import { MobileIngredientList } from '@/components/ingredients/MobileIngredientCard'
+import { StockBadge } from '@/components/ingredients/StockBadge'
 
 
 

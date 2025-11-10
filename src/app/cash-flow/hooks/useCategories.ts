@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { incomeCategories, expenseCategories } from '../constants'
+import { incomeCategories, expenseCategories } from '@/app/cash-flow/constants'
 
 type CategoryType = 'income' | 'expense'
 

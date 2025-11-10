@@ -5,8 +5,8 @@ import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { Button } from './button'
-import { Input } from './input'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface QuickStockAdjustmentProps {
   currentStock: number

@@ -607,4 +607,4 @@ const ProductionTimeline = ({
   )
 }
 
-export default ProductionTimeline
+export { ProductionTimeline }

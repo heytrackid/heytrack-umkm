@@ -17,7 +17,7 @@ const LoadingSkeleton = (): JSX.Element => (
   </div>
 )
 
-const AdminDashboard = dynamic(() => import('@/components/admin/AdminDashboard'), {
+const AdminDashboard = dynamic(() => import('@/components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })), {
   loading: LoadingSkeleton,
   ssr: false
 })

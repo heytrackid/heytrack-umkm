@@ -7,7 +7,7 @@ import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

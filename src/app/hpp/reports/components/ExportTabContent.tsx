@@ -47,4 +47,4 @@ const ExportTabContent = ({ exportData, isMobile }: ExportTabContentProps): JSX.
   </div>
 )
 
-export default ExportTabContent
+export { ExportTabContent }

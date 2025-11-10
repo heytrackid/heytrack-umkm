@@ -1,6 +1,6 @@
 'use client';
 
-import { useTheme } from "next-themes"
+import { useTheme } from 'next-themes'
 import { type ToasterProps, Toaster as Sonner } from 'sonner'
 
 import type { CSSProperties } from 'react'

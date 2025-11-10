@@ -1,4 +1,4 @@
-import type { ChatContext, BusinessData } from './types'
+import type { ChatContext, BusinessData } from '@/lib/ai-chatbot/types'
 
 /**
  * Chatbot Prompt Builder

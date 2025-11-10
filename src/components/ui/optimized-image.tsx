@@ -66,4 +66,4 @@ const OptimizedImage = ({
   )
 }
 
-export default OptimizedImage
+export { OptimizedImage }

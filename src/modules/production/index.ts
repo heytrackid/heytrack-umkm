@@ -33,4 +33,3 @@ export const ProductionModule = {
   }
 }
 
-export default ProductionModule

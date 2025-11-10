@@ -29,7 +29,7 @@ export const TypingIndicator = (): React.JSX.Element => {
           <Bot className="h-4 w-4 text-primary" />
         </AvatarFallback>
       </Avatar>
-      <div className="bg-muted rounded-lg p-3 shadow-sm">
+      <div className="bg-muted rounded-lg p-3 shadow-sm" role="status" aria-live="polite" aria-label="Asisten sedang mengetik">
         <div className="flex items-center gap-2">
           <div className="flex space-x-1">
             <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />

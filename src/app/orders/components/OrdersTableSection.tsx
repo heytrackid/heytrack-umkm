@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { LoadingButton } from '@/components/ui/loading-button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useToast } from '@/hooks'
+import { useToast } from '@/hooks/index'
 
 import type { Row } from '@/types/database'
 
@@ -257,4 +257,4 @@ const OrdersTableSection = ({
   )
 }
 
-export default memo(OrdersTableSection)
+export const OrdersTableSectionMemo = memo(OrdersTableSection)

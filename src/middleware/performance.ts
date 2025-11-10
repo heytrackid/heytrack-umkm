@@ -1,5 +1,5 @@
 import { apiLogger } from '@/lib/logger'
-import { Cache, PerformanceMonitor } from '@/lib/performance'
+import { Cache, PerformanceMonitor } from '@/lib/performance/index'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 

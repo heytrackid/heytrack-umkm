@@ -124,4 +124,4 @@ const OrderSummary = ({
   )
 }
 
-export default OrderSummary
+export { OrderSummary }

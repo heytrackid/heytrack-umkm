@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { usePerformanceMonitoring } from '@/lib/performance'
+import { usePerformanceMonitoring } from '@/lib/performance/index'
 
 /**
  * Performance Monitor Component
@@ -236,4 +236,3 @@ const MetricRow = ({ label, value, threshold, currentValue, icon: Icon }: Metric
   )
 }
 
-export default PerformanceMonitor

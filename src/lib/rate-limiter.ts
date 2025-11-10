@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger'
 
-import { dbLogger } from './logger';
+import { dbLogger } from '@/lib/logger';
 
 import type { NextRequest } from 'next/server'
 

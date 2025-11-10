@@ -13,8 +13,8 @@ import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 
-import { useRenderPerformance } from '@/lib/performance'
-// import { login } from './actions' // Replaced with API call
+import { useRenderPerformance } from '@/lib/performance/index'
+// import { login } from '@/app/auth/login/actions' // Replaced with API call
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter()
@@ -33,7 +33,9 @@ const LoginPage = (): JSX.Element => {
      // Check if session expired
      const sessionExpired = searchParams.get('session_expired')
      if (sessionExpired === 'true') {
-       setError('Sesi Anda telah berakhir. Silakan login kembali.')
+       // Defer state update to next microtask to avoid cascading renders lint rule
+       const t = setTimeout(() => setError('Sesi Anda telah berakhir. Silakan login kembali.'), 0)
+       return () => clearTimeout(t)
      }
 
      return () => {

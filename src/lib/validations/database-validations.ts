@@ -10,7 +10,7 @@ import {
   NonNegativeNumberSchema,
   OrderStatusEnum,
   PaymentMethodEnum
-} from './base-validations'
+} from '@/lib/validations/base-validations'
 
 // Database validation schemas
 // Validation schemas specifically for database operations and CRUD 

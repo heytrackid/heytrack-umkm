@@ -13,7 +13,7 @@ import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 
 import type { Database } from '@/types/database'
-import { createSecureHandler, SecurityPresets } from '@/utils/security'
+import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 

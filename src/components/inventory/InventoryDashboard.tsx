@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { useSettings } from '@/contexts/settings-context'
-import { useInventoryAlerts, useReorderManagement } from '@/hooks'
+import { useInventoryAlerts, useReorderManagement } from '@/hooks/index'
 import { InventoryAlertsList } from '@/hooks/useInventoryAlerts'
 
 

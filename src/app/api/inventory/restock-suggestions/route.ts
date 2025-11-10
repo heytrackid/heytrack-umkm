@@ -6,7 +6,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger, logError } from '@/lib/logger'
 import { RecipeAvailabilityService } from '@/services/recipes/RecipeAvailabilityService'
-import { withSecurity, SecurityPresets } from '@/utils/security'
+import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 

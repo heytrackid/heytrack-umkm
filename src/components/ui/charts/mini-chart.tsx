@@ -2,11 +2,20 @@
 
 import { memo } from 'react'
 import { useMemo } from 'react'
-import { Line, LineChart, Area, AreaChart, Bar, BarChart, ResponsiveContainer } from 'recharts'
 
 import { cn } from '@/lib/utils'
 
-import { type ChartDataPoint, CHART_COLORS } from './types'
+import {
+    Line,
+    Area,
+    Bar,
+    LazyLineChart,
+    LazyAreaChart,
+    LazyBarChart,
+    ResponsiveContainer
+} from '@/components/charts/LazyCharts'
+
+import { type ChartDataPoint, CHART_COLORS } from '@/components/ui/charts/types'
 
 /**
  * Mini Chart Component
@@ -36,9 +45,9 @@ export const MiniChart = memo(({
   height = 60
 }: MiniChartProps) => {
   const ChartComponent = useMemo(() => {
-    if (type === 'line') return LineChart
-    if (type === 'area') return AreaChart
-    return BarChart
+    if (type === 'line') return LazyLineChart
+    if (type === 'area') return LazyAreaChart
+    return LazyBarChart
   }, [type])
 
   return (
@@ -83,4 +92,3 @@ export const MiniChart = memo(({
 
 MiniChart.displayName = 'MiniChart'
 
-export default memo(MiniChart)

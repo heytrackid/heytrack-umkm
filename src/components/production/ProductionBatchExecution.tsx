@@ -8,11 +8,11 @@ import { createClientLogger } from '@/lib/client-logger'
 
 import type { ProductionBatchWithDetails as ProductionBatch } from '@/services/production/BatchSchedulingService'
 
-import ActiveBatchesList from './components/ActiveBatchesList'
-import BatchDetails from './components/BatchDetails'
-import CompletedBatches from './components/CompletedBatches'
-import ProductionOverview from './components/ProductionOverview'
-import { PRODUCTION_STEPS, QUALITY_CHECKS, type BatchExecutionState } from './components/types'
+import { ActiveBatchesList } from '@/components/production/components/ActiveBatchesList'
+import { BatchDetails } from '@/components/production/components/BatchDetails'
+import { CompletedBatches } from '@/components/production/components/CompletedBatches'
+import { ProductionOverview } from '@/components/production/components/ProductionOverview'
+import { PRODUCTION_STEPS, QUALITY_CHECKS, type BatchExecutionState } from '@/components/production/components/types'
 
 
 const logger = createClientLogger('ProductionBatchExecution')
@@ -293,4 +293,4 @@ const ProductionBatchExecution = ({
   )
 }
 
-export default ProductionBatchExecution
+export { ProductionBatchExecution }

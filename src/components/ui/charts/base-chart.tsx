@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 
-import type { BaseMobileChartProps } from './types'
+import type { BaseMobileChartProps } from '@/components/ui/charts/types'
 
 /**
  * Base Mobile Chart Component
