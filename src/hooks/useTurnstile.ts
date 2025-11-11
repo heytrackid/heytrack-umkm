@@ -56,7 +56,29 @@ export function useTurnstile(options?: UseTurnstileOptions) {
         const data = await response.json()
 
         if (!response.ok || !data.success) {
-          throw new Error(data.error || 'Verification failed')
+          // Log detailed error for debugging
+          console.error('Turnstile verification failed:', {
+            status: response.status,
+            error: data.error,
+            errorCodes: data.errorCodes,
+            details: data.details
+          })
+
+          // User-friendly error messages
+          let errorMsg = 'Verifikasi keamanan gagal'
+          if (response.status === 400) {
+            if (data.errorCodes?.includes('timeout-or-duplicate')) {
+              errorMsg = 'Token keamanan sudah digunakan atau expired. Silakan refresh halaman.'
+            } else if (data.errorCodes?.includes('invalid-input-response')) {
+              errorMsg = 'Token keamanan tidak valid. Silakan coba lagi.'
+            }
+          } else if (response.status === 500) {
+            errorMsg = 'Konfigurasi keamanan bermasalah. Silakan hubungi admin.'
+          } else if (response.status === 502) {
+            errorMsg = 'Layanan verifikasi tidak tersedia. Silakan coba lagi.'
+          }
+
+          throw new Error(errorMsg)
         }
 
         setIsVerified(true)

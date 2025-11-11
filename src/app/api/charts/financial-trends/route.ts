@@ -122,7 +122,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       success: true,
       data: chartData,
     })
-  } catch (error) {
+  } catch (error: unknown) {
     apiLogger.error({ error }, 'Error in GET /api/charts/financial-trends')
     return handleAPIError(error, 'GET /api/charts/financial-trends')
   }

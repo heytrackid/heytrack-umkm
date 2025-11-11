@@ -107,7 +107,7 @@ async function diagnosticsGET(_request: NextRequest): Promise<NextResponse> {
         'Access-Control-Allow-Methods': 'GET',
       },
     })
-  } catch (error) {
+  } catch (error: unknown) {
     return handleAPIError(error, 'GET /api/diagnostics')
   }
 }

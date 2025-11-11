@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { createLogger } from '@/lib/logger'
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 
 const logger = createLogger('POST /api/verify-turnstile')
 
@@ -22,18 +22,56 @@ interface TurnstileVerifyResponse {
 
 async function verifyTurnstilePOST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const validation = TurnstileSchema.safeParse(body)
+    // Parse request body
+    let body
+    try {
+      body = await req.json()
+    } catch (parseError) {
+      logger.warn({ parseError }, 'Failed to parse request body')
+      return NextResponse.json(
+        { success: false, error: 'Invalid JSON in request body' },
+        { status: 400 }
+      )
+    }
 
+    // Validate request data
+    const validation = TurnstileSchema.safeParse(body)
     if (!validation.success) {
-      logger.warn({ errors: validation.error.issues }, 'Invalid request data')
-      return NextResponse.json({ success: false, error: 'Invalid request data' }, { status: 400 })
+      logger.warn({ 
+        errors: validation.error.issues,
+        receivedBody: body 
+      }, 'Invalid request data')
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Invalid request data',
+          details: validation.error.issues 
+        },
+        { status: 400 }
+      )
     }
 
     const { token } = validation.data
+    const isDev = process.env.NODE_ENV === 'development'
+
+    logger.info({ 
+      tokenLength: token.length,
+      tokenPrefix: token.substring(0, 20),
+      isDev 
+    }, 'Received Turnstile token')
+
+    // Development bypass - accept dev token without verification
+    if (isDev && token === 'dev-bypass-token') {
+      logger.info('Development mode: Bypassing Turnstile verification')
+      return NextResponse.json({
+        success: true,
+        hostname: 'localhost',
+        challengeTs: new Date().toISOString(),
+        dev: true,
+      })
+    }
 
     const secretKey = process.env['TURNSTILE_SECRET_KEY']
-
     if (!secretKey) {
       logger.error('Turnstile secret key not configured')
       return NextResponse.json(
@@ -43,6 +81,7 @@ async function verifyTurnstilePOST(req: NextRequest) {
     }
 
     // Verify token with Cloudflare Turnstile API
+    logger.info('Verifying token with Cloudflare API')
     const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
       headers: {
@@ -54,11 +93,23 @@ async function verifyTurnstilePOST(req: NextRequest) {
       }),
     })
 
+    if (!verifyResponse.ok) {
+      logger.error({ 
+        status: verifyResponse.status,
+        statusText: verifyResponse.statusText 
+      }, 'Cloudflare API returned error status')
+      return NextResponse.json(
+        { success: false, error: 'Verification service error' },
+        { status: 502 }
+      )
+    }
+
     const verifyData = (await verifyResponse.json()) as TurnstileVerifyResponse
 
     if (!verifyData.success) {
       logger.warn({
         errorCodes: verifyData['error-codes'],
+        hostname: verifyData.hostname,
       }, 'Turnstile verification failed')
       return NextResponse.json(
         {
@@ -81,7 +132,11 @@ async function verifyTurnstilePOST(req: NextRequest) {
       challengeTs: verifyData.challenge_ts,
     })
   } catch (error) {
-    logger.error({ error }, 'Error verifying Turnstile token')
+    logger.error({ 
+      error,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : undefined
+    }, 'Error verifying Turnstile token')
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

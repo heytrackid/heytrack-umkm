@@ -18,11 +18,16 @@ export async function calculateHash(content: string): Promise<string> {
 }
 
 export function getStrictCSP(nonce: string, isDev = false): string {
+  // Script sources - include Vercel Analytics and Cloudflare Turnstile
   const scriptSrc = isDev
     ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://vercel.live https://*.vercel.app https://challenges.cloudflare.com;`
     : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://*.vercel.app https://challenges.cloudflare.com;`
 
-  // Catatan: kamu pakai inline style => 'unsafe-inline' tetap diperlukan
+  // Frame sources - allow Vercel Live and Cloudflare Turnstile
+  const frameSrc = isDev
+    ? `frame-src 'self' https://vercel.live https://*.vercel.app https://challenges.cloudflare.com;`
+    : `frame-src 'self' https://vercel.live https://*.vercel.app https://challenges.cloudflare.com;`
+
   const policies = [
     `default-src 'self' https: data: blob:;`,
     scriptSrc,
@@ -32,7 +37,7 @@ export function getStrictCSP(nonce: string, isDev = false): string {
     `connect-src 'self' https://*.supabase.co https://vrrjoswzmlhkmmcfhicw.supabase.co wss://*.supabase.co https://api.openrouter.ai https://fonts.googleapis.com https://vitals.vercel-insights.com https://vercel.live https://*.vercel.app https://app.heytrack.id https://challenges.cloudflare.com ${isDev ? "http://localhost:3000 http://127.0.0.1:3000 ws://localhost:3000 ws://127.0.0.1:3000" : ''};`,
     `worker-src 'self' blob: https://*.vercel.app;`,
     `media-src 'self' https://*.supabase.co https://*.vercel.app;`,
-    isDev ? `frame-src 'self' https://vercel.live https://*.vercel.app https://challenges.cloudflare.com;` : `frame-src 'self' https://*.vercel.app https://challenges.cloudflare.com;`,
+    frameSrc,
     `object-src 'none';`,
     `base-uri 'self';`,
     `form-action 'self' https://*.supabase.co;`,

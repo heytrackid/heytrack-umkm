@@ -64,11 +64,20 @@ export const TurnstileWidget = ({
       <Turnstile
         siteKey={siteKey}
         onSuccess={(token) => {
-          logger.info('Turnstile verification successful')
+          logger.info({ 
+            message: 'Turnstile verification successful',
+            tokenLength: token.length,
+            tokenPrefix: token.substring(0, 20)
+          })
           onVerify(token)
         }}
         onError={(error) => {
-          logger.error({ message: 'Turnstile error', error })
+          logger.error({ 
+            message: 'Turnstile error', 
+            error,
+            errorType: typeof error,
+            errorString: String(error)
+          })
           onError?.(new Error('CAPTCHA verification failed'))
         }}
         onExpire={() => {
@@ -80,6 +89,8 @@ export const TurnstileWidget = ({
           size,
           action: 'submit',
           appearance: 'always',
+          retry: 'auto',
+          'retry-interval': 8000,
         }}
       />
     </div>

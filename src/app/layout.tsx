@@ -44,7 +44,7 @@ const RootLayout = async ({
   const nonce = await getNonce()
 
   return (
-    <html lang="id" suppressHydrationWarning className="dark h-full" nonce={nonce ?? undefined}>
+    <html lang="id" suppressHydrationWarning className="dark h-full">
       <head>
         {/* Mobile viewport with safe area support */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -54,6 +54,16 @@ const RootLayout = async ({
         <link rel="dns-prefetch" href={process['env']['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} />
         <link rel="preconnect" href="https://api.openrouter.ai" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.openrouter.ai" />
+        
+        {/* CSP nonce for inline scripts */}
+        {nonce && (
+          <script
+            nonce={nonce}
+            dangerouslySetInnerHTML={{
+              __html: `window.__CSP_NONCE__ = '${nonce}';`,
+            }}
+          />
+        )}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100svh] m-0 p-0 w-full`}
@@ -92,7 +102,7 @@ const RootLayout = async ({
               </ThemeProvider>
             </AuthProvider>
           </SupabaseProvider>
-        <Analytics />
+        <Analytics nonce={nonce ?? undefined} />
       </body>
     </html>
   );

@@ -1,7 +1,8 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { NextResponse, type NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
@@ -44,7 +45,7 @@ async function handleHealthCheck(_request: NextRequest): Promise<NextResponse> {
       },
       version: '1.0.0'
     }, { status: 200 })
-  } catch (error) {
+  } catch (error: unknown) {
     return handleAPIError(error, 'GET /api/health')
   }
 }

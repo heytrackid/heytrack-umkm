@@ -70,7 +70,7 @@
   /* Vercel-inspired dark mode - Pure black with visible borders */
   --background: oklch(0 0 0);           /* Pure black #000000 */
   --foreground: oklch(0.93 0 0);        /* Light gray #EDEDED */
-  --card: oklch(0.08 0 0);              /* Slightly lighter #141414 */
+  --card: oklch(0.04 0 0);              /* #0A0A0A - brighter like Vercel */
   --card-foreground: oklch(0.93 0 0);   /* Light gray #EDEDED */
   --popover: oklch(0.1 0 0);            /* Elevated #1A1A1A */
   --popover-foreground: oklch(0.93 0 0);
