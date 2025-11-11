@@ -144,4 +144,8 @@ async function verifyTurnstilePOST(req: NextRequest) {
   }
 }
 
-export const POST = withSecurity(verifyTurnstilePOST, SecurityPresets.enhanced())
+// Use basic security preset to avoid false positives on Turnstile tokens
+// Turnstile tokens are opaque strings that may contain patterns like "0x" 
+// which trigger SQL injection detection, but they're safe since they're
+// verified directly with Cloudflare's API
+export const POST = withSecurity(verifyTurnstilePOST, SecurityPresets.basic())
