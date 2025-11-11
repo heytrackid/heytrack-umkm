@@ -18,6 +18,11 @@ interface TurnstileVerifyResponse {
   'error-codes'?: string[]
   challenge_ts?: string
   hostname?: string
+  action?: string
+  cdata?: string
+  metadata?: {
+    ephemeral_id?: string
+  }
 }
 
 async function verifyTurnstilePOST(req: NextRequest) {
@@ -52,24 +57,11 @@ async function verifyTurnstilePOST(req: NextRequest) {
     }
 
     const { token } = validation.data
-    const isDev = process.env.NODE_ENV === 'development'
 
     logger.info({ 
       tokenLength: token.length,
-      tokenPrefix: token.substring(0, 20),
-      isDev 
+      tokenPrefix: token.substring(0, 20)
     }, 'Received Turnstile token')
-
-    // Development bypass - accept dev token without verification
-    if (isDev && token === 'dev-bypass-token') {
-      logger.info('Development mode: Bypassing Turnstile verification')
-      return NextResponse.json({
-        success: true,
-        hostname: 'localhost',
-        challengeTs: new Date().toISOString(),
-        dev: true,
-      })
-    }
 
     const secretKey = process.env['TURNSTILE_SECRET_KEY']
     if (!secretKey) {
@@ -80,17 +72,40 @@ async function verifyTurnstilePOST(req: NextRequest) {
       )
     }
 
-    // Verify token with Cloudflare Turnstile API
-    logger.info('Verifying token with Cloudflare API')
+    // Log configuration for debugging (without exposing secret)
+    logger.info({
+      hasSecretKey: !!secretKey,
+      secretKeyLength: secretKey.length,
+      isTestKey: secretKey.startsWith('1x') || secretKey.startsWith('2x') || secretKey.startsWith('3x'),
+      hostname: req.headers.get('host'),
+    }, 'Turnstile configuration check')
+
+    // Get client IP for better validation (recommended by Cloudflare)
+    const clientIP = req.headers.get('cf-connecting-ip') ||
+                     req.headers.get('x-forwarded-for') ||
+                     req.headers.get('x-real-ip') ||
+                     'unknown'
+
+    // Verify token with Cloudflare Turnstile API using URLSearchParams for form-encoded data
+    logger.info({
+      tokenLength: token.length,
+      clientIP: clientIP !== 'unknown' ? clientIP : 'unknown',
+      hasSecretKey: true
+    }, 'Verifying token with Cloudflare API')
+
+    const params = new URLSearchParams()
+    params.append('secret', secretKey)
+    params.append('response', token)
+    if (clientIP !== 'unknown') {
+      params.append('remoteip', clientIP)
+    }
+
     const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify({
-        secret: secretKey,
-        response: token,
-      }),
+      body: params,
     })
 
     if (!verifyResponse.ok) {
@@ -107,29 +122,70 @@ async function verifyTurnstilePOST(req: NextRequest) {
     const verifyData = (await verifyResponse.json()) as TurnstileVerifyResponse
 
     if (!verifyData.success) {
+      const errorCodes = verifyData['error-codes'] || []
       logger.warn({
-        errorCodes: verifyData['error-codes'],
+        errorCodes,
         hostname: verifyData.hostname,
-      }, 'Turnstile verification failed')
+        challengeTs: verifyData.challenge_ts,
+        action: verifyData.action,
+        cdata: verifyData.cdata,
+        clientIP,
+        errorDetails: JSON.stringify(verifyData),
+      }, `Turnstile verification failed with codes: ${errorCodes.join(', ')}`)
+
+      // Provide more specific error messages based on error codes
+      let errorMessage = 'Verification failed'
+      if (errorCodes.includes('timeout-or-duplicate')) {
+        errorMessage = 'Token expired or already used'
+      } else if (errorCodes.includes('invalid-input-response')) {
+        errorMessage = 'Invalid token format'
+      } else if (errorCodes.includes('missing-input-secret')) {
+        errorMessage = 'Server configuration error'
+      } else if (errorCodes.includes('invalid-input-secret')) {
+        errorMessage = 'Server configuration error'
+      } else if (errorCodes.includes('bad-request')) {
+        errorMessage = 'Invalid request format'
+      }
+
       return NextResponse.json(
         {
           success: false,
-          error: 'Verification failed',
-          errorCodes: verifyData['error-codes'],
+          error: errorMessage,
+          errorCodes,
+          details: `Cloudflare error codes: ${errorCodes.join(', ')}`,
         },
         { status: 400 }
       )
     }
 
+    // Additional validation for successful responses
+    const challengeTime = verifyData.challenge_ts ? new Date(verifyData.challenge_ts) : null
+    const now = new Date()
+    const tokenAge = challengeTime ? (now.getTime() - challengeTime.getTime()) / (1000 * 60) : null // minutes
+
+    if (tokenAge && tokenAge > 4) {
+      logger.warn({
+        tokenAge: tokenAge.toFixed(1),
+        challengeTs: verifyData.challenge_ts
+      }, 'Token is older than 4 minutes - close to expiry')
+    }
+
     logger.info({
       hostname: verifyData.hostname,
       challengeTs: verifyData.challenge_ts,
+      action: verifyData.action,
+      cdata: verifyData.cdata,
+      tokenAge: tokenAge?.toFixed(1),
+      clientIP,
     }, 'Turnstile verification successful')
 
     return NextResponse.json({
       success: true,
       hostname: verifyData.hostname,
       challengeTs: verifyData.challenge_ts,
+      action: verifyData.action,
+      cdata: verifyData.cdata,
+      tokenAge,
     })
   } catch (error) {
     logger.error({ 

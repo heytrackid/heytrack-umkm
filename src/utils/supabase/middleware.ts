@@ -42,19 +42,6 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  // DEVELOPMENT BYPASS: Only if explicitly enabled for development
-  const ENABLE_DEV_BYPASS = process['env']['ENABLE_DEV_BYPASS'] === 'true'
-  if (ENABLE_DEV_BYPASS && process.env.NODE_ENV === 'development') {
-    return {
-      user: {
-        id: 'dev-user-123',
-        email: 'dev@example.com',
-        user_metadata: { name: 'Development User' }
-      },
-      response: supabaseResponse
-    }
-  }
-
   // Safely get user, handle missing session gracefully
   let user = null
   try {

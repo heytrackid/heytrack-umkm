@@ -26,32 +26,13 @@ export const TurnstileWidget = ({
   size = 'normal',
 }: TurnstileWidgetProps) => {
   const siteKey = process.env['NEXT_PUBLIC_TURNSTILE_SITE_KEY']
-  const isDev = process.env.NODE_ENV === 'development'
-
-  // Development bypass - auto-verify with dummy token
-  if (isDev && !siteKey) {
-    logger.info('Development mode: Bypassing Turnstile verification')
-    
-    // Auto-verify after a short delay to simulate real behavior
-    setTimeout(() => {
-      onVerify('dev-bypass-token')
-    }, 100)
-
-    return (
-      <div className={className}>
-        <div className="text-xs text-muted-foreground text-center p-2 border border-dashed border-border rounded-md bg-muted/50">
-          🔧 Dev Mode: CAPTCHA Bypassed
-        </div>
-      </div>
-    )
-  }
 
   if (!siteKey) {
-    logger.warn('Turnstile site key not configured')
+    logger.error('Turnstile site key not configured')
     return (
       <div className={className}>
-        <div className="text-sm text-muted-foreground text-center p-4 border border-border rounded-md">
-          Turnstile not configured
+        <div className="text-sm text-destructive text-center p-4 border border-destructive rounded-md bg-destructive/10">
+          ⚠️ Security configuration error. Please contact administrator.
         </div>
       </div>
     )
@@ -87,10 +68,13 @@ export const TurnstileWidget = ({
         options={{
           theme,
           size,
-          action: 'submit',
+          action: 'login', // More specific action for login forms
           appearance: 'always',
           retry: 'auto',
           retryInterval: 8000,
+          refreshExpired: 'auto', // Auto-refresh expired tokens
+          refreshTimeout: 'auto', // Auto-refresh on timeout
+          feedbackEnabled: false, // Disable visitor feedback collection
         }}
       />
     </div>

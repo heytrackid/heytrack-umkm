@@ -3,42 +3,23 @@ export const runtime = 'nodejs'
 
 
  import { NextRequest, NextResponse } from 'next/server'
- import { z } from 'zod'
+import { z } from 'zod'
 
   import { apiLogger, logError } from '@/lib/logger'
- import { SecurityPresets, InputSanitizer, withSecurity } from '@/utils/security/index'
- import { createClient } from '@/utils/supabase/server'
+import { InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
 
 // ✅ Force Node.js runtime
 
 const LoginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  captchaToken: z.string().optional(),
+  captcha_token: z.string().optional(),
 })
 
 async function loginPOST(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/auth/login - Request received')
-
-    // DEVELOPMENT BYPASS: Only if explicitly enabled for development
-    const ENABLE_DEV_BYPASS = process['env']['ENABLE_DEV_BYPASS'] === 'true'
-    if (ENABLE_DEV_BYPASS && process.env.NODE_ENV === 'development') {
-      apiLogger.info('POST /api/auth/login - Development mode: bypassing authentication')
-
-      return NextResponse.json({
-        user: {
-          id: 'dev-user-123',
-          email: 'dev@example.com',
-          user_metadata: { name: 'Development User' }
-        },
-        session: {
-          access_token: 'dev-access-token',
-          refresh_token: 'dev-refresh-token',
-          expires_at: Date.now() / 1000 + 3600, // 1 hour from now
-        },
-      })
-    }
 
     const _body = await request.json() as { email: string; password: string }
     const validation = LoginSchema.safeParse(_body)
@@ -50,7 +31,7 @@ async function loginPOST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    const { email, password, captchaToken } = validation.data
+    const { email, password, captcha_token: captchaToken } = validation.data
     const sanitizedEmail = InputSanitizer.sanitizeHtml(email).trim()
 
     const supabase = await createClient()
@@ -58,21 +39,124 @@ async function loginPOST(request: NextRequest): Promise<NextResponse> {
     const credentials: {
       email: string
       password: string
-      captchaToken?: string
+      captcha_token?: string
     } = {
       email: sanitizedEmail,
       password,
     }
 
+    // Include captcha_token if provided
     if (captchaToken) {
-      credentials.captchaToken = captchaToken
+      credentials.captcha_token = captchaToken
     }
+
+    // Validate Turnstile token before Supabase auth
+    if (captchaToken) {
+      try {
+        const secretKey = process.env['TURNSTILE_SECRET_KEY']
+        if (!secretKey) {
+          apiLogger.error('Turnstile secret key not configured')
+          return NextResponse.json({
+            error: 'Konfigurasi keamanan bermasalah. Silakan hubungi admin.'
+          }, { status: 500 })
+        }
+
+        // Get client IP for better validation
+        const clientIP = request.headers.get('cf-connecting-ip') ||
+                         request.headers.get('x-forwarded-for') ||
+                         request.headers.get('x-real-ip') ||
+                         'unknown'
+
+        // Validate token with Cloudflare directly
+        const formData = new FormData()
+        formData.append('secret', secretKey)
+        formData.append('response', captchaToken)
+        if (clientIP !== 'unknown') {
+          formData.append('remoteip', clientIP)
+        }
+
+        const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (!verifyResponse.ok) {
+          apiLogger.warn({ turnstileStatus: verifyResponse.status }, 'Turnstile API error')
+          return NextResponse.json({
+            error: 'Layanan verifikasi keamanan bermasalah. Silakan coba lagi.'
+          }, { status: 502 })
+        }
+
+        const verifyData = await verifyResponse.json()
+
+        if (!verifyData.success) {
+          const errorCodes = verifyData['error-codes'] || []
+          apiLogger.warn({
+            errorCodes,
+            turnstileHostname: verifyData.hostname
+          }, 'Turnstile token validation failed')
+
+          let errorMessage = 'Verifikasi keamanan gagal. Silakan refresh halaman dan coba lagi.'
+          if (errorCodes.includes('timeout-or-duplicate')) {
+            errorMessage = 'Token keamanan sudah expired. Silakan refresh halaman.'
+          }
+
+          return NextResponse.json({
+            error: errorMessage,
+            debug: { turnstileErrorCodes: errorCodes }
+          }, { status: 400 })
+        }
+
+        apiLogger.info({ turnstileValidated: true }, 'Turnstile token validated successfully')
+      } catch (turnstileError) {
+        apiLogger.error({ turnstileError }, 'Error validating Turnstile token')
+        return NextResponse.json({
+          error: 'Terjadi kesalahan verifikasi keamanan. Silakan coba lagi.',
+          debug: { turnstileError: turnstileError instanceof Error ? turnstileError.message : 'Unknown error' }
+        }, { status: 500 })
+      }
+    }
+
+    apiLogger.info({
+      email: sanitizedEmail,
+      hasCaptchaToken: !!captchaToken,
+      captchaTokenPrefix: captchaToken?.substring(0, 20)
+    }, 'Attempting Supabase login')
 
     const { data, error } = await supabase.auth.signInWithPassword(credentials)
 
     if (error) {
-      logError(apiLogger, error, 'POST /api/auth/login - Supabase auth error')
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+      apiLogger.error({ 
+        error,
+        errorMessage: error.message,
+        errorStatus: error.status,
+        errorCode: error.code,
+        errorName: error.name,
+        email: sanitizedEmail,
+        hasCaptchaToken: !!captchaToken
+      }, 'POST /api/auth/login - Supabase auth error')
+      
+      // More specific error messages
+      let errorMessage = 'Invalid credentials'
+      if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Email belum dikonfirmasi. Silakan cek inbox email kamu.'
+      } else if (error.message.includes('Invalid login credentials')) {
+        errorMessage = 'Email atau password salah.'
+      } else if (error.message.includes('Email rate limit exceeded')) {
+        errorMessage = 'Terlalu banyak percobaan login. Silakan coba lagi nanti.'
+      } else if (error.code === 'unexpected_failure') {
+        errorMessage = 'Terjadi kesalahan autentikasi. Silakan coba lagi atau hubungi admin.'
+      }
+      
+      return NextResponse.json({ 
+        error: errorMessage,
+        // Include error details for debugging (production too, for now)
+        debug: { 
+          message: error.message,
+          code: error.code,
+          status: error.status
+        }
+      }, { status: 401 })
     }
 
     apiLogger.info({ userId: data.user?.id }, 'POST /api/auth/login - Success')

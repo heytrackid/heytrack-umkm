@@ -52,41 +52,6 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     authInitializedRef.current = true
     let mounted = true
 
-    // DEVELOPMENT BYPASS: Set mock auth state immediately
-    if (process.env.NODE_ENV === 'development') {
-      setAuthState(prev => ({
-        ...prev,
-        user: {
-          id: 'dev-user-123',
-          email: 'dev@example.com',
-          user_metadata: { name: 'Development User' },
-          app_metadata: {},
-          aud: 'authenticated',
-          created_at: new Date().toISOString(),
-          role: 'authenticated',
-          updated_at: new Date().toISOString()
-        } as User,
-        session: {
-          access_token: 'dev-access-token',
-          refresh_token: 'dev-refresh-token',
-          expires_at: Date.now() / 1000 + 3600,
-          user: {
-            id: 'dev-user-123',
-            email: 'dev@example.com',
-            user_metadata: { name: 'Development User' },
-            app_metadata: {},
-            aud: 'authenticated',
-            created_at: new Date().toISOString(),
-            role: 'authenticated',
-            updated_at: new Date().toISOString()
-          }
-        } as unknown as Session,
-        isLoading: false,
-        isAuthenticated: true,
-      }))
-      return
-    }
-
     if (!supabase) return
 
     let subscription: { unsubscribe: () => void } | null = null
@@ -170,19 +135,6 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   }, [supabase, router])
 
   const signOut = useCallback(async (): Promise<void> => {
-    // DEVELOPMENT BYPASS: Just clear state and redirect
-    if (process.env.NODE_ENV === 'development') {
-      setAuthState(prev => ({
-        ...prev,
-        user: null,
-        session: null,
-        isLoading: false,
-        isAuthenticated: false,
-      }))
-      router.push('/auth/login')
-      return
-    }
-
     const currentSupabase = supabaseRef.current
     if (!currentSupabase) return
     try {

@@ -306,11 +306,14 @@ export function withSecurity<Params extends object = object>(
       
       for (const [key, value] of Object.entries(flatData)) {
         if (typeof value === 'string') {
+          // Skip security checks for Turnstile captcha tokens (they're safe but contain patterns)
+          const skipSecurityCheck = key === 'captcha_token' || key.includes('turnstile')
+
           // Check for SQL injection patterns
-          if (mergedConfig.checkForSQLInjection && hasSQLInjectionPattern(value)) {
-            apiLogger.warn({ 
-              clientIP, 
-              url, 
+          if (mergedConfig.checkForSQLInjection && !skipSecurityCheck && hasSQLInjectionPattern(value)) {
+            apiLogger.warn({
+              clientIP,
+              url,
               field: key,
               value: value.substring(0, 100) // Log partial value for security
             }, 'SQL injection pattern detected')
@@ -319,12 +322,12 @@ export function withSecurity<Params extends object = object>(
               { status: 400 }
             )
           }
-          
+
           // Check for XSS patterns
-          if (mergedConfig.checkForXSS && hasXSSPattern(value)) {
-            apiLogger.warn({ 
-              clientIP, 
-              url, 
+          if (mergedConfig.checkForXSS && !skipSecurityCheck && hasXSSPattern(value)) {
+            apiLogger.warn({
+              clientIP,
+              url,
               field: key,
               value: value.substring(0, 100) // Log partial value for security
             }, 'XSS pattern detected')

@@ -17,8 +17,9 @@ export const AUTH_ERROR_MESSAGES = {
   'User already registered': 'Email sudah terdaftar. Silakan gunakan email lain atau login.',
   'Signup disabled': 'Pendaftaran akun baru sedang dinonaktifkan.',
 
-  // Sign in errors
-  'Invalid login credentials': 'Email atau password salah. Silakan coba lagi.',
+   // Sign in errors
+   'Invalid login credentials': 'Email atau password salah. Silakan coba lagi.',
+   'Invalid credentials': 'Email atau password salah. Silakan coba lagi.',
   'email_not_confirmed': 'Email belum dikonfirmasi. Silakan periksa inbox Anda untuk email konfirmasi.',
   'invalid_email': 'Format email tidak valid.',
   'email_rate_limit_exceeded': 'Terlalu banyak percobaan login. Silakan coba lagi nanti.',

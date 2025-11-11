@@ -32,11 +32,10 @@ const LoginPage = (): JSX.Element => {
   // Turnstile integration
   const {
     token,
-    isVerified,
     isVerifying,
+    isVerified,
     error: turnstileError,
     handleVerify,
-    verifyToken,
     reset: resetTurnstile,
   } = useTurnstile({
     onError: (err: string) => {
@@ -91,13 +90,11 @@ const LoginPage = (): JSX.Element => {
     }
 
     startTransition(async () => {
-      // DEVELOPMENT BYPASS: Skip Turnstile verification in development
-      if (process.env.NODE_ENV !== 'development') {
-        const verified = await verifyToken()
-        if (!verified) {
-          setError('Silakan selesaikan verifikasi keamanan')
-          return
-        }
+      // Check if Turnstile token is available
+      // Supabase will verify the token directly with Cloudflare
+      if (!token) {
+        setError('Silakan selesaikan verifikasi keamanan')
+        return
       }
 
       abortControllerRef.current = new AbortController()
@@ -108,11 +105,11 @@ const LoginPage = (): JSX.Element => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            email,
-            password,
-            captchaToken: process.env.NODE_ENV === 'development' ? 'dev-bypass-token' : token,
-          }),
+           body: JSON.stringify({
+             email,
+             password,
+             captcha_token: token,
+           }),
           credentials: 'include', // Include cookies for authentication
         })
 
@@ -136,9 +133,7 @@ const LoginPage = (): JSX.Element => {
         }
         setError('Network error. Please try again.')
         setErrorAction(null)
-        if (process.env.NODE_ENV !== 'development') {
-          resetTurnstile() // Reset Turnstile on error (only in production)
-        }
+        resetTurnstile() // Reset Turnstile on error
       }
     })
   }
