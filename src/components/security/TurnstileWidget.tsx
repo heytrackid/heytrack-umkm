@@ -90,7 +90,7 @@ export const TurnstileWidget = ({
           action: 'submit',
           appearance: 'always',
           retry: 'auto',
-          'retry-interval': 8000,
+          retryInterval: 8000,
         }}
       />
     </div>

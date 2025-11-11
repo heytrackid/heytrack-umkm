@@ -102,7 +102,7 @@ const RootLayout = async ({
               </ThemeProvider>
             </AuthProvider>
           </SupabaseProvider>
-        <Analytics nonce={nonce ?? undefined} />
+        <Analytics />
       </body>
     </html>
   );
