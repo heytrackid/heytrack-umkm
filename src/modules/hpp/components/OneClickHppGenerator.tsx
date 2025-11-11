@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { CheckCircle } from 'lucide-react'
+import type { ZodIssue } from 'zod'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,7 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import { createClient } from '@/utils/supabase/client'
 import { createClientLogger } from '@/lib/client-logger'
 
-export function OneClickHppGenerator(): JSX.Element {
+export const OneClickHppGenerator = (): JSX.Element => {
   const logger = createClientLogger('OneClickHppGenerator')
   const VERTICAL = 'fnb' as const // Focus on UMKM F&B only
   const [desc, setDesc] = useState('')
@@ -49,7 +50,7 @@ export function OneClickHppGenerator(): JSX.Element {
 
     // Check authentication
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
       const { data: { user }, error } = await supabase.auth.getUser()
       if (error || !user) {
         toast({
@@ -76,7 +77,7 @@ export function OneClickHppGenerator(): JSX.Element {
       // Log request for debugging
       logger.info({
         message: 'Starting bootstrap generation',
-        businessDescription: content.substring(0, 50) + '...',
+        businessDescription: `${content.substring(0, 50)  }...`,
         vertical: VERTICAL,
         contentLength: content.length
       })
@@ -109,12 +110,12 @@ export function OneClickHppGenerator(): JSX.Element {
         logger.error({
           status: res.status,
           data,
-          requestData: { businessDescription: content.substring(0, 50) + '...', vertical: VERTICAL }
+          requestData: { businessDescription: `${content.substring(0, 50)  }...`, vertical: VERTICAL }
         }, 'API request failed')
 
         // Show detailed validation errors if available
         if (data.code === 'VALIDATION_ERROR' && data.details?.issues) {
-          const issues = data.details.issues.map((issue: any) =>
+          const issues = data.details.issues.map((issue: ZodIssue) =>
             `${issue.path?.join('.') || 'unknown'}: ${issue.message}`
           ).join('; ')
           throw new Error(`Validasi gagal: ${issues}`)
@@ -144,7 +145,7 @@ export function OneClickHppGenerator(): JSX.Element {
     } catch (e) {
       logger.error({
         error: e,
-        businessDescription: content.substring(0, 50) + '...',
+        businessDescription: `${content.substring(0, 50)  }...`,
         vertical: VERTICAL
       }, 'Bootstrap generation failed')
 

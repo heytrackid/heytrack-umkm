@@ -41,9 +41,9 @@ export const ProfitPeriodFilter = ({
     <CardContent>
       <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-4'}`}>
         <div>
-          <label className="text-sm font-medium mb-2 block">Periode</label>
+          <label htmlFor="profit-period-select" className="text-sm font-medium mb-2 block">Periode</label>
           <Select value={selectedPeriod} onValueChange={onPeriodChange}>
-            <SelectTrigger>
+            <SelectTrigger id="profit-period-select">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -59,8 +59,9 @@ export const ProfitPeriodFilter = ({
         {selectedPeriod === 'custom' && (
           <>
             <div>
-              <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
+              <label htmlFor="tanggal-mulai" className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
               <input
+                id="tanggal-mulai"
                 type="date"
                 value={startDate}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onStartDateChange(e.target.value)}
@@ -68,8 +69,9 @@ export const ProfitPeriodFilter = ({
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
+              <label htmlFor="tanggal-akhir" className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
               <input
+                id="tanggal-akhir"
                 type="date"
                 value={endDate}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onEndDateChange(e.target.value)}

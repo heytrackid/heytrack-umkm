@@ -186,7 +186,7 @@ export const MobileHeader = ({
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                     placeholder={searchPlaceholder}
                     className="pl-9 pr-9"
-                    autoFocus
+
                   />
                   <Button
                     type="button"

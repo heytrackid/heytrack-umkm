@@ -1,173 +1,104 @@
 'use client'
 
 import { addDays, format } from 'date-fns'
-import { id as localeId } from 'date-fns/locale'
-import { CalendarIcon } from 'lucide-react'
-import { useState } from 'react'
-import { DateRange } from 'react-day-picker'
+import { id as idLocale } from 'date-fns/locale'
+import { Calendar as CalendarLucideIcon } from 'lucide-react'
+import { type DateRange } from 'react-day-picker'
 
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 
-interface DateRangePickerProps {
-  value?: DateRange
-  onChange?: (range: DateRange | undefined) => void
+export interface DateRangePickerProps {
+  date?: DateRange
+  onDateChange?: (date: DateRange | undefined) => void
   className?: string
   placeholder?: string
-  numberOfMonths?: number
+  disabled?: boolean
+  align?: 'start' | 'center' | 'end'
+  showPresets?: boolean
+  minDate?: Date
+  maxDate?: Date
 }
 
-export function DateRangePicker({
-  value,
-  onChange,
-  className,
-  placeholder = 'Pilih rentang tanggal',
-  numberOfMonths = 2,
-}: DateRangePickerProps) {
-  const [date, setDate] = useState<DateRange | undefined>(value)
-
-  const handleSelect = (range: DateRange | undefined) => {
-    setDate(range)
-    onChange?.(range)
-  }
-
-  return (
-    <div className={cn('grid gap-2', className)}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant="outline"
-            className={cn(
-              'w-full justify-start text-left font-normal',
-              !date && 'text-muted-foreground'
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, 'dd MMM yyyy', { locale: localeId })} -{' '}
-                  {format(date.to, 'dd MMM yyyy', { locale: localeId })}
-                </>
-              ) : (
-                format(date.from, 'dd MMM yyyy', { locale: localeId })
-              )
-            ) : (
-              <span>{placeholder}</span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={handleSelect}
-            numberOfMonths={numberOfMonths}
-            locale={localeId}
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
-  )
+interface DateRangePreset {
+  label: string
+  getValue: () => DateRange
 }
 
-// Preset date ranges
-export const dateRangePresets = {
-  today: {
+const DATE_PRESETS: DateRangePreset[] = [
+  {
     label: 'Hari Ini',
     getValue: () => ({
       from: new Date(),
-      to: new Date(),
-    }),
+      to: new Date()
+    })
   },
-  yesterday: {
-    label: 'Kemarin',
-    getValue: () => ({
-      from: addDays(new Date(), -1),
-      to: addDays(new Date(), -1),
-    }),
-  },
-  last7Days: {
+  {
     label: '7 Hari Terakhir',
     getValue: () => ({
-      from: addDays(new Date(), -7),
-      to: new Date(),
-    }),
+      from: addDays(new Date(), -6),
+      to: new Date()
+    })
   },
-  last30Days: {
+  {
     label: '30 Hari Terakhir',
     getValue: () => ({
-      from: addDays(new Date(), -30),
-      to: new Date(),
-    }),
+      from: addDays(new Date(), -29),
+      to: new Date()
+    })
   },
-  last90Days: {
+  {
     label: '90 Hari Terakhir',
     getValue: () => ({
-      from: addDays(new Date(), -90),
-      to: new Date(),
-    }),
+      from: addDays(new Date(), -89),
+      to: new Date()
+    })
   },
-  thisMonth: {
+  {
     label: 'Bulan Ini',
     getValue: () => {
       const now = new Date()
       return {
         from: new Date(now.getFullYear(), now.getMonth(), 1),
-        to: new Date(now.getFullYear(), now.getMonth() + 1, 0),
+        to: new Date(now.getFullYear(), now.getMonth() + 1, 0)
       }
-    },
+    }
   },
-  lastMonth: {
+  {
     label: 'Bulan Lalu',
     getValue: () => {
       const now = new Date()
       return {
         from: new Date(now.getFullYear(), now.getMonth() - 1, 1),
-        to: new Date(now.getFullYear(), now.getMonth(), 0),
+        to: new Date(now.getFullYear(), now.getMonth(), 0)
       }
-    },
-  },
-  thisYear: {
-    label: 'Tahun Ini',
-    getValue: () => {
-      const now = new Date()
-      return {
-        from: new Date(now.getFullYear(), 0, 1),
-        to: new Date(now.getFullYear(), 11, 31),
-      }
-    },
-  },
-}
-
-// Date range picker with presets
-interface DateRangePickerWithPresetsProps extends DateRangePickerProps {
-  presets?: Array<keyof typeof dateRangePresets>
-}
-
-export function DateRangePickerWithPresets({
-  value,
-  onChange,
-  className,
-  placeholder,
-  numberOfMonths = 2,
-  presets = ['last7Days', 'last30Days', 'last90Days', 'thisMonth'],
-}: DateRangePickerWithPresetsProps) {
-  const [date, setDate] = useState<DateRange | undefined>(value)
-
-  const handleSelect = (range: DateRange | undefined) => {
-    setDate(range)
-    onChange?.(range)
+    }
   }
+]
 
-  const handlePresetClick = (preset: keyof typeof dateRangePresets) => {
-    const range = dateRangePresets[preset].getValue()
-    handleSelect(range)
+export function DateRangePicker({
+  date,
+  onDateChange,
+  className,
+  placeholder = 'Pilih rentang tanggal',
+  disabled = false,
+  align = 'start',
+  showPresets = true,
+  minDate,
+  maxDate
+}: DateRangePickerProps) {
+  const formatDateRange = (dateRange: DateRange | undefined): string => {
+    if (!dateRange?.from) {
+      return placeholder
+    }
+
+    if (!dateRange.to) {
+      return format(dateRange.from, 'dd MMM yyyy', { locale: idLocale })
+    }
+
+    return `${format(dateRange.from, 'dd MMM yyyy', { locale: idLocale })} - ${format(dateRange.to, 'dd MMM yyyy', { locale: idLocale })}`
   }
 
   return (
@@ -177,58 +108,49 @@ export function DateRangePickerWithPresets({
           <Button
             id="date"
             variant="outline"
+            disabled={disabled}
             className={cn(
               'w-full justify-start text-left font-normal',
               !date && 'text-muted-foreground'
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, 'dd MMM yyyy', { locale: localeId })} -{' '}
-                  {format(date.to, 'dd MMM yyyy', { locale: localeId })}
-                </>
-              ) : (
-                format(date.from, 'dd MMM yyyy', { locale: localeId })
-              )
-            ) : (
-              <span>{placeholder}</span>
-            )}
+            <CalendarLucideIcon className="mr-2 h-4 w-4" />
+            {formatDateRange(date)}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <div className="flex">
-            {/* Presets */}
-            <div className="border-r border-border p-3 space-y-1">
-              <div className="text-xs font-medium text-muted-foreground mb-2">
-                Preset
-              </div>
-              {presets.map((presetKey) => {
-                const preset = dateRangePresets[presetKey]
-                return (
+        <PopoverContent className="w-auto p-0 max-w-[95vw]" align={align} side="bottom">
+          <div className="flex flex-col sm:flex-row">
+            {showPresets && (
+              <div className="flex flex-row sm:flex-col gap-1 border-b sm:border-b-0 sm:border-r border-border p-3 overflow-x-auto sm:overflow-x-visible">
+                <div className="text-xs font-semibold text-muted-foreground mb-0 sm:mb-2 mr-2 sm:mr-0 whitespace-nowrap flex-shrink-0">
+                  Preset:
+                </div>
+                {DATE_PRESETS.map((preset) => (
                   <Button
-                    key={presetKey}
+                    key={preset.label}
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-xs"
-                    onClick={() => handlePresetClick(presetKey)}
+                    className="justify-start text-sm whitespace-nowrap flex-shrink-0"
+                    onClick={() => onDateChange?.(preset.getValue())}
                   >
                     {preset.label}
                   </Button>
-                )
-              })}
-            </div>
-            {/* Calendar */}
-            <div>
+                ))}
+              </div>
+            )}
+            <div className="p-3 overflow-x-auto">
               <Calendar
                 initialFocus
                 mode="range"
                 defaultMonth={date?.from}
                 selected={date}
-                onSelect={handleSelect}
-                numberOfMonths={numberOfMonths}
-                locale={localeId}
+                onSelect={onDateChange}
+                numberOfMonths={1}
+                disabled={(day) => {
+                  if (minDate && day < minDate) return true
+                  if (maxDate && day > maxDate) return true
+                  return false
+                }}
               />
             </div>
           </div>

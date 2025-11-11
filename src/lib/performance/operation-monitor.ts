@@ -114,7 +114,7 @@ export class Cache {
     let size = 0
     try {
       size = JSON.stringify(data).length
-    } catch (_error) {
+    } catch {
       // If serialization fails, set a default size
       size = 100
     }

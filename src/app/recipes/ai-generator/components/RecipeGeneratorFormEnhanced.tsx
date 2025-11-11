@@ -279,7 +279,7 @@ const RecipeGeneratorFormEnhanced = ({
         <Button
           onClick={onGenerate}
           disabled={(loading || false) || !productName || !servings}
-          className="w-full shadow-lg hover:shadow-xl transition-all"
+          className="w-full  hover: transition-all"
           size="lg"
         >
           {loading ? (

@@ -77,8 +77,8 @@ const TemplatePreview = ({
                         </div>
 
                         {/* WhatsApp Preview */}
-                        <div className="bg-gradient-to-b from-gray-50 to-green-100 border-2 border-border/20 rounded-xl p-3 shadow-md">
-                            <div className="bg-white rounded-lg shadow-sm">
+                        <div className="bg-gradient-to-b from-gray-50 to-green-100 border-2 border-border/20 rounded-xl p-3 ">
+                            <div className="bg-white rounded-lg ">
                                 {/* WhatsApp Header */}
                                 <div className="flex items-center gap-2 p-2 border-b bg-green-600 text-white rounded-t-lg">
                                     <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center flex-shrink-0">
@@ -94,7 +94,7 @@ const TemplatePreview = ({
 
                                 {/* Message Bubble */}
                                 <div className="p-3">
-                                    <div className="bg-white border border-border/20 rounded-lg rounded-tl-none p-2.5 shadow-sm max-h-64 overflow-y-auto">
+                                    <div className="bg-white border border-border/20 rounded-lg rounded-tl-none p-2.5  max-h-64 overflow-y-auto">
                                         <pre className="whitespace-pre-wrap text-xs text-foreground font-sans leading-relaxed">
                                             {renderPreview(template.template_content)}
                                         </pre>
@@ -153,7 +153,7 @@ const TemplatePreview = ({
                                                 </Badge>
                                                 {varInfo && (
                                                     <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-10 w-56">
-                                                        <div className="bg-gray-900 text-white text-xs rounded-lg p-2 shadow-lg">
+                                                        <div className="bg-gray-900 text-white text-xs rounded-lg p-2 ">
                                                             <p className="font-semibold">{varInfo.label}</p>
                                                             <p className="text-gray-300 mt-0.5 text-xs">{varInfo.description}</p>
                                                             <p className="text-muted-foreground mt-0.5 text-xs">Contoh: {varInfo.example}</p>

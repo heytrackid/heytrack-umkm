@@ -1,22 +1,26 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import { FinancialRecordUpdateSchema, type FinancialRecordUpdate } from '@/lib/validations/domains/finance'
 import type { Update } from '@/types/database'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { createSecureRouteHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 
 // GET /api/financial/records/[id] - Get single financial record
 async function getHandler(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse> {
   try {
-    const { id } = params
+    const awaitedParams = await params
+    const id = awaitedParams['id']
+    if (!id) {
+      return NextResponse.json({ error: 'Missing id parameter' }, { status: 400 })
+    }
     const supabase = await createClient()
 
     // Authenticate
@@ -54,10 +58,14 @@ async function getHandler(
 // PUT /api/financial/records/[id] - Update financial record
 async function putHandler(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse> {
   try {
-    const { id } = params
+    const awaitedParams = await params
+    const id = awaitedParams['id']
+    if (!id) {
+      return NextResponse.json({ error: 'Missing id parameter' }, { status: 400 })
+    }
     const supabase = await createClient()
 
     // Authenticate
@@ -122,10 +130,14 @@ async function putHandler(
 // DELETE /api/financial/records/[id] - Delete financial record
 async function deleteHandler(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<Record<string, string>> }
 ): Promise<NextResponse> {
   try {
-    const { id } = params
+    const awaitedParams = await params
+    const id = awaitedParams['id']
+    if (!id) {
+      return NextResponse.json({ error: 'Missing id parameter' }, { status: 400 })
+    }
     const supabase = await createClient()
 
     // Authenticate
@@ -174,6 +186,6 @@ async function deleteHandler(
   }
 }
 
-export const GET = createSecureHandler(getHandler as any, 'GET /api/financial/records/[id]', SecurityPresets.enhanced())
-export const PUT = createSecureHandler(putHandler as any, 'PUT /api/financial/records/[id]', SecurityPresets.enhanced())
-export const DELETE = createSecureHandler(deleteHandler as any, 'DELETE /api/financial/records/[id]', SecurityPresets.enhanced())
+export const GET = createSecureRouteHandler(getHandler, 'GET /api/financial/records/[id]', SecurityPresets.enhanced())
+export const PUT = createSecureRouteHandler(putHandler, 'PUT /api/financial/records/[id]', SecurityPresets.enhanced())
+export const DELETE = createSecureRouteHandler(deleteHandler, 'DELETE /api/financial/records/[id]', SecurityPresets.enhanced())

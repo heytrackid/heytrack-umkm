@@ -5,7 +5,7 @@
  */
 
 // Export all types relevant to production automation
-export * from './types'
+export type * from './types'
 
 // Export all modules
 export { ProductionPlanner } from './production-planner'

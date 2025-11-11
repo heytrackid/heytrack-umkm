@@ -27,7 +27,7 @@ export const RecipeFormDialog = ({
             if (onSuccess) {
                 await onSuccess()
             }
-        } catch (_error) {
+        } catch {
             // Error handling is done in the form component
         }
     }

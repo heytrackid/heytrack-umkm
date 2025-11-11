@@ -1,15 +1,21 @@
 'use client'
 
+import { differenceInDays } from 'date-fns'
+import { AlertCircle, Package } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import type { DateRange } from 'react-day-picker'
+
 import { ChartBarInteractive } from '@/components/charts'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ChartConfig } from '@/components/ui/chart'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useInventoryTrends } from '@/hooks/useInventoryTrends'
-import { AlertCircle, Package } from 'lucide-react'
 
 interface InventoryTrendsChartProps {
   days?: number
+  showDatePicker?: boolean
 }
 
 const chartConfig = {
@@ -23,8 +29,33 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function InventoryTrendsChart({ days = 30 }: InventoryTrendsChartProps) {
+export const InventoryTrendsChart = ({ 
+  days: initialDays = 30,
+  showDatePicker = true 
+}: InventoryTrendsChartProps) => {
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+  
+  const days = useMemo(() => {
+    if (dateRange?.from && dateRange?.to) {
+      return differenceInDays(dateRange.to, dateRange.from) + 1
+    }
+    return initialDays
+  }, [dateRange, initialDays])
+
   const { data, isLoading, error } = useInventoryTrends({ days })
+
+  const filteredData = useMemo(() => {
+    if (!data?.trends || data.trends.length === 0) return []
+    if (!dateRange?.from || !dateRange?.to) return data.trends
+
+    const from = dateRange.from
+    const to = dateRange.to
+
+    return data.trends.filter((item) => {
+      const itemDate = new Date(item.date)
+      return itemDate >= from && itemDate <= to
+    })
+  }, [data, dateRange])
 
   if (isLoading) {
     return (
@@ -46,7 +77,7 @@ export function InventoryTrendsChart({ days = 30 }: InventoryTrendsChartProps) {
     )
   }
 
-  if (!data?.trends || data.trends.length === 0) {
+  if (!data?.trends || data.trends.length === 0 || filteredData.length === 0) {
     return (
       <Alert>
         <Package className="h-4 w-4" />
@@ -59,51 +90,69 @@ export function InventoryTrendsChart({ days = 30 }: InventoryTrendsChartProps) {
 
   return (
     <div className="space-y-4">
+      {/* Date Filter */}
+      {showDatePicker && (
+        <Card>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">Filter Periode</CardTitle>
+          </CardHeader>
+          <CardContent className="pb-4 sm:pb-6">
+            <DateRangePicker
+              date={dateRange}
+              onDateChange={setDateRange}
+              showPresets={true}
+              maxDate={new Date()}
+              placeholder="Pilih rentang tanggal untuk filter"
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Summary Cards */}
-      {data.summary && (
-        <div className="grid grid-cols-3 gap-4">
+      {data?.summary && (
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Total Bahan
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data.summary.totalIngredients}</div>
+            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+              <div className="text-lg sm:text-2xl font-bold">{data.summary.totalIngredients}</div>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Stok Menipis
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-destructive">
+            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+              <div className="text-lg sm:text-2xl font-bold text-destructive">
                 {data.summary.lowStockCount}
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Total Pembelian
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data.summary.totalPurchases}</div>
+            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+              <div className="text-lg sm:text-2xl font-bold">{data.summary.totalPurchases}</div>
             </CardContent>
           </Card>
         </div>
       )}
 
       {/* Chart */}
-      <div className="min-h-[400px]">
+      <div className="min-h-[300px] sm:min-h-[400px] overflow-x-auto">
         <ChartBarInteractive
-          data={data.trends}
+          data={filteredData}
           config={chartConfig}
           title="Tren Pembelian Inventori"
-          description={`Data ${days} hari terakhir`}
+          description={`Menampilkan ${filteredData.length} hari data`}
           defaultChart="purchases"
         />
       </div>

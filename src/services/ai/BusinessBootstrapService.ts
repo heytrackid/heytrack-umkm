@@ -54,7 +54,7 @@ export class BusinessBootstrapService {
     if (ingErr) throw ingErr
 
     const ingMap = new Map<string, string>()
-    ;(ingRows ?? []).forEach((r: any) => ingMap.set(r.name, r.id))
+    ;(ingRows ?? []).forEach((r: { id: string; name: string }) => ingMap.set(r.name, r.id))
 
     // 2) Insert operational costs (map to current schema)
     const today = new Date().toISOString().split('T')[0]

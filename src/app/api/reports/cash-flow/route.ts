@@ -2,7 +2,7 @@
 export const runtime = 'nodejs'
 
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 
  import { apiLogger } from '@/lib/logger'

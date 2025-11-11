@@ -1,11 +1,12 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
+import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema } from '@/lib/validations'
+import type { HppRecommendationsTable } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
@@ -54,7 +55,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     const cacheKey = `${cacheKeys.hpp.recommendations}:${user['id']}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${priority ?? ''}:${isImplemented ?? ''}`
 
     // Wrap database query with caching
-    const getRecommendations = async (): Promise<{ recommendations: any[], total: number, page: number, limit: number, totalPages: number }> => {
+    const getRecommendations = async (): Promise<{ recommendations: HppRecommendationsTable[], total: number, page: number, limit: number, totalPages: number }> => {
       let query = supabase
         .from('hpp_recommendations')
         .select(`

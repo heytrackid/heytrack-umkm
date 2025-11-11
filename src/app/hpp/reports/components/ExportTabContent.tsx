@@ -24,7 +24,7 @@ const formatOptions: Array<{ value: ExportFormat; label: string; icon: typeof Do
 const ExportTabContent = ({ exportData, isMobile }: ExportTabContentProps): JSX.Element => (
   <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
     {formatOptions.map((option) => (
-      <Card key={option.value} className="cursor-pointer hover:shadow-md transition-shadow">
+      <Card key={option.value} className="cursor-pointer hover: ">
         <CardContent className="p-6 text-center space-y-4">
           <option.icon className="h-12 w-12 mx-auto text-primary" />
           <div>

@@ -165,9 +165,10 @@ export const ImportDialog = ({
 
                     {/* File Upload */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Upload File CSV</label>
+                        <label htmlFor="import-csv-file" className="text-sm font-medium">Upload File CSV</label>
                         <div className="flex gap-2">
                             <input
+                                id="import-csv-file"
                                 ref={fileInputRef}
                                 type="file"
                                 accept=".csv"

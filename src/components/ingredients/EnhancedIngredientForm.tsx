@@ -135,7 +135,7 @@ export const EnhancedIngredientForm = ({
                             error={errors.name?.message}
                             required
                             placeholder="Contoh: Tepung Terigu"
-                            autoFocus={mode === 'create'}
+
                             value={watch('name') || ''}
                             onChange={(_, value) => form.setValue('name', value as string)}
                         />

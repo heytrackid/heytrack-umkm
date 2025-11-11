@@ -14,7 +14,7 @@ export class useSupabaseBulk {
     table: T,
     records: Array<Insert<T>>
   ): Promise<Array<Row<T>>> {
-    const supabase = typed(await createClient())
+    const supabase = typed(createClient())
 
     const { data, error } = await supabase
       .from(table)
@@ -32,7 +32,7 @@ export class useSupabaseBulk {
     table: T,
     updates: Array<BulkUpdateItem<T>>
   ): Promise<Array<Row<T>>> {
-    const supabase = typed(await createClient())
+    const supabase = typed(createClient())
     const results: Array<Row<T>> = []
 
     for (const update of updates) {
@@ -57,7 +57,7 @@ export class useSupabaseBulk {
     table: T,
     ids: string[]
   ): Promise<boolean> {
-    const supabase = typed(await createClient())
+    const supabase = typed(createClient())
 
     const { error } = await supabase
       .from(table)
@@ -76,7 +76,7 @@ export class useSupabaseBulk {
     records: Array<Insert<T>>,
     conflictColumns: string[] = ['id']
   ): Promise<Array<Row<T>>> {
-    const supabase = typed(await createClient())
+    const supabase = typed(createClient())
 
     const { data, error } = await supabase
       .from(table)

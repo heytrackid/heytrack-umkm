@@ -18,9 +18,9 @@ export const PasswordRequirements = ({ password }: PasswordRequirementsProps): J
           {req.met ? (
             <Check className="h-3 w-3 text-muted-foreground transition-all duration-200" />
           ) : (
-            <X className="h-3 w-3 text-slate-400 transition-all duration-200" />
+            <X className="h-3 w-3 text-muted-foreground transition-all duration-200" />
           )}
-          <span className={`transition-colors duration-200 ${req.met ? 'text-muted-foreground' : 'text-slate-500'
+          <span className={`transition-colors duration-200 ${req.met ? 'text-muted-foreground' : 'text-muted-foreground'
             }`}>
             {req.label}
           </span>

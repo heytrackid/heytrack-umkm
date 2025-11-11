@@ -213,7 +213,7 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
             await deleteCostMutation.mutateAsync(selectedCost['id'])
             setIsDeleteDialogOpen(false)
             setSelectedCost(null)
-        } catch (_error) {
+        } catch {
             // Error handling is done in the mutation hook
         }
     }, [selectedCost, deleteCostMutation])
@@ -515,7 +515,7 @@ export const EnhancedOperationalCostsPage = (): JSX.Element => {
                         const monthlyCost = calculateMonthlyCost(cost)
 
                         return (
-                            <Card key={cost['id']} className="hover:shadow-md transition-shadow">
+                            <Card key={cost['id']} className="transition-all">
                                 <CardContent className="p-6">
                                     <div className="space-y-4">
                                         {/* Header */}

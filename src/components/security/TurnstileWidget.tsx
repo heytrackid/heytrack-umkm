@@ -4,6 +4,10 @@ import type { TurnstileInstance } from '@marsidev/react-turnstile'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { useState } from 'react'
 
+import { createClientLogger } from '@/lib/client-logger'
+
+const logger = createClientLogger('TurnstileWidget')
+
 interface TurnstileWidgetProps {
   onVerify: (token: string) => void
   onError?: (error: Error) => void
@@ -13,32 +17,62 @@ interface TurnstileWidgetProps {
   size?: 'normal' | 'compact'
 }
 
-export function TurnstileWidget({
+export const TurnstileWidget = ({
   onVerify,
   onError,
   onExpire,
   className,
   theme = 'auto',
   size = 'normal',
-}: TurnstileWidgetProps) {
+}: TurnstileWidgetProps) => {
   const siteKey = process.env['NEXT_PUBLIC_TURNSTILE_SITE_KEY']
+  const isDev = process.env.NODE_ENV === 'development'
+
+  // Development bypass - auto-verify with dummy token
+  if (isDev && !siteKey) {
+    logger.info('Development mode: Bypassing Turnstile verification')
+    
+    // Auto-verify after a short delay to simulate real behavior
+    setTimeout(() => {
+      onVerify('dev-bypass-token')
+    }, 100)
+
+    return (
+      <div className={className}>
+        <div className="text-xs text-muted-foreground text-center p-2 border border-dashed border-border rounded-md bg-muted/50">
+          🔧 Dev Mode: CAPTCHA Bypassed
+        </div>
+      </div>
+    )
+  }
 
   if (!siteKey) {
-    console.warn('Turnstile site key not configured')
-    return null
+    logger.warn('Turnstile site key not configured')
+    return (
+      <div className={className}>
+        <div className="text-sm text-muted-foreground text-center p-4 border border-border rounded-md">
+          Turnstile not configured
+        </div>
+      </div>
+    )
   }
+
+  logger.info({ message: 'Rendering Turnstile widget', siteKey: `${siteKey.substring(0, 10)}...` })
 
   return (
     <div className={className}>
       <Turnstile
         siteKey={siteKey}
-        onSuccess={onVerify}
+        onSuccess={(token) => {
+          logger.info('Turnstile verification successful')
+          onVerify(token)
+        }}
         onError={(error) => {
-          console.error('Turnstile error:', error)
+          logger.error({ message: 'Turnstile error', error })
           onError?.(new Error('CAPTCHA verification failed'))
         }}
         onExpire={() => {
-          console.warn('Turnstile token expired')
+          logger.warn('Turnstile token expired')
           onExpire?.()
         }}
         options={{

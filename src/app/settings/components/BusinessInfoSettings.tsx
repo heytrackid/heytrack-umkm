@@ -24,7 +24,7 @@ interface BusinessInfoSettingsProps {
 /**
  * Business information settings component with Zod validation
  */
-function BusinessInfoSettingsComponent({ settings, onSettingChange }: BusinessInfoSettingsProps) {
+const BusinessInfoSettingsComponent = ({ settings, onSettingChange }: BusinessInfoSettingsProps) => {
   const { toast } = useToast()
   const [localSettings, setLocalSettings] = useState<BusinessSettingsState>(settings.general)
   const [errors, setErrors] = useState<Record<string, string>>({})

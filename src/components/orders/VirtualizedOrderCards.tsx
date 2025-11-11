@@ -55,7 +55,6 @@ export const VirtualizedOrderCards = memo(({
 }: VirtualizedOrderCardsProps) => {
   const parentRef = useRef<HTMLDivElement>(null)
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: orders.length,
     getScrollElement: () => parentRef.current,
@@ -95,7 +94,7 @@ VirtualizedOrderCards.displayName = 'VirtualizedOrderCards'
               }}
             >
               <Card
-                className="hover:shadow-md transition-shadow cursor-pointer mb-3"
+                className="transition-all cursor-pointer mb-3"
                 onClick={() => onOrderClick(order['id'])}
               >
                 <CardContent className="p-6">

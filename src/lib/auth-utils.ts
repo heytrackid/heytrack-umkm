@@ -15,7 +15,7 @@ export function clearAuthSession(redirectTo = '/auth/login'): void {
     try {
       localStorage.clear()
       sessionStorage.clear()
-    } catch (_error) {
+    } catch {
       // Failed to clear browser storage
     }
   }

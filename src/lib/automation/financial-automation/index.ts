@@ -5,7 +5,7 @@
  */
 
 // Export all types relevant to financial automation
-export * from './types'
+export type * from './types'
 
 // Export all modules
 export { MetricsCalculator } from './metrics-calculator'

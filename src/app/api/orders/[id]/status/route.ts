@@ -167,8 +167,8 @@ async function triggerWorkflows(
       newStatus: status,
       notes
     })
-  } catch (error) {
-    apiLoggerInstance.error({ error }, '⚠️ Automation trigger error (non-blocking):')
+  } catch (_error) {
+    apiLoggerInstance.error({ error: _error }, '⚠️ Automation trigger error (non-blocking):')
   }
 }
 
@@ -219,7 +219,7 @@ async function putHandler(
     let currentOrder: Awaited<ReturnType<typeof fetchCurrentOrder>>
     try {
       currentOrder = await fetchCurrentOrder(supabase, orderId)
-    } catch (_error) {
+    } catch {
       throw new APIError('Order not found', { status: 404, code: 'NOT_FOUND' })
     }
 

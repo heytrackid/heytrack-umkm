@@ -14,7 +14,10 @@ const Skeleton = ({ className, ...props }: HTMLAttributes<HTMLDivElement> & Skel
     <div
       data-slot="skeleton"
       className={cn(
-        "animate-pulse rounded-md bg-muted",
+        "relative overflow-hidden rounded-md bg-muted",
+        "before:absolute before:inset-0 before:-translate-x-full",
+        "before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent",
+        "before:animate-shimmer",
         className
       )}
       {...props}
@@ -63,7 +66,7 @@ const SkeletonButton = ({ className, ...props }: SkeletonProps) => (
   )
 
 const SkeletonCard = ({ className, ...props }: SkeletonProps) => (
-    <div className={cn("rounded-lg border border-border/20  p-4 space-y-3", className)} {...props}>
+    <div className={cn("rounded-lg border border-border/20 p-4 space-y-3 animate-fade-in", className)} {...props}>
       <div className="flex items-center justify-between">
         <SkeletonText className="h-5 w-1/3" />
         <Skeleton className="h-4 w-4 rounded" />

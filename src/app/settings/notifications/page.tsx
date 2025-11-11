@@ -134,7 +134,7 @@ const NotificationSettingsPage = () => {
                     setCachedPreferences(data)
                 }
             }
-        } catch (_error) {
+        } catch {
             // Silently fail background refresh
         }
     }

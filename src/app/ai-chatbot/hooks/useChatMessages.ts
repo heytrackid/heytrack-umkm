@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 import { SUGGESTIONS, type Message } from '@/app/ai-chatbot/types/index'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
+import { createLogger } from '@/lib/logger'
 
 interface OrderRow { id: string; status: string; total_amount: number; created_at: string }
 interface InventoryRow { id: string; current_stock: number; min_stock: number }
@@ -83,7 +84,8 @@ export function useChatMessages(): UseChatMessagesResult {
       const newSession = await ChatSessionService.createSession(supabase, userId, 'AI Chat Conversation')
       setCurrentSessionId(newSession.id)
     } catch (error) {
-      console.error('Failed to initialize chat session:', error)
+      const logger = createLogger('useChatMessages')
+      logger.error({ error: error as unknown }, 'Failed to initialize chat session')
        // Continue without session persistence for now
      }
    }, [supabase])
@@ -106,7 +108,8 @@ export function useChatMessages(): UseChatMessagesResult {
         }
       )
     } catch (error) {
-      console.error('Failed to save message to session:', error)
+      const logger = createLogger('useChatMessages')
+      logger.error({ error: error as unknown }, 'Failed to save message to session')
       // Continue without saving - don't break the chat experience
     }
   }, [currentSessionId, supabase])

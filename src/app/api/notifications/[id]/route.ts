@@ -6,12 +6,12 @@ export const runtime = 'nodejs'
  * PATCH /api/notifications/[id] - Update notification (mark as read/dismiss)
  */
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
  import { apiLogger } from '@/lib/logger'
- import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
- import { NotificationUpdateSchema } from '@/lib/validations/domains/notification'
- import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import { NotificationUpdateSchema } from '@/lib/validations/domains/notification'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 

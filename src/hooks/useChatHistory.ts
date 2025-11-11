@@ -2,6 +2,7 @@
 
 import { createClientLogger } from '@/lib/client-logger'
 import { createClient } from '@/utils/supabase/client'
+import type { Json } from '@/types/database'
 import { useCallback, useEffect, useState } from 'react'
 
 const logger = createClientLogger('useChatHistory')
@@ -43,7 +44,7 @@ export function useChatHistory(userId: string) {
   const initializeSession = useCallback(async () => {
     try {
       setIsLoading(true)
-      const supabase = await createClient()
+      const supabase = createClient()
 
       // Get most recent active session
       const { data: sessions, error: sessionError} = await supabase
@@ -90,7 +91,6 @@ export function useChatHistory(userId: string) {
         // Create new session
         const { data: newSession, error: createError } = await supabase
           .from('chat_sessions')
-          // @ts-expect-error - Supabase client type inference issue
           .insert({
             user_id: userId,
             title: 'New Conversation',
@@ -118,11 +118,10 @@ export function useChatHistory(userId: string) {
     if (!currentSessionId) return
 
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
       
       const { error } = await supabase
         .from('chat_messages')
-        // @ts-expect-error - Supabase client type inference issue
         .insert({
           session_id: currentSessionId,
           role: message.role,
@@ -130,7 +129,7 @@ export function useChatHistory(userId: string) {
           metadata: {
             actions: message.actions,
             data: message.data
-          }
+          } as Json
         })
 
       if (error) throw error
@@ -138,7 +137,6 @@ export function useChatHistory(userId: string) {
       // Update session's updated_at
       await supabase
         .from('chat_sessions')
-        // @ts-expect-error - Supabase client type inference issue
         .update({
           updated_at: new Date().toISOString()
         })
@@ -154,7 +152,7 @@ export function useChatHistory(userId: string) {
     if (!currentSessionId) return
 
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
       // Delete all messages in current session
       await supabase
         .from('chat_messages')
@@ -164,7 +162,6 @@ export function useChatHistory(userId: string) {
       // Create new session
       const { data: newSession, error: newSessionError } = await supabase
         .from('chat_sessions')
-        // @ts-expect-error - Supabase client type inference issue
         .insert({
           user_id: userId,
           title: 'New Conversation',

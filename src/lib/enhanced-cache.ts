@@ -89,7 +89,7 @@ class EnhancedCache {
       const jsonString = JSON.stringify(data)
       const { size: blobSize } = new Blob([jsonString])
       size = blobSize
-    } catch (_error) {
+    } catch {
       // If serialization fails, estimate a default size
       size = 100
     }

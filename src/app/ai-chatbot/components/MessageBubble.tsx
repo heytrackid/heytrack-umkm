@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useTheme } from 'next-themes'
+import { createLogger } from '@/lib/logger'
 
 import { DataCard } from '@/app/ai-chatbot/components/DataCard'
 import { FeedbackWidget } from '@/app/ai-chatbot/components/FeedbackWidget'
@@ -90,17 +91,18 @@ const formatMessageContent = (
       const language = firstLineBreak > 0 ? codeBlock.slice(0, firstLineBreak).trim().toLowerCase() : 'text'
       const codeContent = firstLineBreak > 0 ? codeBlock.slice(firstLineBreak + 1) : codeBlock
 
-      const handleCopy = async () => {
-        try {
-          await navigator.clipboard.writeText(codeContent)
-          setCopiedStates(prev => ({ ...prev, [index]: true }))
-          setTimeout(() => {
-            setCopiedStates(prev => ({ ...prev, [index]: false }))
-          }, 2000)
-        } catch (err) {
-          console.error('Failed to copy code:', err)
-        }
-      }
+       const handleCopy = async () => {
+          const logger = createLogger('MessageBubble')
+         try {
+           await navigator.clipboard.writeText(codeContent)
+           setCopiedStates(prev => ({ ...prev, [index]: true }))
+           setTimeout(() => {
+             setCopiedStates(prev => ({ ...prev, [index]: false }))
+           }, 2000)
+         } catch (err) {
+            logger.error({ error: err }, 'Failed to copy code')
+         }
+       }
 
       return (
         <div key={index} className="relative group my-3">
@@ -125,7 +127,7 @@ const formatMessageContent = (
                  fontSize: '0.875rem',
                  lineHeight: '1.5',
                }}
-               showLineNumbers={true}
+               showLineNumbers
                lineNumberStyle={{
                  minWidth: '3em',
                  paddingRight: '1em',
@@ -136,8 +138,8 @@ const formatMessageContent = (
                  textAlign: 'right',
                  userSelect: 'none',
                }}
-              wrapLines={true}
-              wrapLongLines={true}
+              wrapLines
+              wrapLongLines
             >
               {codeContent.trim()}
             </SyntaxHighlighter>
@@ -146,7 +148,7 @@ const formatMessageContent = (
             <Button
               variant="ghost"
               size="sm"
-              className="absolute top-2 right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-background/80 backdrop-blur-sm hover:bg-background border shadow-sm"
+              className="absolute top-2 right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-background/80 backdrop-blur-sm hover:bg-background border "
               onClick={handleCopy}
               title="Salin kode"
             >
@@ -223,10 +225,10 @@ export const MessageBubble = ({ message, onSuggestionClick, onFeedbackSubmit }: 
                 </AvatarFallback>
               </Avatar>
               {/* Online status indicator */}
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-background rounded-full"></div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-background rounded-full" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="bg-gradient-to-br from-muted/50 to-muted/30 backdrop-blur-sm border border-border/50 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm">
+              <div className="bg-gradient-to-br from-muted/50 to-muted/30 backdrop-blur-sm border border-border/50 px-4 py-3 rounded-2xl rounded-tl-md ">
                 <div className="text-sm leading-relaxed text-foreground break-words space-y-2">
                   {formatMessageContent(message.content, theme || 'light', copiedStates, setCopiedStates)}
                 </div>
@@ -245,12 +247,12 @@ export const MessageBubble = ({ message, onSuggestionClick, onFeedbackSubmit }: 
         {message.role === 'user' && (
            <div className="flex items-start gap-3 mb-2 justify-end">
              <div className="flex-1 min-w-0 text-right">
-               <div className="bg-gradient-to-br from-primary to-primary/90 text-primary-foreground px-4 py-3 rounded-2xl rounded-bl-md max-w-full break-words shadow-md">
+               <div className="bg-gradient-to-br from-primary to-primary/90 text-primary-foreground px-4 py-3 rounded-2xl rounded-bl-md max-w-full break-words ">
                  <p className="text-sm leading-relaxed">{message.content}</p>
                  {/* Message status indicator */}
                  <div className="flex justify-end mt-1">
                    <div className="flex items-center gap-1 text-xs opacity-70">
-                     <div className="w-1 h-1 bg-primary-foreground/70 rounded-full"></div>
+                     <div className="w-1 h-1 bg-primary-foreground/70 rounded-full" />
                      <span className="text-primary-foreground/70">
                        {message.timestamp.toLocaleTimeString('id-ID', {
                          hour: '2-digit',

@@ -44,7 +44,7 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
     return (
         <div className={`grid gap-4 ${gridClass}`}>
             {/* Total Revenue Card */}
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="hover: ">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
                         Total Revenue
@@ -65,7 +65,7 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
             </Card>
 
             {/* COGS Card */}
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="hover: ">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
                         COGS (Biaya Produksi)
@@ -87,7 +87,7 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
             </Card>
 
             {/* Gross Profit Card */}
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="hover: ">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
                         Gross Profit
@@ -107,7 +107,7 @@ export const ProfitMetrics: React.FC<ProfitMetricsProps> = ({ summary, isMobile 
             </Card>
 
             {/* Net Profit Card */}
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="hover: ">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
                         Net Profit
@@ -142,7 +142,7 @@ interface ProfitBreakdownProps {
 }
 
 export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProps) => (
-        <Card className="border-0 shadow-sm">
+        <Card className="border-0 ">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5" />

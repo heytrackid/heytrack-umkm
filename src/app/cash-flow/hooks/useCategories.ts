@@ -18,7 +18,7 @@ export function useCategories() {
     if (stored) {
       try {
         return JSON.parse(stored)
-      } catch (error) {
+      } catch {
         // Silent fail for category parsing - use default categories
       }
     }

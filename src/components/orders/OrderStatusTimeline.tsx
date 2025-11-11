@@ -115,6 +115,15 @@ export const OrderStatusTimeline = ({
                                                     : 'border-border/20'
                                                 } ${isClickable ? 'cursor-pointer hover:border-primary' : ''}`}
                                             onClick={() => isClickable && handleStatusClick(step['status'])}
+                                              onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                  if (isClickable) {
+                                                    handleStatusClick(step['status'])
+                                                  }
+                                                }
+                                              }}
+                                            role="button"
+                                            tabIndex={isClickable ? 0 : -1}
                                         >
                                             <div className={`mt-0.5 ${getStatusColor(index)}`}>
                                                 {isCompleted ? (

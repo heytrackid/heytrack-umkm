@@ -253,6 +253,13 @@ Telur,pcs,2500,100,50,Telur ayam negeri`
                         <div
                             className="border-2 border-dashed rounded-lg p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-muted/50 transition-colors"
                             onClick={() => fileInputRef.current?.click()}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                fileInputRef.current?.click()
+                              }
+                            }}
+                            role="button"
+                            tabIndex={0}
                         >
                             <input
                                 ref={fileInputRef}

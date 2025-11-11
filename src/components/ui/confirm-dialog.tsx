@@ -96,7 +96,7 @@ export const ConfirmDialog = ({
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
                   placeholder={`Ketik "${confirmationText}"`}
                   className="w-full px-3 py-2 border border-border/20  rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoFocus
+
                 />
               </div>
             )}

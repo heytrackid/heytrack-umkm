@@ -84,4 +84,6 @@ const StockAlertsSection = ({ lowStockItems }: StockAlertsSectionProps): JSX.Ele
   )
 }
 
-export default StockAlertsSection
+StockAlertsSection.displayName = 'StockAlertsSection'
+
+export { StockAlertsSection }

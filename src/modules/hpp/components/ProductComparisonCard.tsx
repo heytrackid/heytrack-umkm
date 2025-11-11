@@ -80,7 +80,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
                 return (
                   <div
                     key={item['id']}
-                    className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all hover:shadow-md ${
+                    className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all hover: ${
                       isGood 
                         ? 'bg-muted/20 border-border/20 ' 
                         : (isWarning 

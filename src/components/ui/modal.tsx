@@ -85,6 +85,13 @@ export const Modal = ({
       <div
         className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0"
         onClick={handleBackdropClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleBackdropClick(e as unknown as MouseEvent)
+          }
+        }}
+        role="button"
+        tabIndex={0}
       >
         <div
           className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity"
@@ -99,7 +106,6 @@ export const Modal = ({
         {/* Modal Panel */}
         <div
           ref={modalRef}
-          tabIndex={-1}
           className={`
             relative inline-block w-full transform overflow-hidden rounded-lg bg-background text-left align-bottom transition-all sm:my-8 sm:align-middle
             ${fullScreenOnMobile
@@ -109,6 +115,13 @@ export const Modal = ({
             ${sizeClasses[size]}
           `}
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.stopPropagation()
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-border/20 bg-muted">
@@ -212,6 +225,13 @@ export const Drawer = ({
       <div
         className={`flex min-h-screen ${positionClasses[position].container} sm:items-center sm:justify-center sm:p-4`}
         onClick={handleBackdropClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleBackdropClick(e as unknown as MouseEvent)
+          }
+        }}
+        role="button"
+        tabIndex={0}
       >
         <div className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity" aria-hidden="true" />
 
@@ -222,6 +242,13 @@ export const Drawer = ({
             ${positionClasses[position].panel}
           `}
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.stopPropagation()
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-border/20">

@@ -4,6 +4,7 @@
 import { saveAs } from 'file-saver'
 
 import { HtmlEscaper } from '@/utils/security/index'
+import { createLogger } from '@/lib/logger'
 
 import type { ProfitData } from '@/app/reports/components/ProfitReportTypes'
 
@@ -118,9 +119,10 @@ export const exportToPDF = ({ profitData, dateRange, formatCurrency }: ExportToP
     `
 
     // Use secure Blob approach instead of document.write
+    const logger = createLogger('ProfitReportExport')
     const secureWindow = HtmlEscaper.openSecureWindow(htmlContent, '_blank')
     if (!secureWindow) {
-        console.error('Failed to open export window')
+        logger.error('Failed to open export window')
     }
 }
 

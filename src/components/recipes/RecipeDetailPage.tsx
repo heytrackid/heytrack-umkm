@@ -2,30 +2,30 @@
 'use client'
 
 import {
-    ChefHat,
-    Edit,
-    Trash2,
-    Calculator,
-    Clock,
-    Users,
     ArrowLeft,
+    Calculator,
+    ChefHat,
+    Clock,
+    Edit,
     Printer,
     Share2,
+    Trash2,
+    Users,
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
-import { DeleteModal } from '@/components/ui/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DeleteModal } from '@/components/ui/index'
 import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
 
-import type { Row } from '@/types/database'
 import type { RecipeInstruction } from '@/app/recipes/ai-generator/components/types'
+import type { Row } from '@/types/database'
 
 
 
@@ -300,7 +300,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                             alt={recipe.name}
                             width={400}
                             height={256}
-                            className="w-full h-48 sm:h-64 object-cover rounded-lg shadow-md"
+                            className="w-full h-48 sm:h-64 object-cover rounded-lg"
                             priority
                         />
                     </div>
@@ -349,7 +349,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
 
             {/* Info Cards */}
             <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-                <Card className="shadow-sm hover:shadow-md transition-shadow">
+                <Card className="transition-all">
                     <CardContent className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -361,7 +361,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-sm hover:shadow-md transition-shadow">
+                <Card className="transition-all">
                     <CardContent className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -373,7 +373,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-sm hover:shadow-md transition-shadow">
+                <Card className="transition-all">
                     <CardContent className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -385,7 +385,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-sm hover:shadow-md transition-shadow">
+                <Card className="transition-all">
                     <CardContent className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -401,7 +401,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
             </div>
 
             {/* Ingredients */}
-            <Card className="shadow-sm">
+            <Card className="transition-all">
                 <CardHeader className="pb-4">
                     <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
                         🥕 Bahan-bahan
@@ -458,7 +458,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
 
             {/* Instructions */}
             {recipe.instructions && recipe.instructions.length > 0 && (
-                <Card className="shadow-sm">
+                <Card className="transition-all">
                     <CardHeader className="pb-4">
                         <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
                             👨‍🍳 Cara Membuat
@@ -468,7 +468,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <ol className="space-y-4 sm:space-y-6">
                             {recipe.instructions.map((step, index) => (
                                 <li key={step.step || index} className="flex gap-3 sm:gap-4 p-3 rounded-lg hover:bg-muted/30 transition-colors">
-                                    <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-sm">
+                                    <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm transition-all">
                                         {step.step || index + 1}
                                     </div>
                                     <div className="flex-1 min-w-0">

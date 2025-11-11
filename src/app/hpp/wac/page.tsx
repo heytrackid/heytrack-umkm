@@ -126,9 +126,9 @@ const WacEnginePage = (): JSX.Element => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Pilih Bahan Baku</label>
+                <label htmlFor="ingredient-select" className="text-sm font-medium">Pilih Bahan Baku</label>
                 <Select value={selectedIngredient} onValueChange={setSelectedIngredient}>
-                  <SelectTrigger>
+                  <SelectTrigger id="ingredient-select">
                     <SelectValue placeholder="Pilih bahan baku..." />
                   </SelectTrigger>
                   <SelectContent>

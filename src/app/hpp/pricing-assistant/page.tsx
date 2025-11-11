@@ -194,9 +194,9 @@ const PricingAssistantPage = (): JSX.Element => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Pilih Resep</label>
+                <label htmlFor="pricing-recipe-select" className="text-sm font-medium">Pilih Resep</label>
                 <Select value={selectedRecipe} onValueChange={setSelectedRecipe}>
-                  <SelectTrigger>
+                  <SelectTrigger id="pricing-recipe-select">
                     <SelectValue placeholder="Pilih resep untuk analisis..." />
                   </SelectTrigger>
                   <SelectContent>

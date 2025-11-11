@@ -9,19 +9,25 @@
 
 type LogContext = Record<string, unknown>
 
+interface LoggerContext {
+  context?: string
+  [key: string]: unknown
+}
+
 /**
  * Check if we're in development mode or if logging is explicitly enabled
  */
 const isDevelopment = (): boolean => {
-  // Check for explicit logging flag
-  if (typeof process !== 'undefined' && process['env']?.['NEXT_PUBLIC_ENABLE_CLIENT_LOGS'] === 'true') {
+  // Check for explicit logging flag from Next.js public env
+  if (typeof window !== 'undefined' && (window as Window & { NEXT_PUBLIC_ENABLE_CLIENT_LOGS?: string }).NEXT_PUBLIC_ENABLE_CLIENT_LOGS === 'true') {
     return true
   }
-  if (typeof process !== 'undefined' && process['env']?.NODE_ENV === 'development') {
-    return true
-  }
+  // Check if we're in development by checking hostname
   if (typeof window !== 'undefined') {
-    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    return window.location.hostname === 'localhost' ||
+           window.location.hostname === '127.0.0.1' ||
+           window.location.hostname.includes('vercel-preview') ||
+           window.location.hostname.includes('vercel-stage')
   }
   return false
 }
@@ -64,10 +70,10 @@ const safeConsole = {
  * Client-safe logger with Pino-compatible API
  */
 class ClientLogger {
-  private readonly context: Record<string, unknown>
+  private readonly context: LoggerContext
 
-  constructor(context: Record<string, unknown> = {}) {
-    this['context'] = context
+  constructor(context: LoggerContext = {}) {
+    this.context = context
   }
 
   /**
@@ -172,32 +178,32 @@ class ClientLogger {
         if (message && hasData) {
           // Both message and data exist - log them separately to preserve console formatting
           consoleMethod(
-            `[${timestamp}] ${logLevel}${this['context']['context'] ? ` [${this['context']['context']}]` : ''}:`,
+            `[${timestamp}] ${logLevel}${this.context.context ? ` [${this.context.context}]` : ''}:`,
             message,
             sanitizedData
           )
         } else if (message) {
           // Only message exists
           consoleMethod(
-            `[${timestamp}] ${logLevel}${this['context']['context'] ? ` [${this['context']['context']}]` : ''}:`,
+            `[${timestamp}] ${logLevel}${this.context.context ? ` [${this.context.context}]` : ''}:`,
             message
           )
         } else if (hasData) {
           // Only data exists - log separately to preserve console formatting
           consoleMethod(
-            `[${timestamp}] ${logLevel}${this['context']['context'] ? ` [${this['context']['context']}]` : ''}:`,
+            `[${timestamp}] ${logLevel}${this.context.context ? ` [${this.context.context}]` : ''}:`,
             sanitizedData
           )
         } else {
           // Neither exists
           consoleMethod(
-            `[${timestamp}] ${logLevel}${this['context']['context'] ? ` [${this['context']['context']}]` : ''}:`
+            `[${timestamp}] ${logLevel}${this.context.context ? ` [${this.context.context}]` : ''}:`
           )
         }
-      } catch (_error) {
+      } catch {
         // Fallback logging if console fails
         consoleMethod(
-          `[${timestamp}] ${logLevel}${this['context']['context'] ? ` [${this['context']['context']}]` : ''}:`,
+          `[${timestamp}] ${logLevel}${this.context.context ? ` [${this.context.context}]` : ''}:`,
           'Logging error occurred'
         )
       }
@@ -275,7 +281,7 @@ class ClientLogger {
    * Create child logger with additional context (Pino-compatible)
    */
   child(bindings: LogContext): ClientLogger {
-    return new ClientLogger({ ...this['context'], ...bindings })
+    return new ClientLogger({ ...this.context, ...bindings })
   }
 }
 

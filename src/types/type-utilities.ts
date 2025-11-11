@@ -418,11 +418,11 @@ export function safeParse<T extends JsonValue>(
 export type TypedSupabaseClient = SupabaseClient<Database>
 
 /**
- * Helper untuk cast Supabase client dengan type safety
- */
- 
+  * Helper untuk cast Supabase client dengan type safety
+  */
+
 export function typed(
-   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   client: SupabaseClient<Database, any, any>
 ): TypedSupabaseClient {
   return client as unknown as TypedSupabaseClient

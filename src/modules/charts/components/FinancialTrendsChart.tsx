@@ -3,13 +3,13 @@
 import { differenceInDays } from 'date-fns'
 import { AlertCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { DateRange } from 'react-day-picker'
+import type { DateRange } from 'react-day-picker'
 
 import { ChartLineInteractive } from '@/components/charts'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ChartConfig } from '@/components/ui/chart'
-import { DateRangePickerWithPresets } from '@/components/ui/date-range-picker'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFinancialTrends } from '@/hooks/useFinancialTrends'
 
@@ -37,10 +37,10 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function FinancialTrendsChart({ 
+export const FinancialTrendsChart = ({ 
   days: initialDays = 90,
   showDatePicker = true 
-}: FinancialTrendsChartProps) {
+}: FinancialTrendsChartProps) => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
   
   const days = useMemo(() => {
@@ -101,18 +101,24 @@ export function FinancialTrendsChart({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 sm:space-y-6">
       {showDatePicker && (
-        <div className="flex justify-end">
-          <DateRangePickerWithPresets
-            value={dateRange}
-            onChange={setDateRange}
-            placeholder="Pilih rentang tanggal"
-            className="w-full sm:w-[300px]"
-          />
-        </div>
+        <Card>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">Filter Periode</CardTitle>
+          </CardHeader>
+          <CardContent className="pb-4 sm:pb-6">
+            <DateRangePicker
+              date={dateRange}
+              onDateChange={setDateRange}
+              showPresets={true}
+              maxDate={new Date()}
+              placeholder="Pilih rentang tanggal untuk filter"
+            />
+          </CardContent>
+        </Card>
       )}
-      <div className="min-h-[400px]">
+      <div className="min-h-[300px] sm:min-h-[400px] overflow-x-auto">
         <ChartLineInteractive
           data={filteredData}
           config={chartConfig}

@@ -17,12 +17,12 @@ export const PasswordStrengthIndicator = ({ password }: PasswordStrengthIndicato
         {Array.from({ length: 5 }, (_, i) => (
           <div
             key={i}
-            className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-slate-200 dark:bg-slate-700'
+            className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-muted'
               }`}
           />
         ))}
       </div>
-      <p className="text-xs text-slate-600 dark:text-slate-400 transition-opacity duration-200">
+      <p className="text-xs text-muted-foreground transition-opacity duration-200">
         Kekuatan: {currentStrengthLabel}
       </p>
     </div>

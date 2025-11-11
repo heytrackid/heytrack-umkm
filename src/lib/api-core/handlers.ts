@@ -89,7 +89,7 @@ export function createRouteHandler<T>(
           if (responseData.success && responseData['data']) {
             apiCache.set(config.caching.key, responseData['data'], config.caching.ttl)
           }
-        } catch (_error) {
+        } catch {
           // Ignore cache errors
         }
       }

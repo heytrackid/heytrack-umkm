@@ -13,12 +13,7 @@ import { SecurityPresets, withSecurity } from '@/utils/security/index';
 import { createClient } from '@/utils/supabase/server';
 
 
-// Apply security middleware
-const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
-const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
-const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
 
-export { securedDELETE as DELETE, securedGET as GET, securedPUT as PUT };
 
 async function getHandler(
   _request: Request,
@@ -130,7 +125,7 @@ async function putHandler(
     }
 
     const updatePayload = prepareUpdate('financial_records', Object.fromEntries(
-      Object.entries(validation.data).filter(([_, value]) => value !== undefined)
+      Object.entries(validation.data).filter(([, value]) => value !== undefined)
     ) as Database['public']['Tables']['financial_records']['Update'])
 
     // ✅ Use financial_records table
@@ -206,5 +201,12 @@ async function deleteHandler(
   } catch (error: unknown) {
     logError(apiLogger, error, 'DELETE /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
-  }
+   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
+const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
+const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
+
+export { securedDELETE as DELETE, securedGET as GET, securedPUT as PUT }

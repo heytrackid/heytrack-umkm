@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import type {
+    ChartConfig} from '@/components/ui/chart';
 import {
-    ChartConfig,
     ChartContainer,
     ChartLegend,
     ChartLegendContent,
@@ -28,7 +29,7 @@ interface ChartAreaInteractiveProps {
   timeRanges?: Array<{ value: string; label: string; days: number }>
 }
 
-export function ChartAreaInteractive({
+export const ChartAreaInteractive = ({
   data,
   title = 'Area Chart - Interactive',
   description = 'Showing data trends',
@@ -38,7 +39,7 @@ export function ChartAreaInteractive({
     { value: '30d', label: 'Last 30 days', days: 30 },
     { value: '7d', label: 'Last 7 days', days: 7 },
   ],
-}: ChartAreaInteractiveProps) {
+}: ChartAreaInteractiveProps) => {
   const [timeRange, setTimeRange] = useState(timeRanges[0]?.value || '90d')
 
   const filteredData = data.filter((item) => {

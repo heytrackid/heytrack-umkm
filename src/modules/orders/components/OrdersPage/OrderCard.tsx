@@ -51,7 +51,7 @@ export const OrderCard = ({ order, onView, onEdit, onUpdateStatus }: OrderCardPr
         : 'N/A'
 
     return (
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
             <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                     <div className="space-y-1">

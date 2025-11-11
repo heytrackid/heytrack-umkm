@@ -61,28 +61,28 @@ const ResetPasswordPage = (): JSX.Element => {
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
-        <Card className="w-full max-w-md shadow-xl border animate-fade-in-scale">
+        <Card className="w-full max-w-md border animate-fade-in-scale">
           <CardContent className="pt-6 pb-6 sm:pt-8 sm:pb-8 px-4 sm:px-6">
             <div className="text-center space-y-4">
               <div className="w-14 h-14 sm:w-16 sm:h-16 bg-secondary rounded-full flex items-center justify-center mx-auto animate-success-pulse">
                 <CheckCircle className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground" />
               </div>
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
                   Email Terkirim!
                 </h2>
-                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mb-2">
+                <p className="text-sm sm:text-base text-muted-foreground mb-2">
                   Kami telah mengirimkan link reset password ke:
                 </p>
-                <p className="font-medium text-sm sm:text-base text-slate-900 dark:text-slate-100 mb-4 break-words">
+                <p className="font-medium text-sm sm:text-base text-foreground mb-4 break-words">
                   {email}
                 </p>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Silakan check email Anda dan klik link untuk mereset password.
                   Link akan kadaluarsa dalam 1 jam.
                 </p>
                 <Link href="/auth/login">
-                  <Button className="mt-6 h-11 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
+                  <Button className="mt-6 h-11 bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
                     Kembali ke Login
                   </Button>
                 </Link>
@@ -103,16 +103,16 @@ const ResetPasswordPage = (): JSX.Element => {
       <div className="w-full max-w-md space-y-4 sm:space-y-6">
         {/* Logo/Brand */}
         <div className="text-center space-y-2">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-900 dark:bg-slate-100 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-slate-100 dark:bg-slate-900 rounded-lg flex items-center justify-center">
-              <span className="text-slate-900 dark:text-slate-100 font-bold text-base sm:text-lg">H</span>
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary-foreground rounded-lg flex items-center justify-center">
+              <span className="text-primary font-bold text-base sm:text-lg">H</span>
             </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">HeyTrack</h1>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Reset password Anda</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">HeyTrack</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Reset password Anda</p>
         </div>
 
-        <Card className="shadow-xl border">
+        <Card className="border">
           <CardHeader className="space-y-1 pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
             <CardTitle className="text-xl sm:text-2xl text-center">Lupa Password?</CardTitle>
             <CardDescription className="text-center text-sm sm:text-base">
@@ -172,7 +172,7 @@ const ResetPasswordPage = (): JSX.Element => {
 
               <Button
                 type="submit"
-                className="w-full h-11 text-base font-medium bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                className="w-full h-11 text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
                 disabled={isPending}
               >
                 {isPending ? (
@@ -190,7 +190,7 @@ const ResetPasswordPage = (): JSX.Element => {
               <span className="text-muted-foreground">Ingat password Anda? </span>
               <Link
                 href="/auth/login"
-                className="text-slate-900 dark:text-slate-100 hover:text-slate-700 dark:hover:text-slate-300 font-medium underline underline-offset-4 inline-block min-h-[44px] leading-[44px]"
+                className="text-foreground hover:text-muted-foreground font-medium underline underline-offset-4 inline-block min-h-[44px] leading-[44px]"
               >
                 Kembali ke Login
               </Link>

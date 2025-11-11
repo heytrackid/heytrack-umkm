@@ -23,7 +23,7 @@ import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 
-interface BreadcrumbItem {
+interface LayoutBreadcrumbItem {
   label: string
   href?: string
   icon?: ReactNode
@@ -33,7 +33,7 @@ interface PageHeaderProps {
   title: string
   subtitle?: string
   description?: string
-  breadcrumbs?: BreadcrumbItem[]
+  breadcrumbs?: LayoutBreadcrumbItem[]
   actions?: ReactNode
   className?: string
 }

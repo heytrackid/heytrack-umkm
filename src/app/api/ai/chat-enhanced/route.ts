@@ -11,7 +11,7 @@ import { z } from 'zod'
 
 import { ContextAwareAI } from '@/lib/ai-chatbot-enhanced'
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
-import { logger } from '@/lib/logger'
+import { apiLogger } from '@/lib/logger'
 import { AIFallbackService } from '@/lib/services/AIFallbackService'
 import { BusinessContextService } from '@/lib/services/BusinessContextService'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
@@ -54,7 +54,7 @@ function checkRateLimits(userId: string): void {
     const resetTime = RateLimiter.getResetTime(rateLimitKey)
     const remaining = RateLimiter.getRemaining(rateLimitKey, RATE_LIMITS.AI_CHAT.maxRequests)
 
-    logger.warn({ userId, remaining, resetTime }, 'AI chat rate limit exceeded')
+    apiLogger.warn({ userId, remaining, resetTime }, 'AI chat rate limit exceeded')
 
     throw new APIError(
       'Terlalu banyak permintaan. Silakan tunggu sebentar.',
@@ -125,7 +125,7 @@ function validateAndSanitizeMessage(message: string, userId: string): string {
   const containsSuspiciousPattern = suspiciousPatterns.some(pattern => pattern.test(sanitizedMessage))
 
   if (containsSuspiciousPattern) {
-    logger.warn(
+    apiLogger.warn(
       { userId, message: sanitizedMessage.substring(0, 100) },
       'Potential security threat detected in AI chat input'
     )
@@ -141,7 +141,7 @@ function validateAndSanitizeMessage(message: string, userId: string): string {
 
   const containsSpam = spamPatterns.some(pattern => pattern.test(sanitizedMessage))
   if (containsSpam) {
-    logger.warn({ userId }, 'Potential spam content detected')
+    apiLogger.warn({ userId }, 'Potential spam content detected')
     throw new APIError('Input terdeteksi sebagai spam.', { status: 400, code: 'SPAM_DETECTED' })
   }
 
@@ -230,7 +230,7 @@ async function chatEnhancedPOST(request: NextRequest): Promise<NextResponse> {
     const context = await BusinessContextService.loadContext(userId, safeCurrentPage)
     const suggestions = SuggestionEngine.generateSuggestions(context)
 
-    logger.info(`Chat message processed - User: ${userId}, Session: ${sessionId}, Response time: ${responseTime}ms, Fallback: ${fallbackUsed}`)
+    apiLogger.info(`Chat message processed - User: ${userId}, Session: ${sessionId}, Response time: ${responseTime}ms, Fallback: ${fallbackUsed}`)
 
     return NextResponse.json({
       message: aiResponse,
@@ -242,7 +242,7 @@ async function chatEnhancedPOST(request: NextRequest): Promise<NextResponse> {
       },
     })
   } catch (error) {
-    logger.error({ error }, 'Error in AI chat')
+    apiLogger.error({ error }, 'Error in AI chat')
     return handleAPIError(error, 'POST /api/ai/chat-enhanced')
   }
 }

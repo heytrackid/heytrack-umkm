@@ -24,11 +24,11 @@ interface ProductProfitChartProps {
 
 // Tooltip component extracted to avoid defining components during render
 const ProductProfitChartTooltip = (formatCurrency: (amount: number) => string) => {
-  const TooltipComponent = (props: TooltipContentProps<any, any>): JSX.Element | null => {
+  const TooltipComponent = (props: TooltipContentProps<number, string>): JSX.Element | null => {
     const { active, payload } = props
     if (active && payload?.length) {
       return (
-        <div className="bg-background border rounded-lg p-3 shadow-lg">
+        <div className="bg-background border rounded-lg p-3 ">
           <p className="font-medium mb-2">{payload[0]?.payload?.name ?? 'Unknown'}</p>
           <div className="space-y-1 text-sm">
             <div className="flex items-center gap-2">

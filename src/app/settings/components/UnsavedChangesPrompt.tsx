@@ -22,7 +22,7 @@ export const UnsavedChangesPrompt = ({ isUnsavedChanges, onReset, onSave, isSavi
   if (!isUnsavedChanges) {return null}
 
   return (
-    <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20 sticky bottom-4 z-20 shadow-lg">
+    <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20 sticky bottom-4 z-20 ">
       <CardContent className="pt-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-2">

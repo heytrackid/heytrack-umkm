@@ -403,7 +403,7 @@ export const ProfitReportTabs: React.FC<ProfitReportTabsProps> = ({
                     onClick={() => setActiveTab('trend')}
                     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                         activeTab === 'trend'
-                            ? 'bg-background text-foreground shadow-sm'
+                            ? 'bg-background text-foreground '
                             : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
@@ -413,7 +413,7 @@ export const ProfitReportTabs: React.FC<ProfitReportTabsProps> = ({
                     onClick={() => setActiveTab('products')}
                     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                         activeTab === 'products'
-                            ? 'bg-background text-foreground shadow-sm'
+                            ? 'bg-background text-foreground '
                             : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
@@ -423,7 +423,7 @@ export const ProfitReportTabs: React.FC<ProfitReportTabsProps> = ({
                     onClick={() => setActiveTab('expenses')}
                     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                         activeTab === 'expenses'
-                            ? 'bg-background text-foreground shadow-sm'
+                            ? 'bg-background text-foreground '
                             : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
@@ -433,7 +433,7 @@ export const ProfitReportTabs: React.FC<ProfitReportTabsProps> = ({
                     onClick={() => setActiveTab('comparison')}
                     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                         activeTab === 'comparison'
-                            ? 'bg-background text-foreground shadow-sm'
+                            ? 'bg-background text-foreground '
                             : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >

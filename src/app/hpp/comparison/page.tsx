@@ -8,8 +8,8 @@ import { PageHeader, SharedStatsCards } from '@/components/shared/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Calendar } from '@/components/ui/calendar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DateRangePicker, type DateRangeValue } from '@/components/ui/date-range'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/useCurrency'
@@ -134,17 +134,21 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
            title="Recipe Comparison"
            description="Benchmarking dan analisis komparatif antar resep"
          />
-         <div className="hidden md:block">
-           <DateRangePicker
-             onChange={(range: DateRangeValue) => {
-               const params = new URLSearchParams(window.location.search)
-               if (range.from) params.set('from', range.from.toISOString())
-               if (range.to) params.set('to', range.to.toISOString())
-               const url = `${window.location.pathname}?${params.toString()}`
-               window.history.replaceState(null, '', url)
-             }}
-           />
-         </div>
+          <div className="hidden md:block">
+            <Calendar
+              mode="range"
+              onSelect={(range) => {
+                if (!range) return
+                const params = new URLSearchParams(window.location.search)
+                if (range.from) params.set('from', range.from.toISOString())
+                if (range.to) params.set('to', range.to.toISOString())
+                const url = `${window.location.pathname}?${params.toString()}`
+                window.history.replaceState(null, '', url)
+              }}
+              numberOfMonths={2}
+              className="w-full"
+            />
+          </div>
        </div>
 
         {/* Stats Cards */}
@@ -182,9 +186,9 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
           <CardContent className="pt-6">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Category Filter</label>
+                <label htmlFor="category-filter" className="text-sm font-medium">Category Filter</label>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger id="category-filter" className="w-48">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -199,9 +203,9 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Sort By</label>
+                <label htmlFor="sort-by" className="text-sm font-medium">Sort By</label>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger id="sort-by" className="w-48">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

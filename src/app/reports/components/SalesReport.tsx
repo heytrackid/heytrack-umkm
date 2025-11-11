@@ -37,7 +37,7 @@ async function fetchSalesData(dateRange: { start: string | undefined; end: strin
 
     // Calculate stats from API data
     const stats = sales.reduce(
-      (acc: { totalOrders: number; totalRevenue: number; completedOrders: number; pendingOrders: number }, sale: any) => {
+      (acc: { totalOrders: number; totalRevenue: number; completedOrders: number; pendingOrders: number }, sale: { amount?: number }) => {
         acc.totalOrders += 1
         acc.totalRevenue += sale.amount ?? 0
         // Note: The sales API returns financial_records, not orders, so status-based counting may not apply
@@ -53,7 +53,7 @@ async function fetchSalesData(dateRange: { start: string | undefined; end: strin
   }
 }
 
-export async function SalesReport({ dateRange }: SalesReportProps) {
+export const SalesReport = async ({ dateRange }: SalesReportProps) => {
   const salesStats = await fetchSalesData(dateRange)
 
   // Calculate growth percentage (assuming we have previous period data)
@@ -73,7 +73,7 @@ export async function SalesReport({ dateRange }: SalesReportProps) {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Pesanan
@@ -85,7 +85,7 @@ export async function SalesReport({ dateRange }: SalesReportProps) {
             <p className="text-xs text-muted-foreground">+{orderGrowth}% dari periode sebelumnya</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Pendapatan
@@ -97,7 +97,7 @@ export async function SalesReport({ dateRange }: SalesReportProps) {
             <p className="text-xs text-muted-foreground">+{revenueGrowth}% dari periode sebelumnya</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Selesai
@@ -109,7 +109,7 @@ export async function SalesReport({ dateRange }: SalesReportProps) {
             <p className="text-xs text-muted-foreground">Diterima pelanggan</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Pending
@@ -124,7 +124,7 @@ export async function SalesReport({ dateRange }: SalesReportProps) {
       </div>
 
       {/* Detailed View */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border-0 ">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             Detail Penjualan

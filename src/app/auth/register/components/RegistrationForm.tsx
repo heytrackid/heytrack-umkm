@@ -88,7 +88,7 @@ export const RegistrationForm = ({
   }
 
   return (
-    <Card className="shadow-xl border">
+    <Card className="border">
       <CardHeader className="space-y-1 pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
         <CardTitle className="text-xl sm:text-2xl text-center">Bergabung Sekarang</CardTitle>
         <CardDescription className="text-center text-sm sm:text-base">
@@ -258,7 +258,7 @@ export const RegistrationForm = ({
 
           <Button
             type="submit"
-            className="w-full h-11 text-base font-medium bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+            className="w-full h-11 text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
             disabled={isPending || isVerifying || !isVerified}
           >
             {isPending ? (
@@ -287,7 +287,7 @@ export const RegistrationForm = ({
           <span className="text-muted-foreground">Sudah punya akun? </span>
           <Link
             href="/auth/login"
-            className="text-slate-900 dark:text-slate-100 hover:text-slate-700 dark:hover:text-slate-300 font-medium underline underline-offset-4 inline-block min-h-[44px] leading-[44px]"
+            className="text-foreground hover:text-muted-foreground font-medium underline underline-offset-4 inline-block min-h-[44px] leading-[44px]"
           >
             Masuk sekarang
           </Link>

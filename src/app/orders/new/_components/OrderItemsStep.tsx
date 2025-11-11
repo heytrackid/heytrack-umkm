@@ -80,7 +80,7 @@ export const OrderItemsStep = ({
               <div
                 key={itemKey}
                 className={`border rounded-lg p-4 transition-all ${
-                  draggedIndex === index ? 'opacity-50 shadow-lg' : ''
+                  draggedIndex === index ? 'opacity-50 ' : ''
                 } ${draggedIndex !== null && draggedIndex !== index ? 'hover:border-primary/50' : ''}`}
                 draggable={Boolean(onReorderItems)}
                 onDragStart={(e) => handleDragStart(e, index)}

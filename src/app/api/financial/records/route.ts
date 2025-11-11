@@ -2,13 +2,21 @@
 export const runtime = 'nodejs'
 
 
-import { type NextRequest, NextResponse } from 'next/server'
+ import { NextRequest, NextResponse } from 'next/server'
+ import { z } from 'zod'
 
-import { apiLogger } from '@/lib/logger'
-import { safeNumber, getErrorMessage } from '@/lib/type-guards'
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
+ import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, safeNumber } from '@/lib/type-guards'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
+ import { createClient } from '@/utils/supabase/server'
 
+const FinancialRecordSchema = z.object({
+  description: z.string().min(1),
+  category: z.string().min(1),
+  amount: z.number().positive(),
+  date: z.string(),
+  type: z.enum(['income', 'expense']),
+})
 
 // Unused types removed
 
@@ -27,30 +35,20 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         { error: 'Unauthorized' },
         { status: 401 }
       )
-    }    const _body = await request.json() as { description: string; category: string; amount: number; date: string; type: string }
-    const { description, category, amount, date, type } = _body
+    }
 
-    // Validation
-    if (!description || !category || !amount || !date || !type) {
+    const body = await request.json()
+    const validation = FinancialRecordSchema.safeParse(body)
+
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Invalid request data', details: validation.error.issues },
         { status: 400 }
       )
     }
 
-    if (typeof amount !== 'number' || amount <= 0) {
-      return NextResponse.json(
-        { error: 'Invalid amount' },
-        { status: 400 }
-      )
-    }
-
-    if (!['income', 'expense'].includes(type)) {
-      return NextResponse.json(
-        { error: 'Invalid type. Must be income or expense' },
-        { status: 400 }
-      )
-    }
+    const data = validation.data
+    const { description, category, amount, date, type } = data
 
     // Insert into financial_records
     const { data: record, error: insertError } = await supabase

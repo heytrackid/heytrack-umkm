@@ -139,7 +139,8 @@ class InMemoryRateLimiter {
 /**
  * Enhanced security middleware for API routes
  */
-export function withSecurity<Params extends {} = {}>(
+ 
+export function withSecurity<Params extends object = object>(
   handler: (req: NextRequest, params: Params) => Promise<NextResponse>,
   config: SecurityConfig = DEFAULT_SECURITY_CONFIG
 ) {
@@ -278,7 +279,7 @@ export function withSecurity<Params extends {} = {}>(
             { status: 400 }
           )
         }
-      } catch (e) {
+      } catch {
         // If parsing fails, continue without sanitization but log
         apiLogger.warn({ error: 'Failed to parse request body for sanitization' }, 'Body parsing error')
       }
@@ -294,7 +295,7 @@ export function withSecurity<Params extends {} = {}>(
           // Use cached body to avoid consuming the stream multiple times
           const bodyText = await readBodyOnce()
           checkData = JSON.parse(bodyText)
-        } catch (e) {
+        } catch {
           // If we can't parse the body, use an empty object
           checkData = {}
         }
@@ -401,7 +402,7 @@ export function hasSQLInjectionPattern(input: string): boolean {
     /(\b(OR|AND)\b\s+.*(?:=|>|<|LIKE)\s*['"][^'"]*['"])/gi,
     /(\b(DROP|DELETE|INSERT|UPDATE|SELECT|UNION|EXEC|EXECUTE)\b)/gi,
     /(;|--|\/\*|\*\/|xp_|sp_|0x)/gi,
-    /('%.*%'|\".*\")/g // Potential wildcard SQL injection
+    /('%.*%'|".*")/g // Potential wildcard SQL injection
   ]
 
   return sqlPatterns.some(pattern => pattern.test(input))

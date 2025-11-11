@@ -2,7 +2,7 @@ import { DollarSign, Package, ShoppingCart, TrendingUp, type LucideIcon } from '
 
 import { Card, CardContent } from '@/components/ui/card'
 
-import type { IngredientPurchase, PurchaseStats } from '@/app/ingredients/purchases/components/types'
+import type { IngredientPurchase, StatsItem } from '@/app/ingredients/purchases/components/types'
 
 // Purchase Stats Component - Lazy Loaded
 // Displays purchase statistics and metrics cards
@@ -12,7 +12,7 @@ interface PurchaseStatsProps {
   purchases: IngredientPurchase[]
 }
 
-const PurchaseStats = ({ purchases }: PurchaseStatsProps): JSX.Element => {
+const PurchaseStatsCard = ({ purchases }: PurchaseStatsProps): JSX.Element => {
   // Calculate stats
   const thisMonth = purchases.filter((p) => {
     const purchaseDate = new Date(p.purchase_date)
@@ -23,7 +23,7 @@ const PurchaseStats = ({ purchases }: PurchaseStatsProps): JSX.Element => {
 
   const uniqueSuppliers = new Set(purchases.filter((p) => p.supplier).map((p) => p.supplier))
 
-  const stats: Array<PurchaseStats & { icon: LucideIcon }> = [
+  const stats: Array<StatsItem & { icon: LucideIcon }> = [
     {
       title: 'Pembelian (Bulan Ini)',
       value: thisMonth.length,
@@ -86,4 +86,4 @@ const PurchaseStats = ({ purchases }: PurchaseStatsProps): JSX.Element => {
   )
 }
 
-export { PurchaseStats }
+export { PurchaseStatsCard as PurchaseStats }

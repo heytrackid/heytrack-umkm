@@ -232,10 +232,10 @@ export function formatCurrencyIntl(amount: number, currency: Currency): string {
     }).format(amount)
     
     return `${currency.symbol} ${formatted}`
-   } catch (_error: unknown) {
+   } catch {
      // Fallback to basic formatting
      return formatCurrency(amount, currency)
-  }
+   }
 }
 
 /**

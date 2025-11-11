@@ -1,7 +1,7 @@
  
 'use client'
 
-import { MoreVertical, Edit, Trash2, Calculator, Eye, Users, Clock } from 'lucide-react'
+import { Calculator, Clock, Edit, Eye, MoreVertical, Trash2, Users } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -40,7 +40,7 @@ export const MobileRecipeCard = ({
     getDifficultyColor,
     getDifficultyLabel,
 }: MobileRecipeCardProps) => (
-    <Card className="hover:shadow-md transition-shadow" onClick={() => onView(recipe)}>
+    <Card className="transition-all" onClick={() => onView(recipe)}>
         <CardContent className="p-4">
             <div className="space-y-3">
                 {/* Header */}

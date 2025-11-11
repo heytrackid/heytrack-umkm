@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation'
 
 /**
- * Root page - simple redirect to dashboard
- * Middleware handles all auth redirects, this is just a fallback
+ * Root page - redirect to dashboard (middleware handles auth)
  */
-export default async function HomePage(): Promise<never> {
+export default function HomePage() {
   redirect('/dashboard')
 }

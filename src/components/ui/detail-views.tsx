@@ -102,6 +102,13 @@ export const DetailField = ({ label, value, className, copyable: _copyable }: De
       <span
         className={`text-sm text-foreground ml-4 text-right ${_copyable ? 'cursor-pointer hover:text-blue-600' : ''}`}
         onClick={handleCopy}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleCopy()
+          }
+        }}
+        role="button"
+        tabIndex={_copyable ? 0 : -1}
       >
         {value}
       </span>

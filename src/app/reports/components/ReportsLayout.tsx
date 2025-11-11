@@ -1,10 +1,11 @@
 'use client'
 
-import { BarChart3, Calendar, AlertCircle, Filter, CheckCircle, TrendingUp, ShoppingCart, Package, DollarSign } from 'lucide-react'
+import { BarChart3, Calendar, AlertCircle, Filter, CheckCircle, TrendingUp, ShoppingCart, Package, DollarSign, ArrowUpIcon, ArrowDownIcon } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useState, type ReactNode } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
+import { useDashboardStats } from '@/hooks/useDashboardStats'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -100,6 +101,9 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
   })
   const [dateError, setDateError] = useState<string>('')
 
+  // Fetch real dashboard stats
+  const { data: stats, isLoading: statsLoading, error: statsError } = useDashboardStats(dateRange.start, dateRange.end)
+
   // Helper function for responsive tab labels
   const getTabLabel = (full: string, short: string) => (
     <>
@@ -185,10 +189,31 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">Rp 12.500.000</div>
-              <p className="text-xs text-muted-foreground">+12% dari bulan lalu</p>
+              {statsLoading ? (
+                <div className="space-y-2">
+                  <div className="h-8 bg-muted animate-pulse rounded" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                </div>
+              ) : statsError ? (
+                <div className="text-sm text-red-600">Error loading data</div>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">
+                    Rp {stats?.revenue.today.toLocaleString('id-ID') || '0'}
+                  </div>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    {stats?.revenue.trend === 'up' ? (
+                      <ArrowUpIcon className="h-3 w-3 text-green-600" />
+                    ) : (
+                      <ArrowDownIcon className="h-3 w-3 text-red-600" />
+                    )}
+                    {stats?.revenue.growth}% dari periode sebelumnya
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
+
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -197,10 +222,26 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">Rp 3.200.000</div>
-              <p className="text-xs text-muted-foreground">+18% dari bulan lalu</p>
+              {statsLoading ? (
+                <div className="space-y-2">
+                  <div className="h-8 bg-muted animate-pulse rounded" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                </div>
+              ) : statsError ? (
+                <div className="text-sm text-red-600">Error loading data</div>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">
+                    Rp {stats?.expenses.netProfit.toLocaleString('id-ID') || '0'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Berdasarkan pengeluaran periode ini
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
+
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -209,10 +250,24 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">5 Item</div>
-              <p className="text-xs text-muted-foreground">Perlu restock segera</p>
+              {statsLoading ? (
+                <div className="space-y-2">
+                  <div className="h-8 bg-muted animate-pulse rounded" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                </div>
+              ) : statsError ? (
+                <div className="text-sm text-red-600">Error loading data</div>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{stats?.inventory?.lowStock || 0} Item</div>
+                  <p className="text-xs text-muted-foreground">
+                    {(stats?.inventory?.lowStock ?? 0) > 0 ? 'Perlu restock segera' : 'Stok dalam kondisi baik'}
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
+
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -221,14 +276,27 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">24</div>
-              <p className="text-xs text-muted-foreground">+5 dari hari sebelumnya</p>
+              {statsLoading ? (
+                <div className="space-y-2">
+                  <div className="h-8 bg-muted animate-pulse rounded" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                </div>
+              ) : statsError ? (
+                <div className="text-sm text-red-600">Error loading data</div>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{stats?.orders.today || 0}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Pesanan dalam periode ini
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
 
         {/* Enhanced Date Range Picker */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border-0 ">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
@@ -240,9 +308,9 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
           <CardContent>
             <div className="space-y-4">
                {/* Quick Presets */}
-               <div>
-                 <label className="text-sm font-medium mb-2 block">Periode Cepat:</label>
-                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <div>
+                   <p className="text-sm font-medium mb-2">Periode Cepat:</p>
+                  <div aria-label="Periode Cepat" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                    <Button
                      variant="outline"
                      size="sm"
@@ -336,8 +404,9 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                <div className="space-y-4">
                  <div className="flex flex-col sm:flex-row gap-4 items-end">
                    <div className="flex-1">
-                     <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
+                     <label htmlFor="tanggal-mulai" className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
                      <input
+                       id="tanggal-mulai"
                        type="date"
                        value={dateRange.start}
                        onChange={(e) => handleDateChange('start', e.target.value)}
@@ -346,8 +415,9 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                      />
                    </div>
                    <div className="flex-1">
-                     <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
+                     <label htmlFor="tanggal-akhir" className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
                      <input
+                       id="tanggal-akhir"
                        type="date"
                        value={dateRange.end}
                        onChange={(e) => handleDateChange('end', e.target.value)}
@@ -377,19 +447,19 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
         <div className="w-full overflow-hidden">
           <SwipeableTabs defaultValue="profit" className="space-y-4">
             <SwipeableTabsList className="h-12 w-full">
-              <SwipeableTabsTrigger value="profit" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
+              <SwipeableTabsTrigger value="profit" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:">
                 <TrendingUp className="h-4 w-4 mr-2" />
                 {getTabLabel('Profit & Loss', 'Profit')}
               </SwipeableTabsTrigger>
-              <SwipeableTabsTrigger value="sales" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
+              <SwipeableTabsTrigger value="sales" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:">
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 {getTabLabel('Penjualan', 'Sales')}
               </SwipeableTabsTrigger>
-              <SwipeableTabsTrigger value="inventory" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
+              <SwipeableTabsTrigger value="inventory" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:">
                 <Package className="h-4 w-4 mr-2" />
                 {getTabLabel('Inventory', 'Inv')}
               </SwipeableTabsTrigger>
-              <SwipeableTabsTrigger value="financial" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-sm">
+              <SwipeableTabsTrigger value="financial" className="h-9 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:">
                 <DollarSign className="h-4 w-4 mr-2" />
                 {getTabLabel('Keuangan', 'Fin')}
               </SwipeableTabsTrigger>

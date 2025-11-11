@@ -36,8 +36,8 @@ export const animations = {
 
   // Hover transitions
   scaleOnHover: 'hover:scale-105 transition-transform duration-200',
-  liftOnHover: 'hover:-translate-y-1 hover:shadow-lg transition-all duration-200',
-  glowOnHover: 'hover:shadow-xl hover:shadow-primary/20 transition-shadow duration-200',
+  liftOnHover: 'hover:-translate-y-1 hover: transition-all duration-200',
+  glowOnHover: 'hover: /20  duration-200',
 
   // Focus animations
   focusRing: 'focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200',

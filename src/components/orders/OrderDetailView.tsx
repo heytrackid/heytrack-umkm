@@ -72,7 +72,7 @@ export const OrderDetailView = ({
         if (navigator.share) {
             try {
                 await navigator.share(shareData)
-            } catch (_error) {
+            } catch {
                 // User cancelled or error occurred
             }
         }

@@ -67,7 +67,6 @@ export const DataTable = <TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = useState('')
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
@@ -137,13 +136,17 @@ export const DataTable = <TData, TValue>({
               <TableRow key={headerGroup['id']}>
                 {headerGroup['headers'].map((header) => (
                   <TableHead key={header['id']} className="bg-muted/50">
-                    {header.isPlaceholder ? null : (
+                    {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <div
                         onClick={header.column.getToggleSortingHandler()}
-                        className={cn(
-                          'flex items-center gap-2',
-                          header.column.getCanSort() && 'cursor-pointer select-none'
-                        )}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            header.column.getToggleSortingHandler?.()
+                          }
+                        }}
+                        className="flex items-center gap-2 cursor-pointer select-none"
+                        role="button"
+                        tabIndex={0}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {header.column.getIsSorted() === 'asc' && (
@@ -152,6 +155,10 @@ export const DataTable = <TData, TValue>({
                         {header.column.getIsSorted() === 'desc' && (
                           <span className="text-xs">↓</span>
                         )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {flexRender(header.column.columnDef.header, header.getContext())}
                       </div>
                     )}
                   </TableHead>

@@ -1,4 +1,4 @@
 
 
 // Backward compatibility barrel for UI chart types
-export * from './ui/charts'
+export type * from './ui/charts'

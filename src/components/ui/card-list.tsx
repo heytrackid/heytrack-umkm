@@ -41,7 +41,7 @@ export const CardList = <T extends CardListItem>({
         <Card
           key={item['id']}
           className={cn(
-            "transition-all hover:shadow-md",
+            "transition-all hover:",
             onItemClick && "cursor-pointer"
           )}
           onClick={() => onItemClick?.(item)}

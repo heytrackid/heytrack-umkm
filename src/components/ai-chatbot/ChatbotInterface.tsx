@@ -314,7 +314,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
 
         {/* Message content */}
         <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} flex-1 min-w-0 overflow-hidden`}>
-          <div className={`px-4 py-3 rounded-2xl w-full break-words overflow-hidden shadow-sm ${
+          <div className={`px-4 py-3 rounded-2xl w-full break-words overflow-hidden  ${
             isUser
               ? 'bg-gradient-to-br from-gray-500 to-gray-600 text-white'
                 : 'bg-gradient-to-br from-muted to-muted/80 text-foreground border border-border/20'
@@ -459,7 +459,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
   return (
     <Card className={`fixed bottom-4 right-4 w-96 h-[700px] border-2 flex flex-col ${className}`}>
       {/* Header */}
-      <CardHeader className="p-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-t-lg flex flex-row items-center justify-between flex-shrink-0 shadow-lg">
+      <CardHeader className="p-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-t-lg flex flex-row items-center justify-between flex-shrink-0 ">
         <div className="flex items-center space-x-3">
           <div className="relative">
             <Bot className="h-6 w-6 animate-pulse" />
@@ -514,7 +514,7 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center animate-pulse">
                     <Bot className="h-4 w-4 text-white" />
                   </div>
-                   <div className="bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-3 rounded-2xl border border-border/20 shadow-sm">
+                   <div className="bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-3 rounded-2xl border border-border/20 ">
                     <div className="flex items-center space-x-2">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-muted0 rounded-full animate-bounce" />

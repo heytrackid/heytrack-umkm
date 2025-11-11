@@ -9,7 +9,7 @@ import type { Row } from '@/types/database'
 import type { RecipeWithIngredients } from '@/types/query-results'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 
 

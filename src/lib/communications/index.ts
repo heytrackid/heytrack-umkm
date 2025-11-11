@@ -11,7 +11,7 @@ import type { SmartNotification } from '@/lib/communications/types'
  */
 
 // Export all types
-export * from './types'
+export type * from './types'
 
 // Export all services
 export { WhatsAppService } from './whatsapp'

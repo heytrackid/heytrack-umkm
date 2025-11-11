@@ -283,7 +283,7 @@ export const ToastNotification = ({
 
   return (
     <div className={cn(
-      "fixed top-4 right-4 z-50 max-w-sm w-full p-4 rounded-lg border shadow-lg",
+      "fixed top-4 right-4 z-50 max-w-sm w-full p-4 rounded-lg border ",
       getToastStyles()
     )}>
       <div className="flex items-start gap-3">

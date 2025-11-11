@@ -1,11 +1,11 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
-import { apiLogger, logError } from '@/lib/logger'
-import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+ import { apiLogger, logError } from '@/lib/logger'
+ import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -32,15 +32,17 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     }
 
     const { email, password, fullName } = validation.data
+    const sanitizedEmail = InputSanitizer.sanitizeHtml(email).trim()
+    const sanitizedFullName = InputSanitizer.sanitizeHtml(fullName).trim()
 
     const supabase = await createClient()
 
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: sanitizedEmail,
       password,
       options: {
         data: {
-          full_name: fullName,
+          full_name: sanitizedFullName,
         },
       },
     })

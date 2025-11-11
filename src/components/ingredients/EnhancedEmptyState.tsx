@@ -66,7 +66,7 @@ export const EnhancedEmptyState = ({
                 <Button
                     onClick={onAdd}
                     size="lg"
-                    className="mb-4 shadow-md hover:shadow-lg transition-shadow"
+                    className="mb-4 transition-all"
                 >
                     <Plus className="w-5 h-5 mr-2" />
                     Tambah Bahan Baku Pertama

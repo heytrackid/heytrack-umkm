@@ -42,7 +42,7 @@ export function enhancedToast({
 }: EnhancedToastOptions) {
   return sonnerToast.custom(
     (t) => (
-      <div className="bg-background border rounded-lg shadow-lg p-4 min-w-[300px] max-w-[500px] animate-in slide-in-from-bottom-5">
+      <div className="bg-background border rounded-lg  p-4 min-w-[300px] max-w-[500px] animate-in slide-in-from-bottom-5">
         <div className="flex items-start gap-3">
           {getIcon(type)}
           <div className="flex-1 space-y-1">
@@ -133,7 +133,7 @@ export function undoableToast({
 }) {
   return sonnerToast.custom(
     (t) => (
-      <div className="bg-background border rounded-lg shadow-lg p-4 min-w-[350px] animate-in slide-in-from-bottom-5">
+      <div className="bg-background border rounded-lg  p-4 min-w-[350px] animate-in slide-in-from-bottom-5">
         <div className="flex items-start gap-3">
           <CheckCircle2 className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
           <div className="flex-1 space-y-2">

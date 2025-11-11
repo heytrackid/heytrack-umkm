@@ -1,11 +1,14 @@
 'use client'
 
 import { Calendar } from 'lucide-react'
+import { format } from 'date-fns'
+import type { DateRange } from 'react-day-picker'
 
 import { calculateProfitDateRange } from '@/app/profit/utils'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import type { PeriodType, ProfitFilters, ProfitFiltersProps } from '@/app/profit/components/types'
@@ -26,6 +29,20 @@ export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilter
     onFiltersChange(newFilters)
   }
 
+  const handleDateRangeChange = (dateRange: DateRange | undefined) => {
+    if (!dateRange?.from || !dateRange?.to) {
+      onFiltersChange({ dateRange: null })
+      return
+    }
+
+    const newFilters: Partial<ProfitFilters> = {
+      dateRange,
+      startDate: format(dateRange.from, 'yyyy-MM-dd'),
+      endDate: format(dateRange.to, 'yyyy-MM-dd')
+    }
+    onFiltersChange(newFilters)
+  }
+
 
 
   return (
@@ -39,12 +56,12 @@ export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilter
       <CardContent>
         <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
           <div>
-            <label className="text-sm font-medium mb-2 block">Periode</label>
+            <label htmlFor="periode-select" className="text-sm font-medium mb-2 block">Periode</label>
             <Select
               value={filters.selectedPeriod}
               onValueChange={handlePeriodChange}
             >
-              <SelectTrigger>
+              <SelectTrigger id="periode-select">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -59,8 +76,14 @@ export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilter
 
           {filters.selectedPeriod === 'custom' && (
             <div>
-              <label className="text-sm font-medium mb-2 block">Rentang Tanggal</label>
-
+              <label htmlFor="date-range" className="text-sm font-medium mb-2 block">Rentang Tanggal</label>
+              <DateRangePicker
+                date={filters.dateRange ?? undefined}
+                onDateChange={handleDateRangeChange}
+                showPresets={true}
+                maxDate={new Date()}
+                placeholder="Pilih rentang tanggal"
+              />
             </div>
           )}
 

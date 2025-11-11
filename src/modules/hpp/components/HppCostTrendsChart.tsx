@@ -1,6 +1,5 @@
 'use client'
 
-import clsx from 'clsx'
 import { useMemo } from 'react'
 
 import { LazyAreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
@@ -81,11 +80,11 @@ export const HppCostTrendsChart = ({
   }
 
   return (
-    <Card className={clsx('h-full', className)}>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>HPP Cost Trends</CardTitle>
       </CardHeader>
-      <CardContent className="h-full">
+      <CardContent>
         <ResponsiveContainer width="100%" height={height}>
           <LazyAreaChart data={chartData} margin={{ top: 16, right: 24, left: 12, bottom: 8 }}>
             <defs>

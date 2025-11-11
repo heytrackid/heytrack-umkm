@@ -43,7 +43,7 @@ const TabsTrigger = ({
       className={cn(
        "inline-flex h-8 flex-1 items-center justify-center gap-2 rounded-md border border-transparent px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all",
        "text-muted-foreground hover:text-foreground",
-       "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+       "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:",
        "dark:data-[state=active]:bg-gray-800 dark:text-muted-foreground dark:hover:text-gray-200",
        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
        "disabled:pointer-events-none disabled:opacity-50",

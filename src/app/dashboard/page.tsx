@@ -31,7 +31,7 @@ const DashboardClient = dynamic(
   }
 )
 
-async function DashboardPage() {
+const DashboardPage = () => {
   return <DashboardClient />
 }
 

@@ -1,12 +1,28 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { withSecurity, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
+
+const SupplierImportSchema = z.object({
+  name: z.string().min(1),
+  contact_person: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().email().optional(),
+  address: z.string().optional(),
+  company_type: z.string().optional(),
+  payment_terms: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+const SuppliersImportSchema = z.object({
+  suppliers: z.array(SupplierImportSchema),
+})
 
 // POST /api/suppliers/import - Import suppliers from CSV
 async function POST(request: NextRequest): Promise<NextResponse> {
@@ -19,11 +35,17 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     if (authError || !user) {
       apiLogger.error({ error: authError }, 'POST /api/suppliers/import - Unauthorized')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }    const { suppliers } = await request.json() as { suppliers: unknown[] }
+    }    const body = await request.json()
+    const validation = SuppliersImportSchema.safeParse(body)
 
-    if (!Array.isArray(suppliers) || suppliers.length === 0) {
-      return NextResponse.json({ error: 'Invalid suppliers data' }, { status: 400 })
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Invalid request data', details: validation.error.issues },
+        { status: 400 }
+      )
     }
+
+    const { suppliers } = validation.data
 
     const errors: Array<{ row: number; error: string }> = []
     const validSuppliers: Array<{

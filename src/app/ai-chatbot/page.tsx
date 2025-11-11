@@ -2,12 +2,12 @@
 
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { useState, Suspense, useCallback, useEffect } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { useAuth } from '@/providers/AuthProvider'
 
-import { useChatMessages, useAIService } from '@/app/ai-chatbot/hooks/index'
+import { useAIService, useChatMessages } from '@/app/ai-chatbot/hooks/index'
 
 // Lazy load heavy chatbot components
 const ChatHeader = dynamic(() => import('./components').then(mod => ({ default: mod.ChatHeader })), {
@@ -66,7 +66,7 @@ const AIChatbotPage = (): JSX.Element => {
       }
 
       addMessage(assistantMessage)
-    } catch (_error) {
+    } catch {
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant' as const,

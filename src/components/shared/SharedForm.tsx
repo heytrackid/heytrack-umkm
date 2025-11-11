@@ -83,7 +83,7 @@ export const SharedForm = <T extends FieldValues>({
   compact = false
 }: SharedFormProps<T>) => {
   // zodResolver requires specific schema types, but we need generic support
-   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const resolver = zodResolver(schema as any) as Resolver<T>
 
   const form = useForm<T>({
@@ -142,8 +142,7 @@ export const SharedForm = <T extends FieldValues>({
                         label={field.label}
                         name={field.name}
                         type={field['type']}
-                        // eslint-disable-next-line react-hooks/incompatible-library
-                        value={form.watch(fieldPath) as unknown}
+                        value={form.watch(fieldPath)}
                         onChange={(_, value) => form.setValue(fieldPath, value as PathValue<T, Path<T>>)}
                         error={errorMessage}
                         required={field.required}
@@ -189,7 +188,7 @@ export function useSharedForm<T extends FieldValues>(
   defaultValues?: Partial<T>
 ) {
   const form = useForm<T>({
-     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(schema as any) as Resolver<T>,
     defaultValues: defaultValues as DefaultValues<T> | undefined,
   })
@@ -230,7 +229,7 @@ export const SharedModalForm = <T extends Record<string, unknown>>({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70">
       <div
-        className={`bg-background rounded-lg shadow-xl w-full max-h-[90vh] overflow-y-auto ${size === 'sm' ? 'max-w-md' :
+        className={`bg-background rounded-lg  w-full max-h-[90vh] overflow-y-auto ${size === 'sm' ? 'max-w-md' :
           size === 'md' ? 'max-w-lg' :
             size === 'lg' ? 'w-[calc(100%-2rem)] max-w-2xl' :
               'w-[calc(100%-2rem)] max-w-4xl'

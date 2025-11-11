@@ -1,7 +1,7 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { PricingAutomation, UMKM_CONFIG } from '@/lib/automation/index'
 import { apiLogger } from '@/lib/logger'

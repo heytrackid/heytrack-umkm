@@ -411,6 +411,13 @@ export const ProductionTimeline = ({
                               width: position.width
                             }}
                             onClick={() => handleBatchClick(batch)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                handleBatchClick(batch)
+                              }
+                            }}
+                            role="button"
+                            tabIndex={0}
                           >
                             <div className="flex items-center justify-between h-full px-2 text-xs text-white font-medium">
                               <span className="truncate-desktop-only">

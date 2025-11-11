@@ -6,7 +6,7 @@ export const runtime = 'nodejs'
 // PUT: Update template
 // DELETE: Delete template
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import type { Update } from '@/types/database'

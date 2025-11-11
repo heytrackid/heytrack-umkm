@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 
 import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
-import { logger } from '@/lib/logger'
+import { apiLogger } from '@/lib/logger'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
@@ -53,7 +53,7 @@ async function getChatbotAnalytics(days: number): Promise<{
   // Get all messages in date range
   const { data: messages } = await supabase
     .from('chat_messages')
-    .select('content, metadata, created_at, role')
+    .select('id, session_id, content, metadata, created_at, role')
     .in('session_id', sessionIds)
     .gte('created_at', startDate.toISOString())
 
@@ -62,8 +62,8 @@ async function getChatbotAnalytics(days: number): Promise<{
 
   // Analyze topics
   const chatMessages = messages?.map(m => ({
-    id: (m as any).id || '',
-    session_id: (m as any).session_id || '',
+    id: m.id || '',
+    session_id: m.session_id || '',
     role: m.role as 'user' | 'assistant' | 'system',
     content: m.content,
     metadata: (m.metadata as Record<string, unknown>) || {},
@@ -82,19 +82,23 @@ async function getChatbotAnalytics(days: number): Promise<{
   // Analyze response times
   const responseTimes = messages
     ?.filter(m => m.metadata && typeof m.metadata === 'object' && 'response_time_ms' in m.metadata)
-    .map(m => (m.metadata as any).response_time_ms)
-    .filter(time => typeof time === 'number') ?? []
+    .map(m => (m.metadata as Record<string, unknown>)['response_time_ms'])
+    .filter((time): time is number => typeof time === 'number') ?? []
 
   const avgResponseTime = responseTimes.length > 0
     ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
     : 0
 
   // Calculate user satisfaction
-  const userSatisfaction = ChatSessionService.calculateUserSatisfaction(messages ?? [])
+  const mappedMessages = (messages ?? []).map(m => ({
+    role: m.role || 'unknown',
+    content: m.content || undefined
+  }))
+  const userSatisfaction = ChatSessionService.calculateUserSatisfaction(mappedMessages)
 
   // Calculate fallback usage
   const fallbackMessages = messages?.filter(m =>
-    m.metadata && typeof m.metadata === 'object' && 'fallback_used' in m.metadata && (m.metadata as any).fallback_used
+    m.metadata && typeof m.metadata === 'object' && 'fallback_used' in m.metadata && (m.metadata as Record<string, unknown>)['fallback_used']
   ) ?? []
   const fallbackUsage = totalMessages > 0 ? (fallbackMessages.length / totalMessages) * 100 : 0
 
@@ -130,11 +134,11 @@ async function adminChatbotAnalyticsGET(request: NextRequest): Promise<NextRespo
 
     const analytics = await getChatbotAnalytics(validatedDays)
 
-    logger.info({ days: validatedDays }, 'Chatbot analytics retrieved')
+    apiLogger.info({ days: validatedDays }, 'Chatbot analytics retrieved')
 
     return NextResponse.json(analytics)
   } catch (error) {
-    logger.error({ error }, 'Error retrieving chatbot analytics')
+    apiLogger.error({ error }, 'Error retrieving chatbot analytics')
     return handleAPIError(error, 'GET /api/admin/chatbot-analytics')
   }
 }

@@ -245,7 +245,7 @@ const IngredientsPage = () => {
                   success: true,
                   ...(result.count !== undefined && { count: result.count })
                 }
-              } catch (_error) {
+               } catch {
                 return {
                   success: false,
                   error: 'Terjadi kesalahan saat import'

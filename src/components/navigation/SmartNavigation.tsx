@@ -20,6 +20,12 @@ import { cn } from '@/lib/utils'
 
 
 // Haptic feedback utility for mobile devices
+interface ExtendedWindow extends Window {
+  hapticFeedback?: {
+    impact: (type: string) => void
+  }
+}
+
 const triggerHapticFeedback = (type: 'heavy' | 'light' | 'medium' = 'light') => {
   if (typeof window !== 'undefined' && 'navigator' in window) {
     try {
@@ -33,14 +39,13 @@ const triggerHapticFeedback = (type: 'heavy' | 'light' | 'medium' = 'light') => 
         navigator.vibrate(patterns[type] ?? [10])
       }
       // Fallback for iOS devices with haptic feedback
-       
-      else if ('hapticFeedback' in (window as any)) {
+      else if ('hapticFeedback' in (window as ExtendedWindow)) {
         const hapticTypes: Record<string, string> = {
           light: 'impactLight',
           medium: 'impactMedium',
           heavy: 'impactHeavy'
         }
-        ;(window as { hapticFeedback?: { impact: (type: string) => void } }).hapticFeedback?.impact(hapticTypes[type] ?? 'impactLight')
+        ;(window as ExtendedWindow).hapticFeedback?.impact(hapticTypes[type] ?? 'impactLight')
       }
     } catch {
       // Silently fail if haptic feedback is not supported
@@ -271,15 +276,14 @@ export const NavItem = ({ item, index }: NavItemProps) => {
       className={cn(
         "flex flex-col items-center space-y-1 px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-[13px] font-medium transition-all duration-200 rounded-lg min-w-[50px] sm:min-w-[60px] flex-1 max-w-[70px] sm:max-w-[80px] relative group touch-manipulation",
         "min-h-[56px] active:scale-95", // Ensure minimum touch target size (44px is iOS minimum, we use 56px for comfort)
-        isActive && "text-primary bg-primary/10 shadow-sm scale-105",
+        isActive && "text-primary bg-primary/10  scale-105",
         isHovered && !isActive && "hover:opacity-80"
       )}
       style={{ animationDelay: `${index * 100}ms` }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={() => linkPreloading.onFocus(item.href)}
-      aria-label={`Navigate to ${item.title}`}
-      role="navigation"
+       aria-label={`Navigate to ${item.title}`}
     >
       <div className="relative">
         <item.icon
@@ -324,7 +328,7 @@ export const SmartBottomNav = () => {
       <nav
         data-mobile-nav
         data-testid="mobile-nav"
-        className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 place-items-center h-[56px] px-1 bg-background/95 backdrop-blur-md border-t border-border/50 shadow-lg safe-bottom animate-in fade-in duration-300 pb-[env(safe-area-inset-bottom)]"
+        className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 place-items-center h-[56px] px-1 bg-background/95 backdrop-blur-md border-t border-border/50  safe-bottom animate-in fade-in duration-300 pb-[env(safe-area-inset-bottom)]"
         role="navigation"
         aria-label="Mobile navigation"
       >
@@ -370,8 +374,8 @@ export const SmartBottomNav = () => {
             <SmartLink
               key={item.href}
               href={item.href}
-              className="flex items-center space-x-4 p-4 rounded-xl border shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 bg-card hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              activeClassName="border-primary bg-primary/15 shadow-primary/30 ring-2 ring-primary/20 text-primary font-semibold"
+              className="flex items-center space-x-4 p-4 rounded-xl border  hover: hover:scale-105 transition-all duration-200 bg-card hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              activeClassName="border-primary bg-primary/15 ring-2 ring-primary/20 text-primary font-semibold"
               preloadDelay={100}
               onClick={() => {
                 triggerHapticFeedback('light')

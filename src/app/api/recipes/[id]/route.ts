@@ -1,16 +1,16 @@
 export const runtime = 'nodejs'
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { createErrorResponse, handleAPIError } from '@/lib/api-core'
 import { cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
-import { RecipeUpdateSchema, RecipeIngredientInsertSchema } from '@/lib/validations/domains/recipe'
+import { RecipeIngredientInsertSchema, RecipeUpdateSchema } from '@/lib/validations/domains/recipe'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -90,6 +90,7 @@ async function putHandler(
     const ingredientsField = body.ingredients ?? body.recipe_ingredients
 
     // Extract recipe data (without ingredients) - explicitly exclude these fields from recipe update
+     
     const { recipe_ingredients: _recipe_ingredients, ingredients: _ingredients, ...recipeData } = body
 
     // Validate recipe data if provided
@@ -276,4 +277,5 @@ const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
 const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
 const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
 
-export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }
+export { securedDELETE as DELETE, securedGET as GET, securedPUT as PUT }
+

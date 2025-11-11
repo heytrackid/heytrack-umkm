@@ -11,7 +11,7 @@ export { InventoryTrendsChart } from './components/InventoryTrendsChart'
 export { MiniChart } from './components/MiniChart'
 
 // Lazy loaded chart components
-export { 
+export {
   LazyFinancialTrendsChart,
   LazyInventoryTrendsChart,
   LazyMiniChart,
@@ -25,7 +25,7 @@ export {
   ChartDashboardWithProgressiveLoading,
   useChartProgressiveLoading,
   ChartPerformanceUtils
-} from './components/LazyCharts'
+} from './components/ModuleCharts'
 
 // Hooks (when added)
 // export { useChartData } from './hooks/useChartData'

@@ -3,11 +3,11 @@ export const runtime = 'nodejs'
 
 // API Route: Business Context Loading
 
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/logger';
 import { BusinessContextService } from '@/lib/services/BusinessContextService';
-import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index'
+import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index';
 import { createClient } from '@/utils/supabase/server';
 
 /**

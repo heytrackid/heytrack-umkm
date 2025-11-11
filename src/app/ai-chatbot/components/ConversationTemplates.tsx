@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 
-import { CONVERSATION_TEMPLATES, ConversationTemplate } from '@/app/ai-chatbot/types/index'
+import type { ConversationTemplate } from '@/app/ai-chatbot/types/index';
+import { CONVERSATION_TEMPLATES } from '@/app/ai-chatbot/types/index'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -53,7 +54,7 @@ export const ConversationTemplates = ({
         {CONVERSATION_TEMPLATES.map((template) => (
           <Card
             key={template.id}
-            className="group hover:shadow-md transition-all duration-200 cursor-pointer border-2 hover:border-primary/20"
+            className="group hover: transition-all duration-200 cursor-pointer border-2 hover:border-primary/20"
             onClick={() => handleTemplateClick(template)}
           >
             <CardHeader className="pb-3">

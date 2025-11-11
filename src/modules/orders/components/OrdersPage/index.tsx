@@ -45,7 +45,7 @@ const OrderDetailView = dynamic(() => import('../OrderDetailView').then(mod => (
 
 // Import modular components
 
-interface OrderFilters {
+interface OrdersPageFilters {
     status: OrderStatus[]
     payment_status: string[]
     date_from: string
@@ -83,7 +83,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
     type ActiveView = 'analytics' | 'calendar' | 'dashboard' | 'list'
     const [activeView, setActiveView] = useState<ActiveView>('dashboard')
 
-    const [filters, setFilters] = useState<OrderFilters>({
+    const [filters, setFilters] = useState<OrdersPageFilters>({
         status: [],
         payment_status: [],
         date_from: '',

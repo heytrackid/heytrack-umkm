@@ -6,6 +6,12 @@ import { cn } from '@/lib/utils'
 import type { ComponentProps } from 'react'
 
 // Haptic feedback utility for mobile devices
+interface ExtendedWindow extends Window {
+  hapticFeedback?: {
+    impact: (type: string) => void
+  }
+}
+
 const triggerHapticFeedback = (type: 'heavy' | 'light' | 'medium' = 'light') => {
   if (typeof window !== 'undefined' && 'navigator' in window) {
     try {
@@ -18,14 +24,13 @@ const triggerHapticFeedback = (type: 'heavy' | 'light' | 'medium' = 'light') => 
         navigator.vibrate(patterns[type] ?? [10])
       }
        
-      else if ('hapticFeedback' in (window as Record<string, any>)) {
+      else if ('hapticFeedback' in (window as ExtendedWindow)) {
         const hapticTypes: Record<string, string> = {
           light: 'impactLight',
           medium: 'impactMedium',
           heavy: 'impactHeavy'
         }
-         
-        ;(window as Record<string, any>)['hapticFeedback'].impact(hapticTypes[type])
+        ;(window as ExtendedWindow).hapticFeedback?.impact(hapticTypes[type] ?? 'impactLight')
       }
     } catch {
       // Silently fail if haptic feedback is not supported

@@ -67,24 +67,24 @@
 }
 
 .dark {
-  /* Vercel-inspired dark mode - Pure black with subtle borders */
+  /* Vercel-inspired dark mode - Pure black with visible borders */
   --background: oklch(0 0 0);           /* Pure black #000000 */
   --foreground: oklch(0.93 0 0);        /* Light gray #EDEDED */
-  --card: oklch(0.04 0 0);              /* Slightly lighter #0A0A0A */
+  --card: oklch(0.08 0 0);              /* Slightly lighter #141414 */
   --card-foreground: oklch(0.93 0 0);   /* Light gray #EDEDED */
-  --popover: oklch(0.07 0 0);           /* Elevated #111111 */
+  --popover: oklch(0.1 0 0);            /* Elevated #1A1A1A */
   --popover-foreground: oklch(0.93 0 0);
   --primary: oklch(0.8 0 0);
   --primary-foreground: oklch(0.1 0 0);
-  --secondary: oklch(0.07 0 0);         /* Elevated #111111 */
+  --secondary: oklch(0.1 0 0);          /* Elevated #1A1A1A */
   --secondary-foreground: oklch(0.93 0 0);
-  --muted: oklch(0.07 0 0);             /* Elevated #111111 */
+  --muted: oklch(0.1 0 0);              /* Elevated #1A1A1A */
   --muted-foreground: oklch(0.53 0 0);  /* Medium gray #888888 */
-  --accent: oklch(0.07 0 0);
+  --accent: oklch(0.1 0 0);
   --accent-foreground: oklch(0.93 0 0);
   --destructive: oklch(0.6 0 0);
-  --border: oklch(0.1 0 0);             /* Very subtle border rgba(255,255,255,0.1) */
-  --input: oklch(0.04 0 0);             /* Card color #0A0A0A */
+  --border: oklch(0.2 0 0);             /* More visible border #333333 */
+  --input: oklch(0.08 0 0);             /* Card color #141414 */
   --ring: oklch(0.5 0 0);
   --chart-1: oklch(0.4 0 0);
   --chart-2: oklch(0.5 0 0);
@@ -94,7 +94,7 @@
 
   /* Syntax highlighting colors for dark mode */
   --syntax-line-number: oklch(0.53 0 0);
-  --syntax-border: oklch(0.1 0 0);
+  --syntax-border: oklch(0.2 0 0);
 
 }
 
@@ -700,7 +700,7 @@
 
   /* Smooth transitions for all interactive elements */
   button, input, textarea, select {
-    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+    transition-property: background-color, border-color, color, fill, stroke, opacity, transform;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
   }

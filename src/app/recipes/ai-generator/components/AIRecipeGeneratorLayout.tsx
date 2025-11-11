@@ -346,7 +346,7 @@ const AIRecipeGeneratorPage = () => {
         {/* Header with Mode Toggle */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center shadow-lg">
+            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center ">
               <Sparkles className="h-7 w-7 text-white" />
             </div>
             <div>
@@ -364,7 +364,7 @@ const AIRecipeGeneratorPage = () => {
             <button
               onClick={() => setMode('quick')}
               className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'quick'
-                ? 'bg-primary text-primary-foreground shadow-md'
+                ? 'bg-primary text-primary-foreground '
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
             >
@@ -374,7 +374,7 @@ const AIRecipeGeneratorPage = () => {
             <button
               onClick={() => setMode('complete')}
               className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'complete'
-                ? 'bg-primary text-primary-foreground shadow-md'
+                ? 'bg-primary text-primary-foreground '
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
             >
@@ -393,6 +393,13 @@ const AIRecipeGeneratorPage = () => {
                   <div
                     className={`flex items-center justify-center w-10 h-10 rounded-full border-2 cursor-pointer transition-all ${getStepClassName(step['id'])}`}
                     onClick={() => handleStepClick(step['id'])}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        handleStepClick(step['id'])
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                   >
                     {step['id'] < currentStep ? (
                       <CheckCircle className="h-5 w-5" />
@@ -526,7 +533,7 @@ const AIRecipeGeneratorPage = () => {
                   <div className="text-center space-y-8">
                     {/* Animated Chef Icon */}
                     <div className="relative">
-                      <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto shadow-2xl">
+                      <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto ">
                         <ChefHat className="h-12 w-12 text-white animate-pulse" />
                       </div>
                       <div className="absolute inset-0 h-24 w-24 rounded-full bg-gradient-to-br from-primary to-primary/80 mx-auto animate-ping opacity-30" />

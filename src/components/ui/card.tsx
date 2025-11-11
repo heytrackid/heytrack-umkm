@@ -7,7 +7,7 @@ import type { ComponentProps } from 'react'
 export const Card = ({ className, ...props }: ComponentProps<'div'>) => (
     <div
       className={cn(
-        "rounded-lg border bg-card text-card-foreground shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg hover:border-border/60 transition-all duration-200",
+        "rounded-lg border border-border bg-card text-card-foreground hover:border-border/80 transition-all duration-200",
         className
       )}
       {...props}
@@ -28,7 +28,9 @@ const CardTitle = ({ className, ...props }: ComponentProps<'h3'>) => (
         className
       )}
       {...props}
-    />
+    >
+      {props.children && props.children}
+    </h3>
   )
 
 const CardDescription = ({ className, ...props }: ComponentProps<'p'>) => (
@@ -52,6 +54,6 @@ const CardFooter = ({ className, ...props }: ComponentProps<'div'>) => (
 
 
 export {
-    CardContent, CardDescription, CardFooter, CardHeader, CardTitle
+  CardContent, CardDescription, CardFooter, CardHeader, CardTitle
 }
 

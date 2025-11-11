@@ -66,7 +66,7 @@ Focus on Indonesian food business terminology.`
       try {
         const analysis = JSON.parse(response) as NLPAnalysis
         return analysis
-      } catch (_error) {
+      } catch {
         return this.fallbackAnalysis(safeQuery)
       }
     } catch (error) {

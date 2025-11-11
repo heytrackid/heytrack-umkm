@@ -1,7 +1,7 @@
-import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/server'
+import 'server-only'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 

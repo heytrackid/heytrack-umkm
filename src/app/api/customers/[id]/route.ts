@@ -4,14 +4,14 @@ export const runtime = 'nodejs'
 // API Route: /api/customers/[id]
 // Handles GET, PUT, DELETE operations for individual customer
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import { CustomerUpdateSchema, type CustomerUpdateInput } from '@/lib/validations/domains/customer'
 import type { Update } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
@@ -62,7 +62,7 @@ function mapUpdatePayload(data: CustomerUpdateInput): Update<'customers'> {
   setters.forEach(({ key, map }) => {
     const value = data[key]
     if (value !== undefined) {
-      ;(payload as any)[key as keyof Update<'customers'>] = map(value)
+      ;(payload as Record<string, unknown>)[key as keyof Update<'customers'>] = map(value)
     }
   })
 
@@ -235,4 +235,5 @@ const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
 const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
 const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
 
-export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }
+export { securedDELETE as DELETE, securedGET as GET, securedPUT as PUT }
+

@@ -5,9 +5,10 @@ export const runtime = 'nodejs'
  * AI Chat Suggestions API
  */
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
+import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
 import { BusinessContextService } from '@/lib/services/BusinessContextService'
 import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
 import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index'
@@ -16,6 +17,7 @@ import { createClient } from '@/utils/supabase/server'
 
 async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
+    apiLogger.info({ url: request.url }, 'GET /api/ai/suggestions - Request received')
     const supabase = await createClient()
 
     // Get authenticated user

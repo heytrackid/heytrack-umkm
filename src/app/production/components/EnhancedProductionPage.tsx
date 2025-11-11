@@ -599,7 +599,7 @@ const ProductionCard = ({
     formatCurrency,
     getStatusBadge
 }: ProductionCardProps) => (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="hover: ">
         <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
                 <div>

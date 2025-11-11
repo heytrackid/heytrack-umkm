@@ -6,7 +6,7 @@ export const runtime = 'nodejs'
  * Get system metrics for admin dashboard
  */
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'
@@ -178,7 +178,7 @@ function buildMetricsResponse(
   }
 }
 
-async function getHandler(_request: NextRequest): Promise<NextResponse> {
+async function getHandler(): Promise<NextResponse> {
   try {
     const { context, statusCode } = await authenticateAdmin()
     if (!context) {

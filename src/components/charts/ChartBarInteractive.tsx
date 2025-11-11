@@ -4,8 +4,9 @@ import { useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import type {
+    ChartConfig} from '@/components/ui/chart';
 import {
-    ChartConfig,
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
@@ -19,13 +20,13 @@ interface ChartBarInteractiveProps {
   defaultChart?: string
 }
 
-export function ChartBarInteractive({
+export const ChartBarInteractive = ({
   data,
   title = 'Bar Chart - Interactive',
   description = 'Showing data trends',
   config,
   defaultChart,
-}: ChartBarInteractiveProps) {
+}: ChartBarInteractiveProps) => {
   const chartKeys = Object.keys(config).filter((key) => key !== 'views')
   const [activeChart, setActiveChart] = useState<string>(
     defaultChart || chartKeys[0] || 'desktop'

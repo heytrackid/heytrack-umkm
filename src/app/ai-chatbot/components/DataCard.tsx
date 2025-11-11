@@ -17,7 +17,7 @@ const renderOrdersCard = (title: string, data: Record<string, unknown>, isExpand
   const ordersData = data as { total: number; pending?: number; revenue?: number }
 
   return (
-    <Card className="mt-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800 hover:shadow-md transition-all duration-200 group">
+    <Card className="mt-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800 hover: transition-all duration-200 group">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
@@ -103,7 +103,7 @@ const renderInventoryCard = (title: string, data: Record<string, unknown>, isExp
   const {critical} = inventoryData
 
   return (
-    <Card className="mt-3 bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-950 dark:to-red-900 border-orange-200 dark:border-orange-800 hover:shadow-md transition-all duration-200 group">
+    <Card className="mt-3 bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-950 dark:to-red-900 border-orange-200 dark:border-orange-800 hover: transition-all duration-200 group">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
@@ -193,7 +193,7 @@ const renderProfitCard = (title: string, data: Record<string, unknown>, isExpand
   const isPositive = profitData.margin > 0
 
   return (
-    <Card className="mt-3 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-950 dark:to-green-900 border-emerald-200 dark:border-emerald-800 hover:shadow-md transition-all duration-200 group">
+    <Card className="mt-3 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-950 dark:to-green-900 border-emerald-200 dark:border-emerald-800 hover: transition-all duration-200 group">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
@@ -273,7 +273,7 @@ const renderRecipesCard = (title: string, data: Record<string, unknown>, isExpan
   const recipes = data['top_recipes'] as Array<{ name: string; orders: number }>
 
   return (
-    <Card className="mt-3 bg-gradient-to-br from-pink-50 to-purple-100 dark:from-pink-950 dark:to-purple-900 border-pink-200 dark:border-pink-800 hover:shadow-md transition-all duration-200 group">
+    <Card className="mt-3 bg-gradient-to-br from-pink-50 to-purple-100 dark:from-pink-950 dark:to-purple-900 border-pink-200 dark:border-pink-800 hover: transition-all duration-200 group">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">

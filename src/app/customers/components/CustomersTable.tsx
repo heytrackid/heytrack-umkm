@@ -46,7 +46,7 @@ const MobileCustomerCard = ({
   onDelete,
   formatCurrency
 }: MobileCustomerCardProps): JSX.Element => (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover: ">
       <CardContent className="p-4">
         <div className="space-y-3">
           {/* Header */}

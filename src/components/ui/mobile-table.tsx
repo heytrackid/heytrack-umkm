@@ -199,7 +199,7 @@ export const MobileTable = memo(<T extends Record<string, unknown>>({
         <Card
           key={index}
           className={cn(
-            "transition-all hover:shadow-md cursor-pointer",
+            "transition-all hover: cursor-pointer",
             onRowClick && "hover:bg-muted"
           )}
           onClick={() => onRowClick?.(item)}

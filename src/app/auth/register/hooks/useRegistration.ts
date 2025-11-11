@@ -98,7 +98,7 @@ export function useRegistration(): {
 
           setSuccess(true)
           resolve(true)
-        } catch (_error) {
+         } catch {
           setError('Network error. Please try again.')
           resolve(false)
         }

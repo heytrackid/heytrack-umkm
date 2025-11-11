@@ -15,7 +15,7 @@ export const formatDate = (date: Date, format: string): string => {
 
 // Parse date from string format DD/MM/YYYY
 export const parseDate = (dateString: string): Date => {
-  if (!dateString || dateString.length !== 10) {
+  if (dateString?.length !== 10) {
     throw new Error('Invalid date format');
   }
 

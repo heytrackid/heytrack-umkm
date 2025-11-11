@@ -179,6 +179,13 @@ const NotificationItem = ({ notification, onClick, onMarkAsRead, index }: Notifi
       )}
       style={animations.stagger(index, 30)}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onClick()
+        }
+      }}
+      role="button"
+      tabIndex={0}
     >
       <div className="flex gap-3">
         {/* Icon */}

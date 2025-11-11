@@ -247,11 +247,14 @@ const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }): JS
                 return (
                   <div className="space-y-3">
                     {orders.map((order: Order) => (
-                      <div
-                        key={order['id']}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                        onClick={() => router.push(`/orders/${order['id']}`)}
-                      >
+                       <div
+                         key={order['id']}
+                         className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                         role="button"
+                         tabIndex={0}
+                         onClick={() => router.push(`/orders/${order['id']}`)}
+                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { router.push(`/orders/${order['id']}`); e.preventDefault(); } }}
+                       >
                         <div>
                           <p className="font-medium">{order['order_no']}</p>
                           <p className="text-sm text-muted-foreground">

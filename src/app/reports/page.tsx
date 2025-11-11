@@ -4,10 +4,10 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 import { PageHeader } from '@/components/layout/PageHeader'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
-import { DateRangePicker, type DateRangeValue } from '@/components/ui/date-range'
 
 import { ReportsLayout } from '@/app/reports/components/ReportsLayout'
 
@@ -77,7 +77,8 @@ const ReportsPage = () => {
         <PageHeader title="Laporan" description="Analisis performa bisnis Anda" />
         <div className="w-full sm:w-auto">
           <DateRangePicker
-            onChange={(range: DateRangeValue) => {
+            onDateChange={(range) => {
+              if (!range) return
               const params = new URLSearchParams(window.location.search)
               if (range.from) params.set('from', range.from.toISOString())
               if (range.to) params.set('to', range.to.toISOString())

@@ -10,11 +10,18 @@ export function useTurnstile(options?: UseTurnstileOptions) {
   const [isVerifying, setIsVerifying] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const isDev = process.env.NODE_ENV === 'development'
 
   const handleVerify = useCallback((turnstileToken: string) => {
     setToken(turnstileToken)
     setError(null)
-  }, [])
+    setIsVerified(true)
+    
+    // In development, auto-succeed
+    if (isDev && turnstileToken === 'dev-bypass-token') {
+      options?.onSuccess?.()
+    }
+  }, [isDev, options])
 
   const verifyToken = useCallback(
     async (turnstileToken?: string) => {
@@ -25,6 +32,13 @@ export function useTurnstile(options?: UseTurnstileOptions) {
         setError(errorMsg)
         options?.onError?.(errorMsg)
         return false
+      }
+
+      // Development bypass - skip API call
+      if (isDev && tokenToVerify === 'dev-bypass-token') {
+        setIsVerified(true)
+        options?.onSuccess?.()
+        return true
       }
 
       setIsVerifying(true)
@@ -58,7 +72,7 @@ export function useTurnstile(options?: UseTurnstileOptions) {
         setIsVerifying(false)
       }
     },
-    [token, options]
+    [token, options, isDev]
   )
 
   const reset = useCallback(() => {

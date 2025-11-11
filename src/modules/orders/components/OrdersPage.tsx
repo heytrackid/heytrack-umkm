@@ -558,7 +558,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
             ) : (
               <>
                 {orders.map((order) => (
-                  <Card key={order.id} className="hover:shadow-md transition-shadow">
+                  <Card key={order.id} className="hover: ">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="space-y-1">

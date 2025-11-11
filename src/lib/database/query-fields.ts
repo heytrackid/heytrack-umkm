@@ -202,34 +202,6 @@ export const HPP_FIELDS = {
 /**
  * Helper function to build query with specific fields
  */
-export function selectFields<_T extends keyof typeof RECIPE_FIELDS>(
-  table: 'recipes',
-  view: _T
-): string
-export function selectFields<_T extends keyof typeof ORDER_FIELDS>(
-  table: 'orders',
-  view: _T
-): string
-export function selectFields<_T extends keyof typeof INGREDIENT_FIELDS>(
-  table: 'ingredients',
-  view: _T
-): string
-export function selectFields<_T extends keyof typeof CUSTOMER_FIELDS>(
-  table: 'customers',
-  view: _T
-): string
-export function selectFields<_T extends keyof typeof PRODUCTION_FIELDS>(
-  table: 'production_batches',
-  view: _T
-): string
-export function selectFields<_T extends keyof typeof FINANCIAL_FIELDS>(
-  table: 'financial_records',
-  view: _T
-): string
-export function selectFields<_T extends keyof typeof HPP_FIELDS>(
-  table: 'hpp_calculations',
-  view: _T
-): string
 export function selectFields(table: string, view: string): string {
   const fieldMaps: Record<string, Record<string, string>> = {
     recipes: RECIPE_FIELDS,

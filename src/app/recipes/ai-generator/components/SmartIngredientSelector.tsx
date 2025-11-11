@@ -218,6 +218,13 @@ export const SmartIngredientSelector = ({
                                         className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border/20'
                                             }`}
                                         onClick={() => toggleIngredient(ingredient['id'])}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter' || e.key === ' ') {
+                                            toggleIngredient(ingredient['id'])
+                                          }
+                                        }}
+                                        role="button"
+                                        tabIndex={0}
                                     >
                                         <Checkbox
                                             checked={isSelected}
@@ -263,6 +270,13 @@ export const SmartIngredientSelector = ({
                                         className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${isSelected ? 'bg-primary/5 border-primary' : 'border-border/20'
                                             }`}
                                         onClick={() => toggleIngredient(ingredient['id'])}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter' || e.key === ' ') {
+                                            toggleIngredient(ingredient['id'])
+                                          }
+                                        }}
+                                        role="button"
+                                        tabIndex={0}
                                     >
                                         <Checkbox
                                             checked={isSelected}

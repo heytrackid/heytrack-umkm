@@ -31,7 +31,7 @@ async function handleHealthCheck(_request: NextRequest): Promise<NextResponse> {
       } else {
         supabaseStatus = 'missing_env_vars'
       }
-    } catch (_error) {
+    } catch {
       supabaseStatus = 'error'
     }
 
@@ -43,7 +43,7 @@ async function handleHealthCheck(_request: NextRequest): Promise<NextResponse> {
         supabase: supabaseStatus
       },
       version: '1.0.0'
-    })
+    }, { status: 200 })
   } catch (error) {
     return handleAPIError(error, 'GET /api/health')
   }

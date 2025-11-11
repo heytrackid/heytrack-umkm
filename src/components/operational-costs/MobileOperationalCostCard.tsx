@@ -41,7 +41,7 @@ export const MobileOperationalCostCard = ({
     const monthlyCost = calculateMonthlyCost(cost)
 
     return (
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="transition-all">
             <CardContent className="p-4">
                 <div className="space-y-3">
                     {/* Header */}

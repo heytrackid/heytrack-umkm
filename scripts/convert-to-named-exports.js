@@ -92,7 +92,7 @@ class ExportConverter {
     return /export\s+default\s+/.test(content)
   }
 
-  convertDefaultToNamed(content, componentName) {
+  convertDefaultToNamed(content) {
     let converted = content
 
     // Pattern 1: export default function ComponentName
@@ -128,7 +128,7 @@ class ExportConverter {
     return converted
   }
 
-  findImportsToUpdate(filePath, componentName) {
+  findImportsToUpdate(filePath) {
     const imports = []
     const srcDir = path.join(process.cwd(), 'src')
 
@@ -168,7 +168,7 @@ class ExportConverter {
     return imports
   }
 
-  updateImports(filePath, componentName) {
+  updateImports(filePath) {
     const content = fs.readFileSync(filePath, 'utf8')
     const srcDir = path.join(process.cwd(), 'src')
     const relativePath = path.relative(srcDir, filePath).replace(/\\/g, '/')
@@ -206,7 +206,7 @@ class ExportConverter {
       }
 
       const componentName = this.extractComponentName(content, filePath)
-      const converted = this.convertDefaultToNamed(content, componentName)
+      const converted = this.convertDefaultToNamed(content)
 
       if (converted !== content) {
         console.log(`\n📝 ${path.relative(process.cwd(), filePath)}`)
@@ -221,11 +221,11 @@ class ExportConverter {
           fs.writeFileSync(filePath, converted, 'utf8')
 
           // Find and update imports
-          const importFiles = this.findImportsToUpdate(filePath, componentName)
+          const importFiles = this.findImportsToUpdate(filePath)
           let updatedImports = 0
 
           for (const importFile of importFiles) {
-            if (this.updateImports(importFile, componentName)) {
+            if (this.updateImports(importFile)) {
               updatedImports++
             }
           }
@@ -293,7 +293,7 @@ class ExportConverter {
     }
 
     // Print summary
-    console.log('\n' + '='.repeat(60))
+    console.log(`\n${  '='.repeat(60)}`)
     console.log('📊 Summary')
     console.log('='.repeat(60))
     console.log(`Files scanned:  ${this.stats.scanned}`)

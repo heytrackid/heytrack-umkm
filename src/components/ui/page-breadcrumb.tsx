@@ -15,13 +15,13 @@ import { PrefetchLink } from '@/components/ui/prefetch-link'
  * Standardized breadcrumb navigation for pages
  */
 
-export interface BreadcrumbItem {
+export interface UIBreadcrumbItem {
   label: string
   href?: string
 }
 
 interface PageBreadcrumbProps {
-  items: BreadcrumbItem[]
+  items: UIBreadcrumbItem[]
   className?: string
 }
 

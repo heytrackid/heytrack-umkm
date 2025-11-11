@@ -4,8 +4,9 @@ import { useMemo, useState } from 'react'
 import { CartesianGrid, Line, LineChart, XAxis } from 'recharts'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import type {
+    ChartConfig} from '@/components/ui/chart';
 import {
-    ChartConfig,
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
@@ -19,13 +20,13 @@ interface ChartLineInteractiveProps {
   defaultChart?: string
 }
 
-export function ChartLineInteractive({
+export const ChartLineInteractive = ({
   data,
   title = 'Line Chart - Interactive',
   description = 'Showing data trends',
   config,
   defaultChart,
-}: ChartLineInteractiveProps) {
+}: ChartLineInteractiveProps) => {
   const chartKeys = Object.keys(config).filter((key) => key !== 'views')
   const [activeChart, setActiveChart] = useState<string>(
     defaultChart || chartKeys[0] || 'desktop'

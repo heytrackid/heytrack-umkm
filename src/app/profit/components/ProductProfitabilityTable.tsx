@@ -38,7 +38,7 @@ export const ProductProfitabilityTable = ({
   }
 
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="border-0 ">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>

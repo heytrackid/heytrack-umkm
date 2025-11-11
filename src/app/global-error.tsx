@@ -16,7 +16,7 @@ const GlobalError = ({ error, reset }: GlobalErrorProps): JSX.Element => {
   }, [error])
 
   return (
-    <html>
+    <html lang="id">
       <body>
         <div className="flex min-h-screen flex-col items-center justify-center p-4 font-sans">
           <div className="flex flex-col items-center gap-4 text-center">

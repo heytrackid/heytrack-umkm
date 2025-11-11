@@ -4,7 +4,6 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 
 import { createClientLogger } from '@/lib/client-logger'
 import { cachePresets } from '@/providers/QueryProvider'
-import type { Row } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
 
 
@@ -86,14 +85,15 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000)
 
     // Create Supabase client
-    const supabase = await createClient()
+    const supabase = createClient()
     
     // Fetch orders for today and this week
     const { data: todayOrders, error: todayError } = await supabase
       .from('orders')
-      .select('total_amount')
+      .select('total_amount, customer_name, created_at')
       .gte('created_at', todayStart.toISOString())
       .lt('created_at', todayEnd.toISOString())
+      .order('created_at', { ascending: false })
 
     if (todayError) {throw todayError}
 
@@ -119,24 +119,25 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
 
     if (inventoryError) {throw inventoryError}
 
-    type Order = Row<'orders'>
-    type Ingredient = Row<'ingredients'>
-    type Customer = Row<'customers'>
+    type OrderAmount = { total_amount: number | null }
+    type OrderRecent = { total_amount: number | null; customer_name: string | null; created_at: string | null }
+    type InventoryStock = { current_stock: number | null; reorder_point: number | null }
+    type CustomerType = { customer_type: string | null }
 
     // Calculate stats
-    const todayRevenue = todayOrders?.reduce((sum: number, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
-    const weeklyRevenue = weeklyOrders?.reduce((sum: number, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
-    
-    const lowStockItems = inventory?.filter((item: Ingredient) => 
+    const todayRevenue = todayOrders?.reduce((sum: number, order: OrderAmount) => sum + ((order.total_amount as number) || 0), 0) || 0
+    const weeklyRevenue = weeklyOrders?.reduce((sum: number, order: OrderAmount) => sum + ((order.total_amount as number) || 0), 0) || 0
+
+    const lowStockItems = inventory?.filter((item: InventoryStock) =>
       (item.current_stock ?? 0) <= (item.reorder_point ?? 0)
     ) || []
-    const outOfStockItems = inventory?.filter((item: Ingredient) => item.current_stock === 0) || []
-    
-    const vipCustomers = customers?.filter((customer: Customer) => customer.customer_type === 'vip').length ?? 0
+    const outOfStockItems = inventory?.filter((item: InventoryStock) => item.current_stock === 0) || []
+
+    const vipCustomers = customers?.filter((customer: CustomerType) => customer.customer_type === 'vip').length ?? 0
 
     // Get recent orders for activity
-    const recentOrders = todayOrders?.slice(-3).map((order: Order) => ({
-      customer: order['customer_name'] ?? 'Unknown',
+    const recentOrders = todayOrders?.slice(-3).map((order: OrderRecent) => ({
+      customer: order.customer_name ?? 'Unknown',
       amount: order.total_amount ?? 0,
       time: order.created_at ?? ''
     })) || []
@@ -213,7 +214,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
 
-      const supabase = await createClient()
+      const supabase = createClient()
       const { data: orders, error } = await supabase
         .from('orders')
         .select('total_amount')
@@ -222,8 +223,8 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
 
       if (error) {throw error}
 
-      type Order = Row<'orders'>
-      const revenue = orders?.reduce((sum: number, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
+      type OrderAmount = { total_amount: number | null }
+      const revenue = orders?.reduce((sum: number, order: OrderAmount) => sum + ((order.total_amount as number) || 0), 0) || 0
 
       weekData.push({
         day: date.toLocaleDateString('id-ID', { weekday: 'short' }),
@@ -241,14 +242,9 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
 
 // Fetch top products data
 const fetchTopProducts = (): TopProductsData[] => {
-  try {
-    // This would need to be implemented based on your order_items and recipes schema
-    // For now, return empty array since we're removing mock data
-    return []
-   } catch (error) {
-     logger.error({ error }, 'Error fetching top products:')
-     return []
-   }
+  // This would need to be implemented based on your order_items and recipes schema
+  // TODO: Implement top products analytics
+  return []
 }
 
 // Hooks

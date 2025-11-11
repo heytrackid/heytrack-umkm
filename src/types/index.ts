@@ -37,7 +37,7 @@ export type { Insert, Row, TableName, Update, ViewName } from './database'
 // FEATURE TYPES (Application Features)
 // ==========================================================
 // Note: UserProfile is also exported from domain/auth, using that as primary
-export * from './features/auth'
+export type * from './features/auth'
 // Note: RateLimitError is also in shared/errors, using that as primary
 export type {
     BusinessContext, ChatContextCache, ChatError, ChatMessage, ChatSession, ContextType, FinancialSummary, HppSummary, IngredientSummary, MessageMetadata, OrderSummary, RecipeSummary
@@ -48,28 +48,28 @@ export type {
     DashboardAnalytics, ExpenseCategory, FinancialAnalytics, InventoryAnalysis, InventoryMetrics, InventoryStatus, MarketComparison, PricingAnalysis, PricingImpact, PricingRecommendation, PricingTier, PricingTierOption, PricingTiers, ProductPerformance, RevenueCategory, SalesAnalytics, SalesTrend, SmartPricingAnalysis, SystemAlert, TimePeriod
 } from './features/analytics'
 
-export * from './features/notifications'
+export type * from './features/notifications'
 
 // ==========================================================
 // UI TYPES (Interface)
 // ==========================================================
-export * from './ui/components'
+export type * from './ui/components'
 // Note: OrderItemUpdate is also in domain/orders, using that as primary
-export * from './ui/charts'
+export type * from './ui/charts'
 export type {
     ArrayItemUpdate, FormAction, FormFieldUpdate,
     FormFieldUpdater, FormState, FormValidationError, FormValidationResult
 } from './ui/forms'
-export * from './ui/responsive'
+export type * from './ui/responsive'
 
 // ==========================================================
 // SHARED TYPES (Utilities)
 // ==========================================================
-export * from './shared/api'
-export * from './shared/common'
+export type * from './shared/api'
+export type * from './shared/common'
 export * from './shared/errors'
 export * from './shared/guards'
-export * from './shared/utils'
+export type * from './shared/utils'
 
 // ==========================================================
 // CONVENIENCE ALIASES

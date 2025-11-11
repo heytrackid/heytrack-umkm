@@ -2,23 +2,22 @@
 'use client'
 
 import {
-    Search,
-    Plus,
-    Sparkles,
-    MoreVertical,
-    Edit,
-    Trash2,
     Calculator,
-    Eye,
     Clock,
+    Edit,
+    Eye,
+    MoreVertical,
+    Plus,
+    Search,
+    Sparkles,
+    Trash2,
     Users,
     X
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState, useMemo, useCallback } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import { PageHeader } from '@/components/layout/PageHeader'
-import { DeleteModal } from '@/components/ui/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -34,6 +33,7 @@ import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { undoableToast } from '@/components/ui/enhanced-toast'
 import { FilterBadges, createFilterBadges } from '@/components/ui/filter-badges'
 import { SimpleFAB } from '@/components/ui/floating-action-button'
+import { DeleteModal } from '@/components/ui/index'
 import { Input } from '@/components/ui/input'
 import {
     Select,
@@ -43,8 +43,8 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
-import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useRecipes } from '@/hooks/supabase/entities'
+import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -463,7 +463,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                     {paginatedData.map((recipe) => (
                         <Card
                             key={recipe['id']}
-                            className="hover:shadow-md transition-shadow cursor-pointer"
+                            className="transition-all cursor-pointer"
                             onClick={() => handleView(recipe)}
                         >
                             <CardContent className="p-6">

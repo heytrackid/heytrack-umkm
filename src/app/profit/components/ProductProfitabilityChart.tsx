@@ -31,7 +31,7 @@ export const ProductProfitabilityChart = ({
   const [chartType, setChartType] = useState<'area' | 'bar' | 'line'>('bar')
 
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="border-0 ">
       {chartData.length === 0 ? (
         <CardContent className="py-12">
           <div className="text-center text-muted-foreground">

@@ -53,8 +53,13 @@ export async function createClient(): Promise<SupabaseClient<Database>> {
           }
         },
       },
+      global: {
+        headers: {
+          // This might not work, but let's try
+        },
+      },
     }
   )
-  
+
   return client as unknown as SupabaseClient<Database>
 }

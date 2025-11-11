@@ -50,7 +50,7 @@ export class PricingAssistantService {
   */
   static async generatePricingRecommendation(recipeId: string, userId: string): Promise<PricingRecommendation> {
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
       dbLogger.info(`Generating pricing recommendation for recipe ${recipeId}`)
 
       // Get recipe details
@@ -133,7 +133,7 @@ export class PricingAssistantService {
    */
   private static async analyzeMarketFactors(recipe: RecipeRow): Promise<PricingRecommendation['marketFactors']> {
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
       
       // Get competitor prices from similar recipes in same category
       const { data: similarRecipes } = await supabase
@@ -394,7 +394,7 @@ export class PricingAssistantService {
     }>
   }> {
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
 
       interface RecipePricingRow { id: string; name: string | null; selling_price: number | null }
 

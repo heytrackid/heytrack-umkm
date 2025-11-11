@@ -80,7 +80,7 @@ const PreloadingDebugPanel = (): JSX.Element => {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 bg-black text-white p-4 rounded-lg text-xs max-w-sm z-50 shadow-lg">
+    <div className="fixed bottom-4 left-4 bg-black text-white p-4 rounded-lg text-xs max-w-sm z-50 ">
       <div className="flex justify-between items-center mb-2">
         <h3 className="font-bold">Preloading Debug</h3>
         <button onClick={() => setShowDebug(false)}>✕</button>

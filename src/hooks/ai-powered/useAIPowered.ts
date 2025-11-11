@@ -77,7 +77,7 @@ export function useAIPowered(): {
         credentials: 'include', // Include cookies for authentication
       })
       return response.ok
-    } catch (_error: unknown) {
+    } catch {
       return false
     }
   }, [])

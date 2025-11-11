@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useRoutePreloader } from '@/hooks/use-preloader'
 import { prefetchRoute } from '@/lib/route-loader'
 import { cn } from '@/lib/utils'
@@ -32,156 +34,81 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
   const pathname = usePathname()
   const router = useRouter()
   const { preloadOnHover } = useRoutePreloader()
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const tabButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({})
-  const [showLeftShadow, setShowLeftShadow] = useState(false)
-  const [showRightShadow, setShowRightShadow] = useState(false)
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
-  const [isMobile, setIsMobile] = useState(false)
-  const [dropdownPositions, setDropdownPositions] = useState<Record<string, { top: number; left: number }>>({})
-  const closeTimeoutRef = useRef<NodeJS.Timeout>()
   const prefetchTimeoutRef = useRef<NodeJS.Timeout>()
+  const hoverTimeoutRef = useRef<NodeJS.Timeout>()
+  const closeTimeoutRef = useRef<NodeJS.Timeout>()
+  const [openPopover, setOpenPopover] = useState<string | null>(null)
 
   const isActive = (href: string) => {
-    if (href === '/dashboard') {return pathname === href}
+    if (href === '/dashboard') return pathname === href
     return pathname.startsWith(href)
   }
 
-  const isGroupActive = (items?: Array<{ href: string }>) => {
-    if (!items) {return false}
-    return items.some((item) => isActive(item.href))
-  }
+  const handlePrefetch = useCallback(
+    (href: string) => {
+      const heavyRoutes = ['/reports', '/orders', '/recipes', '/ai-chatbot', '/ingredients', '/admin']
+      if (heavyRoutes.includes(href)) {
+        if (prefetchTimeoutRef.current) {
+          clearTimeout(prefetchTimeoutRef.current)
+        }
+        prefetchTimeoutRef.current = setTimeout(() => {
+          router.prefetch(href)
+          prefetchRoute(href)
+          const { preload } = preloadOnHover(href, 50)
+          preload()
+        }, HOVER_PREFETCH_DELAY)
+      }
+    },
+    [router, preloadOnHover]
+  )
 
   const handleMouseEnter = useCallback((label: string) => {
-    if (isMobile) {return}
+    // Clear any pending close timeout
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current)
     }
-    setOpenDropdown(label)
+    // Set hover timeout to open after a short delay
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+    }
+    hoverTimeoutRef.current = setTimeout(() => {
+      setOpenPopover(label)
+    }, 150) // Small delay to prevent accidental opens
+  }, [])
 
-    // Enhanced prefetching with bundle splitting
-    const heavyRoutes = ['/reports', '/orders', '/recipes', '/ai-chatbot', '/ingredients', '/admin']
-    const tab = tabs.find(t => t.label === label)
-    const href = tab?.href
-    if (href && heavyRoutes.includes(href)) {
+  const handleMouseLeave = useCallback(() => {
+    // Clear hover timeout if mouse leaves before opening
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+    }
+    // Set close timeout
+    closeTimeoutRef.current = setTimeout(() => {
+      setOpenPopover(null)
+    }, 200) // Delay before closing to allow moving to popover
+  }, [])
+
+  useEffect(
+    () => () => {
       if (prefetchTimeoutRef.current) {
         clearTimeout(prefetchTimeoutRef.current)
       }
-      prefetchTimeoutRef.current = setTimeout(() => {
-        router.prefetch(href)
-        prefetchRoute(href)
-        // Use new preloader for enhanced bundle splitting
-        const { preload } = preloadOnHover(href, 50)
-        preload()
-      }, HOVER_PREFETCH_DELAY) // Small delay to avoid prefetching on quick mouse movements
-    }
-  }, [isMobile, tabs, router, preloadOnHover])
-
-  const handleMouseLeave = useCallback(() => {
-    if (isMobile) {return}
-    closeTimeoutRef.current = setTimeout(() => {
-      setOpenDropdown(null)
-    }, 150)
-  }, [isMobile])
-
-  const handleClick = useCallback((label: string) => {
-    if (isMobile) {
-      // On mobile, toggle the dropdown
-      setOpenDropdown(openDropdown === label ? null : label)
-    } else {
-      // On desktop, if dropdown is closed, open it. If it's open, navigation happens via links in dropdown
-      setOpenDropdown(openDropdown === label ? null : label)
-    }
-  }, [isMobile, openDropdown])
-
-  const updateShadows = useCallback(() => {
-    const ref = scrollRef.current
-    if (!ref) {return}
-    const { scrollLeft, scrollWidth, clientWidth } = ref
-    setShowLeftShadow(scrollLeft > 0)
-    setShowRightShadow(scrollLeft + clientWidth < scrollWidth - 1)
-  }, [])
-
-  useEffect(() => {
-    updateShadows()
-  }, [tabs, updateShadows])
-
-  useEffect(() => {
-    updateShadows()
-    const ref = scrollRef.current
-    if (!ref) {return undefined}
-    const onScroll = () => updateShadows()
-    ref.addEventListener('scroll', onScroll)
-    return () => ref.removeEventListener('scroll', onScroll)
-  }, [updateShadows])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {return undefined}
-    const handleResize = () => {
-      setIsMobile(window.matchMedia('(max-width: 768px)').matches)
-      updateShadows()
-    }
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [updateShadows])
-
-  const updateDropdownPosition = useCallback(() => {
-    if (!openDropdown) {return}
-    const buttonEl = tabButtonRefs.current[openDropdown]
-    if (!buttonEl) {return}
-    const rect = buttonEl.getBoundingClientRect()
-    setDropdownPositions(prev => ({
-      ...prev,
-      [openDropdown]: {
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
       }
-    }))
-  }, [openDropdown])
-
-  useEffect(() => {
-    updateDropdownPosition()
-  }, [updateDropdownPosition])
-
-  useEffect(() => {
-    const handleResizeOrScroll = () => updateDropdownPosition()
-    window.addEventListener('resize', handleResizeOrScroll)
-    const scrollContainer = scrollRef.current
-    scrollContainer?.addEventListener('scroll', handleResizeOrScroll)
-    return () => {
-      window.removeEventListener('resize', handleResizeOrScroll)
-      scrollContainer?.removeEventListener('scroll', handleResizeOrScroll)
-    }
-  }, [updateDropdownPosition])
-
-  useEffect(() => () => {
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current)
-    }
-    if (prefetchTimeoutRef.current) {
-      clearTimeout(prefetchTimeoutRef.current)
-    }
-  }, [])
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current)
+      }
+    },
+    []
+  )
 
   return (
-    <div className="relative z-40 border-b border-border/20 bg-background">
-      {/* Left shadow */}
-      {showLeftShadow && (
-        <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-gradient-to-r from-background via-background/80 to-transparent" />
-      )}
-
-      {/* Tabs container */}
-      <div
-        ref={scrollRef}
-        className="flex gap-1 overflow-x-auto overflow-y-visible px-4 scrollbar-none py-1 relative"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
+    <div className="border-b border-border bg-background">
+      <div className="flex items-center gap-1 overflow-x-auto px-4 py-1">
         {tabs.map((tab) => {
           const Icon = tab.icon
           const hasDropdown = tab.items && tab.items.length > 0
-          const active = tab.href ? isActive(tab.href) : isGroupActive(tab.items)
-          const isOpen = openDropdown === tab.label
+          const active = tab.href ? isActive(tab.href) : tab.items?.some((item) => isActive(item.href))
 
           // Simple link tab
           if (!hasDropdown && tab.href) {
@@ -190,11 +117,10 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
                 key={tab.href}
                 href={tab.href}
                 className={cn(
-                  'group relative flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active
-                    ? 'border-primary text-foreground'
-                    : 'border-transparent text-muted-foreground hover:border-primary hover:bg-muted/30 hover:text-foreground'
+                  'flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground',
+                  active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
                 )}
+                onMouseEnter={() => tab.href && handlePrefetch(tab.href)}
               >
                 {Icon && <Icon className="h-4 w-4" />}
                 <span className="whitespace-nowrap">{tab.label}</span>
@@ -202,9 +128,7 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
                   <span
                     className={cn(
                       'rounded-full px-2 py-0.5 text-xs font-semibold',
-                      active
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground'
+                      active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                     )}
                   >
                     {tab.badge}
@@ -218,76 +142,68 @@ export const TabNavigation = ({ tabs }: TabNavigationProps) => {
           return (
             <div
               key={tab.label}
-              className="relative"
               onMouseEnter={() => handleMouseEnter(tab.label)}
               onMouseLeave={handleMouseLeave}
             >
-              <button
-                type="button"
-                onClick={() => handleClick(tab.label)}
-                ref={(el) => {
-                  tabButtonRefs.current[tab.label] = el
-                }}
-                className={cn(
-                  'group relative flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  active
-                    ? 'border-primary text-foreground'
-                    : 'border-transparent text-muted-foreground hover:border-primary hover:bg-muted/30 hover:text-foreground'
-                )}
-              >
-                {Icon && <Icon className="h-4 w-4" />}
-                <span className="whitespace-nowrap">{tab.label}</span>
-                <ChevronDown className={cn('h-3 w-3 transition-transform', isOpen && 'rotate-180')} />
-              </button>
-
-              {/* Dropdown menu */}
-              {isOpen && tab.items && (
-                <div
-                  className="fixed z-50 mt-0 min-w-[200px] rounded-md border border-border/20 bg-popover p-1 shadow-lg"
-                  style={{
-                    top: `${dropdownPositions[tab.label]?.top ?? 0}px`,
-                    left: `${dropdownPositions[tab.label]?.left ?? 0}px`,
+              <Popover open={openPopover === tab.label} onOpenChange={(open) => !open && setOpenPopover(null)}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      'flex shrink-0 items-center gap-2 px-3 py-2 text-sm font-medium',
+                      active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
+                    )}
+                    onMouseEnter={() => tab.href && handlePrefetch(tab.href)}
+                  >
+                    {Icon && <Icon className="h-4 w-4" />}
+                    <span className="whitespace-nowrap">{tab.label}</span>
+                    <ChevronDown className={cn('h-3 w-3 transition-transform', openPopover === tab.label && 'rotate-180')} />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[400px] p-2"
+                  align="start"
+                  onMouseEnter={() => {
+                    // Keep popover open when hovering over it
+                    if (closeTimeoutRef.current) {
+                      clearTimeout(closeTimeoutRef.current)
+                    }
                   }}
-                  onMouseEnter={() => handleMouseEnter(tab.label)}
                   onMouseLeave={handleMouseLeave}
                 >
-                  {tab.items.map((item) => {
-                    const ItemIcon = item.icon
-                    const itemActive = isActive(item.href)
+                  <div className="grid gap-1">
+                    {tab.items?.map((item) => {
+                      const ItemIcon = item.icon
+                      const itemActive = isActive(item.href)
 
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setOpenDropdown(null)}
-                        className={cn(
-                          'flex items-center gap-3 rounded-sm px-3 py-2 text-sm transition-colors',
-                          itemActive
-                            ? 'bg-accent text-accent-foreground font-medium'
-                            : 'hover:bg-accent hover:text-accent-foreground'
-                        )}
-                      >
-                        {ItemIcon && <ItemIcon className="h-4 w-4 shrink-0" />}
-                        <div className="flex flex-col">
-                          <span>{item.label}</span>
-                          {item.description && (
-                            <span className="text-xs text-muted-foreground">{item.description}</span>
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setOpenPopover(null)}
+                          className={cn(
+                            'flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-accent hover:text-accent-foreground',
+                            itemActive && 'bg-accent text-accent-foreground font-medium'
                           )}
-                        </div>
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
+                          onMouseEnter={() => handlePrefetch(item.href)}
+                        >
+                          {ItemIcon && <ItemIcon className="h-4 w-4 shrink-0 mt-0.5" />}
+                          <div className="flex flex-col gap-1">
+                            <div className="text-sm font-medium leading-none">{item.label}</div>
+                            {item.description && (
+                              <p className="text-xs leading-snug text-muted-foreground">{item.description}</p>
+                            )}
+                          </div>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           )
         })}
       </div>
-
-      {/* Right shadow */}
-      {showRightShadow && (
-        <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-background via-background/80 to-transparent" />
-      )}
     </div>
   )
 }

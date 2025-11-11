@@ -75,7 +75,7 @@ const EnhancedSummaryCards = ({
             {/* Main Summary Cards */}
             <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
                 {/* Total Income */}
-                <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary/50">
+                <Card className="hover: transition-all duration-200 border-l-4 border-l-primary/50">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
                             <span className="flex items-center gap-2">
@@ -108,7 +108,7 @@ const EnhancedSummaryCards = ({
                 </Card>
 
                 {/* Total Expenses */}
-                <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-destructive/50">
+                <Card className="hover: transition-all duration-200 border-l-4 border-l-destructive/50">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
                             <span className="flex items-center gap-2">
@@ -141,7 +141,7 @@ const EnhancedSummaryCards = ({
                 </Card>
 
                 {/* Net Cash Flow */}
-                <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-secondary/50">
+                <Card className="hover: transition-all duration-200 border-l-4 border-l-secondary/50">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
                             <span className="flex items-center gap-2">

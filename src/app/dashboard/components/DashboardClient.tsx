@@ -111,7 +111,7 @@ function renderLoadingState(): JSX.Element {
   )
 }
 
-const renderErrorState = (router: any): JSX.Element => (
+const renderErrorState = (router: ReturnType<typeof useRouter>): JSX.Element => (
   <AppLayout>
     <div className="text-center py-12">
       <p className="text-muted-foreground">Terjadi kesalahan saat memuat data dashboard</p>

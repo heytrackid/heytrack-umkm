@@ -49,7 +49,7 @@ export const BottomSheet = ({
     onOpenChange(false)
   }
 
-  const handleContentClick = (e: React.MouseEvent) => {
+  const handleContentClick = (e: React.SyntheticEvent) => {
     e.stopPropagation()
   }
 
@@ -61,12 +61,19 @@ export const BottomSheet = ({
       <div
         className="absolute inset-0 bg-black/50 dark:bg-black/70 animate-in fade-in duration-200"
         onClick={handleBackdropClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleBackdropClick()
+          }
+        }}
+        role="button"
+        tabIndex={0}
       />
 
       {/* Sheet */}
       <div
         className={cn(
-          'relative w-full bg-background rounded-t-[20px] sm:rounded-t-2xl shadow-2xl',
+          'relative w-full bg-background rounded-t-[20px] sm:rounded-t-2xl ',
           'animate-in slide-in-from-bottom duration-300',
           className
         )}
@@ -75,6 +82,13 @@ export const BottomSheet = ({
           maxHeight: '90vh'
         }}
         onClick={handleContentClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleContentClick(e)
+          }
+        }}
+        role="button"
+        tabIndex={0}
       >
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-2">

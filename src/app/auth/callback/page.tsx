@@ -12,7 +12,7 @@ const AuthCallbackPage = (): JSX.Element => {
 
   useEffect(() => {
     const handleAuthCallback = async (): Promise<void> => {
-      const supabase = await createClient()
+      const supabase = createClient()
 
       try {
         const { data, error } = await supabase.auth.getSession()

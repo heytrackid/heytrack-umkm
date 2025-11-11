@@ -2,11 +2,11 @@
 export const runtime = 'nodejs'
 
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
  import { apiLogger } from '@/lib/logger'
- import { withSecurity, SecurityPresets } from '@/utils/security/index'
- import { createClient } from '@/utils/supabase/server'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
 
 
 async function postHandler(request: NextRequest): Promise<NextResponse> {

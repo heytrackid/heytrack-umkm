@@ -65,15 +65,6 @@ export async function isAdminUser(userId: string): Promise<AdminCheckResult> {
  * Check if user has admin privileges, with fallback for development
  */
 export function checkAdminPrivileges(user: User): Promise<AdminCheckResult> {
-  // In development, allow all users to have admin privileges for testing
-  if (process['env']?.NODE_ENV === 'development' && 
-      process['env']?.['ADMIN_ALL_USERS'] === 'true') {
-    return Promise.resolve({
-      isAdmin: true,
-      hasPermission: true,
-      userRole: 'admin'
-    })
-  }
 
   return isAdminUser(user['id'])
 }

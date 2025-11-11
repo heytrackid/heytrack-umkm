@@ -198,8 +198,8 @@ export async function typedSelect<T extends TableName>(
 /**
  * Get Supabase client instance (client-side)
  */
-export async function getSupabaseClient() {
-  return await createClient()
+export function getSupabaseClient() {
+  return createClient()
 }
 
 /**
@@ -219,7 +219,7 @@ export async function isAuthenticated() {
     const supabase = await getSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
     return Boolean(user)
-  } catch (_error) {
+  } catch {
     return false
   }
 }
@@ -233,7 +233,7 @@ export async function getCurrentUser() {
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) {throw error}
     return user
-  } catch (_error) {
+  } catch {
     return null
   }
 }
@@ -257,9 +257,7 @@ export async function signOut() {
 // ==========================================================
 
 export type {
-  Database,
-  TableName,
-  TableRow,
-  TableInsert,
-  TableUpdate
+    Database, TableInsert, TableName,
+    TableRow, TableUpdate
 }
+

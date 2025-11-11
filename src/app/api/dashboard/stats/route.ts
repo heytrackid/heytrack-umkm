@@ -1,7 +1,7 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 
 import { apiLogger } from '@/lib/logger'
@@ -258,7 +258,7 @@ async function fetchDashboardData(
 
   // Granular error checks per query
   const checkAndLog = (name: string, result: { error?: { message?: string } | null }) => {
-    if (result && result.error) {
+    if (result.error) {
       const errMsg = typeof result.error.message === 'string' ? result.error.message : 'Unknown error'
       apiLogger.error({ query: name, error: result.error }, 'Dashboard data query failed')
       throw new Error(`${name} query failed: ${errMsg}`)
@@ -274,19 +274,19 @@ async function fetchDashboardData(
   checkAndLog('expenses', expensesResult)
 
   return {
-    orders: (ordersResult as any).data ?? [],
-    currentPeriodOrders: (currentPeriodOrdersResult as any).data ?? [],
-    comparisonOrders: (comparisonOrdersResult as any).data ?? [],
-    customers: (customersResult as any).data ?? [],
-    ingredients: (ingredientsResult as any).data ?? [],
-    recipes: (recipesResult as any).data ?? [],
-    expenses: (expensesResult as any).data ?? []
+    orders: ordersResult.data ?? [],
+    currentPeriodOrders: currentPeriodOrdersResult.data ?? [],
+    comparisonOrders: comparisonOrdersResult.data ?? [],
+    customers: customersResult.data ?? [],
+    ingredients: ingredientsResult.data ?? [],
+    recipes: recipesResult.data ?? [],
+    expenses: expensesResult.data ?? []
   }
 }
 
 function calculateStats(data: DashboardFetchResult): DashboardStats {
-  const revenue = data.orders.reduce((sum, order) => sum + (value => value ?? 0)(order.total_amount), 0)
-  const currentRevenue = data.currentPeriodOrders.reduce((sum, order) => sum + (value => value ?? 0)(order.total_amount), 0)
+  const revenue = data.orders.reduce((sum, order) => sum + (order.total_amount ?? 0), 0)
+  const currentRevenue = data.currentPeriodOrders.reduce((sum, order) => sum + (order.total_amount ?? 0), 0)
   const activeOrders = data.orders.filter(order =>
     order.status && ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(order.status)
   ).length

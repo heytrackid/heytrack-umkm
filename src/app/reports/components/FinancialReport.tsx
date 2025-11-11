@@ -57,7 +57,7 @@ export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Pemasukan
@@ -71,7 +71,7 @@ export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
             <p className="text-xs text-muted-foreground">+{incomeGrowth}% dari periode sebelumnya</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Pengeluaran
@@ -85,7 +85,7 @@ export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
             <p className="text-xs text-muted-foreground">+{expenseGrowth}% dari periode sebelumnya</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Laba Bersih
@@ -99,7 +99,7 @@ export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
             <p className="text-xs text-muted-foreground">+{profitGrowth}% dari periode sebelumnya</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Margin Profit
@@ -117,7 +117,7 @@ export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
 
       {/* Financial Breakdown */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-0 shadow-sm">
+        <Card className="border-0 ">
           <CardHeader>
             <CardTitle>Ringkasan Keuangan</CardTitle>
           </CardHeader>
@@ -154,7 +154,7 @@ export const FinancialReport = ({ dateRange }: FinancialReportProps) => {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm">
+        <Card className="border-0 ">
           <CardHeader>
             <CardTitle>Analisis Keuangan</CardTitle>
           </CardHeader>

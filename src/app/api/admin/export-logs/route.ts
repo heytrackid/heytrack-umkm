@@ -6,7 +6,7 @@ export const runtime = 'nodejs'
  * Export logs as JSON file
  */
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'
@@ -92,7 +92,7 @@ function buildExportPayload(userId: string, perfLogs: unknown[], errLogs: unknow
   }
 }
 
-async function getHandler(_request: NextRequest): Promise<NextResponse> {
+async function getHandler(): Promise<NextResponse> {
   try {
     const { context, statusCode } = await authenticateAdmin()
 

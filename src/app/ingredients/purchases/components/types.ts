@@ -21,7 +21,7 @@ export interface PurchaseFormData {
   notes: string
 }
 
-export interface PurchaseStats {
+export interface StatsItem {
   title: string
   value: number | string
   color: string

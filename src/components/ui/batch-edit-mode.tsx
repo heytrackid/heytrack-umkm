@@ -155,6 +155,14 @@ export const BatchEditMode = <T,>({
                   e.stopPropagation()
                   handleToggleItem(id)
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.stopPropagation()
+                    handleToggleItem(id)
+                  }
+                }}
+                role="button"
+                tabIndex={0}
               >
                 <Checkbox
                   checked={isSelected}
@@ -175,7 +183,7 @@ export const BatchEditMode = <T,>({
       {/* Floating action summary */}
       {selectedCount > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5 duration-300">
-          <div className="bg-primary text-primary-foreground rounded-full px-6 py-3 shadow-2xl flex items-center gap-3">
+          <div className="bg-primary text-primary-foreground rounded-full px-6 py-3  flex items-center gap-3">
             <CheckSquare className="h-5 w-5" />
             <span className="font-semibold">{selectedCount} item dipilih</span>
             <Badge variant="secondary" className="ml-2">

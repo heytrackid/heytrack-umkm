@@ -235,6 +235,11 @@ export {
 } from './calendar'
 
 export {
+    DateRangePicker,
+    type DateRangePickerProps
+} from './date-range-picker'
+
+export {
     ChartContainer, ChartLegend,
     ChartLegendContent, ChartTooltip,
     ChartTooltipContent

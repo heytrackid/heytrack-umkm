@@ -90,7 +90,6 @@ export const NotificationList = ({
     // Use virtual scrolling for large notification lists (>30 items)
     const useVirtualScrolling = filteredNotifications.length > 30
 
-    // eslint-disable-next-line react-hooks/incompatible-library
     const virtualizer = useVirtualizer({
         count: filteredNotifications.length,
         getScrollElement: () => parentRef.current,
@@ -226,6 +225,13 @@ export const NotificationList = ({
                                                     priorityColor
                                                 )}
                                                 onClick={() => handleNotificationClick(notification)}
+                                                onKeyDown={(e) => {
+                                                  if (e.key === 'Enter' || e.key === ' ') {
+                                                    handleNotificationClick(notification)
+                                                  }
+                                                }}
+                                                role="button"
+                                                tabIndex={0}
                                             >
                                                 <div className="flex gap-3">
                                                     {/* Icon */}
@@ -308,6 +314,13 @@ export const NotificationList = ({
                                         priorityColor
                                     )}
                                     onClick={() => handleNotificationClick(notification)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter' || e.key === ' ') {
+                                        handleNotificationClick(notification)
+                                      }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
                                 >
                                     <div className="flex gap-3">
                                         {/* Icon */}

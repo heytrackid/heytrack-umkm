@@ -6,7 +6,7 @@ export const runtime = 'nodejs'
  * Get recent API performance logs
  */
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'

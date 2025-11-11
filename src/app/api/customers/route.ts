@@ -2,7 +2,8 @@
 export const runtime = 'nodejs'
 
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { CUSTOMER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
@@ -11,7 +12,7 @@ import { getErrorMessage, safeNumber, safeString } from '@/lib/type-guards'
 import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { PostgrestError } from '@supabase/supabase-js'
@@ -87,7 +88,7 @@ function validateCustomerPayload(body: Record<string, unknown>, userId: string):
   })
 }
 
-function buildCustomerInsert(userId: string, data: any): Insert<'customers'> {
+function buildCustomerInsert(userId: string, data: z.infer<typeof CustomerInsertSchema>): Insert<'customers'> {
   return typedInsert<'customers'>({
     user_id: userId,
     name: data.name,

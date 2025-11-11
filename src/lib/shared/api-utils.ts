@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
+import { createHash } from 'crypto'
+
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/shared/index'
 
@@ -163,9 +165,8 @@ export function createRateLimitKey(identifier: string, action: string): string {
 
 // Caching helpers
 export function generateETag(data: unknown): string {
-   
-  const crypto = require('crypto')
-  return crypto.createHash('md5').update(JSON.stringify(data)).digest('hex')
+
+  return createHash('md5').update(JSON.stringify(data)).digest('hex')
 }
 
 export function handleConditionalGET(
@@ -230,7 +231,7 @@ export function logAPIResponse(
 }
 
 // Common API patterns
-export function withTiming<T extends any[]>(
+export function withTiming<T extends unknown[]>(
   fn: (...args: T) => Promise<NextResponse>,
   logger: (duration: number, ...args: T) => void = () => {}
 ) {

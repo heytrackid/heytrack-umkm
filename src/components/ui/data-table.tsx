@@ -1,10 +1,11 @@
 'use client'
 
-import {
+import type {
     ColumnDef,
     ColumnFiltersState,
     SortingState,
-    VisibilityState,
+    VisibilityState} from '@tanstack/react-table';
+import {
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
@@ -39,18 +40,17 @@ interface DataTableProps<TData, TValue> {
   searchPlaceholder?: string
 }
 
-export function DataTable<TData, TValue>({
+export const DataTable = <TData, TValue>({
   columns,
   data,
   searchKey,
   searchPlaceholder = 'Cari...',
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,

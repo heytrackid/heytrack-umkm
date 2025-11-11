@@ -80,7 +80,6 @@ const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps): 
     }
   }
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const watchedQty = form.watch('quantity')
   const watchedPrice = form.watch('unit_price')
   const total = watchedQty && watchedPrice ? watchedQty * watchedPrice : 0

@@ -7,7 +7,7 @@ export const runtime = 'nodejs'
  */
 
 import { createCachedResponse, cachePresets } from '@/lib/api-cache'
-import { dbLogger } from '@/lib/logger'
+import { apiLogger, dbLogger } from '@/lib/logger'
 import { safeNumber, getErrorMessage } from '@/lib/type-guards'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
@@ -16,6 +16,7 @@ import type { NextRequest, NextResponse } from 'next/server'
 
 async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
+    apiLogger.info({ url: request.url }, 'GET /api/recipes/optimized - Request received')
     const supabase = await createClient()
 
     // Get user

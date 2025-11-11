@@ -122,8 +122,10 @@ function validateRequest(request: NextRequest, isDev: boolean): NextResponse | n
 async function getUser(request: NextRequest): Promise<{ user: User | null; response: NextResponse }> {
   try {
     const { user, response } = await updateSession(request)
+    middlewareLogger.debug({ userExists: !!user }, 'getUser result')
     return { user, response }
   } catch (error) {
+    middlewareLogger.debug({ error }, 'getUser error')
     middlewareLogger.debug({ error }, 'Middleware auth error (non-blocking)')
     return { user: null, response: NextResponse.next() }
   }

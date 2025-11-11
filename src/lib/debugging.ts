@@ -47,11 +47,11 @@ export interface DetailedDebugOptions {
 }
 
 class DebugLogger {
-  private readonly logger: pino.Logger;
+  private logger!: pino.Logger;
   private context: DebugContext = {};
 
   constructor(context = 'Debug') {
-     
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     this.logger = require('./logger').createLogger(context); // Dynamic import to avoid circular dependencies
   }
 

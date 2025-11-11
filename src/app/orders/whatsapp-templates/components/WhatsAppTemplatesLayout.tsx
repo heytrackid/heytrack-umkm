@@ -290,7 +290,7 @@ const WhatsAppTemplatesLayout = () => {
 
                 {/* Info Card - Show only if no templates */}
                 {templates.length === 0 && !loading && (
-                     <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-border/20 rounded-xl p-6 shadow-sm">
+                     <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-border/20 rounded-xl p-6 ">
                         <div className="flex items-start gap-4">
                             <div className="flex-shrink-0">
                                 <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">

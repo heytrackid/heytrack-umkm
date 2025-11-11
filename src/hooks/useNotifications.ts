@@ -36,7 +36,7 @@ export function useNotifications() {
             ...n,
             timestamp: new Date(n['timestamp'])
           })))
-        } catch (_error) {
+        } catch {
           // Invalid data, ignore
         }
       }
@@ -44,7 +44,7 @@ export function useNotifications() {
       if (savedPrefs) {
         try {
           setPreferences(JSON.parse(savedPrefs))
-        } catch (_error) {
+        } catch {
           // Invalid data, use defaults
         }
       }
@@ -78,7 +78,7 @@ export function useNotifications() {
           const data = await response.json()
           setOrders(Array.isArray(data) ? data : [])
         }
-      } catch (_error) {
+      } catch {
         // Silently fail
       }
     }
@@ -232,7 +232,7 @@ function playNotificationSound() {
       oscillator.disconnect()
       gainNode.disconnect()
     }
-  } catch (_error) {
+  } catch {
     // Browser doesn't support Web Audio API
   }
 }

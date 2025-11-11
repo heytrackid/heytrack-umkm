@@ -185,7 +185,7 @@ export class ChatSessionService {
     // Get messages for analytics
     const { data: messages } = await supabase
       .from('chat_messages')
-      .select('content, metadata, created_at')
+      .select('content, metadata, created_at, role')
       .in('session_id', sessionIds)
       .gte('created_at', startDate.toISOString())
 
@@ -206,7 +206,7 @@ export class ChatSessionService {
     // Analyze response times
     const responseTimes = messages
       ?.filter(m => m.metadata && typeof m.metadata === 'object' && 'response_time_ms' in m.metadata)
-      .map(m => (m.metadata as any).response_time_ms)
+      .map(m => (m.metadata as MessageMetadata).response_time_ms)
       .filter(time => typeof time === 'number') ?? []
 
     const avgResponseTime = responseTimes.length > 0
@@ -214,7 +214,11 @@ export class ChatSessionService {
       : 0
 
     // Calculate user satisfaction based on conversation patterns
-    const userSatisfaction = this.calculateUserSatisfaction(messages ?? [])
+    const mappedMessages = (messages ?? []).map(m => ({
+      role: m.role || 'unknown',
+      content: m.content || undefined
+    }))
+    const userSatisfaction = this.calculateUserSatisfaction(mappedMessages)
 
     return {
       totalSessions: sessions.length,
@@ -233,7 +237,7 @@ export class ChatSessionService {
   /**
    * Calculate user satisfaction score (1-5)
    */
-  static calculateUserSatisfaction(messages: any[]): number {
+  static calculateUserSatisfaction(messages: Array<{ role: string; content?: string }>): number {
     if (messages.length === 0) return 3
 
     let score = 3 // Neutral baseline
@@ -252,9 +256,9 @@ export class ChatSessionService {
 
     // Error patterns (fewer errors = higher satisfaction)
     const errorMessages = messages.filter(m =>
-      m.content.toLowerCase().includes('error') ||
-      m.content.toLowerCase().includes('maaf') ||
-      m.content.toLowerCase().includes('gagal')
+      m.content?.toLowerCase().includes('error') ||
+      m.content?.toLowerCase().includes('maaf') ||
+      m.content?.toLowerCase().includes('gagal')
     )
     score -= (errorMessages.length * 0.2)
 

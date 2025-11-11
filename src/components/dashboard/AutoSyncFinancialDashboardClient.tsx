@@ -94,7 +94,7 @@ const UMKMTooltip = ({ title, content, children }: { title: string, content: str
   </TooltipProvider>
 )
 
-export function AutoSyncFinancialDashboardClient({ initialData }: AutoSyncClientProps) {
+export const AutoSyncFinancialDashboardClient = ({ initialData }: AutoSyncClientProps) => {
   const { formatCurrency } = useCurrency()
   const [data, setData] = useState<AutoSyncData | null>(initialData)
   const [loading, setLoading] = useState(!initialData)

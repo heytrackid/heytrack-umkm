@@ -96,6 +96,13 @@ export const ActiveBatchesList = ({
                     className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedBatch === batch['id'] ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
                       }`}
                     onClick={() => onBatchSelect(batch['id'])}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        onBatchSelect(batch['id'])
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>

@@ -45,13 +45,13 @@ export const FloatingActionButton = ({
               className="flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <span className="text-sm font-medium bg-background border rounded-lg px-3 py-2 shadow-lg whitespace-nowrap">
+              <span className="text-sm font-medium bg-background border rounded-lg px-3 py-2  whitespace-nowrap">
                 {action.label}
               </span>
               <Button
                 size="lg"
                 className={cn(
-                  'h-12 w-12 rounded-full shadow-lg',
+                  'h-12 w-12 rounded-full ',
                   action.color ?? 'bg-primary'
                 )}
                 onClick={() => {
@@ -70,7 +70,7 @@ export const FloatingActionButton = ({
       <Button
         size="lg"
         className={cn(
-          'h-16 w-16 rounded-full shadow-2xl transition-all',
+          'h-16 w-16 rounded-full  transition-all',
           isOpen && 'rotate-45'
         )}
         onClick={handleMainClick}
@@ -95,7 +95,7 @@ export const SimpleFAB = ({
       size="lg"
       onClick={onClick}
       className={cn(
-        'fixed bottom-6 right-6 z-50 h-16 w-16 rounded-full shadow-2xl',
+        'fixed bottom-6 right-6 z-50 h-16 w-16 rounded-full ',
         className
       )}
     >

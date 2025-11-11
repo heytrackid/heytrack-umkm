@@ -2,6 +2,12 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 
+declare global {
+  interface EventListener {
+    (evt: Event): void
+  }
+}
+
 interface SwipeConfig {
   threshold?: number
   resistance?: number

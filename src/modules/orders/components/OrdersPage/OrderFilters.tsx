@@ -20,7 +20,7 @@ import { ORDER_STATUS_CONFIG } from '@/modules/orders/constants'
 
 
 
-interface OrderFilters {
+interface OrderFiltersInterface {
     status: OrderStatus[]
     payment_status: string[]
     date_from: string
@@ -29,10 +29,10 @@ interface OrderFilters {
 }
 
 interface OrderFiltersProps {
-    filters: OrderFilters
+    filters: OrderFiltersInterface
     totalOrders: number
     filteredCount: number
-    onFilterChange: (filters: OrderFilters) => void
+    onFilterChange: (filters: OrderFiltersInterface) => void
     onClearFilters: () => void
 }
 

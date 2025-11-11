@@ -18,7 +18,7 @@ interface ThemedCardProps {
  * Card dengan theming otomatis
  * Menggunakan bg-card, text-card-foreground, dan border-border
  */
-export function ThemedCard({ children, className, hover = false }: ThemedCardProps) {
+export const ThemedCard = ({ children, className, hover = false }: ThemedCardProps) => {
   return (
     <div
       className={cn(
@@ -41,7 +41,7 @@ interface ThemedBadgeProps {
 /**
  * Badge dengan theming otomatis
  */
-export function ThemedBadge({ children, variant = 'default', className }: ThemedBadgeProps) {
+export const ThemedBadge = ({ children, variant = 'default', className }: ThemedBadgeProps) => {
   const variantClasses = {
     default: 'bg-primary/10 text-primary',
     secondary: 'bg-secondary text-secondary-foreground',
@@ -74,7 +74,7 @@ interface ThemedSectionProps {
 /**
  * Section dengan header dan theming otomatis
  */
-export function ThemedSection({ children, title, description, className }: ThemedSectionProps) {
+export const ThemedSection = ({ children, title, description, className }: ThemedSectionProps) => {
   return (
     <section className={cn('space-y-4', className)}>
       {(title || description) && (
@@ -96,7 +96,7 @@ interface ThemedDividerProps {
 /**
  * Divider dengan theming otomatis
  */
-export function ThemedDivider({ className, orientation = 'horizontal' }: ThemedDividerProps) {
+export const ThemedDivider = ({ className, orientation = 'horizontal' }: ThemedDividerProps) => {
   return (
     <div
       className={cn(
@@ -117,7 +117,7 @@ interface ThemedAlertProps {
 /**
  * Alert dengan theming otomatis
  */
-export function ThemedAlert({ children, variant = 'default', className }: ThemedAlertProps) {
+export const ThemedAlert = ({ children, variant = 'default', className }: ThemedAlertProps) => {
   const variantClasses = {
     default: 'bg-muted text-foreground border-border',
     success: 'bg-green-50 text-green-900 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900',
@@ -146,7 +146,7 @@ interface ThemedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 /**
  * Input dengan theming otomatis
  */
-export function ThemedInput({ error, className, ...props }: ThemedInputProps) {
+export const ThemedInput = ({ error, className, ...props }: ThemedInputProps) => {
   return (
     <input
       className={cn(
@@ -169,7 +169,7 @@ interface ThemedTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaE
 /**
  * Textarea dengan theming otomatis
  */
-export function ThemedTextarea({ error, className, ...props }: ThemedTextareaProps) {
+export const ThemedTextarea = ({ error, className, ...props }: ThemedTextareaProps) => {
   return (
     <textarea
       className={cn(
@@ -193,7 +193,7 @@ interface ThemedSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement
 /**
  * Select dengan theming otomatis
  */
-export function ThemedSelect({ error, className, children, ...props }: ThemedSelectProps) {
+export const ThemedSelect = ({ error, className, children, ...props }: ThemedSelectProps) => {
   return (
     <select
       className={cn(
@@ -217,7 +217,7 @@ interface ThemedLabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
 /**
  * Label dengan theming otomatis
  */
-export function ThemedLabel({ required, className, children, ...props }: ThemedLabelProps) {
+export const ThemedLabel = ({ required, className, children, ...props }: ThemedLabelProps) => {
   return (
     <label
       className={cn('block text-sm font-medium text-foreground mb-1.5', className)}
@@ -238,7 +238,7 @@ interface ThemedHelperTextProps {
 /**
  * Helper text untuk form fields
  */
-export function ThemedHelperText({ children, error, className }: ThemedHelperTextProps) {
+export const ThemedHelperText = ({ children, error, className }: ThemedHelperTextProps) => {
   return (
     <p
       className={cn(
@@ -259,7 +259,7 @@ interface ThemedSkeletonProps {
 /**
  * Skeleton loader dengan theming otomatis
  */
-export function ThemedSkeleton({ className }: ThemedSkeletonProps) {
+export const ThemedSkeleton = ({ className }: ThemedSkeletonProps) => {
   return (
     <div
       className={cn(

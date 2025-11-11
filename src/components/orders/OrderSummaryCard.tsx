@@ -42,7 +42,7 @@ export const OrderSummaryCard = memo(({
 
     return (
         <Card
-            className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`}
+            className={`transition-all ${onClick ? 'cursor-pointer' : ''}`}
             onClick={onClick}
         >
             <CardHeader className="pb-3">

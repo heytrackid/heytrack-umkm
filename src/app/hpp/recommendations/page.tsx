@@ -207,7 +207,7 @@ const HppRecommendationsPage = (): JSX.Element => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <label className="text-sm font-medium">Filter:</label>
+              <label htmlFor="recommendation-filter" className="text-sm font-medium">Filter:</label>
               <Select
                 value={filter}
                 onValueChange={(value: string) => {
@@ -216,7 +216,7 @@ const HppRecommendationsPage = (): JSX.Element => {
                   }
                 }}
               >
-                <SelectTrigger className="w-48">
+                <SelectTrigger id="recommendation-filter" className="w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

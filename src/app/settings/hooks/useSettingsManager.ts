@@ -21,7 +21,7 @@ export function useSettingsManager() {
     setSettings(mergedDefaults)
   }, [mergedDefaults])
 
-  // Initialize settings immediately - no fake loading needed
+  // Initialize settings immediately
   useEffect(() => {
     setSettings(mergedDefaults)
   }, [mergedDefaults])
@@ -53,7 +53,7 @@ export function useSettingsManager() {
         setIsSaving(false)
       }, 500) // Simulate save delay
 
-     } catch (_error) {
+    } catch {
       setIsSaving(false)
       // In a real implementation, show error toast
     }
@@ -69,7 +69,7 @@ export function useSettingsManager() {
     settings,
     isUnsavedChanges,
     isSaving,
-    isSkeletonLoading: false, // No more fake loading
+    isSkeletonLoading: false,
     handleSettingChange,
     handleSave,
     handleReset,

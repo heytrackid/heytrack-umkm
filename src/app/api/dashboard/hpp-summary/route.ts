@@ -62,7 +62,7 @@ async function fetchRecipes(
   if (error) {
     throw error
   }
-  return (data ?? []) as any
+  return data ?? []
 }
 
 async function fetchHppCalculations(
@@ -78,7 +78,7 @@ async function fetchHppCalculations(
   if (error) {
     throw error
   }
-  return (data ?? []) as any
+  return data ?? []
 }
 
 async function fetchAlerts(
@@ -94,7 +94,7 @@ async function fetchAlerts(
   if (error) {
     throw error
   }
-  return (data ?? []) as any
+  return data ?? []
 }
 
 function buildHppTrends(calculations: Array<{ recipe_id: string | null; total_hpp: number; created_at: string | null }>): Array<{ date: string | null; value: number | null }> {

@@ -31,8 +31,8 @@ interface StatsCardsProps {
 
 // Lazy load dashboard components with proper chunk names for better bundle analysis
 const LazyHppDashboardWidget = dynamic(() =>
-  import('./HppDashboardWidget').then(mod => ({ default: mod.HppDashboardWidget })), {
-    loading: () => <div className="h-80 bg-muted animate-pulse rounded-lg" />
+  import('./HppDashboardWidget').then(mod => mod.HppDashboardWidget), {
+    loading: () => <StatsCardsSkeleton />
   }
 )
 
@@ -49,7 +49,7 @@ const LazyStatsCardsSection = dynamic(() =>
 )
 
 const LazyStockAlertsSection = dynamic(() =>
-  import('./StockAlertsSection').then(mod => mod.default), {
+  import('./StockAlertsSection').then((mod) => ({ default: mod.StockAlertsSection })), {
     loading: () => <StockAlertSkeleton />
   }
 )

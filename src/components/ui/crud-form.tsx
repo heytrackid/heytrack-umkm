@@ -356,7 +356,7 @@ export const FormActions = ({
   sticky = false,
 }: FormActionsProps) => {
   const containerClasses = `
-    ${sticky ? 'sticky bottom-0 left-0 right-0 bg-background border-t border-border/20 p-4 sm:relative sm:border-t-0 sm:p-0 z-10 shadow-lg sm:shadow-none' : ''}
+    ${sticky ? 'sticky bottom-0 left-0 right-0 bg-background border-t border-border/20 p-4 sm:relative sm:border-t-0 sm:p-0 z-10' : ''}
     ${fullWidthOnMobile ? 'flex flex-col-reverse sm:flex-row sm:justify-end space-y-3 space-y-reverse sm:space-y-0 sm:space-x-3' : 'flex justify-end space-x-3'}
     mt-6 pt-4 ${!sticky ? 'border-t border-border/20' : ''}
   `;
@@ -444,7 +444,17 @@ export const ConfirmDialog = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity" onClick={onClose} />
+        <div 
+          className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity" 
+          onClick={onClose}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              onClose()
+            }
+          }}
+          role="button"
+          tabIndex={0}
+        />
         <div className="relative bg-background rounded-lg max-w-md w-full">
           <div className="p-6">
             <h3 className="text-lg font-medium text-foreground mb-4">{title}</h3>

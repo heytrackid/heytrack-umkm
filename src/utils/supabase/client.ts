@@ -1,11 +1,16 @@
-import { createBrowserClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js'
 
 import { createClientLogger } from '@/lib/client-logger'
+import type { Database } from '@/types/database'
 
-let browserClient: ReturnType<typeof createBrowserClient> | null = null
+let browserClient: SupabaseClient<Database> | null = null
 
-export async function createClient() {
-  // Return existing client if already created to prevent multiple instances
+/**
+ * Creates or returns existing Supabase client (singleton pattern)
+ * MUST be synchronous to prevent render loops
+ */
+export function createClient(): SupabaseClient<Database> {
+  // Return existing client immediately if already created
   if (browserClient) {
     return browserClient
   }
@@ -22,46 +27,13 @@ export async function createClient() {
     throw new Error('Missing Supabase environment variables. Please check your deployment configuration.')
   }
 
-  browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        if (typeof document === 'undefined' || !document.cookie) {
-          return []
-        }
-        return document.cookie
-          .split(';')
-          .map(cookie => {
-            const trimmed = cookie.trim()
-            const [rawName = '', ...rest] = trimmed.split('=')
-            const name = rawName.trim()
-            return { name, value: rest.join('=') }
-          })
-          .filter(({ name }) => name.length > 0)
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => {
-          document.cookie = `${name}=${value}; ${options?.domain ? `domain=${options.domain}; ` : ''}${options?.path ? `path=${options.path}; ` : ''}${options?.expires ? `expires=${options.expires.toUTCString()}; ` : ''}${options?.secure ? 'secure; ' : ''}${options?.sameSite ? `sameSite=${options.sameSite}; ` : ''}`
-        })
-      }
-    },
+  // Create singleton instance
+  browserClient = createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
       flowType: 'pkce'
-    }
-  })
-
-  // Handle auth state changes
-  browserClient.auth.onAuthStateChange((event) => {
-    const logger = createClientLogger('SupabaseAuth')
-    
-    if (event === 'SIGNED_OUT') {
-      logger.info({ event }, 'User signed out')
-    } else if (event === 'TOKEN_REFRESHED') {
-      logger.debug({ event }, 'Token refreshed successfully')
-    } else if (event === 'SIGNED_IN') {
-      logger.info({ event }, 'User signed in')
     }
   })
 

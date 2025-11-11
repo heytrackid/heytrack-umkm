@@ -139,10 +139,10 @@ export const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
                 const data = await chatbotRes.json() as ChatbotAnalytics
                 setChatbotAnalytics(data)
             }
-        } catch (_error) {
+        } catch (error) {
             toast({
                 title: 'Error',
-                description: 'Failed to load admin metrics',
+                description: error instanceof Error ? error.message : 'Failed to load admin metrics',
                 variant: 'destructive'
             })
         } finally {
@@ -183,10 +183,10 @@ export const AdminDashboard = (_props: AdminDashboardProps): JSX.Element => {
                 title: 'Success',
                 description: 'Logs exported successfully'
             })
-        } catch (_error) {
+        } catch (error) {
             toast({
                 title: 'Error',
-                description: 'Failed to export logs',
+                description: error instanceof Error ? error.message : 'Failed to export logs',
                 variant: 'destructive'
             })
         }

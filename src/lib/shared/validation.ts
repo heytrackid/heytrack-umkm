@@ -108,7 +108,7 @@ export const validationFunctions = {
     try {
       new URL(value)
       return validationPatterns.url.test(value)
-    } catch (_error) {
+    } catch {
       return false
     }
   }
@@ -319,7 +319,7 @@ export const validationHelpers = {
     try {
       schema.parse(data)
       return true
-    } catch (_error) {
+    } catch {
       return false
     }
   }

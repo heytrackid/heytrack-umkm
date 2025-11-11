@@ -1,7 +1,7 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger, logError } from '@/lib/logger'
 import type { Database } from '@/types/database'
@@ -163,7 +163,7 @@ async function fetchLowStockAlerts(
     name: item.name,
     current_stock: item.current_stock,
     stock_status: (item.current_stock ?? 0) <= (item.min_stock ?? 0) ? 'LOW_STOCK' : 'IN_STOCK'
-  })) as any
+  } as const))
 }
 
 function buildSummary(

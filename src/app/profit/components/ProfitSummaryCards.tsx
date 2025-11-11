@@ -37,7 +37,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
   return (
     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
       {/* Total Revenue */}
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover: ">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Total Pendapatan
@@ -61,7 +61,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
       </Card>
 
       {/* Gross Profit */}
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover: ">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Laba Kotor
@@ -89,7 +89,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
       </Card>
 
       {/* Net Profit */}
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover: ">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Laba Bersih
@@ -123,7 +123,7 @@ export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }
       </Card>
 
       {/* COGS */}
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover: ">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Harga Pokok Penjualan

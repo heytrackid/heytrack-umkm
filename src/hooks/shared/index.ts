@@ -205,7 +205,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
       const item = window.localStorage.getItem(key)
        
       return item ? JSON.parse(item) : defaultValue
-    } catch (_error) {
+    } catch {
       return defaultValue
     }
   })
@@ -215,23 +215,23 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
       const valueToStore = newValue instanceof Function ? newValue(value) : newValue
       setValue(valueToStore)
 
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore))
-      }
-    } catch (_error) {
-      // Storage _error handled silently
-    }
+       if (typeof window !== 'undefined') {
+         window.localStorage.setItem(key, JSON.stringify(valueToStore))
+       }
+     } catch {
+       // Storage error handled silently
+     }
   }, [key, value])
 
   const removeValue = useCallback(() => {
     try {
       setValue(defaultValue)
-      if (typeof window !== 'undefined') {
-        window.localStorage.removeItem(key)
-      }
-    } catch (_error) {
-      // Storage _error handled silently
-    }
+       if (typeof window !== 'undefined') {
+         window.localStorage.removeItem(key)
+       }
+     } catch {
+       // Storage error handled silently
+     }
   }, [key, defaultValue])
 
   return [value, setStoredValue, removeValue] as const

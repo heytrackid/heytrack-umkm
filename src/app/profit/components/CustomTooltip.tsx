@@ -6,11 +6,11 @@ interface CustomTooltipProps {
 }
 
 const CustomTooltip = ({ formatCurrency }: CustomTooltipProps) => {
-  const Component = (props: TooltipContentProps<any, any>): JSX.Element | null => {
+  const Component = (props: TooltipContentProps<number, string>): JSX.Element | null => {
     const { active, payload } = props
     if (active && payload?.length) {
       return (
-        <div className="bg-background border rounded-lg p-3 shadow-lg">
+        <div className="bg-background border rounded-lg p-3 ">
           <p className="font-medium mb-2">{payload[0]?.payload?.name}</p>
           <div className="space-y-1 text-sm">
             <div className="flex items-center gap-2">

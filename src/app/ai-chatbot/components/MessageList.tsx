@@ -33,7 +33,6 @@ export const MessageList = ({
   // Use virtual scrolling for long conversations (>20 messages)
   const useVirtualScrolling = messages.length > 20
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: messages.length,
     getScrollElement: () => virtualizerRef.current,

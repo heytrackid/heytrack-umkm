@@ -12,12 +12,7 @@ import { createClient } from '@/utils/supabase/server'
 
 
 
-// Apply security middleware
-const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
-const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
-const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
 
-export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }
 
 async function getHandler(
   _request: Request,
@@ -175,3 +170,10 @@ async function deleteHandler(
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
+const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
+const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
+
+export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }

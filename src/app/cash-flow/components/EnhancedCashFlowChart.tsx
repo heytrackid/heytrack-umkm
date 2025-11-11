@@ -26,14 +26,14 @@ type ChartType = 'area' | 'bar' | 'line'
 
 
 
-const CustomTooltip = (props: TooltipContentProps<any, any>): JSX.Element | null => {
+const CustomTooltip = (props: TooltipContentProps<number, string>): JSX.Element | null => {
     const { active, payload } = props
     if (active && payload?.length) {
         const data = payload[0]?.payload
         if (!data) { return null }
 
         return (
-            <div className="bg-background border rounded-lg p-3 shadow-lg">
+            <div className="bg-background border rounded-lg p-3 ">
                 <p className="font-semibold mb-2">{data.date}</p>
                 <div className="space-y-1.5 text-sm">
                     <div className="flex items-center justify-between gap-4">

@@ -30,7 +30,7 @@ const AutoSyncClient = dynamic(
   }
 )
 
-export async function AutoSyncFinancialDashboard() {
+export const AutoSyncFinancialDashboard = async () => {
   const autoSyncData = await fetchAutoSyncData()
 
   if (!autoSyncData?.success) {

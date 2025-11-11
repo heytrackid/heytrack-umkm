@@ -1,7 +1,7 @@
 export const runtime = 'nodejs'
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
+import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
@@ -11,7 +11,7 @@ import { createPaginationMeta } from '@/lib/validations/pagination'
 import type { Insert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
@@ -208,7 +208,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         ...recipeData,
         created_by: user['id'],
         user_id: user['id']
-      } as any])
+      } as Insert<'recipes'>])
       .select('id, name, created_at')
       .single()
 

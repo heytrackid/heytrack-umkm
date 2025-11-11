@@ -60,7 +60,7 @@ const securityHeaders = [
  */
  
  
-function applyDevOptimizations(config: any): void {
+function applyDevOptimizations(config: Record<string, unknown>): void {
   // Ensure module IDs are stable across HMR updates
   config.optimization = {
     ...(config.optimization as Record<string, unknown>),
@@ -74,7 +74,7 @@ function applyDevOptimizations(config: any): void {
  */
  
  
-function applyProdOptimizations(config: any): void {
+function applyProdOptimizations(config: Record<string, unknown>): void {
   // Enable tree shaking
   config.optimization = {
     ...(config.optimization as Record<string, unknown>),

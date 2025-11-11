@@ -65,7 +65,7 @@ const RecipePreviewCard = memo(({
               <div className="h-24 w-24 mx-auto bg-gradient-to-br from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center border-2 border-primary/20">
                 <ChefHat className="h-12 w-12 text-primary" />
               </div>
-              <div className="absolute -top-2 -right-2 h-8 w-8 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-lg">
+              <div className="absolute -top-2 -right-2 h-8 w-8 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center ">
                 <span className="text-white text-lg">✨</span>
               </div>
             </div>

@@ -100,21 +100,21 @@ const UpdatePasswordPage = (): JSX.Element => {
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
-        <Card className="w-full max-w-md shadow-xl border animate-fade-in-scale">
+        <Card className="w-full max-w-md border animate-fade-in-scale">
           <CardContent className="pt-6 pb-6 sm:pt-8 sm:pb-8 px-4 sm:px-6">
             <div className="text-center space-y-4">
               <div className="w-14 h-14 sm:w-16 sm:h-16 bg-secondary rounded-full flex items-center justify-center mx-auto animate-success-pulse">
                 <CheckCircle className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground" />
               </div>
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                  Password Berhasil Diubah!
-                </h2>
-                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mb-4">
-                  Password Anda telah berhasil diperbarui. Silakan login dengan password baru Anda.
-                </p>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
+                Password Berhasil Diubah!
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4">
+                Password Anda telah berhasil diperbarui. Silakan login dengan password baru Anda.
+              </p>
                 <Link href="/auth/login">
-                  <Button className="mt-4 h-11 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
+                  <Button className="mt-4 h-11 bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation">
                     Lanjut ke Login
                   </Button>
                 </Link>
@@ -135,16 +135,16 @@ const UpdatePasswordPage = (): JSX.Element => {
       <div className="w-full max-w-md space-y-4 sm:space-y-6">
         {/* Logo/Brand */}
         <div className="text-center space-y-2">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-900 dark:bg-slate-100 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-slate-100 dark:bg-slate-900 rounded-lg flex items-center justify-center">
-              <span className="text-slate-900 dark:text-slate-100 font-bold text-base sm:text-lg">H</span>
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary-foreground rounded-lg flex items-center justify-center">
+              <span className="text-primary font-bold text-base sm:text-lg">H</span>
             </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">HeyTrack</h1>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Buat password baru</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">HeyTrack</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Buat password baru</p>
         </div>
 
-        <Card className="shadow-xl border">
+        <Card className="border">
           <CardHeader className="space-y-1 pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
             <CardTitle className="text-xl sm:text-2xl text-center">Reset Password</CardTitle>
             <CardDescription className="text-center text-sm sm:text-base">
@@ -211,12 +211,12 @@ const UpdatePasswordPage = (): JSX.Element => {
                       {Array.from({ length: 5 }, (_, i) => (
                         <div
                           key={`bar-${i}`}
-                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-slate-200 dark:bg-slate-700'
+                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-muted'
                             }`}
                         />
                       ))}
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 transition-opacity duration-200">
+                    <p className="text-xs text-muted-foreground transition-opacity duration-200">
                       Kekuatan: {strengthLabels[passwordStrength - 1] ?? 'Sangat Lemah'}
                     </p>
                   </div>
@@ -225,7 +225,7 @@ const UpdatePasswordPage = (): JSX.Element => {
                 {/* Password Requirements */}
                 {password && (
                   <div className="space-y-1 mt-2 animate-fade-in">
-                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <p className="text-xs font-medium text-foreground mb-1">
                       Persyaratan Password:
                     </p>
                     {passwordRequirements.map((req) => (
@@ -233,7 +233,7 @@ const UpdatePasswordPage = (): JSX.Element => {
                         {req.met ? (
                           <Check className="h-3 w-3 text-muted-foreground transition-all duration-200" />
                         ) : (
-                          <X className="h-3 w-3 text-slate-400 transition-all duration-200" />
+                          <X className="h-3 w-3 text-muted-foreground transition-all duration-200" />
                         )}
                         <span className={`transition-colors duration-200 ${req.met ? 'text-muted-foreground' : 'text-muted'}`}>
                           {req.label}
@@ -296,7 +296,7 @@ const UpdatePasswordPage = (): JSX.Element => {
 
               <Button
                 type="submit"
-                className="w-full h-11 text-base font-medium bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                className="w-full h-11 text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
                 disabled={isPending}
               >
                 {isPending ? (
@@ -314,7 +314,7 @@ const UpdatePasswordPage = (): JSX.Element => {
               <span className="text-muted-foreground">Ingat password Anda? </span>
               <Link
                 href="/auth/login"
-                className="text-slate-900 dark:text-slate-100 hover:text-slate-700 dark:hover:text-slate-300 font-medium underline underline-offset-4 inline-block min-h-[44px] leading-[44px]"
+                className="text-foreground hover:text-muted-foreground font-medium underline underline-offset-4 inline-block min-h-[44px] leading-[44px]"
               >
                 Kembali ke Login
               </Link>

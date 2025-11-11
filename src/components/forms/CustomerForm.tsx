@@ -118,7 +118,6 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
               error={form.formState.errors['customer_type']?.message as string}
             >
               <Select
-                // eslint-disable-next-line react-hooks/incompatible-library
                 value={form.watch('customer_type') as string}
                 onValueChange={(value) => form.setValue('customer_type', value as 'regular' | 'retail' | 'vip' | 'wholesale')}
               >

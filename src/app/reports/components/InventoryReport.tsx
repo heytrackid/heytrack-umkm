@@ -63,7 +63,7 @@ export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps)
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Item
@@ -75,7 +75,7 @@ export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps)
             <p className="text-xs text-muted-foreground">Jumlah bahan dalam inventaris</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Nilai Inventory
@@ -87,7 +87,7 @@ export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps)
             <p className="text-xs text-muted-foreground">Nilai total semua stok</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Stok Rendah
@@ -99,7 +99,7 @@ export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps)
             <p className="text-xs text-muted-foreground">Perlu restock segera</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover: ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Habis
@@ -115,7 +115,7 @@ export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps)
 
       {/* Inventory Status Overview */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-0 shadow-sm">
+        <Card className="border-0 ">
           <CardHeader>
             <CardTitle>Status Stok</CardTitle>
           </CardHeader>
@@ -177,7 +177,7 @@ export const InventoryReport = ({ dateRange: _dateRange }: InventoryReportProps)
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm">
+        <Card className="border-0 ">
           <CardHeader>
             <CardTitle>Rekomendasi Tindakan</CardTitle>
           </CardHeader>

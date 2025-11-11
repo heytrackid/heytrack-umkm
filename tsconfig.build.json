@@ -1,0 +1,26 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "new-types.d.ts",
+    "next-env.d.ts",
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "build",
+    "dist",
+    "supabase",
+    "scripts",
+    "public",
+    "docs",
+    "eslint-rules",
+    "*.config.*",
+    "*.test.*",
+    "**/__tests__/**",
+    ".kiro",
+    "workers",
+    "src/types/supabase-generated.ts"
+  ]
+}

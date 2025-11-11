@@ -11,7 +11,7 @@ interface ProfitBreakdownProps {
 }
 
 export const ProfitBreakdown = ({ summary, formatCurrency }: ProfitBreakdownProps) => (
-  <Card className="border-0 shadow-sm">
+  <Card className="border-0 ">
     <CardHeader>
       <div className="flex items-center gap-2">
         <TrendingUp className="h-5 w-5 text-blue-600" />

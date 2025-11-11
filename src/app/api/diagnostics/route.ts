@@ -3,8 +3,9 @@ export const runtime = 'nodejs'
 
 import { NextResponse, type NextRequest } from 'next/server'
 
-import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
+ import { handleAPIError } from '@/lib/errors/api-error-handler'
+ import { apiLogger } from '@/lib/logger'
+ import { SecurityPresets, withSecurity } from '@/utils/security/index'
 
 interface EnvVarDiagnostics {
   exists: boolean
@@ -93,11 +94,13 @@ function buildDiagnosticsSkeleton(): DiagnosticsPayload {
 
 async function diagnosticsGET(_request: NextRequest): Promise<NextResponse> {
   try {
+    apiLogger.info('GET /api/diagnostics - Request received')
     const diagnostics = buildDiagnosticsSkeleton()
     diagnostics.supabase_connectivity = await checkSupabaseConnectivity()
     diagnostics.deployment_status = 'operational'
 
     return NextResponse.json(diagnostics, {
+      status: 200,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Access-Control-Allow-Origin': '*',

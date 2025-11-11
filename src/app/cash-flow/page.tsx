@@ -1,15 +1,15 @@
 'use client'
 
-import { AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle, Settings } from 'lucide-react'
+import { Calendar } from '@/components/ui/calendar'
+import { AlertCircle, ArrowDownCircle, ArrowUpCircle, PlusCircle, Settings } from 'lucide-react'
 import { Suspense, useState } from 'react'
-import { DateRangePicker, type DateRangeValue } from '@/components/ui/date-range'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { StatsSkeleton, CardSkeleton } from '@/components/ui/index'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb' 
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { CardSkeleton, StatsSkeleton } from '@/components/ui/index'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -136,18 +136,22 @@ const CashFlowPage = (): JSX.Element => {
           }
         />
 
-        {/* Mobile DateRangePicker */}
+        {/* Mobile Calendar */}
         <div className="md:hidden mb-4">
           <Card>
             <CardContent className="p-4">
-              <DateRangePicker
-                onChange={(range: DateRangeValue) => {
+              <Calendar
+                mode="range"
+                onSelect={(range) => {
+                  if (!range) return
                   const params = new URLSearchParams(window.location.search)
                   if (range.from) params.set('from', range.from.toISOString())
                   if (range.to) params.set('to', range.to.toISOString())
                   const url = `${window.location.pathname}?${params.toString()}`
                   window.history.replaceState(null, '', url)
                 }}
+                numberOfMonths={1}
+                className="w-full"
               />
             </CardContent>
           </Card>

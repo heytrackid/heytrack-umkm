@@ -45,7 +45,7 @@ export function useAIService(sessionId?: string | null): { processAIQuery: (quer
 
       return {
         message: data.message,
-        suggestions: (data.suggestions || []).map((s: any) => typeof s === 'string' ? s : s.text),
+        suggestions: (data.suggestions || []).map((s: string | { text: string }) => typeof s === 'string' ? s : s.text),
         data: {
           businessContext: data.metadata,
           responseTimeMs: responseTime

@@ -5,7 +5,7 @@ import { SmartBottomNav, NavItem } from '@/components/navigation/SmartNavigation
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard } from 'lucide-react'
 
-// Mock Next.js navigation
+//  Next.js navigation
 vi.mock('next/navigation', () => ({
   usePathname: vi.fn(),
   useRouter: vi.fn(() => ({
@@ -18,7 +18,9 @@ vi.mock('next/navigation', () => ({
   })),
 }))
 
-// Mock the preloading hooks
+const mockUsePathname = vi.mocked(usePathname)
+
+//  the preloading hooks
 vi.mock('@/hooks/usePreloading', () => ({
   useAdvancedLinkPreloading: vi.fn(() => ({
     onMouseEnter: vi.fn(),
@@ -30,7 +32,7 @@ vi.mock('@/hooks/usePreloading', () => ({
   })),
 }))
 
-// Mock useInstantNavigation
+//  useInstantNavigation
 vi.mock('@/hooks/useInstantNavigation', () => ({
   useInstantNavigation: vi.fn(() => ({
     navigateInstant: vi.fn(),
@@ -44,7 +46,7 @@ describe('SmartNavigation', () => {
   })
 
   describe('NavItem', () => {
-    const mockItem = {
+    const Item = {
       title: 'Dashboard',
       href: '/dashboard',
       icon: LayoutDashboard,
@@ -52,20 +54,20 @@ describe('SmartNavigation', () => {
     }
 
     it('should render navigation item with correct title and icon', () => {
-      ;(usePathname as any).mockReturnValue('/dashboard')
+      vi.mocked(usePathname).mockReturnValue('/dashboard')
 
-      render(<NavItem item={mockItem} index={0} />)
+      render(<NavItem item={Item} index={0} />)
 
       expect(screen.getByText('Dashboard')).toBeInTheDocument()
       expect(screen.getByTestId('nav-icon')).toBeInTheDocument()
     })
 
     it('should show active state when pathname matches href', () => {
-      ;(usePathname as any).mockReturnValue('/dashboard')
+      vi.mocked(usePathname).mockReturnValue('/dashboard')
 
-      render(<NavItem item={mockItem} index={0} />)
+      render(<NavItem item={Item} index={0} />)
 
-      const link = screen.getByRole('navigation', { name: 'Navigate to Dashboard' })
+      const link = screen.getByRole('button', { name: 'Navigate to Dashboard' })
       expect(link).toHaveClass('text-primary')
       expect(link).toHaveClass('bg-primary/10')
     })
@@ -78,11 +80,11 @@ describe('SmartNavigation', () => {
         preloadTargets: ['/orders', '/cash-flow', '/ingredients'] as string[]
       }
 
-      ;(usePathname as any).mockReturnValue('/')
+      mockUsePathname.mockReturnValue('/')
 
       render(<NavItem item={dashboardItem} index={0} />)
 
-      const link = screen.getByRole('navigation', { name: 'Navigate to Dasbor' })
+      const link = screen.getByRole('button', { name: 'Navigate to Dasbor' })
       expect(link).toHaveClass('text-primary')
     })
 
@@ -94,37 +96,37 @@ describe('SmartNavigation', () => {
         preloadTargets: ['/customers', '/orders/new'] as string[]
       }
 
-      ;(usePathname as any).mockReturnValue('/orders/new')
+      mockUsePathname.mockReturnValue('/orders/new')
 
       render(<NavItem item={ordersItem} index={0} />)
 
-      const link = screen.getByRole('navigation', { name: 'Navigate to Orders' })
+      const link = screen.getByRole('button', { name: 'Navigate to Orders' })
       expect(link).toHaveClass('text-primary')
     })
 
     it('should not show active state when pathname does not match', () => {
-      ;(usePathname as any).mockReturnValue('/orders')
+      mockUsePathname.mockReturnValue('/orders')
 
-      render(<NavItem item={mockItem} index={0} />)
+      render(<NavItem item={Item} index={0} />)
 
-      const link = screen.getByRole('navigation', { name: 'Navigate to Dashboard' })
+      const link = screen.getByRole('button', { name: 'Navigate to Dashboard' })
       expect(link).not.toHaveClass('text-primary')
       expect(link).not.toHaveClass('bg-primary/10')
     })
 
     it('should render active indicator dot when active', () => {
-      ;(usePathname as any).mockReturnValue('/dashboard')
+      ;(usePathname as any).ReturnValue('/dashboard')
 
-      render(<NavItem item={mockItem} index={0} />)
+      render(<NavItem item={Item} index={0} />)
 
       const activeDot = screen.getByTestId('active-indicator')
       expect(activeDot).toHaveClass('opacity-100')
     })
 
     it('should hide active indicator dot when not active', () => {
-      ;(usePathname as any).mockReturnValue('/orders')
+      mockUsePathname.mockReturnValue('/orders')
 
-      render(<NavItem item={mockItem} index={0} />)
+      render(<NavItem item={Item} index={0} />)
 
       const activeDot = screen.getByTestId('active-indicator')
       expect(activeDot).toHaveClass('opacity-0')
@@ -133,7 +135,7 @@ describe('SmartNavigation', () => {
 
   describe('SmartBottomNav', () => {
     it('should render main navigation items', () => {
-      ;(usePathname as any).mockReturnValue('/dashboard')
+      ;(usePathname as any).ReturnValue('/dashboard')
 
       render(<SmartBottomNav />)
 
@@ -145,7 +147,7 @@ describe('SmartNavigation', () => {
     })
 
     it('should have proper accessibility attributes', () => {
-      ;(usePathname as any).mockReturnValue('/dashboard')
+      ;(usePathname as any).ReturnValue('/dashboard')
 
       render(<SmartBottomNav />)
 

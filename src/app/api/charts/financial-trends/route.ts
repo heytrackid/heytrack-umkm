@@ -4,9 +4,10 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 
-async function GET(request: NextRequest) {
+async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -34,7 +35,13 @@ async function GET(request: NextRequest) {
 
     if (ordersError) throw ordersError
 
-    const orders: any[] = data
+    const orders: Array<{ created_at: string; total_amount: number; status: string }> = (data || []).filter(order =>
+      order.created_at !== null && order.total_amount !== null && order.status !== null
+    ).map(order => ({
+      created_at: order.created_at!,
+      total_amount: order.total_amount!,
+      status: order.status!
+    }))
 
     // Fetch expenses data
     // Helper to get date string
@@ -71,7 +78,7 @@ async function GET(request: NextRequest) {
     const dataMap = new Map<string, { revenue: number; expenses: number; hpp: number }>()
 
     // Process orders (revenue)
-    orders?.forEach((order: any) => {
+    orders?.forEach((order: { created_at: string; total_amount: number; status: string }) => {
       if (order.status === 'DELIVERED') {
         const dateParts = new Date((order.created_at ?? '')).toISOString().split('T')
         const date = dateParts[0] || ''
@@ -116,6 +123,7 @@ async function GET(request: NextRequest) {
       data: chartData,
     })
   } catch (error) {
+    apiLogger.error({ error }, 'Error in GET /api/charts/financial-trends')
     return handleAPIError(error, 'GET /api/charts/financial-trends')
   }
 }

@@ -8,7 +8,8 @@ import { uiLogger } from '@/lib/logger'
  */
 
 // Lazy load with error boundary
-export function lazyLoad<T extends ComponentType<any>>(  
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function lazyLoad<T extends ComponentType<any>>(
   importFunc: () => Promise<{ default: T }>
 ): LazyExoticComponent<T> {
   return lazy(() =>

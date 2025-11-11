@@ -7,9 +7,9 @@ import { SuppliersCRUD } from '@/components/crud/suppliers-crud'
 import { generateSuppliersTemplate, parseSuppliersCSV } from '@/components/import/csv-helpers'
 import { ImportDialog } from '@/components/import/ImportDialog'
 import { AppLayout } from '@/components/layout/app-layout'
-import { DateRangePicker, type DateRangeValue } from '@/components/ui/date-range'
-import { BreadcrumbPatterns, PageBreadcrumb, PageHeader, StatsCards } from '@/components/ui/index'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { BreadcrumbPatterns, PageBreadcrumb, PageHeader, StatsCards } from '@/components/ui/index'
 import { useSupabaseCRUD } from '@/hooks/supabase/index'
 
 import type { Row } from '@/types/database'
@@ -41,17 +41,21 @@ const SuppliersPage = (): JSX.Element => {
                     description="Kelola data supplier dan vendor bahan baku"
                       actions={
                         <div className="flex items-center gap-2">
-                          <div className="hidden md:block">
-                            <DateRangePicker
-                              onChange={(range: DateRangeValue) => {
-                                const params = new URLSearchParams(window.location.search)
-                                if (range.from) params.set('from', range.from.toISOString())
-                                if (range.to) params.set('to', range.to.toISOString())
-                                const url = `${window.location.pathname}?${params.toString()}`
-                                window.history.replaceState(null, '', url)
-                              }}
-                            />
-                          </div>
+                           <div className="hidden md:block">
+                             <Calendar
+                               mode="range"
+                               onSelect={(range) => {
+                                 if (!range) return
+                                 const params = new URLSearchParams(window.location.search)
+                                 if (range.from) params.set('from', range.from.toISOString())
+                                 if (range.to) params.set('to', range.to.toISOString())
+                                 const url = `${window.location.pathname}?${params.toString()}`
+                                 window.history.replaceState(null, '', url)
+                               }}
+                               numberOfMonths={2}
+                               className="w-full"
+                             />
+                           </div>
                           <Button
                             variant="outline"
                             onClick={() => setImportDialogOpen(true)}
@@ -131,7 +135,7 @@ const SuppliersPage = (): JSX.Element => {
                                 success: true,
                                 ...(result.count !== undefined && { count: result.count })
                             }
-                        } catch (_error) {
+                         } catch {
                             return {
                                 success: false,
                                 error: 'Terjadi kesalahan saat import'

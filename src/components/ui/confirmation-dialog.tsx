@@ -74,7 +74,7 @@ export const ConfirmationDialog = ({
       setInternalLoading(true)
       await onConfirm()
       onOpenChange(false)
-    } catch (_error) {
+    } catch {
       // Error handling is done by the caller
     } finally {
       setInternalLoading(false)

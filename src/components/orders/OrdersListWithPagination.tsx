@@ -87,10 +87,10 @@ export const OrdersListWithPagination = (): JSX.Element => {
 
             setOrders(result['data'])
             setTotalItems(result.meta.total)
-        } catch (_error) {
+        } catch (error) {
             toast({
                 title: 'Error',
-                description: 'Gagal memuat data pesanan',
+                description: error instanceof Error ? error.message : 'Gagal memuat data pesanan',
                 variant: 'destructive',
             })
         } finally {
@@ -224,7 +224,7 @@ export const OrdersListWithPagination = (): JSX.Element => {
                      {orders.map((order) => (
                          <Card
                              key={order['id']}
-                             className="hover:shadow-md transition-shadow cursor-pointer"
+                             className="transition-all cursor-pointer"
                              onClick={() => router.push(`/orders/${order['id']}`)}
                          >
                              <CardContent className="p-6">

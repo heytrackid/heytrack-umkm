@@ -10,7 +10,10 @@ const withBundleAnalyzer =
     : (config: NextConfig) => config
 
 const nextConfig: NextConfig = {
-  typescript: { ignoreBuildErrors: false },
+  typescript: {
+    ignoreBuildErrors: false,
+    tsconfigPath: './tsconfig.build.json'
+  },
   typedRoutes: true,
   compiler: { removeConsole: isProd ? { exclude: ['error'] } : false },
   poweredByHeader: false,
@@ -19,63 +22,25 @@ const nextConfig: NextConfig = {
   generateBuildId: async () =>
     process.env['VERCEL_GIT_COMMIT_SHA']?.slice(0, 10) || `build-${Date.now()}`,
 
-  // 🔥 Turbopack: disabled to fix HMR issues
-  turbopack: {},
-
-    experimental: {
-      typedEnv: true,
-      serverActions: {
-        allowedOrigins: ['localhost:3000', '127.0.0.1:3000', appDomain].filter(Boolean),
+  // 🔥 Turbopack: enabled for faster development
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
-      optimizeCss: true,
-      optimizePackageImports: [
-      // UI Libraries
-      'lucide-react',
-      '@radix-ui/react-icons',
-      'recharts',
-
-      // Radix UI Components (used)
-      '@radix-ui/react-accordion',
-      '@radix-ui/react-alert-dialog',
-      '@radix-ui/react-avatar',
-      '@radix-ui/react-checkbox',
-      '@radix-ui/react-collapsible',
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-dropdown-menu',
-      '@radix-ui/react-label',
-      '@radix-ui/react-popover',
-      '@radix-ui/react-progress',
-      '@radix-ui/react-radio-group',
-      '@radix-ui/react-scroll-area',
-      '@radix-ui/react-select',
-      '@radix-ui/react-separator',
-      '@radix-ui/react-slider',
-      '@radix-ui/react-switch',
-      '@radix-ui/react-tabs',
-      '@radix-ui/react-toast',
-      '@radix-ui/react-toggle',
-      '@radix-ui/react-tooltip',
-
-      // Data & State Management
-      '@tanstack/react-table',
-      '@tanstack/react-virtual',
-      '@supabase/supabase-js',
-      '@tanstack/react-query',
-      'zustand',
-
-      // Utilities
-      'date-fns',
-      'zod',
-      'dompurify',
-      'react-hook-form',
-      'react-window',
-      'react-resizable-panels',
-      'react-hot-toast',
-      'sonner',
-      'input-otp',
-    ],
-    optimisticClientCache: false,
+    },
   },
+
+      experimental: {
+        typedEnv: true,
+        serverActions: {
+          allowedOrigins: ['localhost:3000', '127.0.0.1:3000', appDomain].filter(Boolean),
+        },
+        optimizeCss: true, // Enabled for Turbopack
+        // optimizePackageImports disabled for Turbopack compatibility
+        optimisticClientCache: false,
+      },
 
   images: {
     formats: ['image/webp', 'image/avif'],

@@ -1,6 +1,7 @@
 'use client'
 
-import { DateRangePicker } from '@/components/ui/date-range'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
+import type { DateRange } from 'react-day-picker'
 
 import { Calendar, Filter, ShoppingCart, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -11,8 +12,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { useCurrency } from '@/hooks/useCurrency'
-
-import type { DateRange } from 'react-day-picker'
 
 interface RecentOrdersSectionProps {
   orders?: Array<{
@@ -138,18 +137,23 @@ const RecentOrdersSection = ({
         
         {/* Date Range Picker */}
         {showDateFilter && showDatePicker && dateRange && (
-          <div className="mt-4 p-4 border rounded-lg bg-muted/20">
-            <div className="w-full md:w-auto">
-              <DateRangePicker
-                onChange={(range) => {
-                  const params = new URLSearchParams(window.location.search)
-                  if (range.from) params.set('from', range.from.toISOString())
-                  if (range.to) params.set('to', range.to.toISOString())
-                  const url = `${window.location.pathname}?${params.toString()}`
-                  window.history.replaceState(null, '', url)
-                }}
-              />
-            </div>
+          <div 
+            className="mt-4 p-4 border rounded-lg bg-muted/20" 
+            role="region" 
+            aria-label="Date range picker"
+          >
+             <div className="w-full md:w-auto">
+               <DateRangePicker
+                 onDateChange={(range: DateRange | undefined) => {
+                   if (!range) return
+                   const params = new URLSearchParams(window.location.search)
+                   if (range.from) params.set('from', range.from.toISOString())
+                   if (range.to) params.set('to', range.to.toISOString())
+                   const url = `${window.location.pathname}?${params.toString()}`
+                   window.history.replaceState(null, '', url)
+                 }}
+               />
+             </div>
           </div>
         )}
       </CardHeader>
@@ -211,6 +215,13 @@ const RecentOrdersSection = ({
                   key={order['id']}
                   className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted cursor-pointer transition-colors"
                   onClick={() => router.push(`/orders/${order['id']}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      router.push(`/orders/${order['id']}`)
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-wrap-mobile">{order.customer}</div>

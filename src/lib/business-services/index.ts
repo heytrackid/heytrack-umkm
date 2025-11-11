@@ -9,7 +9,7 @@
 
 
 // Types and interfaces
-export * from './types'
+export type * from './types'
 
 // Services
 export { InventoryServices } from './inventory'

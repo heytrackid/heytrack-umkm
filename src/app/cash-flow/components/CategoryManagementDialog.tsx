@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { createLogger } from '@/lib/logger'
 
 interface CategoryManagementDialogProps {
   isOpen: boolean
@@ -37,7 +38,8 @@ const CategoryManagementDialog = ({ isOpen, onOpenChange }: CategoryManagementDi
       try {
         return JSON.parse(stored)
       } catch (error) {
-        console.error('Failed to parse stored categories:', error)
+        const logger = createLogger('CategoryManagementDialog')
+        logger.error({ error }, 'Failed to parse stored categories')
       }
     }
 
@@ -137,7 +139,6 @@ const CategoryManagementDialog = ({ isOpen, onOpenChange }: CategoryManagementDi
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditValue(e.target.value)}
                           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') { updateCategory(category.id, editValue); setEditingId(null); setEditValue(''); } }}
                           onBlur={() => { updateCategory(category.id, editValue); setEditingId(null); setEditValue(''); }}
-                          autoFocus
                         />
                         <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
                           <X className="h-4 w-4" />
@@ -193,7 +194,6 @@ const CategoryManagementDialog = ({ isOpen, onOpenChange }: CategoryManagementDi
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditValue(e.target.value)}
                           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') { updateCategory(category.id, editValue); setEditingId(null); setEditValue(''); } }}
                           onBlur={() => { updateCategory(category.id, editValue); setEditingId(null); setEditValue(''); }}
-                          autoFocus
                         />
                         <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
                           <X className="h-4 w-4" />

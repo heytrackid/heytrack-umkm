@@ -136,7 +136,7 @@ export const OrdersList = memo(({
               }
             ]}
           >
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="transition-all">
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">

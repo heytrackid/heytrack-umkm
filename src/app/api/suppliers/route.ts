@@ -2,9 +2,10 @@
 export const runtime = 'nodejs'
 
 
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-import { getErrorMessage } from '@/lib/type-guards'
+ import { apiLogger } from '@/lib/logger'
+ import { getErrorMessage } from '@/lib/type-guards'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import type { Insert } from '@/types/database'
@@ -83,6 +84,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error: unknown) {
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/suppliers')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
@@ -134,6 +136,7 @@ async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json(supplier, { status: 201 })
   } catch (error: unknown) {
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/suppliers')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }

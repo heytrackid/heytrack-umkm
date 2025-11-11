@@ -146,7 +146,6 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
                 onValueChange={(value) => {
                   form.setValue('difficulty', value as 'EASY' | 'HARD' | 'MEDIUM')
                 }}
-                // eslint-disable-next-line react-hooks/incompatible-library
                 {...(form.watch('difficulty') ? { value: form.watch('difficulty') as string } : {})}
               
               >

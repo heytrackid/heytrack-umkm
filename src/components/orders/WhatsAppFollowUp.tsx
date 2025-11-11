@@ -153,8 +153,8 @@ export const WhatsAppFollowUp = ({
       setCopied(type);
       toast.success('Berhasil disalin!');
       setTimeout(() => setCopied(null), 2000);
-    } catch (_error: unknown) {
-      toast.error('Gagal menyalin text');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Gagal menyalin text');
     }
   };
 

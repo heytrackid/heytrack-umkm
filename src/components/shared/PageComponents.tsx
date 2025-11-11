@@ -25,7 +25,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { getStatusColor, getStatusText } from '@/lib/shared/utilities'
 
-interface BreadcrumbItem {
+interface PageBreadcrumbItem {
   label: string
   href?: string
 }
@@ -34,7 +34,7 @@ interface PageHeaderProps {
   title: string
   description?: string
   actions?: ReactNode
-  breadcrumbs?: BreadcrumbItem[]
+  breadcrumbs?: PageBreadcrumbItem[]
   className?: string
 }
 

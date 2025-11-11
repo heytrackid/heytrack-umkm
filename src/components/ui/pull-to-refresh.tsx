@@ -92,7 +92,7 @@ export const PullToRefresh = ({
           opacity
         }}
       >
-        <div className="bg-primary text-primary-foreground rounded-full p-2 shadow-lg">
+        <div className="bg-primary text-primary-foreground rounded-full p-2 ">
           <RefreshCw className={cn('h-5 w-5 transition-transform duration-300', rotation)} />
         </div>
       </div>

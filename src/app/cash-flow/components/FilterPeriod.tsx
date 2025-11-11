@@ -94,20 +94,22 @@ const FilterPeriod = ({
           {selectedPeriod === 'custom' && (
             <div className="space-y-3 pt-2 border-t">
               <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
-                  <input
-                    type="date"
-                    value={startDate || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => onStartDateChange(e.target.value)}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
-                  <input
-                    type="date"
-                    value={endDate || ''}
+                 <div>
+                   <label htmlFor="start-date" className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
+                   <input
+                     id="start-date"
+                     type="date"
+                     value={startDate || ''}
+                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => onStartDateChange(e.target.value)}
+                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                   />
+                 </div>
+                 <div>
+                   <label htmlFor="end-date" className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
+                   <input
+                     id="end-date"
+                     type="date"
+                     value={endDate || ''}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => onEndDateChange(e.target.value)}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   />

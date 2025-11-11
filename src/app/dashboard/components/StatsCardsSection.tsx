@@ -1,7 +1,6 @@
 'use client'
 
 import { AlertCircle, DollarSign, HelpCircle, Package, ShoppingCart, TrendingDown, TrendingUp, Users } from 'lucide-react'
-import { memo } from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -29,7 +28,7 @@ interface StatsCardsSectionProps {
   formatCurrency: (value: number) => string
 }
 
-const StatsCardsSection = memo(({ stats, formatCurrency }: StatsCardsSectionProps): JSX.Element => {
+const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): JSX.Element => {
    // Component logic here
    if (!stats) {
      return (
@@ -197,10 +196,8 @@ const StatsCardsSection = memo(({ stats, formatCurrency }: StatsCardsSectionProp
            </CardContent>
          </Card>
        </div>
-     </TooltipProvider>
+      </TooltipProvider>
     )
-  })
-
-StatsCardsSection.displayName = 'StatsCardsSection'
+  }
 
 export { StatsCardsSection }

@@ -350,6 +350,13 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                           key={customer['id']}
                           className="p-2 hover:bg-muted cursor-pointer"
                           onClick={() => selectCustomer(customer)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              selectCustomer(customer)
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
                         >
                           <div className="font-medium">{customer.name}</div>
                           <div className="text-sm text-muted-foreground">{customer.phone}</div>
