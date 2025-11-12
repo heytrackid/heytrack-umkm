@@ -59,8 +59,8 @@ async function putHandler(
     }
 
     // ✅ V2: Safe extraction of joined recipe data
-    const recipe = extractFirst(batch.recipe)
-    const recipeName = recipe && isRecord(recipe) ? safeString(recipe.name, 'Unknown') : 'Unknown'
+    const recipe = extractFirst((batch as any).recipe)
+    const recipeName = recipe && isRecord(recipe) ? safeString(recipe['name'], 'Unknown') : 'Unknown'
 
     // ✅ Map database columns to expected format
     const mappedBatch = {
@@ -96,6 +96,18 @@ async function deleteHandler(
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       throw new APIError('Unauthorized', { status: 401, code: 'AUTH_REQUIRED' })
+    }
+
+    // ✅ Fetch batch first to check if it exists
+    const { data: batch } = await supabase
+      .from('productions')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user['id'])
+      .single()
+
+    if (!batch) {
+      throw new APIError('Production batch not found', { status: 404, code: 'NOT_FOUND' })
     }
 
     // ✅ Delete with RLS (user_id filter)

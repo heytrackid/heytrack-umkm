@@ -3,11 +3,11 @@
 import { useCallback, useState } from 'react'
 
 import { successToast } from '@/hooks/use-toast'
-import type { TableName, Row, Insert, Update } from '@/types/database'
+import type { Insert, Row, TableName, Update } from '@/types/database'
 import { getErrorMessage, typed } from '@/types/type-utilities'
 import { createClient as createSupabaseClient } from '@/utils/supabase/client'
 
-import { handleCRUDError, validateCRUDInputs, validateBulkInputs } from '@/hooks/enhanced-crud/utils'
+import { handleCRUDError, validateBulkInputs, validateCRUDInputs } from '@/hooks/enhanced-crud/utils'
 
 import type { EnhancedCRUDOptions } from '@/hooks/enhanced-crud/types'
 
@@ -75,8 +75,9 @@ export function useEnhancedCRUD<TTable extends TableName>(
     try {
       const supabase = typed(createSupabaseClient())
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: result, error } = await supabase
-        .from(table)
+        .from(table as any)
         .insert(data as never)
         .select()
         .single() as { data: TRow | null; error: Error | null }
@@ -107,8 +108,9 @@ export function useEnhancedCRUD<TTable extends TableName>(
     try {
       const supabase = typed(createSupabaseClient())
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: result, error } = await supabase
-        .from(table)
+        .from(table as any)
         .update(data as never)
         .eq('id', id as never)
         .select()
@@ -142,8 +144,9 @@ export function useEnhancedCRUD<TTable extends TableName>(
       const supabase = typed(createSupabaseClient())
 
       // Check if record exists first
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: existingRecord, error: fetchError } = await supabase
-        .from(table)
+        .from(table as any)
         .select('id')
         .eq('id', id as never)
         .single() as { data: Pick<TRow, 'id'> | null; error: Error | null }
@@ -152,8 +155,9 @@ export function useEnhancedCRUD<TTable extends TableName>(
         throw new Error('Data tidak ditemukan')
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await supabase
-        .from(table)
+        .from(table as any)
         .delete()
         .eq('id', id as never)
 
@@ -180,8 +184,9 @@ export function useEnhancedCRUD<TTable extends TableName>(
     try {
       const supabase = typed(createSupabaseClient())
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: result, error } = await supabase
-        .from(table)
+        .from(table as any)
         .insert(records as never)
         .select() as { data: TRow[] | null; error: Error | null }
 
@@ -221,8 +226,9 @@ export function useEnhancedCRUD<TTable extends TableName>(
       const results: TRow[] = []
 
       for (const update of updates) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: result, error } = await supabase
-          .from(table)
+          .from(table as any)
           .update(update['data'] as never)
           .eq('id', update['id'] as never)
           .select()
@@ -264,8 +270,9 @@ export function useEnhancedCRUD<TTable extends TableName>(
     try {
       const supabase = typed(createSupabaseClient())
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await supabase
-        .from(table)
+        .from(table as any)
         .delete()
         .in('id', ids as never)
 

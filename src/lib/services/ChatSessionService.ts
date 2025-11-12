@@ -1,13 +1,12 @@
 import type { Json } from '@/types/database'
 import type {
-
-  ChatSession,
-  ChatMessage,
-  SessionListItem,
   BusinessContext,
+  ChatMessage,
+  ChatSession,
   MessageMetadata,
+  SessionListItem,
 } from '@/types/features/chat'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { TypedSupabaseClient } from '@/types/type-utilities'
 
 import { logger } from '@/lib/logger'
 
@@ -36,13 +35,13 @@ export class ChatSessionService {
    * Create a new chat session
    */
   static async createSession(
-    supabase: SupabaseClient,
+    supabase: TypedSupabaseClient,
     userId: string,
-    title = 'New Conversation',
-    contextSnapshot: BusinessContext = {}
+    title?: string,
+    contextSnapshot?: Record<string, unknown>
   ): Promise<ChatSession> {
 
-    const serializedSnapshot = JSON.parse(JSON.stringify(contextSnapshot)) as Json
+    const serializedSnapshot = contextSnapshot ? JSON.parse(JSON.stringify(contextSnapshot)) as Json : null
 
     const { data, error } = await supabase
       .from('chat_sessions')
@@ -71,7 +70,7 @@ export class ChatSessionService {
    * Get a session by ID
    */
   static async getSession(
-    supabase: SupabaseClient,
+    supabase: TypedSupabaseClient,
     sessionId: string,
     userId: string
   ): Promise<ChatSession> {
@@ -98,9 +97,9 @@ export class ChatSessionService {
    * List user's sessions
    */
   static async listSessions(
-    supabase: SupabaseClient,
+    supabase: TypedSupabaseClient,
     userId: string,
-    limit = 20
+    limit = 50
   ): Promise<SessionListItem[]> {
 
     const { data: sessions, error } = await supabase
@@ -148,7 +147,7 @@ export class ChatSessionService {
    * Get chatbot analytics for a user
    */
   static async getChatAnalytics(
-    supabase: SupabaseClient,
+    supabase: TypedSupabaseClient,
     userId: string,
     days = 30
   ): Promise<{
@@ -269,7 +268,7 @@ export class ChatSessionService {
    * Update session title
    */
   static async updateSessionTitle(
-    supabase: SupabaseClient,
+    supabase: TypedSupabaseClient,
     sessionId: string,
     userId: string,
     title: string
@@ -293,7 +292,7 @@ export class ChatSessionService {
    * Soft delete a session
    */
   static async deleteSession(
-    supabase: SupabaseClient,
+    supabase: TypedSupabaseClient,
     sessionId: string,
     userId: string
   ): Promise<void> {
@@ -316,11 +315,11 @@ export class ChatSessionService {
    * Add a message to a session
    */
   static async addMessage(
-    supabase: SupabaseClient,
+    supabase: TypedSupabaseClient,
     sessionId: string,
-    role: 'assistant' | 'system' | 'user',
+    role: 'user' | 'assistant',
     content: string,
-    metadata: Record<string, unknown> = {}
+    metadata?: MessageMetadata
   ): Promise<ChatMessage> {
 
     const { data, error } = await supabase
@@ -359,7 +358,7 @@ export class ChatSessionService {
    * Returns recent messages with context awareness
    */
   static async getConversationContext(
-    supabase: SupabaseClient,
+    supabase: TypedSupabaseClient,
     sessionId: string,
     userId: string,
     maxMessages = 20
@@ -479,10 +478,10 @@ export class ChatSessionService {
    * Get messages for a session
    */
   static async getMessages(
-    supabase: SupabaseClient,
+    supabase: TypedSupabaseClient,
     sessionId: string,
     userId: string,
-    limit = 100
+    limit: number = 100
   ): Promise<ChatMessage[]> {
 
     // Verify session belongs to user

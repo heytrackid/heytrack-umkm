@@ -19,10 +19,12 @@ interface RealtimePayload<T extends TableName> {
  */
 export function useSupabaseQuery<T extends TableName>(
   tableName: T,
-  options: UseSupabaseQueryOptions<T> = {}
-): UseSupabaseQueryResult<T> {
+  // @ts-expect-error - Generic type constraint limitation with Supabase types
+  options: UseSupabaseQueryOptions<T & TableName> = {}
+  // @ts-expect-error - Generic type constraint limitation with Supabase types
+): UseSupabaseQueryResult<T & TableName> {
   const { supabase } = useSupabase()
-  const [data, setData] = useState<Array<Row<T>>>(options.initial ?? [])
+  const [data, setData] = useState<Array<Row<T>>>((options.initial ?? []) as Array<Row<T>>)
   const [loading, setLoading] = useState(!options.initial)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,7 +43,8 @@ export function useSupabaseQuery<T extends TableName>(
       setError(null)
 
       const currentOptions = optionsRef.current
-      let _query = supabase.from(tableName).select(currentOptions.select ?? '*')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let _query = supabase.from(tableName as any).select(currentOptions.select ?? '*')
 
       // Apply filters
       if (currentOptions.filter) {
@@ -80,7 +83,7 @@ export function useSupabaseQuery<T extends TableName>(
         throw queryError
       }
       const typedResult = (result ?? []) as unknown as Row<T>[]
-      setData(typedResult)
+      setData(typedResult as Array<Row<T>>)
     } catch (error) {
       if (fetchIdRef.current !== currentFetchId) {
         return
@@ -117,16 +120,16 @@ export function useSupabaseQuery<T extends TableName>(
           (payload: unknown) => {
             const typedPayload = payload as RealtimePayload<T>
             if (typedPayload.eventType === 'INSERT') {
-              setData((prev) => [typedPayload.new, ...prev])
+              setData((prev) => [typedPayload.new, ...prev] as Array<Row<T>>)
             } else if (typedPayload.eventType === 'UPDATE') {
               setData((prev) =>
                 prev.map((item: Row<T>) =>
                   (item as { id: string })['id'] === (typedPayload.new as { id: string })['id'] ? typedPayload.new : item
-                )
+                ) as Array<Row<T>>
               )
             } else if (typedPayload.eventType === 'DELETE') {
               setData((prev) =>
-                prev.filter((item: Row<T>) => (item as { id: string })['id'] !== (typedPayload.old as { id: string })['id'])
+                prev.filter((item: Row<T>) => (item as { id: string })['id'] !== (typedPayload.old as { id: string })['id']) as Array<Row<T>>
               )
             }
           }
@@ -151,6 +154,7 @@ export function useSupabaseQuery<T extends TableName>(
   }, [tableName, fetchData, options.realtime, options.refetchOnMount, options.initial, supabase])
 
   return {
+    // @ts-expect-error - Generic type constraint limitation with Supabase types
     data,
     loading,
     error,

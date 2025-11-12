@@ -68,7 +68,7 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
           .eq('is_active', true),
 
         // Get recipes with their costs
-        supabase
+        (supabase as any)
           .from('recipes')
           .select('id, cost_per_unit, selling_price, margin_percentage')
           .eq('user_id', user['id'])
@@ -99,16 +99,21 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
 
       const totalRecipes = recipesResult.count ?? 0
       const recipesWithCost = calculationsResult['data'] ?? []
-      const alertsData: AlertWithRecipe[] = alertsResult['data'] ?? []
+      const alertsRaw = alertsResult['data'] ?? []
 
       // Calculate average HPP
       const averageHpp = recipesWithCost.length > 0
-        ? recipesWithCost.reduce((sum, r) => sum + (Number(r.cost_per_unit) || 0), 0) / recipesWithCost.length
+        ? (recipesWithCost as any[]).reduce((sum: any, r: any) => sum + (Number(r.cost_per_unit) || 0), 0) / recipesWithCost.length
         : 0
 
       const recipesWithHpp = recipesWithCost.length
 
-      // Process alerts data
+      // Process alerts data - handle Supabase join structure
+      const alertsData: AlertWithRecipe[] = alertsRaw.map((alert: any) => ({
+        ...alert,
+        recipes: Array.isArray(alert.recipes) ? alert.recipes[0] : alert.recipes
+      }))
+
       const totalAlerts = alertsData.length
       const unreadAlerts = alertsData.filter(alert => !alert.is_read).length
 

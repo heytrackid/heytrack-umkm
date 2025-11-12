@@ -1,9 +1,9 @@
-import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import type { Row, Json } from '@/types/database'
-import { safeGet, typed, isRecord, hasKey, isArray } from '@/types/type-utilities'
-import { createClient } from '@/utils/supabase/server'
 import type { RecipeOption } from '@/modules/orders/types'
+import type { Json, Row } from '@/types/database'
+import { hasKey, isArray, isRecord, safeGet, typed } from '@/types/type-utilities'
+import { createClient } from '@/utils/supabase/server'
+import 'server-only'
 
 
 
@@ -231,15 +231,17 @@ export class RecipeAvailabilityService {
         const insufficientIngredients: string[] = []
 
         for (const recipeIngredient of recipe.recipe_ingredients || []) {
-          const ingredient = recipeIngredient.ingredient
+          const ingredient = Array.isArray(recipeIngredient.ingredient) 
+            ? recipeIngredient.ingredient[0] 
+            : recipeIngredient.ingredient
           if (!ingredient) continue
 
           const requiredAmount = recipeIngredient.quantity * (recipe.servings ?? 1)
-          const availableStock = ingredient.current_stock ?? 0
+          const availableStock = ingredient['current_stock'] ?? 0
 
           if (availableStock < requiredAmount) {
             isAvailable = false
-            insufficientIngredients.push(`${ingredient.name}: perlu ${requiredAmount}, tersedia ${availableStock}`)
+            insufficientIngredients.push(`${ingredient['name']}: perlu ${requiredAmount}, tersedia ${availableStock}`)
           }
         }
 

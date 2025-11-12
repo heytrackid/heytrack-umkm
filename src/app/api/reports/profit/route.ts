@@ -105,7 +105,7 @@ async function getHandler(request: NextRequest) {
       ? recipesRaw.map((recipe) => ({
           ...recipe,
           recipe_ingredients: Array.isArray(recipe.recipe_ingredients)
-            ? recipe.recipe_ingredients.map((ri) => ({
+            ? recipe.recipe_ingredients.map((ri: any) => ({
                 ...ri,
                 ingredient: Array.isArray(ri.ingredient) ? ri.ingredient[0]! : ri.ingredient
               }))

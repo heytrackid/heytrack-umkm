@@ -107,8 +107,15 @@ async function postHandler(request: NextRequest, { params }: { params: { id: str
     const pricingAutomation = new PricingAutomation(UMKM_CONFIG)
     
     // Transform recipeData to match expected type with proper null handling
-    const recipeForPricing: RecipeWithIngredients = {
+    const recipeForPricing = {
       ...recipeData,
+      batch_size: recipeData?.batch_size ?? null,
+      category: recipeData?.category ?? null,
+      cook_time: recipeData?.cook_time ?? null,
+      cost_per_unit: recipeData?.cost_per_unit ?? null,
+      created_at: recipeData?.created_at ?? null,
+      created_by: recipeData?.created_by ?? null,
+      description: recipeData?.description ?? null,
       servings: recipeData?.servings ?? 1,
       recipe_ingredients: (recipeData?.recipe_ingredients ?? []).map((ri) => ({
         id: ri?.id || '',
@@ -119,7 +126,7 @@ async function postHandler(request: NextRequest, { params }: { params: { id: str
         user_id: ri?.user_id || '',
         ingredient: ri?.ingredient ?? null
       }))
-    }
+    } as RecipeWithIngredients
     
     // Calculate pricing using the original recipeData which should have the right structure
     const sanitizedIngredients = (recipeForPricing.recipe_ingredients ?? [])

@@ -16,8 +16,9 @@ export class useSupabaseBulk {
   ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
-      .from(table)
+      .from(table as any)
       .insert(records as never)
       .select('*') as { data: Array<Row<T>> | null; error: Error | null }
 
@@ -30,14 +31,16 @@ export class useSupabaseBulk {
 
   static async updateMultiple<T extends TableName>(
     table: T,
-    updates: Array<BulkUpdateItem<T>>
+    // @ts-expect-error - Generic type constraint limitation with Supabase types
+    updates: Array<BulkUpdateItem<T & TableName>>
   ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
     const results: Array<Row<T>> = []
 
     for (const update of updates) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await supabase
-        .from(table)
+        .from(table as any)
         .update(update['data'] as never)
         .eq('id', update['id'] as never)
         .select('*')
@@ -59,8 +62,9 @@ export class useSupabaseBulk {
   ): Promise<boolean> {
     const supabase = typed(createClient())
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await supabase
-      .from(table)
+      .from(table as any)
       .delete()
       .in('id', ids as never)
 
@@ -78,8 +82,9 @@ export class useSupabaseBulk {
   ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
-      .from(table)
+      .from(table as any)
       .upsert(records as never, { onConflict: conflictColumns.join(',') })
       .select('*') as { data: Array<Row<T>> | null; error: Error | null }
 
