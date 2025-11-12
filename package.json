@@ -34,7 +34,7 @@
     "supabase:types": "supabase gen types typescript --local > src/types/supabase-generated.ts",
     "supabase:types:remote": "supabase gen types typescript --project-id vrrjoswzmlhkmmcfhicw > src/types/supabase-generated.ts"
   },
-  "packageManager": "pnpm@9.15.2",
+  "packageManager": "pnpm@10.21.0",
   "pnpm": {
     "overrides": {
       "react": "^18.3.1",
