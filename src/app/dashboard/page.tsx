@@ -29,7 +29,6 @@ import { DashboardClient } from './components/DashboardClient'
 const DashboardPage = () => {
   // Debug logging for auth state verification
   if (typeof window !== 'undefined') {
-    console.log('Dashboard page loaded, checking auth state...')
     // This will be handled by useAuth hook in DashboardClient
   }
 

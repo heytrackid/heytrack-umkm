@@ -8,7 +8,7 @@ import { calculateProfitDateRange } from '@/app/profit/utils'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import type { PeriodType, ProfitFilters, ProfitFiltersProps } from '@/app/profit/components/types'
@@ -29,7 +29,7 @@ export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilter
     onFiltersChange(newFilters)
   }
 
-  const handleDateRangeChange = (dateRange: DateRange | undefined) => {
+  const _handleDateRangeChange = (dateRange: DateRange | undefined) => {
     if (!dateRange?.from || !dateRange?.to) {
       onFiltersChange({ dateRange: null })
       return
@@ -77,13 +77,7 @@ export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilter
           {filters.selectedPeriod === 'custom' && (
             <div>
               <label htmlFor="date-range" className="text-sm font-medium mb-2 block">Rentang Tanggal</label>
-              <DateRangePicker
-                date={filters.dateRange ?? undefined}
-                onDateChange={handleDateRangeChange}
-                showPresets={true}
-                maxDate={new Date()}
-                placeholder="Pilih rentang tanggal"
-              />
+
             </div>
           )}
 

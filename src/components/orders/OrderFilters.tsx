@@ -28,13 +28,11 @@ export const OrderFilters = ({
     onFiltersChange({ ...filters, [key]: value })
   }
 
-  const hasActiveFilters =
-    filters['status'] !== 'all' ||
-    filters.paymentStatus !== 'all' ||
-    filters.priority !== 'all' ||
-    Boolean(filters.dateFrom) ||
-    Boolean(filters.dateTo) ||
-    Boolean(filters.searchTerm)
+   const hasActiveFilters =
+     filters['status'] !== 'all' ||
+     filters.paymentStatus !== 'all' ||
+     filters.priority !== 'all' ||
+     Boolean(filters.searchTerm)
 
   return (
     <Card>
@@ -52,7 +50,7 @@ export const OrderFilters = ({
           </div>
 
           {/* Filter Row */}
-          <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-5'}`}>
+           <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-3'}`}>
             {/* Status Filter */}
             <div>
               <Select value={filters['status']} onValueChange={(value) => handleFilterChange('status', value)}>
@@ -101,25 +99,7 @@ export const OrderFilters = ({
               </Select>
             </div>
 
-            {/* Date From */}
-            <div>
-              <Input
-                type="date"
-                value={filters.dateFrom ?? ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('dateFrom', e.target.value)}
-                placeholder=""
-              />
-            </div>
 
-            {/* Date To */}
-            <div>
-              <Input
-                type="date"
-                value={filters.dateTo ?? ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('dateTo', e.target.value)}
-                placeholder=""
-              />
-            </div>
           </div>
 
           {/* Quick Filter Buttons */}

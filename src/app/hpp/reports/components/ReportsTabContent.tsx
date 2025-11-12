@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 // import { Input } from '@/components/ui/input'
@@ -33,34 +33,12 @@ interface ReportsTabContentProps {
 }
 
 const ReportsTabContent = ({ config, setConfig, generateReport, generating }: ReportsTabContentProps): JSX.Element => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Report Configuration</CardTitle>
-    </CardHeader>
-    <CardContent className="space-y-6">
-       {/* Date Range */}
-       <div className="grid grid-cols-1 gap-4">
-         <div className="space-y-2">
-           <Label>Periode</Label>
-           <Calendar
-             mode="range"
-             onSelect={(range) => {
-               if (!range) return
-               setConfig(prev => ({
-                 ...prev,
-                 dateRange: {
-                   start: range.from ? range.from.toISOString().slice(0, 10) : prev.dateRange.start,
-                   end: range.to ? range.to.toISOString().slice(0, 10) : prev.dateRange.end,
-                 }
-               }))
-             }}
-             numberOfMonths={2}
-             className="w-full"
-           />
-         </div>
-       </div>
-
-      {/* Metrics */}
+    <Card>
+      <CardHeader>
+        <CardTitle>Report Configuration</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+       {/* Metrics */}
       <div className="space-y-2">
         <Label>Metrics to Include</Label>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">

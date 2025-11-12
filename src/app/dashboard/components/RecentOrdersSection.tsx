@@ -1,6 +1,6 @@
 'use client'
 
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+
 import type { DateRange } from 'react-day-picker'
 
 import { Calendar, Filter, ShoppingCart, X } from 'lucide-react'
@@ -143,16 +143,7 @@ const RecentOrdersSection = ({
             aria-label="Date range picker"
           >
              <div className="w-full md:w-auto">
-               <DateRangePicker
-                 onDateChange={(range: DateRange | undefined) => {
-                   if (!range) return
-                   const params = new URLSearchParams(window.location.search)
-                   if (range.from) params.set('from', range.from.toISOString())
-                   if (range.to) params.set('to', range.to.toISOString())
-                   const url = `${window.location.pathname}?${params.toString()}`
-                   window.history.replaceState(null, '', url)
-                 }}
-               />
+
              </div>
           </div>
         )}

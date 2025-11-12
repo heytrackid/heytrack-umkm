@@ -1,6 +1,6 @@
 'use client'
 
-import { Calendar } from '@/components/ui/calendar'
+
 import { AlertCircle, ArrowDownCircle, ArrowUpCircle, PlusCircle, Settings } from 'lucide-react'
 import { Suspense, useState } from 'react'
 
@@ -136,26 +136,7 @@ const CashFlowPage = (): JSX.Element => {
           }
         />
 
-        {/* Mobile Calendar */}
-        <div className="md:hidden mb-4">
-          <Card>
-            <CardContent className="p-4">
-              <Calendar
-                mode="range"
-                onSelect={(range) => {
-                  if (!range) return
-                  const params = new URLSearchParams(window.location.search)
-                  if (range.from) params.set('from', range.from.toISOString())
-                  if (range.to) params.set('to', range.to.toISOString())
-                  const url = `${window.location.pathname}?${params.toString()}`
-                  window.history.replaceState(null, '', url)
-                }}
-                numberOfMonths={1}
-                className="w-full"
-              />
-            </CardContent>
-          </Card>
-        </div>
+
 
          {/* Main Content - Single Suspense boundary for parallel loading */}
          <Suspense fallback={

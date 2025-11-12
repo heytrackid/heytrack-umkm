@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 import { PageHeader } from '@/components/layout/PageHeader'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
@@ -75,18 +75,7 @@ const ReportsPage = () => {
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between gap-3">
         <PageHeader title="Laporan" description="Analisis performa bisnis Anda" />
-        <div className="w-full sm:w-auto">
-          <DateRangePicker
-            onDateChange={(range) => {
-              if (!range) return
-              const params = new URLSearchParams(window.location.search)
-              if (range.from) params.set('from', range.from.toISOString())
-              if (range.to) params.set('to', range.to.toISOString())
-              const url = `${window.location.pathname}?${params.toString()}`
-              window.history.replaceState(null, '', url)
-            }}
-          />
-        </div>
+
       </div>
       <ReportsLayout />
     </div>

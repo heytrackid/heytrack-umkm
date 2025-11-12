@@ -151,12 +151,7 @@ export function useOrders() {
     // Priority filter
     const priorityMatch = filters.priority === 'all' || order.priority === filters.priority
 
-    // Date range filter
-    const orderDate = order.delivery_date ? new Date(order.delivery_date) : new Date(0) // Use epoch date if null
-    const dateFromMatch = !filters.dateFrom || (order.delivery_date && orderDate >= new Date(filters.dateFrom))
-    const dateToMatch = !filters.dateTo || (order.delivery_date && orderDate <= new Date(filters.dateTo))
-
-    return searchMatch && statusMatch && paymentMatch && priorityMatch && dateFromMatch && dateToMatch
+    return searchMatch && statusMatch && paymentMatch && priorityMatch
   }), [orders, filters])
 
   // Calculate stats (memoized for performance)

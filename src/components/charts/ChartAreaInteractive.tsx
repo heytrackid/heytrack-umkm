@@ -1,7 +1,11 @@
 'use client'
 
-import { useState } from 'react'
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
+import { lazy, useState } from 'react'
+
+const Area = lazy(() => import('recharts').then(mod => ({ default: mod.Area })))
+const AreaChart = lazy(() => import('recharts').then(mod => ({ default: mod.AreaChart })))
+const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
+const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type {

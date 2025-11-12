@@ -8,7 +8,7 @@ import { PageHeader, SharedStatsCards } from '@/components/shared/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar } from '@/components/ui/calendar'
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/hooks/use-toast'
@@ -134,21 +134,7 @@ const ComparisonAnalyticsPage = (): JSX.Element => {
            title="Recipe Comparison"
            description="Benchmarking dan analisis komparatif antar resep"
          />
-          <div className="hidden md:block">
-            <Calendar
-              mode="range"
-              onSelect={(range) => {
-                if (!range) return
-                const params = new URLSearchParams(window.location.search)
-                if (range.from) params.set('from', range.from.toISOString())
-                if (range.to) params.set('to', range.to.toISOString())
-                const url = `${window.location.pathname}?${params.toString()}`
-                window.history.replaceState(null, '', url)
-              }}
-              numberOfMonths={2}
-              className="w-full"
-            />
-          </div>
+
        </div>
 
         {/* Stats Cards */}

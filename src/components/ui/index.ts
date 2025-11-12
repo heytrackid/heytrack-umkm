@@ -230,14 +230,7 @@ export {
 // SPECIALIZED COMPONENTS
 // ==========================================================
 
-export {
-    Calendar
-} from './calendar'
 
-export {
-    DateRangePicker,
-    type DateRangePickerProps
-} from './date-range-picker'
 
 export {
     ChartContainer, ChartLegend,

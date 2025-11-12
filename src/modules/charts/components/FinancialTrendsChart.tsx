@@ -9,7 +9,7 @@ import { ChartLineInteractive } from '@/components/charts'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ChartConfig } from '@/components/ui/chart'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFinancialTrends } from '@/hooks/useFinancialTrends'
 
@@ -41,7 +41,7 @@ export const FinancialTrendsChart = ({
   days: initialDays = 90,
   showDatePicker = true 
 }: FinancialTrendsChartProps) => {
-  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+  const [dateRange, _setDateRange] = useState<DateRange | undefined>()
   
   const days = useMemo(() => {
     if (dateRange?.from && dateRange?.to) {
@@ -108,13 +108,7 @@ export const FinancialTrendsChart = ({
             <CardTitle className="text-base sm:text-lg">Filter Periode</CardTitle>
           </CardHeader>
           <CardContent className="pb-4 sm:pb-6">
-            <DateRangePicker
-              date={dateRange}
-              onDateChange={setDateRange}
-              showPresets={true}
-              maxDate={new Date()}
-              placeholder="Pilih rentang tanggal untuk filter"
-            />
+
           </CardContent>
         </Card>
       )}

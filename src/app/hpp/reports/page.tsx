@@ -9,7 +9,7 @@ import { PageHeader, SharedStatsCards } from '@/components/shared/index'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
@@ -366,15 +366,7 @@ const HppReportsPage = (): JSX.Element => {
                 {/* Date Range */}
                 <div className="space-y-2">
                   <Label>Rentang Tanggal</Label>
-                  <DateRangePicker
-                    date={config.dateRange}
-                    onDateChange={(dateRange: DateRange | undefined) => setConfig(prev => ({
-                      ...prev,
-                      dateRange
-                    }))}
-                    showPresets={true}
-                    align="start"
-                  />
+
                 </div>
 
                 {/* Format */}

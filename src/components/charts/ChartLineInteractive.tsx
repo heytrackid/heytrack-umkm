@@ -1,7 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { CartesianGrid, Line, LineChart, XAxis } from 'recharts'
+import { lazy, useMemo, useState } from 'react'
+
+const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
+const Line = lazy(() => import('recharts').then(mod => ({ default: mod.Line })))
+const LineChart = lazy(() => import('recharts').then(mod => ({ default: mod.LineChart })))
+const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type {

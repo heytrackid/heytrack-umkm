@@ -64,7 +64,5 @@ export interface OrderFilters {
   status: string
   paymentStatus: string
   priority: string
-  dateFrom?: string
-  dateTo?: string
   searchTerm: string
 }

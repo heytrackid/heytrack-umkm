@@ -1,21 +1,19 @@
 'use client'
 
-import { format } from 'date-fns'
-import { id as idLocale } from 'date-fns/locale'
-import { CalendarIcon, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Popover } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { uiLogger } from '@/lib/logger'
-import { cn } from '@/lib/utils'
+
 
 import type { Row } from '@/types/database'
 
@@ -215,30 +213,12 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                             Tanggal Rencana Produksi <span className="text-muted-foreground">*</span>
                         </Label>
                         <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className={cn(
-                                        'w-full justify-start text-left font-normal',
-                                        !formData.planned_date && 'text-muted-foreground'
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {formData.planned_date ? (
-                                        format(formData.planned_date, 'dd MMMM yyyy', { locale: idLocale })
-                                    ) : (
-                                        <span>Pilih tanggal</span>
-                                    )}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    selected={formData.planned_date}
-                                    onSelect={(date) => date && setFormData({ ...formData, planned_date: date })}
-                                    initialFocus
-                                />
-                            </PopoverContent>
+                            <Input
+                              type="date"
+                              value={formData.planned_date.toISOString().slice(0, 10)}
+                              onChange={(e) => setFormData({ ...formData, planned_date: new Date(e.target.value) })}
+                              placeholder="Pilih tanggal"
+                            />
                         </Popover>
                     </div>
 
