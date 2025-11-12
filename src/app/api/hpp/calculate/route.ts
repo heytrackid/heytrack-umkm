@@ -9,6 +9,7 @@ import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { typed } from '@/types/type-utilities'
 import { createClient } from '@/utils/supabase/server'
 
 
@@ -26,6 +27,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 401 }
       )
     }
+
 
     const body = await request.json() as { recipeId?: string }
     const { recipeId } = body
@@ -82,7 +84,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Use consolidated HPP Calculator Service
     const hppService = new HppCalculatorService()
-    const calculation = await hppService.calculateRecipeHpp(supabase, recipeId, user['id'])
+    const calculation = await hppService.calculateRecipeHpp(typed(supabase), recipeId, user['id'])
 
     const materialCost = calculation.material_cost
     const totalHpp = calculation.total_hpp
@@ -139,8 +141,10 @@ async function PUT(request: NextRequest): Promise<NextResponse> {
     const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
       .select('id')
-      .eq('user_id', user['id'])
+      .eq('user_id', (user as { id: string }).id)
       .eq('is_active', true)
+
+    const typedRecipes = recipes as Array<{ id: string }> | null
 
     if (recipesError) {
       throw recipesError
@@ -148,14 +152,14 @@ async function PUT(request: NextRequest): Promise<NextResponse> {
 
     // Calculate HPP for each recipe in parallel
     const results = await Promise.allSettled(
-      (recipes ?? []).map(async (recipe) => {
+      (typedRecipes || []).map(async (recipe) => {
         const response = await fetch(`${request.nextUrl.origin}/api/hpp/calculate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Cookie': request['headers'].get('cookie') ?? ''
+            'Cookie': request.headers.get('cookie') ?? ''
           },
-          body: JSON.stringify({ recipeId: recipe['id'] })
+          body: JSON.stringify({ recipeId: recipe.id })
         })
 
         if (!response.ok) {
@@ -172,7 +176,7 @@ async function PUT(request: NextRequest): Promise<NextResponse> {
     // Log errors
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
-        apiLogger.error({ error: result.reason, recipeId: recipes?.[index]?.id }, 'Error calculating HPP for recipe')
+        apiLogger.error({ error: result.reason, recipeId: typedRecipes?.[index]?.id }, 'Error calculating HPP for recipe')
       }
     })
 

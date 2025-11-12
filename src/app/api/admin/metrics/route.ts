@@ -12,15 +12,16 @@ import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 
-import type { Database } from '@/types/database'
+
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { typed } from '@/types/type-utilities'
 
 import { createClient } from '@/utils/supabase/server'
 
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { TypedSupabaseClient } from '@/types/type-utilities'
 
 interface AdminMetricsContext {
-  supabase: SupabaseClient<Database>
+  supabase: TypedSupabaseClient
   userId: string
 }
 
@@ -75,7 +76,7 @@ interface AdminMetricsResponse {
 }
 
 async function authenticateAdmin(): Promise<AuthResult> {
-  const supabase = await createClient()
+  const supabase = typed(await createClient())
   const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error || !user) {
@@ -90,7 +91,7 @@ async function authenticateAdmin(): Promise<AuthResult> {
   return { context: { supabase, userId: user['id'] } }
 }
 
-async function fetchCountSummary(supabase: SupabaseClient<Database>): Promise<CountSummary> {
+async function fetchCountSummary(supabase: TypedSupabaseClient): Promise<CountSummary> {
   const [usersRes, recipesRes, ordersRes, ingredientsRes, revenueRes] = await Promise.all([
     supabase.from('user_profiles').select('id', { count: 'exact', head: true }),
     supabase.from('recipes').select('id', { count: 'exact', head: true }),
@@ -110,7 +111,7 @@ async function fetchCountSummary(supabase: SupabaseClient<Database>): Promise<Co
   }
 }
 
-async function fetchActivitySummary(supabase: SupabaseClient<Database>): Promise<ActivitySummary> {
+async function fetchActivitySummary(supabase: TypedSupabaseClient): Promise<ActivitySummary> {
   const today = new Date().toISOString().split('T')[0]
   const weekAgo = new Date()
   weekAgo.setDate(weekAgo.getDate() - 7)
@@ -132,7 +133,7 @@ async function fetchActivitySummary(supabase: SupabaseClient<Database>): Promise
   }
 }
 
-async function fetchDatabaseSummary(supabase: SupabaseClient<Database>): Promise<DatabaseSummary> {
+async function fetchDatabaseSummary(supabase: TypedSupabaseClient): Promise<DatabaseSummary> {
   const [{ data: dbSize }, { data: activeConnections }, { data: totalRows }] = await Promise.all([
     supabase.rpc('get_database_size'),
     supabase.rpc('get_active_connections'),

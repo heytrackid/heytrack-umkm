@@ -5,8 +5,10 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
  import { apiLogger } from '@/lib/logger'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
+ import { SecurityPresets, withSecurity } from '@/utils/security/index'
+ import { createClient } from '@/utils/supabase/server'
+ import type { NotificationsTable } from '@/types/database'
+ 
 
 
 async function postHandler(request: NextRequest): Promise<NextResponse> {
@@ -21,13 +23,15 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const { category } = _body
 
     // Build query
+    const updateData: Partial<Pick<NotificationsTable, 'is_read' | 'updated_at'>> = {
+      is_read: true,
+      updated_at: new Date().toISOString(),
+    }
+
     let query = supabase
       .from('notifications')
-      .update({
-        is_read: true,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('user_id', user['id'])
+      .update(updateData)
+      .eq('user_id', user.id)
       .eq('is_read', false)
 
     // Filter by category if provided

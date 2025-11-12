@@ -1,7 +1,7 @@
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
  import { handleAPIError } from '@/lib/errors/api-error-handler'
  import { apiLogger } from '@/lib/logger'

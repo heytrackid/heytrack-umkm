@@ -256,4 +256,4 @@ const RecentOrdersSection = ({
   )
 }
 
-export { RecentOrdersSection }
+export default RecentOrdersSection

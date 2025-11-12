@@ -688,16 +688,6 @@ Log client-side errors.
 
 ## Security
 
-### POST /api/verify-turnstile
-Verify Cloudflare Turnstile token.
-
-**Request:**
-```json
-{
-  "token": "turnstile_token"
-}
-```
-
 ---
 
 ## Common Response Formats

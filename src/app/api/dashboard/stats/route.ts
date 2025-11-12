@@ -448,8 +448,8 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     try {
       userId = await requireUserId(supabase)
       apiLogger.info({ userId }, 'Authenticated user for dashboard stats')
-    } catch (authError) {
-      apiLogger.warn({ error: getErrorMessage(authError) }, 'Unauthorized access to dashboard stats')
+    } catch (error) {
+      apiLogger.warn({ error: getErrorMessage(error) }, 'Unauthorized access to dashboard stats')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

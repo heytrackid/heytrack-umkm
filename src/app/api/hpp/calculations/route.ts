@@ -8,6 +8,7 @@ import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { typed } from '@/types/type-utilities'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -183,7 +184,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
     // Calculate HPP using consolidated service
     const hppService = new HppCalculatorService()
-    const calculationResult = await hppService.calculateRecipeHpp(supabase, recipeId, user['id'])
+    const calculationResult = await hppService.calculateRecipeHpp(typed(supabase), recipeId, user['id'])
 
     // Invalidate cache
     cacheInvalidation.hpp()

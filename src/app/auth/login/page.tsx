@@ -5,15 +5,13 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { type FormEvent, useEffect, useRef, useState, useTransition } from 'react'
 
-import { TurnstileWidget } from '@/components/security/TurnstileWidget'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { useTurnstile } from '@/hooks/useTurnstile'
-import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
+import { validateEmail } from '@/lib/auth-errors'
 
 import { useRenderPerformance } from '@/lib/performance/index'
 // import { login } from '@/app/auth/login/actions' // Replaced with API call
@@ -28,20 +26,6 @@ const LoginPage = (): JSX.Element => {
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
-
-  // Turnstile integration
-  const {
-    token,
-    isVerifying,
-    isVerified,
-    error: turnstileError,
-    handleVerify,
-    reset: resetTurnstile,
-  } = useTurnstile({
-    onError: (err: string) => {
-      setError(`Verifikasi keamanan gagal: ${err}`)
-    },
-  })
 
   const [isPending, startTransition] = useTransition()
 
@@ -90,13 +74,6 @@ const LoginPage = (): JSX.Element => {
     }
 
     startTransition(async () => {
-      // Check if Turnstile token is available
-      // Supabase will verify the token directly with Cloudflare
-      if (!token) {
-        setError('Silakan selesaikan verifikasi keamanan')
-        return
-      }
-
       abortControllerRef.current = new AbortController()
       try {
         const response = await fetch('/api/auth/login', {
@@ -105,35 +82,27 @@ const LoginPage = (): JSX.Element => {
           headers: {
             'Content-Type': 'application/json',
           },
-           body: JSON.stringify({
-             email,
-             password,
-             captcha_token: token,
-           }),
-          credentials: 'include', // Include cookies for authentication
+          body: JSON.stringify({ email, password }),
         })
 
-        const data = await response.json() as { error?: string }
+        const data = await response.json() as { error?: string; success?: boolean }
 
-        if (!response.ok) {
+        if (!response.ok || !data.success) {
           if (!mountedRef.current) {
             return
           }
-          const authError = getAuthErrorMessage(data.error ?? 'Login failed')
-          setError(authError)
-          setErrorAction(null)
+          setError(data.error ?? 'Login gagal')
           return
         }
 
-        // Success - redirect
+        // Success - redirect to dashboard
         router.push('/dashboard')
-       } catch {
+        router.refresh()
+      } catch {
         if (!mountedRef.current) {
           return
         }
-        setError('Network error. Please try again.')
-        setErrorAction(null)
-        resetTurnstile() // Reset Turnstile on error
+        setError('Koneksi gagal. Silakan coba lagi.')
       }
     })
   }
@@ -158,16 +127,16 @@ const LoginPage = (): JSX.Element => {
       <div className="w-full max-w-md space-y-4 sm:space-y-6">
         {/* Logo/Brand */}
         <div className="text-center space-y-2">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary-foreground rounded-lg flex items-center justify-center">
-              <span className="text-primary font-bold text-base sm:text-lg">H</span>
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-900 dark:bg-slate-100 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-slate-100 dark:bg-slate-900 rounded-lg flex items-center justify-center">
+              <span className="text-slate-900 dark:text-slate-100 font-bold text-base sm:text-lg">H</span>
             </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">HeyTrack</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Masuk ke akun Anda</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">HeyTrack</h1>
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Masuk ke akun Anda</p>
         </div>
 
-        <Card className="border">
+        <Card className="shadow-xl border-slate-200 dark:border-slate-800">
           <CardHeader className="space-y-1 pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
             <CardTitle className="text-xl sm:text-2xl text-center">Selamat Datang Kembali</CardTitle>
             <CardDescription className="text-center text-sm sm:text-base">
@@ -228,7 +197,7 @@ const LoginPage = (): JSX.Element => {
                   </Label>
                   <Link
                     href="/auth/reset-password"
-                    className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 min-h-[44px] flex items-center"
+                    className="text-xs text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 underline underline-offset-2 min-h-[44px] flex items-center"
                   >
                     Lupa password?
                   </Link>
@@ -271,54 +240,29 @@ const LoginPage = (): JSX.Element => {
                 )}
               </div>
 
-              {/* Turnstile CAPTCHA */}
-              <TurnstileWidget
-                onVerify={handleVerify}
-                onError={() => setError('Verifikasi keamanan gagal')}
-                onExpire={resetTurnstile}
-                className="flex justify-center"
-                theme="auto"
-                size="normal"
-              />
 
-              {turnstileError && (
-                <p className="text-sm text-destructive text-center animate-fade-in">
-                  {turnstileError}
-                </p>
-              )}
 
               <Button
                 type="submit"
-                className="w-full h-11 text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
-                disabled={isPending || isVerifying || !isVerified}
+                className="w-full h-11 text-base font-medium bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                disabled={isPending}
               >
                 {isPending ? (
                   <span className="flex items-center justify-center">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     <span className="animate-pulse">Masuk...</span>
                   </span>
-                ) : isVerifying ? (
-                  <span className="flex items-center justify-center">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    <span>Memverifikasi...</span>
-                  </span>
                 ) : (
                   'Masuk'
                 )}
               </Button>
-
-              {isVerified && !isPending && (
-                <div className="text-sm text-green-600 dark:text-green-400 text-center animate-fade-in">
-                  ✓ Verifikasi keamanan berhasil
-                </div>
-              )}
             </form>
 
             <div className="text-center text-sm sm:text-base">
               <span className="text-muted-foreground">Belum punya akun? </span>
               <Link
                 href="/auth/register"
-                className="text-foreground hover:text-muted-foreground font-medium underline underline-offset-4 inline-block min-h-[44px] leading-[44px]"
+                className="text-slate-900 dark:text-slate-100 hover:text-slate-700 dark:hover:text-slate-300 font-medium underline underline-offset-4 inline-block min-h-[44px] leading-[44px]"
               >
                 Daftar sekarang
               </Link>

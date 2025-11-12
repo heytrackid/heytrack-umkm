@@ -54,6 +54,8 @@ const RootLayout = async ({
         <link rel="dns-prefetch" href={process['env']['NEXT_PUBLIC_SUPABASE_URL'] ?? ''} />
         <link rel="preconnect" href="https://api.openrouter.ai" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.openrouter.ai" />
+
+
         
         {/* CSP nonce for inline scripts */}
         {nonce && (
@@ -80,12 +82,12 @@ const RootLayout = async ({
               <QueryProvider>
                 <SettingsProvider>
                   <SWRProvider>
-                    <PreloadingProvider
-                      enableSmartPreloading
-                      enableIdlePreloading
-                      enableNetworkAware
-                      debug={false}
-                      >
+                     <PreloadingProvider
+                       enableSmartPreloading={false}
+                       enableIdlePreloading={false}
+                       enableNetworkAware={false}
+                       debug={false}
+                       >
                          <GlobalErrorBoundary>
                        {/* Header temporarily disabled during development */}
                       {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">

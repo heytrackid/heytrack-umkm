@@ -163,18 +163,19 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     }
 
     // Create recommendation
+    const insertData = {
+      recipe_id: recipeId,
+      recommendation_type: recommendationType,
+      title,
+      description,
+      potential_savings: potentialSavings ?? 0,
+      priority: priority ?? 'MEDIUM',
+      is_implemented: false,
+      user_id: user['id']
+    }
     const { data, error } = await supabase
       .from('hpp_recommendations')
-      .insert({
-        recipe_id: recipeId,
-        recommendation_type: recommendationType,
-        title,
-        description,
-        potential_savings: potentialSavings ?? 0,
-        priority: priority ?? 'MEDIUM',
-        is_implemented: false,
-        user_id: user['id']
-      })
+      .insert(insertData)
       .select()
       .single()
 

@@ -217,4 +217,4 @@ const HppDashboardWidget = (): JSX.Element | null => {
   )
 }
 
-export { HppDashboardWidget }
+export default HppDashboardWidget

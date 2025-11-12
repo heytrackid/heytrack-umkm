@@ -153,8 +153,14 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
         // Type the ingredients properly
         type IngredientSubset = Pick<Ingredient, 'current_stock' | 'id' | 'name' | 'price_per_unit' | 'unit'>
-        const typedIngredients: IngredientSubset[] = (ingredients ?? []).map(ing => ({
-            id: ing['id'],
+        const typedIngredients: IngredientSubset[] = ((ingredients as Array<{
+            id: string
+            name: string
+            unit: string | null
+            price_per_unit: number | null
+            current_stock: number | null
+        }>) ?? []).map(ing => ({
+            id: ing.id,
             name: ing.name,
             unit: ing.unit || 'gram', // Default to common unit if null
             price_per_unit: ing.price_per_unit || 0, // Default to 0 if null
@@ -1296,8 +1302,9 @@ async function calculateRecipeHPP(
         .eq('is_active', true)
         .gte('date', today)
         .lte('date', today)
-    
-    const dailyOpCost = opCosts?.reduce((sum, cost) => sum + cost.amount, 0) ?? 0
+
+    const typedOpCosts = opCosts as Array<{ amount: number }> | null
+    const dailyOpCost = typedOpCosts?.reduce((sum, cost) => sum + cost.amount, 0) ?? 0
     
     // Estimate operational cost per unit
     // Assume daily production of 50 units (can be configured)

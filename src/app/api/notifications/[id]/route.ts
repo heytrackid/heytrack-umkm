@@ -9,10 +9,12 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
  import { apiLogger } from '@/lib/logger'
-import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
-import { NotificationUpdateSchema } from '@/lib/validations/domains/notification'
-import { SecurityPresets, withSecurity } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
+ import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+ import { NotificationUpdateSchema } from '@/lib/validations/domains/notification'
+ import { SecurityPresets, withSecurity } from '@/utils/security/index'
+ import { createClient } from '@/utils/supabase/server'
+ import type { NotificationsTable } from '@/types/database'
+ 
 
 
 async function putHandler(
@@ -57,16 +59,10 @@ async function putHandler(
       )
     }
 
-    interface NotificationUpdate {
-      is_read?: boolean
-      is_dismissed?: boolean
-      updated_at: string
-    }
-
-    const updateData: NotificationUpdate = {
+    const updateData: Partial<Pick<NotificationsTable, 'is_read' | 'is_dismissed' | 'updated_at'>> = {
       updated_at: new Date().toISOString()
     }
-    
+
     if (typeof is_read === 'boolean') {
       updateData.is_read = is_read
     }
@@ -78,7 +74,7 @@ async function putHandler(
       .from('notifications')
       .update(updateData)
       .eq('id', notificationId)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .select()
       .single()
 

@@ -3,12 +3,12 @@ export const runtime = 'nodejs'
 
 
  import { NextRequest, NextResponse } from 'next/server'
- import { z } from 'zod'
+import { z } from 'zod'
 
  import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, safeNumber } from '@/lib/type-guards'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
- import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@/utils/supabase/server'
 
 const FinancialRecordSchema = z.object({
   description: z.string().min(1),
@@ -54,7 +54,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     const { data: record, error: insertError } = await supabase
       .from('financial_records')
       .insert({
-        user_id: user['id'],
+        user_id: user.id,
         type: type.toUpperCase() as 'EXPENSE' | 'INCOME',
         description,
         category: type === 'income' ? 'Revenue' : category,

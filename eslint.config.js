@@ -1,9 +1,9 @@
 import js from "@eslint/js";
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
-import jsxA11y from "eslint-plugin-jsx-a11y";
 import globals from "globals";
 
 export default [
@@ -71,7 +71,7 @@ export default [
       ...jsxA11y.configs.recommended.rules,
       "react/react-in-jsx-scope": "off",
        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
-       "@typescript-eslint/no-explicit-any": "warn",
+       "@typescript-eslint/no-explicit-any": "error",
        "react-hooks/exhaustive-deps": "warn",
        "react-hooks/incompatible-library": "off",
     },

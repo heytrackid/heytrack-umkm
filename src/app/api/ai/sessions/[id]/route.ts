@@ -7,10 +7,12 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 
-import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
+import { APIError } from '@/lib/errors/api-error-handler'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { createSecureRouteHandler, SecurityPresets } from '@/utils/security/index'
+import { typed } from '@/types/type-utilities'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -40,8 +42,8 @@ async function getHandler(_request: NextRequest, context: RouteContext): Promise
 
     // Get session and messages
     const [session, messages] = await Promise.all([
-      ChatSessionService.getSession(supabase, sessionId, user['id']),
-      ChatSessionService.getMessages(supabase, sessionId, user['id']),
+      ChatSessionService.getSession(typed(supabase), sessionId, user['id']),
+      ChatSessionService.getMessages(typed(supabase), sessionId, user['id']),
     ])
 
     apiLogger.info(
@@ -76,7 +78,7 @@ async function deleteHandler(_request: NextRequest, context: RouteContext): Prom
     const sessionId = id
 
     // Delete session
-    await ChatSessionService.deleteSession(supabase, sessionId, user['id'])
+    await ChatSessionService.deleteSession(typed(supabase), sessionId, user['id'])
 
     apiLogger.info({ userId: user['id'], sessionId }, 'Session deleted')
 

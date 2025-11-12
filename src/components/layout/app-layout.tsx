@@ -1,36 +1,36 @@
 'use client'
 
 import {
-  BarChart3,
-  Calculator,
-  CircleDollarSign,
-  Download,
-  Factory,
-  FileText,
-  LayoutDashboard,
-  MessageSquare,
-  Package,
-  Receipt,
-  ShoppingCart,
-  TrendingUp,
-  Truck,
-  User,
-  Users,
-  Utensils,
-  Wallet
+    BarChart3,
+    Calculator,
+    CircleDollarSign,
+    Download,
+    Factory,
+    FileText,
+    LayoutDashboard,
+    MessageSquare,
+    Package,
+    Receipt,
+    ShoppingCart,
+    TrendingUp,
+    Truck,
+    User,
+    Users,
+    Utensils,
+    Wallet
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { memo, useEffect, useLayoutEffect, useState, useRef, type ReactNode } from 'react'
+import { memo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
 import { GlobalErrorBoundary } from '@/components/error-boundaries/GlobalErrorBoundary'
 import { TabNavigation } from '@/components/layout/TabNavigation'
 import { SmartBottomNav } from '@/components/navigation/SmartNavigation'
 import { Button } from '@/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { NotificationCenter } from '@/components/ui/notification-center'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -129,7 +129,7 @@ export const AppLayout = memo(({
   const notifications = useNotifications()
 
   // Supabase client
-  const { supabase } = useSupabase()
+  const { supabase: _supabase } = useSupabase()
 
 
 
@@ -305,10 +305,7 @@ export const AppLayout = memo(({
                   Pengaturan
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={async () => {
-                    await supabase.auth.signOut()
-                    router.push('/auth/login')
-                  }}
+                  onClick={() => router.push('/auth/logout')}
                   className="text-red-600 focus:text-red-600"
                 >
                   Keluar

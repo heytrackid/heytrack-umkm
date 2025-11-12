@@ -10,7 +10,8 @@ import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
-async function putHandler(
+// Apply security middleware
+export const PUT = withSecurity(async function PUT(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -24,7 +25,7 @@ async function putHandler(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    apiLogger.info({ alertId, userId: user['id'] }, 'Marking HPP alert as read')
+    apiLogger.info({ alertId, userId: user.id }, 'Marking HPP alert as read')
 
     // Update the alert to mark it as read
     const { data, error } = await supabase
@@ -35,7 +36,7 @@ async function putHandler(
         updated_at: new Date().toISOString()
       })
       .eq('id', alertId)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -61,9 +62,4 @@ async function putHandler(
   } catch (error) {
     return handleAPIError(error, 'PUT /api/hpp/alerts/[id]/read')
   }
-}
-
-// Apply security middleware
-const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
-
-export { securedPUT as PUT }
+}, SecurityPresets.enhanced())

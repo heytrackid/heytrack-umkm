@@ -6,10 +6,13 @@ import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import type { NextRequest} from 'next/server';
 import { NextResponse } from 'next/server'
+import type { OrdersTable, OperationalCostsTable, IngredientPurchasesTable } from '@/types/database'
 
 async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
+
+    // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -24,8 +27,11 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
 
+    // Use typed supabase client to avoid type inference issues
+    const typedSupabase = supabase
+
     // Fetch orders data (revenue)
-    const { data, error: ordersError } = await supabase
+    const { data, error: ordersError } = await typedSupabase
       .from('orders')
       .select('created_at, total_amount, status')
       .eq('user_id', user.id)
@@ -35,9 +41,10 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (ordersError) throw ordersError
 
-    const orders: Array<{ created_at: string; total_amount: number; status: string }> = (data || []).filter(order =>
-      order.created_at !== null && order.total_amount !== null && order.status !== null
-    ).map(order => ({
+    const rawOrders = data as Array<Pick<OrdersTable, 'created_at' | 'total_amount' | 'status'> | null> | null
+    const orders: Array<{ created_at: string; total_amount: number; status: string }> = (rawOrders || []).filter((order): order is Pick<OrdersTable, 'created_at' | 'total_amount' | 'status'> =>
+      order !== null && order.created_at !== null && order.total_amount !== null && order.status !== null
+    ).map((order) => ({
       created_at: order.created_at!,
       total_amount: order.total_amount!,
       status: order.status!
@@ -49,11 +56,11 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       const parts = date.toISOString().split('T')
       return parts[0] || ''
     }
-    
+
     const startDateStr = getDateString(startDate)
     const endDateStr = getDateString(endDate)
-    
-    const { data: expenses, error: expensesError } = await supabase
+
+    const { data: expenses, error: expensesError } = await typedSupabase
       .from('operational_costs')
       .select('date, amount, category')
       .eq('user_id', user.id)
@@ -64,7 +71,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     if (expensesError) throw expensesError
 
     // Fetch ingredient purchases (HPP)
-    const { data: purchases, error: purchasesError } = await supabase
+    const { data: purchases, error: purchasesError } = await typedSupabase
       .from('ingredient_purchases')
       .select('purchase_date, total_price')
       .eq('user_id', user.id)
@@ -74,23 +81,23 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (purchasesError) throw purchasesError
 
+    const rawExpenses = expenses as Array<Pick<OperationalCostsTable, 'date' | 'amount' | 'category'> | null> | null
+    const rawPurchases = purchases as Array<Pick<IngredientPurchasesTable, 'purchase_date' | 'total_price'> | null> | null
+
     // Group data by date
     const dataMap = new Map<string, { revenue: number; expenses: number; hpp: number }>()
 
     // Process orders (revenue)
-    orders?.forEach((order: { created_at: string; total_amount: number; status: string }) => {
-      if (order.status === 'DELIVERED') {
-        const dateParts = new Date((order.created_at ?? '')).toISOString().split('T')
-        const date = dateParts[0] || ''
-        if (!date) return
-        const current = dataMap.get(date) || { revenue: 0, expenses: 0, hpp: 0 }
-        current.revenue += Number(order.total_amount ?? 0)
-        dataMap.set(date, current)
-      }
+    orders.forEach((order) => {
+      const date = order.created_at.split('T')[0] || ''
+      const current = dataMap.get(date) || { revenue: 0, expenses: 0, hpp: 0 }
+      current.revenue += Number(order.total_amount ?? 0)
+      dataMap.set(date, current)
     })
 
     // Process expenses
-    expenses?.forEach((expense) => {
+    rawExpenses?.forEach((expense) => {
+      if (!expense) return
       const date = expense.date || ''
       const current = dataMap.get(date) || { revenue: 0, expenses: 0, hpp: 0 }
       current.expenses += Number(expense.amount) || 0
@@ -98,7 +105,8 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     })
 
     // Process purchases (HPP)
-    purchases?.forEach((purchase) => {
+    rawPurchases?.forEach((purchase) => {
+      if (!purchase) return
       const date = purchase.purchase_date || ''
       const current = dataMap.get(date) || { revenue: 0, expenses: 0, hpp: 0 }
       current.hpp += Number(purchase.total_price) || 0

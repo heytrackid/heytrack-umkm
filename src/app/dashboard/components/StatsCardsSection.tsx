@@ -200,4 +200,4 @@ const StatsCardsSection = ({ stats, formatCurrency }: StatsCardsSectionProps): J
     )
   }
 
-export { StatsCardsSection }
+export default StatsCardsSection

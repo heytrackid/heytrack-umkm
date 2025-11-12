@@ -4,38 +4,27 @@ import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 
 const AuthCallbackPage = (): JSX.Element => {
   const router = useRouter()
 
   useEffect(() => {
-    const handleAuthCallback = async (): Promise<void> => {
+    const handleCallback = async () => {
       const supabase = createClient()
+      
+      const { data: { session }, error } = await supabase.auth.getSession()
 
-      try {
-        const { data, error } = await supabase.auth.getSession()
-
-        if (error) {
-          apiLogger.error({ error }, 'Auth callback error:')
-          router.push('/auth/login?error=auth_callback_error')
-          return
-        }
-
-        if (data.session) {
-          router.push('/dashboard')
-        } else {
-          router.push('/auth/login')
-        }
-      } catch (error) {
-        const normalizedError = error instanceof Error ? error : new Error(String(error))
-        apiLogger.error({ error: normalizedError }, 'Unexpected error in auth callback:')
-        router.push('/auth/login?error=unexpected_error')
+      if (error || !session) {
+        router.push('/auth/login')
+        return
       }
+
+      router.push('/dashboard')
+      router.refresh()
     }
 
-    void handleAuthCallback()
+    handleCallback()
   }, [router])
 
   return (

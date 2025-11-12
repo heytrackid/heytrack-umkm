@@ -18,19 +18,19 @@ interface RouteContext {
   params: Promise<{ id: string }>
 }
 
-// GET /api/ingredient-purchases/[id] - Get single purchase
-async function getHandler(
+// Apply security middleware
+export const GET = withSecurity(async function GET(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
   try {
     const { id } = await context['params']
-    
+
     // Validate UUID format
     if (!isValidUUID(id)) {
       return createErrorResponse('Invalid purchase ID format', 400)
     }
-    
+
     const supabase = await createClient()
 
     // Authenticate
@@ -64,20 +64,42 @@ async function getHandler(
       return createErrorResponse('Failed to fetch purchase', 500)
     }
 
+    // Type the data properly
+    const typedData = data as {
+      id: string
+      ingredient_id: string
+      quantity: number
+      unit_price: number
+      total_price: number
+      purchase_date: string
+      supplier?: string
+      notes?: string
+      user_id: string
+      created_at: string
+      updated_at: string
+      ingredient: {
+        id: string
+        name: string
+        unit: string
+        current_stock: number
+        price_per_unit: number
+      } | null
+    } | null
+
     // ✅ V2: Validate data structure with type guards
-    if (!isRecord(data)) {
+    if (!isRecord(typedData)) {
       apiLogger.error({ data }, 'Invalid purchase data structure')
       return createErrorResponse('Invalid data structure', 500)
     }
 
     // ✅ V2: Safe extraction of joined ingredient data
-    if (isRecord(data) && 'ingredient' in data) {
-      const ingredient = extractFirst(data.ingredient)
+    if (isRecord(typedData) && 'ingredient' in typedData) {
+      const ingredient = extractFirst(typedData.ingredient)
       if (ingredient && isRecord(ingredient)) {
         // Ingredient data is safely extracted and validated
-        apiLogger.info({ 
-          purchaseId: data['id'], 
-          ingredientName: ingredient.name 
+        apiLogger.info({
+          purchaseId: typedData.id,
+          ingredientName: ingredient.name
         }, 'Purchase fetched with ingredient details')
       }
     }
@@ -87,21 +109,20 @@ async function getHandler(
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/ingredient-purchases/[id]')
     return createErrorResponse(getErrorMessage(error), 500)
   }
-}
+}, SecurityPresets.enhanced())
 
-// PUT /api/ingredient-purchases/[id] - Update purchase
-async function putHandler(
+export const PUT = withSecurity(async function PUT(
   request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
   try {
     const { id } = await context['params']
-    
+
     // Validate UUID format
     if (!isValidUUID(id)) {
       return createErrorResponse('Invalid purchase ID format', 400)
     }
-    
+
     const supabase = await createClient()
 
     // Authenticate
@@ -124,8 +145,16 @@ async function putHandler(
       return createErrorResponse('Purchase not found', 404)
     }
 
+    // Type the existing purchase
+    const typedExistingPurchase = existingPurchase as {
+      id: string
+      ingredient_id: string
+      quantity: number
+      user_id: string
+    }
+
     // Calculate stock adjustment
-    const oldQuantity = existingPurchase.quantity
+    const oldQuantity = typedExistingPurchase.quantity
     const newQuantity = body.quantity ?? oldQuantity
     const quantityDiff = newQuantity - oldQuantity
 
@@ -144,7 +173,7 @@ async function putHandler(
       .from('ingredient_purchases')
       .update(updatePayload)
       .eq('id', id)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .select(`
         *,
         ingredient:ingredients (
@@ -169,14 +198,15 @@ async function putHandler(
       const { data: ingredient } = await supabase
         .from('ingredients')
         .select('current_stock')
-        .eq('id', existingPurchase.ingredient_id)
+        .eq('id', typedExistingPurchase.ingredient_id)
         .single()
 
-      const currentStock = ingredient?.current_stock ?? 0
+      const typedIngredient = ingredient as { current_stock: number } | null
+      const currentStock = typedIngredient?.current_stock ?? 0
 
       // Create adjustment transaction - trigger will handle stock update
       const adjustmentTransaction: Insert<'stock_transactions'> = {
-        ingredient_id: existingPurchase.ingredient_id,
+        ingredient_id: typedExistingPurchase.ingredient_id,
         type: 'ADJUSTMENT',
         quantity: quantityDiff,
         unit_price: body.unit_price ?? 0,
@@ -196,7 +226,7 @@ async function putHandler(
 
       // Log the change for audit trail
       const stockLog: Insert<'inventory_stock_logs'> = {
-        ingredient_id: existingPurchase.ingredient_id,
+        ingredient_id: typedExistingPurchase.ingredient_id,
         quantity_changed: quantityDiff,
         quantity_before: currentStock,
         quantity_after: currentStock + quantityDiff,
@@ -216,21 +246,20 @@ async function putHandler(
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/ingredient-purchases/[id]')
     return createErrorResponse(getErrorMessage(error), 500)
   }
-}
+}, SecurityPresets.enhanced())
 
-// DELETE /api/ingredient-purchases/[id] - Delete purchase and revert stock
-async function deleteHandler(
+export const DELETE = withSecurity(async function DELETE(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
   try {
     const { id } = await context['params']
-    
+
     // Validate UUID format
     if (!isValidUUID(id)) {
       return createErrorResponse('Invalid purchase ID format', 400)
     }
-    
+
     const supabase = await createClient()
 
     // Authenticate
@@ -251,22 +280,31 @@ async function deleteHandler(
       return createErrorResponse('Purchase not found', 404)
     }
 
+    // Type the purchase
+    const typedPurchase = purchase as {
+      id: string
+      ingredient_id: string
+      quantity: number
+      user_id: string
+    }
+
     // Get current stock before reversal
     const { data: ingredient } = await supabase
       .from('ingredients')
       .select('current_stock')
-      .eq('id', purchase.ingredient_id)
+      .eq('id', typedPurchase.ingredient_id)
       .single()
 
-    const currentStock = ingredient?.current_stock ?? 0
+    const typedIngredient = ingredient as { current_stock: number } | null
+    const currentStock = typedIngredient?.current_stock ?? 0
 
     // ✅ FIX: Let database trigger handle stock reversal
     // Create reversal transaction - trigger will auto-update current_stock
     const reversalTransaction: Insert<'stock_transactions'> = {
-      ingredient_id: purchase.ingredient_id,
+      ingredient_id: typedPurchase.ingredient_id,
       type: 'ADJUSTMENT',
-      quantity: -purchase.quantity, // Negative to reduce stock
-      reference: `PURCHASE-DELETE-${purchase['id']}`,
+      quantity: -typedPurchase.quantity, // Negative to reduce stock
+      reference: `PURCHASE-DELETE-${typedPurchase.id}`,
       notes: `Purchase deleted - reverting stock`,
       user_id: user['id']
     }
@@ -282,10 +320,10 @@ async function deleteHandler(
 
     // Log stock reversal for audit trail
     const reversalLog: Insert<'inventory_stock_logs'> = {
-      ingredient_id: purchase.ingredient_id,
-      quantity_changed: -purchase.quantity,
+      ingredient_id: typedPurchase.ingredient_id,
+      quantity_changed: -typedPurchase.quantity,
       quantity_before: currentStock,
-      quantity_after: currentStock - purchase.quantity,
+      quantity_after: currentStock - typedPurchase.quantity,
       change_type: 'adjustment',
       reason: 'Purchase deletion',
       reference_id: purchase['id'],
@@ -313,11 +351,4 @@ async function deleteHandler(
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/ingredient-purchases/[id]')
     return createErrorResponse(getErrorMessage(error), 500)
   }
-}
-
-// Apply security middleware
-const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
-const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
-const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
-
-export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }
+}, SecurityPresets.enhanced())

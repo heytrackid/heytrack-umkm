@@ -105,7 +105,7 @@ async function putHandler(
       .from('financial_records')
       .update(updatePayload)
       .eq('id', id)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .select()
       .single()
 

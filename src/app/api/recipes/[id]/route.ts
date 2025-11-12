@@ -19,7 +19,7 @@ interface RouteContext {
 }
 
 // GET /api/recipes/[id] - Get single recipe with ingredients
-async function getHandler(
+async function getRecipe(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -63,7 +63,7 @@ async function getHandler(
 }
 
 // PUT /api/recipes/[id] - Update recipe with ingredients
-async function putHandler(
+async function updateRecipe(
   request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -226,7 +226,7 @@ async function putHandler(
 }
 
 // DELETE /api/recipes/[id] - Delete recipe
-async function deleteHandler(
+async function deleteRecipe(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -273,9 +273,7 @@ async function deleteHandler(
 }
 
 // Apply security middleware
-const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
-const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
-const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
-
-export { securedDELETE as DELETE, securedGET as GET, securedPUT as PUT }
+export const GET = withSecurity(getRecipe, SecurityPresets.enhanced())
+export const PUT = withSecurity(updateRecipe, SecurityPresets.enhanced())
+export const DELETE = withSecurity(deleteRecipe, SecurityPresets.enhanced())
 

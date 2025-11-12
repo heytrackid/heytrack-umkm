@@ -15,7 +15,8 @@ import { createClient } from '@/utils/supabase/server';
 
 
 
-async function getHandler(
+// Apply security middleware
+export const GET = withSecurity(async function GET(
   _request: Request,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -41,7 +42,7 @@ async function getHandler(
       .from('financial_records')
       .select('*')
       .eq('id', id)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .eq('type', 'EXPENSE')
       .single();
 
@@ -70,7 +71,7 @@ async function getHandler(
     // ✅ V2: Safe extraction of supplier data
     let responseExpense: typeof expense & { supplier_name?: string } = expense;
     if ('supplier' in expense) {
-      const supplier = extractFirst(expense.supplier)
+      const supplier = extractFirst(expense['supplier'])
       if (supplier && isRecord(supplier) && 'name' in supplier) {
         // Supplier data safely extracted
         responseExpense = {
@@ -86,9 +87,9 @@ async function getHandler(
     logError(apiLogger, error, 'GET /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
-}
+}, SecurityPresets.enhanced())
 
-async function putHandler(
+export const PUT = withSecurity(async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -133,7 +134,7 @@ async function putHandler(
       .from('financial_records')
       .update(updatePayload)
       .eq('id', id)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -157,9 +158,9 @@ async function putHandler(
     logError(apiLogger, error, 'PUT /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
-}
+}, SecurityPresets.enhanced())
 
-async function deleteHandler(
+export const DELETE = withSecurity(async function DELETE(
   _request: Request,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
@@ -202,11 +203,4 @@ async function deleteHandler(
     logError(apiLogger, error, 'DELETE /api/expenses/[id] - Unexpected error');
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
    }
-}
-
-// Apply security middleware
-const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
-const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
-const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
-
-export { securedDELETE as DELETE, securedGET as GET, securedPUT as PUT }
+}, SecurityPresets.enhanced())

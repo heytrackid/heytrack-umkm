@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage } from '@/lib/type-guards'
@@ -38,30 +38,13 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
 
   const router = useRouter()
   const { supabase } = useSupabase()
-  const supabaseRef = useRef(supabase)
-  const authInitializedRef = useRef(false)
-
-  // Keep supabase ref updated
-  useEffect(() => {
-    supabaseRef.current = supabase
-  }, [supabase])
 
   useEffect(() => {
-    if (authInitializedRef.current) return
-
-    authInitializedRef.current = true
-    let mounted = true
-
-    if (!supabase) return
-
-    let subscription: { unsubscribe: () => void } | null = null
 
     // Get initial session with error handling
     const getSession = async (): Promise<void> => {
       try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-
-        if (!mounted) return
 
         if (sessionError) {
           authLogger.error({ error: sessionError }, 'Session error:')
@@ -82,37 +65,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
           isLoading: false,
           isAuthenticated: Boolean(session?.user),
         }))
-
-        // Only setup listener after initial session is loaded
-        const { data } = supabase.auth.onAuthStateChange(
-          (event, session) => {
-            if (!mounted) return
-
-            // Don't log SIGNED_IN on initial load to avoid spam
-            if (event !== 'INITIAL_SESSION') {
-              authLogger.info({ event }, 'Auth state changed')
-            }
-
-            setAuthState(prev => ({
-              ...prev,
-              user: session?.user ?? null,
-              session: session ?? null,
-              isLoading: false,
-              isAuthenticated: Boolean(session?.user),
-            }))
-
-            // Refresh router on auth changes (but not on initial session)
-            if (event === 'SIGNED_OUT') {
-              router.push('/auth/login?reason=session_expired')
-            } else if (event === 'TOKEN_REFRESHED') {
-              router.refresh()
-            }
-          }
-        )
-
-        subscription = data.subscription
       } catch (error: unknown) {
-        if (!mounted) return
         const message = getErrorMessage(error)
         authLogger.error({ error: message }, 'Auth initialization error:')
         setAuthState(prev => ({
@@ -127,18 +80,39 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
 
     void getSession()
 
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        authLogger.info({ event }, 'Auth state changed')
+
+        setAuthState(prev => ({
+          ...prev,
+          user: session?.user ?? null,
+          session: session ?? null,
+          isLoading: false,
+          isAuthenticated: Boolean(session?.user),
+        }))
+
+        // Refresh router on auth changes
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          router.refresh()
+        }
+
+        // Handle session expiry - redirect to login with reason
+        if (event === 'SIGNED_OUT' && !session) {
+          router.push('/auth/login?reason=session_expired')
+        }
+      }
+    )
+
     return (): void => {
-      mounted = false
       subscription?.unsubscribe()
     }
-    // router is stable from Next.js but included for exhaustive-deps
-  }, [supabase, router])
+  }, [router, supabase.auth])
 
   const signOut = useCallback(async (): Promise<void> => {
-    const currentSupabase = supabaseRef.current
-    if (!currentSupabase) return
     try {
-      await currentSupabase.auth.signOut()
+      await supabase.auth.signOut()
       setAuthState(prev => ({
         ...prev,
         user: null,
@@ -151,18 +125,16 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       const message = getErrorMessage(error)
       authLogger.error({ error: message }, 'Sign out error:')
     }
-  }, [router])
+  }, [router, supabase.auth])
 
   const refreshSession = useCallback(async (): Promise<void> => {
-    const currentSupabase = supabaseRef.current
-    if (!currentSupabase) return
     try {
-      const { data: { session }, error } = await currentSupabase.auth.refreshSession()
-
+      const { data: { session }, error } = await supabase.auth.refreshSession()
+      
       if (error) {
         throw error
       }
-
+      
       setAuthState(prev => ({
         ...prev,
         session: session ?? null,
@@ -175,7 +147,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       // If refresh failed, clear session and redirect to login
       import('@/lib/auth/session-handler').then(m => m.handleSessionExpired())
     }
-  }, [])
+  }, [supabase.auth])
 
   const value = useMemo(() => ({
     user: authState.user,

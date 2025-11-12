@@ -1,11 +1,9 @@
 // Lazy loaded dashboard components for improved performance
 
-import dynamic from 'next/dynamic'
-import { RecentOrdersSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { RecentOrdersSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons';
+import dynamic from 'next/dynamic';
 
-// Define props interface to replace 'any' types
-type DashboardComponentProps = Record<string, unknown>;
-
+// Define props interfaces matching the actual component props
 interface StatsCardsProps {
   stats?: {
     revenue: {
@@ -29,30 +27,41 @@ interface StatsCardsProps {
   formatCurrency: (value: number) => string
 }
 
-// Lazy load dashboard components with proper chunk names for better bundle analysis
-const LazyHppDashboardWidget = dynamic(() =>
-  import('./HppDashboardWidget').then(mod => mod.HppDashboardWidget), {
-    loading: () => <StatsCardsSkeleton />
-  }
-)
+interface RecentOrdersProps {
+  orders?: Array<{
+    id: string
+    customer: string
+    amount: number | null
+    status: string | null
+    created_at: string | null
+  }>
+}
 
-const LazyRecentOrdersSection = dynamic(() =>
-  import('./RecentOrdersSection').then(mod => ({ default: mod.RecentOrdersSection })), {
-    loading: () => <RecentOrdersSkeleton />
-  }
-)
+interface StockAlertsProps {
+  lowStockItems?: Array<{
+    id: string
+    name: string
+    currentStock: number
+    reorderPoint: number
+  }>
+}
 
-const LazyStatsCardsSection = dynamic(() =>
-  import('./StatsCardsSection').then(mod => ({ default: mod.StatsCardsSection })), {
-    loading: () => <StatsCardsSkeleton />
-  }
-)
+// Lazy load dashboard components - using default imports
+const LazyHppDashboardWidget = dynamic(() => import('./HppDashboardWidget'), {
+  loading: () => <StatsCardsSkeleton />
+})
 
-const LazyStockAlertsSection = dynamic(() =>
-  import('./StockAlertsSection').then((mod) => ({ default: mod.StockAlertsSection })), {
-    loading: () => <StockAlertSkeleton />
-  }
-)
+const LazyRecentOrdersSection = dynamic(() => import('./RecentOrdersSection'), {
+  loading: () => <RecentOrdersSkeleton />
+})
+
+const LazyStatsCardsSection = dynamic(() => import('./StatsCardsSection'), {
+  loading: () => <StatsCardsSkeleton />
+})
+
+const LazyStockAlertsSection = dynamic(() => import('./StockAlertsSection'), {
+  loading: () => <StockAlertSkeleton />
+})
 
 // Wrapper components that include loading boundaries
 const HppDashboardWidgetWithSuspenseComponent = (): JSX.Element => (
@@ -61,7 +70,7 @@ const HppDashboardWidgetWithSuspenseComponent = (): JSX.Element => (
 
 
 
-const RecentOrdersSectionWithSuspenseComponent = (props: DashboardComponentProps): JSX.Element => (
+const RecentOrdersSectionWithSuspenseComponent = (props: RecentOrdersProps): JSX.Element => (
   <LazyRecentOrdersSection {...props} />
 )
 
@@ -73,13 +82,11 @@ const StatsCardsSkeleton = (): JSX.Element => (
   </div>
 )
 
-const StatsCardsSectionWithSuspenseComponent = (props: DashboardComponentProps): JSX.Element => (
-  <LazyStatsCardsSection {...(props as unknown as StatsCardsProps)} />
+const StatsCardsSectionWithSuspenseComponent = (props: StatsCardsProps): JSX.Element => (
+  <LazyStatsCardsSection {...props} />
 )
 
-
-
-const StockAlertsSectionWithSuspenseComponent = (props: DashboardComponentProps): JSX.Element => (
+const StockAlertsSectionWithSuspenseComponent = (props: StockAlertsProps): JSX.Element => (
   <LazyStockAlertsSection {...props} />
 )
 

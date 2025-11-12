@@ -8,7 +8,7 @@ import { cacheInvalidation } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import type { Update } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
@@ -18,7 +18,7 @@ interface RouteContext {
 }
 
 // GET /api/suppliers/[id] - Get single supplier
-async function getHandler(
+async function getSupplier(
   _request: NextRequest,
   context: RouteContext
 ) {
@@ -60,7 +60,7 @@ async function getHandler(
 }
 
 // PUT /api/suppliers/[id] - Update supplier
-async function putHandler(
+async function updateSupplier(
   request: NextRequest,
   context: RouteContext
 ) {
@@ -110,7 +110,7 @@ async function putHandler(
 }
 
 // DELETE /api/suppliers/[id] - Delete supplier
-async function deleteHandler(
+async function deleteSupplier(
   _request: NextRequest,
   context: RouteContext
 ) {
@@ -164,8 +164,6 @@ async function deleteHandler(
 }
 
 // Apply security middleware
-const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
-const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
-const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
-
-export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }
+export const GET = withSecurity(getSupplier, SecurityPresets.enhanced())
+export const PUT = withSecurity(updateSupplier, SecurityPresets.enhanced())
+export const DELETE = withSecurity(deleteSupplier, SecurityPresets.enhanced())

@@ -114,7 +114,7 @@ async function putHandler(
       .from('operational_costs')
       .update(updatePayload)
       .eq('id', id)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .select()
       .single()
 

@@ -328,25 +328,71 @@ export const DashboardClient = ({ initialData }: DashboardClientProps) => {
   // Enable smart preloading for dashboard
   usePagePreloading('dashboard')
 
-
-
-  // Handle session expiry
+  // Clean up old login timestamp on mount if user is authenticated
   useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      toast({
-        title: 'Sesi berakhir',
-        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
-        variant: 'destructive',
-      })
-      router.push('/auth/login')
+    if (isAuthenticated) {
+      const lastLogin = sessionStorage.getItem('auth:login_time')
+      if (lastLogin) {
+        const timeSinceLogin = Date.now() - parseInt(lastLogin)
+        // If timestamp is older than 5 minutes, remove it
+        if (timeSinceLogin > 300000) {
+          console.log('Removing stale login timestamp')
+          sessionStorage.removeItem('auth:login_time')
+        }
+      }
     }
+  }, [isAuthenticated])
+
+  // Handle session expiry - but be more careful to avoid redirect loops
+  useEffect(() => {
+    // Only redirect if we're sure there's no authentication
+    // Give time for session recovery after login
+    const timer = setTimeout(() => {
+      if (!isAuthLoading && !isAuthenticated) {
+        // Check if we just logged in (within last 5 minutes)
+        const lastLogin = sessionStorage.getItem('auth:login_time')
+        const timeSinceLogin = lastLogin ? Date.now() - parseInt(lastLogin) : Infinity
+
+        // Only redirect if:
+        // 1. More than 5 minutes since login (or no login timestamp)
+        // 2. Still not authenticated after loading is done
+        // This gives plenty of time for session recovery and avoids false positives
+        if (timeSinceLogin > 300000) { // 5 minutes (300 seconds)
+          console.log('Session expired, redirecting to login', {
+            timeSinceLogin,
+            lastLogin,
+            isAuthLoading,
+            isAuthenticated
+          })
+          
+          // Clear the stale timestamp
+          sessionStorage.removeItem('auth:login_time')
+          
+          toast({
+            title: 'Sesi berakhir',
+            description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+            variant: 'destructive',
+          })
+          router.push('/auth/login?session_expired=true')
+        } else if (lastLogin) {
+          console.log('Not redirecting - recent login detected', {
+            timeSinceLogin: Math.round(timeSinceLogin / 1000) + 's',
+            lastLogin
+          })
+        }
+      }
+    }, 5000) // Wait 5 seconds before checking to give session time to recover
+
+    return () => clearTimeout(timer)
   }, [isAuthLoading, isAuthenticated, toast, router])
 
+  // Don't redirect if authenticated but user is null - this can happen during session recovery
   useEffect(() => {
-    if (isAuthenticated && !user) {
-      router.push('/auth/login')
+    if (isAuthenticated && !user && !isAuthLoading) {
+      console.log('Authenticated but no user object - waiting for session recovery')
+      // Don't redirect immediately, give time for session recovery
     }
-  }, [isAuthenticated, user, router])
+  }, [isAuthenticated, user, isAuthLoading])
 
   const isLoading = isAuthLoading || isDataLoading
 

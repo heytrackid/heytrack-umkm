@@ -4,6 +4,7 @@ import { SUGGESTIONS, type Message } from '@/app/ai-chatbot/types/index'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { createLogger } from '@/lib/logger'
+import type { MessageMetadata } from '@/types/features/chat'
 
 interface OrderRow { id: string; status: string; total_amount: number; created_at: string }
 interface InventoryRow { id: string; current_stock: number; min_stock: number }
@@ -97,16 +98,16 @@ export function useChatMessages(): UseChatMessagesResult {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      await ChatSessionService.addMessage(
-        supabase,
-        currentSessionId,
-        message.role,
-        message.content,
-        {
-          ...(message.data || {}),
-          timestamp: message.timestamp.toISOString()
-        }
-      )
+      // Only store user and assistant messages, not system messages
+      if (message.role === 'user' || message.role === 'assistant') {
+        await ChatSessionService.addMessage(
+          supabase,
+          currentSessionId,
+          message.role as 'user' | 'assistant',
+          message.content,
+          message.data as MessageMetadata
+        )
+      }
     } catch (error) {
       const logger = createLogger('useChatMessages')
       logger.error({ error: error as unknown }, 'Failed to save message to session')

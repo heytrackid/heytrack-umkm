@@ -8,14 +8,15 @@ import { apiLogger } from '@/lib/logger'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
+import { typed } from '@/types/type-utilities'
 
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { TypedSupabaseClient } from '@/types/type-utilities'
 
 const AnalyticsQuerySchema = z.object({
   days: z.number().min(1).max(365).default(30)
 }).strict()
 
-async function authenticateAdmin(supabase: SupabaseClient): Promise<{ userId: string }> {
+async function authenticateAdmin(supabase: TypedSupabaseClient): Promise<{ userId: string }> {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if (authError || !user) {
@@ -47,8 +48,10 @@ async function getChatbotAnalytics(days: number): Promise<{
     .select('id, created_at')
     .gte('created_at', startDate.toISOString())
 
-  const totalSessions = sessions?.length ?? 0
-  const sessionIds = sessions?.map(s => s.id) ?? []
+  const _typedSessions = sessions as Array<{ id: string; created_at: string }> | null
+
+  const totalSessions = (sessions as Array<{ id: string; created_at: string }>)?.length ?? 0
+  const sessionIds = (sessions as Array<{ id: string; created_at: string }>)?.map(s => s.id) ?? []
 
   // Get all messages in date range
   const { data: messages } = await supabase
@@ -57,11 +60,20 @@ async function getChatbotAnalytics(days: number): Promise<{
     .in('session_id', sessionIds)
     .gte('created_at', startDate.toISOString())
 
-  const totalMessages = messages?.length ?? 0
+  const typedMessages = messages as Array<{
+    id: string
+    session_id: string
+    content: string
+    metadata: unknown
+    created_at: string
+    role: string
+  }> | null
+
+  const totalMessages = typedMessages?.length ?? 0
   const avgSessionLength = totalSessions > 0 ? totalMessages / totalSessions : 0
 
   // Analyze topics
-  const chatMessages = messages?.map(m => ({
+  const chatMessages = typedMessages?.map(m => ({
     id: m.id || '',
     session_id: m.session_id || '',
     role: m.role as 'user' | 'assistant' | 'system',
@@ -80,7 +92,7 @@ async function getChatbotAnalytics(days: number): Promise<{
     .map(([topic, count]) => ({ topic, count }))
 
   // Analyze response times
-  const responseTimes = messages
+  const responseTimes = typedMessages
     ?.filter(m => m.metadata && typeof m.metadata === 'object' && 'response_time_ms' in m.metadata)
     .map(m => (m.metadata as Record<string, unknown>)['response_time_ms'])
     .filter((time): time is number => typeof time === 'number') ?? []
@@ -90,14 +102,14 @@ async function getChatbotAnalytics(days: number): Promise<{
     : 0
 
   // Calculate user satisfaction
-  const mappedMessages = (messages ?? []).map(m => ({
+  const mappedMessages = (typedMessages ?? []).map(m => ({
     role: m.role || 'unknown',
     content: m.content || undefined
   }))
   const userSatisfaction = ChatSessionService.calculateUserSatisfaction(mappedMessages)
 
   // Calculate fallback usage
-  const fallbackMessages = messages?.filter(m =>
+  const fallbackMessages = typedMessages?.filter(m =>
     m.metadata && typeof m.metadata === 'object' && 'fallback_used' in m.metadata && (m.metadata as Record<string, unknown>)['fallback_used']
   ) ?? []
   const fallbackUsage = totalMessages > 0 ? (fallbackMessages.length / totalMessages) * 100 : 0
@@ -124,7 +136,7 @@ async function getChatbotAnalytics(days: number): Promise<{
 
 async function adminChatbotAnalyticsGET(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient()
+    const supabase = typed(await createClient())
     await authenticateAdmin(supabase)
 
     const { searchParams } = new URL(request.url)

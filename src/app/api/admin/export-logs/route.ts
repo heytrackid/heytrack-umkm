@@ -11,15 +11,16 @@ import { NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/auth/admin-check'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { Database } from '@/types/database'
+
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { typed } from '@/types/type-utilities'
 
 import { createClient } from '@/utils/supabase/server'
 
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { TypedSupabaseClient } from '@/types/type-utilities'
 
 interface AdminContext {
-  supabase: SupabaseClient<Database>
+  supabase: TypedSupabaseClient
   userId: string
 }
 
@@ -29,7 +30,7 @@ interface AuthResult {
 }
 
 async function authenticateAdmin(): Promise<AuthResult> {
-  const supabase = await createClient()
+  const supabase = typed(await createClient())
   const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error || !user) {
@@ -49,7 +50,7 @@ interface LogSummary {
   errLogs: unknown[]
 }
 
-async function fetchLogs(supabase: SupabaseClient<Database>): Promise<LogSummary> {
+async function fetchLogs(supabase: TypedSupabaseClient): Promise<LogSummary> {
   const { data: perfLogs } = await supabase
     .from('performance_logs')
     .select('id, user_id, action, duration, timestamp, metadata')

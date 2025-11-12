@@ -70,7 +70,7 @@ async function GET(
         )
       `)
       .eq('id', id)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .single()
 
     if (error) {
@@ -97,7 +97,7 @@ async function GET(
     }
 
     // ✅ V2: Validate order items array
-    if ('order_items' in data && !Array.isArray(data.order_items)) {
+    if (isRecord(data) && 'order_items' in data && !Array.isArray(data['order_items'])) {
       apiLogger.error({ data }, 'Invalid order_items structure')
       return NextResponse.json(
         { error: 'Invalid order items structure' },
@@ -175,7 +175,7 @@ async function PUT(
     const updateData: OrderUpdate = {
       ...Object.fromEntries(
         Object.entries(validatedData).map(([key, value]) => [key, value ?? null])
-      ),
+      ) as Partial<OrderUpdate>,
       updated_at: new Date().toISOString()
     }
 
@@ -200,7 +200,7 @@ async function PUT(
       validatedData['status'] === 'DELIVERED' && 
       existingOrder['status'] !== 'DELIVERED' &&
       !existingOrder.financial_record_id &&
-      updatedOrder.total_amount && 
+      updatedOrder.total_amount &&
       updatedOrder.total_amount > 0
     ) {
       const incomeDate = normalizeDateValue(updatedOrder.delivery_date)

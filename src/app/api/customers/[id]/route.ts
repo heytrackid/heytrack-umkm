@@ -4,15 +4,20 @@ export const runtime = 'nodejs'
 // API Route: /api/customers/[id]
 // Handles GET, PUT, DELETE operations for individual customer
 
+// External dependencies
 import { NextRequest, NextResponse } from 'next/server'
 
+// Internal modules
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
-import { CustomerUpdateSchema, type CustomerUpdateInput } from '@/lib/validations/domains/customer'
-import type { Update } from '@/types/database'
+import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
 import { typed } from '@/types/type-utilities'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
+
+// Type imports
+import type { CustomerUpdateInput } from '@/lib/validations/domains/customer'
+import type { Update } from '@/types/database'
 
 
 
@@ -114,8 +119,8 @@ async function resolveUpdatePayload(
   return { updateData: mapUpdatePayload(validation.data) }
 }
 
-// GET /api/customers/[id] - Get single customer
-async function getHandler(
+// Apply security middleware
+export const GET = withSecurity(async function GET(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -145,10 +150,9 @@ async function getHandler(
     apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/customers/[id]')
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
-}
+}, SecurityPresets.enhanced())
 
-// PUT /api/customers/[id] - Update customer
-async function putHandler(
+export const PUT = withSecurity(async function PUT(
   request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -189,10 +193,9 @@ async function putHandler(
       { status: 500 }
     )
   }
-}
+}, SecurityPresets.enhanced())
 
-// DELETE /api/customers/[id] - Delete customer
-async function deleteHandler(
+export const DELETE = withSecurity(async function DELETE(
   _request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
@@ -228,12 +231,5 @@ async function deleteHandler(
       { status: 500 }
     )
   }
-}
-
-// Apply security middleware
-const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
-const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
-const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
-
-export { securedDELETE as DELETE, securedGET as GET, securedPUT as PUT }
+}, SecurityPresets.enhanced())
 

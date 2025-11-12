@@ -16,11 +16,11 @@ export type {
 } from './supabase-generated'
 
 // Generic type helpers for table operations
-export type TableName = keyof DatabaseType['public']['Tables']
-export type ViewName = keyof DatabaseType['public']['Views']
-export type Row<T extends TableName> = DatabaseType['public']['Tables'][T]['Row']
-export type Insert<T extends TableName> = DatabaseType['public']['Tables'][T]['Insert']
-export type Update<T extends TableName> = DatabaseType['public']['Tables'][T]['Update']
+export type TableName = string
+export type ViewName = string
+export type Row<T extends TableName> = T extends keyof DatabaseType['public']['Tables'] ? DatabaseType['public']['Tables'][T]['Row'] : Record<string, unknown>
+export type Insert<T extends TableName> = T extends keyof DatabaseType['public']['Tables'] ? DatabaseType['public']['Tables'][T]['Insert'] : Record<string, unknown>
+export type Update<T extends TableName> = T extends keyof DatabaseType['public']['Tables'] ? DatabaseType['public']['Tables'][T]['Update'] : Record<string, unknown>
 
 // Fallback types for tables that might not exist in generated types
 export type SafeRow<T extends string> = T extends TableName ? Row<T> : Record<string, unknown>

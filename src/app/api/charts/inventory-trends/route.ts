@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
+
 async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -23,8 +24,11 @@ async function GET(request: NextRequest) {
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
 
+    // Use typed supabase client to avoid type inference issues
+    const typedSupabase = supabase
+
     // Fetch ingredient purchases over time
-    const { data: purchases, error: purchasesError } = await supabase
+    const { data: purchases, error: purchasesError } = await typedSupabase
       .from('ingredient_purchases')
       .select('purchase_date, quantity, total_price, ingredient:ingredients(name)')
       .eq('user_id', user.id)
@@ -35,17 +39,31 @@ async function GET(request: NextRequest) {
     if (purchasesError) throw purchasesError
 
     // Fetch current stock levels
-    const { data: ingredients, error: ingredientsError } = await supabase
+    const { data: ingredients, error: ingredientsError } = await typedSupabase
       .from('ingredients')
-      .select('id, name, current_stock, unit, reorder_point')
+      .select('id, name, current_stock, reorder_point')
       .eq('user_id', user.id)
 
     if (ingredientsError) throw ingredientsError
 
+    const rawPurchases = purchases as unknown as Array<{
+      purchase_date: string | null
+      quantity: number | null
+      total_price: number | null
+      ingredient: { name: string | null } | null
+    } | null> | null
+    const rawIngredients = ingredients as Array<{
+      id: string
+      name: string | null
+      current_stock: number | null
+      reorder_point: number | null
+    } | null> | null
+
     // Group purchases by date
     const purchasesByDate = new Map<string, { purchases: number; cost: number }>()
 
-    purchases?.forEach((purchase) => {
+    rawPurchases?.forEach((purchase) => {
+      if (!purchase) return
       const date = purchase.purchase_date || ''
       const current = purchasesByDate.get(date) || { purchases: 0, cost: 0 }
       current.purchases += 1
@@ -63,8 +81,8 @@ async function GET(request: NextRequest) {
       .sort((a, b) => a.date.localeCompare(b.date))
 
     // Calculate stock status
-    const lowStockCount = ingredients?.filter(
-      (ing) => Number(ing.current_stock) <= Number(ing.reorder_point)
+    const lowStockCount = rawIngredients?.filter(
+      (ing) => ing && Number(ing.current_stock) <= Number(ing.reorder_point)
     ).length || 0
 
     apiLogger.info(

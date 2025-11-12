@@ -114,7 +114,7 @@ async function postHandler(): Promise<NextResponse> {
       .select()
 
     if (error) {
-      apiLogger.error({ error, userId: user['id'] }, 'Failed to create template costs')
+      apiLogger.error({ error, userId: user.id }, 'Failed to create template costs')
       return NextResponse.json(
         { error: 'Failed to create template costs' },
         { status: 500 }

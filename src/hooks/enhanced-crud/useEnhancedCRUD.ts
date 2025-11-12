@@ -75,12 +75,11 @@ export function useEnhancedCRUD<TTable extends TableName>(
     try {
       const supabase = typed(createSupabaseClient())
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: result, error } = await supabase
-        .from(table as any)
+        .from(table as never)
         .insert(data as never)
         .select()
-        .single() as { data: TRow | null; error: Error | null }
+        .single()
 
       if (error) {
         throw new Error((error instanceof Error ? error.message : String(error)))
@@ -90,7 +89,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
       if (!result) {
         throw new Error('Create operation returned no data')
       }
-      return result
+      return result as TRow
     } catch (error: unknown) {
       handleCRUDError(error as Error, 'create', showErrorToast, customErrorHandler)
       throw error
@@ -108,13 +107,12 @@ export function useEnhancedCRUD<TTable extends TableName>(
     try {
       const supabase = typed(createSupabaseClient())
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: result, error } = await supabase
-        .from(table as any)
+        .from(table as never)
         .update(data as never)
-        .eq('id', id as never)
+        .eq('id', id)
         .select()
-        .single() as { data: TRow | null; error: Error | null }
+        .single()
 
       if (error) {
         throw new Error((error instanceof Error ? error.message : String(error)))
@@ -125,7 +123,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
       }
 
       handleSuccess('update')
-      return result
+      return result as TRow
     } catch (error: unknown) {
       handleCRUDError(new Error(getErrorMessage(error)), 'update', showErrorToast, customErrorHandler)
       throw error
@@ -144,22 +142,20 @@ export function useEnhancedCRUD<TTable extends TableName>(
       const supabase = typed(createSupabaseClient())
 
       // Check if record exists first
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: existingRecord, error: fetchError } = await supabase
-        .from(table as any)
+        .from(table as never)
         .select('id')
-        .eq('id', id as never)
-        .single() as { data: Pick<TRow, 'id'> | null; error: Error | null }
+        .eq('id', id)
+        .single()
 
       if (fetchError || !existingRecord) {
         throw new Error('Data tidak ditemukan')
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await supabase
-        .from(table as any)
+        .from(table as never)
         .delete()
-        .eq('id', id as never)
+        .eq('id', id)
 
       if (error) {
         throw new Error((error instanceof Error ? error.message : String(error)))
@@ -184,11 +180,10 @@ export function useEnhancedCRUD<TTable extends TableName>(
     try {
       const supabase = typed(createSupabaseClient())
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: result, error } = await supabase
-        .from(table as any)
+        .from(table as never)
         .insert(records as never)
-        .select() as { data: TRow[] | null; error: Error | null }
+        .select()
 
       if (error) {
         throw new Error(getErrorMessage(error))
@@ -204,7 +199,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
       if (!result) {
         throw new Error('Bulk create operation returned no data')
       }
-      return result
+      return result as TRow[]
     } catch (error: unknown) {
       handleCRUDError(new Error(getErrorMessage(error)), 'create', showErrorToast, customErrorHandler)
       throw error
@@ -226,11 +221,10 @@ export function useEnhancedCRUD<TTable extends TableName>(
       const results: TRow[] = []
 
       for (const update of updates) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: result, error } = await supabase
-          .from(table as any)
-          .update(update['data'] as never)
-          .eq('id', update['id'] as never)
+          .from(table as never)
+          .update(update.data as never)
+          .eq('id', update.id)
           .select()
           .single()
 
@@ -242,7 +236,7 @@ export function useEnhancedCRUD<TTable extends TableName>(
           throw new Error(`Update returned no data for ${update['id']}`)
         }
 
-        results.push(result as unknown as TRow)
+        results.push(result as TRow)
       }
 
       if (showSuccessToast) {
@@ -270,11 +264,10 @@ export function useEnhancedCRUD<TTable extends TableName>(
     try {
       const supabase = typed(createSupabaseClient())
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await supabase
-        .from(table as any)
+        .from(table as never)
         .delete()
-        .in('id', ids as never)
+        .in('id', ids)
 
       if (error) {
         throw new Error(getErrorMessage(error))

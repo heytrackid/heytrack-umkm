@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
  import { apiLogger, logError } from '@/lib/logger'
- import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index'
+  import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -21,7 +21,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'POST /api/auth/signup - Request received')
 
-    const _body = await request.json() as { email: string; password: string; fullName: string }
+    const _body = await request.json() as { email: string; password: string; fullName: string; captchaToken?: string }
     const validation = SignupSchema.safeParse(_body)
 
     if (!validation.success) {
@@ -35,7 +35,12 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const sanitizedEmail = InputSanitizer.sanitizeHtml(email).trim()
     const sanitizedFullName = InputSanitizer.sanitizeHtml(fullName).trim()
 
+
+
     const supabase = await createClient()
+
+    // Note: For signup, we might want to redirect to email confirmation page
+    // instead of dashboard, but for now we'll keep the same pattern
 
     const { data, error } = await supabase.auth.signUp({
       email: sanitizedEmail,

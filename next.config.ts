@@ -15,7 +15,10 @@ const nextConfig: NextConfig = {
     tsconfigPath: './tsconfig.build.json'
   },
   typedRoutes: true,
-  compiler: { removeConsole: isProd ? { exclude: ['error'] } : false },
+  compiler: { 
+    removeConsole: isProd ? { exclude: ['error'] } : false 
+  },
+  // ⚡ Build Performance Optimizations (SWC is default in Next.js 15+)
   poweredByHeader: false,
   compress: true,
   output: 'standalone',

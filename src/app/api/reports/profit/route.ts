@@ -101,11 +101,11 @@ async function getHandler(request: NextRequest) {
 
     // Transform recipes - handle Supabase join structure
     // Supabase returns ingredient as array, we need to extract first element
-    const recipes: RecipeWithIngredients[] = Array.isArray(recipesRaw) 
+    const recipes: RecipeWithIngredients[] = Array.isArray(recipesRaw)
       ? recipesRaw.map((recipe) => ({
           ...recipe,
           recipe_ingredients: Array.isArray(recipe.recipe_ingredients)
-            ? recipe.recipe_ingredients.map((ri: any) => ({
+            ? recipe.recipe_ingredients.map((ri: { ingredient: unknown }) => ({
                 ...ri,
                 ingredient: Array.isArray(ri.ingredient) ? ri.ingredient[0]! : ri.ingredient
               }))

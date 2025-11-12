@@ -265,10 +265,7 @@ export const MobileHeader = ({
                   Pengaturan
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={async () => {
-                    await supabase.auth.signOut()
-                    router.push('/auth/login')
-                  }}
+                  onClick={() => router.push('/auth/logout')}
                   className="text-red-600 focus:text-red-600"
                 >
                   Keluar

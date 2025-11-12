@@ -7,14 +7,14 @@ import { NextResponse } from 'next/server'
 import { apiLogger, logError } from '@/lib/logger'
 import { prepareUpdate } from '@/lib/supabase/insert-helpers'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
 
 
 
-async function getHandler(
+async function getSale(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
@@ -68,7 +68,7 @@ async function getHandler(
   }
 }
 
-async function putHandler(
+async function updateSale(
   request: Request,
   { params }: { params: { id: string } }
 ) {
@@ -126,7 +126,7 @@ async function putHandler(
   }
 }
 
-async function deleteHandler(
+async function deleteSale(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
@@ -172,8 +172,6 @@ async function deleteHandler(
 }
 
 // Apply security middleware
-const securedGET = withSecurity(getHandler, SecurityPresets.enhanced())
-const securedPUT = withSecurity(putHandler, SecurityPresets.enhanced())
-const securedDELETE = withSecurity(deleteHandler, SecurityPresets.enhanced())
-
-export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }
+export const GET = withSecurity(getSale, SecurityPresets.enhanced())
+export const PUT = withSecurity(updateSale, SecurityPresets.enhanced())
+export const DELETE = withSecurity(deleteSale, SecurityPresets.enhanced())

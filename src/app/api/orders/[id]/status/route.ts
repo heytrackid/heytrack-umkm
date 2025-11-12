@@ -167,8 +167,8 @@ async function triggerWorkflows(
       newStatus: status,
       notes
     })
-  } catch (_error) {
-    apiLoggerInstance.error({ error: _error }, '⚠️ Automation trigger error (non-blocking):')
+  } catch (error) {
+    apiLoggerInstance.error({ error }, '⚠️ Automation trigger error (non-blocking):')
   }
 }
 

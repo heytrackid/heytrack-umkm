@@ -5,13 +5,11 @@ import Link from 'next/link'
 import { type FormEvent, useEffect } from 'react'
 
 import { useRegistration } from '@/app/auth/register/hooks/useRegistration'
-import { TurnstileWidget } from '@/components/security/TurnstileWidget'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useTurnstile } from '@/hooks/useTurnstile'
 
 import { PasswordRequirements } from '@/app/auth/register/components/PasswordRequirements'
 import { PasswordStrengthIndicator } from '@/app/auth/register/components/PasswordStrengthIndicator'
@@ -51,15 +49,7 @@ export const RegistrationForm = ({
     handleSubmit
   } = useRegistration()
 
-  // Turnstile integration
-  const {
-    isVerified,
-    isVerifying,
-    error: turnstileError,
-    handleVerify,
-    verifyToken,
-    reset: resetTurnstile,
-  } = useTurnstile()
+
 
   // Notify parent of success
   useEffect(() => {
@@ -68,24 +58,13 @@ export const RegistrationForm = ({
     }
   }, [success, onSuccess])
 
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+     e.preventDefault()
 
-    // Verify Turnstile first
-    const verified = await verifyToken()
-    if (!verified) {
-      return
-    }
+     const formData = new FormData(e.currentTarget)
 
-    const formData = new FormData(e.currentTarget)
-
-    const result = await handleSubmit(formData)
-    
-    // Reset Turnstile if registration failed
-    if (!result) {
-      resetTurnstile()
-    }
-  }
+     await handleSubmit(formData)
+   }
 
   return (
     <Card className="border">
@@ -241,46 +220,22 @@ export const RegistrationForm = ({
             )}
           </div>
 
-          {/* Turnstile CAPTCHA */}
-          <TurnstileWidget
-            onVerify={handleVerify}
-            onExpire={resetTurnstile}
-            className="flex justify-center"
-            theme="auto"
-            size="normal"
-          />
 
-          {turnstileError && (
-            <p className="text-sm text-destructive text-center animate-fade-in">
-              {turnstileError}
-            </p>
-          )}
 
-          <Button
-            type="submit"
-            className="w-full h-11 text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
-            disabled={isPending || isVerifying || !isVerified}
-          >
-            {isPending ? (
-              <span className="flex items-center justify-center">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                <span className="animate-pulse">Mendaftarkan...</span>
-              </span>
-            ) : isVerifying ? (
-              <span className="flex items-center justify-center">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                <span>Memverifikasi...</span>
-              </span>
-            ) : (
-              'Daftar'
-            )}
-          </Button>
-
-          {isVerified && !isPending && (
-            <div className="text-sm text-green-600 dark:text-green-400 text-center animate-fade-in">
-              ✓ Verifikasi keamanan berhasil
-            </div>
-          )}
+           <Button
+             type="submit"
+             className="w-full h-11 text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+             disabled={isPending}
+           >
+             {isPending ? (
+               <span className="flex items-center justify-center">
+                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                 <span className="animate-pulse">Mendaftarkan...</span>
+               </span>
+             ) : (
+               'Daftar'
+             )}
+           </Button>
         </form>
 
         <div className="text-center text-sm sm:text-base">

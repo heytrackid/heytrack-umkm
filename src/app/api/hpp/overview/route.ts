@@ -64,14 +64,14 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
         supabase
           .from('recipes')
           .select('id', { count: 'exact', head: true })
-          .eq('user_id', user['id'])
+          .eq('user_id', (user as { id: string }).id)
           .eq('is_active', true),
 
         // Get recipes with their costs
-        (supabase as any)
+        supabase
           .from('recipes')
           .select('id, cost_per_unit, selling_price, margin_percentage')
-          .eq('user_id', user['id'])
+          .eq('user_id', (user as { id: string }).id)
           .eq('is_active', true)
           .gt('cost_per_unit', 0),
 
@@ -92,7 +92,7 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
               name
             )
           `)
-          .eq('user_id', user['id'])
+          .eq('user_id', (user as { id: string }).id)
           .order('created_at', { ascending: false })
           .limit(10)
       ])
@@ -103,16 +103,19 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
 
       // Calculate average HPP
       const averageHpp = recipesWithCost.length > 0
-        ? (recipesWithCost as any[]).reduce((sum: any, r: any) => sum + (Number(r.cost_per_unit) || 0), 0) / recipesWithCost.length
+        ? recipesWithCost.reduce((sum, r) => sum + (Number((r as { cost_per_unit: number | null }).cost_per_unit) || 0), 0) / recipesWithCost.length
         : 0
 
       const recipesWithHpp = recipesWithCost.length
 
       // Process alerts data - handle Supabase join structure
-      const alertsData: AlertWithRecipe[] = alertsRaw.map((alert: any) => ({
-        ...alert,
-        recipes: Array.isArray(alert.recipes) ? alert.recipes[0] : alert.recipes
-      }))
+      const alertsData: AlertWithRecipe[] = alertsRaw.map((alert) => {
+        const alertWithRecipes = alert as { recipes: unknown }
+        return {
+          ...alert,
+          recipes: Array.isArray(alertWithRecipes.recipes) ? alertWithRecipes.recipes[0] as { name: string } | null : alertWithRecipes.recipes as { name: string } | null
+        }
+      })
 
       const totalAlerts = alertsData.length
       const unreadAlerts = alertsData.filter(alert => !alert.is_read).length

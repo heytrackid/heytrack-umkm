@@ -1,7 +1,7 @@
 import { useState, useTransition } from 'react'
 
 import type { ErrorAction, FieldErrors } from '@/app/auth/register/types/index'
-import { getAuthErrorMessage, validateEmail, validatePassword, validatePasswordMatch } from '@/app/auth/register/utils/validation'
+import { validateEmail, validatePassword, validatePasswordMatch } from '@/app/auth/register/utils/validation'
 
 // import { signup } from '@/app/auth/register/actions' // Replaced with API call
 
@@ -71,7 +71,7 @@ export function useRegistration(): {
     return new Promise((resolve) => {
       startTransition(async () => {
         try {
-          const response = await fetch('/api/auth/signup', {
+          const response = await fetch('/api/auth/register', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -79,27 +79,22 @@ export function useRegistration(): {
             body: JSON.stringify({
               email,
               password,
-              fullName: email.split('@')[0], // Use email prefix as name
+              fullName: email.split('@')[0],
             }),
-            credentials: 'include', // Include cookies for authentication
           })
 
-          const data = await response.json() as unknown
+          const data = await response.json() as { error?: string; success?: boolean }
 
-          if (!response.ok) {
-            const authError = getAuthErrorMessage((data as { error?: string }).error ?? 'Registration failed')
-            setError(authError.message)
-            if (authError.action) {
-              setErrorAction(authError.action)
-            }
+          if (!response.ok || !data.success) {
+            setError(data.error ?? 'Registrasi gagal')
             resolve(false)
             return
           }
 
           setSuccess(true)
           resolve(true)
-         } catch {
-          setError('Network error. Please try again.')
+        } catch {
+          setError('Koneksi gagal. Silakan coba lagi.')
           resolve(false)
         }
       })

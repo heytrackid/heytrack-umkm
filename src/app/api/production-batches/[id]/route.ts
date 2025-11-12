@@ -37,7 +37,7 @@ async function putHandler(
       .from('productions')
       .update(body)
       .eq('id', id)
-      .eq('user_id', user['id'])
+      .eq('user_id', user.id)
       .select(`
         *,
         recipe:recipes(name)
@@ -45,10 +45,10 @@ async function putHandler(
       .single()
 
     if (error) {
-      if (error['code'] === 'PGRST116') {
+      if (error.code === 'PGRST116') {
         throw new APIError('Production batch not found', { status: 404, code: 'NOT_FOUND' })
       }
-      apiLogger.error({ error, userId: user['id'], batchId: id }, 'Failed to update production batch')
+      apiLogger.error({ error, userId: user.id, batchId: id }, 'Failed to update production batch')
       throw error
     }
 
@@ -59,13 +59,13 @@ async function putHandler(
     }
 
     // ✅ V2: Safe extraction of joined recipe data
-    const recipe = extractFirst((batch as any).recipe)
-    const recipeName = recipe && isRecord(recipe) ? safeString(recipe['name'], 'Unknown') : 'Unknown'
+    const recipe = extractFirst((batch as { recipe?: unknown }).recipe)
+    const recipeName = recipe && isRecord(recipe) ? safeString(recipe['name'] as string, 'Unknown') : 'Unknown'
 
     // ✅ Map database columns to expected format
     const mappedBatch = {
       ...batch,
-      batch_number: batch['id'].slice(0, 8).toUpperCase(),
+      batch_number: batch.id.slice(0, 8).toUpperCase(),
       planned_date: batch.created_at,
       actual_cost: batch.total_cost,
       recipe_name: recipeName,

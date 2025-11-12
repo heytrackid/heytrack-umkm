@@ -2,9 +2,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 
 
-import { generateNonce, getStrictCSP } from './src/lib/csp'
-import { middlewareLogger } from './src/lib/logger'
-import { updateSession } from './src/utils/supabase/middleware'
+import { generateNonce, getStrictCSP } from '@/lib/csp'
+import { middlewareLogger } from '@/lib/logger'
+import { updateSession } from '@/utils/supabase/middleware'
 
 import type { User } from '@supabase/supabase-js'
 
@@ -120,15 +120,8 @@ function validateRequest(request: NextRequest, isDev: boolean): NextResponse | n
  * Update session and get user
  */
 async function getUser(request: NextRequest): Promise<{ user: User | null; response: NextResponse }> {
-  try {
-    const { user, response } = await updateSession(request)
-    middlewareLogger.debug({ userExists: !!user }, 'getUser result')
-    return { user, response }
-  } catch (error) {
-    middlewareLogger.debug({ error }, 'getUser error')
-    middlewareLogger.debug({ error }, 'Middleware auth error (non-blocking)')
-    return { user: null, response: NextResponse.next() }
-  }
+  const { user, response } = await updateSession(request)
+  return { user, response }
 }
 
 /**

@@ -1,4 +1,3 @@
-import dynamic from 'next/dynamic'
 // import { createLogger } from '@/lib/logger'
 
 // Server-side data fetching (removed in client-fetch option)
@@ -24,14 +23,16 @@ import dynamic from 'next/dynamic'
 } */
 
 // Client component for interactive dashboard features
-const DashboardClient = dynamic(
-  () => import('./components/DashboardClient').then(m => ({ default: m.DashboardClient })),
-  {
-    loading: () => <div>Loading dashboard...</div>
-  }
-)
+// Import directly without dynamic - DashboardClient already has its own lazy loading
+import { DashboardClient } from './components/DashboardClient'
 
 const DashboardPage = () => {
+  // Debug logging for auth state verification
+  if (typeof window !== 'undefined') {
+    console.log('Dashboard page loaded, checking auth state...')
+    // This will be handled by useAuth hook in DashboardClient
+  }
+
   return <DashboardClient />
 }
 

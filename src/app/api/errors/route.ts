@@ -97,7 +97,7 @@ async function logErrorToDatabase(
       }
     }
 
-    const { error } = await supabase.from('error_logs').insert(payload)
+    const { error } = await supabase.from('error_logs').insert(payload as Insert<'error_logs'>)
     if (error) {
       throw error
     }

@@ -149,8 +149,14 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
         }
 
         // Type-safe ingredient data
-
-        const ingredientData = ingredient
+        const ingredientData = ingredient as {
+            id: string
+            name: string
+            unit: string
+            current_stock: number
+            price_per_unit: number
+            user_id: string
+        }
 
         // 1. Create financial transaction (expense)
         let financialTransactionId: string | null = null
@@ -162,18 +168,20 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
             description: `Pembelian: ${ingredientData.name} (${qtyBeli} ${ingredientData.unit}) dari ${validatedData.supplier ?? 'Supplier'}`,
             date: validatedData.purchase_date ?? null
         }
-        
+
         const { data: transaction, error: transactionError } = await supabase
             .from('financial_records')
-            .insert(financialRecord)
+            .insert(financialRecord as never)
             .select('id')
             .single()
+
+        const typedTransaction = transaction as { id: string } | null
 
         if (transactionError) {
             apiLogger.error({ error: transactionError }, 'Error creating financial transaction:')
             // Continue without financial transaction
         } else {
-            financialTransactionId = transaction?.id || null
+            financialTransactionId = typedTransaction?.id || null
         }
 
         // 2. Create purchase record
@@ -233,7 +241,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
             .from('ingredients')
             .update(stockUpdate)
             .eq('id', validatedData.ingredient_id)
-            .eq('user_id', user['id'])
+            .eq('user_id', (user as { id: string }).id)
             // Add optimistic lock: only update if current_stock hasn't changed
             .eq('current_stock', ingredientData.current_stock ?? 0)
 
@@ -253,7 +261,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
             reference_id: purchase?.id || null,
             reference_type: 'ingredient_purchase'
         }
-        
+
         await supabase
             .from('inventory_stock_logs')
             .insert(stockLog)

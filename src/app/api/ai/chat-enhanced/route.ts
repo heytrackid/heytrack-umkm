@@ -18,6 +18,7 @@ import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { RateLimiter, RATE_LIMITS } from '@/lib/services/RateLimiter'
 import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
 import type { Database } from '@/types/database'
+import { typed } from '@/types/type-utilities'
 import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
@@ -166,9 +167,9 @@ function validateAndSanitizeMessage(message: string, userId: string): string {
 async function handleSession(supabase: SupabaseClient, userId: string, sessionId: string | undefined, message: string, currentPage?: string): Promise<string> {
   if (sessionId) {return sessionId}
 
-  const context = await BusinessContextService.loadContext(userId, currentPage)
+  const _context = await BusinessContextService.loadContext(userId, currentPage)
   const title = ChatSessionService.generateTitle(message)
-  const session = await ChatSessionService.createSession(supabase, userId, title, context)
+  const session = await ChatSessionService.createSession(typed(supabase), userId, title)
   return session['id']
 }
 
@@ -199,7 +200,7 @@ async function chatEnhancedPOST(request: NextRequest): Promise<NextResponse> {
 
   try {
     const supabase = await createClient()
-    const { userId } = await authenticateUser(supabase)
+    const { userId } = await authenticateUser(typed(supabase))
 
     await checkRateLimits(userId)
 
@@ -215,14 +216,14 @@ async function chatEnhancedPOST(request: NextRequest): Promise<NextResponse> {
         })()
       : undefined
 
-    const sessionId = await handleSession(supabase, userId, safeSessionId, sanitizedMessage, safeCurrentPage)
+    const sessionId = await handleSession(typed(supabase), userId, safeSessionId, sanitizedMessage, safeCurrentPage)
 
-    await ChatSessionService.addMessage(supabase, sessionId, 'user', sanitizedMessage)
+    await ChatSessionService.addMessage(typed(supabase), sessionId, 'user', sanitizedMessage)
 
     const { aiResponse, fallbackUsed } = await processAIResponse(userId, sessionId, sanitizedMessage, safeCurrentPage)
 
     const responseTime = Date.now() - startTime
-    await ChatSessionService.addMessage(supabase, sessionId, 'assistant', aiResponse, {
+    await ChatSessionService.addMessage(typed(supabase), sessionId, 'assistant', aiResponse, {
       response_time_ms: responseTime,
       fallback_used: fallbackUsed,
     })

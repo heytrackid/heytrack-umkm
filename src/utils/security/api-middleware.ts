@@ -306,8 +306,7 @@ export function withSecurity<Params extends object = object>(
       
       for (const [key, value] of Object.entries(flatData)) {
         if (typeof value === 'string') {
-          // Skip security checks for Turnstile captcha tokens (they're safe but contain patterns)
-          const skipSecurityCheck = key === 'captcha_token' || key.includes('turnstile')
+          const skipSecurityCheck = false
 
           // Check for SQL injection patterns
           if (mergedConfig.checkForSQLInjection && !skipSecurityCheck && hasSQLInjectionPattern(value)) {

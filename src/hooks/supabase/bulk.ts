@@ -1,10 +1,12 @@
 'use client'
 
-import type { Insert, Row, TableName } from '@/types/database'
+import type { Database, Insert, Row, TableName } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 import { createClient } from '@/utils/supabase/client'
 
 import type { BulkUpdateItem } from '@/hooks/supabase/types'
+
+type TableKey = keyof Database['public']['Tables']
 
 /**
  * Bulk operations for Supabase tables
@@ -16,11 +18,10 @@ export class useSupabaseBulk {
   ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
-      .from(table as any)
+      .from(table as never)
       .insert(records as never)
-      .select('*') as { data: Array<Row<T>> | null; error: Error | null }
+      .select('*')
 
     if (error) {
       throw new Error((error instanceof Error ? error.message : String(error)))
@@ -31,20 +32,18 @@ export class useSupabaseBulk {
 
   static async updateMultiple<T extends TableName>(
     table: T,
-    // @ts-expect-error - Generic type constraint limitation with Supabase types
-    updates: Array<BulkUpdateItem<T & TableName>>
+    updates: Array<BulkUpdateItem<TableKey>>
   ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
     const results: Array<Row<T>> = []
 
     for (const update of updates) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await supabase
-        .from(table as any)
-        .update(update['data'] as never)
-        .eq('id', update['id'] as never)
+        .from(table as never)
+        .update(update.data as never)
+        .eq('id', update.id)
         .select('*')
-        .single() as { data: Row<T> | null; error: Error | null }
+        .single()
 
       if (error) {
         throw new Error(`Failed to update record ${update['id']}: ${error.message}`)
@@ -62,11 +61,10 @@ export class useSupabaseBulk {
   ): Promise<boolean> {
     const supabase = typed(createClient())
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await supabase
-      .from(table as any)
+      .from(table as never)
       .delete()
-      .in('id', ids as never)
+      .in('id', ids)
 
     if (error) {
       throw new Error((error instanceof Error ? error.message : String(error)))
@@ -82,11 +80,10 @@ export class useSupabaseBulk {
   ): Promise<Array<Row<T>>> {
     const supabase = typed(createClient())
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
-      .from(table as any)
+      .from(table as never)
       .upsert(records as never, { onConflict: conflictColumns.join(',') })
-      .select('*') as { data: Array<Row<T>> | null; error: Error | null }
+      .select('*')
 
     if (error) {
       throw new Error((error instanceof Error ? error.message : String(error)))

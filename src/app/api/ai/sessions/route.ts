@@ -12,6 +12,7 @@ import { apiLogger } from '@/lib/logger'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { safeNumber } from '@/lib/type-guards'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
+import { typed } from '@/types/type-utilities'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -34,7 +35,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     const limit = safeNumber(searchParams.get('limit'), 20)
 
     // List sessions
-    const sessions = await ChatSessionService.listSessions(supabase, user['id'], limit)
+    const sessions = await ChatSessionService.listSessions(typed(supabase), user['id'], limit)
 
     apiLogger.info({ userId: user['id'], count: sessions.length }, 'Sessions listed')
 
