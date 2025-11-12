@@ -41,13 +41,13 @@ const SuppliersPage = (): JSX.Element => {
                     description="Kelola data supplier dan vendor bahan baku"
                     actions={
                         <div className="flex items-center gap-2">
-                            <Button
+                             <Button
                                 variant="outline"
                                 onClick={() => setImportDialogOpen(true)}
                                 className="flex-1 sm:flex-none"
                             >
                                 <Upload className="h-4 w-4 mr-2" />
-                                Import
+                                Import CSV
                             </Button>
                         </div>
                     }
