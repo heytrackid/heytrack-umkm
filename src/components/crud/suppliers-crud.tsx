@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form'
 import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields';
 import { CreateModal, EditModal, DeleteModal } from '@/components/ui/index';
 import { SimpleDataTable, type SimpleColumn } from '@/components/ui/simple-data-table';
-import { useSuppliers } from '@/hooks/index';
 import { useSupabaseCRUD } from '@/hooks/supabase/index';
 import { createClientLogger } from '@/lib/client-logger'
 import { SupplierFormSchema, type SupplierForm } from '@/lib/validations/form-validations';
@@ -25,9 +24,7 @@ type Supplier = Row<'suppliers'>
 
 
 export const SuppliersCRUD = (): JSX.Element => {
-  const { data: suppliersData, loading, error } = useSuppliers();
-  const { create: createSupplier, update: updateSupplier, remove: deleteSupplier } = useSupabaseCRUD('suppliers');
-  const suppliers = suppliersData || [];
+  const { data: suppliers, loading, error, create: createSupplier, update: updateSupplier, remove: deleteSupplier } = useSupabaseCRUD('suppliers');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -166,7 +163,7 @@ export const SuppliersCRUD = (): JSX.Element => {
   if (error) {
     return (
       <div className="bg-secondary border border-red-200 rounded-md p-4">
-        <p className="text-muted-foreground">Error loading suppliers: {error}</p>
+        <p className="text-muted-foreground">Error loading suppliers: {error.message}</p>
       </div>
     );
   }
@@ -174,7 +171,7 @@ export const SuppliersCRUD = (): JSX.Element => {
   return (
     <div className="space-y-6">
       <SimpleDataTable
-        data={suppliers}
+        data={suppliers || []}
         columns={columns}
         loading={loading}
         onEdit={handleEdit}
