@@ -210,7 +210,7 @@ export const PricingCalculatorCard = ({
                 </SwipeableTabs>
 
                 {/* Display Price */}
-                <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-900/20 rounded-lg border-2 border-border/20 ">
+                <div className="p-6 bg-gradient-to-br from-muted/30 to-muted/50 dark:from-muted/10 dark:to-muted/20 rounded-lg border-2 border-border/20 ">
                     <div className="flex items-start justify-between mb-4">
                         <div>
                             <div className="text-sm text-muted-foreground mb-1">

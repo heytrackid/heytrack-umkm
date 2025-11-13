@@ -81,11 +81,11 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
                   <div
                     key={item['id']}
                     className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all hover: ${
-                      isGood 
-                        ? 'bg-muted/20 border-border/20 ' 
-                        : (isWarning 
-                          ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500/30' 
-                          : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800')
+                      isGood
+                        ? 'bg-muted/20 border-border/20 '
+                        : (isWarning
+                          ? 'bg-accent/10 dark:bg-accent/20 border-accent/30'
+                          : 'bg-destructive/10 dark:bg-destructive/20 border-destructive/30')
                       }`}
                   >
                     {/* Rank Badge */}
@@ -171,7 +171,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
 
         {/* Enhanced Recommendations */}
         {comparison.length > 0 && (
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-900/20 p-5 rounded-lg border-2 border-border/20 ">
+          <div className="bg-gradient-to-r from-muted/30 to-muted/50 dark:from-muted/10 dark:to-muted/20 p-5 rounded-lg border-2 border-border/20 ">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                 <Lightbulb className="h-5 w-5 text-white" />

@@ -13,10 +13,10 @@ export const HppEmptyState = (): JSX.Element => {
     const router = useRouter()
 
     return (
-        <Card className="border-2 border-dashed border-border/20  bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
+        <Card className="border-2 border-dashed border-border/20 bg-gradient-to-br from-muted/30 to-muted/50 dark:from-muted/10 dark:to-muted/20">
             <CardContent className="py-12">
                 <div className="text-center max-w-2xl mx-auto">
-                    <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-500 to-gray-1000 rounded-full flex items-center justify-center">
+                    <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-muted-foreground/60 to-muted-foreground/80 rounded-full flex items-center justify-center">
                         <Calculator className="h-12 w-12 text-white" />
                     </div>
 

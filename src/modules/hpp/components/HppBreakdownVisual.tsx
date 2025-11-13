@@ -220,7 +220,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
     return (
         <div className="space-y-4">
             {/* Summary Card */}
-            <Card className="border-2 border-border/20  bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
+            <Card className="border-2 border-border/20 bg-gradient-to-br from-muted/30 to-muted/50 dark:from-muted/10 dark:to-muted/20">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
@@ -287,7 +287,7 @@ export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVis
                         </div>
                         <div className="relative h-8 bg-muted rounded-full overflow-hidden">
                             <div
-                                className="absolute h-full bg-gradient-to-r from-gray-500 to-gray-600 flex items-center justify-center text-white text-xs font-medium"
+                                className="absolute h-full bg-gradient-to-r from-muted-foreground/60 to-muted-foreground/80 flex items-center justify-center text-white text-xs font-medium"
                                 style={{ width: `${ingredientSharePercent}%` }}
                             >
                                 {ingredientSharePercent.toFixed(0)}%

@@ -156,10 +156,10 @@ export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps): JSX.Ele
     return (
         <div className="space-y-4">
             {/* Header */}
-            <Card className="border-2 border-border/20  bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-950/20">
+            <Card className="border-2 border-border/20 bg-gradient-to-br from-muted/30 to-muted/50 dark:from-muted/10 dark:to-muted/20">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-1000 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-muted-foreground/60 to-muted-foreground/80 flex items-center justify-center">
                             <Calculator className="h-5 w-5 text-white" />
                         </div>
                         <div>
