@@ -1,12 +1,12 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Popover } from '@/components/ui/popover'
@@ -67,11 +67,22 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
     const fetchRecipes = async () => {
         try {
             setLoadingRecipes(true)
-            const response = await fetch('/api/recipes', {
+            const response = await fetch('/api/recipes?limit=1000', {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
-                const payload: unknown = await response.json()
+                const result: unknown = await response.json()
+                
+                // Handle both formats: direct array or { data: array }
+                let payload: unknown
+                if (Array.isArray(result)) {
+                    payload = result
+                } else if (result && typeof result === 'object' && 'data' in result) {
+                    payload = (result as { data: unknown }).data
+                } else {
+                    payload = []
+                }
+                
                 if (isRecipeArray(payload)) {
                     setRecipes(payload)
                 } else {

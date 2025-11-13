@@ -98,12 +98,24 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     const { data: recipesData = [] } = useQuery({
         queryKey: ['recipes', 'active'],
         queryFn: async () => {
-            const response = await fetch('/api/recipes', {
+            const response = await fetch('/api/recipes?limit=1000', {
                 credentials: 'include', // Include cookies for authentication
             })
             if (!response.ok) { throw new Error('Failed to fetch recipes') }
-            const _data: Array<Row<'recipes'>> = await response.json()
-            return _data.filter(recipe => recipe.is_active)
+            const result = await response.json() as unknown
+            
+            // Handle both formats: direct array or { data: array }
+            let data: Array<Row<'recipes'>>
+            if (Array.isArray(result)) {
+                data = result as Array<Row<'recipes'>>
+            } else if (result && typeof result === 'object' && 'data' in result) {
+                const extracted = (result as { data: unknown }).data
+                data = Array.isArray(extracted) ? (extracted as Array<Row<'recipes'>>) : []
+            } else {
+                data = []
+            }
+            
+            return data.filter(recipe => recipe.is_active)
         },
         staleTime: 5 * 60 * 1000,
     })
@@ -112,11 +124,23 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     const { data: customersData = [] } = useQuery({
         queryKey: ['customers', 'all'],
         queryFn: async () => {
-            const response = await fetch('/api/customers', {
+            const response = await fetch('/api/customers?limit=1000', {
                 credentials: 'include', // Include cookies for authentication
             })
             if (!response.ok) { throw new Error('Failed to fetch customers') }
-            return response.json() as Promise<Customer[]>
+            const result = await response.json() as unknown
+            
+            // Handle both formats: direct array or { data: array }
+            if (Array.isArray(result)) {
+                return result as Customer[]
+            }
+            
+            if (result && typeof result === 'object' && 'data' in result) {
+                const data = (result as { data: unknown }).data
+                return Array.isArray(data) ? (data as Customer[]) : []
+            }
+            
+            return []
         },
         staleTime: 5 * 60 * 1000,
     })

@@ -32,21 +32,33 @@ export const OrdersTableView = () => {
   } = useQuery<Order[]>({
     queryKey: ['orders', 'table'],
     queryFn: async () => {
-      const response = await fetch('/api/orders', {
+      const response = await fetch('/api/orders?limit=1000', {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {
         const errorText = await response.text()
         throw new Error(`Failed to fetch orders: ${errorText}`)
       }
-      const data = await response.json() as Order[]
+      const result = await response.json() as unknown
+
+      // Handle both formats: direct array or { data: array }
+      let data: Order[]
+      if (Array.isArray(result)) {
+        data = result as Order[]
+      } else if (result && typeof result === 'object' && 'data' in result) {
+        const extracted = (result as { data: unknown }).data
+        data = Array.isArray(extracted) ? (extracted as Order[]) : []
+      } else {
+        logger.warn({ result }, 'API returned unexpected format for orders')
+        return []
+      }
 
       // Validate the response with type guards
       if (isArrayOf(data, isOrder)) {
         return data
       }
 
-      logger.warn({ data }, 'API returned unexpected format for orders')
+      logger.warn({ data }, 'API returned invalid order data')
       return []
     },
     staleTime: 2 * 60 * 1000, // 2 minutes

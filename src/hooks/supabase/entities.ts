@@ -9,9 +9,11 @@ import type { UseSupabaseQueryOptions, UseSupabaseQueryResult } from '@/hooks/su
  */
 
 // Ingredients
-export function useIngredients(options?: { realtime?: boolean }): UseSupabaseQueryResult<'ingredients'> {
+export function useIngredients(options?: { realtime?: boolean; limit?: number }): UseSupabaseQueryResult<'ingredients'> {
   const queryOptions: UseSupabaseQueryOptions<'ingredients'> = {
     orderBy: { column: 'name' },
+    // Default to high limit (1000) for listing all ingredients, allow override
+    limit: options?.limit ?? 1000,
   }
   if (options?.realtime !== undefined) {
     queryOptions.realtime = options.realtime

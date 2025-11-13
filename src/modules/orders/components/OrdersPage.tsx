@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { BarChart3, Calendar, Clock, DollarSign, Edit, Eye, Filter, MessageCircle, Plus, Search, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { useMemo, useState, useCallback } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -98,13 +98,33 @@ const OrdersPage = (_props: OrdersPageProps) => {
   const { data: ordersData, isLoading: loading, error: queryError } = useQuery<Order[]>({
     queryKey: ['orders', 'all'],
     queryFn: async (): Promise<Order[]> => {
-      const response = await fetch(`/api/orders?${(() => { const p=new URLSearchParams(); const u=new URLSearchParams(typeof window!== 'undefined' ? window.location.search : ''); const f=u.get('from'); const t=u.get('to'); if (f) p.set('from', f); if (t) p.set('to', t); return p.toString(); })()}`, {
+      logger.info('Fetching orders from API...')
+      const response = await fetch(`/api/orders?limit=1000&${(() => { const p=new URLSearchParams(); const u=new URLSearchParams(typeof window!== 'undefined' ? window.location.search : ''); const f=u.get('from'); const t=u.get('to'); if (f) p.set('from', f); if (t) p.set('to', t); return p.toString(); })()}`, {
         credentials: 'include', // Include cookies for authentication
       })
-      if (!response.ok) { throw new Error('Failed to fetch orders') }
-      const data: unknown = await response.json()
-      // Ensure we always return an array
-      return Array.isArray(data) ? (data as Order[]) : []
+      if (!response.ok) { 
+        logger.error('Failed to fetch orders', { status: response.status })
+        throw new Error('Failed to fetch orders') 
+      }
+      const result: unknown = await response.json()
+      
+      logger.info('Received orders data', { result })
+      
+      // Handle both formats: direct array or { data: array }
+      if (Array.isArray(result)) {
+        logger.info('Orders data is array', { count: result.length })
+        return result as Order[]
+      }
+      
+      if (result && typeof result === 'object' && 'data' in result) {
+        const data = (result as { data: unknown }).data
+        const orders = Array.isArray(data) ? (data as Order[]) : []
+        logger.info('Orders data extracted from object', { count: orders.length })
+        return orders
+      }
+      
+      logger.warn('Orders data format not recognized, returning empty array')
+      return []
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
@@ -114,7 +134,30 @@ const OrdersPage = (_props: OrdersPageProps) => {
 
   const error = queryError ? getErrorMessage(queryError) : null
 
-  // ✅ Calculate stats with useMemo for performance
+  // Filter orders based on search and status
+  const filteredOrders = useMemo(() => {
+    let result = orders
+
+    // Apply search filter
+    if (filters.customer_search?.trim()) {
+      const term = filters.customer_search.toLowerCase()
+      result = result.filter(order =>
+        order.order_no?.toLowerCase().includes(term) ||
+        order.customer_name?.toLowerCase().includes(term)
+      )
+    }
+
+    // Apply status filter
+    if (filters.status.length > 0) {
+      result = result.filter(order => 
+        order.status && filters.status.includes(order.status)
+      )
+    }
+
+    return result
+  }, [orders, filters.customer_search, filters.status])
+
+  // ✅ Calculate stats with useMemo for performance (use all orders, not filtered)
   const stats = useMemo<OrderStats>(() => ({
     total_orders: orders.length,
     pending_orders: orders.filter(o => o['status'] === 'PENDING').length,
@@ -500,7 +543,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
                 {/* Search Results Info */}
                 <div className="flex items-center justify-between text-sm">
                   <div className="text-muted-foreground">
-                    Menampilkan <span className="font-semibold text-foreground">{orders.length}</span> pesanan
+                    Menampilkan <span className="font-semibold text-foreground">{filteredOrders.length}</span> pesanan
                     {hasFiltersApplied && (
                       <span> (dari total {stats.total_orders} pesanan)</span>
                     )}
@@ -523,7 +566,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
 
           {/* Orders List */}
           <div className="space-y-4">
-            {orders.length === 0 ? (
+            {filteredOrders.length === 0 ? (
               <Card>
                 <CardContent className="py-16">
                   <div className="text-center">
@@ -557,7 +600,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
               </Card>
             ) : (
               <>
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                   <Card key={order.id} className="hover: ">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
