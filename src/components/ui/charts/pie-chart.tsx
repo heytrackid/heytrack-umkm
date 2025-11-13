@@ -9,13 +9,13 @@ import { type BaseMobileChartProps, CHART_COLORS } from '@/components/ui/charts/
 import type { PieLabelRenderProps } from 'recharts'
 
 // Lazy load recharts components
-// ✅ Correct pattern for named exports (per Next.js docs)
-const Pie = lazy(() => import('recharts').then(mod => mod.Pie))
-const PieChart = lazy(() => import('recharts').then(mod => mod.PieChart))
-const Cell = lazy(() => import('recharts').then(mod => mod.Cell))
-const Tooltip = lazy(() => import('recharts').then(mod => mod.Tooltip))
-const Legend = lazy(() => import('recharts').then(mod => mod.Legend))
-const ResponsiveContainer = lazy(() => import('recharts').then(mod => mod.ResponsiveContainer))
+// ✅ Correct pattern for named exports with React.lazy
+const Pie = lazy(() => import('recharts').then(mod => ({ default: mod.Pie })))
+const PieChart = lazy(() => import('recharts').then(mod => ({ default: mod.PieChart })))
+const Cell = lazy(() => import('recharts').then(mod => ({ default: mod.Cell })))
+const Tooltip = lazy(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
+const Legend = lazy(() => import('recharts').then(mod => ({ default: mod.Legend })))
+const ResponsiveContainer = lazy(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
 
 /**
  * Mobile Pie Chart Component
