@@ -21,14 +21,7 @@ export function useIngredients(options?: { realtime?: boolean; limit?: number })
   return useSupabaseQuery('ingredients', queryOptions)
 }
 
-// Recipes
-export function useRecipes(options?: { realtime?: boolean }): UseSupabaseQueryResult<'recipes'> {
-  return useSupabaseQuery('recipes', {
-    filter: { is_active: true },
-    orderBy: { column: 'name' },
-    ...(options?.realtime !== undefined && { realtime: options.realtime }),
-  })
-}
+
 
 // Orders
 export function useOrders(options?: { realtime?: boolean }): UseSupabaseQueryResult<'orders'> {

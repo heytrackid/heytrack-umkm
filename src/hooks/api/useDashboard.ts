@@ -73,120 +73,69 @@ export interface TopProductsData {
   color: string
 }
 
-// Fetch dashboard stats
+// Fetch dashboard stats from API
 const fetchDashboardStats = async (): Promise<DashboardStats> => {
   try {
-    // Get current date
-    const today = new Date()
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
-    
-    // Get week start (7 days ago)
-    const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const response = await fetch('/api/dashboard/stats', {
+      credentials: 'include', // Include cookies for authentication
+    })
 
-    // Create Supabase client
-    const supabase = createClient()
-    
-    // Fetch orders for today and this week
-    const { data: todayOrders, error: todayError } = await supabase
-      .from('orders')
-      .select('total_amount, customer_name, created_at')
-      .gte('created_at', todayStart.toISOString())
-      .lt('created_at', todayEnd.toISOString())
-      .order('created_at', { ascending: false })
+    if (!response.ok) {
+      throw new Error(`Failed to fetch dashboard stats: ${response.status}`)
+    }
 
-    if (todayError) {throw todayError}
+    const result = await response.json()
 
-    const { data: weeklyOrders, error: weeklyError } = await supabase
-      .from('orders')
-      .select('total_amount')
-      .gte('created_at', weekStart.toISOString())
-      .lt('created_at', todayEnd.toISOString())
-
-    if (weeklyError) {throw weeklyError}
-
-    // Fetch customers
-    const { data: customers, error: customersError } = await supabase
-      .from('customers')
-      .select('customer_type')
-
-    if (customersError) {throw customersError}
-
-    // Fetch inventory with low stock
-    const { data: inventory, error: inventoryError } = await supabase
-      .from('ingredients')
-      .select('current_stock, reorder_point')
-
-    if (inventoryError) {throw inventoryError}
-
-    type OrderAmount = { total_amount: number | null }
-    type OrderRecent = { total_amount: number | null; customer_name: string | null; created_at: string | null }
-    type InventoryStock = { current_stock: number | null; reorder_point: number | null }
-    type CustomerType = { customer_type: string | null }
-
-    // Calculate stats
-    const todayRevenue = todayOrders?.reduce((sum: number, order: OrderAmount) => sum + ((order.total_amount as number) || 0), 0) || 0
-    const weeklyRevenue = weeklyOrders?.reduce((sum: number, order: OrderAmount) => sum + ((order.total_amount as number) || 0), 0) || 0
-
-    const lowStockItems = inventory?.filter((item: InventoryStock) =>
-      (item.current_stock ?? 0) <= (item.reorder_point ?? 0)
-    ) || []
-    const outOfStockItems = inventory?.filter((item: InventoryStock) => item.current_stock === 0) || []
-
-    const vipCustomers = customers?.filter((customer: CustomerType) => customer.customer_type === 'vip').length ?? 0
-
-    // Get recent orders for activity
-    const recentOrders = todayOrders?.slice(-3).map((order: OrderRecent) => ({
-      customer: order.customer_name ?? 'Unknown',
-      amount: order.total_amount ?? 0,
-      time: order.created_at ?? ''
-    })) || []
-
+    // Transform API response to match expected DashboardStats interface
     return {
       revenue: {
-        today: todayRevenue,
+        today: result.revenue.today,
         target: 1000000, // 1M IDR target per day
-        weekly: weeklyRevenue,
-        trend: todayRevenue > (weeklyRevenue / 7) ? 'up' : 'down',
-        growth: weeklyRevenue > 0 ? ((todayRevenue - (weeklyRevenue / 7)) / (weeklyRevenue / 7)) * 100 : 0
+        weekly: result.revenue.total,
+        trend: result.revenue.trend,
+        growth: parseFloat(result.revenue.growth)
       },
       profit: {
         margin: 25.5, // Calculate from actual data when available
-        today: todayRevenue * 0.255 // 25.5% margin
+        today: result.expenses.netProfit
       },
       hpp: {
-        average: todayRevenue * 0.45 // Estimate 45% of revenue as HPP
+        average: result.hpp.average
       },
       products: {
         bestSeller: {
-          name: 'Belum ada data',
-          sold: 0,
+          name: result.recipes.popular[0]?.name || 'Belum ada data',
+          sold: result.recipes.popular[0]?.times_made || 0,
           price: 0
         }
       },
       inventory: {
-        alerts: lowStockItems.length + outOfStockItems.length,
-        outOfStock: outOfStockItems.length,
-        lowStock: lowStockItems.length
+        alerts: result.inventory.lowStock,
+        outOfStock: result.alerts.lowStock,
+        lowStock: result.inventory.lowStock
       },
       orders: {
-        active: todayOrders?.length ?? 0,
-        today: todayOrders?.length ?? 0,
-        total: weeklyOrders?.length ?? 0,
-        recent: recentOrders
+        active: result.orders.active,
+        today: result.orders.today,
+        total: result.orders.total,
+        recent: result.orders.recent.map((order: { customer: string; amount: number; created_at: string }) => ({
+          customer: order.customer,
+          amount: order.amount,
+          time: order.created_at
+        }))
       },
       customers: {
-        total: customers?.length ?? 0,
-        vip: vipCustomers
+        total: result.customers.total,
+        vip: result.customers.vip
       },
       expenses: {
-        netProfit: todayRevenue * 0.255 // Estimate profit
+        netProfit: result.expenses.netProfit
       },
-      lastUpdated: Date.now()
+      lastUpdated: result.lastUpdated
     }
-   } catch (error) {
-     logger.error({ error }, 'Error fetching dashboard stats:')
-    
+  } catch (error) {
+    logger.error({ error }, 'Error fetching dashboard stats from API:')
+
     // Return default/empty data on error
     return {
       revenue: { today: 0, target: 1000000, weekly: 0, trend: 'up', growth: 0 },

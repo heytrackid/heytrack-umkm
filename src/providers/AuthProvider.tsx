@@ -40,17 +40,19 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const { supabase } = useSupabase()
 
   useEffect(() => {
-
     // Get initial session with error handling
+    // IMPORTANT: Use getUser() instead of getSession() to ensure token is validated
     const getSession = async (): Promise<void> => {
+      authLogger.info('Initializing auth state')
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        // First, get the user to validate the token
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-        if (sessionError) {
-          authLogger.error({ error: sessionError }, 'Session error')
+        if (userError) {
+          authLogger.error({ error: userError }, 'User validation error')
           
           // Check if it's a refresh token error
-          const errorMessage = sessionError.message || ''
+          const errorMessage = userError.message || ''
           if (errorMessage.includes('Refresh Token Not Found') || errorMessage.includes('Invalid Refresh Token')) {
             authLogger.warn('Refresh token invalid, clearing session')
             // Clear session and redirect to login
@@ -67,12 +69,15 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
           return
         }
 
+        // If user is valid, get the session
+        const { data: { session } } = await supabase.auth.getSession()
+
         setAuthState(prev => ({
           ...prev,
-          user: session?.user ?? null,
+          user: user ?? null,
           session: session ?? null,
           isLoading: false,
-          isAuthenticated: Boolean(session?.user),
+          isAuthenticated: Boolean(user),
         }))
       } catch (error: unknown) {
         const message = getErrorMessage(error)
@@ -126,6 +131,35 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     }
   }, [router, supabase.auth])
 
+  // Warn user 5 minutes before session expires
+  useEffect(() => {
+    if (!authState.session) {
+      return undefined
+    }
+
+    const expiresAt = authState.session.expires_at
+    if (!expiresAt) {
+      return undefined
+    }
+
+    const expiryTime = expiresAt * 1000 // Convert to milliseconds
+    const now = Date.now()
+    const timeUntilExpiry = expiryTime - now
+    const warnTime = timeUntilExpiry - (5 * 60 * 1000) // 5 minutes before expiry
+
+    if (warnTime > 0 && warnTime < timeUntilExpiry) {
+      const warnTimer = setTimeout(() => {
+        authLogger.warn('Session expiring soon')
+        // You can add a toast notification here if you have a toast system
+        // toast.warning('Your session will expire soon. Please save your work.')
+      }, warnTime)
+
+      return () => clearTimeout(warnTimer)
+    }
+
+    return undefined
+  }, [authState.session])
+
   const signOut = useCallback(async (): Promise<void> => {
     try {
       await supabase.auth.signOut()
@@ -147,6 +181,8 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     const MAX_RETRIES = 3
 
     try {
+      authLogger.info({ retryCount }, 'Attempting to refresh session')
+      
       const { data: { session }, error } = await supabase.auth.refreshSession()
 
       if (error) {
@@ -163,15 +199,26 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         throw error
       }
 
-      setAuthState(prev => ({
-        ...prev,
-        session: session ?? null,
-        user: session?.user ?? prev.user,
-        isAuthenticated: Boolean(session?.user),
-      }))
+      if (session) {
+        authLogger.info('Session refreshed successfully')
+        setAuthState(prev => ({
+          ...prev,
+          session: session,
+          user: session.user,
+          isAuthenticated: true,
+        }))
+      } else {
+        authLogger.warn('Session refresh returned null session')
+        setAuthState(prev => ({
+          ...prev,
+          session: null,
+          user: null,
+          isAuthenticated: false,
+        }))
+      }
     } catch (error: unknown) {
       const message = getErrorMessage(error)
-      authLogger.error({ error: message }, 'Session refresh error')
+      authLogger.error({ error: message, retryCount }, 'Session refresh failed')
 
       // Check if it's a refresh token error
       if (typeof message === 'string' && (message.includes('Refresh Token Not Found') || message.includes('Invalid Refresh Token'))) {
@@ -181,7 +228,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       }
 
       // For network errors, retry with exponential backoff (max 3 retries)
-      if (typeof message === 'string' && (message.includes('network') || message.includes('fetch')) && retryCount < MAX_RETRIES) {
+      if (typeof message === 'string' && (message.includes('network') || message.includes('fetch') || message.includes('Failed to fetch')) && retryCount < MAX_RETRIES) {
         const delay = Math.min(1000 * Math.pow(2, retryCount), 10000) // Exponential backoff, max 10s
         authLogger.info(`Network error during refresh, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`)
         setTimeout(() => {
@@ -190,9 +237,11 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         return
       }
 
-      // For other errors or max retries reached, don't throw - just log
+      // For other errors or max retries reached
       if (retryCount >= MAX_RETRIES) {
-        authLogger.warn('Max retry attempts reached for session refresh')
+        authLogger.error('Max retry attempts reached for session refresh, forcing logout')
+        // Force logout after max retries
+        import('@/lib/auth/session-handler').then(m => m.handleSessionExpired())
       }
     }
   }, [supabase.auth])

@@ -43,10 +43,10 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
-import { useRecipes } from '@/hooks/supabase/entities'
 import { useSupabaseCRUD } from '@/hooks/supabase/index'
 import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
+import { useRecipes } from '@/hooks/useRecipes'
 import { useResponsive } from '@/hooks/useResponsive'
 
 import type { Row } from '@/types/database'
@@ -77,7 +77,7 @@ type DifficultyFilter = 'all' | 'easy' | 'hard' | 'medium'
 
 export const EnhancedRecipesPage = (): JSX.Element => {
     const router = useRouter()
-    const { data: recipes, loading } = useRecipes({ realtime: true })
+    const { data: recipes, isLoading: loading } = useRecipes()
     const { remove: deleteRecipe } = useSupabaseCRUD('recipes')
     const { toast } = useToast()
     const { isMobile } = useResponsive()
@@ -99,7 +99,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
         if (!recipes) { return [] }
 
         return recipes
-            .filter((recipe) => {
+            .filter((recipe: Recipe) => {
                 // Search filter
                 const matchesSearch =
                     !searchTerm ||
@@ -113,7 +113,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                 // Only show active recipes
                 return matchesSearch && matchesDifficulty && recipe.is_active
             })
-            .sort((a, b) => a.name.localeCompare(b.name))
+            .sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name))
     }, [recipes, searchTerm, difficultyFilter])
 
     // Pagination
@@ -405,7 +405,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                 </>
             ) : isMobile ? (
                 <div className="space-y-3">
-                    {paginatedData.map((recipe) => (
+                    {paginatedData.map((recipe: Recipe) => (
                         <MobileRecipeCard
                             key={recipe['id']}
                             recipe={recipe}
@@ -421,7 +421,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                 </div>
             ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {paginatedData.map((recipe) => (
+                    {paginatedData.map((recipe: Recipe) => (
                         <Card
                             key={recipe['id']}
                             className="transition-all cursor-pointer"

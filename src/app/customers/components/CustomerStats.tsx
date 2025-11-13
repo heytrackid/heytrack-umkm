@@ -44,7 +44,7 @@ const CustomerStats = ({
 
   if (isLoading) {
     return (
-      <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-4'}`}>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }, (_, i) => (
           <StatsCardSkeleton key={i} />
         ))}
@@ -53,7 +53,7 @@ const CustomerStats = ({
   }
 
   return (
-    <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-4'}`}>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardContent className="p-4 text-center">
           <Users className="h-8 w-8 text-primary mx-auto mb-2" />
