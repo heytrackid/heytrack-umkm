@@ -64,11 +64,12 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     // Wrap database query with caching
     // ✅ OPTIMIZED: Use specific fields instead of SELECT *
     const result = await withCache(async () => {
-      // Get total count
-      let countQuery = supabase
-        .from('recipes')
-        .select('id', { count: 'exact', head: true })
-        .eq('created_by', user['id'])
+       // Get total count - only active recipes by default
+       let countQuery = supabase
+         .from('recipes')
+         .select('id', { count: 'exact', head: true })
+         .eq('created_by', user['id'])
+         .eq('is_active', true)
 
       if (search) {
         countQuery = countQuery.ilike('name', `%${search}%`)
@@ -86,26 +87,36 @@ async function GET(request: NextRequest): Promise<NextResponse> {
         throw new Error(`Database error: ${countError.message}`)
       }
 
-      // Get paginated data
-      let query = supabase
-        .from('recipes')
-        .select(RECIPE_FIELDS.DETAIL) // Specific fields for better performance
-        .eq('created_by', user['id'])
+       // Get paginated data - only active recipes by default
+       let query = supabase
+         .from('recipes')
+         .select(RECIPE_FIELDS.DETAIL) // Specific fields for better performance
+         .eq('created_by', user['id'])
+         .eq('is_active', true)
 
       // Add search filter
       if (search) {
         query = query.ilike('name', `%${search}%`)
       }
 
-      // Add category filter
-      if (category) {
-        query = query.ilike('category', `%${category}%`)
-      }
+       // Add category filter
+       if (category) {
+         query = query.ilike('category', `%${category}%`)
+       }
 
-      // Add status filter
-      if (status) {
-        query = query.eq('status', status)
-      }
+       // Add status filter (overrides default is_active filter if specified)
+       if (status) {
+         if (status === 'active') {
+           query = query.eq('is_active', true)
+           countQuery = countQuery.eq('is_active', true)
+         } else if (status === 'inactive') {
+           query = query.eq('is_active', false)
+           countQuery = countQuery.eq('is_active', false)
+         } else {
+           query = query.eq('status', status)
+           countQuery = countQuery.eq('status', status)
+        }
+       }
 
       // Add sorting
       const sortField = sort_by ?? 'name'

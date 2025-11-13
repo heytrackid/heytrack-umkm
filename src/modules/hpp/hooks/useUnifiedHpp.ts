@@ -161,15 +161,24 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
         ? _data.recipe_ingredients.filter(isValidRecipeIngredient)
         : []
 
-      ingredientCost = recipeIngredients.reduce((sum: number, ri) => {
-        const quantity = ri.quantity ?? 0
-        // Use WAC if available, otherwise use current price
-        const unitPrice =
-          ri.ingredients?.weighted_average_cost ??
-          ri.ingredients?.price_per_unit ??
-          0
-        return sum + quantity * unitPrice
-      }, 0)
+       ingredientCost = recipeIngredients.reduce((sum: number, ri) => {
+         const quantity = ri.quantity ?? 0
+         // Use WAC if available, otherwise use current price
+         const unitPrice =
+           ri.ingredients?.weighted_average_cost ??
+           ri.ingredients?.price_per_unit ??
+           0
+
+         // Log warning if ingredient has no price
+         if (unitPrice === 0 && ri.ingredients?.name) {
+           logger.warn({
+             ingredientId: ri.ingredient_id,
+             ingredientName: ri.ingredients.name
+           }, 'Ingredient has no price data for HPP calculation')
+         }
+
+         return sum + quantity * unitPrice
+       }, 0)
       
       // Get operational costs using configured percentage and minimum
       const operationalCost = Math.max(

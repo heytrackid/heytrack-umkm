@@ -111,12 +111,24 @@ export const HppEmptyState = (): JSX.Element => {
                             <Lightbulb className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                             <div className="text-sm">
                                 <p className="font-semibold text-foreground mb-1">
-                                    💡 Tips: Pastikan Harga Bahan Sudah Diisi
+                                    💡 Tips: Lengkapi Data untuk Perhitungan Akurat
                                 </p>
-                                <p className="text-muted-foreground">
-                                    Sebelum menghitung HPP, pastikan semua bahan sudah memiliki harga.
-                                    Kunjungi halaman <button onClick={() => router.push('/ingredients')} className="underline font-medium">Bahan Baku</button> untuk update harga.
+                                <p className="text-muted-foreground mb-2">
+                                    Untuk hasil HPP yang akurat, pastikan:
                                 </p>
+                                <ul className="text-muted-foreground text-sm space-y-1 ml-4">
+                                    <li>• Semua bahan sudah memiliki harga jual</li>
+                                    <li>• Resep sudah lengkap dengan jumlah bahan</li>
+                                    <li>• Jumlah porsi per resep sudah ditentukan</li>
+                                </ul>
+                                <div className="mt-3 flex gap-2">
+                                    <button onClick={() => router.push('/ingredients')} className="text-primary underline font-medium text-sm">
+                                        Update Harga Bahan →
+                                    </button>
+                                    <button onClick={() => router.push('/recipes')} className="text-primary underline font-medium text-sm">
+                                        Kelola Resep →
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
