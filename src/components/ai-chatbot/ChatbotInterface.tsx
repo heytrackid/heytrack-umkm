@@ -171,12 +171,12 @@ Yuk, mulai ngobrol! Mau tanya apa hari ini? 😊`,
         setMessages(prev => [...prev, assistantMessage]);
         void saveMessage(assistantMessage);
 
-        // Update session context
+        // Update session context with updated messages
         if (result.session_id) {
           setContext({
             userId,
             sessionId: result.session_id,
-            conversationHistory: messages
+            conversationHistory: [...messages, assistantMessage]
               .filter(m => m.role !== 'system')
               .map(({ role, content, timestamp }) => ({
                 role: role as 'assistant' | 'user',

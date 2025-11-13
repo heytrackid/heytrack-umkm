@@ -504,13 +504,13 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                                                     <Edit className="h-4 w-4 mr-2" />
                                                     Edit
                                                 </DropdownMenuItem>
-                                                 <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLElement>) => {
-                                                     e.stopPropagation()
-                                                     handleEdit(recipe)
-                                                 }}>
-                                                    <Calculator className="h-4 w-4 mr-2" />
-                                                    Hitung HPP
-                                                </DropdownMenuItem>
+                                                  <DropdownMenuItem onClick={(e: React.MouseEvent<HTMLElement>) => {
+                                                      e.stopPropagation()
+                                                      handleCalculateHPP(recipe)
+                                                  }}>
+                                                     <Calculator className="h-4 w-4 mr-2" />
+                                                     Hitung HPP
+                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                  <DropdownMenuItem
                                                      onClick={(e: React.MouseEvent<HTMLElement>) => {

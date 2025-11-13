@@ -314,9 +314,10 @@ export function validateOrderData(data: OrderFormValues): string[] {
     errors.push('Nomor telepon harus diisi')
   }
 
-  if (!data.delivery_date?.trim()) {
-    errors.push('Tanggal pengiriman harus diisi')
-  }
+  // delivery_date is optional according to database schema
+  // if (!data.delivery_date?.trim()) {
+  //   errors.push('Tanggal pengiriman harus diisi')
+  // }
 
   if (data.order_items.length === 0) {
     errors.push('Minimal harus ada 1 item pesanan')
