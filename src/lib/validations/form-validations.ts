@@ -68,11 +68,10 @@ export const RecipeSchema = z.object({
   prep_time_minutes: z.number().int().min(1, 'Waktu persiapan minimal 1 menit').max(1440, 'Waktu persiapan maksimal 1440 menit'),
   cook_time_minutes: z.number().int().min(0, 'Waktu memasak tidak boleh negatif').optional(),
   instructions: z.array(z.string().min(1, 'Instruksi tidak boleh kosong')).min(1, 'Minimal satu instruksi'),
-  difficulty_level: z.enum(['EASY', 'MEDIUM', 'HARD'], {
-    message: 'Tingkat kesulitan tidak valid'
-  }).optional(),
-  category: optionalString,
-  selling_price: rupiah.optional(),
+   difficulty_level: z.enum(['EASY', 'MEDIUM', 'HARD'], {
+     message: 'Tingkat kesulitan tidak valid'
+   }).optional(),
+   selling_price: rupiah.optional(),
   cost_per_serving: rupiah.optional(),
   profit_margin: percentage.optional(),
   rating: z.number().min(1, 'Rating minimal 1').max(5, 'Rating maksimal 5').optional(),

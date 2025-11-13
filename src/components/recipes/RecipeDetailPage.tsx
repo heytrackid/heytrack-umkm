@@ -147,15 +147,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
         }
     }
 
-    const getCategoryIcon = (category: string) => {
-        const icons: Record<string, string> = {
-            bread: '🍞',
-            pastry: '🥐',
-            cake: '🍰',
-            cookie: '🍪',
-        }
-        return icons[category] ?? '👩‍🍳'
-    }
+
 
     const getDifficultyColor = (difficulty: string) => {
         const colors: Record<string, string> = {
@@ -282,9 +274,8 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <div className="min-w-0 flex-1">
-                        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 truncate">
-                            <span className="text-2xl sm:text-3xl flex-shrink-0">{getCategoryIcon(recipe.category ?? 'other')}</span>
-                            <span className="truncate">{recipe.name}</span>
+                        <h1 className="text-2xl sm:text-3xl font-bold truncate">
+                            {recipe.name}
                         </h1>
                         {recipe.description && (
                             <p className="text-muted-foreground mt-1 text-sm sm:text-base">{recipe.description}</p>

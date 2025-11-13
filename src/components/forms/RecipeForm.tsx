@@ -46,7 +46,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
       cooking_time: initialData?.cooking_time ?? initialData?.cook_time ?? 0,
       instructions: typeof initialData?.instructions === 'string' ? [] : initialData?.instructions ?? [],
       difficulty: (initialData?.difficulty as 'EASY' | 'HARD' | 'MEDIUM') || 'MEDIUM',
-      category: initialData?.category ?? '',
+
       is_active: initialData?.is_active ?? true,
       is_available: initialData?.is_available ?? true,
       selling_price: initialData?.selling_price ?? 0,
@@ -92,14 +92,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
               />
             </FormField>
 
-            <FormField
-              label="Kategori"
-              error={form.formState.errors.category?.message}
-            >
-              <Input
-                {...form.register('category')}
-              />
-            </FormField>
+
 
             <FormField
               label="Jumlah Porsi"

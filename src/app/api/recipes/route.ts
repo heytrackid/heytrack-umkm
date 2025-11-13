@@ -55,11 +55,10 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const { page, limit, search, sort_by, sort_order } = queryValidation['data']
-    const category = searchParams.get('category')
     const status = searchParams.get('status')
 
     // Create cache key based on query parameters
-    const cacheKey = `${cacheKeys.recipes.all}:${user['id']}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${category ?? ''}:${status ?? ''}`
+    const cacheKey = `${cacheKeys.recipes.all}:${user['id']}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${status ?? ''}`
 
     // Wrap database query with caching
     // ✅ OPTIMIZED: Use specific fields instead of SELECT *
@@ -71,13 +70,10 @@ async function GET(request: NextRequest): Promise<NextResponse> {
          .eq('created_by', user['id'])
          .eq('is_active', true)
 
-      if (search) {
-        countQuery = countQuery.ilike('name', `%${search}%`)
-      }
-      if (category) {
-        countQuery = countQuery.ilike('category', `%${category}%`)
-      }
-      if (status) {
+       if (search) {
+         countQuery = countQuery.ilike('name', `%${search}%`)
+       }
+       if (status) {
         countQuery = countQuery.eq('status', status)
       }
 
@@ -99,10 +95,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
         query = query.ilike('name', `%${search}%`)
       }
 
-       // Add category filter
-       if (category) {
-         query = query.ilike('category', `%${category}%`)
-       }
+
 
        // Add status filter (overrides default is_active filter if specified)
        if (status) {

@@ -72,7 +72,7 @@ import { RecipeStatsCards } from '@/components/recipes/RecipeStatsCards'
 // Types
 
 type Recipe = Row<'recipes'>
-type CategoryFilter = 'all' | 'bread' | 'cake' | 'cookie' | 'other' | 'pastry'
+
 type DifficultyFilter = 'all' | 'easy' | 'hard' | 'medium'
 
 export const EnhancedRecipesPage = (): JSX.Element => {
@@ -90,7 +90,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
 
     // Filter states
     const [searchTerm, setSearchTerm] = useState('')
-    const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
+
     const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('all')
     const [pageSize, setPageSize] = useState(12)
 
@@ -106,19 +106,15 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                     recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     (recipe.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
 
-                // Category filter
-                const matchesCategory =
-                    categoryFilter === 'all' || (recipe.category ?? 'other') === categoryFilter
-
                 // Difficulty filter
                 const matchesDifficulty =
                     difficultyFilter === 'all' || (recipe.difficulty ?? 'medium') === difficultyFilter
 
                 // Only show active recipes
-                return matchesSearch && matchesCategory && matchesDifficulty && recipe.is_active
+                return matchesSearch && matchesDifficulty && recipe.is_active
             })
             .sort((a, b) => a.name.localeCompare(b.name))
-    }, [recipes, searchTerm, categoryFilter, difficultyFilter])
+    }, [recipes, searchTerm, difficultyFilter])
 
     // Pagination
     const pagination = usePagination({
@@ -137,22 +133,17 @@ export const EnhancedRecipesPage = (): JSX.Element => {
 
     // Create filter badges
     const activeFilters = createFilterBadges(
-        { 
+        {
             search: searchTerm,
-            category: categoryFilter,
             difficulty: difficultyFilter
         },
         {
             search: 'Search',
-            category: 'Category',
             difficulty: 'Difficulty'
         },
         (newFilters) => {
             if (newFilters.search !== undefined) {
                 setSearchTerm(newFilters.search)
-            }
-            if (newFilters.category !== undefined) {
-                setCategoryFilter(newFilters.category)
             }
             if (newFilters.difficulty !== undefined) {
                 setDifficultyFilter(newFilters.difficulty)
@@ -162,7 +153,6 @@ export const EnhancedRecipesPage = (): JSX.Element => {
 
     const handleClearAllFilters = useCallback(() => {
         setSearchTerm('')
-        setCategoryFilter('all')
         setDifficultyFilter('all')
     }, [])
 
@@ -225,28 +215,14 @@ export const EnhancedRecipesPage = (): JSX.Element => {
 
     const clearFilters = () => {
         setSearchTerm('')
-        setCategoryFilter('all')
         setDifficultyFilter('all')
     }
 
     const hasActiveFilters =
-        searchTerm || categoryFilter !== 'all' || difficultyFilter !== 'all'
+        searchTerm || difficultyFilter !== 'all'
 
     // Helper functions
-    const getCategoryIcon = (category: string) => {
-        switch (category) {
-            case 'bread':
-                return '🍞'
-            case 'pastry':
-                return '🥐'
-            case 'cake':
-                return '🍰'
-            case 'cookie':
-                return '🍪'
-            default:
-                return '👩‍🍳'
-        }
-    }
+
 
     const getDifficultyColor = (difficulty: string) => {
         switch (difficulty) {
@@ -324,22 +300,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
 
                         {/* Filters */}
                         <div className="flex flex-col sm:flex-row gap-3">
-                            <Select
-                                value={categoryFilter}
-                                onValueChange={(value) => setCategoryFilter(value as CategoryFilter)}
-                            >
-                                <SelectTrigger className="w-full sm:w-[180px]">
-                                    <SelectValue placeholder="Kategori" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Semua Kategori</SelectItem>
-                                    <SelectItem value="bread">🍞 Roti</SelectItem>
-                                    <SelectItem value="pastry">🥐 Pastry</SelectItem>
-                                    <SelectItem value="cake">🍰 Kue</SelectItem>
-                                    <SelectItem value="cookie">🍪 Cookie</SelectItem>
-                                    <SelectItem value="other">👩‍🍳 Lainnya</SelectItem>
-                                </SelectContent>
-                            </Select>
+
 
                             <Select
                                 value={difficultyFilter}
@@ -452,7 +413,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             onCalculateHPP={handleCalculateHPP}
-                            getCategoryIcon={getCategoryIcon}
+
                             getDifficultyColor={getDifficultyColor}
                             getDifficultyLabel={getDifficultyLabel}
                         />
@@ -472,7 +433,6 @@ export const EnhancedRecipesPage = (): JSX.Element => {
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="text-2xl">{getCategoryIcon(recipe.category ?? 'other')}</span>
                                                 <h3 className="font-semibold text-lg">{recipe.name}</h3>
                                             </div>
                                             {recipe.description && (

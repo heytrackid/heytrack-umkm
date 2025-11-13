@@ -25,7 +25,7 @@ interface MobileRecipeCardProps {
     onEdit: (recipe: Recipe) => void
     onDelete: (recipe: Recipe) => void
     onCalculateHPP: (recipe: Recipe) => void
-    getCategoryIcon: (category: string) => string
+
     getDifficultyColor: (difficulty: string) => string
     getDifficultyLabel: (difficulty: string) => string
 }
@@ -36,7 +36,7 @@ export const MobileRecipeCard = ({
     onEdit,
     onDelete,
     onCalculateHPP,
-    getCategoryIcon,
+
     getDifficultyColor,
     getDifficultyLabel,
 }: MobileRecipeCardProps) => (
@@ -47,7 +47,7 @@ export const MobileRecipeCard = ({
                 <div className="flex items-start justify-between">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xl">{getCategoryIcon(recipe.category ?? 'other')}</span>
+
                             <h3 className="font-semibold">{recipe.name}</h3>
                         </div>
                         {recipe.description && (
