@@ -108,7 +108,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
     const type = searchParams.get('type') // income or expense
-    const limit = safeNumber(searchParams.get('limit'), 100)
+    const limit = safeNumber(searchParams.get('limit'), 1000)
 
     let query = supabase
       .from('financial_records')

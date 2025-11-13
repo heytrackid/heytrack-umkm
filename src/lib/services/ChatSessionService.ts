@@ -481,7 +481,7 @@ export class ChatSessionService {
     supabase: TypedSupabaseClient,
     sessionId: string,
     userId: string,
-    limit: number = 100
+    limit: number = 1000
   ): Promise<ChatMessage[]> {
 
     // Verify session belongs to user

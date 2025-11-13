@@ -94,7 +94,7 @@ async function GET(_request: NextRequest): Promise<NextResponse> {
           `)
           .eq('user_id', (user as { id: string }).id)
           .order('created_at', { ascending: false })
-          .limit(10)
+          .limit(100)
       ])
 
       const totalRecipes = recipesResult.count ?? 0

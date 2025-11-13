@@ -169,7 +169,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const { searchParams } = new URL(request.url)
-    const limit = parseInt(searchParams.get('limit') ?? '50', 10)
+    const limit = parseInt(searchParams.get('limit') ?? '1000', 10)
     const offset = parseInt(searchParams.get('offset') ?? '0', 10)
 
     // Fetch recent errors from database

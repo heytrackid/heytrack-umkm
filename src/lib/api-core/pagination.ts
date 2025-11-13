@@ -13,7 +13,7 @@ import type { NextRequest } from 'next/server'
 export function extractPagination(request: NextRequest): PaginationState {
   const { searchParams } = new URL(request.url)
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'))
-  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') ?? '10')))
+  const limit = Math.min(10000, Math.max(1, parseInt(searchParams.get('limit') ?? '1000')))
   const offset = (page - 1) * limit
 
   return { page, limit, offset, total: 0, pages: 0 }
@@ -49,7 +49,7 @@ export function createPaginationMeta(
  * Apply pagination to array of items
  */
 export function usePagination<T>(items: T[], params: PaginationParams) {
-  const { page = 1, limit = 10, offset } = params
+  const { page = 1, limit = 1000, offset } = params
   const actualOffset = offset ?? calculateOffset(page, limit)
   const paginatedItems = items.slice(actualOffset, actualOffset + limit)
   const total = items.length

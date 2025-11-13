@@ -134,7 +134,7 @@ async function fetchPendingOrders(
     .in('status', ['CONFIRMED', 'IN_PROGRESS'])
     .is('production_batch_id', null)
     .order('delivery_date', { nullsFirst: false })
-    .limit(10)
+    .limit(100)
 
   if (error) {
     throw error
@@ -152,7 +152,7 @@ async function fetchLowStockAlerts(
     .select('id, name, current_stock, min_stock')
     .eq('user_id', userId)
     .order('current_stock')
-    .limit(10)
+    .limit(100)
 
   if (error) {
     throw error

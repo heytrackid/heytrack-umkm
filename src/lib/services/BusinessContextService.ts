@@ -99,7 +99,7 @@ export class BusinessContextService {
       .select('id, name, cost_per_unit')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(100);
 
     return data?.map(r => ({
       id: r['id'],
@@ -145,7 +145,7 @@ export class BusinessContextService {
       .select('id, customer_name, total_amount, status, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(100);
 
     return (data ?? []).map(order => ({
       id: order['id'],

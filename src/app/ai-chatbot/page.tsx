@@ -6,6 +6,7 @@ import { Suspense, useCallback, useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { useAuth } from '@/providers/AuthProvider'
+import { useSupabase } from '@/providers/SupabaseProvider'
 
 import { useAIService, useChatMessages } from '@/app/ai-chatbot/hooks/index'
 
@@ -26,16 +27,34 @@ const MessageList = dynamic(() => import('./components').then(mod => ({ default:
 
 const AIChatbotPage = (): JSX.Element => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { supabase } = useSupabase()
   const router = useRouter()
   const { messages, isLoading, scrollAreaRef, addMessage, setLoading, currentSessionId } = useChatMessages()
   const { processAIQuery } = useAIService(currentSessionId)
   const [input, setInput] = useState('')
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated - with improved timing and error handling
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/auth/login?redirectTo=/ai-chatbot')
+    const checkAuth = async () => {
+      // Wait for auth to stabilize (prevent race condition)
+      await new Promise(resolve => setTimeout(resolve, 300))
+
+      if (!authLoading && !isAuthenticated) {
+        // Double-check with Supabase directly before redirecting
+        try {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (!session?.user) {
+            router.push('/auth/login?redirectTo=/ai-chatbot')
+          }
+        } catch (error) {
+          // If session check fails, redirect to login
+          console.warn('Auth check failed, redirecting to login:', error)
+          router.push('/auth/login?redirectTo=/ai-chatbot')
+        }
+      }
     }
+
+    checkAuth()
   }, [authLoading, isAuthenticated, router])
 
   const handleSendMessage = useCallback(async (messageText?: string) => {

@@ -143,7 +143,7 @@ export class PricingAssistantService {
         .eq('user_id', recipe.user_id)
         .neq('id', recipe['id'])
         .not('selling_price', 'is', null)
-        .limit(10)
+        .limit(100)
 
       const competitorPrices = (similarRecipes as Array<{ selling_price: number | null }> || [])
         .map(r => r.selling_price ?? 0)

@@ -189,7 +189,7 @@ export class HppCalculatorService {
         .eq('user_id', userId)
         .eq('status', 'COMPLETED')
         .order('actual_end_time', { ascending: false })
-        .limit(10)
+        .limit(100)
 
       if (error) {
         this.logger.warn({ error: error.message }, 'Failed to fetch productions for labor cost')

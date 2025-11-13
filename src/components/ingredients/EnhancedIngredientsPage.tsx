@@ -32,8 +32,7 @@ import {
 } from '@/components/ui/select'
 import { SimplePagination } from '@/components/ui/simple-pagination'
 import { useSettings } from '@/contexts/settings-context'
-import { useIngredients } from '@/hooks/index'
-import { useSupabaseCRUD } from '@/hooks/supabase/index'
+import { useIngredients, useDeleteIngredient } from '@/hooks/useIngredients'
 import { useToast } from '@/hooks/use-toast'
 import { usePagination } from '@/hooks/usePagination'
 import {
@@ -59,8 +58,8 @@ interface EnhancedIngredientsPageProps {
 const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProps = {}) => {
     const router = useRouter()
     const { formatCurrency } = useSettings()
-    const { data: ingredients, loading, refetch } = useIngredients({ realtime: true })
-    const { remove: deleteIngredient } = useSupabaseCRUD('ingredients')
+    const { data: ingredients, isLoading } = useIngredients()
+    const deleteIngredient = useDeleteIngredient()
     const { toast } = useToast()
     const { isMobile } = useMobile()
 
@@ -179,12 +178,11 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
         if (!selectedIngredient) { return }
 
         try {
-            const deletedItem = selectedIngredient
-            await deleteIngredient(selectedIngredient['id'])
+            await deleteIngredient.mutateAsync(selectedIngredient['id'])
 
             // Enhanced toast with undo functionality
             undoableToast({
-                title: `${deletedItem.name} dihapus`,
+                title: `${selectedIngredient.name} dihapus`,
                 description: 'Bahan baku telah dihapus dari sistem',
                 onUndo: () => {
                     // Note: Would need an undelete API endpoint for real undo
@@ -213,7 +211,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
     const hasActiveFilters = (searchTerm || false) || stockFilter !== 'all' || categoryFilter !== 'all'
 
     // Empty state
-    if (!loading && (!ingredients || ingredients.length === 0)) {
+    if (!isLoading && (!ingredients || ingredients.length === 0)) {
         return (
             <>
                 <EmptyState
@@ -230,7 +228,6 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                     open={showFormDialog}
                     onOpenChange={setShowFormDialog}
                     {...(editingIngredient ? { ingredient: editingIngredient } : {})}
-                    {...(refetch ? { onSuccess: refetch } : {})}
                 />
             </>
         )
@@ -494,7 +491,7 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                 onConfirm={handleConfirmDelete}
                 entityName="Bahan Baku"
                 itemName={selectedIngredient?.name ?? ''}
-                isLoading={loading}
+                isLoading={deleteIngredient.isPending}
             />
 
             {/* Form Dialog */}
@@ -502,7 +499,6 @@ const EnhancedIngredientsPageComponent = ({ onAdd }: EnhancedIngredientsPageProp
                 open={showFormDialog}
                 onOpenChange={setShowFormDialog}
                 {...(editingIngredient ? { ingredient: editingIngredient } : {})}
-                {...(refetch ? { onSuccess: refetch } : {})}
             />
 
             {/* Floating Action Button for Mobile */}

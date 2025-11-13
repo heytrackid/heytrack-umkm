@@ -28,7 +28,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     const { searchParams } = new URL(request.url)
     const unreadOnly = searchParams.get('unread_only') === 'true'
     const category = searchParams.get('category')
-    const limit = parseInt(searchParams.get('limit') ?? '50', 10)
+    const limit = parseInt(searchParams.get('limit') ?? '1000', 10)
 
     // Build query
     let query = supabase

@@ -12,14 +12,14 @@ import { UUIDSchema, DateStringSchema, NonNegativeNumberSchema } from '@/lib/val
 // Pagination schemas
 export const PaginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(10),
+  limit: z.coerce.number().int().min(1).max(10000).default(1000),
   sort_by: z.string().optional(),
   sort_order: z.enum(['asc', 'desc']).default('desc'),
 })
 
 export const PaginationQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1).catch(() => 1),
-  limit: z.coerce.number().int().min(1).max(100).default(10).catch(() => 10),
+  limit: z.coerce.number().int().min(1).max(10000).default(1000).catch(() => 1000),
   search: z.string().nullable().optional().transform(val => val ?? undefined),
   sort_by: z.string().nullable().optional().transform(val => val ?? undefined),
   sort_order: z.enum(['asc', 'desc']).default('desc').catch(() => 'desc' as const),

@@ -43,7 +43,7 @@ export class ContextManager {
             supabase as unknown as SupabaseClient<Database>,
             this['context'].sessionId,
             this['context'].userId,
-            20 // Load last 20 messages for context
+            100 // Load last 100 messages for context (increased limit)
           )
 
           // Convert to internal format

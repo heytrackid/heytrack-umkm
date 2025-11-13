@@ -68,7 +68,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       query = query.limit(parseInt(limit, 10))
     }
     if (offset) {
-      query = query.range(parseInt(offset, 10), parseInt(offset, 10) + parseInt(limit ?? '10', 10) - 1)
+      query = query.range(parseInt(offset, 10), parseInt(offset, 10) + parseInt(limit ?? '1000', 10) - 1)
     }
 
     const { data, error, count } = await query

@@ -30,7 +30,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
       return queryValidation // Return error response
     }
 
-    const { page = 1, limit = 10, sort, order = 'desc', search } = queryValidation
+    const { page = 1, limit = 1000, sort, order = 'desc', search } = queryValidation
     const offset = calculateOffset(page, limit)
 
     // Create authenticated Supabase client

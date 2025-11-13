@@ -12,8 +12,8 @@ export function validateQueryParams(params: {
   orderBy?: { column: string; ascending?: boolean }
   limit?: number
 }): void {
-  if (params.limit && (params.limit < 1 || params.limit > 1000)) {
-    throw new Error('Limit must be between 1 and 1000')
+  if (params.limit && (params.limit < 1 || params.limit > 10000)) {
+    throw new Error('Limit must be between 1 and 10000')
   }
 
   if (params.select && typeof params.select !== 'string') {
