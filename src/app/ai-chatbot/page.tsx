@@ -55,7 +55,7 @@ const AIChatbotPage = (): JSX.Element => {
     }
 
     checkAuth()
-  }, [authLoading, isAuthenticated, router])
+  }, [authLoading, isAuthenticated, router, supabase.auth])
 
   const handleSendMessage = useCallback(async (messageText?: string) => {
     const textToSend = (messageText ?? input).trim()

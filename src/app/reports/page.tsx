@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 import { PageHeader } from '@/components/layout/PageHeader'
-
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useAuth } from '@/hooks/index'
+import { useSupabase } from '@/providers/SupabaseProvider'
 import { useToast } from '@/hooks/use-toast'
 
 import { ReportsLayout } from '@/app/reports/components/ReportsLayout'
@@ -20,6 +20,7 @@ import { ReportsLayout } from '@/app/reports/components/ReportsLayout'
 
 const ReportsPage = () => {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
+  const { supabase } = useSupabase()
   // Extract initial date range from URL for consistency across pages
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -35,17 +36,39 @@ const ReportsPage = () => {
   const { toast } = useToast()
   const router = useRouter()
 
-  // Handle auth errors
+  // Handle auth errors with improved double-check
   useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      toast({
-        title: 'Sesi berakhir',
-        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
-        variant: 'destructive',
-      })
-      router.push('/auth/login')
+    const checkAuth = async () => {
+      // Wait for auth to stabilize (prevent race condition)
+      await new Promise(resolve => setTimeout(resolve, 300))
+
+      if (!isAuthLoading && !isAuthenticated) {
+        // Double-check with Supabase directly before redirecting
+        try {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (!session?.user) {
+            toast({
+              title: 'Sesi berakhir',
+              description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+              variant: 'destructive',
+            })
+            router.push('/auth/login?redirectTo=/reports')
+          }
+        } catch (error) {
+          // If session check fails, redirect to login
+          console.warn('Auth check failed, redirecting to login:', error)
+          toast({
+            title: 'Sesi berakhir',
+            description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+            variant: 'destructive',
+          })
+          router.push('/auth/login?redirectTo=/reports')
+        }
+      }
     }
-  }, [isAuthLoading, isAuthenticated, router, toast])
+
+    checkAuth()
+  }, [isAuthLoading, isAuthenticated, router, toast, supabase.auth])
 
   // Show loading state while auth is initializing
   if (isAuthLoading) {
