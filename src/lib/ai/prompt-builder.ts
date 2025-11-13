@@ -53,40 +53,5 @@ Data: ${JSON.stringify(data)}
 Please provide insights, recommendations, and actionable suggestions in Indonesian business context. Focus on practical improvements for UMKM food businesses.`
   }
 
-  /**
-   * Build bootstrap prompt for one-click HPP generation
-   */
-  static buildBootstrapPrompt(input: {
-    businessDescription: string
-    vertical: 'fnb'|'beauty'|'fashion'|'services'|'general'
-    targetMarket?: string
-    extraInstructions?: string
-  }): string {
-    const { businessDescription, vertical, targetMarket, extraInstructions } = input
-    return `
-Tugas Anda: Generate data awal bisnis secara REALISTIS untuk Indonesia (IDR), terstruktur dalam JSON STRICT sesuai schema.
-- Vertical: ${vertical}
-- Deskripsi: ${businessDescription}
-- Target market: ${targetMarket ?? 'umum'}
 
-Output WAJIB JSON VALID sesuai schema berikut (tanpa komentar/teks tambahan):
-{
-  "ingredients": [{ "name": "", "category": "", "unit": "g|kg|ml|l|pcs|butir|sachet|pack|cup|tbsp|tsp", "unit_price_idr": 0, "initial_stock": 0 }],
-  "operational_costs": [{ "name": "", "type": "fixed|variable", "amount_idr": 0, "period": "daily|weekly|monthly" }],
-  "recipes": [{
-    "name": "", "category": "", "yield_quantity": 0, "yield_unit": "portion|g|kg|ml|l|pcs|butir|sachet",
-    "ingredients": [{ "ingredient_name": "", "quantity": 0, "unit": "..." }]
-  }]
-}
-
-Ketentuan realisme:
-- Harga dan biaya sesuai kisaran umum Indonesia 2023-2025.
-- Unit konsisten. Quantity dan yield masuk akal.
-- Untuk non-FnB, gunakan "recipes" sebagai "product structures" atau paket jasa dengan komponen/material layanan.
-- Ikuti instruksi tambahan spesifik vertical berikut bila ada:
-${extraInstructions ?? ''}
-
-Kembalikan HANYA JSON valid, tanpa penjelasan tambahan.
-`
-  }
 }
