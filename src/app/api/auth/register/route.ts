@@ -37,9 +37,28 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
+      // Provide more specific error messages
+      let errorMessage = error.message
+      
+      if (error.message.includes('User already registered')) {
+        errorMessage = 'Email sudah terdaftar. Silakan login atau gunakan email lain.'
+      } else if (error.message.includes('Password should be')) {
+        errorMessage = 'Password terlalu lemah. Gunakan minimal 6 karakter.'
+      } else if (error.message.includes('Invalid email')) {
+        errorMessage = 'Format email tidak valid.'
+      }
+      
       return NextResponse.json(
-        { error: error.message },
+        { error: errorMessage },
         { status: 400 }
+      )
+    }
+
+    // Check if user was created
+    if (!data.user) {
+      return NextResponse.json(
+        { error: 'Gagal membuat akun. Silakan coba lagi.' },
+        { status: 500 }
       )
     }
 
@@ -47,6 +66,9 @@ export async function POST(request: NextRequest) {
       success: true,
       user: data.user,
       needsEmailConfirmation: !data.session,
+      message: data.session 
+        ? 'Akun berhasil dibuat. Anda akan diarahkan ke dashboard.'
+        : 'Akun berhasil dibuat. Silakan cek email Anda untuk konfirmasi.'
     })
   } catch {
     return NextResponse.json(

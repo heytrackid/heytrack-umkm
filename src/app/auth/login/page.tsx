@@ -95,7 +95,13 @@ const LoginPage = (): JSX.Element => {
           return
         }
 
-        // Success - redirect to dashboard
+        // Success - wait a bit for cookies to be set, then redirect
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        if (!mountedRef.current) {
+          return
+        }
+        
         router.push('/dashboard')
         router.refresh()
       } catch {
