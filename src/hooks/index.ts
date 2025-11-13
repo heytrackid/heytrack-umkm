@@ -20,9 +20,17 @@ export { useConfirm } from './useConfirm'
 // Auth Hooks
 export { useAuth } from '@/providers/AuthProvider'
 
-// Database Hooks
+// Database Hooks - ALL API-based versions
+export { useIngredients } from './useIngredients'
+export { useRecipes } from './useRecipes'
+export { useOperationalCosts } from './useOperationalCosts'
+export { useCustomers } from './useCustomers'
+export { useSuppliers } from './useSuppliers'
+export { useFinancialRecords } from './useFinancialRecords'
+export { useOrders, useOrder, useOrderStats } from './useOrdersQuery'
+// Keep Supabase versions only for utility functions
 export {
-    useCustomers, useFinancialRecords, useIngredients, useOrders, useRecipes, useSupabaseBulk, useSupabaseCRUD, useSupabaseQuery, useSuppliers
+    useSupabaseBulk, useSupabaseCRUD, useSupabaseQuery
 } from './supabase'
 
 // Business Logic Hooks

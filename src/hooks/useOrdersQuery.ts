@@ -1,25 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { useSupabase } from '@/providers/SupabaseProvider'
-
-import type { Row } from '@/types/database'
-
-type Order = Row<'orders'> & {
-  items?: Array<{
-    id: string
-    product_name: string | null
-    quantity: number
-    unit_price: number
-    total_price: number
-  }>
-}
-
 interface UseOrdersOptions {
   page?: number
   pageSize?: number
   searchTerm?: string
   statusFilter?: string
   enabled?: boolean
+}
+
+interface OrderStats {
+  status: string
+  total_amount: number | null
+  created_at: string | null
 }
 
 export function useOrders({
@@ -29,53 +21,34 @@ export function useOrders({
   statusFilter = 'all',
   enabled = true
 }: UseOrdersOptions = {}) {
-  const { supabase } = useSupabase()
-
   return useQuery({
     queryKey: ['orders', { page, pageSize, searchTerm, statusFilter }],
     queryFn: async () => {
-      let query = supabase
-        .from('orders')
-        .select(`
-          *,
-          items:order_items(
-            id,
-            product_name,
-            quantity,
-            unit_price,
-            total_price
-          )
-        `, { count: 'exact' })
+      const params = new URLSearchParams()
+      params.set('page', page.toString())
+      params.set('limit', pageSize.toString())
+      if (searchTerm) params.set('search', searchTerm)
+      if (statusFilter !== 'all') params.set('status', statusFilter)
 
-      // Apply search filter
-      if (searchTerm) {
-        query = query.or(`order_no.ilike.%${searchTerm}%,customer_name.ilike.%${searchTerm}%`)
+      const response = await fetch(`/api/orders?${params}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders')
       }
 
-      // Apply status filter
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter as 'CANCELLED' | 'CONFIRMED' | 'DELIVERED' | 'IN_PROGRESS' | 'PENDING' | 'READY')
-      }
-
-      // Apply pagination
-      const from = (page - 1) * pageSize
-      const to = from + pageSize - 1
-      query = query.range(from, to)
-
-      // Order by creation date (newest first)
-      query = query.order('created_at', { ascending: false })
-
-      const { data, error, count } = await query
-
-      if (error) {
-        throw error
+      const result = await response.json()
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch orders')
       }
 
       return {
-        orders: data as Order[],
-        totalCount: count ?? 0,
-        totalPages: Math.ceil((count ?? 0) / pageSize),
-        currentPage: page,
+        orders: result.data?.orders || [],
+        totalCount: result.data?.pagination?.total || 0,
+        page,
+        pageSize,
+        totalPages: result.data?.pagination?.totalPages || 0
       }
     },
     enabled,
@@ -86,31 +59,23 @@ export function useOrders({
 
 // Hook for fetching a single order
 export function useOrder(orderId: string, enabled = true) {
-  const { supabase } = useSupabase()
-
   return useQuery({
     queryKey: ['order', orderId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          items:order_items(
-            id,
-            product_name,
-            quantity,
-            unit_price,
-            total_price
-          )
-        `)
-        .eq('id', orderId)
-        .single()
+      const response = await fetch(`/api/orders/${orderId}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
 
-      if (error) {
-        throw error
+      if (!response.ok) {
+        throw new Error('Failed to fetch order')
       }
 
-      return data as Order
+      const result = await response.json()
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch order')
+      }
+
+      return result.data
     },
     enabled: enabled && Boolean(orderId),
     staleTime: 60000, // 1 minute - single order details
@@ -120,37 +85,43 @@ export function useOrder(orderId: string, enabled = true) {
 
 // Hook for fetching order statistics
 export function useOrderStats(enabled = true) {
-  const { supabase } = useSupabase()
-
   return useQuery({
     queryKey: ['order-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('status, total_amount, created_at')
+      // Fetch all orders to calculate stats (since no dedicated stats API endpoint)
+      const response = await fetch('/api/orders?limit=1000', {
+        credentials: 'include', // Include cookies for authentication
+      })
 
-      if (error) {
-        throw error
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders for stats')
       }
 
+      const result = await response.json()
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch orders for stats')
+      }
+
+      const orders = result.data?.orders || []
+
       const stats = {
-        total: data.length,
-        pending: data.filter(order => order['status'] === 'PENDING').length,
-        confirmed: data.filter(order => order['status'] === 'CONFIRMED').length,
-        inProgress: data.filter(order => order['status'] === 'IN_PROGRESS').length,
-        completed: data.filter(order => order['status'] === 'READY').length,
-        delivered: data.filter(order => order['status'] === 'DELIVERED').length,
-        cancelled: data.filter(order => order['status'] === 'CANCELLED').length,
-        totalRevenue: data.reduce((sum, order) => sum + (order.total_amount ?? 0), 0),
-        recentOrders: data
-          .sort((a, b) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime())
+        total: orders.length,
+        pending: orders.filter((order: OrderStats) => order.status === 'PENDING').length,
+        confirmed: orders.filter((order: OrderStats) => order.status === 'CONFIRMED').length,
+        inProgress: orders.filter((order: OrderStats) => order.status === 'IN_PROGRESS').length,
+        completed: orders.filter((order: OrderStats) => order.status === 'READY').length,
+        delivered: orders.filter((order: OrderStats) => order.status === 'DELIVERED').length,
+        cancelled: orders.filter((order: OrderStats) => order.status === 'CANCELLED').length,
+        totalRevenue: orders.reduce((sum: number, order: OrderStats) => sum + (order.total_amount ?? 0), 0),
+        recentOrders: orders
+          .sort((a: OrderStats, b: OrderStats) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime())
           .slice(0, 5)
       }
 
       return stats
     },
     enabled,
-    staleTime: 60000, // 1 minute - stats update frequently
-    gcTime: 300000, // 5 minutes cache
+    staleTime: 300000, // 5 minutes - stats don't change as frequently
+    gcTime: 600000, // 10 minutes cache
   })
 }

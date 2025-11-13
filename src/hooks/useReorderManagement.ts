@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 
-import { useIngredients } from '@/hooks/index'
+import { useIngredients } from '@/hooks/useIngredients'
 
 import type { Row } from '@/types/database'
 
@@ -39,7 +39,7 @@ export interface ReorderSummary {
  * Hook for managing reorder suggestions and purchase planning
  */
 export function useReorderManagement() {
-  const { data: ingredients, loading } = useIngredients()
+  const { data: ingredients, isLoading: loading } = useIngredients()
 
   const reorderData = useMemo((): ReorderSummary => {
     if (!ingredients || ingredients.length === 0) {

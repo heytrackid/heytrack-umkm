@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 
 import { Badge } from '@/components/ui/badge'
-import { useIngredients } from '@/hooks/index'
+import { useIngredients } from '@/hooks/useIngredients'
 
 import type { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
 import type { Row, Json } from '@/types/database'
@@ -50,7 +50,7 @@ export interface InventoryStatus {
  * Hook for inventory alerts and status monitoring
  */
 export function useInventoryAlerts() {
-  const { data: ingredients, loading } = useIngredients()
+  const { data: ingredients, isLoading: loading } = useIngredients()
 
   const inventoryStatus = useMemo((): InventoryStatus => {
     if (!ingredients || ingredients.length === 0) {
