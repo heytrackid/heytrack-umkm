@@ -115,9 +115,13 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     apiLogger.info({ userId: user['id'] }, 'GET /api/orders - User authenticated')
 
     const { searchParams } = new URL(request.url)
+    
+    // If no limit is specified, return all data (no pagination)
+    const hasLimit = searchParams.has('limit')
+    
     const queryValidation = PaginationQuerySchema.safeParse({
       page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
+      limit: hasLimit ? searchParams.get('limit') : '999999', // Very high limit = all data
       search: searchParams.get('search'),
       sort_by: searchParams.get('sort_by'),
       sort_order: searchParams.get('sort_order'),

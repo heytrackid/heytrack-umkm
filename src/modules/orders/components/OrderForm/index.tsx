@@ -98,7 +98,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     const { data: recipesData = [] } = useQuery({
         queryKey: ['recipes', 'active'],
         queryFn: async () => {
-            const response = await fetch('/api/recipes?limit=1000', {
+            const response = await fetch('/api/recipes', {
                 credentials: 'include', // Include cookies for authentication
             })
             if (!response.ok) { throw new Error('Failed to fetch recipes') }
@@ -124,7 +124,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     const { data: customersData = [] } = useQuery({
         queryKey: ['customers', 'all'],
         queryFn: async () => {
-            const response = await fetch('/api/customers?limit=1000', {
+            const response = await fetch('/api/customers', {
                 credentials: 'include', // Include cookies for authentication
             })
             if (!response.ok) { throw new Error('Failed to fetch customers') }

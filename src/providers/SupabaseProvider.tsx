@@ -37,6 +37,11 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   })
 
+  // Set up global auth error interceptor
+  useEffect(() => {
+    setupAuthInterceptor()
+  }, [])
+
   return (
     <Context.Provider value={{ supabase }}>
       {children}

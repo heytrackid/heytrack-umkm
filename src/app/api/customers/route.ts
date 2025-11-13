@@ -48,10 +48,13 @@ async function requireUser(): Promise<AuthResult | NextResponse> {
 function parseListQuery(request: NextRequest): ListQuery {
   const { searchParams } = new URL(request.url)
   const sortOrder = safeString(searchParams.get('sort_order'), 'asc') === 'asc' ? 'asc' : 'desc'
+  
+  // If no limit is specified, return all data (no pagination)
+  const hasLimit = searchParams.has('limit')
 
   return {
     page: safeNumber(searchParams.get('page'), 1),
-    limit: safeNumber(searchParams.get('limit'), 10),
+    limit: hasLimit ? safeNumber(searchParams.get('limit'), 10) : 999999, // Very high limit = all data
     search: safeString(searchParams.get('search'), ''),
     sortBy: safeString(searchParams.get('sort_by'), 'name'),
     sortOrder

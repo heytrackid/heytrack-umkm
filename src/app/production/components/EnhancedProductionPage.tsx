@@ -2,9 +2,9 @@
 
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { Factory, Plus, Search, Calendar, Clock, CheckCircle, XCircle, TrendingUp, Package, Play, BarChart3, Filter, Download, RefreshCw } from 'lucide-react'
+import { BarChart3, Calendar, CheckCircle, Clock, Download, Factory, Filter, Package, Play, Plus, RefreshCw, Search, TrendingUp, XCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -40,7 +40,7 @@ const LazyProductionFormDialog = dynamic(
   }
 )
 
-import type { Row, ProductionStatus } from '@/types/database'
+import type { ProductionStatus, Row } from '@/types/database'
 
 // Extended type for production page display
 interface ProductionWithRecipe extends Row<'production_batches'> {
@@ -102,7 +102,18 @@ const EnhancedProductionPage = () => {
             setLoading(true)
             const response = await fetch('/api/production-batches')
             if (response.ok) {
-                const payload: unknown = await response.json()
+                const result: unknown = await response.json()
+                
+                // Handle both formats: direct array or { data: array }
+                let payload: unknown
+                if (Array.isArray(result)) {
+                    payload = result
+                } else if (result && typeof result === 'object' && 'data' in result) {
+                    payload = (result as { data: unknown }).data
+                } else {
+                    payload = []
+                }
+                
                 if (isProductionWithRecipeArray(payload)) {
                     setProductions(payload)
                 } else {

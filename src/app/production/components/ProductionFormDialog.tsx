@@ -67,7 +67,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
     const fetchRecipes = async () => {
         try {
             setLoadingRecipes(true)
-            const response = await fetch('/api/recipes?limit=1000', {
+            const response = await fetch('/api/recipes', {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {

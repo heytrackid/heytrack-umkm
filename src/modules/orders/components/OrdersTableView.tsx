@@ -32,7 +32,7 @@ export const OrdersTableView = () => {
   } = useQuery<Order[]>({
     queryKey: ['orders', 'table'],
     queryFn: async () => {
-      const response = await fetch('/api/orders?limit=1000', {
+      const response = await fetch('/api/orders', {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) {

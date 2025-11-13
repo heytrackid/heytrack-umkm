@@ -99,7 +99,7 @@ const OrdersPage = (_props: OrdersPageProps) => {
     queryKey: ['orders', 'all'],
     queryFn: async (): Promise<Order[]> => {
       logger.info('Fetching orders from API...')
-      const response = await fetch(`/api/orders?limit=1000&${(() => { const p=new URLSearchParams(); const u=new URLSearchParams(typeof window!== 'undefined' ? window.location.search : ''); const f=u.get('from'); const t=u.get('to'); if (f) p.set('from', f); if (t) p.set('to', t); return p.toString(); })()}`, {
+      const response = await fetch(`/api/orders?${(() => { const p=new URLSearchParams(); const u=new URLSearchParams(typeof window!== 'undefined' ? window.location.search : ''); const f=u.get('from'); const t=u.get('to'); if (f) p.set('from', f); if (t) p.set('to', t); return p.toString(); })()}`, {
         credentials: 'include', // Include cookies for authentication
       })
       if (!response.ok) { 

@@ -2,11 +2,11 @@
 
 import { MessageCircle, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect, useCallback, Suspense, lazy } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 
 import { type WhatsAppTemplate } from '@/app/orders/whatsapp-templates/components/types'
 import { AppLayout } from '@/components/layout/app-layout'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
@@ -50,12 +50,24 @@ const WhatsAppTemplatesLayout = () => {
     const fetchTemplates = useCallback(async () => {
         try {
             setLoading(true)
-            const response = await fetch('/api/whatsapp-templates', {
+            const response = await fetch('/api/whatsapp-templates?limit=1000', {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {
-                const _data = await response.json() as WhatsAppTemplate[]
-                setTemplates(_data)
+                const result = await response.json() as unknown
+                
+                // Handle both formats: direct array or { data: array }
+                let data: WhatsAppTemplate[]
+                if (Array.isArray(result)) {
+                    data = result as WhatsAppTemplate[]
+                } else if (result && typeof result === 'object' && 'data' in result) {
+                    const extracted = (result as { data: unknown }).data
+                    data = Array.isArray(extracted) ? (extracted as WhatsAppTemplate[]) : []
+                } else {
+                    data = []
+                }
+                
+                setTemplates(data)
             } else {
                 toast({
                     title: 'Error',

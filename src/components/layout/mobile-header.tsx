@@ -19,14 +19,12 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { useAuth } from '@/providers/AuthProvider'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
-import { useSupabase } from '@/providers/SupabaseProvider'
 import { useMobile } from '@/utils/responsive'
-
-import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 interface MobileHeaderProps {
   title?: string | undefined
@@ -60,37 +58,9 @@ export const MobileHeader = ({
 }: MobileHeaderProps) => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [user, setUser] = useState<SupabaseUser | null>(null)
-  const [loading, setLoading] = useState(true)
   const { isMobile } = useMobile()
   const router = useRouter()
-  const { supabase } = useSupabase()
-
-  // Check auth state on mount
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        setUser(user)
-      } catch (error) {
-        uiLogger.error({ error }, 'Error getting user:')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    void getUser()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event: string, session: { user: SupabaseUser | null } | null) => {
-        setUser(session?.user ?? null)
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
+  const { user, isLoading: loading } = useAuth()
 
   const handleSearchSubmit = useCallback((e: FormEvent) => {
     e.preventDefault()

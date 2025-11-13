@@ -47,7 +47,16 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
         if (sessionError) {
-          authLogger.error({ error: sessionError }, 'Session error:')
+          authLogger.error({ error: sessionError }, 'Session error')
+          
+          // Check if it's a refresh token error
+          const errorMessage = sessionError.message || ''
+          if (errorMessage.includes('Refresh Token Not Found') || errorMessage.includes('Invalid Refresh Token')) {
+            authLogger.warn('Refresh token invalid, clearing session')
+            // Clear session and redirect to login
+            import('@/lib/auth/session-handler').then(m => m.handleSessionExpired())
+          }
+          
           setAuthState(prev => ({
             ...prev,
             user: null,
@@ -67,7 +76,14 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         }))
       } catch (error: unknown) {
         const message = getErrorMessage(error)
-        authLogger.error({ error: message }, 'Auth initialization error:')
+        authLogger.error({ error: message }, 'Auth initialization error')
+        
+        // Check if it's a refresh token error
+        if (typeof message === 'string' && (message.includes('Refresh Token Not Found') || message.includes('Invalid Refresh Token'))) {
+          authLogger.warn('Refresh token invalid, clearing session')
+          import('@/lib/auth/session-handler').then(m => m.handleSessionExpired())
+        }
+        
         setAuthState(prev => ({
           ...prev,
           user: null,
@@ -130,11 +146,21 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const refreshSession = useCallback(async (): Promise<void> => {
     try {
       const { data: { session }, error } = await supabase.auth.refreshSession()
-      
+
       if (error) {
+        authLogger.error({ error }, 'Session refresh error')
+
+        // Check if it's a refresh token error
+        const errorMessage = error.message || ''
+        if (errorMessage.includes('Refresh Token Not Found') || errorMessage.includes('Invalid Refresh Token')) {
+          authLogger.warn('Refresh token invalid, clearing session and redirecting')
+          import('@/lib/auth/session-handler').then(m => m.handleSessionExpired())
+          return
+        }
+
         throw error
       }
-      
+
       setAuthState(prev => ({
         ...prev,
         session: session ?? null,
@@ -143,9 +169,25 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       }))
     } catch (error: unknown) {
       const message = getErrorMessage(error)
-      authLogger.error({ error: message }, 'Session refresh error:')
-      // If refresh failed, clear session and redirect to login
-      import('@/lib/auth/session-handler').then(m => m.handleSessionExpired())
+      authLogger.error({ error: message }, 'Session refresh error')
+
+      // Check if it's a refresh token error
+      if (typeof message === 'string' && (message.includes('Refresh Token Not Found') || message.includes('Invalid Refresh Token'))) {
+        authLogger.warn('Refresh token invalid, clearing session and redirecting')
+        import('@/lib/auth/session-handler').then(m => m.handleSessionExpired())
+        return
+      }
+
+      // For network/other errors, try one more time after a delay
+      if (typeof message === 'string' && (message.includes('network') || message.includes('fetch'))) {
+        authLogger.info('Network error during refresh, retrying in 2 seconds')
+        setTimeout(() => {
+          void refreshSession() // Recursive retry
+        }, 2000)
+        return
+      }
+
+      // For other errors, don't throw - just log
     }
   }, [supabase.auth])
 
