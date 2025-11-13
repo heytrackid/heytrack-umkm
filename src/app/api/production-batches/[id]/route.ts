@@ -12,9 +12,9 @@ import { createClient } from '@/utils/supabase/server'
 
 async function putHandler(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const { id } = params
+  const { id } = await params
   
   // Validate UUID format
   if (!isValidUUID(id)) {
@@ -80,9 +80,9 @@ async function putHandler(
 
 async function deleteHandler(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params
+  const { id } = await params
   
   // Validate UUID format
   if (!isValidUUID(id)) {

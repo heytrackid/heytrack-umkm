@@ -5,32 +5,33 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
 
+import { IngredientsCRUDSkeleton as ImportedIngredientsCRUDSkeleton } from '@/app/ingredients/components/IngredientsCRUDSkeleton'
 import { generateIngredientsTemplate, parseIngredientsCSV } from '@/components/import/csv-helpers'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { BreadcrumbPatterns, PageBreadcrumb, StatCardPatterns, StatsCards } from '@/components/ui/index'
 import { Button } from '@/components/ui/button'
+import { BreadcrumbPatterns, PageBreadcrumb, StatCardPatterns, StatsCards } from '@/components/ui/index'
 import { useAuth } from '@/hooks/index'
 import { useToast } from '@/hooks/use-toast'
 import { useIngredients } from '@/hooks/useIngredients'
-import { IngredientsCRUDSkeleton as ImportedIngredientsCRUDSkeleton } from '@/app/ingredients/components/IngredientsCRUDSkeleton'
 
 import type { Row } from '@/types/database'
 
 
 // Lazy load heavy components
+// ✅ Correct pattern for named exports (per Next.js docs)
 
-const IngredientsCRUD = dynamic(() => import('@/components/ingredients/EnhancedIngredientsPage').then(mod => ({ default: mod.EnhancedIngredientsPage })), {
+const IngredientsCRUD = dynamic(() => import('@/components/ingredients/EnhancedIngredientsPage').then(mod => mod.EnhancedIngredientsPage), {
   loading: () => <ImportedIngredientsCRUDSkeleton />,
   ssr: false
 })
 
-const IngredientFormDialog = dynamic(() => import('@/components/ingredients/IngredientFormDialog').then(mod => ({ default: mod.IngredientFormDialog })), {
+const IngredientFormDialog = dynamic(() => import('@/components/ingredients/IngredientFormDialog').then(mod => mod.IngredientFormDialog), {
   loading: () => null,
   ssr: false
 })
 
-const ImportDialog = dynamic(() => import('@/components/import/ImportDialog').then(mod => ({ default: mod.ImportDialog })), {
+const ImportDialog = dynamic(() => import('@/components/import/ImportDialog').then(mod => mod.ImportDialog), {
   loading: () => null,
   ssr: false
 })

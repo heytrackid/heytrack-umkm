@@ -33,12 +33,13 @@ const logger = createClientLogger('OrdersPage')
 
 
 // ✅ Code Splitting - Lazy load heavy components
-const OrderForm = dynamic(() => import('./OrderForm').then(mod => ({ default: mod.OrderForm })), {
+// ✅ Correct pattern for named exports (per Next.js docs)
+const OrderForm = dynamic(() => import('./OrderForm').then(mod => mod.OrderForm), {
   loading: () => <div className="h-64 sm:h-96 animate-pulse bg-gray-100 rounded-lg" />,
   ssr: false
 })
 
-const OrderDetailView = dynamic(() => import('./OrderDetailView').then(mod => ({ default: mod.OrderDetailView })), {
+const OrderDetailView = dynamic(() => import('./OrderDetailView').then(mod => mod.OrderDetailView), {
   loading: () => <div className="h-64 sm:h-96 animate-pulse bg-gray-100 rounded-lg" />,
   ssr: false
 })

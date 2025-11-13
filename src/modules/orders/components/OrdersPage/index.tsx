@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Calendar, MessageCircle, Plus, ShoppingCart, TrendingUp, XCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { useState, useMemo, useCallback } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import type { Order, OrderStatus } from '@/app/orders/types/orders.types'
 import { Button } from '@/components/ui/button'
@@ -33,12 +33,13 @@ import { OrdersList } from '@/modules/orders/components/OrdersPage/OrdersList'
 
 
 // ✅ Code Splitting - Lazy load heavy components
-const OrderForm = dynamic(() => import('../OrderForm').then(mod => ({ default: mod.OrderForm })), {
+// ✅ Correct pattern for named exports (per Next.js docs)
+const OrderForm = dynamic(() => import('../OrderForm').then(mod => mod.OrderForm), {
     loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
     ssr: false
 })
 
-const OrderDetailView = dynamic(() => import('../OrderDetailView').then(mod => ({ default: mod.OrderDetailView })), {
+const OrderDetailView = dynamic(() => import('../OrderDetailView').then(mod => mod.OrderDetailView), {
     loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
     ssr: false
 })

@@ -9,21 +9,22 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
  import { apiLogger } from '@/lib/logger'
- import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
- import { NotificationUpdateSchema } from '@/lib/validations/domains/notification'
- import { SecurityPresets, withSecurity } from '@/utils/security/index'
- import { createClient } from '@/utils/supabase/server'
- import type { NotificationsTable } from '@/types/database'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
+import { NotificationUpdateSchema } from '@/lib/validations/domains/notification'
+import type { NotificationsTable } from '@/types/database'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
+import { createClient } from '@/utils/supabase/server'
  
 
 
 async function putHandler(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     const supabase = await createClient()
-    const { id: notificationId } = params
+    const resolvedParams = await params
+    const { id: notificationId } = resolvedParams
     
     // Validate UUID format
     if (!isValidUUID(notificationId)) {

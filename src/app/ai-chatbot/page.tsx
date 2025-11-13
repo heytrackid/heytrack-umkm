@@ -11,15 +11,16 @@ import { useSupabase } from '@/providers/SupabaseProvider'
 import { useAIService, useChatMessages } from '@/app/ai-chatbot/hooks/index'
 
 // Lazy load heavy chatbot components
-const ChatHeader = dynamic(() => import('./components').then(mod => ({ default: mod.ChatHeader })), {
+// ✅ Correct pattern for named exports (per Next.js docs)
+const ChatHeader = dynamic(() => import('./components').then(mod => mod.ChatHeader), {
   loading: () => <div className="h-16 bg-muted animate-pulse rounded-t-xl" />
 })
 
-const ChatInput = dynamic(() => import('./components').then(mod => ({ default: mod.ChatInput })), {
+const ChatInput = dynamic(() => import('./components').then(mod => mod.ChatInput), {
   loading: () => <div className="h-20 bg-muted animate-pulse" />
 })
 
-const MessageList = dynamic(() => import('./components').then(mod => ({ default: mod.MessageList })), {
+const MessageList = dynamic(() => import('./components').then(mod => mod.MessageList), {
   loading: () => <div className="flex-1 bg-muted animate-pulse" />
 })
 
@@ -27,35 +28,17 @@ const MessageList = dynamic(() => import('./components').then(mod => ({ default:
 
 const AIChatbotPage = (): JSX.Element => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
-  const { supabase } = useSupabase()
   const router = useRouter()
   const { messages, isLoading, scrollAreaRef, addMessage, setLoading, currentSessionId } = useChatMessages()
   const { processAIQuery } = useAIService(currentSessionId)
   const [input, setInput] = useState('')
 
-  // Redirect if not authenticated - with improved timing and error handling
+  // Redirect if not authenticated
   useEffect(() => {
-    const checkAuth = async () => {
-      // Wait for auth to stabilize (prevent race condition)
-      await new Promise(resolve => setTimeout(resolve, 300))
-
-      if (!authLoading && !isAuthenticated) {
-        // Double-check with Supabase directly before redirecting
-        try {
-          const { data: { session } } = await supabase.auth.getSession()
-          if (!session?.user) {
-            router.push('/auth/login?redirectTo=/ai-chatbot')
-          }
-        } catch (error) {
-          // If session check fails, redirect to login
-          console.warn('Auth check failed, redirecting to login:', error)
-          router.push('/auth/login?redirectTo=/ai-chatbot')
-        }
-      }
+    if (!authLoading && !isAuthenticated) {
+      router.push('/auth/login?redirectTo=/ai-chatbot')
     }
-
-    checkAuth()
-  }, [authLoading, isAuthenticated, router, supabase.auth])
+  }, [authLoading, isAuthenticated, router])
 
   const handleSendMessage = useCallback(async (messageText?: string) => {
     const textToSend = (messageText ?? input).trim()

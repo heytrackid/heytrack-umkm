@@ -18,9 +18,9 @@ import { createClient } from '@/utils/supabase/server';
 // Apply security middleware
 export const GET = withSecurity(async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const { id } = params;
+  const { id } = await params;
 
   // Validate UUID format
   if (!isValidUUID(id)) {
@@ -91,9 +91,9 @@ export const GET = withSecurity(async function GET(
 
 export const PUT = withSecurity(async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const { id } = params;
+  const { id } = await params;
 
   // Validate UUID format
   if (!isValidUUID(id)) {
@@ -162,9 +162,9 @@ export const PUT = withSecurity(async function PUT(
 
 export const DELETE = withSecurity(async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const { id } = params;
+  const { id } = await params;
 
   // Validate UUID format
   if (!isValidUUID(id)) {

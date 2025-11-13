@@ -41,8 +41,9 @@ const LoadingChart = () => (
 )
 
 // Only lazy load HEAVY chart components
+// ✅ Correct pattern for named exports (per Next.js docs)
 const ProductProfitabilityChart = dynamic(
-  () => import(/* webpackChunkName: "profit-chart" */ './components').then(mod => ({ default: mod.ProductProfitabilityChart })),
+  () => import(/* webpackChunkName: "profit-chart" */ './components').then(mod => mod.ProductProfitabilityChart),
   {
     loading: LoadingChart
   }

@@ -14,10 +14,10 @@ import { createClient } from '@/utils/supabase/server'
 // GET /api/operational-costs/[id] - Get single operational cost
 async function getHandler(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { id } = params
+    const { id } = await params
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -61,10 +61,10 @@ async function getHandler(
 // PUT /api/operational-costs/[id] - Update operational cost
 async function putHandler(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { id } = params
+    const { id } = await params
     
     // Validate UUID format
     if (!isValidUUID(id)) {
@@ -139,10 +139,10 @@ async function putHandler(
 // DELETE /api/operational-costs/[id] - Delete operational cost
 async function deleteHandler(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { id } = params
+    const { id } = await params
     
     // Validate UUID format
     if (!isValidUUID(id)) {

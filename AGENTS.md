@@ -492,3 +492,93 @@ function VirtualizedList({ items }) {
 <parameter name="filePath">AGENTS.md
 
 
+
+
+## Dynamic Import Patterns (CRITICAL)
+
+### ✅ CORRECT Pattern for Named Exports
+
+When using `dynamic()` from `next/dynamic` or `lazy()` from React with **named exports**, use this pattern:
+
+```tsx
+// ✅ CORRECT - Named Export
+import dynamic from 'next/dynamic'
+
+const Component = dynamic(() => 
+  import('./module').then(mod => mod.ComponentName)
+)
+
+// ✅ CORRECT - React.lazy with Named Export
+import { lazy } from 'react'
+
+const Component = lazy(() => 
+  import('./module').then(mod => mod.ComponentName)
+)
+```
+
+### ✅ CORRECT Pattern for Default Exports
+
+```tsx
+// ✅ CORRECT - Default Export
+const Component = dynamic(() => import('./Component'))
+
+// No .then() needed for default exports
+```
+
+### ❌ WRONG Pattern (DO NOT USE)
+
+```tsx
+// ❌ WRONG - Named Export with default wrapper
+const Component = dynamic(() => 
+  import('./module').then(mod => ({ default: mod.ComponentName }))
+)
+
+// This will cause runtime errors and type issues!
+```
+
+### Documentation Reference
+
+From Next.js official docs: https://nextjs.org/docs/app/guides/lazy-loading#importing-named-exports
+
+> To dynamically import a named export, you can return it from the Promise returned by import() function:
+> ```jsx
+> const ClientComponent = dynamic(() =>
+>   import('../components/hello').then((mod) => mod.Hello)
+> )
+> ```
+
+### Examples from Codebase
+
+```tsx
+// ✅ CORRECT - AI Chatbot Components
+const ChatHeader = dynamic(() => 
+  import('./components').then(mod => mod.ChatHeader), 
+  { loading: () => <div>Loading...</div> }
+)
+
+// ✅ CORRECT - Recharts Components
+const BarChart = lazy(() => import('recharts').then(mod => mod.BarChart))
+const LineChart = lazy(() => import('recharts').then(mod => mod.LineChart))
+
+// ✅ CORRECT - Form Sections
+const CustomerSection = dynamic(() => 
+  import('./CustomerSection').then(mod => mod.CustomerSection),
+  { ssr: false }
+)
+```
+
+### Key Rules
+
+1. **Named Exports**: Use `.then(mod => mod.ComponentName)`
+2. **Default Exports**: Use `import('./Component')` directly
+3. **NEVER** wrap named exports with `{ default: ... }`
+4. **Recharts**: All Recharts components are named exports
+5. **Custom Components**: Check the export type before using dynamic import
+
+### Verification
+
+After adding dynamic imports, verify with:
+```bash
+pnpm type-check  # Should pass with no errors
+pnpm build       # Should build successfully
+```

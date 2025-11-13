@@ -67,8 +67,9 @@ interface DashboardClientProps {
 }
 
 // Lazy load OnboardingWizard - only needed for new users
+// ✅ Correct pattern for named exports (per Next.js docs)
 const OnboardingWizard = dynamic(
-  () => import('@/components/onboarding/OnboardingWizard').then(mod => ({ default: mod.OnboardingWizard })),
+  () => import('@/components/onboarding/OnboardingWizard').then(mod => mod.OnboardingWizard),
   {
     loading: () => <div className="animate-pulse bg-muted rounded-lg h-64 sm:h-96" />
   }

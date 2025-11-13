@@ -1,4 +1,4 @@
-import { memo, lazy, Suspense } from 'react'
+import { lazy, memo, Suspense } from 'react'
 
 import { useResponsive } from '@/hooks/useResponsive'
 
@@ -7,13 +7,14 @@ import { MobileTooltip } from '@/components/ui/charts/mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from '@/components/ui/charts/types'
 
 // Lazy load recharts components
-const Area = lazy(() => import('recharts').then(mod => ({ default: mod.Area })))
-const AreaChart = lazy(() => import('recharts').then(mod => ({ default: mod.AreaChart })))
-const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
-const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
-const YAxis = lazy(() => import('recharts').then(mod => ({ default: mod.YAxis })))
-const Tooltip = lazy(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
-const ResponsiveContainer = lazy(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
+// ✅ Correct pattern for named exports (per Next.js docs)
+const Area = lazy(() => import('recharts').then(mod => mod.Area))
+const AreaChart = lazy(() => import('recharts').then(mod => mod.AreaChart))
+const CartesianGrid = lazy(() => import('recharts').then(mod => mod.CartesianGrid))
+const XAxis = lazy(() => import('recharts').then(mod => mod.XAxis))
+const YAxis = lazy(() => import('recharts').then(mod => mod.YAxis))
+const Tooltip = lazy(() => import('recharts').then(mod => mod.Tooltip))
+const ResponsiveContainer = lazy(() => import('recharts').then(mod => mod.ResponsiveContainer))
 
 /**
  * Mobile Area Chart Component

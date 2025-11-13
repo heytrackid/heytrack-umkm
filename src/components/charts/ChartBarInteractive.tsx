@@ -2,14 +2,16 @@
 
 import { lazy, useMemo, useState } from 'react'
 
-const Bar = lazy(() => import('recharts').then(mod => ({ default: mod.Bar })))
-const BarChart = lazy(() => import('recharts').then(mod => ({ default: mod.BarChart })))
-const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
-const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
+// ✅ Correct pattern for named exports (per Next.js docs)
+const Bar = lazy(() => import('recharts').then(mod => mod.Bar))
+const BarChart = lazy(() => import('recharts').then(mod => mod.BarChart))
+const CartesianGrid = lazy(() => import('recharts').then(mod => mod.CartesianGrid))
+const XAxis = lazy(() => import('recharts').then(mod => mod.XAxis))
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type {
-    ChartConfig} from '@/components/ui/chart';
+    ChartConfig
+} from '@/components/ui/chart'
 import {
     ChartContainer,
     ChartTooltip,

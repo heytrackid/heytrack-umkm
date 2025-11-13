@@ -77,10 +77,13 @@ type DifficultyFilter = 'all' | 'easy' | 'hard' | 'medium'
 
 export const EnhancedRecipesPage = (): JSX.Element => {
     const router = useRouter()
-    const { data: recipes, isLoading: loading } = useRecipes()
+    const { data: recipesResponse, isLoading: loading } = useRecipes()
     const { remove: deleteRecipe } = useSupabaseCRUD('recipes')
     const { toast } = useToast()
     const { isMobile } = useResponsive()
+
+    // Extract recipes array from API response
+    const recipes = recipesResponse?.data ?? []
 
     // Modal states
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -96,7 +99,7 @@ export const EnhancedRecipesPage = (): JSX.Element => {
 
     // Filter and sort data
     const filteredData = useMemo(() => {
-        if (!recipes) { return [] }
+        if (!recipes || !Array.isArray(recipes)) { return [] }
 
         return recipes
             .filter((recipe: Recipe) => {

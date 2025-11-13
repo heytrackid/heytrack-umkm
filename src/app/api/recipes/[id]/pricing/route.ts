@@ -30,10 +30,11 @@ interface RecipeIngredientWithIngredient {
   } | null
 }
 
-async function postHandler(request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
+async function postHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }): Promise<NextResponse> {
   try {
     const supabase = await createClient()
-    const { id: recipeId } = params
+    const resolvedParams = await params
+    const { id: recipeId } = resolvedParams
     
     // Verify user is authenticated
     const { data: { user } } = await supabase.auth.getUser()

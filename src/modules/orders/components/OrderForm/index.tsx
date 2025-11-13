@@ -25,22 +25,23 @@ import type { Row } from '@/types/database'
 
 
 // ✅ Code Splitting - Lazy load section components
-const CustomerSection = dynamic(() => import('./CustomerSection').then(mod => ({ default: mod.CustomerSection })), {
+// ✅ Correct pattern for named exports (per Next.js docs)
+const CustomerSection = dynamic(() => import('./CustomerSection').then(mod => mod.CustomerSection), {
     loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
 })
 
-const ItemsSection = dynamic(() => import('./ItemsSection').then(mod => ({ default: mod.ItemsSection })), {
+const ItemsSection = dynamic(() => import('./ItemsSection').then(mod => mod.ItemsSection), {
     loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
 })
 
-const DeliverySection = dynamic(() => import('./DeliverySection').then(mod => ({ default: mod.DeliverySection })), {
+const DeliverySection = dynamic(() => import('./DeliverySection').then(mod => mod.DeliverySection), {
     loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
 })
 
-const PaymentSection = dynamic(() => import('./PaymentSection').then(mod => ({ default: mod.PaymentSection })), {
+const PaymentSection = dynamic(() => import('./PaymentSection').then(mod => mod.PaymentSection), {
     loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
 })

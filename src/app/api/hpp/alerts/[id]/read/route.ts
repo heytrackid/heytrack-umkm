@@ -13,10 +13,11 @@ import { createClient } from '@/utils/supabase/server'
 // Apply security middleware
 export const PUT = withSecurity(async function PUT(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const alertId = params['id']
+    const resolvedParams = await params
+    const alertId = resolvedParams['id']
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 

@@ -151,12 +151,16 @@ export class BundleMonitor {
 }
 
 // Export common lazy-loaded components
+// ✅ Correct pattern for named exports (per Next.js docs)
 export const LazyCharts = {
   BarChart: lazyLoad(() => import('@/components/ui/charts/bar-chart').then(mod => ({ default: mod.MobileBarChart }))),
   LineChart: lazyLoad(() => import('@/components/ui/charts/line-chart').then(mod => ({ default: mod.MobileLineChart }))),
   PieChart: lazyLoad(() => import('@/components/ui/charts/pie-chart').then(mod => ({ default: mod.MobilePieChart }))),
   AreaChart: lazyLoad(() => import('@/components/ui/charts/area-chart').then(mod => ({ default: mod.MobileAreaChart }))),
 }
+
+// Note: LazyCharts uses { default: ... } because lazyLoad() expects default exports
+// The chart components themselves are named exports, but we wrap them as default for lazyLoad()
 
 export const LazyPages = {
   Dashboard: lazyLoad(() => import('@/app/dashboard/page')),

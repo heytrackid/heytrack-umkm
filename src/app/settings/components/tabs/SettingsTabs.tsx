@@ -13,8 +13,9 @@ import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/typ
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 
 // Lazy load settings components only when tabs are accessed (smart code splitting)
-const BusinessInfoSettings = lazy(() => import('@/app/settings/components/BusinessInfoSettings').then(mod => ({ default: mod.BusinessInfoSettings })))
-const RegionalSettings = lazy(() => import('@/app/settings/components/RegionalSettings').then(mod => ({ default: mod.RegionalSettings })))
+// ✅ Correct pattern for named exports (per Next.js docs)
+const BusinessInfoSettings = lazy(() => import('@/app/settings/components/BusinessInfoSettings').then(mod => mod.BusinessInfoSettings))
+const RegionalSettings = lazy(() => import('@/app/settings/components/RegionalSettings').then(mod => mod.RegionalSettings))
 
 
 // Import existing components

@@ -314,7 +314,7 @@ export const AppLayout = memo(({
             </DropdownMenu>
           )}
 
-          {!loading && !user && !isAuthenticated && (
+          {!loading && !isAuthenticated && (
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" onClick={() => router.push('/auth/login')}>
                 Masuk

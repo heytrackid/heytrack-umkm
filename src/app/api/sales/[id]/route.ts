@@ -16,9 +16,9 @@ import { createClient } from '@/utils/supabase/server'
 
 async function getSale(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params
+  const { id } = await params
 
   // Validate UUID format
   if (!isValidUUID(id)) {
@@ -70,9 +70,9 @@ async function getSale(
 
 async function updateSale(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params
+  const { id } = await params
 
   // Validate UUID format
   if (!isValidUUID(id)) {
@@ -128,9 +128,9 @@ async function updateSale(
 
 async function deleteSale(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params
+  const { id } = await params
 
   // Validate UUID format
   if (!isValidUUID(id)) {

@@ -13,7 +13,8 @@ import { UnsavedChangesPrompt } from '@/app/settings/components/UnsavedChangesPr
 import { useSettingsManager } from '@/app/settings/hooks/index'
 
 // Only lazy load the heavy tabs component
-const SettingsTabs = lazy(() => import('./components/tabs/SettingsTabs').then(mod => ({ default: mod.SettingsTabs })))
+// ✅ Correct pattern for named exports (per Next.js docs)
+const SettingsTabs = lazy(() => import('./components/tabs/SettingsTabs').then(mod => mod.SettingsTabs))
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('general')

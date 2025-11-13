@@ -6,8 +6,8 @@ import { useEffect } from 'react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useAuth } from '@/hooks/index'
-import { useSupabase } from '@/providers/SupabaseProvider'
 import { useToast } from '@/hooks/use-toast'
+import { useSupabase } from '@/providers/SupabaseProvider'
 
 import { ReportsLayout } from '@/app/reports/components/ReportsLayout'
 
@@ -36,39 +36,17 @@ const ReportsPage = () => {
   const { toast } = useToast()
   const router = useRouter()
 
-  // Handle auth errors with improved double-check
+  // Redirect if not authenticated
   useEffect(() => {
-    const checkAuth = async () => {
-      // Wait for auth to stabilize (prevent race condition)
-      await new Promise(resolve => setTimeout(resolve, 300))
-
-      if (!isAuthLoading && !isAuthenticated) {
-        // Double-check with Supabase directly before redirecting
-        try {
-          const { data: { session } } = await supabase.auth.getSession()
-          if (!session?.user) {
-            toast({
-              title: 'Sesi berakhir',
-              description: 'Sesi Anda telah berakhir. Silakan login kembali.',
-              variant: 'destructive',
-            })
-            router.push('/auth/login?redirectTo=/reports')
-          }
-        } catch (error) {
-          // If session check fails, redirect to login
-          console.warn('Auth check failed, redirecting to login:', error)
-          toast({
-            title: 'Sesi berakhir',
-            description: 'Sesi Anda telah berakhir. Silakan login kembali.',
-            variant: 'destructive',
-          })
-          router.push('/auth/login?redirectTo=/reports')
-        }
-      }
+    if (!isAuthLoading && !isAuthenticated) {
+      toast({
+        title: 'Sesi berakhir',
+        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+        variant: 'destructive',
+      })
+      router.push('/auth/login?redirectTo=/reports')
     }
-
-    checkAuth()
-  }, [isAuthLoading, isAuthenticated, router, toast, supabase.auth])
+  }, [isAuthLoading, isAuthenticated, router, toast])
 
   // Show loading state while auth is initializing
   if (isAuthLoading) {
