@@ -9,6 +9,9 @@ export * from './base-validations'
 // Form validations - export everything
 export * from './form-validations'
 
+// Override SupplierFormSchema to use the basic one from form-validations
+export { SupplierFormSchema, type SupplierForm } from './form-validations'
+
 // Database validations - export all Insert/Update schemas
 export {
   CustomerInsertSchema,
@@ -39,7 +42,6 @@ export {
   IngredientFormSchema,
   OrderFormSchema,
   RecipeFormSchema,
-  SupplierFormSchema,
 
   // Query schemas (from domains/common)
   PaginationQuerySchema,

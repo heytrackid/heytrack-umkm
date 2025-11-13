@@ -66,13 +66,24 @@ if (Array.isArray(result)) {
 - ✅ `src/app/orders/whatsapp-templates/components/WhatsAppTemplatesLayout.tsx`
 - ✅ `src/app/customers/components/CustomersLayout.tsx`
 
-### Limit Parameter
-Semua fetch calls sudah ditambahkan `?limit=1000` untuk memastikan semua data dimuat:
+### Default Behavior - No Limit Required
+API routes sudah diupdate untuk **return semua data secara default** jika tidak ada parameter `limit`:
 
 ```typescript
-fetch('/api/orders?limit=1000')
-fetch('/api/recipes?limit=1000')
-fetch('/api/customers?limit=1000')
+// ✅ Fetch all data (no limit needed)
+fetch('/api/orders')
+fetch('/api/recipes')
+fetch('/api/customers')
+
+// ✅ Optional: Use pagination when needed
+fetch('/api/orders?limit=20&page=1')
+```
+
+**Backend Logic:**
+```typescript
+// If no limit is specified, return all data
+const hasLimit = searchParams.has('limit')
+const limit = hasLimit ? searchParams.get('limit') : '999999'
 ```
 
 ## Rekomendasi untuk Masa Depan
@@ -128,7 +139,8 @@ Dokumentasikan format response setiap endpoint di:
 ## Status Saat Ini
 
 ✅ **Frontend sudah aman** - Semua komponen bisa handle kedua format
-✅ **Limit sudah ditambahkan** - Tidak ada lagi masalah "hanya muncul 10 data"
+✅ **Backend smart default** - Return semua data jika tidak ada limit parameter
+✅ **No hardcoded limits** - Frontend tidak perlu tahu berapa banyak data maksimal
 ⚠️ **Backend masih inkonsisten** - Tapi tidak masalah karena frontend sudah handle
 
 ## Next Steps (Optional)

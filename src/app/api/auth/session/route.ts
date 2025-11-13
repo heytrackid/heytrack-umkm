@@ -3,7 +3,7 @@ export const runtime = 'nodejs'
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const supabase = await createClient()
     
@@ -17,10 +17,9 @@ export async function GET(request: NextRequest) {
       hasSession: !!session,
       hasUser: !!user,
       session: session ? {
-        access_token: session.access_token.substring(0, 20) + '...',
-        refresh_token: session.refresh_token?.substring(0, 20) + '...',
         expires_at: session.expires_at,
         expires_in: session.expires_in,
+        // Don't expose tokens for security
       } : null,
       user: user ? {
         id: user.id,
@@ -32,10 +31,7 @@ export async function GET(request: NextRequest) {
         sessionError: sessionError?.message,
         userError: userError?.message,
       },
-      cookies: {
-        hasCookies: request.cookies.getAll().length > 0,
-        cookieNames: request.cookies.getAll().map(c => c.name),
-      }
+      // Remove cookie information for security
     })
   } catch (error) {
     return NextResponse.json(

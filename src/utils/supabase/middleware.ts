@@ -41,5 +41,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  return { user, response: supabaseResponse }
+  // Also refresh session if needed (this will update cookies if session was refreshed)
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  return { user, session, response: supabaseResponse }
 }

@@ -51,9 +51,12 @@ export {
 } from './domains/recipe'
 
 export {
-  SupplierFormSchema,
   SupplierInsertSchema,
 } from './domains/supplier'
+
+export {
+  SupplierFormSchema,
+} from './form-validations'
 
 // Reports API validation schemas
 export const ReportTypeEnum = z.enum([

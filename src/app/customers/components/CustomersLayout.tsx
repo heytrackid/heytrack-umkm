@@ -38,7 +38,7 @@ export const CustomersLayout = (): JSX.Element => {
   const fetchCustomers = useCallback(async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/customers?limit=1000')
+      const response = await fetch('/api/customers')
       
       if (!response.ok) {
         throw new Error('Failed to fetch customers')

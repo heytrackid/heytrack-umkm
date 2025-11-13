@@ -79,7 +79,7 @@ class ClientLogger {
   /**
    * Format log entry to match Pino structure
    */
-  private formatLog(level: string, obj: LogContext | string, msg?: string): void {
+  private formatLog(level: string, obj: LogContext | string, msg?: string | LogContext): void {
     const timestamp = new Date().toISOString()
     const logLevel = level.toUpperCase()
     
@@ -90,11 +90,21 @@ class ClientLogger {
     if (typeof obj === 'string') {
       message = obj
       if (msg) {
-        data = { extra: msg }
+        if (typeof msg === 'string') {
+          data = { extra: msg }
+        } else {
+          // msg is LogContext, merge it into data
+          data = msg
+        }
       }
     } else {
       data = obj
-      message = msg ?? ''
+      if (typeof msg === 'string') {
+        message = msg
+      } else if (msg) {
+        // msg is LogContext, merge it into data
+        data = { ...data, ...msg }
+      }
     }
 
     const logEntry = {
@@ -250,28 +260,28 @@ class ClientLogger {
    * Pino-style info logger
    * Usage: logger.info('message') or logger.info({ data }, 'message')
    */
-  info(obj: LogContext | string, msg?: string): void {
+  info(obj: LogContext | string, msg?: string | LogContext): void {
     this.formatLog('info', obj, msg)
   }
 
   /**
    * Pino-style warn logger
    */
-  warn(obj: LogContext | string, msg?: string): void {
+  warn(obj: LogContext | string, msg?: string | LogContext): void {
     this.formatLog('warn', obj, msg)
   }
 
   /**
    * Pino-style error logger
    */
-  error(obj: LogContext | string, msg?: string): void {
+  error(obj: LogContext | string, msg?: string | LogContext): void {
     this.formatLog('error', obj, msg)
   }
 
   /**
    * Pino-style debug logger
    */
-  debug(obj: LogContext | string, msg?: string): void {
+  debug(obj: LogContext | string, msg?: string | LogContext): void {
     if (isDevelopment()) {
       this.formatLog('debug', obj, msg)
     }

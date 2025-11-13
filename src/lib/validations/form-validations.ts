@@ -28,7 +28,7 @@ export const IngredientSchema = z.object({
   name: indonesianName,
   description: optionalString,
   unit: z.enum(['kg', 'gram', 'liter', 'ml', 'pcs', 'pack'], {
-    message: 'validation.invalidUnit'
+    message: 'Satuan tidak valid'
   }),
   price_per_unit: rupiah,
   current_stock: positiveNumber,
@@ -40,7 +40,7 @@ export const IngredientSchema = z.object({
   expiry_date: z.string().datetime().optional(),
   cost_per_unit: rupiah.optional(),
   usage_rate_daily: positiveNumber.optional(),
-  reorder_lead_time: z.number().int().min(1, 'validation.leadTimeMin').optional(),
+  reorder_lead_time: z.number().int().min(1, 'Lead time minimal 1 hari').optional(),
   supplier_info: z.object({
     name: optionalString,
     contact: optionalString,
@@ -54,7 +54,7 @@ export const IngredientSchema = z.object({
   }
   return true
 }, {
-  message: 'validation.minStockTooHigh',
+    message: 'Stok minimum tidak boleh lebih tinggi dari stok saat ini',
   path: ['min_stock']
 })
 
@@ -64,20 +64,20 @@ export type IngredientFormData = z.infer<typeof IngredientSchema>
 export const RecipeSchema = z.object({
   name: indonesianName,
   description: optionalString,
-  servings: z.number().int().min(1, 'validation.servingsMin').max(1000, 'validation.servingsMax'),
-  prep_time_minutes: z.number().int().min(1, 'validation.prepTimeMin').max(1440, 'validation.prepTimeMax'),
-  cook_time_minutes: z.number().int().min(0, 'validation.cookTimeNonNegative').optional(),
-  instructions: z.array(z.string().min(1, 'validation.instructionNotEmpty')).min(1, 'validation.instructionMinCount'),
+  servings: z.number().int().min(1, 'Porsi minimal 1').max(1000, 'Porsi maksimal 1000'),
+  prep_time_minutes: z.number().int().min(1, 'Waktu persiapan minimal 1 menit').max(1440, 'Waktu persiapan maksimal 1440 menit'),
+  cook_time_minutes: z.number().int().min(0, 'Waktu memasak tidak boleh negatif').optional(),
+  instructions: z.array(z.string().min(1, 'Instruksi tidak boleh kosong')).min(1, 'Minimal satu instruksi'),
   difficulty_level: z.enum(['EASY', 'MEDIUM', 'HARD'], {
-    message: 'validation.invalidDifficulty'
+    message: 'Tingkat kesulitan tidak valid'
   }).optional(),
   category: optionalString,
   selling_price: rupiah.optional(),
   cost_per_serving: rupiah.optional(),
   profit_margin: percentage.optional(),
-  rating: z.number().min(1, 'validation.ratingMin').max(5, 'validation.ratingMax').optional(),
+  rating: z.number().min(1, 'Rating minimal 1').max(5, 'Rating maksimal 5').optional(),
   is_active: z.boolean().default(true),
-  image_url: z.string().url('validation.invalidImageUrl').optional(),
+  image_url: z.string().url('URL gambar tidak valid').optional(),
   tags: z.array(z.string()).optional()
 })
 
@@ -88,7 +88,7 @@ export const RecipeIngredientSchema = z.object({
   recipe_id: UUIDSchema,
   ingredient_id: UUIDSchema,
   quantity: positiveNumber,
-  unit: z.string().min(1, 'validation.unitRequired'),
+  unit: z.string().min(1, 'Satuan wajib diisi'),
   notes: optionalString
 })
 

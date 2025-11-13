@@ -50,7 +50,7 @@ const WhatsAppTemplatesLayout = () => {
     const fetchTemplates = useCallback(async () => {
         try {
             setLoading(true)
-            const response = await fetch('/api/whatsapp-templates?limit=1000', {
+            const response = await fetch('/api/whatsapp-templates', {
                 credentials: 'include', // Include cookies for authentication
             })
             if (response.ok) {

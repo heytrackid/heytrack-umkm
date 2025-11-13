@@ -143,7 +143,9 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     }
   }, [router, supabase.auth])
 
-  const refreshSession = useCallback(async (): Promise<void> => {
+  const refreshSession = useCallback(async (retryCount = 0): Promise<void> => {
+    const MAX_RETRIES = 3
+
     try {
       const { data: { session }, error } = await supabase.auth.refreshSession()
 
@@ -178,16 +180,20 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         return
       }
 
-      // For network/other errors, try one more time after a delay
-      if (typeof message === 'string' && (message.includes('network') || message.includes('fetch'))) {
-        authLogger.info('Network error during refresh, retrying in 2 seconds')
+      // For network errors, retry with exponential backoff (max 3 retries)
+      if (typeof message === 'string' && (message.includes('network') || message.includes('fetch')) && retryCount < MAX_RETRIES) {
+        const delay = Math.min(1000 * Math.pow(2, retryCount), 10000) // Exponential backoff, max 10s
+        authLogger.info(`Network error during refresh, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`)
         setTimeout(() => {
-          void refreshSession() // Recursive retry
-        }, 2000)
+          void refreshSession(retryCount + 1)
+        }, delay)
         return
       }
 
-      // For other errors, don't throw - just log
+      // For other errors or max retries reached, don't throw - just log
+      if (retryCount >= MAX_RETRIES) {
+        authLogger.warn('Max retry attempts reached for session refresh')
+      }
     }
   }, [supabase.auth])
 

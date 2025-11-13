@@ -5,22 +5,25 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
  import { apiLogger } from '@/lib/logger'
- import { getErrorMessage } from '@/lib/type-guards'
+import { getErrorMessage } from '@/lib/type-guards'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import type { Insert } from '@/types/database'
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
 
 async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url)
+  
+  // If no limit is specified, return all data (no pagination)
+  const hasLimit = searchParams.has('limit')
 
   // Validate query parameters
   const queryValidation = PaginationQuerySchema.safeParse({
     page: searchParams.get('page'),
-    limit: searchParams.get('limit'),
+    limit: hasLimit ? searchParams.get('limit') : '999999', // Very high limit = all data
     search: searchParams.get('search'),
     sort_by: searchParams.get('sort_by'),
     sort_order: searchParams.get('sort_order'),

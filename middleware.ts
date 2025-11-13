@@ -6,7 +6,7 @@ import { generateNonce, getStrictCSP } from '@/lib/csp'
 import { middlewareLogger } from '@/lib/logger'
 import { updateSession } from '@/utils/supabase/middleware'
 
-import type { User } from '@supabase/supabase-js'
+import type { User, Session } from '@supabase/supabase-js'
 
 
 
@@ -119,9 +119,9 @@ function validateRequest(request: NextRequest, isDev: boolean): NextResponse | n
 /**
  * Update session and get user
  */
-async function getUser(request: NextRequest): Promise<{ user: User | null; response: NextResponse }> {
-  const { user, response } = await updateSession(request)
-  return { user, response }
+async function getUser(request: NextRequest): Promise<{ user: User | null; session: Session | null; response: NextResponse }> {
+  const { user, session, response } = await updateSession(request)
+  return { user, session, response }
 }
 
 /**

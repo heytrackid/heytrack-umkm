@@ -9,18 +9,18 @@ import { InputSanitizer } from '@/utils/security/index'
 
 
 // Base validation utilities
-export const requiredString = z.string().min(1, 'validation.fieldRequired')
+export const requiredString = z.string().min(1, 'Field ini wajib diisi')
 export const optionalString = z.string().optional()
-export const positiveNumber = z.number().positive('validation.positiveNumber')
-export const nonNegativeNumber = z.number().min(0, 'validation.nonNegative')
-export const email = z.string().email('validation.invalidEmail')
-export const phone = z.string().min(10, 'validation.phoneMinLength')
-export const uuid = z.string().uuid('validation.invalidId')
+export const positiveNumber = z.number().positive('Nilai harus lebih dari 0')
+export const nonNegativeNumber = z.number().min(0, 'Nilai tidak boleh negatif')
+export const email = z.string().email('Format email tidak valid')
+export const phone = z.string().min(10, 'Nomor telepon minimal 10 digit')
+export const uuid = z.string().uuid('ID tidak valid')
 
 // Indonesian specific validations
-export const rupiah = z.number().min(0, 'validation.nonNegativeAmount').transform(val => Math.round(val))
-export const percentage = z.number().min(0, 'validation.nonNegativePercentage').max(100, 'validation.maxPercentage')
-export const indonesianName = z.string().min(2, 'validation.nameMinLength').max(100, 'validation.nameMaxLength')
+export const rupiah = z.number().min(0, 'Jumlah tidak boleh negatif').transform(val => Math.round(val))
+export const percentage = z.number().min(0, 'Persentase tidak boleh negatif').max(100, 'Persentase maksimal 100%')
+export const indonesianName = z.string().min(2, 'Nama minimal 2 karakter').max(100, 'Nama maksimal 100 karakter')
 
 // Enhanced base schemas
 export const UUIDSchema = z.string().uuid({ message: 'Invalid UUID format' })

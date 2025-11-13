@@ -18,11 +18,13 @@ export async function handleSessionExpired(): Promise<void> {
 
     keysToRemove.forEach(key => localStorage.removeItem(key))
 
-    // Clear session cookies by setting them to expire
+    // Clear only Supabase/auth related cookies
+    const authCookieNames = ['sb-', 'supabase-auth-token']
     document.cookie.split(";").forEach(c => {
-      document.cookie = c
-        .replace(/^ +/, "")
-        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/")
+      const cookieName = c.replace(/^ +/, "").split('=')[0]
+      if (authCookieNames.some(prefix => cookieName.startsWith(prefix))) {
+        document.cookie = `${cookieName}=;expires=${new Date().toUTCString()};path=/;secure;samesite=lax`
+      }
     })
 
     // Small delay to ensure cleanup is complete before redirect
