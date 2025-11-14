@@ -104,7 +104,7 @@ async function putHandler(
     }
 
     // Update with RLS enforcement (RLS will filter by user_id automatically)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data, error } = await (supabase
       .from('financial_records') as any)
       .update(updatePayload)

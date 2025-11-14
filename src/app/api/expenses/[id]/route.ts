@@ -131,7 +131,7 @@ export const PUT = withSecurity(async function PUT(
     ) as Database['public']['Tables']['financial_records']['Update'])
 
     // ✅ Use financial_records table
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data: expense, error } = await (supabase
       .from('financial_records') as any)
       .update(updatePayload)

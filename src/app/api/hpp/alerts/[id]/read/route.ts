@@ -32,7 +32,7 @@ export const PUT = withSecurity(async function PUT(
     apiLogger.info({ alertId, userId: user.id }, 'Marking HPP alert as read')
 
     // Update the alert to mark it as read
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data, error } = await (supabase
       .from('hpp_alerts') as any)
       .update({

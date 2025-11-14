@@ -50,7 +50,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     const { description, category, amount, date, type } = data
 
     // Insert into financial_records
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data: record, error: insertError } = await (supabase
       .from('financial_records') as any)
       .insert({

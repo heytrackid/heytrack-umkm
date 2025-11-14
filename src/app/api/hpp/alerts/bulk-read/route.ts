@@ -23,7 +23,7 @@ async function postHandler(): Promise<NextResponse> {
     const user = authResult
 
     // Update all unread alerts for the current user
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data, error } = await (supabase
       .from('hpp_alerts') as any)
       .update({
