@@ -6,8 +6,11 @@ import { Suspense, useCallback, useEffect, useState } from 'react'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { useAuth } from '@/hooks/useAuth'
+import { createClientLogger } from '@/lib/client-logger'
 
 import { useAIService, useChatMessages } from '@/app/ai-chatbot/hooks/index'
+
+const logger = createClientLogger('AIChatbot')
 
 // Lazy load heavy chatbot components
 // ✅ Correct pattern for named exports (per Next.js docs)
