@@ -1,5 +1,5 @@
 import { apiLogger } from '@/lib/logger'
-import type { GeneratedRecipe, IngredientSubset, RawRecipeResponse, RecipeInstruction } from '../types'
+import type { GeneratedRecipe, IngredientSubset, RawRecipeResponse, RecipeIngredient, RecipeInstruction } from '../types'
 
 export function parseRecipeResponse(response: string): GeneratedRecipe {
   try {
@@ -64,7 +64,7 @@ export function parseRecipeResponse(response: string): GeneratedRecipe {
 
     const recipe: GeneratedRecipe = {
       name: rawRecipe.name,
-      ingredients: rawRecipe.ingredients as any,
+      ingredients: rawRecipe.ingredients as RecipeIngredient[],
       instructions,
       ...(typeof rawRecipe.servings === 'number' && { servings: rawRecipe.servings }),
       ...(typeof rawRecipe.prep_time_minutes === 'number' && { prep_time_minutes: rawRecipe.prep_time_minutes }),

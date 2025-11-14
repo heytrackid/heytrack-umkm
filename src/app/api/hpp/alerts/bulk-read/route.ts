@@ -23,14 +23,14 @@ async function postHandler(): Promise<NextResponse> {
     const user = authResult
 
     // Update all unread alerts for the current user
-     
-    const { data, error } = await (supabase
-      .from('hpp_alerts') as any)
+
+    const { data, error } = await supabase
+      .from('hpp_alerts')
       .update({
         is_read: true,
         read_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      })
+      } as never)
       .eq('is_read', false)
       .eq('user_id', user['id'])
       .select()

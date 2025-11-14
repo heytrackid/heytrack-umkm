@@ -98,7 +98,11 @@
     "*.test.*",
     "**/__tests__/**",
     ".kiro",
-    "workers",
-    "src/types/supabase-generated.ts"
-  ]
+    "workers"
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
 }

@@ -53,7 +53,7 @@ interface OrderWithItems extends Order {
   order_items?: Array<Pick<OrderItem, 'product_name' | 'quantity'>>
 }
 
-interface OrdersTableProps {
+interface OrderProps {
   orders: OrderWithItems[]
   loading?: boolean
   onViewOrder: (order: OrderWithItems) => void
@@ -63,7 +63,7 @@ interface OrdersTableProps {
   onBulkAction?: (action: string, orderIds: string[]) => void
 }
 
-export const OrdersTableComponent = ({
+export const OrderComponent = ({
   orders,
   loading = false,
   onViewOrder,
@@ -71,7 +71,7 @@ export const OrdersTableComponent = ({
   onDeleteOrder,
   onUpdateStatus,
   onBulkAction
-}: OrdersTableProps) => {
+}: OrderProps) => {
   const { formatCurrency } = useCurrency()
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)

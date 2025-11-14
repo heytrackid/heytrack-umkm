@@ -1,6 +1,5 @@
 'use client'
 
-import { getSupabaseJwt } from '@/lib/supabase-jwt'
 import type { Database } from '@/types/database'
 import { createBrowserClient } from '@supabase/ssr'
 

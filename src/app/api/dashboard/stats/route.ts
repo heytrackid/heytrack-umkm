@@ -120,13 +120,7 @@ async function getTypedSupabase(): Promise<TypedSupabaseClient> {
   return typed(client)
 }
 
-async function requireUserId(): Promise<string> {
-  const authResult = await requireAuth()
-  if (isErrorResponse(authResult)) {
-    throw new Error('Unauthorized')
-  }
-  return authResult.id
-}
+
 
 function normalizeDate(value: string | null): string | undefined {
   if (!value) {

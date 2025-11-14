@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { getSupabaseJwt } from '@/lib/supabase-jwt'
-import type { Database } from '@/types/database-config'
+import type { Database } from '@/types/database'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 

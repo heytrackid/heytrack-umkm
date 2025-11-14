@@ -36,7 +36,7 @@ async function getSupplier(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = await createClient()
     const { data, error } = await supabase
@@ -78,7 +78,7 @@ async function updateSupplier(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = await createClient()
     const body = await request.json() as Update<'suppliers'>
@@ -128,7 +128,7 @@ async function deleteSupplier(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = await createClient()
     // Check if supplier is used in ingredients (RLS handles user_id filtering)

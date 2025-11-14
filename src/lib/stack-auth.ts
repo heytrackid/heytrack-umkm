@@ -4,6 +4,7 @@
  */
 
 import { stackServerApp } from '@/stack/server'
+import { logger } from '@/lib/logger'
 
 export interface StackUser {
   id: string
@@ -27,7 +28,7 @@ export async function getCurrentUser(): Promise<StackUser | null> {
       email: user.primaryEmail || null
     }
   } catch (error) {
-    console.error('Error getting current user:', error)
+    logger.error({ error }, 'Error getting current user')
     return null
   }
 }

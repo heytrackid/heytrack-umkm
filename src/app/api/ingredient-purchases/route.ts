@@ -23,7 +23,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
         if (isErrorResponse(authResult)) {
             return authResult
         }
-        const user = authResult
+        const _user = authResult
 
         const supabase = await createClient()
 
@@ -103,7 +103,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
         if (isErrorResponse(authResult)) {
             return authResult
         }
-        const user = authResult
+        const _user = authResult
 
         const supabase = await createClient()
 
@@ -132,7 +132,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
             .from('ingredients')
             .select('id, name, unit, current_stock, price_per_unit, user_id')
             .eq('id', validatedData.ingredient_id)
-            .eq('user_id', user['id'])
+            .eq('user_id', _user['id'])
             .single()
 
         if (ingredientError || !ingredient) {
@@ -155,7 +155,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
         // 1. Create financial transaction (expense)
         let financialTransactionId: string | null = null
         const financialRecord: Insert<'financial_records'> = {
-            user_id: user['id'],
+            user_id: _user['id'],
             type: 'EXPENSE',
             category: 'Pembelian Bahan Baku',
             amount: totalHarga,
@@ -180,7 +180,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
 
         // 2. Create purchase record
         const purchaseRecord: Insert<'ingredient_purchases'> = {
-            user_id: user['id'],
+            user_id: _user['id'],
             ingredient_id: validatedData.ingredient_id,
             ...(validatedData.supplier !== undefined && { supplier: validatedData.supplier }),
             quantity: qtyBeli,
@@ -235,7 +235,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
             .from('ingredients')
             .update(stockUpdate as never)
             .eq('id', validatedData.ingredient_id)
-            .eq('user_id', (user as { id: string }).id)
+            .eq('user_id', (_user as { id: string }).id)
             // Add optimistic lock: only update if current_stock hasn't changed
             .eq('current_stock', ingredientData.current_stock ?? 0)
 

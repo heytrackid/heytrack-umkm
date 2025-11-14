@@ -15,8 +15,8 @@ import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTr
 import { useToast } from '@/hooks/use-toast'
 import { createClientLogger } from '@/lib/client-logger'
 import {
-  batchSchedulingService,
-  type ProductionConstraints
+    batchSchedulingService,
+    type ProductionConstraints
 } from '@/services/production/BatchSchedulingService'
 
 const logger = createClientLogger('ProductionCapacityManager')
@@ -113,7 +113,7 @@ export const ProductionCapacityManager = ({
       )
 
     // Generate optimization recommendations
-    const recommendations = []
+    const recommendations: string[] = []
     if (bottleneck.resource === 'oven') {
       recommendations.push('Consider adding oven capacity during peak hours')
     }

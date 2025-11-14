@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import { NotificationUpdateSchema } from '@/lib/validations/domains/notification'
-import type { NotificationsTable } from '@/types/database'
+import type { Notification } from '@/types/database'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
  
@@ -62,7 +62,7 @@ async function putHandler(
       )
     }
 
-    const updateData: Partial<Pick<NotificationsTable, 'is_read' | 'is_dismissed' | 'updated_at'>> = {
+    const updateData: Partial<Pick<Notification, 'is_read' | 'is_dismissed' | 'updated_at'>> = {
       updated_at: new Date().toISOString()
     }
 

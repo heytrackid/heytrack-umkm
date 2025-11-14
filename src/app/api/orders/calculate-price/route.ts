@@ -5,11 +5,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { z } from 'zod'
 
-import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { APISecurity, InputSanitizer, SecurityPresets, withSecurity } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
+
 
 const OrderItemSchema = z.object({
   unit_price: z.number().finite().min(0, { message: 'unit_price must be >= 0' }),
@@ -35,8 +35,6 @@ async function calculatePricePOST(request: NextRequest): Promise<NextResponse> {
       return authResult
     }
     const user = authResult
-
-    const client = await createClient()
 
     const sanitizedBody = APISecurity.sanitizeRequestBody(await request.json())
     const parsedBody = CalculatePriceSchema.parse(sanitizedBody)

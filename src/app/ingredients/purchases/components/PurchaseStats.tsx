@@ -15,6 +15,7 @@ interface PurchaseStatsProps {
 const PurchaseStatsCard = ({ purchases }: PurchaseStatsProps): JSX.Element => {
   // Calculate stats
   const thisMonth = purchases.filter((p) => {
+    if (!p.purchase_date) return false
     const purchaseDate = new Date(p.purchase_date)
     const now = new Date()
     return purchaseDate.getMonth() === now.getMonth() &&

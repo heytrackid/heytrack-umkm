@@ -137,7 +137,7 @@ export class OrderPricingService {
           
           try {
             const latestHpp = await hppCalculator.getLatestHpp(supabase as any, recipe['id'], (recipe as any).user_id)
-            if (latestHpp && latestHpp.cost_per_unit > 0) {
+            if (latestHpp && latestHpp.cost_per_unit && latestHpp.cost_per_unit > 0) {
               estimated_cost = latestHpp.cost_per_unit
               dbLogger.info({ 
                 recipeId: recipe['id'], 

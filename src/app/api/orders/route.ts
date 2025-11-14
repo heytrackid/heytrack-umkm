@@ -5,15 +5,15 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger, logError } from '@/lib/logger'
-import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { createPaginationMeta } from '@/lib/validations/pagination'
-import type { Database, Insert, OrderStatus, Update } from '@/types/database'
+import type { Database, FinancialRecordInsert, FinancialRecordUpdate, OrderInsert, OrderStatus } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
@@ -23,10 +23,6 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 
 
-
-type FinancialRecordInsert = Insert<'financial_records'>
-type FinancialRecordUpdate = Update<'financial_records'>
-type OrderInsert = Insert<'orders'>
 
 interface FetchOrdersParams {
   page: number
@@ -204,7 +200,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 
     const validatedData = validation['data']
     const orderStatus = validatedData['status'] || 'PENDING'
-    let incomeRecordId = null
+    let incomeRecordId: string | null = null
 
     // Create income record if needed
     if (orderStatus === 'DELIVERED' && validatedData.total_amount && validatedData.total_amount > 0) {

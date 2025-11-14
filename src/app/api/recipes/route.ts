@@ -1,15 +1,15 @@
 export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
-import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { getErrorMessage } from '@/lib/type-guards'
 import { PaginationQuerySchema } from '@/lib/validations'
 import { RecipeInsertSchema } from '@/lib/validations/domains/recipe'
 import { createPaginationMeta } from '@/lib/validations/pagination'
-import type { Insert } from '@/types/database'
+import type { RecipeIngredientInsert, RecipeInsert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
 
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
@@ -207,7 +207,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         ...recipeData,
         created_by: user['id'],
         user_id: user['id']
-      } as Insert<'recipes'>])
+      } as RecipeInsert])
       .select('id, name, created_at')
       .single()
 
@@ -221,7 +221,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Add ingredients to recipe_ingredients (already validated by schema)
     const createdRecipe = recipe
-    const recipeIngredientsToInsert: Array<Insert<'recipe_ingredients'>> = ingredients.map((ingredient) => ({
+    const recipeIngredientsToInsert: RecipeIngredientInsert[] = ingredients.map((ingredient) => ({
       recipe_id: createdRecipe['id'],
       ingredient_id: ingredient.ingredient_id,
       quantity: ingredient.quantity,

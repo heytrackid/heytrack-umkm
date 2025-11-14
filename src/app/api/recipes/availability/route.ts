@@ -29,13 +29,13 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
-    const client = await createClient()
+    const _client = await createClient()
     const result = await RecipeAvailabilityService.checkAvailability(recipeId, quantity)
 
     apiLogger.info({
-      userId: user.id,
+      userId: _user.id,
       recipeId,
       quantity,
       isAvailable: result.is_available
@@ -56,9 +56,9 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
-    const client = await createClient()
+    const _client = await createClient()
     const body = await request.json() as { recipes?: Array<{ recipe_id: string; quantity: number }> }
     const { recipes } = body
 
@@ -72,7 +72,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const results = await RecipeAvailabilityService.checkMultipleRecipes(recipes)
 
     apiLogger.info({ 
-      userId: user['id'],
+      userId: _user['id'],
       recipeCount: recipes.length,
       availableCount: results.filter(r => r.is_available).length
     }, 'Multiple recipes checked')

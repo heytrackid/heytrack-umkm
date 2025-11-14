@@ -1,23 +1,20 @@
 import type {
-
-
-// Recipe types - use generated Supabase types as base
-  RecipesTable,
-  RecipesInsert,
-  RecipesUpdate,
-  RecipeIngredientsTable,
-  RecipeIngredientsInsert,
-  RecipeIngredientsUpdate
+    RecipeIngredientInsert as RecipeIngredientInsertType,
+    RecipeIngredient as RecipeIngredientRow,
+    RecipeIngredientUpdate as RecipeIngredientUpdateType,
+    RecipeInsert as RecipeInsertType,
+    Recipe as RecipeRow,
+    RecipeUpdate as RecipeUpdateType
 } from '@/types/database'
 
 // Base types from generated schema
-export type Recipe = RecipesTable
-export type RecipeInsert = RecipesInsert
-export type RecipeUpdate = RecipesUpdate
+export type Recipe = RecipeRow
+export type RecipeInsert = RecipeInsertType
+export type RecipeUpdate = RecipeUpdateType
 
-export type RecipeIngredient = RecipeIngredientsTable
-export type RecipeIngredientInsert = RecipeIngredientsInsert
-export type RecipeIngredientUpdate = RecipeIngredientsUpdate
+export type RecipeIngredient = RecipeIngredientRow
+export type RecipeIngredientInsert = RecipeIngredientInsertType
+export type RecipeIngredientUpdate = RecipeIngredientUpdateType
 
 // Extended types for UI
 export interface RecipeFormData extends Omit<Recipe, 'created_at' | 'id' | 'updated_at' | 'user_id'> {

@@ -1,5 +1,5 @@
 import { createClientLogger } from '@/lib/client-logger'
-import type { Database } from '@/types/supabase-generated'
+import type { Database } from '@/types/database'
 import { createClient } from '@/utils/supabase/client'
 import { useCallback, useEffect, useState } from 'react'
 

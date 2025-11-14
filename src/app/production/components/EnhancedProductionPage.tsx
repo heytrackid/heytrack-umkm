@@ -20,7 +20,12 @@ import { apiLogger } from '@/lib/logger'
 
 // Lazy load the ProductionFormDialog component as it's heavy
 const LazyProductionFormDialog = dynamic(
-  () => import('./ProductionFormDialog').then(mod => mod.ProductionFormDialog),
+  () => import('./ProductionFormDialog')
+    .then(mod => mod.ProductionFormDialog)
+    .catch((error) => {
+      console.error('Failed to load ProductionFormDialog:', error)
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load production form</div> }
+    }),
   {
     loading: () => (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

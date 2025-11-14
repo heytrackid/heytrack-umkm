@@ -30,7 +30,7 @@ async function getHandler(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = await createClient()
 
@@ -77,7 +77,7 @@ async function putHandler(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = await createClient()
 
@@ -155,7 +155,7 @@ async function deleteHandler(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = await createClient()
 

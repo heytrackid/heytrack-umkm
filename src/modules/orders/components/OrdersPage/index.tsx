@@ -34,15 +34,31 @@ import { OrdersList } from '@/modules/orders/components/OrdersPage/OrdersList'
 
 // ✅ Code Splitting - Lazy load heavy components
 // ✅ Correct pattern for named exports (per Next.js docs)
-const OrderForm = dynamic(() => import('../OrderForm').then(mod => mod.OrderForm), {
+const OrderForm = dynamic(
+  () => import('../OrderForm')
+    .then(mod => mod.OrderForm)
+    .catch((error) => {
+      console.error('Failed to load OrderForm:', error)
+      return { default: () => <div className="h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load form</div> }
+    }),
+  {
     loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
     ssr: false
-})
+  }
+)
 
-const OrderDetailView = dynamic(() => import('../OrderDetailView').then(mod => mod.OrderDetailView), {
+const OrderDetailView = dynamic(
+  () => import('../OrderDetailView')
+    .then(mod => mod.OrderDetailView)
+    .catch((error) => {
+      console.error('Failed to load OrderDetailView:', error)
+      return { default: () => <div className="h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load details</div> }
+    }),
+  {
     loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
     ssr: false
-})
+  }
+)
 
 // Import modular components
 

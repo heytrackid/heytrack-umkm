@@ -31,7 +31,12 @@ const defaultChartFallback = chartLoadingFallback()
 
 // Dynamically import chart components with loading fallback
 export const LazyFinancialTrendsChart = dynamic(
-  () => import('./FinancialTrendsChart').then(m => ({ default: m.FinancialTrendsChart })),
+  () => import('./FinancialTrendsChart')
+    .then(m => ({ default: m.FinancialTrendsChart }))
+    .catch((error) => {
+      console.error('Failed to load FinancialTrendsChart:', error)
+      return { default: () => chartLoadingFallback() }
+    }),
   {
     loading: chartLoadingFallback,
     ssr: false // Disable server-side rendering for chart components
@@ -39,7 +44,12 @@ export const LazyFinancialTrendsChart = dynamic(
 )
 
 export const LazyInventoryTrendsChart = dynamic(
-  () => import('./InventoryTrendsChart').then(m => ({ default: m.InventoryTrendsChart })),
+  () => import('./InventoryTrendsChart')
+    .then(m => ({ default: m.InventoryTrendsChart }))
+    .catch((error) => {
+      console.error('Failed to load InventoryTrendsChart:', error)
+      return { default: () => chartLoadingFallback() }
+    }),
   {
     loading: chartLoadingFallback,
     ssr: false
@@ -47,7 +57,12 @@ export const LazyInventoryTrendsChart = dynamic(
 )
 
 export const LazyMiniChart = dynamic(
-  () => import('./MiniChart').then(m => ({ default: m.MiniChart })),
+  () => import('./MiniChart')
+    .then(m => ({ default: m.MiniChart }))
+    .catch((error) => {
+      console.error('Failed to load MiniChart:', error)
+      return { default: () => chartLoadingFallback() }
+    }),
   {
     loading: chartLoadingFallback,
     ssr: false
@@ -56,7 +71,12 @@ export const LazyMiniChart = dynamic(
 
 // Recharts components (if they exist)
 export const LazyRechartsLineChart = dynamic(
-  () => import('recharts').then(module => ({ default: module.LineChart })),
+  () => import('recharts')
+    .then(module => ({ default: module.LineChart }))
+    .catch((error) => {
+      console.error('Failed to load recharts LineChart:', error)
+      return { default: () => chartLoadingFallback() }
+    }),
   {
     loading: chartLoadingFallback,
     ssr: false
@@ -64,7 +84,12 @@ export const LazyRechartsLineChart = dynamic(
 )
 
 export const LazyRechartsBarChart = dynamic(
-  () => import('recharts').then(module => ({ default: module.BarChart })),
+  () => import('recharts')
+    .then(module => ({ default: module.BarChart }))
+    .catch((error) => {
+      console.error('Failed to load recharts BarChart:', error)
+      return { default: () => chartLoadingFallback() }
+    }),
   {
     loading: chartLoadingFallback,
     ssr: false
@@ -72,7 +97,12 @@ export const LazyRechartsBarChart = dynamic(
 )
 
 export const LazyRechartsAreaChart = dynamic(
-  () => import('recharts').then(module => ({ default: module.AreaChart })),
+  () => import('recharts')
+    .then(module => ({ default: module.AreaChart }))
+    .catch((error) => {
+      console.error('Failed to load recharts AreaChart:', error)
+      return { default: () => chartLoadingFallback() }
+    }),
   {
     loading: chartLoadingFallback,
     ssr: false
@@ -80,7 +110,12 @@ export const LazyRechartsAreaChart = dynamic(
 )
 
 export const LazyRechartsPieChart = dynamic(
-  () => import('recharts').then(module => ({ default: module.PieChart })),
+  () => import('recharts')
+    .then(module => ({ default: module.PieChart }))
+    .catch((error) => {
+      console.error('Failed to load recharts PieChart:', error)
+      return { default: () => chartLoadingFallback() }
+    }),
   {
     loading: chartLoadingFallback,
     ssr: false
@@ -91,6 +126,9 @@ export const LazyRechartsPieChart = dynamic(
 export async function preloadChartComponents(): Promise<boolean> {
   // Preload chart components
   await Promise.all([
+    import('./FinancialTrendsChart'),
+    import('./InventoryTrendsChart'),
+    import('./MiniChart'),
   ])
 
   return true

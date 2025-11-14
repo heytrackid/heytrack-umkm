@@ -13,7 +13,7 @@ interface SkeletonProps {
 }
 
 // Skeleton untuk Orders Table
-export const OrdersTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
+export const OrderSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
       <div className="rounded-lg border border-border/20 overflow-hidden">
         {/* Table Header */}
@@ -54,7 +54,7 @@ export const OrdersTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { r
   )
 
 // Skeleton untuk Customers Table
-export const CustomersTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
+export const CustomerSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
       <div className="rounded-lg border border-border/20 overflow-hidden">
         {/* Table Header */}
@@ -131,7 +131,7 @@ export const InventoryTableSkeleton = ({ className, rows = 5 }: SkeletonProps & 
   )
 
 // Skeleton untuk Recipes Table
-export const RecipesTableSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
+export const RecipeSkeleton = ({ className, rows = 5 }: SkeletonProps & { rows?: number }) => (
     <div className={cn("", className)}>
       <div className="rounded-lg border border-border/20 overflow-hidden">
         {/* Table Header */}

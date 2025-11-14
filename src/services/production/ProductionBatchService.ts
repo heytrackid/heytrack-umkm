@@ -1,10 +1,8 @@
-import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import type { Insert, Update, Row, WithNestedRelation, Json } from '@/types/database'
-import { isRecord, hasKey, getErrorMessage, typed, safeGet } from '@/types/type-utilities'
+import type { Insert, Json, Row, Update } from '@/types/database'
+import { getErrorMessage, hasKey, isRecord, safeGet, typed } from '@/types/type-utilities'
 import { createClient } from '@/utils/supabase/server'
-
-
+import 'server-only'
 
 type JsonValue = Json
 
@@ -25,7 +23,9 @@ type Recipe = Row<'recipes'>
 type Order = Row<'orders'>
 type OrderItem = Row<'order_items'>
 
-type OrderItemWithRecipe = WithNestedRelation<OrderItem, 'recipe', 'recipes'>
+type OrderItemWithRecipe = OrderItem & {
+  recipe: Recipe | null
+}
 type OrderItemWithBoth = OrderItem & {
   recipe: Recipe | null
   order: Order | null

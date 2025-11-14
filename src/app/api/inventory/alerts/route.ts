@@ -25,7 +25,7 @@ async function GET(__request: NextRequest): Promise<NextResponse> {
     }
     const user = authResult
 
-    const supabase = typed(await createClient())
+    const _supabase = typed(await createClient())
     const alertService = new InventoryAlertService()
     const alerts = await alertService.getActiveAlerts(user.id)
 
@@ -53,7 +53,7 @@ async function POST(__request: NextRequest): Promise<NextResponse> {
     }
     const user = authResult
 
-    const supabase = await createClient()
+    const _supabase = await createClient()
     const alertService = new InventoryAlertService()
     await alertService.checkLowStockAlerts(user.id)
 

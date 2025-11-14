@@ -11,13 +11,11 @@
 export { useAuth } from './useAuth'
 
 // Database Hooks - ALL API-based versions
-// export { useCategories } from './useCategories' // TODO: File missing
 export { useCustomers } from './useCustomers'
 export { useIngredientPurchases } from './useIngredientPurchases'
 export { useIngredients } from './useIngredients'
 export { useOperationalCosts } from './useOperationalCosts'
-// export { useOrders } from './useOrders' // TODO: File missing - use useOrdersQuery instead
-// export { useProductionBatches } from './useProductionBatches' // TODO: File missing
+export { useOrder, useOrders, useOrderStats } from './useOrdersQuery'
 export { useRecipes } from './useRecipes'
 export { useSuppliers } from './useSuppliers'
 
@@ -30,7 +28,8 @@ export { useInstantNavigation } from './useInstantNavigation'
 export { useNotifications } from './useNotifications'
 
 // Dashboard Hooks
-// export { useDashboard } from './api/useDashboard' // TODO: File missing or export missing
+export { useDashboardStats, useTopProducts, useWeeklySales } from './api/useDashboard'
+export type { DashboardStats, TopProductsData, WeeklySalesData } from './api/useDashboard'
 
 // Supabase Hooks
 export { useSupabaseQuery } from './supabase/core'

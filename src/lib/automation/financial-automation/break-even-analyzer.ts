@@ -103,7 +103,13 @@ export class BreakEvenAnalyzer {
     pricePerUnit: number,
     sensitivityRange = 0.1
   ) {
-    const scenarios = []
+    const scenarios: Array<{
+      type: string
+      changePercent: number
+      breakEvenUnits: number
+      breakEvenRevenue: number
+      impact: number
+    }> = []
     const baseBreakEven = this.calculateBreakEven(fixedCosts, variableCostPerUnit, pricePerUnit)
 
     if (baseBreakEven.error) {return { error: baseBreakEven.error, scenarios: [] }}

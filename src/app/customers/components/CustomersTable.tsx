@@ -10,14 +10,14 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CustomerSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
-import { CustomersTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { useResponsive } from '@/hooks/useResponsive'
 
 import type { Row } from '@/types/database'
 type CustomerRow = Row<'customers'>
 
-interface CustomersTableProps {
+interface CustomerProps {
   customers: CustomerRow[]
   selectedItems: string[]
   onSelectItem: (itemId: string) => void
@@ -133,7 +133,7 @@ const MobileCustomerCard = ({
  * Customers Table Component with Pagination
  * Extracted from customers/page.tsx for code splitting
  */
-const CustomersTable = ({
+const Customer = ({
   customers,
   selectedItems,
   onSelectItem,
@@ -145,7 +145,7 @@ const CustomersTable = ({
   formatCurrency,
   isMobile,
   isLoading = false
-}: CustomersTableProps): JSX.Element => {
+}: CustomerProps): JSX.Element => {
   const { isMobile: responsiveIsMobile } = useResponsive()
   const mobile = isMobile || responsiveIsMobile
 
@@ -181,7 +181,7 @@ const CustomersTable = ({
   }
 
   if (isLoading) {
-    return <CustomersTableSkeleton rows={10} />
+    return <CustomerSkeleton rows={10} />
   }
 
   return (
@@ -373,4 +373,4 @@ const CustomersTable = ({
   )
 }
 
-export { CustomersTable }
+export { Customer as CustomersTable }

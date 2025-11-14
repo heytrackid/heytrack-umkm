@@ -145,7 +145,7 @@ Focus on Indonesian food business terminology.`
     const percentages = (query.match(/\d+%/g) ?? []).map(p => parseInt(p))
     const dates = query.match(/\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|hari ini|kemarin|besok|minggu ini|bulan ini/gi) ?? []
     
-    const timeframes = []
+    const timeframes: string[] = []
     if (/hari ini|today/i.test(query)) {timeframes.push('today')}
     if (/kemarin|yesterday/i.test(query)) {timeframes.push('yesterday')}
     if (/minggu ini|this week/i.test(query)) {timeframes.push('this_week')}
@@ -229,7 +229,7 @@ Focus on Indonesian food business terminology.`
       'berapa': 'how_much'
     }
     
-    let questionType = null
+    let questionType: string | null = null
     for (const [indo, eng] of Object.entries(questionWords)) {
       if (lowerQuery.includes(indo)) {
         questionType = eng
@@ -237,7 +237,7 @@ Focus on Indonesian food business terminology.`
       }
     }
     
-    const intents = []
+    const intents: Array<{ intent: string; confidence: number; entities: { numbers: number[] } }> = []
     
     if (/stok|persediaan|inventory/i.test(query)) {
       intents.push({ intent: 'check_inventory', confidence: 0.9, entities: { numbers } })
@@ -263,7 +263,7 @@ Focus on Indonesian food business terminology.`
     if (intents.length > 2) {complexity = 'complex'}
     else if (intents.length === 2 || numbers.length > 2) {complexity = 'medium'}
     
-    const contexts = []
+    const contexts: string[] = []
     if (/resep|recipe/i.test(query)) {contexts.push('recipes')}
     if (/bahan|ingredient/i.test(query)) {contexts.push('ingredients')}
     if (/hpp|cost/i.test(query)) {contexts.push('hpp')}

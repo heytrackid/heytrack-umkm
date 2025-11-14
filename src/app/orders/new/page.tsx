@@ -16,64 +16,103 @@ import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTr
 
 
 // Lazy load wizard step components
-const OrderCustomerStep = dynamic(() => import('./_components/OrderCustomerStep').then(m => ({ default: m.OrderCustomerStep })), {
-  loading: () => (
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {Array.from({ length: 4 }, (_, i) => (
-                              <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-                            ))}
+const OrderCustomerStep = dynamic(
+  () => import('./_components/OrderCustomerStep')
+    .then(m => ({ default: m.OrderCustomerStep }))
+    .catch((error) => {
+      console.error('Failed to load OrderCustomerStep:', error)
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load customer step</div> }
+    }),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="h-10 bg-muted animate-pulse rounded" />
+          ))}
+        </div>
+        <div className="h-32 bg-muted animate-pulse rounded" />
       </div>
-      <div className="h-32 bg-muted animate-pulse rounded" />
-    </div>
-  )
-})
+    )
+  }
+)
 
-const OrderItemsStep = dynamic(() => import('./_components/OrderItemsStep').then(m => ({ default: m.OrderItemsStep })), {
-  loading: () => (
-    <div className="space-y-4">
-      <div className="h-12 bg-muted animate-pulse rounded" />
-      <div className="space-y-3">
-        {Array.from({ length: 3 }, (_, i) => (
-          <div key={i} className="h-16 bg-muted animate-pulse rounded" />
-        ))}
+const OrderItemsStep = dynamic(
+  () => import('./_components/OrderItemsStep')
+    .then(m => ({ default: m.OrderItemsStep }))
+    .catch((error) => {
+      console.error('Failed to load OrderItemsStep:', error)
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load items step</div> }
+    }),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="h-12 bg-muted animate-pulse rounded" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }, (_, i) => (
+            <div key={i} className="h-16 bg-muted animate-pulse rounded" />
+          ))}
+        </div>
       </div>
-    </div>
-  )
-})
+    )
+  }
+)
 
-const OrderDeliveryStep = dynamic(() => import('./_components/OrderDeliveryStep').then(m => ({ default: m.OrderDeliveryStep })), {
-  loading: () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-        ))}
+const OrderDeliveryStep = dynamic(
+  () => import('./_components/OrderDeliveryStep')
+    .then(m => ({ default: m.OrderDeliveryStep }))
+    .catch((error) => {
+      console.error('Failed to load OrderDeliveryStep:', error)
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load delivery step</div> }
+    }),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="h-10 bg-muted animate-pulse rounded" />
+          ))}
+        </div>
       </div>
-    </div>
-  )
-})
+    )
+  }
+)
 
-const OrderPaymentStep = dynamic(() => import('./_components/OrderPaymentStep').then(m => ({ default: m.OrderPaymentStep })), {
-  loading: () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <div key={i} className="h-10 bg-muted animate-pulse rounded" />
-        ))}
+const OrderPaymentStep = dynamic(
+  () => import('./_components/OrderPaymentStep')
+    .then(m => ({ default: m.OrderPaymentStep }))
+    .catch((error) => {
+      console.error('Failed to load OrderPaymentStep:', error)
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load payment step</div> }
+    }),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="h-10 bg-muted animate-pulse rounded" />
+          ))}
+        </div>
       </div>
-    </div>
-  )
-})
+    )
+  }
+)
 
-const OrderSummary = dynamic(() => import('./_components/OrderSummary').then(m => ({ default: m.OrderSummary })), {
-  loading: () => (
-    <div className="space-y-4">
-      <div className="h-32 bg-muted animate-pulse rounded" />
-      <div className="flex gap-2">
-        <div className="h-10 bg-muted animate-pulse rounded flex-1" />
-        <div className="h-10 bg-muted animate-pulse rounded w-20" />
-      </div>
+const OrderSummary = dynamic(
+  () => import('./_components/OrderSummary')
+    .then(m => ({ default: m.OrderSummary }))
+    .catch((error) => {
+      console.error('Failed to load OrderSummary:', error)
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load order summary</div> }
+    }),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="h-32 bg-muted animate-pulse rounded" />
+        <div className="flex gap-2">
+          <div className="h-10 bg-muted animate-pulse rounded flex-1" />
+          <div className="h-10 bg-muted animate-pulse rounded w-20" />
+        </div>
     </div>
   )
 })

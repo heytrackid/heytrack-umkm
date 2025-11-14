@@ -4,20 +4,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 
 import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
-import { OrdersTableComponent } from '@/components/orders/orders-table'
+import { OrderComponent } from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { createClientLogger } from '@/lib/client-logger'
 import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'
 import { OrderDetailView } from '@/modules/orders/components/OrderDetailView'
 import { OrderForm } from '@/modules/orders/components/OrderForm'
 
-import type { OrdersTable as OrdersTableRow } from '@/types/database'
+import type { Order as OrderRow } from '@/types/database'
 
-const logger = createClientLogger('OrdersTableView')
+const logger = createClientLogger('OrderView')
 
-type Order = OrdersTableRow
+type Order = OrderRow
 
-export const OrdersTableView = () => {
+export const OrderView = () => {
   const queryClient = useQueryClient()
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [showOrderDetail, setShowOrderDetail] = useState(false)
@@ -198,7 +198,7 @@ export const OrdersTableView = () => {
 
   return (
     <>
-      <OrdersTableComponent
+      <OrderComponent
         orders={orders}
         loading={tableLoading}
         onViewOrder={handleViewOrder}

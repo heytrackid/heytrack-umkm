@@ -8,6 +8,7 @@ import { z } from 'zod'
  import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, safeNumber } from '@/lib/type-guards'
+import type { FinancialRecordInsert } from '@/types/database'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
@@ -50,9 +51,9 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     const { description, category, amount, date, type } = data
 
     // Insert into financial_records
-     
-    const { data: record, error: insertError } = await (supabase
-      .from('financial_records') as any)
+
+    const { data: record, error: insertError } = await supabase
+      .from('financial_records')
       .insert({
         user_id: user.id,
         type: type.toUpperCase() as 'EXPENSE' | 'INCOME',
@@ -61,7 +62,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
         amount,
         date,
         reference: `MANUAL-${Date.now()}`
-      })
+      } as FinancialRecordInsert)
       .select()
       .single()
 

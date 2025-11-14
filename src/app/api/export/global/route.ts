@@ -8,7 +8,6 @@ import { GlobalExportService } from '@/lib/export/global-export'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
 
 export const dynamic = 'force-dynamic'
 

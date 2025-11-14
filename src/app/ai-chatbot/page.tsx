@@ -11,17 +11,41 @@ import { useAIService, useChatMessages } from '@/app/ai-chatbot/hooks/index'
 
 // Lazy load heavy chatbot components
 // ✅ Correct pattern for named exports (per Next.js docs)
-const ChatHeader = dynamic(() => import('./components').then(mod => mod.ChatHeader), {
-  loading: () => <div className="h-16 bg-muted animate-pulse rounded-t-xl" />
-})
+const ChatHeader = dynamic(
+  () => import('./components')
+    .then(mod => mod.ChatHeader)
+    .catch((error) => {
+      logger.error({ error }, 'Failed to load ChatHeader:')
+      return { default: () => <div className="h-16 bg-red-100 rounded-t-xl flex items-center justify-center text-red-600">Failed to load chat header</div> }
+    }),
+  {
+    loading: () => <div className="h-16 bg-muted animate-pulse rounded-t-xl" />
+  }
+)
 
-const ChatInput = dynamic(() => import('./components').then(mod => mod.ChatInput), {
-  loading: () => <div className="h-20 bg-muted animate-pulse" />
-})
+const ChatInput = dynamic(
+  () => import('./components')
+    .then(mod => mod.ChatInput)
+    .catch((error) => {
+      logger.error({ error }, 'Failed to load ChatInput:')
+      return { default: () => <div className="h-20 bg-red-100 flex items-center justify-center text-red-600">Failed to load chat input</div> }
+    }),
+  {
+    loading: () => <div className="h-20 bg-muted animate-pulse" />
+  }
+)
 
-const MessageList = dynamic(() => import('./components').then(mod => mod.MessageList), {
-  loading: () => <div className="flex-1 bg-muted animate-pulse" />
-})
+const MessageList = dynamic(
+  () => import('./components')
+    .then(mod => mod.MessageList)
+    .catch((error) => {
+      logger.error({ error }, 'Failed to load MessageList:')
+      return { default: () => <div className="flex-1 bg-red-100 flex items-center justify-center text-red-600">Failed to load messages</div> }
+    }),
+  {
+    loading: () => <div className="flex-1 bg-muted animate-pulse" />
+  }
+)
 
 
 

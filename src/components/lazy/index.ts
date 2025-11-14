@@ -15,13 +15,27 @@ export { LazyDataTable } from './lazy-data-table'
 
 // Temporarily disabled due to syntax errors in table-lazy-loader.tsx
 // export {
-//   CRUDTableWithSuspense, DataTableWithSuspense, FinanceTableWithSuspense, InventoryTableWithSuspense, LazyCRUDTable, LazyFinanceTable, LazyInventoryTable, LazyOrdersTable, LazyVirtualizedTable, OrdersTableWithSuspense, preloadTableBundle, TableContainer, useRowVirtualization, useTableIntersectionObserver, useTablePerformance, VirtualizedTableWithSuspense, type TableType
+//   CRUDTableWithSuspense, DataTableWithSuspense, FinanceTableWithSuspense, InventoryTableWithSuspense, LazyCRUDTable, LazyFinanceTable, LazyInventoryTable, LazyOrder, LazyVirtualizedTable, OrderWithSuspense, preloadTableBundle, TableContainer, useRowVirtualization, useTableIntersectionObserver, useTablePerformance, VirtualizedTableWithSuspense, type TableType
 // } from './table-lazy-loader'
 
 // Modal Lazy Loading
 export {
-  LazyBulkActionModal,
-  LazyConfirmationModal, LazyCustomerDetail, LazyCustomerForm, LazyExportModal, LazyFinanceForm, LazyIngredientForm, LazyInventoryDetail, LazyModal, LazyOrderDetail, LazyOrderForm, LazyRecipeForm, ModalLoadingStrategy, preloadModalComponent, useConfirmationModal, useLazyModal
+    LazyBulkActionModal,
+    LazyConfirmationModal,
+    CustomerDetail as LazyCustomerDetail,
+    LazyCustomerForm,
+    LazyExportModal,
+    FinanceForm as LazyFinanceForm,
+    IngredientForm as LazyIngredientForm,
+    InventoryDetail as LazyInventoryDetail,
+    LazyModal,
+    LazyOrderDetail,
+    OrderForm as LazyOrderForm,
+    RecipeForm as LazyRecipeForm,
+    ModalLoadingStrategy,
+    preloadModalComponent,
+    useConfirmationModal,
+    useLazyModal
 } from './modal-lazy-loader'
 
 // Route-based Lazy Loading Strategy
@@ -149,6 +163,9 @@ export const LazyLoadingMetrics = {
   // Track bundle sizes
   bundleSizes: new Map<string, number>(),
 
+  // Track failures
+  failedComponents: new Map<string, number>(),
+
   // Add component load tracking
   trackComponentLoad: (componentName: string, startTime: number) => {
     const endTime = performance.now()
@@ -162,6 +179,18 @@ export const LazyLoadingMetrics = {
     }
   },
 
+  // Track component load failures
+  trackComponentFailure: (componentName: string, error: unknown) => {
+    const currentFailures = LazyLoadingMetrics.failedComponents.get(componentName) || 0
+    LazyLoadingMetrics.failedComponents.set(componentName, currentFailures + 1)
+
+    apiLogger.error({
+      componentName,
+      failureCount: currentFailures + 1,
+      error: error instanceof Error ? error.message : String(error)
+    }, 'Component load failure')
+  },
+
   // Get metrics summary
   getMetrics: () => ({
     totalComponents: LazyLoadingMetrics.loadedComponents.size,
@@ -169,8 +198,18 @@ export const LazyLoadingMetrics = {
       .reduce((a, b) => a + b, 0) / LazyLoadingMetrics.loadingTimes.size,
     slowComponents: Array.from(LazyLoadingMetrics.loadingTimes.entries())
       .filter(([_, time]) => time > 1000)
-      .map(([name, time]) => ({ name, time }))
-  })
+      .map(([name, time]) => ({ name, time })),
+    failedComponents: Array.from(LazyLoadingMetrics.failedComponents.entries())
+      .map(([name, count]) => ({ name, count }))
+  }),
+
+  // Reset metrics (useful for testing)
+  reset: () => {
+    LazyLoadingMetrics.loadedComponents.clear()
+    LazyLoadingMetrics.loadingTimes.clear()
+    LazyLoadingMetrics.bundleSizes.clear()
+    LazyLoadingMetrics.failedComponents.clear()
+  }
 }
 
 // Global lazy loading utilities

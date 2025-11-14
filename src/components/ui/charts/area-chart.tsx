@@ -8,13 +8,48 @@ import { type BaseMobileChartProps, CHART_COLORS } from '@/components/ui/charts/
 
 // Lazy load recharts components
 // ✅ Correct pattern for named exports with React.lazy
-const Area = lazy(() => import('recharts').then(mod => ({ default: mod.Area })))
-const AreaChart = lazy(() => import('recharts').then(mod => ({ default: mod.AreaChart })))
-const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
-const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
-const YAxis = lazy(() => import('recharts').then(mod => ({ default: mod.YAxis })))
-const Tooltip = lazy(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
-const ResponsiveContainer = lazy(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
+const Area = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.Area }))
+  .catch((error) => {
+    console.error('Failed to load recharts Area:', error)
+    throw error
+  }))
+const AreaChart = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.AreaChart }))
+  .catch((error) => {
+    console.error('Failed to load recharts AreaChart:', error)
+    throw error
+  }))
+const CartesianGrid = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.CartesianGrid }))
+  .catch((error) => {
+    console.error('Failed to load recharts CartesianGrid:', error)
+    throw error
+  }))
+const XAxis = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.XAxis }))
+  .catch((error) => {
+    console.error('Failed to load recharts XAxis:', error)
+    throw error
+  }))
+const YAxis = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.YAxis }))
+  .catch((error) => {
+    console.error('Failed to load recharts YAxis:', error)
+    throw error
+  }))
+const Tooltip = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.Tooltip }))
+  .catch((error) => {
+    console.error('Failed to load recharts Tooltip:', error)
+    throw error
+  }))
+const ResponsiveContainer = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.ResponsiveContainer }))
+  .catch((error) => {
+    console.error('Failed to load recharts ResponsiveContainer:', error)
+    throw error
+  }))
 
 /**
  * Mobile Area Chart Component

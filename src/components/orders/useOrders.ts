@@ -101,7 +101,7 @@ export function useOrders() {
 
           return {
             data: json['data'],
-            meta: json['meta'] || {}
+            meta: json['meta'] || null
           }
         }
 

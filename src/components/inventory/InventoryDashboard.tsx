@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { useSettings } from '@/contexts/settings-context'
+import type { ReorderSuggestion } from '@/hooks/useReorderManagement'
 // import { useInventoryAlerts, useReorderManagement } from '@/hooks/index' // TODO: Hooks missing
 // import { InventoryAlertsList } from '@/hooks/useInventoryAlerts'
 
 // Temporary placeholder component
-const InventoryAlertsList = ({ alerts, maxItems }: { alerts: any[]; maxItems?: number }) => <div>No alerts</div>
+const InventoryAlertsList = ({ alerts: _alerts, maxItems: _maxItems }: { alerts: unknown[]; maxItems?: number }) => <div>No alerts</div>
 
 
 
@@ -182,7 +183,7 @@ export const InventoryDashboard = (): JSX.Element => {
               </div>
             ) : (
               <div className="space-y-3">
-                {reorderData.suggestions.slice(0, 5).map((suggestion: any) => (
+                {reorderData.suggestions.slice(0, 5).map((suggestion: ReorderSuggestion) => (
                   <div key={suggestion.ingredient_id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">

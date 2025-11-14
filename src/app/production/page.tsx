@@ -3,10 +3,16 @@
 import dynamic from 'next/dynamic'
 
 import { AppLayout } from '@/components/layout/app-layout'
+import { logger } from '@/lib/logger'
 
 // Dynamically import the production page to optimize initial load
 const EnhancedProductionPage = dynamic(
-  () => import('./components/EnhancedProductionPage').then(m => ({ default: m.EnhancedProductionPage })),
+  () => import('./components/EnhancedProductionPage')
+    .then(m => ({ default: m.EnhancedProductionPage }))
+    .catch((error) => {
+      logger.error({ error }, 'Failed to load EnhancedProductionPage:')
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load production page</div> }
+    }),
   {
     loading: () => (
       <div className="space-y-6 p-6">

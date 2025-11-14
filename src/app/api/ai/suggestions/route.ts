@@ -14,12 +14,9 @@ import { BusinessContextService } from '@/lib/services/BusinessContextService'
 import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
 import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index'
 
-import { createClient } from '@/utils/supabase/server'
-
 async function getHandler(request: NextRequest): Promise<NextResponse> {
   try {
     apiLogger.info({ url: request.url }, 'GET /api/ai/suggestions - Request received')
-    const supabase = await createClient()
 
     // Authenticate with Stack Auth
     const authResult = await requireAuth()

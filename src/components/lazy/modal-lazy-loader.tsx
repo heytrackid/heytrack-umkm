@@ -1,11 +1,18 @@
 'use client'
 
-import { lazy, Suspense, useState, useCallback, type ComponentType } from 'react'
+import React, { lazy, Suspense, useState, useCallback, type ComponentType, type ReactNode } from 'react'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { logger } from '@/lib/logger'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-void import(/* webpackChunkName: "modal-customer-form" */ '@/components/forms/CustomerForm').then(m => ({ default: m.CustomerForm }))
+
+// Error fallback for lazy-loaded components
+const LazyErrorFallback = () => (
+  <div className="p-4 text-center text-destructive">
+    <p>Failed to load component</p>
+  </div>
+)
 
 // Modal Loading Skeleton
 const ModalLoadingSkeleton = ({ title }: { title?: string }) => (
@@ -39,44 +46,36 @@ const FormLoadingSkeleton = ({ fields = 4 }: { fields?: number }) => (
   </div>
 )
 
-// Lazy loaded form components - Placeholder implementations
-// These components don't exist yet in @/components, so we provide fallbacks
+// Placeholder components for forms/details that don't exist yet
 const FormPlaceholder = () => <div className="p-4 text-center text-muted-foreground">Form component not available</div>
 const DetailPlaceholder = () => <div className="p-4 text-center text-muted-foreground">Detail view not available</div>
 
-export const LazyIngredientForm = lazy(() =>
-  Promise.resolve({ default: FormPlaceholder })
-)
-
-export const LazyOrderForm = lazy(() =>
-  Promise.resolve({ default: FormPlaceholder })
-)
+// Form components - only CustomerForm exists as dynamic import
+export const IngredientForm = FormPlaceholder
+export const OrderForm = FormPlaceholder
+export const RecipeForm = FormPlaceholder
+export const FinanceForm = FormPlaceholder
 
 export const LazyCustomerForm = lazy(() =>
   import(/* webpackChunkName: "modal-customer-form" */ '@/components/forms/CustomerForm')
     .then(m => ({ default: m.CustomerForm }))
-    .catch(() => ({ default: FormPlaceholder }))
+    .catch((error) => {
+      logger.warn({ error }, 'Failed to load CustomerForm')
+      return { default: FormPlaceholder }
+    })
 )
 
-export const LazyRecipeForm = lazy(() =>
-  Promise.resolve({ default: FormPlaceholder })
-)
+// Detail components - OrderDetail exists, others are placeholders
+export const CustomerDetail = DetailPlaceholder
+export const InventoryDetail = DetailPlaceholder
 
-export const LazyFinanceForm = lazy(() =>
-  Promise.resolve({ default: FormPlaceholder })
-)
-
-// Lazy loaded detail/view components
 export const LazyOrderDetail = lazy(() =>
-  Promise.resolve({ default: DetailPlaceholder })
-)
-
-export const LazyCustomerDetail = lazy(() =>
-  Promise.resolve({ default: DetailPlaceholder })
-)
-
-export const LazyInventoryDetail = lazy(() =>
-  Promise.resolve({ default: DetailPlaceholder })
+  import(/* webpackChunkName: "modal-order-detail" */ '@/modules/orders/components/OrderDetailView')
+    .then(m => ({ default: m.OrderDetailView }))
+    .catch((error) => {
+      logger.warn({ error }, 'Failed to load OrderDetailView')
+      return { default: DetailPlaceholder }
+    })
 )
 
 // Lazy Modal Wrapper Component
@@ -102,15 +101,15 @@ export const LazyModal = ({
 
   const getComponent = () => {
     switch (component) {
-      case 'ingredient-form': return LazyIngredientForm
-      case 'order-form': return LazyOrderForm
+      case 'ingredient-form': return IngredientForm
+      case 'order-form': return OrderForm
       case 'customer-form': return LazyCustomerForm
-      case 'recipe-form': return LazyRecipeForm
-      case 'finance-form': return LazyFinanceForm
+      case 'recipe-form': return RecipeForm
+      case 'finance-form': return FinanceForm
       case 'order-detail': return LazyOrderDetail
-      case 'customer-detail': return LazyCustomerDetail
-      case 'inventory-detail': return LazyInventoryDetail
-       
+      case 'customer-detail': return CustomerDetail
+      case 'inventory-detail': return InventoryDetail
+
       default: {
         const DefaultComponent = () => <div>Informasi</div>
         Object.defineProperty(DefaultComponent, 'displayName', { value: 'DefaultComponent' })

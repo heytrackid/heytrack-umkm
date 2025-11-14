@@ -5,6 +5,7 @@ import { ResponsiveContainer } from 'recharts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { logger } from '@/lib/logger'
 
 /**
  * Canonical Lazy-loaded Chart Components
@@ -24,11 +25,16 @@ const ChartSkeleton = (): JSX.Element => (
     </div>
 )
 
-// Lazy load recharts components to avoid HMR issues with individual imports
+// Lazy load recharts components using shared bundle to avoid HMR issues
 export const LazyLineChart = dynamic(
     async () => {
-        const mod = await import('recharts')
-        return { default: mod.LineChart }
+        try {
+            const mod = await import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+            return { default: mod.LineChart }
+        } catch (error) {
+            logger.error({ error }, 'Failed to load recharts LineChart')
+            return { default: () => <ChartSkeleton /> }
+        }
     },
     {
         loading: () => <ChartSkeleton />,
@@ -38,8 +44,13 @@ export const LazyLineChart = dynamic(
 
 export const LazyBarChart = dynamic(
     async () => {
-        const mod = await import('recharts')
-        return { default: mod.BarChart }
+        try {
+            const mod = await import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+            return { default: mod.BarChart }
+        } catch (error) {
+            logger.error({ error }, 'Failed to load recharts BarChart')
+            return { default: () => <ChartSkeleton /> }
+        }
     },
     {
         loading: () => <ChartSkeleton />,
@@ -49,8 +60,13 @@ export const LazyBarChart = dynamic(
 
 export const LazyPieChart = dynamic(
     async () => {
-        const mod = await import('recharts')
-        return { default: mod.PieChart }
+        try {
+            const mod = await import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+            return { default: mod.PieChart }
+        } catch (error) {
+            logger.error({ error }, 'Failed to load recharts PieChart')
+            return { default: () => <ChartSkeleton /> }
+        }
     },
     {
         loading: () => <ChartSkeleton />,
@@ -60,8 +76,13 @@ export const LazyPieChart = dynamic(
 
 export const LazyAreaChart = dynamic(
     async () => {
-        const mod = await import('recharts')
-        return { default: mod.AreaChart }
+        try {
+            const mod = await import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+            return { default: mod.AreaChart }
+        } catch (error) {
+            logger.error({ error }, 'Failed to load recharts AreaChart')
+            return { default: () => <ChartSkeleton /> }
+        }
     },
     {
         loading: () => <ChartSkeleton />,
@@ -71,8 +92,13 @@ export const LazyAreaChart = dynamic(
 
 export const LazyComposedChart = dynamic(
     async () => {
-        const mod = await import('recharts')
-        return { default: mod.ComposedChart }
+        try {
+            const mod = await import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+            return { default: mod.ComposedChart }
+        } catch (error) {
+            logger.error({ error }, 'Failed to load recharts ComposedChart')
+            return { default: () => <ChartSkeleton /> }
+        }
     },
     {
         loading: () => <ChartSkeleton />,
@@ -91,6 +117,7 @@ export const ChartLegend = dynamic(
     return { default: mod.Legend }
   },
   {
+    loading: () => <div className="h-4 bg-muted animate-pulse rounded" />,
     ssr: false, // Charts don't need SSR
   }
 )
@@ -98,7 +125,7 @@ export const ChartLegend = dynamic(
 // Chart Bundle Preloader
 export const preloadChartBundle = () =>
     // Preload the entire recharts bundle when user interacts with dashboard
-    import('recharts')
+    import('recharts').catch(() => {})
 
 /**
  * Wrapper component for lazy-loaded charts with error boundary

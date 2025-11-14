@@ -8,7 +8,7 @@ import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { PricingAssistantService } from '@/services/orders/PricingAssistantService'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
-import { createClient } from '@/utils/supabase/server'
+
 
 interface PricingRecommendation {
   recommendedPrice: number
@@ -24,9 +24,6 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       return authResult
     }
     const user = authResult
-
-    // Create authenticated Supabase client
-    const supabase = await createClient()
 
     const body = await request.json() as { recipeId?: string }
     const { recipeId } = body

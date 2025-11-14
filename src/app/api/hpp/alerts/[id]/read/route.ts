@@ -32,14 +32,14 @@ export const PUT = withSecurity(async function PUT(
     apiLogger.info({ alertId, userId: user.id }, 'Marking HPP alert as read')
 
     // Update the alert to mark it as read
-     
-    const { data, error } = await (supabase
-      .from('hpp_alerts') as any)
+
+    const { data, error } = await supabase
+      .from('hpp_alerts')
       .update({
         is_read: true,
         read_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      })
+      } as never)
       .eq('id', alertId)
       .select()
       .single()

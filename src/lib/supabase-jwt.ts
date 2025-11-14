@@ -7,6 +7,7 @@
 
 import { stackServerApp } from '@/stack/server'
 import * as jose from 'jose'
+import { logger } from '@/lib/logger'
 
 /**
  * Generate Supabase JWT token for authenticated Stack Auth user
@@ -24,7 +25,7 @@ export async function getSupabaseJwt(): Promise<string | null> {
 
     const jwtSecret = process.env['SUPABASE_JWT_SECRET']
     if (!jwtSecret) {
-      console.error('SUPABASE_JWT_SECRET is not set')
+      logger.warn('SUPABASE_JWT_SECRET is not set')
       return null
     }
 
@@ -41,7 +42,7 @@ export async function getSupabaseJwt(): Promise<string | null> {
 
     return token
   } catch (error) {
-    console.error('Error generating Supabase JWT:', error)
+    logger.error({ error }, 'Error generating Supabase JWT')
     return null
   }
 }
@@ -55,7 +56,7 @@ export async function getAuthenticatedUserId(): Promise<string | null> {
     const user = await stackServerApp.getUser()
     return user?.id || null
   } catch (error) {
-    console.error('Error getting authenticated user ID:', error)
+    logger.error({ error }, 'Error getting authenticated user ID')
     return null
   }
 }

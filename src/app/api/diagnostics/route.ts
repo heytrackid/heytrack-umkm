@@ -5,7 +5,6 @@ import { NextRequest, NextResponse } from 'next/server'
 
  import { handleAPIError } from '@/lib/errors/api-error-handler'
  import { apiLogger } from '@/lib/logger'
-import { requireAuth, isErrorResponse } from '@/lib/api-auth'
  import { SecurityPresets, withSecurity } from '@/utils/security/index'
 
 interface EnvVarDiagnostics {

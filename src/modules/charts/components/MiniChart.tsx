@@ -18,7 +18,16 @@ export interface MiniChartProps {
 
 // Dynamically import Recharts to reduce initial bundle size
 const DynamicChart = dynamic(
-  () => import(/* webpackChunkName: "mini-chart-core" */ './MiniChartCore').then(m => ({ default: m.MiniChartCore })),
+  () => import(/* webpackChunkName: "mini-chart-core" */ './MiniChartCore')
+    .then(m => ({ default: m.MiniChartCore }))
+    .catch((error) => {
+      console.error('Failed to load MiniChartCore:', error)
+      return { default: () => (
+        <div className="flex items-center justify-center bg-red-100 rounded text-red-600 text-xs">
+          Failed to load chart
+        </div>
+      ) }
+    }),
   {
     loading: () => (
       <div className="flex items-center justify-center bg-muted rounded animate-pulse">

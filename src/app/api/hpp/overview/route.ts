@@ -11,19 +11,7 @@ import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 
-// Type for alerts with recipe relation
-interface AlertWithRecipe {
-  id: string
-  recipe_id: string
-  alert_type: string
-  title: string
-  message: string
-  severity: string
-  is_read: boolean | null
-  new_value: number | null
-  created_at: string | null
-  recipes: { name: string } | null
-}
+
 
 // GET /api/hpp/overview - Get comprehensive HPP overview data in one request
 async function GET(_request: NextRequest): Promise<NextResponse> {

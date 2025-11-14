@@ -26,11 +26,11 @@ async function putHandler(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
-    const supabase = await createClient()
+    const _supabase = await createClient()
     const alertService = new InventoryAlertService()
-    await alertService.acknowledgeAlert(id, user.id)
+    await alertService.acknowledgeAlert(id, _user.id)
 
     return NextResponse.json({ 
       message: 'Alert acknowledged successfully' 

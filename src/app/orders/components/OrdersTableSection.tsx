@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { LoadingButton } from '@/components/ui/loading-button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { OrdersTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { OrderSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { useToast } from '@/hooks/index'
 
 import type { Row } from '@/types/database'
@@ -17,7 +17,7 @@ import type { Row } from '@/types/database'
 
 type OrderForTable = Row<'orders'>
 
-const OrdersTableSection = ({
+const OrderSection = ({
   orders,
   formatCurrency,
   formatDate,
@@ -118,7 +118,7 @@ const OrdersTableSection = ({
   }
 
   if (isLoading) {
-    return <OrdersTableSkeleton rows={10} />
+    return <OrderSkeleton rows={10} />
   }
 
   return (
@@ -264,4 +264,4 @@ const OrdersTableSection = ({
   )
 }
 
-export const OrdersTableSectionMemo = memo(OrdersTableSection)
+export const OrderSectionMemo = memo(OrderSection)

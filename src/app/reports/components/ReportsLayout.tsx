@@ -19,7 +19,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 
-const SalesReport = dynamic(() => import('./SalesReport').then(m => ({ default: m.SalesReport })), {
+const SalesReport = dynamic(
+  () => import('./SalesReport')
+    .then(m => ({ default: m.SalesReport }))
+    .catch((error) => {
+      console.error('Failed to load SalesReport:', error)
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load sales report</div> }
+    }),
+  {
   loading: () => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -37,53 +44,76 @@ const SalesReport = dynamic(() => import('./SalesReport').then(m => ({ default: 
   ssr: false
 })
 
-const InventoryReport = dynamic(() => import('./InventoryReport').then(m => ({ default: m.InventoryReport })), {
-  loading: () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
-        ))}
+const InventoryReport = dynamic(
+  () => import('./InventoryReport')
+    .then(m => ({ default: m.InventoryReport }))
+    .catch((error) => {
+      console.error('Failed to load InventoryReport:', error)
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load inventory report</div> }
+    }),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="h-64 bg-muted/50 rounded animate-pulse" />
+          <div className="h-64 bg-muted/50 rounded animate-pulse" />
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="h-64 bg-muted/50 rounded animate-pulse" />
-        <div className="h-64 bg-muted/50 rounded animate-pulse" />
-      </div>
-    </div>
-  ),
-  ssr: false
-})
+    ),
+    ssr: false
+  }
+)
 
-const FinancialReport = dynamic(() => import('./FinancialReport').then(m => ({ default: m.FinancialReport })), {
-  loading: () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
-        ))}
+const FinancialReport = dynamic(
+  () => import('./FinancialReport')
+    .then(m => ({ default: m.FinancialReport }))
+    .catch((error) => {
+      console.error('Failed to load FinancialReport:', error)
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load financial report</div> }
+    }),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="h-48 bg-muted/50 rounded animate-pulse" />
+          <div className="h-48 bg-muted/50 rounded animate-pulse" />
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="h-48 bg-muted/50 rounded animate-pulse" />
-        <div className="h-48 bg-muted/50 rounded animate-pulse" />
-      </div>
-    </div>
-  ),
-  ssr: false
-})
+    ),
+    ssr: false
+  }
+)
 
-const EnhancedProfitReport = dynamic(() => import('./EnhancedProfitReport').then(m => ({ default: m.EnhancedProfitReport })), {
-  loading: () => (
-    <div className="space-y-4">
-      <div className="h-16 bg-muted/50 rounded animate-pulse" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
-        ))}
+const EnhancedProfitReport = dynamic(
+  () => import('./EnhancedProfitReport')
+    .then(m => ({ default: m.EnhancedProfitReport }))
+    .catch((error) => {
+      console.error('Failed to load EnhancedProfitReport:', error)
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load profit report</div> }
+    }),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="h-16 bg-muted/50 rounded animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="h-24 bg-muted/50 rounded animate-pulse" />
+          ))}
+        </div>
+        <div className="h-96 bg-muted/50 rounded animate-pulse" />
       </div>
-      <div className="h-96 bg-muted/50 rounded animate-pulse" />
-    </div>
-  ),
-  ssr: false
+    ),
+    ssr: false
 })
 
 // Reports Layout - Main structure and navigation

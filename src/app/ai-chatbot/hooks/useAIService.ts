@@ -1,10 +1,9 @@
 import { apiLogger } from '@/lib/logger';
-import { useSupabase } from '@/providers/SupabaseProvider';
 
 
 
 export function useAIService(sessionId?: string | null): { processAIQuery: (query: string) => Promise<{ message: string; suggestions: string[]; data?: Record<string, unknown> }> } {
-  const { supabase } = useSupabase()
+  // const { supabase } = useSupabase()
 
 
   const processAIQuery = async (query: string): Promise<{ message: string; suggestions: string[]; data?: Record<string, unknown> }> => {

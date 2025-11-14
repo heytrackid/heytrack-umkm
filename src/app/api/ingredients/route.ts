@@ -1,14 +1,14 @@
 export const runtime = 'nodejs'
 import { z } from 'zod'
 
-import { createSuccessResponse, createErrorResponse, handleAPIError, withQueryValidation, PaginationSchema, calculateOffset, createPaginationMeta } from '@/lib/api-core'
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
+import { PaginationSchema, calculateOffset, createErrorResponse, createPaginationMeta, createSuccessResponse, handleAPIError, withQueryValidation } from '@/lib/api-core'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
-import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { IngredientInsertSchema } from '@/lib/validations/domains/ingredient'
-import type { Insert } from '@/types/database'
+import type { IngredientInsert } from '@/types/database'
 import { typed } from '@/types/type-utilities'
-import { withSecurity, SecurityPresets } from '@/utils/security/index'
+import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
 import type { NextRequest, NextResponse } from 'next/server'
@@ -39,7 +39,7 @@ async function GET(request: NextRequest): Promise<NextResponse> {
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     // Create authenticated Supabase client
     const supabase = typed(await createClient())
@@ -113,7 +113,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = typed(await createClient())
 
@@ -128,7 +128,7 @@ async function POST(request: NextRequest): Promise<NextResponse> {
       supplier: validatedData.supplier ?? null,
       description: validatedData.description ?? null,
       is_active: validatedData.is_active ?? true,
-    } as Insert<'ingredients'>
+    } as IngredientInsert
 
     const { data: insertedData, error } = await supabase
       .from('ingredients')

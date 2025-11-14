@@ -8,14 +8,44 @@ import { type BaseMobileChartProps, CHART_COLORS } from '@/components/ui/charts/
 
 import type { PieLabelRenderProps } from 'recharts'
 
-// Lazy load recharts components
+// Lazy load recharts components using shared bundle
 // ✅ Correct pattern for named exports with React.lazy
-const Pie = lazy(() => import('recharts').then(mod => ({ default: mod.Pie })))
-const PieChart = lazy(() => import('recharts').then(mod => ({ default: mod.PieChart })))
-const Cell = lazy(() => import('recharts').then(mod => ({ default: mod.Cell })))
-const Tooltip = lazy(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
-const Legend = lazy(() => import('recharts').then(mod => ({ default: mod.Legend })))
-const ResponsiveContainer = lazy(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
+const Pie = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.Pie }))
+  .catch((error) => {
+    console.error('Failed to load recharts Pie:', error)
+    throw error
+  }))
+const PieChart = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.PieChart }))
+  .catch((error) => {
+    console.error('Failed to load recharts PieChart:', error)
+    throw error
+  }))
+const Cell = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.Cell }))
+  .catch((error) => {
+    console.error('Failed to load recharts Cell:', error)
+    throw error
+  }))
+const Tooltip = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.Tooltip }))
+  .catch((error) => {
+    console.error('Failed to load recharts Tooltip:', error)
+    throw error
+  }))
+const Legend = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.Legend }))
+  .catch((error) => {
+    console.error('Failed to load recharts Legend:', error)
+    throw error
+  }))
+const ResponsiveContainer = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.ResponsiveContainer }))
+  .catch((error) => {
+    console.error('Failed to load recharts ResponsiveContainer:', error)
+    throw error
+  }))
 
 /**
  * Mobile Pie Chart Component

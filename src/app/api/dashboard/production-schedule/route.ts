@@ -62,13 +62,7 @@ async function getSupabaseClient(): Promise<TypedSupabaseClient> {
   return typed(await createClient())
 }
 
-async function requireUserId(): Promise<string> {
-  const authResult = await requireAuth()
-  if (isErrorResponse(authResult)) {
-    throw new Error('Unauthorized')
-  }
-  return authResult.id
-}
+
 
 function getTodayRange(): { start: string; end: string } {
   const today = new Date()

@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
  import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
-import type { NotificationsTable } from '@/types/database'
+import type { Notification } from '@/types/database'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
  
@@ -27,7 +27,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     const { category } = _body
 
     // Build query
-    const updateData: Partial<Pick<NotificationsTable, 'is_read' | 'updated_at'>> = {
+    const updateData: Partial<Pick<Notification, 'is_read' | 'updated_at'>> = {
       is_read: true,
       updated_at: new Date().toISOString(),
     }

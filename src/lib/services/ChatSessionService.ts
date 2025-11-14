@@ -62,6 +62,8 @@ export class ChatSessionService {
 
     return {
       ...data,
+      created_at: data.created_at ?? new Date().toISOString(),
+      updated_at: data.updated_at ?? new Date().toISOString(),
       context_snapshot: (data.context_snapshot as BusinessContext | null) ?? {},
     }
   }
@@ -89,6 +91,8 @@ export class ChatSessionService {
 
     return {
       ...data,
+      created_at: data.created_at ?? new Date().toISOString(),
+      updated_at: data.updated_at ?? new Date().toISOString(),
       context_snapshot: (data.context_snapshot as BusinessContext | null) ?? {},
     }
   }
@@ -127,6 +131,8 @@ export class ChatSessionService {
     sessions.forEach((session) => {
       sessionMap.set(session['id'], {
         ...session,
+        created_at: session.created_at ?? new Date().toISOString(),
+        updated_at: session.updated_at ?? new Date().toISOString(),
         message_count: 0,
         last_message: undefined,
       });

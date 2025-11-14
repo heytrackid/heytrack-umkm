@@ -34,15 +34,31 @@ const logger = createClientLogger('OrdersPage')
 
 // ✅ Code Splitting - Lazy load heavy components
 // ✅ Correct pattern for named exports (per Next.js docs)
-const OrderForm = dynamic(() => import('./OrderForm').then(mod => mod.OrderForm), {
-  loading: () => <div className="h-64 sm:h-96 animate-pulse bg-gray-100 rounded-lg" />,
-  ssr: false
-})
+const OrderForm = dynamic(
+  () => import('./OrderForm')
+    .then(mod => mod.OrderForm)
+    .catch((error) => {
+      console.error('Failed to load OrderForm:', error)
+      return { default: () => <div className="h-64 sm:h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load order form</div> }
+    }),
+  {
+    loading: () => <div className="h-64 sm:h-96 animate-pulse bg-gray-100 rounded-lg" />,
+    ssr: false
+  }
+)
 
-const OrderDetailView = dynamic(() => import('./OrderDetailView').then(mod => mod.OrderDetailView), {
-  loading: () => <div className="h-64 sm:h-96 animate-pulse bg-gray-100 rounded-lg" />,
-  ssr: false
-})
+const OrderDetailView = dynamic(
+  () => import('./OrderDetailView')
+    .then(mod => mod.OrderDetailView)
+    .catch((error) => {
+      console.error('Failed to load OrderDetailView:', error)
+      return { default: () => <div className="h-64 sm:h-96 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load order details</div> }
+    }),
+  {
+    loading: () => <div className="h-64 sm:h-96 animate-pulse bg-gray-100 rounded-lg" />,
+    ssr: false
+  }
+)
 
 // Local types
 interface OrderFilters {

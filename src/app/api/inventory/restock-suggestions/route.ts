@@ -34,14 +34,14 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
-    const client = await createClient()
+    const _client = await createClient()
 
-    const suggestions = await RecipeAvailabilityService.getRestockSuggestions(user.id)
+    const suggestions = await RecipeAvailabilityService.getRestockSuggestions(_user.id)
 
     apiLogger.info({
-      userId: user.id,
+      userId: _user.id,
       suggestionsCount: suggestions.length,
       criticalCount: suggestions.filter((s: RestockSuggestion) => s.urgency === 'CRITICAL').length
     }, 'Restock suggestions fetched')

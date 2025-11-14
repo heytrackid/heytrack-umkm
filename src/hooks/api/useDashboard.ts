@@ -55,6 +55,19 @@ export interface DashboardStats {
   expenses: {
     netProfit: number
   }
+  // Flat properties for easier access
+  totalOrders: number
+  pendingOrders: number
+  totalRevenue: number
+  completedOrders: number
+  totalCustomers: number
+  lowStockItems: number
+  totalRecipes: number
+  cashFlow: {
+    totalIncome: number
+    totalExpense: number
+    netCashFlow: number
+  }
   lastUpdated: number
 }
 
@@ -131,6 +144,19 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       expenses: {
         netProfit: result.expenses.netProfit
       },
+      // Flat properties for easier access
+      totalOrders: result.orders.total,
+      pendingOrders: result.orders.active,
+      totalRevenue: result.revenue.total,
+      completedOrders: result.orders.today, // Assuming today orders are completed
+      totalCustomers: result.customers.total,
+      lowStockItems: result.inventory.lowStock,
+      totalRecipes: result.recipes.total || 0,
+      cashFlow: {
+        totalIncome: result.revenue.total,
+        totalExpense: result.expenses.total || 0,
+        netCashFlow: result.expenses.netProfit
+      },
       lastUpdated: result.lastUpdated
     }
   } catch (error) {
@@ -146,6 +172,19 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       orders: { active: 0, today: 0, total: 0, recent: [] },
       customers: { total: 0, vip: 0 },
       expenses: { netProfit: 0 },
+      // Flat properties for easier access
+      totalOrders: 0,
+      pendingOrders: 0,
+      totalRevenue: 0,
+      completedOrders: 0,
+      totalCustomers: 0,
+      lowStockItems: 0,
+      totalRecipes: 0,
+      cashFlow: {
+        totalIncome: 0,
+        totalExpense: 0,
+        netCashFlow: 0
+      },
       lastUpdated: Date.now()
     }
   }

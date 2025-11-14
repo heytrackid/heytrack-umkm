@@ -7,7 +7,7 @@ import { cacheInvalidation, cacheKeys, withCache } from '@/lib/cache'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { PaginationQuerySchema } from '@/lib/validations'
-import type { HppRecommendationsTable } from '@/types/database'
+import type { HppRecommendation } from '@/types/database'
 import { createSecureHandler, SecurityPresets } from '@/utils/security/index'
 
 import { createClient } from '@/utils/supabase/server'
@@ -52,7 +52,7 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     const cacheKey = `${cacheKeys.hpp.recommendations}:${user['id']}:${page}:${limit}:${search ?? ''}:${sort_by ?? ''}:${sort_order ?? ''}:${recipeId ?? ''}:${priority ?? ''}:${isImplemented ?? ''}`
 
     // Wrap database query with caching
-    const getRecommendations = async (): Promise<{ recommendations: HppRecommendationsTable[], total: number, page: number, limit: number, totalPages: number }> => {
+    const getRecommendations = async (): Promise<{ recommendations: HppRecommendation[], total: number, page: number, limit: number, totalPages: number }> => {
       let query = supabase
         .from('hpp_recommendations')
         .select(`
@@ -165,9 +165,9 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
       is_implemented: false,
       user_id: user['id']
     }
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('hpp_recommendations')
-      .insert(insertData as any)
+      .insert(insertData)
       .select()
       .single()
 

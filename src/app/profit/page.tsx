@@ -3,6 +3,7 @@
 import { AlertCircle, Download, Loader2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
+import { logger } from '@/lib/logger'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -43,7 +44,12 @@ const LoadingChart = () => (
 // Only lazy load HEAVY chart components
 // ✅ Correct pattern for named exports (per Next.js docs)
 const ProductProfitabilityChart = dynamic(
-  () => import(/* webpackChunkName: "profit-chart" */ './components').then(mod => mod.ProductProfitabilityChart),
+  () => import(/* webpackChunkName: "profit-chart" */ './components')
+    .then(mod => mod.ProductProfitabilityChart)
+    .catch((error) => {
+      logger.error({ error }, 'Failed to load ProductProfitabilityChart')
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load profit chart</div> }
+    }),
   {
     loading: LoadingChart
   }

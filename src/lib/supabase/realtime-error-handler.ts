@@ -1,9 +1,11 @@
 /**
  * Supabase Realtime Error Handler
- * 
+ *
  * Suppresses noisy WebSocket connection errors in the browser console
  * while still allowing Supabase to handle reconnection automatically.
  */
+
+import { logger } from '@/lib/logger'
 
 // Store original console.error
 const originalConsoleError = console.error
@@ -34,7 +36,7 @@ export function initRealtimeErrorSuppression() {
 
     if (!shouldSuppress) {
       // Pass through other errors normally
-      originalConsoleError.apply(console, args)
+      logger.error(args.join(' '))
     }
     // Silently ignore WebSocket errors - Supabase handles reconnection
   }

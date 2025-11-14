@@ -7,15 +7,15 @@ import { MobileTooltip } from '@/components/ui/charts/mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from '@/components/ui/charts/types'
 
 // Lazy load recharts components
-// ✅ Correct pattern for named exports with React.lazy
-const Line = lazy(() => import('recharts').then(mod => ({ default: mod.Line })))
-const LineChart = lazy(() => import('recharts').then(mod => ({ default: mod.LineChart })))
-const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
-const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
-const YAxis = lazy(() => import('recharts').then(mod => ({ default: mod.YAxis })))
-const Tooltip = lazy(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
-const Legend = lazy(() => import('recharts').then(mod => ({ default: mod.Legend })))
-const ResponsiveContainer = lazy(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
+// ✅ Correct pattern for named exports with React.lazy using shared recharts bundle
+const Line = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts').then(mod => ({ default: mod.Line })))
+const LineChart = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts').then(mod => ({ default: mod.LineChart })))
+const CartesianGrid = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts').then(mod => ({ default: mod.CartesianGrid })))
+const XAxis = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts').then(mod => ({ default: mod.XAxis })))
+const YAxis = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts').then(mod => ({ default: mod.YAxis })))
+const Tooltip = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts').then(mod => ({ default: mod.Tooltip })))
+const Legend = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts').then(mod => ({ default: mod.Legend })))
+const ResponsiveContainer = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts').then(mod => ({ default: mod.ResponsiveContainer })))
 
 /**
  * Mobile Line Chart Component

@@ -7,7 +7,7 @@ import { createErrorResponse, createSuccessResponse } from '@/lib/api-core'
 import { apiLogger } from '@/lib/logger'
 import { extractFirst, getErrorMessage, isRecord, isValidUUID } from '@/lib/type-guards'
 import type { IngredientPurchaseUpdate } from '@/lib/validations/database-validations'
-import type { BypassRLS, Insert, Update } from '@/types/database'
+import type { Insert, Update } from '@/types/database'
 import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 
@@ -221,7 +221,7 @@ export const PUT = withSecurity(async function PUT(
 
       const { error: transactionError } = await supabase
         .from('stock_transactions')
-        .insert(adjustmentTransaction as BypassRLS<typeof adjustmentTransaction>)
+        .insert(adjustmentTransaction as never)
 
       if (transactionError) {
         apiLogger.error({ error: transactionError }, 'Failed to create adjustment transaction')
@@ -241,7 +241,7 @@ export const PUT = withSecurity(async function PUT(
 
       await supabase
         .from('inventory_stock_logs')
-        .insert(stockLog as BypassRLS<typeof stockLog>)
+        .insert(stockLog as never)
     }
 
     return createSuccessResponse(updatedPurchase)
@@ -315,7 +315,7 @@ export const DELETE = withSecurity(async function DELETE(
 
     const { error: transactionError } = await supabase
       .from('stock_transactions')
-      .insert(reversalTransaction as BypassRLS<typeof reversalTransaction>)
+      .insert(reversalTransaction as never)
 
     if (transactionError) {
       apiLogger.error({ error: transactionError }, 'Failed to create reversal transaction')
@@ -336,7 +336,7 @@ export const DELETE = withSecurity(async function DELETE(
 
     await supabase
       .from('inventory_stock_logs')
-      .insert(reversalLog as BypassRLS<typeof reversalLog>)
+      .insert(reversalLog as never)
 
     // Delete purchase
     const { error: deleteError } = await supabase

@@ -1,6 +1,3 @@
-import type { 
-
-
 /**
  * Type Guards and Assertions
  * Provides runtime type checking functions
@@ -17,30 +14,22 @@ import type {
  * Validation functions return detailed error information for debugging.
  */
 
-  CustomersTable, 
-  IngredientsTable, 
-  IngredientPurchasesTable, 
-  OrdersTable, 
-  OrderItemsTable, 
-  OrderStatus,
-  RecipesTable, 
-  RecipeIngredientsTable, 
-  SuppliersTable, 
-  UserProfilesTable 
+import type {
+    Customer,
+    Ingredient,
+    IngredientPurchase,
+    Order,
+    OrderItem,
+    OrderStatus,
+    Recipe,
+    RecipeIngredient,
+    Supplier,
+    UserProfile
 } from '@/types/database';
 
 import type { ApiError, ApiResponse } from '@/types/shared/api';
 
 // Type aliases for easier use in guards
-type Customer = CustomersTable;
-type Ingredient = IngredientsTable;
-type IngredientPurchase = IngredientPurchasesTable;
-type Order = OrdersTable;
-type OrderItem = OrderItemsTable;
-type Recipe = RecipesTable;
-type RecipeIngredient = RecipeIngredientsTable;
-type Supplier = SuppliersTable;
-type UserProfile = UserProfilesTable;
 type PaymentStatus = 'paid' | 'partial' | 'unpaid';
 
 /**

@@ -35,14 +35,14 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
-    const client = await createClient()
+    const _client = await createClient()
 
-    const suggestions = await ProductionBatchService.getSuggestedBatches(user.id)
+    const suggestions = await ProductionBatchService.getSuggestedBatches(_user.id)
 
     apiLogger.info({
-      userId: user.id,
+      userId: _user.id,
       suggestionsCount: suggestions.length
     }, 'GET /api/production/suggestions - Success')
 
@@ -73,15 +73,15 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
-    const client = await createClient()
+    const _client = await createClient()
 
     const { order_ids, planned_date } = CreateBatchSchema.parse(await request.json())
 
     const result = await ProductionBatchService.createBatchFromOrders(
       order_ids,
-      user.id,
+      _user.id,
       planned_date
     )
 
@@ -93,7 +93,7 @@ async function postHandler(request: NextRequest): Promise<NextResponse> {
     }
 
     apiLogger.info({ 
-      userId: user['id'],
+      userId: _user['id'],
       batchId: result.batch_id,
       orderCount: order_ids.length
     }, 'POST /api/production/suggestions - Batch created')

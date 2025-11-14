@@ -58,11 +58,11 @@ async function getHandler(request: NextRequest): Promise<NextResponse> {
         id: string
         recipe_id: string | null
         calculation_date: string | null
-        material_cost: number
-        labor_cost: number
-        overhead_cost: number
-        total_hpp: number
-        cost_per_unit: number
+        material_cost: number | null
+        labor_cost: number | null
+        overhead_cost: number | null
+        total_hpp: number | null
+        cost_per_unit: number | null
         production_quantity: number | null
         wac_adjustment: number | null
         notes: string | null

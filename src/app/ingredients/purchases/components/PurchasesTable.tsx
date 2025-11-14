@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { InventoryTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 import type { IngredientPurchase } from '@/app/ingredients/purchases/components/types'
 
@@ -56,7 +56,7 @@ const PurchasesTable = ({ purchases, isLoading = false }: PurchasesTableProps): 
                 purchases.map((purchase) => (
                   <TableRow key={purchase['id']}>
                     <TableCell>
-                      {new Date(purchase.purchase_date).toLocaleDateString('id-ID')}
+                      {purchase.purchase_date ? new Date(purchase.purchase_date).toLocaleDateString('id-ID') : '-'}
                     </TableCell>
                     <TableCell>
                       <div>

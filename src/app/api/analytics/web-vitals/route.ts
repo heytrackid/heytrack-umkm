@@ -5,11 +5,10 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
-import { APIError, handleAPIError } from '@/lib/errors/api-error-handler'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { SecurityPresets, createSecureHandler } from '@/utils/security/index'
-import { createClient } from '@/utils/supabase/server'
 
 const WebVitalsSchema = z.object({
   name: z.string().trim().min(1).max(80),

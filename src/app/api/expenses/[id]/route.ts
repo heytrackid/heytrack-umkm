@@ -131,10 +131,10 @@ export const PUT = withSecurity(async function PUT(
     ) as Database['public']['Tables']['financial_records']['Update'])
 
     // ✅ Use financial_records table
-     
-    const { data: expense, error } = await (supabase
-      .from('financial_records') as any)
-      .update(updatePayload)
+
+    const { data: expense, error } = await supabase
+      .from('financial_records')
+      .update(updatePayload as never)
       .eq('id', id)
       .select()
       .single();

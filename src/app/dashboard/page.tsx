@@ -13,7 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { DashboardHeaderSkeleton, RecentOrdersSkeleton, StatsCardSkeleton, StockAlertSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 
-import { useToast } from '@/hooks/use-toast'
+// Toast hook available for future use
+// import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
 
@@ -75,8 +76,8 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
 
 const DashboardPage = () => {
   const { formatCurrency } = useCurrency()
-  const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth()
-  const { toast } = useToast()
+  const { user, isLoading: isAuthLoading } = useAuth()
+  // const { toast } = useToast()
   const router = useRouter()
   const [showOnboarding, setShowOnboarding] = useState(false)
 

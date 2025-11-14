@@ -15,9 +15,24 @@ import { useToast } from '@/hooks/use-toast'
 import { uiLogger } from '@/lib/client-logger'
 
 // Lazy load heavy components
-const TemplatesTable = lazy(() => import('./TemplatesTable').then(module => ({ default: module.TemplatesTable })))
-const TemplateForm = lazy(() => import('./TemplateForm').then(module => ({ default: module.TemplateForm })))
-const TemplatePreview = lazy(() => import('./TemplatePreview').then(module => ({ default: module.TemplatePreview })))
+const TemplatesTable = lazy(() => import('./TemplatesTable')
+  .then(module => ({ default: module.TemplatesTable }))
+  .catch((error) => {
+    console.error('Failed to load TemplatesTable:', error)
+    return { default: () => <div className="p-4 text-center text-red-600">Failed to load templates table</div> }
+  }))
+const TemplateForm = lazy(() => import('./TemplateForm')
+  .then(module => ({ default: module.TemplateForm }))
+  .catch((error) => {
+    console.error('Failed to load TemplateForm:', error)
+    return { default: () => <div className="p-4 text-center text-red-600">Failed to load template form</div> }
+  }))
+const TemplatePreview = lazy(() => import('./TemplatePreview')
+  .then(module => ({ default: module.TemplatePreview }))
+  .catch((error) => {
+    console.error('Failed to load TemplatePreview:', error)
+    return { default: () => <div className="p-4 text-center text-red-600">Failed to load template preview</div> }
+  }))
 
 
 const WhatsAppTemplatesLayout = () => {

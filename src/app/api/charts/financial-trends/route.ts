@@ -7,7 +7,7 @@ import { SecurityPresets, withSecurity } from '@/utils/security/index'
 import { createClient } from '@/utils/supabase/server'
 import type { NextRequest} from 'next/server';
 import { NextResponse } from 'next/server'
-import type { OrdersTable, OperationalCostsTable, IngredientPurchasesTable } from '@/types/database'
+import type { Order, OperationalCost, IngredientPurchase } from '@/types/database'
 
 async function GET(request: NextRequest): Promise<NextResponse> {
   try {
@@ -38,8 +38,8 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (ordersError) throw ordersError
 
-    const rawOrders = data as Array<Pick<OrdersTable, 'created_at' | 'total_amount' | 'status'> | null> | null
-    const orders: Array<{ created_at: string; total_amount: number; status: string }> = (rawOrders || []).filter((order): order is Pick<OrdersTable, 'created_at' | 'total_amount' | 'status'> =>
+    const rawOrders = data as Array<Pick<Order, 'created_at' | 'total_amount' | 'status'> | null> | null
+    const orders: Array<{ created_at: string; total_amount: number; status: string }> = (rawOrders || []).filter((order): order is Pick<Order, 'created_at' | 'total_amount' | 'status'> =>
       order !== null && order.created_at !== null && order.total_amount !== null && order.status !== null
     ).map((order) => ({
       created_at: order.created_at!,
@@ -77,8 +77,8 @@ async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (purchasesError) throw purchasesError
 
-    const rawExpenses = expenses as Array<Pick<OperationalCostsTable, 'date' | 'amount' | 'category'> | null> | null
-    const rawPurchases = purchases as Array<Pick<IngredientPurchasesTable, 'purchase_date' | 'total_price'> | null> | null
+    const rawExpenses = expenses as Array<Pick<OperationalCost, 'date' | 'amount' | 'category'> | null> | null
+    const rawPurchases = purchases as Array<Pick<IngredientPurchase, 'purchase_date' | 'total_price'> | null> | null
 
     // Group data by date
     const dataMap = new Map<string, { revenue: number; expenses: number; hpp: number }>()

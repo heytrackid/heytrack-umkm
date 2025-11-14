@@ -26,25 +26,57 @@ import type { Row } from '@/types/database'
 
 // ✅ Code Splitting - Lazy load section components
 // ✅ Correct pattern for named exports (per Next.js docs)
-const CustomerSection = dynamic(() => import('./CustomerSection').then(mod => mod.CustomerSection), {
+const CustomerSection = dynamic(
+  () => import('./CustomerSection')
+    .then(mod => mod.CustomerSection)
+    .catch((error) => {
+      console.error('Failed to load CustomerSection:', error)
+      return { default: () => <div className="h-64 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load customer section</div> }
+    }),
+  {
     loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
-})
+  }
+)
 
-const ItemsSection = dynamic(() => import('./ItemsSection').then(mod => mod.ItemsSection), {
+const ItemsSection = dynamic(
+  () => import('./ItemsSection')
+    .then(mod => mod.ItemsSection)
+    .catch((error) => {
+      console.error('Failed to load ItemsSection:', error)
+      return { default: () => <div className="h-64 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load items section</div> }
+    }),
+  {
     loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
-})
+  }
+)
 
-const DeliverySection = dynamic(() => import('./DeliverySection').then(mod => mod.DeliverySection), {
+const DeliverySection = dynamic(
+  () => import('./DeliverySection')
+    .then(mod => mod.DeliverySection)
+    .catch((error) => {
+      console.error('Failed to load DeliverySection:', error)
+      return { default: () => <div className="h-64 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load delivery section</div> }
+    }),
+  {
     loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
-})
+  }
+)
 
-const PaymentSection = dynamic(() => import('./PaymentSection').then(mod => mod.PaymentSection), {
+const PaymentSection = dynamic(
+  () => import('./PaymentSection')
+    .then(mod => mod.PaymentSection)
+    .catch((error) => {
+      console.error('Failed to load PaymentSection:', error)
+      return { default: () => <div className="h-64 bg-red-100 rounded-lg flex items-center justify-center text-red-600">Failed to load payment section</div> }
+    }),
+  {
     loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" />,
     ssr: false
-})
+  }
+)
 
 type Customer = Row<'customers'>
 

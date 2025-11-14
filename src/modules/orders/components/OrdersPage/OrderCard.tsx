@@ -10,7 +10,9 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { ORDER_STATUS_CONFIG, ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '@/modules/orders/constants'
 
 import type { Order } from '@/modules/orders/types'
-import type { OrderStatus, PaymentStatus } from '@/types/database'
+import type { OrderStatus } from '@/types/database'
+
+type PaymentStatus = string
 
 
 

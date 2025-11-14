@@ -172,6 +172,12 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       return validationError
     }
 
+    // Handle root redirect first
+    const rootRedirect = handleRootRedirect(request, nonce, isDev)
+    if (rootRedirect) {
+      return rootRedirect
+    }
+
     // Check authentication for protected routes
     if (isProtectedRoute(pathname)) {
       const user = await stackServerApp.getUser()
@@ -187,17 +193,12 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       }
     }
 
-    // Let Stack Auth handle authentication
-    const response = await (stackServerApp as any).middleware(request)
+    // Continue with request
+    const response = NextResponse.next()
     addSecurityHeaders(response, nonce, isDev)
 
     if (request.nextUrl.pathname.startsWith('/api/')) {
       addApiHeaders(response, isDev)
-    }
-
-    const rootRedirect = handleRootRedirect(request, nonce, isDev)
-    if (rootRedirect) {
-      return rootRedirect
     }
 
     return response

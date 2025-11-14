@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic'
 import { createLogger } from '@/lib/logger'
+const logger = createLogger('AutoSyncFinancialDashboard')
 
 // Server-side data fetching
 async function fetchAutoSyncData() {
@@ -23,7 +24,13 @@ async function fetchAutoSyncData() {
 
 // Client component for interactive features
 const AutoSyncClient = dynamic(
-  () => import('./AutoSyncFinancialDashboardClient').then(m => ({ default: m.AutoSyncFinancialDashboardClient })),
+  () => import('./AutoSyncFinancialDashboardClient')
+    .then(m => ({ default: m.AutoSyncFinancialDashboardClient }))
+    .catch((error) => {
+      const logger = createLogger('AutoSyncFinancialDashboard')
+      logger.error({ error }, 'Failed to load AutoSyncFinancialDashboardClient')
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load auto-sync dashboard</div> }
+    }),
   {
     loading: () => <div>Loading auto-sync dashboard...</div>,
     ssr: false

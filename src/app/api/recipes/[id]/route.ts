@@ -37,7 +37,7 @@ async function getRecipe(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = typed(await createClient())
 
@@ -80,7 +80,7 @@ async function updateRecipe(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = typed(await createClient())
 
@@ -180,7 +180,7 @@ async function updateRecipe(
                 quantity: v.data!.quantity,
                 unit: v.data!.unit,
                 notes: v.data!.notes ?? null,
-                user_id: user.id
+                user_id: _user.id
               }
             }
             throw new Error('Invalid ingredient data')
@@ -240,7 +240,7 @@ async function deleteRecipe(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = typed(await createClient())
 

@@ -1,12 +1,33 @@
 'use client'
 
-import { lazy, useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
+import { logger } from '@/lib/logger'
 
-// ✅ Correct pattern for named exports with React.lazy
-const Area = lazy(() => import('recharts').then(mod => ({ default: mod.Area })))
-const AreaChart = lazy(() => import('recharts').then(mod => ({ default: mod.AreaChart })))
-const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
-const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
+// ✅ Correct pattern for named exports with React.lazy using shared recharts bundle
+const Area = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.Area }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts Area')
+    throw error
+  }))
+const AreaChart = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.AreaChart }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts AreaChart')
+    throw error
+  }))
+const CartesianGrid = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.CartesianGrid }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts CartesianGrid')
+    throw error
+  }))
+const XAxis = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.XAxis }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts XAxis')
+    throw error
+  }))
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type {
@@ -84,58 +105,60 @@ export const ChartAreaInteractive = ({
         </Select>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer config={config} className="aspect-auto h-[250px] w-full">
-          <AreaChart data={filteredData}>
-            <defs>
-              {chartKeys.map((key) => (
-                <linearGradient key={key} id={`fill${key}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={`var(--color-${key})`} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={`var(--color-${key})`} stopOpacity={0.1} />
-                </linearGradient>
-              ))}
-            </defs>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value: string) => {
-                const date = new Date(value)
-                return date.toLocaleDateString('id-ID', {
-                  month: 'short',
-                  day: 'numeric',
-                })
-              }}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value: unknown) => {
-                    return new Date(value as string).toLocaleDateString('id-ID', {
-                      month: 'short',
-                      day: 'numeric',
-                    })
-                  }}
-                  indicator="dot"
-                />
-              }
-            />
-            {chartKeys.map((key) => (
-              <Area
-                key={key}
-                dataKey={key}
-                type="natural"
-                fill={`url(#fill${key})`}
-                stroke={`var(--color-${key})`}
-                stackId="a"
+        <Suspense fallback={<div className="h-[250px] bg-muted animate-pulse" />}>
+          <ChartContainer config={config} className="aspect-auto h-[250px] w-full">
+            <AreaChart data={filteredData}>
+              <defs>
+                {chartKeys.map((key) => (
+                  <linearGradient key={key} id={`fill${key}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={`var(--color-${key})`} stopOpacity={0.8} />
+                    <stop offset="95%" stopColor={`var(--color-${key})`} stopOpacity={0.1} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={32}
+                tickFormatter={(value: string) => {
+                  const date = new Date(value)
+                  return date.toLocaleDateString('id-ID', {
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                }}
               />
-            ))}
-            <ChartLegend content={<ChartLegendContent payload={[]} />} />
-          </AreaChart>
-        </ChartContainer>
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    labelFormatter={(value: unknown) => {
+                      return new Date(value as string).toLocaleDateString('id-ID', {
+                        month: 'short',
+                        day: 'numeric',
+                      })
+                    }}
+                    indicator="dot"
+                  />
+                }
+              />
+              {chartKeys.map((key) => (
+                <Area
+                  key={key}
+                  dataKey={key}
+                  type="natural"
+                  fill={`url(#fill${key})`}
+                  stroke={`var(--color-${key})`}
+                  stackId="a"
+                />
+              ))}
+              <ChartLegend content={<ChartLegendContent payload={[]} />} />
+            </AreaChart>
+          </ChartContainer>
+        </Suspense>
       </CardContent>
     </Card>
   )

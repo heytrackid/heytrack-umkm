@@ -16,16 +16,10 @@
 // DATABASE TYPES (Primary Source)
 // ==========================================================
 export type {
-  CompositeTypes, Database, Enums, Tables,
-  TablesInsert,
-  TablesUpdate
-} from './supabase-generated'
-
-// Re-export helper types from database.ts
-export type { Insert, Row, TableName, Update, ViewName } from './database'
-
-// Note: database.ts is a backward compatibility layer that re-exports from this file
-// Do not export from it here to avoid circular dependencies
+  Database,
+  Enums,
+  Insert, Json, Row, TableName, Update, ViewName
+} from './database'
 
 // ==========================================================
 // DOMAIN TYPES (Business Logic)
@@ -75,24 +69,11 @@ export type * from './shared/utils'
 // CONVENIENCE ALIASES
 // ==========================================================
 
-// Import Row type for convenience aliases
-import type { Row } from '@/types/database'
+// Re-export specific types from database.ts
+export type {
+  Customer, FinancialRecord, Ingredient, IngredientWithStock, OperationalCost, Order,
+  OrderItem, OrderWithDetails,
+  ProductionWithRecipe, Recipe,
+  RecipeIngredient, RecipeWithIngredients, Supplier
+} from './database'
 
-export type Ingredient = Row<'ingredients'>
-export type Recipe = Row<'recipes'>
-export type RecipeIngredient = Row<'recipe_ingredients'>
-export type Order = Row<'orders'>
-export type OrderItem = Row<'order_items'>
-export type Customer = Row<'customers'>
-export type Supplier = Row<'suppliers'>
-export type FinancialRecord = Row<'financial_records'>
-export type OperationalCost = Row<'operational_costs'>
-
-// Complex types
-export type RecipeWithIngredients = Recipe & {
-  recipe_ingredients?: Array<
-    RecipeIngredient & {
-      ingredient?: Ingredient
-    }
-  >
-}

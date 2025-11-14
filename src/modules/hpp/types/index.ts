@@ -4,15 +4,15 @@
  */
 
 import type {
-  HppCalculationsTable,
-  HppCalculationsInsert,
-  HppCalculationsUpdate
+    HppCalculationInsert as HppCalculationInsertType,
+    HppCalculation as HppCalculationRow,
+    HppCalculationUpdate as HppCalculationUpdateType
 } from '@/types/database'
 
 // Use generated types from Supabase
-export type HppCalculation = HppCalculationsTable
-export type HppCalculationInsert = HppCalculationsInsert
-export type HppCalculationUpdate = HppCalculationsUpdate
+export type HppCalculation = HppCalculationRow
+export type HppCalculationInsert = HppCalculationInsertType
+export type HppCalculationUpdate = HppCalculationUpdateType
 
 export interface HppCalculationResult {
   recipe_id: string // Use snake_case for consistency with DB

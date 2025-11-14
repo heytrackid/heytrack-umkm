@@ -1,21 +1,42 @@
 'use client'
 
-import { lazy, useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
+import { logger } from '@/lib/logger'
 
-// ✅ Correct pattern for named exports with React.lazy
-const Bar = lazy(() => import('recharts').then(mod => ({ default: mod.Bar })))
-const BarChart = lazy(() => import('recharts').then(mod => ({ default: mod.BarChart })))
-const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
-const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
+// ✅ Correct pattern for named exports with React.lazy using shared recharts bundle
+const Bar = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.Bar }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts Bar')
+    throw error // Re-throw to let lazy handle the error
+  }))
+const BarChart = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.BarChart }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts BarChart')
+    throw error // Re-throw to let lazy handle the error
+  }))
+const CartesianGrid = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.CartesianGrid }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts CartesianGrid')
+    throw error // Re-throw to let lazy handle the error
+  }))
+const XAxis = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.XAxis }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts XAxis')
+    throw error // Re-throw to let lazy handle the error
+  }))
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type {
-    ChartConfig
+  ChartConfig
 } from '@/components/ui/chart'
 import {
-    ChartContainer,
-    ChartTooltip,
-    ChartTooltipContent,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
 } from '@/components/ui/chart'
 
 interface ChartBarInteractiveProps {
@@ -76,48 +97,50 @@ export const ChartBarInteractive = ({
         </div>
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
-        <ChartContainer config={config} className="aspect-auto h-[250px] w-full">
-          <BarChart
-            accessibilityLayer
-            data={data}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value: string) => {
-                const date = new Date(value)
-                return date.toLocaleDateString('id-ID', {
-                  month: 'short',
-                  day: 'numeric',
-                })
+        <Suspense fallback={<div className="h-[250px] bg-muted animate-pulse" />}>
+          <ChartContainer config={config} className="aspect-auto h-[250px] w-full">
+            <BarChart
+              accessibilityLayer
+              data={data}
+              margin={{
+                left: 12,
+                right: 12,
               }}
-            />
-            <ChartTooltip
-              content={
-                <ChartTooltipContent
-                  className="w-[150px]"
-                  nameKey="views"
-                  labelFormatter={(value: unknown) => {
-                    return new Date(value as string).toLocaleDateString('id-ID', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })
-                  }}
-                />
-              }
-            />
-            <Bar dataKey={activeChart} fill={`var(--color-${activeChart})`} />
-          </BarChart>
-        </ChartContainer>
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={32}
+                tickFormatter={(value: string) => {
+                  const date = new Date(value)
+                  return date.toLocaleDateString('id-ID', {
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                }}
+              />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    className="w-[150px]"
+                    nameKey="views"
+                    labelFormatter={(value: unknown) => {
+                      return new Date(value as string).toLocaleDateString('id-ID', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })
+                    }}
+                  />
+                }
+              />
+              <Bar dataKey={activeChart} fill={`var(--color-${activeChart})`} />
+            </BarChart>
+          </ChartContainer>
+        </Suspense>
       </CardContent>
     </Card>
   )

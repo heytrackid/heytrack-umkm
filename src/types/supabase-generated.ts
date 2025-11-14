@@ -41,7 +41,7 @@ export type Database = {
       chat_context_cache: {
         Row: {
           context_type: string
-          created_at: string
+          created_at: string | null
           data: Json
           expires_at: string
           id: string
@@ -49,7 +49,7 @@ export type Database = {
         }
         Insert: {
           context_type: string
-          created_at?: string
+          created_at?: string | null
           data: Json
           expires_at: string
           id?: string
@@ -57,7 +57,7 @@ export type Database = {
         }
         Update: {
           context_type?: string
-          created_at?: string
+          created_at?: string | null
           data?: Json
           expires_at?: string
           id?: string
@@ -68,7 +68,7 @@ export type Database = {
       chat_messages: {
         Row: {
           content: string
-          created_at: string
+          created_at: string | null
           id: string
           metadata: Json | null
           role: string
@@ -76,7 +76,7 @@ export type Database = {
         }
         Insert: {
           content: string
-          created_at?: string
+          created_at?: string | null
           id?: string
           metadata?: Json | null
           role: string
@@ -84,7 +84,7 @@ export type Database = {
         }
         Update: {
           content?: string
-          created_at?: string
+          created_at?: string | null
           id?: string
           metadata?: Json | null
           role?: string
@@ -103,29 +103,29 @@ export type Database = {
       chat_sessions: {
         Row: {
           context_snapshot: Json | null
-          created_at: string
+          created_at: string | null
           deleted_at: string | null
           id: string
-          title: string
-          updated_at: string
+          title: string | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
           context_snapshot?: Json | null
-          created_at?: string
+          created_at?: string | null
           deleted_at?: string | null
           id?: string
-          title?: string
-          updated_at?: string
+          title?: string | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
           context_snapshot?: Json | null
-          created_at?: string
+          created_at?: string | null
           deleted_at?: string | null
           id?: string
-          title?: string
-          updated_at?: string
+          title?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -342,7 +342,7 @@ export type Database = {
           resolved_by: string | null
           severity: string | null
           stack_trace: string | null
-          timestamp: string
+          timestamp: string | null
           user_id: string | null
         }
         Insert: {
@@ -358,7 +358,7 @@ export type Database = {
           resolved_by?: string | null
           severity?: string | null
           stack_trace?: string | null
-          timestamp?: string
+          timestamp?: string | null
           user_id?: string | null
         }
         Update: {
@@ -374,7 +374,7 @@ export type Database = {
           resolved_by?: string | null
           severity?: string | null
           stack_trace?: string | null
-          timestamp?: string
+          timestamp?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -499,46 +499,46 @@ export type Database = {
       hpp_calculations: {
         Row: {
           calculation_date: string | null
-          cost_per_unit: number
+          cost_per_unit: number | null
           created_at: string | null
           id: string
-          labor_cost: number
-          material_cost: number
+          labor_cost: number | null
+          material_cost: number | null
           notes: string | null
-          overhead_cost: number
+          overhead_cost: number | null
           production_quantity: number | null
           recipe_id: string | null
-          total_hpp: number
+          total_hpp: number | null
           user_id: string | null
           wac_adjustment: number | null
         }
         Insert: {
           calculation_date?: string | null
-          cost_per_unit?: number
+          cost_per_unit?: number | null
           created_at?: string | null
           id?: string
-          labor_cost?: number
-          material_cost?: number
+          labor_cost?: number | null
+          material_cost?: number | null
           notes?: string | null
-          overhead_cost?: number
+          overhead_cost?: number | null
           production_quantity?: number | null
           recipe_id?: string | null
-          total_hpp?: number
+          total_hpp?: number | null
           user_id?: string | null
           wac_adjustment?: number | null
         }
         Update: {
           calculation_date?: string | null
-          cost_per_unit?: number
+          cost_per_unit?: number | null
           created_at?: string | null
           id?: string
-          labor_cost?: number
-          material_cost?: number
+          labor_cost?: number | null
+          material_cost?: number | null
           notes?: string | null
-          overhead_cost?: number
+          overhead_cost?: number | null
           production_quantity?: number | null
           recipe_id?: string | null
-          total_hpp?: number
+          total_hpp?: number | null
           user_id?: string | null
           wac_adjustment?: number | null
         }
@@ -670,47 +670,47 @@ export type Database = {
       ingredient_purchases: {
         Row: {
           cost_per_unit: number | null
-          created_at: string
+          created_at: string | null
           expense_id: string | null
           id: string
           ingredient_id: string
           notes: string | null
-          purchase_date: string
+          purchase_date: string | null
           quantity: number
           supplier: string | null
           total_price: number
           unit_price: number
-          updated_at: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
           cost_per_unit?: number | null
-          created_at?: string
+          created_at?: string | null
           expense_id?: string | null
           id?: string
           ingredient_id: string
           notes?: string | null
-          purchase_date?: string
+          purchase_date?: string | null
           quantity: number
           supplier?: string | null
           total_price: number
           unit_price: number
-          updated_at?: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
           cost_per_unit?: number | null
-          created_at?: string
+          created_at?: string | null
           expense_id?: string | null
           id?: string
           ingredient_id?: string
           notes?: string | null
-          purchase_date?: string
+          purchase_date?: string | null
           quantity?: number
           supplier?: string | null
           total_price?: number
           unit_price?: number
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -787,7 +787,7 @@ export type Database = {
           max_stock?: number | null
           min_stock?: number | null
           name: string
-          price_per_unit: number
+          price_per_unit?: number
           reorder_point?: number | null
           reserved_stock?: number | null
           supplier?: string | null
@@ -906,8 +906,8 @@ export type Database = {
           id: string
           ingredient_id: string
           is_active: boolean | null
-          reorder_point: number
-          reorder_quantity: number
+          reorder_point: number | null
+          reorder_quantity: number | null
           updated_at: string | null
           user_id: string
         }
@@ -916,8 +916,8 @@ export type Database = {
           id?: string
           ingredient_id: string
           is_active?: boolean | null
-          reorder_point?: number
-          reorder_quantity?: number
+          reorder_point?: number | null
+          reorder_quantity?: number | null
           updated_at?: string | null
           user_id: string
         }
@@ -926,8 +926,8 @@ export type Database = {
           id?: string
           ingredient_id?: string
           is_active?: boolean | null
-          reorder_point?: number
-          reorder_quantity?: number
+          reorder_point?: number | null
+          reorder_quantity?: number | null
           updated_at?: string | null
           user_id?: string
         }
@@ -1176,7 +1176,7 @@ export type Database = {
           description: string
           frequency: string | null
           id: string
-          is_active: boolean
+          is_active: boolean | null
           notes: string | null
           payment_method: string | null
           recurring: boolean | null
@@ -1195,7 +1195,7 @@ export type Database = {
           description: string
           frequency?: string | null
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           notes?: string | null
           payment_method?: string | null
           recurring?: boolean | null
@@ -1214,7 +1214,7 @@ export type Database = {
           description?: string
           frequency?: string | null
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           notes?: string | null
           payment_method?: string | null
           recurring?: boolean | null
@@ -1405,20 +1405,6 @@ export type Database = {
             referencedRelation: "customers"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "orders_financial_record_id_fkey"
-            columns: ["financial_record_id"]
-            isOneToOne: false
-            referencedRelation: "financial_records"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "orders_production_batch_id_fkey"
-            columns: ["production_batch_id"]
-            isOneToOne: false
-            referencedRelation: "productions"
-            referencedColumns: ["id"]
-          },
         ]
       }
       payments: {
@@ -1480,7 +1466,7 @@ export type Database = {
           request_body: Json | null
           response_body: Json | null
           status: number
-          timestamp: string
+          timestamp: string | null
           user_agent: string | null
           user_id: string | null
         }
@@ -1494,7 +1480,7 @@ export type Database = {
           request_body?: Json | null
           response_body?: Json | null
           status: number
-          timestamp?: string
+          timestamp?: string | null
           user_agent?: string | null
           user_id?: string | null
         }
@@ -1508,7 +1494,7 @@ export type Database = {
           request_body?: Json | null
           response_body?: Json | null
           status?: number
-          timestamp?: string
+          timestamp?: string | null
           user_agent?: string | null
           user_id?: string | null
         }
@@ -1526,7 +1512,7 @@ export type Database = {
           quantity: number
           recipe_id: string
           started_at: string | null
-          status: string
+          status: string | null
           unit: string
           updated_at: string | null
           user_id: string
@@ -1542,7 +1528,7 @@ export type Database = {
           quantity: number
           recipe_id: string
           started_at?: string | null
-          status?: string
+          status?: string | null
           unit: string
           updated_at?: string | null
           user_id: string
@@ -1558,7 +1544,7 @@ export type Database = {
           quantity?: number
           recipe_id?: string
           started_at?: string | null
-          status?: string
+          status?: string | null
           unit?: string
           updated_at?: string | null
           user_id?: string
@@ -1674,7 +1660,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           id: string
-          labor_cost: number
+          labor_cost: number | null
           notes: string | null
           planned_start_time: string | null
           quantity: number
@@ -1702,7 +1688,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           id?: string
-          labor_cost?: number
+          labor_cost?: number | null
           notes?: string | null
           planned_start_time?: string | null
           quantity: number
@@ -1730,7 +1716,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           id?: string
-          labor_cost?: number
+          labor_cost?: number | null
           notes?: string | null
           planned_start_time?: string | null
           quantity?: number
@@ -1914,42 +1900,45 @@ export type Database = {
         Row: {
           consumed_at: string | null
           created_at: string | null
+          expires_at: string | null
           id: string
           ingredient_id: string
           notes: string | null
-          order_id: string
-          released_at: string | null
+          order_id: string | null
+          production_id: string | null
+          quantity: number
           reserved_at: string | null
-          reserved_quantity: number
-          status: string
+          status: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           consumed_at?: string | null
           created_at?: string | null
+          expires_at?: string | null
           id?: string
           ingredient_id: string
           notes?: string | null
-          order_id: string
-          released_at?: string | null
+          order_id?: string | null
+          production_id?: string | null
+          quantity: number
           reserved_at?: string | null
-          reserved_quantity: number
-          status?: string
+          status?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           consumed_at?: string | null
           created_at?: string | null
+          expires_at?: string | null
           id?: string
           ingredient_id?: string
           notes?: string | null
-          order_id?: string
-          released_at?: string | null
+          order_id?: string | null
+          production_id?: string | null
+          quantity?: number
           reserved_at?: string | null
-          reserved_quantity?: number
-          status?: string
+          status?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -1987,6 +1976,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "productions"
             referencedColumns: ["id"]
           },
         ]
@@ -2215,7 +2211,7 @@ export type Database = {
           ingredient_id?: string | null
           prediction_next_7_days?: number | null
           quantity_purchased?: number | null
-          quantity_used?: number
+          quantity_used: number
           quantity_wasted?: number | null
           running_average?: number | null
           trend?: string | null
@@ -2258,6 +2254,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_onboarding: {
+        Row: {
+          completed: boolean | null
+          created_at: string | null
+          current_step: number | null
+          id: string
+          steps_data: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string | null
+          current_step?: number | null
+          id?: string
+          steps_data?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string | null
+          current_step?: number | null
+          id?: string
+          steps_data?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_profiles: {
         Row: {
@@ -2306,7 +2332,7 @@ export type Database = {
       }
       whatsapp_templates: {
         Row: {
-          category: string
+          category: string | null
           created_at: string | null
           description: string | null
           id: string
@@ -2319,7 +2345,7 @@ export type Database = {
           variables: Json | null
         }
         Insert: {
-          category?: string
+          category?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -2332,7 +2358,7 @@ export type Database = {
           variables?: Json | null
         }
         Update: {
-          category?: string
+          category?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -2478,7 +2504,7 @@ export type Database = {
           delivery_time: string | null
           discount: number | null
           id: string | null
-          items_detail: Json[] | null
+          items_detail: Json | null
           notes: string | null
           order_date: string | null
           order_no: string | null
@@ -2492,6 +2518,7 @@ export type Database = {
           total_amount: number | null
           total_items: number | null
           updated_at: string | null
+          user_id: string | null
         }
         Relationships: [
           {
@@ -2511,7 +2538,7 @@ export type Database = {
           is_active: boolean | null
           is_available: boolean | null
           max_possible_quantity: number | null
-          missing_ingredients: Json[] | null
+          missing_ingredients: Json | null
           name: string | null
           selling_price: number | null
         }
@@ -2519,6 +2546,7 @@ export type Database = {
       }
     }
     Functions: {
+      auth_user_id: { Args: never; Returns: string }
       calculate_ingredient_wac: {
         Args: { p_ingredient_id: string }
         Returns: number
@@ -2534,9 +2562,33 @@ export type Database = {
       }
       clean_old_logs: { Args: never; Returns: undefined }
       cleanup_expired_context_cache: { Args: never; Returns: undefined }
-      create_default_whatsapp_templates: {
-        Args: { p_user_id: string }
-        Returns: undefined
+      consume_stock: {
+        Args: { p_order_id: string; p_user_id: string }
+        Returns: number
+      }
+      create_default_whatsapp_templates:
+        | {
+            Args: { p_user_id: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.create_default_whatsapp_templates(p_user_id => text), public.create_default_whatsapp_templates(p_user_id => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+        | {
+            Args: { p_user_id: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.create_default_whatsapp_templates(p_user_id => text), public.create_default_whatsapp_templates(p_user_id => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+      create_notification: {
+        Args: {
+          p_action_url?: string
+          p_data?: Json
+          p_message: string
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
       }
       decrement_ingredient_stock: {
         Args: { p_ingredient_id: string; p_quantity: number }
@@ -2547,6 +2599,10 @@ export type Database = {
         }[]
       }
       get_active_connections: { Args: never; Returns: number }
+      get_available_stock: {
+        Args: { p_ingredient_id: string; p_user_id: string }
+        Returns: number
+      }
       get_dashboard_stats: { Args: never; Returns: Json }
       get_database_size: { Args: never; Returns: string }
       get_foreign_key_constraints: {
@@ -2569,7 +2625,24 @@ export type Database = {
         }[]
       }
       get_total_rows: { Args: never; Returns: number }
-      get_unread_alert_count: { Args: { p_user_id: string }; Returns: number }
+      get_unread_alert_count:
+        | {
+            Args: { p_user_id: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.get_unread_alert_count(p_user_id => text), public.get_unread_alert_count(p_user_id => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+        | {
+            Args: { p_user_id: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.get_unread_alert_count(p_user_id => text), public.get_unread_alert_count(p_user_id => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+      get_unread_notification_count: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      get_user_id: { Args: never; Returns: string }
       get_user_role: {
         Args: { user_uuid?: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -2591,6 +2664,27 @@ export type Database = {
         }
         Returns: string
       }
+      mark_all_notifications_read: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      mark_notification_read: {
+        Args: { p_notification_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      release_stock: {
+        Args: { p_order_id: string; p_user_id: string }
+        Returns: number
+      }
+      reserve_stock: {
+        Args: {
+          p_ingredient_id: string
+          p_order_id: string
+          p_quantity: number
+          p_user_id: string
+        }
+        Returns: string
+      }
       user_has_business_unit_access: {
         Args: {
           business_unit_val: Database["public"]["Enums"]["business_unit"]
@@ -2598,10 +2692,15 @@ export type Database = {
         }
         Returns: boolean
       }
-      user_has_permission: {
-        Args: { permission_name: string; user_uuid?: string }
-        Returns: boolean
-      }
+      user_has_permission:
+        | {
+            Args: { permission_name: string; user_uuid?: string }
+            Returns: boolean
+          }
+        | {
+            Args: { permission_name: string; user_uuid?: string }
+            Returns: boolean
+          }
       validate_data_integrity: {
         Args: never
         Returns: {

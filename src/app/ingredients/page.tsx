@@ -21,20 +21,44 @@ import type { Row } from '@/types/database'
 // Lazy load heavy components
 // ✅ Correct pattern for named exports (per Next.js docs)
 
-const IngredientsCRUD = dynamic(() => import('@/components/ingredients/EnhancedIngredientsPage').then(mod => mod.EnhancedIngredientsPage), {
-  loading: () => <ImportedIngredientsCRUDSkeleton />,
-  ssr: false
-})
+const IngredientsCRUD = dynamic(
+  () => import('@/components/ingredients/EnhancedIngredientsPage')
+    .then(mod => mod.EnhancedIngredientsPage)
+    .catch((error) => {
+      console.error('Failed to load EnhancedIngredientsPage:', error)
+      return { default: () => <div className="p-4 text-center text-red-600">Failed to load ingredients page</div> }
+    }),
+  {
+    loading: () => <ImportedIngredientsCRUDSkeleton />,
+    ssr: false
+  }
+)
 
-const IngredientFormDialog = dynamic(() => import('@/components/ingredients/IngredientFormDialog').then(mod => mod.IngredientFormDialog), {
-  loading: () => null,
-  ssr: false
-})
+const IngredientFormDialog = dynamic(
+  () => import('@/components/ingredients/IngredientFormDialog')
+    .then(mod => mod.IngredientFormDialog)
+    .catch((error) => {
+      console.error('Failed to load IngredientFormDialog:', error)
+      return { default: () => null }
+    }),
+  {
+    loading: () => null,
+    ssr: false
+  }
+)
 
-const ImportDialog = dynamic(() => import('@/components/import/ImportDialog').then(mod => mod.ImportDialog), {
-  loading: () => null,
-  ssr: false
-})
+const ImportDialog = dynamic(
+  () => import('@/components/import/ImportDialog')
+    .then(mod => mod.ImportDialog)
+    .catch((error) => {
+      console.error('Failed to load ImportDialog:', error)
+      return { default: () => null }
+    }),
+  {
+    loading: () => null,
+    ssr: false
+  }
+)
 
 const IngredientsPage = () => {
   const { data: ingredients, isLoading: loading, error } = useIngredients();

@@ -1,6 +1,3 @@
-import type { 
-
-
 /**
  * Typed Query Result Interfaces
  * 
@@ -8,23 +5,24 @@ import type {
  * These interfaces define the exact structure of query results with relations.
  */
 
-  OrdersTable, 
-  OrderItemsTable, 
-  RecipesTable, 
-  RecipeIngredientsTable, 
-  IngredientsTable, 
-  CustomersTable, 
-  FinancialRecordsTable 
+import type {
+    Customer as CustomerRow,
+    FinancialRecord as FinancialRecordRow,
+    Ingredient as IngredientRow,
+    OrderItem as OrderItemRow,
+    Order as OrderRow,
+    RecipeIngredient as RecipeIngredientRow,
+    Recipe as RecipeRow
 } from '@/types/database'
 
 // Base table types - use imported types
-type Order = OrdersTable
-type OrderItem = OrderItemsTable
-type Recipe = RecipesTable
-type RecipeIngredient = RecipeIngredientsTable
-type Ingredient = IngredientsTable
-type Customer = CustomersTable
-type FinancialRecord = FinancialRecordsTable
+type Order = OrderRow
+type OrderItem = OrderItemRow
+type Recipe = RecipeRow
+type RecipeIngredient = RecipeIngredientRow
+type Ingredient = IngredientRow
+type Customer = CustomerRow
+type FinancialRecord = FinancialRecordRow
 
 // Query result types with relations
 

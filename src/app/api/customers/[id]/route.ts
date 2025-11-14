@@ -8,8 +8,8 @@ export const runtime = 'nodejs'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Internal modules
+import { isErrorResponse, requireAuth } from '@/lib/api-auth'
 import { apiLogger } from '@/lib/logger'
-import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
 import { typed } from '@/types/type-utilities'
@@ -18,9 +18,7 @@ import { createClient } from '@/utils/supabase/server'
 
 // Type imports
 import type { CustomerUpdateInput } from '@/lib/validations/domains/customer'
-import type { Update } from '@/types/database'
-
-
+import type { CustomerUpdate } from '@/types/database'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -51,8 +49,8 @@ async function buildCustomerContext(context: RouteContext): Promise<CustomerRout
   return { supabase, userId: user.id, customerId: id }
 }
 
-function mapUpdatePayload(data: CustomerUpdateInput): Update<'customers'> {
-  const payload: Update<'customers'> = { updated_at: new Date().toISOString() }
+function mapUpdatePayload(data: CustomerUpdateInput): CustomerUpdate {
+  const payload: CustomerUpdate = { updated_at: new Date().toISOString() }
   const setters: Array<{
     key: keyof CustomerUpdateInput
     map: (value: CustomerUpdateInput[keyof CustomerUpdateInput]) => unknown
@@ -70,7 +68,7 @@ function mapUpdatePayload(data: CustomerUpdateInput): Update<'customers'> {
   setters.forEach(({ key, map }) => {
     const value = data[key]
     if (value !== undefined) {
-      ;(payload as Record<string, unknown>)[key as keyof Update<'customers'>] = map(value)
+      ;(payload as Record<string, unknown>)[key as string] = map(value)
     }
   })
 
@@ -111,7 +109,7 @@ async function ensureNoOrders(
 async function resolveUpdatePayload(
   request: NextRequest,
   userId: string
-): Promise<{ updateData: Update<'customers'> } | NextResponse> {
+): Promise<{ updateData: CustomerUpdate } | NextResponse> {
   const body = await request.json() as Omit<CustomerUpdateInput, 'user_id'>
   const validation = CustomerUpdateSchema.safeParse({ ...body, user_id: userId })
 

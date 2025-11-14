@@ -22,7 +22,7 @@ async function getHandler(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const awaitedParams = await params
     const id = awaitedParams['id']
@@ -68,7 +68,7 @@ async function putHandler(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const awaitedParams = await params
     const id = awaitedParams['id']
@@ -104,10 +104,10 @@ async function putHandler(
     }
 
     // Update with RLS enforcement (RLS will filter by user_id automatically)
-     
-    const { data, error } = await (supabase
-      .from('financial_records') as any)
-      .update(updatePayload)
+
+    const { data, error } = await supabase
+      .from('financial_records')
+      .update(updatePayload as never)
       .eq('id', id)
       .select()
       .single()
@@ -141,7 +141,7 @@ async function deleteHandler(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const awaitedParams = await params
     const id = awaitedParams['id']

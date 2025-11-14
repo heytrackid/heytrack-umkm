@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 
-import { apiLogger } from '@/lib/logger'
+import { apiLogger, logger } from '@/lib/logger'
 
 /**
  * Performance Optimizations untuk Skeleton Loading System
@@ -99,14 +99,14 @@ export function preloadSkeletonComponents() {
   // Preload common skeleton components to avoid loading delays
   if (typeof window !== 'undefined') {
     // Use dynamic imports to preload skeleton components
-    import('./dashboard-skeletons').catch(() => {
-      // Ignore preload failures
+    import('./dashboard-skeletons').catch((error) => {
+      logger.warn({ error }, 'Failed to preload dashboard skeletons')
     })
-    import('./table-skeletons').catch(() => {
-      // Ignore preload failures
+    import('./table-skeletons').catch((error) => {
+      logger.warn({ error }, 'Failed to preload table skeletons')
     })
-    import('./form-skeletons').catch(() => {
-      // Ignore preload failures
+    import('./form-skeletons').catch((error) => {
+      logger.warn({ error }, 'Failed to preload form skeletons')
     })
   }
 }

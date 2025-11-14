@@ -214,7 +214,7 @@ export class ProductionServices {
 
         // Create reservation record
         const { error: reservationError } = await supabase
-          .from('ingredient_reservations')
+          .from('stock_reservations')
           .insert({
             ingredient_id: ingredient.ingredient_id,
             recipe_id: recipeId,
@@ -276,7 +276,7 @@ export class ProductionServices {
         throw error
       }
 
-      return (data ?? []) as ProductionBatch[]
+      return (data ?? []) as unknown as ProductionBatch[]
     } catch (error) {
       productionLogger.error({ error }, 'Error in getActiveBatches')
       return []
@@ -304,7 +304,7 @@ export class ProductionServices {
 
       // Release reserved ingredients
       const { error: releaseError } = await supabase
-        .from('ingredient_reservations')
+        .from('stock_reservations')
         .update({ status: 'released', updated_at: new Date().toISOString() } as never)
         .eq('recipe_id', (batch as any).recipe_id)
         .eq('status', 'reserved')

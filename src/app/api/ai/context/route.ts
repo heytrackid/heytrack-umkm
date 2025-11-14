@@ -9,7 +9,6 @@ import { logger } from '@/lib/logger';
 import { requireAuth, isErrorResponse } from '@/lib/api-auth'
 import { BusinessContextService } from '@/lib/services/BusinessContextService';
 import { createSecureHandler, InputSanitizer, SecurityPresets } from '@/utils/security/index';
-import { createClient } from '@/utils/supabase/server';
 
 /**
  * GET /api/ai/context - Load business context for AI chat

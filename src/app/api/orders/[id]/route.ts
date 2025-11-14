@@ -44,7 +44,7 @@ async function GET(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = await createClient()
 
@@ -131,7 +131,7 @@ async function PUT(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = await createClient()
 
@@ -207,7 +207,7 @@ async function PUT(
  ?? new Date().toISOString().split('T')[0]
 
       const incomeData = {
-        user_id: user.id,
+        user_id: _user.id,
         type: 'INCOME' as const,
         category: 'Revenue',
         amount: typedUpdatedOrder.total_amount,
@@ -276,7 +276,7 @@ async function DELETE(
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = await createClient()
 

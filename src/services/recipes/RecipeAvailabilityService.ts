@@ -305,7 +305,13 @@ export class RecipeAvailabilityService {
 
       // Filter valid recipes
       const validRecipes = recipes.filter(isRecipeWithIngredients)
-      const availableRecipes = []
+      const availableRecipes: Array<{
+        recipe_id: string
+        recipe_name: string
+        max_quantity: number
+        cost_per_unit: number
+        selling_price: number | null
+      }> = []
 
       for (const recipe of validRecipes) {
         const recipeIngredients = recipe.recipe_ingredients || []

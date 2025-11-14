@@ -8,14 +8,49 @@ import { MobileTooltip } from '@/components/ui/charts/mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS } from '@/components/ui/charts/types'
 
 // Lazy load recharts components
-// ✅ Correct pattern for named exports with React.lazy
-const Bar = lazy(() => import('recharts').then(mod => ({ default: mod.Bar })))
-const BarChart = lazy(() => import('recharts').then(mod => ({ default: mod.BarChart })))
-const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
-const ResponsiveContainer = lazy(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
-const Tooltip = lazy(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
-const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
-const YAxis = lazy(() => import('recharts').then(mod => ({ default: mod.YAxis })))
+// ✅ Correct pattern for named exports with React.lazy using shared recharts bundle
+const Bar = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.Bar }))
+  .catch((error) => {
+    console.error('Failed to load recharts Bar:', error)
+    throw error
+  }))
+const BarChart = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.BarChart }))
+  .catch((error) => {
+    console.error('Failed to load recharts BarChart:', error)
+    throw error
+  }))
+const CartesianGrid = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.CartesianGrid }))
+  .catch((error) => {
+    console.error('Failed to load recharts CartesianGrid:', error)
+    throw error
+  }))
+const ResponsiveContainer = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.ResponsiveContainer }))
+  .catch((error) => {
+    console.error('Failed to load recharts ResponsiveContainer:', error)
+    throw error
+  }))
+const Tooltip = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.Tooltip }))
+  .catch((error) => {
+    console.error('Failed to load recharts Tooltip:', error)
+    throw error
+  }))
+const XAxis = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.XAxis }))
+  .catch((error) => {
+    console.error('Failed to load recharts XAxis:', error)
+    throw error
+  }))
+const YAxis = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.YAxis }))
+  .catch((error) => {
+    console.error('Failed to load recharts YAxis:', error)
+    throw error
+  }))
 
 /**
  * Mobile Bar Chart Component

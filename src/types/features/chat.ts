@@ -5,7 +5,7 @@
 export interface ChatSession {
   id: string;
   user_id: string;
-  title: string;
+  title: string | null;
   context_snapshot: BusinessContext;
   created_at: string;
   updated_at: string;
@@ -140,7 +140,7 @@ export interface ChatResponse {
 
 export interface SessionListItem {
   id: string;
-  title: string;
+  title: string | null;
   last_message?: string;
   message_count: number;
   created_at: string;

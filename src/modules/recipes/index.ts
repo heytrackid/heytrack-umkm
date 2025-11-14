@@ -9,49 +9,33 @@
 export { SmartPricingAssistant } from './components/SmartPricingAssistant'
 
 // Extracted HPP calculator components
-export { UMKMTooltip } from './components/UMKMTooltip'
-export { SettingsPanel } from './components/SettingsPanel'
+export { EducationalFooter } from './components/EducationalFooter'
 export { MainResultsCard } from './components/MainResultsCard'
 export { MethodComparisonCard } from './components/MethodComparisonCard'
 export { RecommendationsCard } from './components/RecommendationsCard'
-export { EducationalFooter } from './components/EducationalFooter'
+export { SettingsPanel } from './components/SettingsPanel'
+export { UMKMTooltip } from './components/UMKMTooltip'
 
 // Lazy loaded recipe components
 export {
   LazySmartPricingAssistant,
-  preloadRecipeComponents,
-  RecipeDashboardWithProgressiveLoading,
-  useRecipeProgressiveLoading,
-  SmartRecipeLoader
+  preloadRecipeComponents
 } from './components/LazyComponents'
 
 // Hooks
 export { useRecipesData } from './hooks/useRecipesData'
 
 // Utils
-export { 
-  calculateIngredientCost,
+export {
+  calculateComplexityScore, calculateIngredientCost,
   calculateProfitMargin,
-  formatRecipeServings,
-  scaleRecipe,
-  validateRecipe,
-  getDifficultyInfo,
-  getCategoryInfo,
-  formatRecipeTime,
-  calculateComplexityScore,
-  generateRecipeSummary
+  formatRecipeServings, formatRecipeTime, generateRecipeSummary, getCategoryInfo, getDifficultyInfo, scaleRecipe,
+  validateRecipe
 } from './utils'
 
 // Constants
-export { 
-  RECIPE_CATEGORIES, 
-  DIFFICULTY_LEVELS, 
-  MEASUREMENT_UNITS,
-  MARGIN_PRESETS,
-  OVERHEAD_RATES,
-  LABOR_COSTS,
-  VALIDATION_RULES,
-  DEFAULT_RECIPE
+export {
+  DEFAULT_RECIPE, DIFFICULTY_LEVELS, LABOR_COSTS, MARGIN_PRESETS, MEASUREMENT_UNITS, OVERHEAD_RATES, RECIPE_CATEGORIES, VALIDATION_RULES
 } from './constants'
 
 // Types - export interfaces from utils for now

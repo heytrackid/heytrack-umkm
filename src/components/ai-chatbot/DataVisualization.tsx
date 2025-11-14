@@ -13,37 +13,80 @@ import type { Row } from '@/types/database'
 type Customer = Row<'customers'>
 type Recipe = Row<'recipes'>
 
-// Dynamically import Recharts components to reduce bundle size
+// Use shared recharts bundle to reduce bundle size
 const BarChart = dynamic(
-  () => import('recharts').then(mod => mod.BarChart),
-  { ssr: false }
+  () => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+    .then(mod => mod.BarChart)
+    .catch((error) => {
+      console.error('Failed to load recharts BarChart:', error)
+      return { default: () => <div className="text-red-600">Chart failed to load</div> }
+    }),
+  {
+    ssr: false,
+    loading: () => <div className="animate-pulse bg-muted h-32 rounded" />
+  }
 )
 const Bar = dynamic(
-  () => import('recharts').then(mod => mod.Bar),
+  () => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+    .then(mod => mod.Bar)
+    .catch((error) => {
+      console.error('Failed to load recharts Bar:', error)
+      return { default: () => null }
+    }),
   { ssr: false }
 )
 const XAxis = dynamic(
-  () => import('recharts').then(mod => mod.XAxis),
+  () => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+    .then(mod => mod.XAxis)
+    .catch((error) => {
+      console.error('Failed to load recharts XAxis:', error)
+      return { default: () => null }
+    }),
   { ssr: false }
 )
 const YAxis = dynamic(
-  () => import('recharts').then(mod => mod.YAxis),
+  () => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+    .then(mod => mod.YAxis)
+    .catch((error) => {
+      console.error('Failed to load recharts YAxis:', error)
+      return { default: () => null }
+    }),
   { ssr: false }
 )
 const CartesianGrid = dynamic(
-  () => import('recharts').then(mod => mod.CartesianGrid),
+  () => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+    .then(mod => mod.CartesianGrid)
+    .catch((error) => {
+      console.error('Failed to load recharts CartesianGrid:', error)
+      return { default: () => null }
+    }),
   { ssr: false }
 )
 const Tooltip = dynamic(
-  () => import('recharts').then(mod => mod.Tooltip),
+  () => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+    .then(mod => mod.Tooltip)
+    .catch((error) => {
+      console.error('Failed to load recharts Tooltip:', error)
+      return { default: () => null }
+    }),
   { ssr: false }
 )
 const ResponsiveContainer = dynamic(
-  () => import('recharts').then(mod => mod.ResponsiveContainer),
+  () => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+    .then(mod => mod.ResponsiveContainer)
+    .catch((error) => {
+      console.error('Failed to load recharts ResponsiveContainer:', error)
+      return { default: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }
+    }),
   { ssr: false }
 )
 const Cell = dynamic(
-  () => import('recharts').then(mod => mod.Cell),
+  () => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+    .then(mod => mod.Cell)
+    .catch((error) => {
+      console.error('Failed to load recharts Cell:', error)
+      return { default: () => null }
+    }),
   { ssr: false }
 )
 

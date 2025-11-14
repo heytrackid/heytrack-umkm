@@ -1,4 +1,4 @@
-import type { Database, TablesUpdate } from '@/types/database'
+import type { Database, Update } from '@/types/database'
 
 type TablesMap = Database['public']['Tables']
 
@@ -21,5 +21,5 @@ export interface UseSupabaseQueryResult<T extends keyof TablesMap> {
 
 export interface BulkUpdateItem<T extends keyof TablesMap> {
   id: string
-  data: TablesUpdate<T>
+  data: Update<T>
 }

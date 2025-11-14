@@ -35,550 +35,228 @@
 - **Hooks**: `use` prefix (`useAuth`, `useDebounce`)
 - **Services**: PascalCase with `Service` suffix (`UserService`, `EmailService`)
 
-### Import Organization
-```ts
-// External dependencies (React, libraries)
-import React from 'react'
-import { useState } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-
-// Internal modules (@/ paths)
-import { Button } from '@/components/ui/button'
-import { useAuth } from '@/hooks/useAuth'
-import { UserService } from '@/services/UserService'
-
-// Type imports (at bottom)
-import type { User } from '@/types/user'
-import type { ApiResponse } from '@/types/api'
-```
-
-### Formatting Rules (Prettier)
-- **Quotes**: Single quotes only (`'string'`)
-- **Semicolons**: None (ASI - Automatic Semicolon Insertion)
-- **Line Length**: 100 characters max
-- **Indentation**: 2 spaces
-- **Trailing Commas**: ES5 style (always for multiline)
-- **Line Endings**: LF (Unix style)
-- **Arrow Parens**: Avoid when possible (`x => x`)
-
-### Error Handling Patterns
-```ts
-// API Routes
-export const runtime = 'nodejs'
-async function GET(req: NextRequest) {
-  try {
-    const data = await someOperation()
-    return NextResponse.json({ data })
-  } catch (error) {
-    return handleAPIError(error)
-  }
-}
-export const GET = withSecurity(GET, SecurityPresets.apiRead)
-
-// Client Components
-import { createClientLogger } from '@/lib/logger'
-
-function MyComponent() {
-  const handleError = (error: unknown) => {
-    const logger = createClientLogger('MyComponent')
-    logger.error('Operation failed', { error })
-    // Show user-friendly message
-  }
-}
-```
-
-### Security Patterns
-```ts
-// Input Sanitization
-import { InputSanitizer } from '@/utils/security/InputSanitizer'
-
-const sanitizedInput = InputSanitizer.sanitize(userInput)
-
-// Zod Validation
-import { z } from 'zod'
-
-const userSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(2).max(50)
-})
-
-// API Security Middleware
-export const GET = withSecurity(GET, SecurityPresets.apiRead)
-export const POST = withSecurity(POST, SecurityPresets.apiWrite)
-```
-
-## Component Patterns
-
-### Basic Component
-```tsx
-'use client'
-import type { ReactNode } from 'react'
-
-interface ButtonProps {
-  children: ReactNode
-  onClick: () => void
-  variant?: 'primary' | 'secondary'
-  disabled?: boolean
-}
-
-export function Button({
-  children,
-  onClick,
-  variant = 'primary',
-  disabled = false,
-  ...props
-}: ButtonProps) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`btn btn-${variant}`}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
-```
-
-### Custom Hook
-```ts
-import { useState, useEffect } from 'react'
-import type { User } from '@/types/user'
-
-export function useUser(userId: string) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch(`/api/users/${userId}`)
-        if (!response.ok) throw new Error('Failed to fetch user')
-        const userData = await response.json()
-        setUser(userData)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchUser()
-  }, [userId])
-
-  return { user, loading, error }
-}
-```
-
-## API Route Patterns
-
-### CRUD Operations
-```ts
-// GET /api/users/[id]/route.ts
-export const runtime = 'nodejs'
-
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerLogger } from '@/lib/logger'
-import { handleAPIError } from '@/lib/errors'
-
-async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const logger = createServerLogger('GET /api/users/[id]')
-    const { id } = params
-
-    // Business logic here
-    const user = await getUserById(id)
-
-    logger.info('User retrieved', { userId: id })
-    return NextResponse.json({ user })
-  } catch (error) {
-    return handleAPIError(error)
-  }
-}
-
-export const GET = withSecurity(GET, SecurityPresets.apiRead)
-```
-
-### POST with Validation
-```ts
-// POST /api/users/route.ts
-async function POST(req: NextRequest) {
-  try {
-    const logger = createServerLogger('POST /api/users')
-    const body = await req.json()
-
-    // Validate input
-    const validatedData = userCreateSchema.parse(body)
-
-    // Business logic
-    const newUser = await createUser(validatedData)
-
-    logger.info('User created', { userId: newUser.id })
-    return NextResponse.json({ user: newUser }, { status: 201 })
-  } catch (error) {
-    return handleAPIError(error)
-  }
-}
-
-export const POST = withSecurity(POST, SecurityPresets.apiWrite)
-```
-
-## Database Patterns
-
-### Supabase Queries
-```ts
-import { supabase } from '@/lib/supabase'
-import type { Database } from '@/types/database'
-
-// Type-safe queries
-export async function getUserById(id: string) {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, email, name, role')
-    .eq('id', id)
-    .single()
-
-  if (error) throw error
-  return data
-}
-
-// Insert with type safety
-export async function createUser(userData: Database['public']['Tables']['profiles']['Insert']) {
-  const { data, error } = await supabase
-    .from('profiles')
-    .insert(userData)
-    .select()
-    .single()
-
-  if (error) throw error
-  return data
-}
-
-// Complex queries with joins
-export async function getOrdersWithItems(orderId: string) {
-  const { data, error } = await supabase
-    .from('orders')
-    .select(`
-      *,
-      order_items (
-        *,
-        recipes (
-          name,
-          price
-        )
-      )
-    `)
-    .eq('id', orderId)
-    .single()
-
-  if (error) throw error
-  return data
-}
-```
-
-## Service Layer Patterns
-
-### Business Service
-```ts
-import type { Database } from '@/types/database'
-import { supabase } from '@/lib/supabase'
-import { createServerLogger } from '@/lib/logger'
-
-type Order = Database['public']['Tables']['orders']['Row']
-type OrderInsert = Database['public']['Tables']['orders']['Insert']
-
-export class OrderService {
-  private logger = createServerLogger('OrderService')
-
-  async createOrder(orderData: OrderInsert): Promise<Order> {
-    this.logger.info('Creating order', { customerId: orderData.customer_id })
-
-    const { data, error } = await supabase
-      .from('orders')
-      .insert(orderData)
-      .select()
-      .single()
-
-    if (error) throw error
-
-    this.logger.info('Order created', { orderId: data.id })
-    return data
-  }
-
-  async getOrderById(id: string): Promise<Order | null> {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (error) {
-      if (error.code === 'PGRST116') return null // Not found
-      throw error
-    }
-
-    return data
-  }
-}
-```
-
-## Testing Patterns
-
-### Component Test
-```ts
-import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
-import { Button } from './Button'
-
-describe('Button', () => {
-  it('renders children correctly', () => {
-    render(<Button onClick={() => {}}>Click me</Button>)
-    expect(screen.getByText('Click me')).toBeInTheDocument()
-  })
-
-  it('calls onClick when clicked', () => {
-    const handleClick = vi.fn()
-    render(<Button onClick={handleClick}>Click me</Button>)
-
-    fireEvent.click(screen.getByText('Click me'))
-    expect(handleClick).toHaveBeenCalledTimes(1)
-  })
-
-  it('is disabled when disabled prop is true', () => {
-    render(<Button onClick={() => {}} disabled>Click me</Button>)
-    expect(screen.getByText('Click me')).toBeDisabled()
-  })
-})
-```
-
-### API Route Test
-```ts
-import { describe, it, expect, vi } from 'vitest'
-import { GET } from './route'
-import { createMockRequest } from '@/lib/test-utils'
-
-describe('GET /api/users/[id]', () => {
-  it('returns user data for valid id', async () => {
-    const mockReq = createMockRequest()
-    const mockParams = { id: '123' }
-
-    const response = await GET(mockReq, { params: mockParams })
-    const data = await response.json()
-
-    expect(response.status).toBe(200)
-    expect(data.user).toBeDefined()
-    expect(data.user.id).toBe('123')
-  })
-
-  it('returns 404 for non-existent user', async () => {
-    const mockReq = createMockRequest()
-    const mockParams = { id: 'non-existent' }
-
-    const response = await GET(mockReq, { params: mockParams })
-
-    expect(response.status).toBe(404)
-  })
-})
-```
-
-## Performance Guidelines
-
-### Complexity Limits
-- **Cyclomatic Complexity**: ≤14 (ESLint rule)
-- **Max Depth**: 4 levels (ESLint rule)
-- **Max Lines per Function**: 250 (ESLint rule)
-- **Max Parameters**: 5 (ESLint rule)
-- **Max Statements**: 40 (ESLint rule)
-
-### Optimization Patterns
-```ts
-// Memoization for expensive calculations
-import { useMemo } from 'react'
-
-function ExpensiveComponent({ data, filter }) {
-  const filteredData = useMemo(() => {
-    return data.filter(item => item.status === filter)
-  }, [data, filter])
-
-  return <div>{/* render filteredData */}</div>
-}
-
-// Lazy loading for routes (with named exports)
-import dynamic from 'next/dynamic'
-
-const HeavyComponent = dynamic(() =>
-  import('@/components/HeavyComponent').then(mod => ({ default: mod.HeavyComponent })), {
-    loading: () => <div>Loading...</div>
-  }
-)
-
-// Virtual scrolling for large lists
-import { FixedSizeList as List } from 'react-window'
-
-function VirtualizedList({ items }) {
-  return (
-    <List
-      height={400}
-      itemCount={items.length}
-      itemSize={50}
-    >
-      {({ index, style }) => (
-        <div style={style}>{items[index].name}</div>
-      )}
-    </List>
-  )
-}
-```
-
-## Critical Rules & Best Practices
-
-### ✅ REQUIRED
-- **Input Validation**: Always validate and sanitize user inputs with Zod schemas
-- **TypeScript Strict**: Never use `any`, always provide explicit types
-- **Security Middleware**: Use `withSecurity()` wrapper on all API routes
-- **Proper Logging**: Use `createClientLogger()`/`createServerLogger()` instead of `console`
-- **Absolute Imports**: Never use relative imports (`../`), always use `@/` aliases
-- **Named Exports**: Use named exports for all components, hooks, utils, services, and types
-- **Error Boundaries**: Wrap components that might throw errors
-- **Accessibility**: Follow JSX A11y rules for screen readers
-- **Performance**: Keep bundle size optimized, use lazy loading for heavy components
-
-### ❌ FORBIDDEN
-- **Console Usage**: No `console.log`, `console.error`, etc. (use proper logging)
-- **Any Type**: Never use `any` or `unknown` without proper type guards
-- **Relative Imports**: No `../../../components/Button` (use `@/components/Button`)
-- **Secret Exposure**: Never log or expose API keys, passwords, or sensitive data
-- **Dangerous HTML**: No `dangerouslySetInnerHTML` without sanitization
-- **Enums**: Use const objects or union types instead of TypeScript enums
-- **Default Exports**: NEVER use default exports except for Next.js special files (page.tsx, layout.tsx, route.ts, error.tsx)
-- **PropTypes**: Use TypeScript interfaces instead of prop-types package
-- **Semicolons**: Never use semicolons (breaks Prettier formatting)
-- **Double Quotes**: Always use single quotes
-- **Var Declarations**: Use `const`/`let`, never `var`
-
-### Export Strategy (CRITICAL)
-- **Named Exports (99% of cases)**: Use for ALL components, hooks, utils, services, types
-  ```tsx
-  // ✅ CORRECT
-  export function Button() { }
-  export function useAuth() { }
-  export class OrderService { }
-  export type User = { }
-  ```
-- **Default Exports (ONLY for Next.js requirements)**: Pages, layouts, API routes, error pages
-  ```tsx
-  // ✅ ONLY for Next.js special files
-  export default function OrdersPage() { }      // page.tsx
-  export default function OrdersLayout() { }    // layout.tsx
-  export default async function GET() { }       // route.ts
-  export default function Error() { }           // error.tsx
-  ```
-- **Rationale**: Named exports provide better tree-shaking, refactoring safety, IDE auto-import accuracy, and consistency
-- **Lazy Loading**: For dynamic imports with named exports, use `.then(mod => ({ default: mod.ComponentName }))` pattern
-
-### Module-Specific Rules
-- **API Routes**: Must have `runtime = 'nodejs'`, use `handleAPIError()`, wrap with `withSecurity()`
-- **Components**: Client components need `'use client'`, use proper TypeScript interfaces, **ALWAYS use named exports**
-- **Services**: Class-based with proper error handling and logging, **use named exports**
-- **Hooks**: Follow Rules of Hooks, proper dependency arrays, **use named exports**
-- **Types**: Keep in separate files, use consistent naming patterns, **use named exports**
-- **Utils**: Pure functions, comprehensive error handling, **use named exports**
-- **Tests**: Use Vitest with jsdom environment, follow testing-library patterns</content>
-<parameter name="filePath">AGENTS.md
-
-
-
-
-## Dynamic Import Patterns (CRITICAL)
-
-### ✅ CORRECT Pattern for Named Exports
-
-When using `dynamic()` from `next/dynamic` or `lazy()` from React with **named exports**, use this pattern:
-
-```tsx
-// ✅ CORRECT - Named Export
-import dynamic from 'next/dynamic'
-
-const Component = dynamic(() => 
-  import('./module').then(mod => mod.ComponentName)
-)
-
-// ✅ CORRECT - React.lazy with Named Export
-import { lazy } from 'react'
-
-const Component = lazy(() => 
-  import('./module').then(mod => mod.ComponentName)
-)
-```
-
-### ✅ CORRECT Pattern for Default Exports
-
-```tsx
-// ✅ CORRECT - Default Export
-const Component = dynamic(() => import('./Component'))
-
-// No .then() needed for default exports
-```
-
-### ❌ WRONG Pattern (DO NOT USE)
-
-```tsx
-// ❌ WRONG - Named Export with default wrapper
-const Component = dynamic(() => 
-  import('./module').then(mod => ({ default: mod.ComponentName }))
-)
-
-// This will cause runtime errors and type issues!
-```
-
-### Documentation Reference
-
-From Next.js official docs: https://nextjs.org/docs/app/guides/lazy-loading#importing-named-exports
-
-> To dynamically import a named export, you can return it from the Promise returned by import() function:
-> ```jsx
-> const ClientComponent = dynamic(() =>
->   import('../components/hello').then((mod) => mod.Hello)
-> )
-> ```
-
-### Examples from Codebase
-
-```tsx
-// ✅ CORRECT - AI Chatbot Components
-const ChatHeader = dynamic(() => 
-  import('./components').then(mod => mod.ChatHeader), 
-  { loading: () => <div>Loading...</div> }
-)
-
-// ✅ CORRECT - Recharts Components
-const BarChart = lazy(() => import('recharts').then(mod => mod.BarChart))
-const LineChart = lazy(() => import('recharts').then(mod => mod.LineChart))
-
-// ✅ CORRECT - Form Sections
-const CustomerSection = dynamic(() => 
-  import('./CustomerSection').then(mod => mod.CustomerSection),
-  { ssr: false }
-)
-```
-
-### Key Rules
-
-1. **Named Exports**: Use `.then(mod => mod.ComponentName)`
-2. **Default Exports**: Use `import('./Component')` directly
-3. **NEVER** wrap named exports with `{ default: ... }`
-4. **Recharts**: All Recharts components are named exports
-5. **Custom Components**: Check the export type before using dynamic import
-
-### Verification
-
-After adding dynamic imports, verify with:
-```bash
-pnpm type-check  # Should pass with no errors
-pnpm build       # Should build successfully
-```
+
+## HeyTrack Application Features & Logic
+
+### Core Business Logic
+
+HeyTrack is a comprehensive culinary business management system designed to help food businesses optimize operations, maximize profits, and streamline workflows. The application focuses on three main pillars: **Cost Management**, **Operations**, and **Analytics**.
+
+### 1. Dashboard (Beranda)
+**Purpose**: Central hub providing real-time business overview and quick actions.
+
+**Key Features**:
+- **Real-time Statistics**: Revenue, orders, customers, and inventory metrics
+- **Onboarding Wizard**: Automated setup for new users with guided tour
+- **Quick Actions**: Direct access to create orders, generate recipes, manage inventory
+- **Stock Alerts**: Automatic notifications for low-stock items
+- **Financial Trends**: 90-day revenue and inventory trend charts
+
+**Logic**:
+- Fetches aggregated data from `/api/dashboard/stats`
+- Triggers onboarding for users with no data
+- Uses React Query for efficient data caching and background updates
+- Implements progressive disclosure pattern for new users
+
+### 2. HPP (Harga Pokok Penjualan) Calculator
+**Purpose**: Advanced cost calculation system for food pricing optimization.
+
+**Key Features**:
+- **Recipe Cost Analysis**: Detailed breakdown of ingredient costs per recipe
+- **Scenario Planning**: What-if analysis for pricing strategies
+- **Cost Trend Monitoring**: Historical cost tracking and alerts
+- **Pricing Recommendations**: AI-powered optimal pricing suggestions
+- **Worker-based Calculations**: High-performance background processing
+
+**Logic**:
+- Uses Web Workers for complex calculations to avoid blocking UI
+- Implements cost allocation algorithms (direct vs indirect costs)
+- Supports multiple pricing scenarios with profit margin calculations
+- Real-time cost updates when ingredient prices change
+
+### 3. Order Management (Pesanan)
+**Purpose**: Complete order lifecycle management from creation to fulfillment.
+
+**Key Features**:
+- **Multi-step Order Creation**: Customer selection → Items → Delivery → Payment
+- **WhatsApp Integration**: Automated order confirmations and updates
+- **Order Status Tracking**: Real-time status updates with notifications
+- **Customer Management**: Integrated customer database with order history
+- **Payment Processing**: Multiple payment method support
+
+**Logic**:
+- State machine pattern for order status transitions
+- Real-time inventory validation during order creation
+- Automatic stock reservation system
+- Integration with WhatsApp Business API for notifications
+
+### 4. Recipe Management (Resep)
+**Purpose**: Recipe database with AI-powered generation and cost analysis.
+
+**Key Features**:
+- **AI Recipe Generator**: Create recipes using natural language prompts
+- **Ingredient Cost Tracking**: Automatic cost calculation per recipe
+- **Production Scaling**: Batch size adjustments with proportional costing
+- **Recipe Categories**: Organized recipe library with search and filters
+- **Cost Optimization**: Identify most profitable recipes
+
+**Logic**:
+- AI integration for recipe generation using Openrouter API
+- Ingredient-based cost calculation with waste factor consideration
+- Recipe versioning system for iterative improvements
+- Cross-referencing with inventory for availability checking
+
+### 5. Inventory Management (Bahan Baku)
+**Purpose**: Comprehensive ingredient and raw material tracking.
+
+**Key Features**:
+- **Stock Level Monitoring**: Real-time inventory with low-stock alerts
+- **Purchase Tracking**: Supplier management and purchase history
+- **Cost Tracking**: Price per unit with historical pricing
+- **Bulk Import/Export**: CSV import for mass data updates
+- **Supplier Management**: Multi-supplier support with pricing comparison
+
+**Logic**:
+- (Weighted Average Cost) inventory valuation
+- Automatic reorder point calculations
+- Supplier performance tracking (delivery time, quality)
+- Integration with purchase orders and recipe consumption
+
+### 6. Production Management (Produksi)
+**Purpose**: Production planning and batch tracking for food manufacturing.
+
+**Key Features**:
+- **Batch Production**: Track production batches with quality control
+- **Production Scheduling**: Plan production based on orders and inventory
+- **Quality Assurance**: Production checklists and quality metrics
+- **Yield Tracking**: Monitor production efficiency and waste
+- **Cost Allocation**: Allocate overhead costs to production batches
+
+**Logic**:
+- Production batch lifecycle management
+- Integration with recipes for ingredient consumption
+- Quality control checkpoints with pass/fail criteria
+- Cost roll-up from ingredients to finished products
+
+### 7. Cash Flow Management (Arus Kas)
+**Purpose**: Financial transaction tracking and cash flow analysis.
+
+**Key Features**:
+- **Transaction Categorization**: Income/expense classification
+- **Category Management**: Customizable transaction categories
+- **Period Filtering**: Flexible date range analysis
+- **Trend Analysis**: Visual cash flow trends and projections
+- **Budget Tracking**: Budget vs actual spending analysis
+
+**Logic**:
+- Double-entry accounting principles
+- Category-based budgeting and variance analysis
+- Cash flow forecasting using historical patterns
+- Integration with sales and expense data
+
+### 8. Reports & Analytics (Laporan)
+**Purpose**: Comprehensive business intelligence and reporting.
+
+**Key Features**:
+- **Profit Reports**: Detailed profit/loss analysis by period
+- **Sales Reports**: Revenue analysis by product, category, customer
+- **Inventory Reports**: Stock movement and valuation reports
+- **Financial Trends**: Long-term business performance visualization
+- **Export Functionality**: PDF/Excel export for external reporting
+
+**Logic**:
+- Multi-dimensional data aggregation
+- Time-series analysis with growth calculations
+- Comparative period analysis (YoY, MoM)
+- Automated report generation with scheduled delivery
+
+### 9. Customer Management (Pelanggan)
+**Purpose**: Customer relationship management integrated with sales.
+
+**Key Features**:
+- **Customer Profiles**: Complete customer information and history
+- **VIP Classification**: Customer segmentation and loyalty programs
+- **Order History**: Complete purchase history per customer
+- **Communication Tracking**: Customer interaction logs
+- **Analytics**: Customer lifetime value and retention metrics
+
+**Logic**:
+- Customer segmentation algorithms
+- RFM (Recency, Frequency, Monetary) analysis
+- Automated VIP status based on purchase thresholds
+- Integration with order management for seamless data flow
+
+### 10. Settings & Configuration
+**Purpose**: System configuration and user preferences.
+
+**Key Features**:
+- **User Profile Management**: Personal settings and preferences
+- **Business Settings**: Company information and branding
+- **Notification Preferences**: Customizable alert settings
+- **Security Settings**: Password management and access controls
+- **Data Management**: Import/export and data backup options
+
+**Logic**:
+- Role-based access control (RBAC)
+- User preference persistence
+- Business rule configuration
+- Data validation and sanitization
+
+### Technical Architecture
+
+**Frontend**:
+- Next.js 14 with App Router
+- TypeScript for type safety
+- Tailwind CSS for styling
+- React Query for data management
+- Shadcn/ui component library
+
+**Backend**:
+- Next.js API routes
+- Supabase for database and real-time features
+- Row Level Security (RLS) for data protection
+- Web Workers for heavy calculations
+
+**Database Design**:
+- Normalized schema with proper relationships
+- JSON columns for flexible data storage
+- Indexing strategy for performance optimization
+- Migration system for schema evolution
+
+**Security**:
+- Authentication via Supabase Auth
+- API route protection with middleware
+- Input validation with Zod schemas
+- SQL injection prevention with parameterized queries
+
+**Performance**:
+- Code splitting and lazy loading
+- Image optimization and caching
+- Database query optimization
+- CDN integration for static assets
+
+### Business Rules & Validation
+
+**Pricing Logic**:
+- HPP calculation: (Ingredient Cost + Overhead) / (1 - Profit Margin)
+- Minimum markup validation (typically 30-50%)
+- Competitive pricing analysis
+
+**Inventory Logic**:
+- Reorder point: (Average Daily Usage × Lead Time) + Safety Stock
+- Stock valuation: FIFO method
+- Low stock alerts: Current Stock ≤ Reorder Point
+
+**Order Logic**:
+- Stock validation before order confirmation
+- Automatic status progression
+- Payment deadline enforcement
+- Cancellation policies based on order status
+
+**Production Logic**:
+- Batch size optimization based on demand forecasting
+- Quality control checkpoints
+- Waste tracking and cost allocation
+- Production efficiency metrics
+
+This comprehensive system enables food businesses to optimize their operations, reduce costs, and increase profitability through data-driven decision making.

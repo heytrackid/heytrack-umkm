@@ -128,7 +128,7 @@ async function PUT(request: NextRequest): Promise<NextResponse> {
     if (isErrorResponse(authResult)) {
       return authResult
     }
-    const user = authResult
+    const _user = authResult
 
     const supabase = await createClient()
 

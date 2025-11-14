@@ -1,12 +1,33 @@
 'use client'
 
-import { lazy, useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
+import { logger } from '@/lib/logger'
 
-// ✅ Correct pattern for named exports with React.lazy
-const CartesianGrid = lazy(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
-const Line = lazy(() => import('recharts').then(mod => ({ default: mod.Line })))
-const LineChart = lazy(() => import('recharts').then(mod => ({ default: mod.LineChart })))
-const XAxis = lazy(() => import('recharts').then(mod => ({ default: mod.XAxis })))
+// ✅ Correct pattern for named exports with React.lazy using shared recharts bundle
+const CartesianGrid = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.CartesianGrid }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts CartesianGrid')
+    throw error
+  }))
+const Line = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.Line }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts Line')
+    throw error
+  }))
+const LineChart = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.LineChart }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts LineChart')
+    throw error
+  }))
+const XAxis = lazy(() => import(/* webpackChunkName: "recharts-lib" */ 'recharts')
+  .then(mod => ({ default: mod.XAxis }))
+  .catch((error) => {
+    logger.error({ error }, 'Failed to load recharts XAxis')
+    throw error
+  }))
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type {
@@ -76,54 +97,56 @@ export const ChartLineInteractive = ({
         </div>
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
-        <ChartContainer config={config} className="aspect-auto h-[250px] w-full">
-          <LineChart
-            accessibilityLayer
-            data={data}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value: string) => {
-                const date = new Date(value)
-                return date.toLocaleDateString('id-ID', {
-                  month: 'short',
-                  day: 'numeric',
-                })
+        <Suspense fallback={<div className="h-[250px] bg-muted animate-pulse" />}>
+          <ChartContainer config={config} className="aspect-auto h-[250px] w-full">
+            <LineChart
+              accessibilityLayer
+              data={data}
+              margin={{
+                left: 12,
+                right: 12,
               }}
-            />
-            <ChartTooltip
-              content={
-                <ChartTooltipContent
-                  className="w-[150px]"
-                  nameKey="views"
-                  labelFormatter={(value: unknown) => {
-                    return new Date(value as string).toLocaleDateString('id-ID', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })
-                  }}
-                />
-              }
-            />
-            <Line
-              dataKey={activeChart}
-              type="monotone"
-              stroke={`var(--color-${activeChart})`}
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ChartContainer>
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={32}
+                tickFormatter={(value: string) => {
+                  const date = new Date(value)
+                  return date.toLocaleDateString('id-ID', {
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                }}
+              />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    className="w-[150px]"
+                    nameKey="views"
+                    labelFormatter={(value: unknown) => {
+                      return new Date(value as string).toLocaleDateString('id-ID', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })
+                    }}
+                  />
+                }
+              />
+              <Line
+                dataKey={activeChart}
+                type="monotone"
+                stroke={`var(--color-${activeChart})`}
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
+          </ChartContainer>
+        </Suspense>
       </CardContent>
     </Card>
   )
